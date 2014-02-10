@@ -1,4 +1,4 @@
-var fs = Npm.require('xml2js');
+
 
 if (Meteor.isClient) {
   Template.hello.greeting = function () {
