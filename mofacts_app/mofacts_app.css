@@ -1,1 +1,8 @@
-/* CSS declarations go here */
+/** Example button override **/
+.btn {
+    border-radius: 0px;
+}
+
+.btn-primary {
+	background-color: green;
+}
