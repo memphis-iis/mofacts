@@ -3,6 +3,10 @@
     border-radius: 0px;
 }
 
-.btn-primary {
-	background-color: green;
+.navbar {
+	border-radius: 0px;
+}
+
+.form-control {
+	border-radius: 0px;
 }

@@ -6,11 +6,60 @@
 </head>
 
 <body>
-  {{> hello}}
+  {{> login}}
 </body>
 
 <template name="hello">
   <h1>Hello World!</h1>
   {{greeting}}
   <input class="btn btn-primary" type="button" value="Click" />
+</template>
+
+
+<template name="login">
+
+	<nav class="navbar navbar-inverse" role="navigation">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-2">
+					<a class="navbar-brand" href="">MoFACTS</a>
+				</div>
+				<div class="col-sm-offset-9 col-sm-1">
+					<button type="button" class="btn btn-primary navbar-btn">Sign Up</button>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div class="container">
+		<div class="row">
+			<fieldset>
+				<form class="form-horizontal" name="loginForm" action="" method="post" role="form">
+					<legend>Sign In</legend>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="username">Username:</label>
+						<div class="col-sm-2">
+							<input class="form-control" type="text" id="username" name="username" value="" placeholder="Username">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label class="col-sm-2 control-label" for="password">Password:</label>
+						<div class="col-sm-2">
+							<input class="form-control" type="password" id="password" name="password" value="" placeholder="Password">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-2">
+							<input type="submit" class="btn btn-primary" value="Sign In" />
+							<input type="hidden" name="action" value="login">
+						</div>
+					</div>
+
+				</form>
+			</fieldset>
+		</div>
+	</div>
 </template>
