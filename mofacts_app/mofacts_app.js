@@ -1,6 +1,9 @@
 
 
 if (Meteor.isClient) {
+
+
+
     Template.hello.greeting = function () {
         return "Welcome to mofacts_app.";
     };
@@ -13,7 +16,7 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.login.events({
+    Template.signInTemplate.events({
         'click #signInButton' : function () {
             if (typeof console !== 'undefined') {
                 console.log("You are trying to sign in!");
@@ -23,6 +26,12 @@ if (Meteor.isClient) {
             if (typeof console !== 'undefined') {
                 console.log("You are trying to sign up!");
             }
+        }
+    });
+
+    Template.signUpTemplate.events({
+        'click #createAccountButton' : function () {
+            //create the new user account here.
         }
     });
 }
