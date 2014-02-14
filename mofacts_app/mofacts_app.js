@@ -37,7 +37,7 @@ if (Meteor.isClient) {
             if (typeof console !== 'undefined') {
                 console.log("You are trying to sign up!");
             }
-            Session.set('currentTemplate', 'signUpTemplate');
+            //switch the template to the signUpTemplate.
         }
     });
 
@@ -49,7 +49,21 @@ if (Meteor.isClient) {
             Session.set('currentTemplate', 'signInTemplate');
         },
         'click #createAccountButton' : function () {
-            //create the new user account here.
+            var newUsername = username.value;
+            var newPassword1 = password1.value;
+            var newPassword2 = password2.value;
+            
+            //we need to check if the newUsername is already in use.
+            //this requires that the DB already exists.
+
+            if (password1 !== password2) {
+                //we need to let them know that their passwords must be the same.
+                console.log("Please make sure the passwords you typed in are the same.");
+                return;
+            }
+
+            //once the above checks have been completed, we can add the user to the DB.
+
         }
     });
 }
