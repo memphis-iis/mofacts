@@ -56,7 +56,7 @@ if (Meteor.isClient) {
             //we need to check if the newUsername is already in use.
             //this requires that the DB already exists.
 
-            if (password1 !== password2) {
+            if (newPassword1 !== newPassword2) {
                 //we need to let them know that their passwords must be the same.
                 console.log("Please make sure the passwords you typed in are the same.");
                 return;
