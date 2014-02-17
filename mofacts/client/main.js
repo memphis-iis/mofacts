@@ -1,6 +1,6 @@
 if (Meteor.isClient) {
 
-    Session.setDefault('currentTemplate', 'signInTemplate');
+    Session.setDefault('currentTemplate', 'signUpTemplate');
     
     Template.baseTemplate.currentTemplate = Session.get('currentTemplate');
     Template.baseTemplate.signInTemplate = 'signInTemplate';
@@ -77,11 +77,15 @@ if (Meteor.isClient) {
                 //IWB 2/14/2014 - we need to let them know that their password has certain
                 //requirements (which will have to be changed above).
                 //for now we can just log it, but later we will need to put this on the page.
-                console.log("Please make sure the passwords you typed in are the same.");
+                console.log("Please type in a password in both password fields.");
                 return;
             }
 
             //IWB 2/14/2014 - once the above checks have been completed, we can add the user to the DB.
+            Accounts.createUser({username: newUsername, password: newPassword1});
+
+            var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+            console.log( currentUser + " is logged in!");
 
         }
     });
