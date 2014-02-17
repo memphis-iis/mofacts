@@ -6,8 +6,8 @@ if (Meteor.isClient) {
     Template.baseTemplate.signInTemplate = 'signInTemplate';
     Template.baseTemplate.signUpTemplate = 'signUpTemplate';
 
-    Handlebars.registerHelper('equals', function (v1, v2, options) {
-        if (v1 === v2) {
+    Handlebars.registerHelper('equals', function (arg1, arg2, options) {
+        if (arg1 === arg2) {
             return true;
         } else {
             return false;
