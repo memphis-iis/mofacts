@@ -1,8 +1,6 @@
 Template.signUpTemplate.events({
     'click #signInButton' : function () {
-        if (typeof console !== 'undefined') {
-            console.log("You are trying to sign in!");
-        }
+		Router.go('signin');
         //IWB 2/14/2014 - switch the template to the signInTemplate.
     },
     'click #createAccountButton' : function () {

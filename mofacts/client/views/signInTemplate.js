@@ -18,9 +18,6 @@ Template.signInTemplate.events({
 
     },
     'click #signUpButton' : function () {
-        if (typeof console !== 'undefined') {
-            console.log("You are trying to sign up!");
-        }
-        //IWB 2/14/2014 - switch the template to the signUpTemplate.
+		Router.go("signup");
     }
 });

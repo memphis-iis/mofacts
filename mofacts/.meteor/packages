@@ -9,3 +9,4 @@ insecure
 preserve-inputs
 accounts-password
 xml2js
+iron-router
