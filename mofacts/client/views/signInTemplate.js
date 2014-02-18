@@ -5,7 +5,17 @@ Template.signInTemplate.events({
         }
         var newUsername = username.value;
         var newPassword = password.value;
-        //IWB 2/14/2014 - sign the user in here.
+        
+        Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+            if (typeof error !== 'undefined') {
+                console.log(error);
+            } else {
+                console.log(newUsername + " was logged in successfully!");
+            }
+        });
+
+        
+
     },
     'click #signUpButton' : function () {
         if (typeof console !== 'undefined') {
