@@ -10,7 +10,8 @@ Template.signInTemplate.events({
             if (typeof error !== 'undefined') {
                 console.log(error);
             } else {
-                console.log(newUsername + " was logged in successfully!");
+                var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+                console.log(currentUser + " was logged in successfully!");
             }
         });
 

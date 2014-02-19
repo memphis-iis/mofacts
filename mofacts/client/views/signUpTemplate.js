@@ -9,6 +9,7 @@ Template.signUpTemplate.events({
         var newPassword2 = password2.value;
 
         if (newUsername === "") {
+            $(".badUsername").show();
             //IWB 2/14/2014 - we need to let them know that their username has certain
             //requirements (which will have to be changed above).
             //for now we can just log it, but later we will need to put this on the page.
