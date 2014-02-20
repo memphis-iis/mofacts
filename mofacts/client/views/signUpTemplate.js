@@ -3,7 +3,7 @@ Template.signUpTemplate.events({
 		Router.go('signin');
         //IWB 2/14/2014 - switch the template to the signInTemplate.
     },
-    'click #createAccountButton' : function () {
+    'click #signUpButton' : function () {
         var newUsername = username.value;
         var newPassword1 = password1.value;
         var newPassword2 = password2.value;
