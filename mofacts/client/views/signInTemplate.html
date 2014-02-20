@@ -16,19 +16,28 @@
 	<div class="container">
 		<div class="row">
 			<legend class="text-center">Login</legend>
+
+			<form class="form-horizontal" role="form">
 				
-			<div class="col-xs-2 centered-vert-form-element">
-				<input class="form-control" type="text" id="username" value="" placeholder="Username">
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-2 centered-vert-form-element">
-				<input class="form-control" type="password" id="password" value="" placeholder="Password">
-			</div>
-		</div>
-		<div class="row">
-			<div class="col-xs-2 centered-vert-form-element text-center">
-				<button type="button" id="signInButton" class="btn btn-primary">Login</button>
+				<div class="form-group">
+					<div class="col-xs-offset-5 col-xs-2">
+						<input class="form-control" type="text" id="signInUsername" value="" placeholder="Username">
+					</div>
+					<span class="help-inline danger" id="invalidLogin" hidden >Username password pair not found!</span>
+				</div>
+
+				<div class="form-group">
+					<div class="col-xs-offset-5 col-xs-2">
+						<input class="form-control" type="password" id="password" value="" placeholder="Password">
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<div class="text-center">
+						<button type="button" id="signInButton" class="btn btn-primary">Login</button>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>

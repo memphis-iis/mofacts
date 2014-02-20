@@ -17,28 +17,36 @@
 		<div class="row">
 			<legend class="text-center">Sign Up</legend>
 
-			<div class="col-xs-2 centered-vert-form-element">
-				<input class="form-control" type="text" id="username" value="" placeholder="Username">
-			</div>
-			<div class="alert alert-danger badUsername" hidden="true">bad username</div>
-		</div>
+			<form class="form-horizontal" role="form">
 
-		<div class="row">
-			<div class="col-xs-2 centered-vert-form-element">
-				<input class="form-control" type="password" id="password1" value="" placeholder="Password">
-			</div>
-		</div>
+				<div class="form-group">
+					<div class="col-xs-offset-5 col-xs-2">
+						<input class="form-control" type="text" id="signUpUsername" value="" placeholder="Username">
+					</div>
+					<span class="help-inline danger" id="usernameAlreadyInUse" hidden >Username already taken!</span>
+					<span class="help-inline danger" id="usernameTooShort" hidden >Must be at least 6 characters long!</span>
+				</div>
 
-		<div class="row">
-			<div class="col-xs-2 centered-vert-form-element">
-				<input class="form-control" type="password" id="password2" value="" placeholder="Re-Type Password">
-			</div>
-		</div>
+				<div class="form-group">
+					<div class="col-xs-offset-5 col-xs-2">
+						<input class="form-control" type="password" id="password1" value="" placeholder="Password">
+					</div>
+					<span class="help-inline danger" id="passwordTooShort" hidden >Must be at least 6 characters long!</span>
+				</div>
 
-		<div class="row">
-			<div class="col-xs-2 centered-vert-form-element text-center">
-				<button type="button" id="signUpButton" class="btn btn-primary">Sign Up</button>
-			</div>
+				<div class="form-group">
+					<div class="col-xs-offset-5 col-xs-2">
+						<input class="form-control" type="password" id="password2" value="" placeholder="Re-Type Password">
+					</div>
+					<span class="help-inline danger" id="passwordMustMatch" hidden >Password fields must match!</span>
+				</div>
+
+				<div class="form-group">
+					<div class="text-center">
+						<button type="button" id="signUpButton" class="btn btn-primary">Sign Up</button>
+					</div>
+				</div>
+			</form>
 		</div>
 	</div>
 </template>
