@@ -1,5 +1,3 @@
-
-
 <template name="signInTemplate">
 
 	<nav class="navbar navbar-inverse" role="navigation">
@@ -17,32 +15,21 @@
 
 	<div class="container">
 		<div class="row">
-			<fieldset>
-				<form class="form-horizontal" role="form">
-					<legend>Sign In</legend>
-
-					<div class="form-group">
-						<label class="col-xs-2 control-label" for="username">Username:</label>
-						<div class="col-xs-2">
-							<input class="form-control" type="text" id="username" value="" placeholder="Username">
-						</div>
-					</div>
-
-					<div class="form-group">
-						<label class="col-xs-2 control-label" for="password">Password:</label>
-						<div class="col-xs-2">
-							<input class="form-control" type="password" id="password" value="" placeholder="Password">
-						</div>
-					</div>
-
-					<div class="form-group">
-						<div class="col-xs-offset-2 col-xs-2">
-							<button type="button" id="signInButton" class="btn btn-primary">Sign In</button>
-						</div>
-					</div>
-
-				</form>
-			</fieldset>
+			<legend class="text-center">Login</legend>
+				
+			<div class="col-xs-2 centered-vert-form-element">
+				<input class="form-control" type="text" id="username" value="" placeholder="Username">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-2 centered-vert-form-element">
+				<input class="form-control" type="password" id="password" value="" placeholder="Password">
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-xs-2 centered-vert-form-element text-center">
+				<button type="button" id="signInButton" class="btn btn-primary">Login</button>
+			</div>
 		</div>
 	</div>
 </template>

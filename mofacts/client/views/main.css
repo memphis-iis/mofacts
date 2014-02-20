@@ -10,3 +10,9 @@
 .form-control {
 	border-radius: 0px;
 }
+
+.centered-vert-form-element{
+	float: none;
+    margin: 0 auto;
+    margin-bottom: 15px;
+}
