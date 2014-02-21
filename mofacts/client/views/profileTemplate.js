@@ -21,7 +21,7 @@ Template.profileTemplate.events({
     		if (typeof error !== "undefined") {
     			//something happened during logout
     			console.log("Error: Could not sign out of account! \n" +
-    						"User: " + Meteor.user() +" \n");
+    						"\tUser: " + Meteor.user() +" \n");
     		} else {
     			Router.go("signin");
     		}

@@ -3,48 +3,57 @@ Template.signUpTemplate.events({
 		Router.go('signin');
     },
     'click #signUpButton' : function () {
-        var newUsername = signUpUsername.value;
-        var newPassword1 = password1.value;
-        var newPassword2 = password2.value;
+        var formUsername = signUpUsername.value;
+        var formPassword1 = password1.value;
+        var formPassword2 = password2.value;
 
-        if(newUsername.length < 6) {
+        if(formUsername.length < 6) {
             $("#usernameTooShort").show();
             return;
         } else {
             $("#usernameTooShort").hide();
         }
         
-        var userWithGivenUsername = Meteor.users.findOne({username: newUsername});
-        if(typeof userWithGivenUsername !== "undefined") {
+        if(typeof Meteor.users.findOne({username: formUsername}) !== "undefined") {
             $("#usernameAlreadyInUse").show();
             return;
         } else {
             $("#usernameAlreadyInUse").hide();
         }
 
-        if (newPassword1.length < 6) {
+        if (formPassword1.length < 6) {
              $("#passwordTooShort").show();
              return;
         } else {
             $("#passwordTooShort").hide();
         }
 
-        if(newPassword1 !== newPassword2) {
+        if(formPassword1 !== formPassword2) {
             $("#passwordMustMatch").show();
             return;
         } else {
             $("#passwordMustMatch").hide();
         }
 
-        Accounts.createUser({username: newUsername, password: newPassword1});
+        Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
+            if(typeof error !== "undefined") {
+                console.log("ERROR: There was an error creating the user account!\n" +
+                            "\t[Username: " + formUsername + "]\n" +
+                            "\t" + error);
+            }
+        });
 
-        var currentUser = Meteor.users.findOne({_id: Meteor.userId()});
+        var currentUser = Meteor.user();
 
-        if (currentUser !== "undefined") {
+        if (currentUser !== null) {
             console.log( currentUser.username + " is logged in!");
             Router.go("profile");
         } else {
-            //there was an issue with the account creation or the login thereafter.
+            console.log("ERROR: The account was created, but there was a problem logging into the account!\n" +
+                        "\t[Username: " + formUsername + "]\n" +
+                        "\t[Meteor.user(): " + Meteor.user() + "]\n" +
+                        "\t[Meteor.userId(): " + Meteor.userId() + "]\n");
+            Meteor.logout();
         }
     },
     'blur #signUpUsername' : function () {
