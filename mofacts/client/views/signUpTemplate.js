@@ -38,12 +38,14 @@ Template.signUpTemplate.events({
 
         Accounts.createUser({username: newUsername, password: newPassword1});
 
-        if (Meteor.user() !== null) {
-            console.log( Meteor.user().username + " is logged in!");
+        var currentUser = Meteor.users.findOne({_id: Meteor.userId()});
+
+        if (currentUser !== "undefined") {
+            console.log( currentUser.username + " is logged in!");
+            Router.go("profile");
         } else {
             //there was an issue with the account creation or the login thereafter.
         }
-        Meteor.logout();
     },
     'blur #signUpUsername' : function () {
         if(signUpUsername.value.length < 6) {

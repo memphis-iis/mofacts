@@ -18,6 +18,11 @@ Router.map(function() {
 	this.route('home', {
 		path: '/',
 		template: 'signInTemplate'
+	});
+
+	this.route('profile', {
+		path: '/profile',
+		template: 'profileTemplate'
 	})
 
 });

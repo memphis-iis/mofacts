@@ -11,8 +11,14 @@
 	border-radius: 0px;
 }
 
-.centered-vert-form-element{
+.centered-vert-form-element {
 	float: none;
     margin: 0 auto;
     margin-bottom: 15px;
+}
+
+.well {
+	border-radius: 0px;
+	background-color: #808080;
+	border-color: #414141;
 }

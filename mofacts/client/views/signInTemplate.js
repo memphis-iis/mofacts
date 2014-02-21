@@ -15,6 +15,7 @@ Template.signInTemplate.events({
                 $("#invalidLogin").hide();
                 var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                 console.log(currentUser + " was logged in successfully!");
+                Router.go("profile");
             }
         });
     },
