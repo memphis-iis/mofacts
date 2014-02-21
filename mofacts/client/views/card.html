@@ -1,0 +1,12 @@
+<template name="card">
+	<div class="col-xs-offset-5 col-xs-3">
+		<h1> <label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label> </h1>
+		<h3><label id="testAnswer" class="label label-success">Current Answer:  {{currentAnswer}}}</label></h3>
+		<div class="panel panel-primary">
+			<div class="panel-heading">Enter Your Answer Below</div>
+			<div class="panel-body">
+				<input type="text" id="answer">
+			</div>
+		</div>
+		{{invokeAfterLoad}}
+	</template>

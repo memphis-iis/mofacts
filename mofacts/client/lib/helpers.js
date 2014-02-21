@@ -5,3 +5,11 @@ Handlebars.registerHelper('equals', function (arg1, arg2, options) {
         return false;
     }
 });
+
+Handlebars.registerHelper('currentQuestion', function () {
+    return Session.get("currentQuestion");
+});
+
+Handlebars.registerHelper('currentAnswer', function () {
+    return Session.get("currentAnswer");
+});
