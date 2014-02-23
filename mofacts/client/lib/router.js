@@ -25,4 +25,9 @@ Router.map(function() {
 		template: 'profileTemplate'
 	})
 
+	this.route('card', {
+		path: '/card',
+		template: 'cardTemplate'
+	})
+
 });
