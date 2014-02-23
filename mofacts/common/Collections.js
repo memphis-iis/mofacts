@@ -1,0 +1,1 @@
+Stimuli = new Meteor.Collection("stimuli");
