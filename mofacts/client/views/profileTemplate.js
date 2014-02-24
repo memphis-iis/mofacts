@@ -3,12 +3,14 @@ Template.profileTemplate.rendered = function () {
     var allStimuli = Stimuli.find({});
     var numFiles = allStimuli.count();
     console.log(numFiles);
+    var counter = 0;
     allStimuli.forEach( function (stimuliObject) {
         $("#startingDiv").append(
-            "<div class=\"col-xs-1 well text-center\">" +
-                stimuliObject.fileName +
+            "<div class=\"col-xs-3 text-center\">" +
+                "<button type=\"button\" id=\"button_" + stimuliObject.fileName +"\" class=\"btn btn-primary btn-block\">" + stimuliObject.fileName + "</button>" +
             "</div>"
         );
+        counter++;
     });
 }
 
