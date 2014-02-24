@@ -7,7 +7,7 @@ Template.profileTemplate.rendered = function () {
     allStimuli.forEach( function (stimuliObject) {
         $("#startingDiv").append(
             "<div class=\"col-xs-3 text-center\">" +
-                "<button type=\"button\" id=\"button_" + stimuliObject.fileName +"\" class=\"btn btn-primary btn-block\">" + stimuliObject.fileName + "</button>" +
+                "<button type=\"button\" name=\"" + stimuliObject.fileName + "\" class=\"btn btn-primary btn-block stimButton\">" + stimuliObject.fileName + "</button>" +
             "</div>"
         );
         counter++;
@@ -32,5 +32,9 @@ Template.profileTemplate.events({
     },
     'click .homeLink' : function () {
     	Router.go("profile");
+    },
+    'click .stimButton' : function (event) {
+        console.log(event.target.name);
     }
+
 });
