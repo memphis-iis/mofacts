@@ -1,14 +1,15 @@
 Template.profileTemplate.rendered = function () {
 	//this is called whenever the template is rendered.
-	for(var i = 1; i <= 12; i++) {
-		$("#startingDiv").append(
-			"<div>" + 
-				"<div class=\"col-xs-1 well text-center\">" +
-					"deck#" + i + 
-				"</div>" +
-			"</div>"
-		);
-	}
+    var allStimuli = Stimuli.find({});
+    var numFiles = allStimuli.count();
+    console.log(numFiles);
+    allStimuli.forEach( function (stimuliObject) {
+        $("#startingDiv").append(
+            "<div class=\"col-xs-1 well text-center\">" +
+                stimuliObject.fileName +
+            "</div>"
+        );
+    });
 }
 
 Template.profileTemplate.username = function () {
