@@ -10,7 +10,11 @@ function randomCard() {
 }
 
 Template.cardTemplate.events({
-	'keypress #answer' : function () {
-		console.log("You Clicked 'Enter'");
+	'keypress #answer' : function (e) {
+		
+		var key=e.keyCode || e.which;
+		if (key==13){
+			console.log("You Clicked 'Enter'");
+		}
 	}
 });
