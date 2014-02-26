@@ -16,6 +16,19 @@ Template.profileTemplate.rendered = function () {
     });
 }
 
+function WritetoFile(content){
+	
+	var fs = require('fs');
+	
+	//fs.writeFile("/tmp/test", content, function(err) {
+	//    if(err) {
+	//        console.log(err);
+	//    } else {
+	//        console.log("The file was saved!");
+	//    }
+	//}); 
+}
+
 Template.profileTemplate.username = function () {
     if (typeof Meteor.users.findOne({_id: Meteor.userId()}) === "undefined" ) {
         Router.go("signin");
@@ -42,6 +55,7 @@ Template.profileTemplate.events({
     },
     'click .stimButton' : function (event) {
         Session.set("currentTest", event.target.name);
+        WritetoFile(event.target.name);
         console.log("You clicked on: " + Session.get("currentTest"));
         Router.go("card");
     }
