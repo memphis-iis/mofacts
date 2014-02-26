@@ -40,7 +40,9 @@ Template.profileTemplate.events({
     	Router.go("profile");
     },
     'click .stimButton' : function (event) {
-        console.log(event.target.name);
+        Session.set("currentTest", event.target.name);
+        console.log("You clicked on: " + Session.get("currentTest"));
+        Router.go("card");
     }
 
 });
