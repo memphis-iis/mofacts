@@ -9,10 +9,8 @@ function randomCard() {
 
 }
 
-function handleKeyPress(e){
-    var key=e.keyCode || e.which;
-		 if (key==13){
-			 //searching();
-			 console.log('You Clicked "Enter"');
-		  }
-		}
+Template.cardTemplate.events({
+	'keypress #answer' : function () {
+		console.log("You Clicked 'Enter'");
+	}
+});
