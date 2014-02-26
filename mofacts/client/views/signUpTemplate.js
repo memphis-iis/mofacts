@@ -40,21 +40,10 @@ Template.signUpTemplate.events({
                 console.log("ERROR: There was an error creating the user account!\n" +
                             "\t[Username: " + formUsername + "]\n" +
                             "\t" + error);
+            } else {
+                Router.go("profile");
             }
         });
-
-        var currentUser = Meteor.user();
-
-        if (currentUser !== null) {
-            console.log( currentUser.username + " is logged in!");
-            Router.go("profile");
-        } else {
-            console.log("ERROR: The account was created, but there was a problem logging into the account!\n" +
-                        "\t[Username: " + formUsername + "]\n" +
-                        "\t[Meteor.user(): " + Meteor.user() + "]\n" +
-                        "\t[Meteor.userId(): " + Meteor.userId() + "]\n");
-            Meteor.logout();
-        }
     },
     'blur #signUpUsername' : function () {
         if(signUpUsername.value.length < 6) {

@@ -20,6 +20,7 @@ Template.profileTemplate.username = function () {
     if (typeof Meteor.users.findOne({_id: Meteor.userId()}) === "undefined" ) {
         Router.go("signin");
         window.location.reload();
+        return;
     }
 	return Meteor.users.findOne({_id: Meteor.userId()}).username;
 }
