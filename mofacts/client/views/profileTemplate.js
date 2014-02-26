@@ -17,8 +17,9 @@ Template.profileTemplate.rendered = function () {
 }
 
 function WritetoFile(content){
+	console.log("You clicked on: " + content);
 	
-	var fs = require('fs');
+	//var fs = require('fs');
 	
 	//fs.writeFile("/tmp/test", content, function(err) {
 	//    if(err) {
