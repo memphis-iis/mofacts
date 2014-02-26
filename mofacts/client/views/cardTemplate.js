@@ -9,12 +9,25 @@ function randomCard() {
 
 }
 
+function startTimer() {
+	var start = new Date().getTime();
+	return start
+}
+
 Template.cardTemplate.events({
+
+	'focus #answer' : function() {
+		start = startTimer()
+	},
+
 	'keypress #answer' : function (e) {
 		
 		var key=e.keyCode || e.which;
 		if (key==13){
-			console.log("You Clicked 'Enter'");
+			var result = document.getElementById('answer').value;
+			var elapsed = new Date().getTime()-start;
+
+			console.log("You answered " + result + " in " + elapsed + " Milliseconds");
 		}
 	}
 });
