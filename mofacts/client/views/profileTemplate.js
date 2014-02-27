@@ -1,18 +1,16 @@
 Template.profileTemplate.rendered = function () {
     
-
 	//this is called whenever the template is rendered.
     var allStimuli = Stimuli.find({});
-    var numFiles = allStimuli.count();
-    console.log(numFiles);
-    var counter = 0;
     allStimuli.forEach( function (stimuliObject) {
         $("#testContainingDiv").append(
-            "<div class=\"col-xs-3 text-center\">" +
-                "<button type=\"button\" name=\"" + stimuliObject.fileName + "\" class=\"btn btn-primary btn-block stimButton\">" + stimuliObject.fileName + "</button>" +
+            "<div class=\"col-sm-3 col-md-3 col-lg-3 text-center\">" +
+                "<button type=\"button\" name=\"" + stimuliObject.fileName + "\" class=\"btn btn-primary btn-block stimButton\">" + 
+                    stimuliObject.fileName + 
+                "</button>" +
+                "</br>" +
             "</div>"
         );
-        counter++;
     });
 }
 
@@ -41,7 +39,7 @@ Template.profileTemplate.username = function () {
 
 Template.profileTemplate.events({
     'click .logoutLink' : function () {
-    	Meteor.logout(function(error) {
+    	Meteor.logout( function (error) {
     		if (typeof error !== "undefined") {
     			//something happened during logout
     			console.log("Error: Could not sign out of account! \n" +
