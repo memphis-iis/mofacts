@@ -16,7 +16,21 @@ Template.cardTemplate.events({
 		if (key==13){
 			console.log("You Clicked 'Enter'");
 		}
-	}
+	},
+	'click .logoutLink' : function () {
+        Meteor.logout( function (error) {
+            if (typeof error !== "undefined") {
+                //something happened during logout
+                console.log("User: " + Meteor.user() +" \n" +
+                            "\tError: " + error + "\n");
+            } else {
+                Router.go("signin");
+            }
+        });
+    },
+    'click .homeLink' : function () {
+        Router.go("profile");
+    }
 });
 
 Template.cardTemplate.username = function () {
