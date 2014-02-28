@@ -18,3 +18,7 @@ Template.cardTemplate.events({
 		}
 	}
 });
+
+Template.cardTemplate.username = function () {
+	return Meteor.user().username;
+}
