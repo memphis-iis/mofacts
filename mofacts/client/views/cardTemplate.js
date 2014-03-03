@@ -8,6 +8,9 @@ Template.cardTemplate.events({
 		var key=e.keyCode || e.which;
 		if (key==13){
 			console.log("You Clicked 'Enter'");
+            //get a new card
+            randomCard();
+            //TODO: Log the results
 		}
 	},
 	'click .logoutLink' : function () {
@@ -32,7 +35,10 @@ Template.cardTemplate.events({
 
 Template.cardTemplate.invokeAfterLoad = function() {
 	console.log('card loaded');
-	randomCard();
+    //the card loads frequently, but we only want to set this the first time
+    if(Session.get("currentQuestion") == undefined){
+        randomCard();
+    }
 }
 
 Template.cardTemplate.username = function () {
@@ -53,6 +59,6 @@ Template.cardTemplate.username = function () {
 
 function randomCard() {
 	var nextCardIndex = Math.floor((Math.random() * 17));
-	Session.setDefault("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
-	Session.setDefault("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
+	Session.set("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
+	Session.set("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
 }
