@@ -1,13 +1,6 @@
-Template.cardTemplate.invokeAfterLoad = function() {
-	console.log('card loaded');
-	randomCard();
-}
-
-function randomCard() {
-	var nextCardIndex = Math.floor((Math.random() * 17));
-	Session.setDefault("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
-	Session.setDefault("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
-}
+//////////////
+//  EVENTS  //
+//////////////
 
 Template.cardTemplate.events({
 	'keypress #answer' : function (e) {
@@ -33,6 +26,15 @@ Template.cardTemplate.events({
     }
 });
 
+/////////////////
+//  VARIABLES  //
+/////////////////
+
+Template.cardTemplate.invokeAfterLoad = function() {
+	console.log('card loaded');
+	randomCard();
+}
+
 Template.cardTemplate.username = function () {
 	if (typeof Meteor.users.findOne({_id: Meteor.userId()}) === "undefined" ) {
         Router.go("signin");
@@ -42,4 +44,14 @@ Template.cardTemplate.username = function () {
         return;
     }
 	return Meteor.user().username;
+}
+
+/////////////////
+//  FUNCTIONS  //
+/////////////////
+
+function randomCard() {
+	var nextCardIndex = Math.floor((Math.random() * 17));
+	Session.setDefault("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
+	Session.setDefault("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
 }
