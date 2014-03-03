@@ -53,12 +53,39 @@ Template.cardTemplate.username = function () {
     }
 }
 
+//determine the type of question to display
+Template.cardTemplate.textCard = function() {
+    return getQuestionType() === "text";
+}
+
+Template.cardTemplate.audioCard = function() {
+    return getQuestionType() === "sound";
+}
+
+Template.cardTemplate.imageCard = function() {
+    return getQuestionType() === "image";
+}
+
 /////////////////
 //  FUNCTIONS  //
 /////////////////
 
 function randomCard() {
-	var nextCardIndex = Math.floor((Math.random() * 17));
-	Session.set("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
-	Session.set("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
+    //get the file from the collection
+    var file = Stimuli.findOne({fileName: getFileName()});
+    //get the cluster size (avoids out of bounds error)
+    var size = file.stimuli.setspec.clusters[0].cluster.length;
+    //get a valid index
+	var nextCardIndex = Math.floor((Math.random() * size));
+    //set the question and answer
+	Session.set("currentQuestion", file.stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
+	Session.set("currentAnswer", file.stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
+}
+
+function getQuestionType() {
+    return Stimuli.findOne({fileName: getFileName()}).stimuli.setspec.groups[0].group[0].type[0];
+}
+
+function getFileName() {
+    return Session.get("currentTest");
 }
