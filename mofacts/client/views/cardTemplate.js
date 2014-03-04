@@ -62,3 +62,7 @@ function randomCard() {
 	Session.set("currentQuestion", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
 	Session.set("currentAnswer", Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
 }
+
+function scheduledCard(index) {
+      	
+}
