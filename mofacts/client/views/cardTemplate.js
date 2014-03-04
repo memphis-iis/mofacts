@@ -9,7 +9,7 @@ Template.cardTemplate.events({
 		if (key==13){
 			console.log("You Clicked 'Enter'");
             //get a new card
-            randomCard();
+            prepareCard();
             //TODO: Log the results
 		}
 	},
@@ -37,7 +37,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
 	console.log('card loaded');
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-        randomCard();
+        prepareCard();
     }
 }
 
@@ -70,6 +70,22 @@ Template.cardTemplate.imageCard = function() {
 //  FUNCTIONS  //
 /////////////////
 
+function prepareCard() {
+    var file = Stimuli.findOne({fileName: getFileName()});
+    if (file.stimuli.setspec.schedule != undefined) {
+        if (Session.get("scheduleIndex") === undefined) {
+            Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
+        }
+        if (Session.get("scheduleIndex") === file.stimuli.setspec.schedule[0].q.length){
+            alert("End of test.  Thank you.");
+            Router.go("profile"); //Send user to profile after test finishes
+        }
+        scheduledCard();        
+    } else {
+        randomCard();    
+    }
+}
+
 function randomCard() {
     //get the file from the collection
     var file = Stimuli.findOne({fileName: getFileName()});
@@ -84,6 +100,15 @@ function randomCard() {
 
 function getQuestionType() {
     return Stimuli.findOne({fileName: getFileName()}).stimuli.setspec.groups[0].group[0].type[0];
+}
+
+function scheduledCard() {
+    var index = Session.get("scheduleIndex");
+    var file = Stimuli.findOne({fileName: getFileName()});
+    var which = file.stimuli.setspec.schedule[0].q[index];
+    Session.set("currentQuestion", file.stimuli.setspec.clusters[0].cluster[which].word[0]);
+    Session.set("currentAnswer", file.stimuli.setspec.clusters[0].cluster[which].answer[0]);
+    Session.set("scheduleIndex", index + 1);
 }
 
 function getFileName() {

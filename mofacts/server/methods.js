@@ -13,6 +13,8 @@ Meteor.startup(function () {
 		var json = getStimJSON('stims/' + fileName);
 		Stimuli.insert({fileName: fileName, stimuli: json});
 	}
+	
+	buildSchedule();
 });
 
 function getStimJSON(fileName) {
@@ -23,4 +25,8 @@ function getStimJSON(fileName) {
 		future.return(json);
 	});
 	return future.wait();
+}
+
+function buildSchedule() {
+        	
 }
