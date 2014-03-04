@@ -44,10 +44,22 @@
 	</nav>  <!-- close nav -->
 
 	<div class="container">
-
+		
+		<br>
 		<div class="row">
 			<div class="col-lg-offset-3 col-lg-6 text-center">
-				<h1><label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label></h1>
+				{{#if textCard}}
+					<h1><label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label></h1>
+				{{/if}}
+				{{#if audioCard}}
+					<audio controls>
+						<source src={{currentQuestion}} type="audio/wav">
+						Your browser does not support the audio element.
+					</audio>
+				{{/if}}
+				{{#if imageCard}}
+					<img id="imageId">
+				{{/if}}
 			</div>  <!-- close column -->
 		</div>  <!-- close row -->
 
