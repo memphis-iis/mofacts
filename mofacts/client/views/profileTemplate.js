@@ -36,7 +36,7 @@ Template.profileTemplate.rendered = function () {
         $("#testContainingDiv").append(
             "<div class=\"col-sm-3 col-md-3 col-lg-3 text-center\">" +
                 "<button type=\"button\" name=\"" + stimuliObject.fileName + "\" class=\"btn btn-primary btn-block stimButton\">" + 
-                    stimuliObject.fileName + 
+                    "<h4>" + stimuliObject.fileName + "</h4>" + 
                 "</button>" +
                 "</br>" +
             "</div>"
