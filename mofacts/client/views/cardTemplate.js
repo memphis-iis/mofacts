@@ -78,12 +78,20 @@ function prepareCard() {
         }
         if (Session.get("scheduleIndex") === file.stimuli.setspec.schedule[0].q.length){
             alert("End of test.  Thank you.");
+            cleanUp();
             Router.go("profile"); //Send user to profile after test finishes
-        }
-        scheduledCard();        
+        } else {
+            scheduledCard();  
+        }      
     } else {
         randomCard();    
     }
+}
+
+function cleanUp() {
+    Session.set("currentQuestion", undefined);
+    Session.set("currentAnswer", undefined);
+    Session.set("scheduleIndex", undefined);
 }
 
 function randomCard() {
