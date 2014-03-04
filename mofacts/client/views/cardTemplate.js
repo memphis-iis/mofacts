@@ -11,7 +11,10 @@ Template.cardTemplate.events({
             //get a new card
             prepareCard();
             //TODO: Log the results
+			$("#answer").val("");
 		}
+		
+		
 	},
 	'click .logoutLink' : function () {
         Meteor.logout( function (error) {
