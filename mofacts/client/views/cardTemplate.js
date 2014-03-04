@@ -9,7 +9,7 @@ Template.cardTemplate.events({
 		if (key==13){
 			console.log("You Clicked 'Enter'");
             //get a new card
-            randomCard();
+            prepareCard();
             //TODO: Log the results
 		}
 	},
@@ -37,7 +37,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
 	console.log('card loaded');
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-        randomCard();
+        prepareCard();
     }
 }
 
@@ -70,6 +70,12 @@ Template.cardTemplate.imageCard = function() {
 //  FUNCTIONS  //
 /////////////////
 
+
+
+function prepareCard() {
+    randomCard();
+}
+
 function randomCard() {
     //get the file from the collection
     var file = Stimuli.findOne({fileName: getFileName()});
@@ -87,7 +93,7 @@ function getQuestionType() {
 }
 
 function scheduledCard(index) {
-      	
+    return Stimuli.
 }
 function getFileName() {
     return Session.get("currentTest");
