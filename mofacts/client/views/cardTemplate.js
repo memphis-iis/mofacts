@@ -26,8 +26,9 @@ Template.cardTemplate.events({
 		if (key==13){
 			var result = document.getElementById('answer').value;
 			var elapsed = new Date().getTime()-start;
+			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
 
-			console.log("You answered " + result + " in " + elapsed + " Milliseconds");
+			console.log(message);
 		}
 	}
 });
