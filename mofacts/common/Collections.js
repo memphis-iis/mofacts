@@ -1,2 +1,2 @@
 Stimuli = new Meteor.Collection("stimuli");
-Schedule = new Meteor.Collection("schedule");
+Paused = new Meteor.Collection("paused");
