@@ -1,3 +1,7 @@
+//////////////
+//  EVENTS  //
+//////////////
+
 Template.signUpTemplate.events({
     'click #signInButton' : function () {
 		Router.go('signin');
@@ -74,3 +78,11 @@ Template.signUpTemplate.events({
         }
     }
 });
+
+/////////////////
+//  VARIABLES  //
+/////////////////
+
+/////////////////
+//  FUNCTIONS  //
+/////////////////

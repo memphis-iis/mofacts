@@ -3,6 +3,10 @@
     border-radius: 0px;
 }
 
+.stimButton {
+	height: 75px;
+}
+
 .navbar {
 	border-radius: 0px;
 }
@@ -11,14 +15,10 @@
 	border-radius: 0px;
 }
 
-.centered-vert-form-element {
-	float: none;
-    margin: 0 auto;
-    margin-bottom: 15px;
+.label {
+	border-radius: 0px;
 }
 
-.well {
+.panel, .panel-heading, .panel-body {
 	border-radius: 0px;
-	background-color: #808080;
-	border-color: #414141;
 }

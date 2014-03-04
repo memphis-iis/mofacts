@@ -3,17 +3,18 @@ var fs = Npm.require("fs");
 
 Meteor.startup(function () {
 	Stimuli.remove({});
-	var files = fs.readdirSync('./assets/app/');
-
+	var files = fs.readdirSync('./assets/app/stims/');
 	var stims = _(files).reject( function(fileName) {
 		return fileName.indexOf('.xml') < 0;
 	});
 
 	for(var i = 0; i < stims.length; i++){
 		var fileName = stims[i];
-		var json = getStimJSON(fileName);
+		var json = getStimJSON('stims/' + fileName);
 		Stimuli.insert({fileName: fileName, stimuli: json});
 	}
+	
+	buildSchedule();
 });
 
 function getStimJSON(fileName) {
@@ -26,9 +27,8 @@ function getStimJSON(fileName) {
 	return future.wait();
 }
 
-function writeToFile(){
-	//fs.writeFile('message.txt', 'Hello Node', function (err) {
-  	//	if (err) throw err;
- 	//	console.log('It\'s saved!');
-	//});
+
+function buildSchedule() {
+        	
 }
+

@@ -1,3 +1,7 @@
+//////////////
+//  EVENTS  //
+//////////////
+
 Template.signInTemplate.events({
     'click #signInButton' : function () {
         if (typeof console !== 'undefined') {
@@ -31,3 +35,11 @@ Template.signInTemplate.events({
         $("#invalidLogin").hide();
     }
 });
+
+/////////////////
+//  VARIABLES  //
+/////////////////
+
+/////////////////
+//  FUNCTIONS  //
+/////////////////
