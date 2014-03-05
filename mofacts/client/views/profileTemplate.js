@@ -18,6 +18,7 @@ Template.profileTemplate.events({
         Router.go("profile");
     },
     'click .stimButton' : function (event) {
+        console.log(event);
         Session.set("currentTest", event.target.name);
         WritetoFile(event.target.name);
         console.log("You clicked on: " + Session.get("currentTest"));
@@ -33,14 +34,23 @@ Template.profileTemplate.rendered = function () {
 	//this is called whenever the template is rendered.
     var allStimuli = Stimuli.find({});
     allStimuli.forEach( function (stimuliObject) {
-        $("#testContainingDiv").append(
-            "<div class=\"col-sm-3 col-md-3 col-lg-3 text-center\">" +
-                "<button type=\"button\" name=\"" + stimuliObject.fileName + "\" class=\"btn btn-primary btn-block stimButton\">" + 
-                    "<h4>" + stimuliObject.fileName + "</h4>" + 
-                "</button>" +
-                "</br>" +
-            "</div>"
-        );
+
+        console.log("rendered: " + stimuliObject.fileName);
+        var name = stimuliObject.fileName;
+
+        if (typeof name !== "undefined") {
+
+            $("#testContainingDiv").append(
+                "<div class=\"col-sm-3 col-md-3 col-lg-3 text-center\">" +
+                    "<button type=\"button\" name=\"" + name + "\" class=\"btn btn-primary btn-block stimButton\">" + 
+                        "" + name + "" + 
+                    "</button>" +
+                    "</br>" +
+                "</div>"
+            );
+
+        }
+
     });
 }
 
@@ -62,7 +72,7 @@ Template.profileTemplate.username = function () {
 /////////////////
 
 function WritetoFile(content){
-    console.log("You clicked on: " + content);
+    //console.log("You clicked on: " + content);
     
     //var fs = require('fs');
     

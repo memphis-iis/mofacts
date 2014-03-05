@@ -126,6 +126,7 @@ function randomCard() {
 }
 
 function getQuestionType() {
+    console.log(getFileName());
     return Stimuli.findOne({fileName: getFileName()}).stimuli.setspec.groups[0].group[0].type[0];
 }
 

@@ -4,6 +4,7 @@ var fs = Npm.require("fs");
 Meteor.startup(function () {
 	Stimuli.remove({});
 	var files = fs.readdirSync('./assets/app/stims/');
+	console.log(files);
 	var stims = _(files).reject( function(fileName) {
 		return fileName.indexOf('.xml') < 0;
 	});
