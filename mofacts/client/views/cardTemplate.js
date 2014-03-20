@@ -23,9 +23,11 @@ Template.cardTemplate.events({
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
 			console.log(message);
 
-			console.log("You Clicked 'Enter'");
+            console.log(Meteor.user().username);
 
-            Meteor.call("writing", "Will Work soon");
+            Meteor.call("writing", result +":"+elapsed+";;");
+
+            start = startTimer();
 
             //get a new card
             prepareCard();

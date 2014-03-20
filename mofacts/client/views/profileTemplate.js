@@ -20,7 +20,10 @@ Template.profileTemplate.events({
     'click .stimButton' : function (event) {
         console.log(event);
         Session.set("currentTest", event.target.name);
-        WritetoFile(event.target.name);
+
+        console.log();
+        Meteor.call("writing", Meteor.user().username + "::" + event.target.name + '\n');
+
         console.log("You clicked on: " + Session.get("currentTest"));
         //make sure session variables are cleared from previous tests
         cleanUp();
@@ -72,20 +75,6 @@ Template.profileTemplate.username = function () {
 /////////////////
 //  FUNCTIONS  //
 /////////////////
-
-function WritetoFile(content){
-    //console.log("You clicked on: " + content);
-    
-    //var fs = require('fs');
-    
-    //fs.writeFile("/tmp/test", content, function(err) {
-    //    if(err) {
-    //        console.log(err);
-    //    } else {
-    //        console.log("The file was saved!");
-    //    }
-    //}); 
-}
 
 function cleanUp() {
     Session.set("currentQuestion", undefined);

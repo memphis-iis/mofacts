@@ -17,9 +17,8 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 		writing: function(stuff){
-			fs.appendFile('log.txt', stuff + '\n', function (err) {
+			fs.appendFile('log.txt', stuff, function (err) {
   				if (err) throw err;
-  				console.log('It\'s saved!');
 			});
 		}
 	});
