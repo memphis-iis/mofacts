@@ -6,8 +6,6 @@ Template.signInTemplate.events({
     'click #signInButton' : function () {
         if (typeof console !== 'undefined') {
             console.log("You are trying to sign in!");
-            console.log(Stimuli.findOne({fileName: "EEGstims.xml"}).stimuli.setspec.clusters[0].cluster[0]);
-            console.log(Stimuli.findOne({fileName: "Music.xml"}).stimuli.setspec.clusters[0].cluster[0]);
         }
         var newUsername = signInUsername.value;
         var newPassword = password.value;
