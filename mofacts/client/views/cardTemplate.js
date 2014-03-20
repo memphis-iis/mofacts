@@ -24,6 +24,9 @@ Template.cardTemplate.events({
 			console.log(message);
 
 			console.log("You Clicked 'Enter'");
+
+            Meteor.call("writing", "Will Work soon");
+
             //get a new card
             prepareCard();
             //TODO: Log the results

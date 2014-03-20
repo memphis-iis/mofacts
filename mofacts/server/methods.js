@@ -14,6 +14,15 @@ Meteor.startup(function () {
 		var json = getStimJSON('stims/' + fileName);
 		Stimuli.insert({fileName: fileName, stimuli: json});
 	}
+
+		Meteor.methods({
+		writing: function(stuff){
+			fs.appendFile('log.txt', stuff + '\n', function (err) {
+  				if (err) throw err;
+  				console.log('It\'s saved!');
+			});
+		}
+	});
 	
 	buildSchedule();
 });
