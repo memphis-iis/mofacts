@@ -20,12 +20,13 @@ Template.profileTemplate.events({
     'click .stimButton' : function (event) {
         console.log(event);
 
-        console.log("ess")
-
         Session.set("currentTest", event.target.name);
 
+        var time = new Date();
+
+        Meteor.call("user", Meteor.user().username);
         Meteor.call("naming", event.target.name);
-        Meteor.call("writing",Meteor.user().username + "::" + event.target.name + '\n');
+        Meteor.call("writing",Meteor.user().username + "::" + event.target.name + "::" +  time.getTime() + '\n');
 
         console.log("You clicked on: " + Session.get("currentTest"));
         //make sure session variables are cleared from previous tests

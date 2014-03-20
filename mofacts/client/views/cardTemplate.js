@@ -19,11 +19,24 @@ Template.cardTemplate.events({
 		if (key==13){
 
 			var result = document.getElementById('answer').value;
-			var elapsed = new Date().getTime()-start;
+            var answer = document.getElementById('testAnswer').textContent;
+			var isCorrect = true;
+            var elapsed = new Date().getTime()-start;
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
 			console.log(message);
 
-            Meteor.call("writing",result +":"+elapsed+";;");
+            answer = answer.split(":");
+            answer = answer[1].split("  ");
+            answer = answer[1];
+
+            if (result.localeCompare(answer)){
+                isCorrect = false;
+            }
+
+            console.log(answer + "|" + result + "    " + isCorrect);
+
+
+            Meteor.call("writing",result +";"+ isCorrect + ";" + elapsed+"::");
 
             start = startTimer();
 
