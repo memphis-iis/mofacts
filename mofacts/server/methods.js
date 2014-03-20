@@ -1,5 +1,6 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
+var filename;
 
 Meteor.startup(function () {
 	Stimuli.remove({});
@@ -16,10 +17,22 @@ Meteor.startup(function () {
 	}
 
 		Meteor.methods({
+
 		writing: function(stuff){
-			fs.appendFile('log.txt', stuff, function (err) {
+			fs.appendFile(filename, stuff, function (err) {
   				if (err) throw err;
 			});
+		}
+	});
+
+		Meteor.methods({
+
+		naming: function(name){
+
+			name = name.split(".",1)
+
+			filename = name + "_log.txt";
+			this.filename = filename;
 		}
 	});
 	

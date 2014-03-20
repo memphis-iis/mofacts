@@ -23,7 +23,7 @@ Template.cardTemplate.events({
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
 			console.log(message);
 
-            Meteor.call("writing", result +":"+elapsed+";;");
+            Meteor.call("writing",result +":"+elapsed+";;");
 
             start = startTimer();
 
