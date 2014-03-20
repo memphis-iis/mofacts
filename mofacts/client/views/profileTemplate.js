@@ -22,6 +22,8 @@ Template.profileTemplate.events({
         Session.set("currentTest", event.target.name);
         WritetoFile(event.target.name);
         console.log("You clicked on: " + Session.get("currentTest"));
+        //make sure session variables are cleared from previous tests
+        cleanUp();
         Router.go("card");
     }
 });
@@ -83,4 +85,10 @@ function WritetoFile(content){
     //        console.log("The file was saved!");
     //    }
     //}); 
+}
+
+function cleanUp() {
+    Session.set("currentQuestion", undefined);
+    Session.set("currentAnswer", undefined);
+    Session.set("scheduleIndex", undefined);
 }
