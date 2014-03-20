@@ -1,87 +1,15 @@
 <setspec>
     <groups>
         <group>
-            <name>entry</name>
-            <type>text</type>
-        </group>
-        <group>
             <name>interval</name>
             <type>sound</type>
         </group>     
     </groups>
-    <clusters>
-        <cluster>	
-            <interval>resources/wav/1.wav</interval>
-            <entry>Minor_3rd</entry>	
-            <interval>resources/wav/7.wav</interval>
-            <entry>Minor_3rd</entry>	    	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/2.wav</interval>
-            <entry>Major_3rd</entry>		
-            <interval>resources/wav/8.wav</interval>
-            <entry>Major_3rd</entry>	   	
-        </cluster>
-        <cluster>
-            <interval>resources/wav/3.wav</interval>
-            <entry>Tritone</entry>		
-            <interval>resources/wav/9.wav</interval>
-            <entry>Tritone</entry>	    	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/4.wav</interval>
-            <entry>Perfect_5th</entry>	
-            <interval>resources/wav/10.wav</interval>
-            <entry>Perfect_5th</entry>	
-        </cluster>
-        <cluster>
-            <interval>resources/wav/5.wav</interval>
-            <entry>Major_7th</entry>	
-            <interval>resources/wav/11.wav</interval>
-            <entry>Major_7th</entry>	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/6.wav</interval>
-            <entry>Octave</entry>	        	
-            <interval>resources/wav/12.wav</interval>
-            <entry>Octave</entry>	  	
-        </cluster>
-     
-        <cluster>	
-            <interval>resources/wav/13.wav</interval>
-            <entry>Minor_3rd</entry>	
-            <interval>resources/wav/19.wav</interval>
-            <entry>Minor_3rd</entry>	    	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/14.wav</interval>
-            <entry>Major_3rd</entry>		
-            <interval>resources/wav/20.wav</interval>
-            <entry>Major_3rd</entry>	   	
-        </cluster>
-        <cluster>
-            <interval>resources/wav/15.wav</interval>
-            <entry>Tritone</entry>		
-            <interval>resources/wav/21.wav</interval>
-            <entry>Tritone</entry>	    	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/16.wav</interval>
-            <entry>Perfect_5th</entry>	
-            <interval>resources/wav/22.wav</interval>
-            <entry>Perfect_5th</entry>	
-        </cluster>
-        <cluster>
-            <interval>resources/wav/17.wav</interval>
-            <entry>Major_7th</entry>	
-            <interval>resources/wav/23.wav</interval>
-            <entry>Major_7th</entry>	
-        </cluster>
-        <cluster>	
-            <interval>resources/wav/18.wav</interval>
-            <entry>Octave</entry>	        	
-            <interval>resources/wav/24.wav</interval>
-            <entry>Octave</entry>	  	
-        </cluster>     		
+    <clusters> 
+        <cluster><word>100Hz.wav</word><answer>100Hz</answer></cluster>    
+        <cluster><word>250Hz.wav</word><answer>250Hz</answer></cluster>     
+        <cluster><word>440Hz.wav</word><answer>440Hz</answer></cluster>   
+        <cluster><word>1kHz.wav</word><answer>1kHz</answer></cluster>      	
+        <cluster><word>10kHz.wav</word><answer>10kHz</answer></cluster>       	
     </clusters>
 </setspec>

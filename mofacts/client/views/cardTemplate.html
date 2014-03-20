@@ -52,7 +52,7 @@
 					<h1><label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label></h1>
 				{{/if}}
 				{{#if audioCard}}
-					<audio controls>
+					<audio controls autoplay id="audio">
 						<source src={{currentQuestion}} type="audio/wav">
 						Your browser does not support the audio element.
 					</audio>

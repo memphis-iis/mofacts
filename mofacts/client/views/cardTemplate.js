@@ -48,6 +48,13 @@ Template.cardTemplate.events({
     }
 });
 
+Template.cardTemplate.rendered = function() {
+    if(getQuestionType() === "sound"){
+        console.log("Sound")
+        document.getElementById('audio').play();
+    }
+}
+
 /////////////////
 //  VARIABLES  //
 /////////////////
