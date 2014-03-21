@@ -26,7 +26,7 @@ Template.profileTemplate.events({
 
         Meteor.call("user", Meteor.user().username);
         Meteor.call("naming", event.target.name);
-        Meteor.call("writing",Meteor.user().username + "::" + event.target.name + "::" +  time.getTime() + '\n');
+        Meteor.call("writing",'\n' + Meteor.user().username + "::" + event.target.name + "::" +  time.getTime() + '\n');
 
         console.log("You clicked on: " + Session.get("currentTest"));
         //make sure session variables are cleared from previous tests
