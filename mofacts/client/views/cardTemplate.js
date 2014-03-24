@@ -18,13 +18,22 @@ Template.cardTemplate.events({
 		var key=e.keyCode || e.which;
 		if (key==13){
 
+            //Gets User Response
 			var result = document.getElementById('answer').value;
+
+            //Check Correctness
             var answer = document.getElementById('testAnswer').textContent;
 			var isCorrect = true;
+            //---------
+
+            //Timer
             var elapsed = new Date().getTime()-start;
+
+            //Display results
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
 			console.log(message);
 
+            //Check Correctness
             answer = answer.split(":");
             answer = answer[1].split("  ");
             answer = answer[1];
@@ -34,10 +43,12 @@ Template.cardTemplate.events({
             }
 
             console.log(answer + "|" + result + "    " + isCorrect);
+            //---------
 
-
+            //Write to Log
             Meteor.call("writing",result +";"+ isCorrect + ";" + elapsed+"::");
 
+            //Reset timer for next question
             start = startTimer();
 
             //get a new card

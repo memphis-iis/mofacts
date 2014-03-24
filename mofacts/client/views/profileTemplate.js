@@ -22,13 +22,18 @@ Template.profileTemplate.events({
 
         Session.set("currentTest", event.target.name);
 
+        //Client side time
         var time = new Date();
 
+        //Saves User, Test, and Time to Server side and Log
         Meteor.call("user", Meteor.user().username);
         Meteor.call("naming", event.target.name);
         Meteor.call("writing",'\n' + Meteor.user().username + "::" + event.target.name + "::" +  time.getTime() + '\n');
+        //---------
 
+        //Display Current Test in Console Log
         console.log("You clicked on: " + Session.get("currentTest"));
+
         //make sure session variables are cleared from previous tests
         cleanUp();
         Router.go("card");

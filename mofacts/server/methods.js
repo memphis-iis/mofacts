@@ -19,6 +19,7 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 
+		//Writes to Log
 		writing: function(stuff){
 			fs.appendFile(name + "_" + filename +".txt", stuff, function (err) {
   				if (err) throw err;
@@ -28,6 +29,7 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 
+		//Saves test name to Server side
 		naming: function(name){
 			name = name.split(".",1);
 			filename = name;
@@ -36,8 +38,9 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 
+		//Saves username to Server side
 		user: function(names){
-			name = names;
+			name = Snames;
 
 		}
 	});
