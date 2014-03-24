@@ -45,7 +45,34 @@ Template.signUpTemplate.events({
                             "\t[Username: " + formUsername + "]\n" +
                             "\t" + error);
             } else {
-                Router.go("profile");
+                var newUserID = Meteor.userId();
+                if(newUserID !== null) {
+                    UserProgress.insert({
+                          userID: newUserID
+                        , currentStimuliTest: ""
+                        , timeStarted: ""
+                        , progressDataArray: [
+                                                {
+                                                    question: ""
+                                                  , correctAnswer: ""
+                                                  , userAnswer: ""
+                                                  , timeSpentTyping: ""
+                                                }
+                                             ]
+                    }, function (error, id) { //callback function
+                        if (typeof error !== "undefined") {
+                            console.log("ERROR: The user was not logged in upon account creation!\n"+
+                                    "\t[Username:" + formUsername + "]" +
+                                    "\t" + error);
+                        } else {
+                            Router.go("profile");
+                        }
+                    });
+                } else {
+                    console.log("ERROR: The user was not logged in upon account creation!\n"+
+                            "\t[Username:" + formUsername + "]" +
+                            "\t" + error);
+                }
             }
         });
     },
