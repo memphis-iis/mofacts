@@ -30,4 +30,9 @@ Router.map(function() {
 		template: 'cardTemplate'
 	})
 
+	this.route('instructions', {
+		path: '/instructions',
+		template: 'instructionsTemplate'
+	})
+
 });

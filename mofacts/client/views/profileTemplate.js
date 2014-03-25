@@ -39,7 +39,7 @@ Template.profileTemplate.events({
 
         //make sure session variables are cleared from previous tests
         cleanUp();
-        Router.go("card");
+        Router.go("instructions");
     }
 });
 
