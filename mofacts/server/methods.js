@@ -1,6 +1,6 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
-var filename, name;
+var filename, name, timestamp;
 
 
 Meteor.startup(function () {
@@ -19,7 +19,17 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 
-		//Writes to Log
+		//Writes to Log for the first time for that test. 
+		TheFirstWriting: function(stuff){
+			fs.appendFile(name + "_" + filename +".txt", '\n' + stuff + timestamp + '\n', function (err) {
+  				if (err) throw err;
+			});
+		}
+	});
+
+		Meteor.methods({
+
+		//Added addition stuff to Log
 		writing: function(stuff){
 			fs.appendFile(name + "_" + filename +".txt", stuff, function (err) {
   				if (err) throw err;
@@ -40,8 +50,17 @@ Meteor.startup(function () {
 
 		//Saves username to Server side
 		user: function(names){
-			name = Snames;
+			name = names;
 
+		}
+	});
+
+		Meteor.methods({
+
+		//Saves timestamp to Server side
+		timestamp: function(){
+			var time = Date.now();
+			timestamp = time;
 		}
 	});
 

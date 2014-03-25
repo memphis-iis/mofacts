@@ -22,13 +22,14 @@ Template.profileTemplate.events({
 
         Session.set("currentTest", event.target.name);
 
-        //Client side time
-        var time = new Date();
+        //Get Test Type
+            //Whether it is a practice, drill, etc
 
         //Saves User, Test, and Time to Server side and Log
         Meteor.call("user", Meteor.user().username);
         Meteor.call("naming", event.target.name);
-        Meteor.call("writing",'\n' + Meteor.user().username + "::" + event.target.name + "::" +  time.getTime() + '\n');
+        Meteor.call("timestamp");
+        Meteor.call("TheFirstWriting",Meteor.user().username + "::" + event.target.name + "::");
         //---------
 
         //Display Current Test in Console Log

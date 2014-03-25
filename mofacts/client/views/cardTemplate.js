@@ -45,8 +45,30 @@ Template.cardTemplate.events({
             console.log(answer + "|" + result + "    " + isCorrect);
             //---------
 
+            //Get question Number
+            
+            if(Session.get("scheduleIndex") === undefined) {
+                index = getIndexForRandom();
+            }else{
+                index = Session.get("scheduleIndex");
+            }
+
+            console.log(index);
+
+            //Get whether text, audio or picture
+            var QType = getQuestionType();
+            if (QType == "text"){
+                QType = "T";    //T for Text
+            } else if (QType == "image"){
+                QType = "I";    //I for Image
+            } else if (QType == "sound"){
+                QType = "A";    //A for Audio
+            } else {
+                QType = "NA";   //NA for Not Applicable
+            }
+
             //Write to Log
-            Meteor.call("writing",result +";"+ isCorrect + ";" + elapsed+"::");
+            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsed+"::");
 
             //Reset timer for next question
             start = startTimer();
@@ -168,4 +190,18 @@ function scheduledCard() {
 
 function getFileName() {
     return Session.get("currentTest");
+}
+
+function getIndexForRandom(){
+    var file = Stimuli.findOne({fileName: getFileName()});
+    var ses = Session.get("currentQuestion");
+
+    for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
+       var temp = file.stimuli.setspec.clusters[0].cluster[i].word[0];
+
+       if(temp == ses){
+        return i+1;
+       }
+    };
+    
 }
