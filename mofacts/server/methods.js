@@ -1,7 +1,7 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var filename, name, timestamp;
-
+var filepath = '/home/kdogfour/mofacts/mofacts/.meteor/'
 
 Meteor.startup(function () {
 	Stimuli.remove({});
@@ -21,7 +21,7 @@ Meteor.startup(function () {
 
 		//Added addition stuff to Log
 		writing: function(stuff){
-			fs.appendFile(name + "_" + filename +".txt", stuff, function (err) {
+			fs.appendFile(filepath + name + "_" + filename +".txt", stuff, function (err) {
   				if (err) throw err;
 			});
 			Meteor.call("addtime");
@@ -33,9 +33,10 @@ Meteor.startup(function () {
 		//Added addition stuff to Log
 		addtime: function(){
 			Meteor.call("timestamp");
-			fs.appendFile(name + "_" + filename +".txt", timestamp  + '\n', function (err) {
+			fs.appendFile(filepath + name + "_" + filename +".txt", timestamp  + '\n', function (err) {
   				if (err) throw err;
 			});
+			
 		}
 	});
 
