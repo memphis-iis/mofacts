@@ -1,7 +1,8 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var filename, name, timestamp;
-var filepath = '/home/kdogfour/mofacts/mofacts/.meteor/'
+//var filepath = 'mofacts/mofacts/.meteor/';
+var filepath = "";
 
 Meteor.startup(function () {
 	Stimuli.remove({});
