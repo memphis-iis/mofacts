@@ -63,7 +63,7 @@ Template.cardTemplate.events({
             }
 
             //Write to Log
-            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsed+"::");
+            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsed+"::"+'\n');
 
             //Reset timer for next question
             start = startTimer();
