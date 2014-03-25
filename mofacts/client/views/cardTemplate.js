@@ -146,7 +146,7 @@ function startTimer() {
 }
 
 function prepareCard() {
-    var file = Stimuli.findOne({fileName: getFileName()});
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
     if (file.stimuli.setspec.schedule != undefined) {
         if (Session.get("scheduleIndex") === undefined) {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
@@ -164,7 +164,7 @@ function prepareCard() {
 
 function randomCard() {
     //get the file from the collection
-    var file = Stimuli.findOne({fileName: getFileName()});
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
     //get the cluster size (avoids out of bounds error)
     var size = file.stimuli.setspec.clusters[0].cluster.length;
     //get a valid index
@@ -175,25 +175,25 @@ function randomCard() {
 }
 
 function getQuestionType() {
-    console.log(getFileName());
-    return Stimuli.findOne({fileName: getFileName()}).stimuli.setspec.groups[0].group[0].type[0];
+    console.log(getCurrentTestName());
+    return Stimuli.findOne({fileName: getCurrentTestName()}).stimuli.setspec.groups[0].group[0].type[0];
 }
 
 function scheduledCard() {
     var index = Session.get("scheduleIndex");
-    var file = Stimuli.findOne({fileName: getFileName()});
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var which = file.stimuli.setspec.schedule[0].q[index];
     Session.set("currentQuestion", file.stimuli.setspec.clusters[0].cluster[which].word[0]);
     Session.set("currentAnswer", file.stimuli.setspec.clusters[0].cluster[which].answer[0]);
     Session.set("scheduleIndex", index + 1);
 }
 
-function getFileName() {
+function getCurrentTestName() {
     return Session.get("currentTest");
 }
 
 function getIndex(){
-    var file = Stimuli.findOne({fileName: getFileName()});
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var ses = Session.get("currentQuestion");
 
     for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
