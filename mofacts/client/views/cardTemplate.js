@@ -23,6 +23,7 @@ Template.cardTemplate.events({
 
             //Timer
             var elapsed = new Date().getTime()-start;
+            var elapsedOnRender = new Date().getTime()-startOnRender;
 
             //Display results
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
@@ -63,7 +64,8 @@ Template.cardTemplate.events({
             }
 
             //Write to Log
-            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsed+"::"+'\n');
+            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsedOnRender + 
+                ";" + elapsed + "::" );
 
             //Reset timer for next question
             start = startTimer();
@@ -93,6 +95,10 @@ Template.cardTemplate.events({
 });
 
 Template.cardTemplate.rendered = function() {
+    startOnRender = startTimer()
+
+    document.getElementById("answer").blur();
+
     if(getQuestionType() === "sound"){
         console.log("Sound")
         document.getElementById('audio').play();
@@ -153,6 +159,10 @@ function prepareCard() {
         }
         if (Session.get("scheduleIndex") === file.stimuli.setspec.schedule[0].q.length){
             alert("End of test.  Thank you.");
+
+            //Add the timestamp for the End of test
+            Meteor.call("addtime");
+
             Router.go("profile"); //Send user to profile after test finishes
         } else {
             scheduledCard();  

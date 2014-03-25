@@ -29,7 +29,7 @@ Template.profileTemplate.events({
         Meteor.call("user", Meteor.user().username);
         Meteor.call("naming", event.target.name);
         Meteor.call("timestamp");
-        Meteor.call("TheFirstWriting",Meteor.user().username + "::" + event.target.name + "::");
+        Meteor.call("writing",Meteor.user().username + "::" + event.target.name + "::");
         //---------
 
         //Display Current Test in Console Log

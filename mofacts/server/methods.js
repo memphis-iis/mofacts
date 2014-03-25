@@ -19,19 +19,21 @@ Meteor.startup(function () {
 
 		Meteor.methods({
 
-		//Writes to Log for the first time for that test. 
-		TheFirstWriting: function(stuff){
-			fs.appendFile(name + "_" + filename +".txt", '\n' + stuff + timestamp + '\n', function (err) {
+		//Added addition stuff to Log
+		writing: function(stuff){
+			fs.appendFile(name + "_" + filename +".txt", stuff, function (err) {
   				if (err) throw err;
 			});
+			Meteor.call("addtime");
 		}
 	});
 
 		Meteor.methods({
 
 		//Added addition stuff to Log
-		writing: function(stuff){
-			fs.appendFile(name + "_" + filename +".txt", stuff, function (err) {
+		addtime: function(){
+			Meteor.call("timestamp");
+			fs.appendFile(name + "_" + filename +".txt", timestamp  + '\n', function (err) {
   				if (err) throw err;
 			});
 		}
