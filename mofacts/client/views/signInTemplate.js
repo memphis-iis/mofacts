@@ -4,7 +4,7 @@
 
 Template.signInTemplate.events({
     'click #signInButton' : function () {
-        if (typeof console !== 'undefined') {
+        if (typeof console !== 'undefined' && Session.get("debugging")) {
             console.log("You are trying to sign in!");
         }
         UserPasswordCheck();
@@ -38,20 +38,21 @@ Template.signInTemplate.events({
 /////////////////
 
 function UserPasswordCheck(){
-        var newUsername = signInUsername.value;
-        var newPassword = password.value;
-        
-        Meteor.loginWithPassword(newUsername, newPassword, function(error) {
-           if (typeof error !== 'undefined') {
-                // console.log(error);
-                $("#invalidLogin").show();
-                return;
-            } else {
-                $("#invalidLogin").hide();
-                var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+    var newUsername = signInUsername.value;
+    var newPassword = password.value;
+    
+    Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+       if (typeof error !== 'undefined') {
+            // console.log(error);
+            $("#invalidLogin").show();
+            return;
+        } else {
+            $("#invalidLogin").hide();
+            var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+            if(typeof console !== "undefined" && Session.get("debugging")) {
                 console.log(currentUser + " was logged in successfully!");
-                Router.go("profile");
             }
-        });
-
+            Router.go("profile");
+        }
+    });
 }
