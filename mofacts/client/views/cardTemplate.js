@@ -2,11 +2,6 @@
 //  EVENTS  //
 //////////////
 
-function startTimer() {
-	var start = new Date().getTime();
-	return start
-}
-
 Template.cardTemplate.events({
 
 	'focus #answer' : function() {
@@ -144,6 +139,11 @@ Template.cardTemplate.imageCard = function() {
 /////////////////
 //  FUNCTIONS  //
 /////////////////
+
+function startTimer() {
+    var start = new Date().getTime();
+    return start
+}
 
 function prepareCard() {
     var file = Stimuli.findOne({fileName: getFileName()});
