@@ -47,10 +47,10 @@ Template.cardTemplate.events({
 
             //Get question Number
             
-            if(Session.get("scheduleIndex") === undefined) {
-                index = getIndexForRandom();
-            }else{
-                index = Session.get("scheduleIndex");
+            index = getIndex();
+            
+            if(index === "undefined"){
+                index = "NA";
             }
 
             console.log(index);
@@ -192,7 +192,7 @@ function getFileName() {
     return Session.get("currentTest");
 }
 
-function getIndexForRandom(){
+function getIndex(){
     var file = Stimuli.findOne({fileName: getFileName()});
     var ses = Session.get("currentQuestion");
 
