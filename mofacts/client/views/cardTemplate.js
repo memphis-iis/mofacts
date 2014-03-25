@@ -205,3 +205,7 @@ function getIndex(){
     };
     
 }
+
+function recordProgress ( question, answer, userAnswer, timeSpentTyping ) {
+    //TODO: Here we will insert records into the userProgress Collection.
+}
