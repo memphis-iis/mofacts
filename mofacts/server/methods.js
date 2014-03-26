@@ -2,6 +2,7 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var filename, name, timestamp;
 var filepath = '../../../../../server/';
+var endOfLine = Npm.require("os").EOL;
 
 Meteor.startup(function () {
 	Stimuli.remove({});
@@ -47,7 +48,7 @@ Meteor.startup(function () {
 		//Added addition stuff to Log
 		addtime: function(){
 			Meteor.call("timestamp");
-			fs.appendFile(filepath + name + "_" + filename +".txt", timestamp  + '\n', function (err) {
+			fs.appendFile(filepath + name + "_" + filename +".txt", timestamp  + endOfLine, function (err) {
   				if (err) throw err;
 			});
 			
