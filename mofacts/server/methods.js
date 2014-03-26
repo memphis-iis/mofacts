@@ -25,9 +25,6 @@ Meteor.startup(function () {
 		if (fileName.indexOf("stims") != -1){
 			Stimuli.insert({fileName: fileName, stimuli: json});
 		}
-		if (fileName.indexOf("TDF") != -1){
-			Tdfs.insert({fileName: fileName, tdfs: json});
-		}
 	}
 	
 	for(var i = 0; i < tdfs.length; i++){
