@@ -6,17 +6,42 @@ var filepath = "";
 
 Meteor.startup(function () {
 	Stimuli.remove({});
+	Tdfs.remove({});
+	stimTdfPair.remove({});
 	var files = fs.readdirSync('./assets/app/stims/');
+	var tdffiles = fs.readdirSync('./assets/app/tdf/');
+	console.log(tdffiles);
 	console.log(files);
 	var stims = _(files).reject( function(fileName) {
+		return fileName.indexOf('.xml') < 0;
+	});
+	var tdfs = _(tdffiles).reject( function(fileName) {
 		return fileName.indexOf('.xml') < 0;
 	});
 
 	for(var i = 0; i < stims.length; i++){
 		var fileName = stims[i];
 		var json = getStimJSON('stims/' + fileName);
-		Stimuli.insert({fileName: fileName, stimuli: json});
+		if (fileName.indexOf("stims") != -1){
+			Stimuli.insert({fileName: fileName, stimuli: json});
+		}
+		if (fileName.indexOf("TDF") != -1){
+			Tdfs.insert({fileName: fileName, tdfs: json});
+		}
 	}
+	
+	for(var i = 0; i < tdfs.length; i++){
+		var fileName = tdfs[i];
+		var json = getStimJSON('tdf/' + fileName);
+		if (fileName.indexOf("TDF") != -1){
+			Tdfs.insert({fileName: fileName, tdfs: json});
+		}
+	}
+	
+
+	
+	
+	
 
 		Meteor.methods({
 
