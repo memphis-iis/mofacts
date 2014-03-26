@@ -22,17 +22,15 @@ Meteor.startup(function () {
 	for(var i = 0; i < stims.length; i++){
 		var fileName = stims[i];
 		var json = getStimJSON('stims/' + fileName);
-		if (fileName.indexOf("stims") != -1){
-			Stimuli.insert({fileName: fileName, stimuli: json});
-		}
+		Stimuli.insert({fileName: fileName, stimuli: json});
+		
 	}
 	
 	for(var i = 0; i < tdfs.length; i++){
 		var fileName = tdfs[i];
 		var json = getStimJSON('tdf/' + fileName);
-		if (fileName.indexOf("TDF") != -1){
-			Tdfs.insert({fileName: fileName, tdfs: json});
-		}
+		Tdfs.insert({fileName: fileName, tdfs: json});
+		
 	}
 	
 
