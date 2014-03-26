@@ -5,11 +5,11 @@
 Template.cardTemplate.events({
 
 	'focus #answer' : function() {
-		start = startTimer()
+		
 	},
 
 	'keypress #answer' : function (e) {
-		
+
 		var key=e.keyCode || e.which;
 		if (key==13){
 
@@ -26,7 +26,7 @@ Template.cardTemplate.events({
             var elapsedOnRender = new Date().getTime()-startOnRender;
 
             //Display results
-			var message = "You answered " + result + " in " + elapsed + " Milliseconds"
+			var message = "You answered " + result + " in " + elapsed + " Milliseconds :: " + elapsedOnRender;
 			console.log(message);
 
             //Check Correctness
@@ -74,8 +74,9 @@ Template.cardTemplate.events({
             prepareCard();
             //TODO: Log the results
 			$("#answer").val("");
-		}
-		
+		}else{
+            start = startTimer();
+        }
 		
 	},
 	'click .logoutLink' : function () {
@@ -97,7 +98,7 @@ Template.cardTemplate.events({
 Template.cardTemplate.rendered = function() {
     startOnRender = startTimer()
 
-    document.getElementById("answer").blur();
+    //document.getElementById("answer").blur();
 
     if(getQuestionType() === "sound"){
         console.log("Sound")
