@@ -26,8 +26,13 @@ Template.cardTemplate.events({
             var elapsedOnRender = new Date().getTime()-startOnRender;
 
             //Display results
+            if (result === ""){
+                elapsed = 0;
+            }
+
 			var message = "You answered " + result + " in " + elapsed + " Milliseconds :: " + elapsedOnRender;
 			console.log(message);
+            //---------
 
             //Check Correctness
             answer = answer.split(":");
@@ -96,7 +101,8 @@ Template.cardTemplate.events({
 });
 
 Template.cardTemplate.rendered = function() {
-    startOnRender = startTimer()
+    startOnRender = startTimer();
+    start = 0;
 
     //document.getElementById("answer").blur();
 
