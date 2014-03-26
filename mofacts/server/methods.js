@@ -1,8 +1,7 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var filename, name, timestamp;
-//var filepath = 'mofacts/mofacts/.meteor/';
-var filepath = "";
+var filepath = '../../../../../server/';
 
 Meteor.startup(function () {
 	Stimuli.remove({});
@@ -32,12 +31,6 @@ Meteor.startup(function () {
 		Tdfs.insert({fileName: fileName, tdfs: json});
 		
 	}
-	
-
-	
-	
-	
-
 		Meteor.methods({
 
 		//Added addition stuff to Log
