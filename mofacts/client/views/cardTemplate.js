@@ -211,18 +211,23 @@ function getCurrentTestName() {
 
 function getIndex(){
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var ses = Session.get("currentQuestion");
+    var currentQuestion = Session.get("currentQuestion");
 
     for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
-       var temp = file.stimuli.setspec.clusters[0].cluster[i].word[0];
+       var tempQuestion = file.stimuli.setspec.clusters[0].cluster[i].word[0];
 
-       if(temp == ses){
-        return i+1;
-       }
+        if (tempQuestion == currentQuestion) {
+            return i+1;
+        }
     };
     
 }
 
-function recordProgress ( question, answer, userAnswer, timeSpentTyping ) {
-    //TODO: Here we will insert records into the userProgress Collection.
+function recordProgress ( question, questionIndex, correctAnswer, userAnswer ) {
+    // {
+    //     question: ""
+    //   , questionIndex: ""
+    //   , correctAnswer: ""
+    //   , userAnswer: ""
+    // }
 }
