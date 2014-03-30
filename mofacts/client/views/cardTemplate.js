@@ -14,7 +14,7 @@ Template.cardTemplate.events({
 		if (key==13){
 
             //Gets User Response
-			var result = document.getElementById('answer').value;
+			var userAnswer = document.getElementById('answer').value;
 
             //Check Correctness
             var answer = document.getElementById('testAnswer').textContent;
@@ -26,11 +26,11 @@ Template.cardTemplate.events({
             var elapsedOnRender = new Date().getTime()-startOnRender;
 
             //Display results
-            if (result === ""){
+            if (userAnswer === ""){
                 elapsed = 0;
             }
 
-			var message = "You answered " + result + " in " + elapsed + " Milliseconds :: " + elapsedOnRender;
+			var message = "You answered " + userAnswer + " in " + elapsed + " Milliseconds :: " + elapsedOnRender;
 			console.log(message);
             //---------
 
@@ -39,11 +39,11 @@ Template.cardTemplate.events({
             answer = answer[1].split("  ");
             answer = answer[1];
 
-            if (result.localeCompare(answer)){
+            if (userAnswer.localeCompare(answer)){
                 isCorrect = false;
             }
 
-            console.log(answer + "|" + result + "    " + isCorrect);
+            console.log(answer + "|" + userAnswer + "    " + isCorrect);
             //---------
 
             //Get question Number
@@ -69,7 +69,7 @@ Template.cardTemplate.events({
             }
 
             //Write to Log
-            Meteor.call("writing",index + ";" + QType + ";" + result +";"+ isCorrect + ";" + elapsedOnRender + 
+            Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
                 ";" + elapsed + "::" );
 
             //Reset timer for next question
@@ -211,23 +211,52 @@ function getCurrentTestName() {
 
 function getIndex(){
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var currentQuestion = Session.get("currentQuestion");
+    var currentQ = Session.get("currentQuestion");
 
     for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
-       var tempQuestion = file.stimuli.setspec.clusters[0].cluster[i].word[0];
+       var tempQ = file.stimuli.setspec.clusters[0].cluster[i].word[0];
 
-        if (tempQuestion == currentQuestion) {
+        if (tempQ == currentQ) {
             return i+1;
         }
     };
     
 }
 
-function recordProgress ( question, questionIndex, correctAnswer, userAnswer ) {
-    // {
-    //     question: ""
-    //   , questionIndex: ""
-    //   , correctAnswer: ""
-    //   , userAnswer: ""
-    // }
+function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
+
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var currentTestMode;
+
+    if (file.stimuli.setspec.schedule != undefined) {
+        currentTestMode = "BASIC SCHEDULE";
+    } else {
+        currentTestMode = "RANDOM";
+    }
+
+    if (Meteor.userId() !== null) {
+
+        //update the currentTest and mode
+        UserProgress.update(
+            { userID: Meteor.userId() }, //where userID === Meteor.userId()
+            { $set: {                  //set the current test and mode
+                          currentStimuliTest: getCurrentTestName()
+                        , currentTestMode: currentTestMode
+                    }
+            }
+        );
+
+        //add to the progressDataArray
+        UserProgress.update(
+            { userID: Meteor.userId() },
+            { $push: {
+                          questionIndex: questionIndex
+                        , question: question
+                        , correctAnswer: correctAnswer
+                        , userAnswer: userAnswer
+                     }
+            }
+        );
+
+    }  
 }

@@ -50,15 +50,8 @@ Template.signUpTemplate.events({
                     UserProgress.insert({
                           userID: newUserID
                         , currentStimuliTest: ""
-                        , timeStarted: ""
-                        , progressDataArray: [
-                                                {
-                                                    question: ""
-                                                  , correctAnswer: ""
-                                                  , userAnswer: ""
-                                                  , timeSpentTyping: ""
-                                                }
-                                             ]
+                        , currentTestMode: ""
+                        , progressDataArray: []
                     }, function (error, id) { //callback function
                         if (typeof error !== "undefined") {
                             console.log("ERROR: The user was not logged in upon account creation!\n"+
