@@ -5,7 +5,12 @@
 Template.cardTemplate.events({
 
 	'focus #answer' : function() {
-		
+		if(Session.get("debugging")){
+            var progress = UserProgress.find({_id: Meteor.userId()});
+            progress.forEach(function (user) {
+                console.log(user);
+            });
+        }
 	},
 
 	'keypress #answer' : function (e) {
@@ -72,12 +77,15 @@ Template.cardTemplate.events({
             Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
                 ";" + elapsed + "::" );
 
+            //record progress in UserProgress collection.
+            recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
+
             //Reset timer for next question
             start = startTimer();
 
             //get a new card
             prepareCard();
-            //TODO: Log the results
+            
 			$("#answer").val("");
 		}else{
             start = startTimer();
@@ -121,6 +129,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
         prepareCard();
+        recordCurrentTestData();
     }
 }
 
@@ -225,6 +234,26 @@ function getIndex(){
 
 function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
 
+    if (Meteor.userId() !== null) {
+
+        //add to the progressDataArray
+        UserProgress.update(
+            { _id: Meteor.userId() },
+            { $push: { progressDataArray :  {
+                                                questionIndex: questionIndex
+                                                , question: question
+                                                , correctAnswer: correctAnswer
+                                                , userAnswer: userAnswer
+                                            }  
+                     }
+            }
+        );
+
+    }  
+}
+
+function recordCurrentTestData() {
+
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var currentTestMode;
 
@@ -238,25 +267,13 @@ function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
 
         //update the currentTest and mode
         UserProgress.update(
-            { userID: Meteor.userId() }, //where userID === Meteor.userId()
-            { $set: {                  //set the current test and mode
+            { _id: Meteor.userId() }, //where _id === Meteor.userId()
+            { $set: {                  //set the current test and mode, and then clear the progress array.
                           currentStimuliTest: getCurrentTestName()
                         , currentTestMode: currentTestMode
+                        , progressDataArray: []
                     }
             }
         );
-
-        //add to the progressDataArray
-        UserProgress.update(
-            { userID: Meteor.userId() },
-            { $push: {
-                          questionIndex: questionIndex
-                        , question: question
-                        , correctAnswer: correctAnswer
-                        , userAnswer: userAnswer
-                     }
-            }
-        );
-
-    }  
+    }
 }

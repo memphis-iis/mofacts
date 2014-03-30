@@ -46,11 +46,13 @@ Template.signUpTemplate.events({
                             "\t" + error);
             } else {
                 var newUserID = Meteor.userId();
+                var newUserName = Meteor.user().username;
                 if(newUserID !== null) {
                     UserProgress.insert({
-                          userID: newUserID
-                        , currentStimuliTest: ""
-                        , currentTestMode: ""
+                          _id: newUserID
+                        , username: newUserName
+                        , currentStimuliTest: "NEW USER"
+                        , currentTestMode: "NEW USER"
                         , progressDataArray: []
                     }, function (error, id) { //callback function
                         if (typeof error !== "undefined") {
