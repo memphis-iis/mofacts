@@ -12,7 +12,6 @@ Template.cardTemplate.events({
             });
         }
 	},
-
 	'keypress #answer' : function (e) {
 
 		var key=e.keyCode || e.which;
@@ -80,6 +79,8 @@ Template.cardTemplate.events({
             //record progress in UserProgress collection.
             recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
+            calculateCardProbabilities();
+
             //Reset timer for next question
             start = startTimer();
 
@@ -90,7 +91,6 @@ Template.cardTemplate.events({
 		}else{
             start = startTimer();
         }
-		
 	},
 	'click .logoutLink' : function () {
         Meteor.logout( function (error) {
@@ -240,7 +240,7 @@ function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
         UserProgress.update(
             { _id: Meteor.userId() },
             { $push: { progressDataArray :  {
-                                                questionIndex: questionIndex
+                                                  questionIndex: questionIndex
                                                 , question: question
                                                 , correctAnswer: correctAnswer
                                                 , userAnswer: userAnswer
@@ -276,4 +276,81 @@ function recordCurrentTestData() {
             }
         );
     }
+}
+
+function calculateCardProbabilities() {
+
+    //TODO: IWB - 3/30/2014: still need to get actual values for these variables.
+
+
+
+    // var questionSuccessCount = 0;
+    // var questionFailureCount = 0;
+    // var totalQuestionStudies = questionSuccessCount + questionFailureCount;
+    // var trialsSinceLastSeen = 0;
+    // var totalTrials = 0;
+
+    // var x = -3.0 + (2.4 * questionSuccessCount) + (0.8 * questionFailureCount) + totalQuestionStudies - (0.3 * totalTrials);
+
+    // var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
+}
+
+function getNextCard() {
+
+    //TODO: IWB - 3/30/2014: still need to get actual values for these variables.
+
+    var numItemsPracticed = 0;
+
+    if (numItemsPracticed === 0) {
+        //introduce new card.  (#2 in the algorithm)
+    } else {
+        //var currentMaxProbabilityForSelection = 0;
+        //var currentLowestProbability = 1; //maximum probability of 1 or 100%
+        //var cardWithLowestProbability = null;
+        //var cardToShowNext = null;
+        //var numCardsChecked = 0;
+        //var numCardsBelow85 = 0;
+
+        // forEach( card ) {
+        //     numCardsChecked++;
+        //
+        //     if (card.probability < currentLowestProbability) {
+        //            cardWithLowestProbability = card;
+        //            currentLowestProbability = card.probability;
+        //     }
+        //     
+        //     if (card.probability < 0.85) {
+        //         numCardsBelow85++;
+        //         if (card.probability > currentMaxProbabilityForSelection) {
+        //             if (card.trialsSinceLastSeen > 2) {
+        //
+        //                 (#3 in the algorithm)
+        //
+        //                 currentMaxProbabilityForSelection = card.probability;
+        //                 cardToShowNext = card;
+        //
+        //             }
+        //         }
+        //     }
+        //
+        //     if(numCardsChecked === totalNumberOfCards) {
+        //         if (cardToShowNext === null) {
+        //
+        //             (#5 in the algorithm)
+        //
+        //             cardToShowNext = cardWithLowestProbability;
+        //             display some help text about overlearning.
+        //         }
+        //     } else if (numCardsBelow85 === 0) {
+        //          
+        //          (#4 in the algorithm)
+        //      
+        //          //introduce a new card
+        //     }
+        // }
+
+    }
+
+
+
 }
