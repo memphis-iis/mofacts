@@ -18,10 +18,10 @@ Template.cardTemplate.events({
 		if (key==13){
 
             //Gets User Response
-			var userAnswer = document.getElementById('answer').value;
+			var userAnswer = document.getElementById('answer').value.toLowerCase().trim();
 
             //Check Correctness
-            var answer = document.getElementById('testAnswer').textContent;
+            var answer = document.getElementById('testAnswer').textContent.toLowerCase().trim();
 			var isCorrect = true;
             //---------
 
@@ -40,8 +40,8 @@ Template.cardTemplate.events({
 
             //Check Correctness
             answer = answer.split(":");
-            answer = answer[1].split("  ");
-            answer = answer[1];
+            answer = answer[1].trim();
+            console.log(answer + "-" + userAnswer)
 
             if (userAnswer.localeCompare(answer)){
                 isCorrect = false;
