@@ -1,0 +1,159 @@
+<tutor>
+	<setspec>
+		<lessonname>Tones</lessonname>
+		<stimulusfile>Tonestims.xml</stimulusfile>
+		<clustermodel>structuralpairs</clustermodel>
+		<clustersize>1</clustersize>
+	        <shuffleclusters>0-16</shuffleclusters>
+                <lfparameter>0.80</lfparameter>
+                   <eeglogged>true</eeglogged>
+	</setspec>
+	<deliveryparams>
+            <verticalalign>true</verticalalign>
+		<model>simplepaired</model>
+		<blocking>false</blocking>
+		<usessound>false</usessound>
+                <responsesound>false</responsesound>
+		<forcespacing>true</forcespacing>
+		<numchoices>0</numchoices>
+		<drillsonly>true</drillsonly>
+		<responses>answer</responses>
+		<initialclustershuffle>true</initialclustershuffle>
+		<caseinsensitive>true</caseinsensitive>
+		<border>0</border>
+                <skipstudy>false</skipstudy>
+		<optimizeinline>
+			<numdrills1>50</numdrills1>
+			<param1>initbeta</param1>
+			<step1>0.05</step1>
+			<type1>correctness</type1>
+			<numdrills2>40</numdrills2>
+			<param2>latencyscalar</param2>
+			<step2>0.03</step2>
+			<type2>latency</type2>
+		</optimizeinline>
+                <imagestretch>true</imagestretch>
+	</deliveryparams>
+	<parameters>
+            <studyweight>1</studyweight>
+		<decayinit>-0.24</decayinit>
+		<decayscalar>.2493</decayscalar>
+		<correctweight>2.3138</correctweight>
+		<fincorrectweight>1.4743</fincorrectweight>
+		<incorrectweight>.1</incorrectweight>
+		<threshold>-.6891</threshold>
+		<minactnoise>.2767</minactnoise>
+		<psychadjust>-.031</psychadjust>
+		<latencyscalar>2.2194</latencyscalar>
+		<fixedcost>1.6</fixedcost>
+		<latencyupdate>0.5847</latencyupdate>
+		<initbeta>0</initbeta>
+		<betabins>1</betabins>
+		<betabinrange>7</betabinrange>
+		<failuresecs>6</failuresecs>
+		<retentioninterval>30</retentioninterval>
+		<minima>
+			<decayinit>-.3</decayinit>
+			<latencyscalar>1.2</latencyscalar>
+		</minima>
+		<maxima>
+			<decayinit>-.1</decayinit>
+			<latencyscalar>3.22</latencyscalar>
+		</maxima>
+	</parameters>
+        <unit1>
+		<unitname>Learn Swahili!</unitname>
+		<unitinstructions>
+		This tutor will famliarize you with some common Swahili words and phrases. You will be given the word and the English meaning. Please, try to learn and remember as many as you can. You will be tested on the items at the end of the study period.</unitinstructions>
+                <instructconfirm>false</instructconfirm>
+                <messagescore>false</messagescore>
+                <correctscore>1</correctscore>
+        <incorrectscore>0</incorrectscore>	
+		<deliveryparams>
+			<purestudy>10000</purestudy>
+			<readyprompt>0</readyprompt>
+			<reviewstudy>10000</reviewstudy>
+			<correctprompt>0</correctprompt>
+			<drill>80000</drill>
+		</deliveryparams>
+		<allowquit>false</allowquit>
+		<allowpause>false</allowpause>
+		<unending>false</unending>
+		<unitconfigscreen>false</unitconfigscreen>
+		<unitendscreen>false</unitendscreen>           
+		
+		<assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames> 
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>17</templatesrepeated>
+                <group>0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
+                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
+                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
+                0,f,s,0 0,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 
+                A_15 A_16 A_17 
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-16</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>1-17</permutefinalresult>
+        </assessmentsession>
+                </unit1>
+                
+        <unit2>
+		<unitname>Learn Swahili!</unitname>
+		<unitinstructions>Now that you have studied the Swahili words and their English meanings, let's see how many you can remember! In the following test, a Swahili word will be presented and you will enter the English meaning/definition. Don't worry, if you don't remember the word, you can skip it by pressing ENTER! Have fun!</unitinstructions>
+                <instructconfirm>false</instructconfirm>
+                <messagescore>false</messagescore>
+                <correctscore>1</correctscore>
+        <incorrectscore>0</incorrectscore>	
+		<deliveryparams>
+			<purestudy>5000</purestudy>
+			<readyprompt>0</readyprompt>
+			<reviewstudy>0</reviewstudy>
+			<correctprompt>0</correctprompt>
+			<drill>80000</drill>
+		</deliveryparams>
+		<allowquit>false</allowquit>
+		<allowpause>false</allowpause>
+		<unending>false</unending>
+		<unitconfigscreen>false</unitconfigscreen>
+		<unitendscreen>false</unitendscreen>
+                <finalscore>17</finalscore>
+		<mindurationtime>170</mindurationtime>
+		<durationpriormessage>
+			
+		</durationpriormessage>
+		<durationminmessage>
+			
+		</durationminmessage>
+		<assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames> 
+                <grouptemplatesizes>1</grouptemplatesizes>
+                <grouptemplatenum>17</grouptemplatenum>
+                <group>0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0
+                0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0
+                0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0 0,f,t,0
+                0,f,t,0 0,f,t,0</group>
+            </conditiontemplatesbygroup>
+            <conditionpositionsbygroup>
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 
+                A_15 A_16 A_17 
+            </conditionpositionsbygroup>
+            <randomizeconditionsbygroup>false</randomizeconditionsbygroup>
+            <clusterlist>0-16</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>1-17</permutefinalresult>
+        </assessmentsession>
+            </unit2>
+                    <unit3>
+        <instructions>Your participation in this study is now complete. You will receive 1 credit for participating in the study.  Credits will be posted by the experimenter within a few days. Thank you.</instructions>
+        <unitname>last</unitname>
+
+
+    </unit3>
+</tutor>

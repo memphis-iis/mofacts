@@ -21,7 +21,7 @@ Template.profileTemplate.events({
     'click .stimButton' : function (event) {
         console.log(event);
 
-        Session.set("currentTest", event.target.name);
+        Session.set("currentTest", getStimNameFromTdf(event.target.name));
 
         //Get Test Type
             //Whether it is a practice, drill, etc
@@ -50,11 +50,13 @@ Template.profileTemplate.events({
 
 Template.profileTemplate.rendered = function () {
 	//this is called whenever the template is rendered.
-    var allStimuli = Stimuli.find({});
-    allStimuli.forEach( function (stimuliObject) {
+	var allTdfs = Tdfs.find({});
+	
+    allTdfs.forEach( function (tdfObject) {
 
-        console.log("rendered: " + stimuliObject.fileName);
-        var name = stimuliObject.fileName;
+        console.log("rendered: " + tdfObject.tFileName);
+        
+      	var name = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
 
         if (typeof name !== "undefined") {
 
@@ -88,6 +90,12 @@ Template.profileTemplate.username = function () {
 /////////////////
 //  FUNCTIONS  //
 /////////////////
+
+function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/ TDF
+	var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});
+	var stimFileName = newTdf.tdfs.tutor.setspec[0].stimulusfile[0];
+	return stimFileName;
+}
 
 function cleanUp() {
     Session.set("currentQuestion", undefined);
