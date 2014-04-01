@@ -35,4 +35,9 @@ Router.map(function() {
 		template: 'instructionsTemplate'
 	})
 
+	this.route('stats', {
+		path: '/stats',
+		template: 'statsPageTemplate'
+	})
+
 });
