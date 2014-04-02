@@ -231,7 +231,7 @@ function getIndex(){
     
 }
 
-function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
+function recordProgress ( questionIndex, question, answer, userAnswer ) {
 
     if (Meteor.userId() !== null) {
 
@@ -241,7 +241,7 @@ function recordProgress ( questionIndex, question, correctAnswer, userAnswer ) {
             { $push: { progressDataArray :  {
                                                   questionIndex: questionIndex
                                                 , question: question
-                                                , correctAnswer: correctAnswer
+                                                , answer: answer
                                                 , userAnswer: userAnswer
                                             }  
                      }
@@ -279,9 +279,8 @@ function recordCurrentTestData() {
 
 function calculateCardProbabilities() {
 
-    //TODO: IWB - 3/30/2014: still need to get actual values for these variables.
-
-
+    //TODO: IWB - 03/30/2014: still need to get actual values for these variables.
+    //TODO: IWB - 04/02/2014: may need an entire collection to keep track of these variables.
 
     // var questionSuccessCount = 0;
     // var questionFailureCount = 0;
@@ -338,7 +337,7 @@ function getNextCard() {
         //             (#5 in the algorithm)
         //
         //             cardToShowNext = cardWithLowestProbability;
-        //             display some help text about overlearning.
+        //             //display some help text about overlearning.
         //         }
         //     } else if (numCardsBelow85 === 0) {
         //          

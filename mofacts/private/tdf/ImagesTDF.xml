@@ -1,7 +1,7 @@
 <tutor>
 	<setspec>
 		<lessonname>Images</lessonname>
-		<stimulusfile>Imagesstims.xml</stimulusfile>
+		<stimulusfile>Images.xml</stimulusfile>
 		<clustermodel>structuralpairs</clustermodel>
 		<clustersize>1</clustersize>
 	        <shuffleclusters>0-16</shuffleclusters>
