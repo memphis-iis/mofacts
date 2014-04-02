@@ -62,6 +62,11 @@ Meteor.startup(function () {
 		timestamp: function(){
 			var time = Date.now();
 			timestamp = time;
+		},
+
+		//Saves timestamp to Server side
+		Userlog: function(usernamestuff){
+			console.log(usernamestuff + " has connected.")
 		}
 	});
 

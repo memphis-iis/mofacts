@@ -8,7 +8,7 @@ Template.signInTemplate.events({
             console.log("You are trying to sign in!");
         }
         UserPasswordCheck();
-
+        Meteor.call("Userlog", Meteor.user().username);
     },
     'click #signUpButton' : function () {
 		Router.go("signup");
