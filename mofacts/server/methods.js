@@ -36,44 +36,27 @@ Meteor.startup(function () {
 
 		//Added addition stuff to Log
 		writing: function(stuff){
-			fs.appendFile(filepath + name + "_" + filename +".txt", stuff, function (err) {
-  				if (err) throw err;
-			});
+			fs.appendFileSync(filepath + name + "_" + filename +".txt", stuff)
 			Meteor.call("addtime");
-		}
-	});
-
-		Meteor.methods({
-
+		},
+	
 		//Added addition stuff to Log
 		addtime: function(){
 			Meteor.call("timestamp");
-			fs.appendFile(filepath + name + "_" + filename +".txt", timestamp  + endOfLine, function (err) {
-  				if (err) throw err;
-			});
-			
-		}
-	});
-
-		Meteor.methods({
+			fs.appendFileSync(filepath + name + "_" + filename +".txt", timestamp  + endOfLine)
+		},
 
 		//Saves test name to Server side
 		naming: function(name){
 			name = name.split(".",1);
 			filename = name;
-		}
-	});
-
-		Meteor.methods({
+		},
 
 		//Saves username to Server side
 		user: function(names){
 			name = names;
 
-		}
-	});
-
-		Meteor.methods({
+		},
 
 		//Saves timestamp to Server side
 		timestamp: function(){

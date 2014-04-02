@@ -174,9 +174,10 @@ function prepareCard() {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
         }
         if (Session.get("scheduleIndex") === file.stimuli.setspec.schedule[0].q.length){
+            Meteor.call("addtime");
             Router.go("stats"); //Send user to stats page after test finishes
             //Add the timestamp for the End of test
-            Meteor.call("addtime");
+            
 
         } else {
             scheduledCard();  
