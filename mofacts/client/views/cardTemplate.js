@@ -4,7 +4,7 @@
 
 Template.cardTemplate.events({
 
-	'focus #answer' : function() {
+	'focus #userAnswer' : function() {
 		if(Session.get("debugging")){
             var progress = UserProgress.find({_id: Meteor.userId()});
             progress.forEach(function (user) {
@@ -12,16 +12,16 @@ Template.cardTemplate.events({
             });
         }
 	},
-	'keypress #answer' : function (e) {
+	'keypress #userAnswer' : function (e) {
 
 		var key=e.keyCode || e.which;
 		if (key==13){
 
             //Gets User Response
-			var userAnswer = document.getElementById('answer').value.toLowerCase().trim();
+			var userAnswer = document.getElementById('userAnswer').value.toLowerCase().trim();
 
             //Check Correctness
-            var answer = document.getElementById('testAnswer').textContent.toLowerCase().trim();
+            var answer = document.getElementById('answer').textContent.toLowerCase().trim();
 			var isCorrect = true;
             //---------
 
@@ -39,11 +39,9 @@ Template.cardTemplate.events({
             //---------
 
             //Check Correctness
-            answer = answer.split(":");
-            answer = answer[1].trim();
             console.log(answer + "-" + userAnswer)
 
-            if (userAnswer.localeCompare(answer)){
+            if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
             }
 
@@ -87,7 +85,7 @@ Template.cardTemplate.events({
             //get a new card
             prepareCard();
             
-			$("#answer").val("");
+			$("#userAnswer").val("");
 		}else{
             start = startTimer();
         }
