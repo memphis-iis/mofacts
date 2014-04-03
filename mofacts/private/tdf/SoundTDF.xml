@@ -1,7 +1,7 @@
 <tutor>
 	<setspec>
 		<lessonname>Tones</lessonname>
-		<stimulusfile>Tones.xml</stimulusfile>
+		<stimulusfile>Tonestims.xml</stimulusfile>
 		<clustermodel>structuralpairs</clustermodel>
 		<clustersize>1</clustersize>
 	        <shuffleclusters>0-16</shuffleclusters>
