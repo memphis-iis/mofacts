@@ -8,7 +8,6 @@ Template.signInTemplate.events({
             console.log("You are trying to sign in!");
         }
         UserPasswordCheck();
-        Meteor.call("Userlog", Meteor.user().username);
     },
     'click #signUpButton' : function () {
 		Router.go("signup");
@@ -51,6 +50,7 @@ function UserPasswordCheck(){
             var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
             if(typeof console !== "undefined" && Session.get("debugging")) {
                 console.log(currentUser + " was logged in successfully!");
+                Meteor.call("Userlog", currentUser);
             }
             Router.go("profile");
         }

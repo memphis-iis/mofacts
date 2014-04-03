@@ -34,18 +34,15 @@ Template.cardTemplate.events({
                 elapsed = 0;
             }
 
-			var message = "You answered " + userAnswer + " in " + elapsed + " Milliseconds :: " + elapsedOnRender;
-			console.log(message);
+            console.log(
+			"You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
+			);
             //---------
 
             //Check Correctness
-            console.log(answer + "-" + userAnswer)
-
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
             }
-
-            console.log(answer + "|" + userAnswer + "    " + isCorrect);
             //---------
 
             //Get question Number
@@ -198,7 +195,6 @@ function randomCard() {
 }
 
 function getQuestionType() {
-    console.log(getCurrentTestName());
     return Stimuli.findOne({fileName: getCurrentTestName()}).stimuli.setspec.groups[0].group[0].type[0];
 }
 

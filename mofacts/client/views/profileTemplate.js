@@ -54,7 +54,7 @@ Template.profileTemplate.rendered = function () {
 	
     allTdfs.forEach( function (tdfObject) {
 
-        console.log("rendered: " + tdfObject.tFileName);
+        console.log("rendered: " + tdfObject.tdfs.tutor.setspec[0].stimulusfile[0]);
         
       	var name = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
 
