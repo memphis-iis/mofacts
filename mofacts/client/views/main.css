@@ -22,3 +22,8 @@
 .panel, .panel-heading, .panel-body {
 	border-radius: 0px;
 }
+
+.center-fill-parent {
+	width: 100%;
+	margin: auto;
+}

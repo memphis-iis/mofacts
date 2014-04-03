@@ -1,17 +1,3 @@
-<!-- <template name="cardTemplate">
-	<div class="col-xs-offset-5 col-xs-3">
-		<h1><label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label></h1>
-		<h3><label id="testAnswer" class="label label-success">Current Answer:  {{currentAnswer}}}</label></h3>
-		<div class="panel panel-primary">
-			<div class="panel-heading">Enter Your Answer Below</div>
-			<div class="panel-body">
-				<input type="text" id="answer">
-			</div>
-		</div>
-		{{invokeAfterLoad}}
-	</div>
-</template> -->
-
 <template name="cardTemplate">
 
 	<nav class="navbar navbar-inverse" role="navigation">
@@ -49,7 +35,8 @@
 		<div class="row">
 			<div class="col-lg-offset-3 col-lg-6 text-center">
 				{{#if textCard}}
-					<h1><label id="question" class="label label-primary">Current Question:  {{currentQuestion}}}</label></h1>
+					<h1><label id="questionLabel" class="label label-primary">Question:</label></h1>
+					<h2><div id="textQuesiton">{{currentQuestion}}</div></h2>
 				{{/if}}
 				{{#if audioCard}}
 					<audio controls id="audio">
@@ -65,7 +52,8 @@
 
 		<div class="row">
 			<div class="col-lg-offset-3 col-lg-6 text-center">
-				<h3><label id="testAnswer" class="label label-success">Current Answer:  {{currentAnswer}}}</label></h3>
+				<h2><label id="answerLabel" class="label label-success">Answer:</label></h2>
+				<h3><div id="answer">{{currentAnswer}}}</div></h3>
 			</div>  <!-- close column -->
 		</div>  <!-- close row -->
 		
