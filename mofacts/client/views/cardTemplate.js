@@ -187,23 +187,39 @@ function randomCard() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     //get the cluster size (avoids out of bounds error)
     var size = file.stimuli.setspec.clusters[0].cluster.length;
+
     //get a valid index
 	var nextCardIndex = Math.floor((Math.random() * size));
     //set the question and answer
-	Session.set("currentQuestion", file.stimuli.setspec.clusters[0].cluster[nextCardIndex].word[0]);
-	Session.set("currentAnswer", file.stimuli.setspec.clusters[0].cluster[nextCardIndex].answer[0]);
+	Session.set("currentQuestion", getStimQuestion(nextCardIndex));
+	Session.set("currentAnswer", getStimAnswer(nextCardIndex));
 }
 
 function getQuestionType() {
-    return Stimuli.findOne({fileName: getCurrentTestName()}).stimuli.setspec.groups[0].group[0].type[0];
+    return Stimuli.findOne({fileName: getCurrentTestName()}).stimuli.setspec.groups[0].group[1].type[0];
+}
+
+//get the question at this index
+function getStimQuestion(index) {
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    console.log(file.stimuli.setspec)
+    var questionName = file.stimuli.setspec.groups[0].group[1].name[0];
+    return file.stimuli.setspec.clusters[0].cluster[index][questionName];
+}
+
+//get the answer at this index
+function getStimAnswer(index) {
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var answerName = file.stimuli.setspec.groups[0].group[0].name[0];
+    return file.stimuli.setspec.clusters[0].cluster[index][answerName];
 }
 
 function scheduledCard() {
     var index = Session.get("scheduleIndex");
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var which = file.stimuli.setspec.schedule[0].q[index];
-    Session.set("currentQuestion", file.stimuli.setspec.clusters[0].cluster[which].word[0]);
-    Session.set("currentAnswer", file.stimuli.setspec.clusters[0].cluster[which].answer[0]);
+    Session.set("currentQuestion", getStimQuestion(which));
+    Session.set("currentAnswer", getStimAnswer(which));
     Session.set("scheduleIndex", index + 1);
 }
 
@@ -216,7 +232,7 @@ function getIndex(){
     var currentQ = Session.get("currentQuestion");
 
     for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
-       var tempQ = file.stimuli.setspec.clusters[0].cluster[i].word[0];
+       var tempQ = getStimQuestion(i);
 
         if (tempQ == currentQ) {
             return i+1;

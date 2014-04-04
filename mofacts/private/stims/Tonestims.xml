@@ -1,15 +1,19 @@
 <setspec>
     <groups>
         <group>
-            <name>interval</name>
+            <name>frequency</name>
+            <type>text</type>
+        </group>  
+		<group>
+            <name>file</name>
             <type>sound</type>
-        </group>     
+        </group>		
     </groups>
     <clusters> 
-        <cluster><word>100Hz.wav</word><answer>100Hz</answer></cluster>    
-        <cluster><word>250Hz.wav</word><answer>250Hz</answer></cluster>     
-        <cluster><word>440Hz.wav</word><answer>440Hz</answer></cluster>   
-        <cluster><word>1kHz.wav</word><answer>1kHz</answer></cluster>      	
-        <cluster><word>10kHz.wav</word><answer>10kHz</answer></cluster>       	
+        <cluster><file>100Hz.wav</file><frequency>100Hz</frequency></cluster>    
+        <cluster><file>250Hz.wav</file><frequency>250Hz</frequency></cluster>     
+        <cluster><file>440Hz.wav</file><frequency>440Hz</frequency></cluster>   
+        <cluster><file>1kHz.wav</file><frequency>1kHz</frequency></cluster>      	
+        <cluster><file>10kHz.wav</file><frequency>10kHz</frequency></cluster>       	
     </clusters>
 </setspec>

@@ -1,13 +1,17 @@
 <setspec>
     <groups>
+		<group>
+            <name>color</name>
+            <type>text</type>
+        </group>
         <group>
-            <name>interval</name>
+            <name>file</name>
             <type>image</type>
         </group>     
     </groups>
     <clusters> 
-        <cluster><word>dot_blue.png</word><answer>Blue</answer></cluster>    
-        <cluster><word>dot_red.png</word><answer>Red</answer></cluster>     
-        <cluster><word>dot_yellow.png</word><answer>Yellow</answer></cluster>    	
+        <cluster><file>dot_blue.png</file><color>Blue</color></cluster>    
+        <cluster><file>dot_red.png</file><color>Red</color></cluster>     
+        <cluster><file>dot_yellow.png</file><color>Yellow</color></cluster>    	
     </clusters>
 </setspec>
