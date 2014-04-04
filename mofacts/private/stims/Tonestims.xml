@@ -1,0 +1,15 @@
+<setspec>
+    <groups>
+        <group>
+            <name>interval</name>
+            <type>sound</type>
+        </group>     
+    </groups>
+    <clusters> 
+        <cluster><word>100Hz.wav</word><answer>100Hz</answer></cluster>    
+        <cluster><word>250Hz.wav</word><answer>250Hz</answer></cluster>     
+        <cluster><word>440Hz.wav</word><answer>440Hz</answer></cluster>   
+        <cluster><word>1kHz.wav</word><answer>1kHz</answer></cluster>      	
+        <cluster><word>10kHz.wav</word><answer>10kHz</answer></cluster>       	
+    </clusters>
+</setspec>
