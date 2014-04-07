@@ -48,11 +48,6 @@ Template.cardTemplate.events({
             //Get question Number
             
             index = getIndex();
-            
-            if(index === "undefined"){
-                index = "NA";
-            }
-
             console.log(index);
 
             //Get whether text, audio or picture
@@ -70,6 +65,9 @@ Template.cardTemplate.events({
             //Write to Log
             Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
                 ";" + elapsed + "::" );
+
+            Meteor.call("TempStorage", index + "," + isCorrect);
+            //console.log(Meteor.call("TempReturn"));
 
             //record progress in UserProgress collection.
             recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
@@ -202,7 +200,7 @@ function getQuestionType() {
 //get the question at this index
 function getStimQuestion(index) {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    console.log(file.stimuli.setspec)
+    //console.log(file.stimuli.setspec)
     var questionName = file.stimuli.setspec.groups[0].group[1].name[0];
     return file.stimuli.setspec.clusters[0].cluster[index][questionName];
 }
@@ -234,7 +232,7 @@ function getIndex(){
     for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
        var tempQ = getStimQuestion(i);
 
-        if (tempQ == currentQ) {
+        if(tempQ.toString() == currentQ.toString()){
             return i+1;
         }
     };
