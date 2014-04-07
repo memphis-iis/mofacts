@@ -93,6 +93,7 @@ Template.profileTemplate.username = function () {
 
 function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/ TDF
 	var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});
+	Session.set("currentTdfName", newTdf.fileName);
 	var stimFileName = newTdf.tdfs.tutor.setspec[0].stimulusfile[0];
 	return stimFileName;
 }

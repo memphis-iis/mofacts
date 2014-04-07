@@ -8,6 +8,18 @@
                 <lfparameter>0.80</lfparameter>
                    <eeglogged>true</eeglogged>
 	</setspec>
+	<schedule>
+	     <q>0,s</q>
+	     <q>1,s</q>
+	     <q>2,s</q>
+	     <q>3,s</q>
+	     <q>0,s</q>
+	     <q>1,s</q>
+	     <q>2,s</q>
+	     <q>3,s</q>
+	     <q>0,s</q>
+	     <q>1,s</q>
+	</schedule>
 	<deliveryparams>
             <verticalalign>true</verticalalign>
 		<model>simplepaired</model>
