@@ -10,6 +10,7 @@ Template.cardTemplate.events({
             progress.forEach(function (user) {
                 console.log(user);
             });
+
         }
 	},
 	'keypress #userAnswer' : function (e) {
@@ -64,9 +65,6 @@ Template.cardTemplate.events({
             //Write to Log
             Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
                 ";" + elapsed + "::" );
-
-            //Method call to temp store the index and whether the answer was correct. For stats Page
-            Meteor.call("TempStorage", isCorrect + " ");
 
             //record progress in UserProgress collection.
             recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
