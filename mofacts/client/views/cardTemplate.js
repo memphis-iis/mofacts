@@ -46,7 +46,6 @@ Template.cardTemplate.events({
             //---------
 
             //Get question Number
-            
             index = getIndex();
             console.log(index);
 
@@ -66,8 +65,8 @@ Template.cardTemplate.events({
             Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
                 ";" + elapsed + "::" );
 
-            Meteor.call("TempStorage", index + "," + isCorrect);
-            //console.log(Meteor.call("TempReturn"));
+            //Method call to temp store the index and whether the answer was correct. For stats Page
+            Meteor.call("TempStorage", isCorrect + " ");
 
             //record progress in UserProgress collection.
             recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);

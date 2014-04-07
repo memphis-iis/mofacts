@@ -1,6 +1,6 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
-var filename, name, timestamp;
+var filename, name, timestamp, TempLog = "";
 var filepath = '../../../../../server/';
 var endOfLine = Npm.require("os").EOL;
 
@@ -67,6 +67,16 @@ Meteor.startup(function () {
 		//Saves timestamp to Server side
 		Userlog: function(usernamestuff){
 			console.log(usernamestuff + " has connected.")
+		},
+
+		//Will be deleted once Collection works
+		TempStorage: function(templog){
+			TempLog = TempLog + templog;
+		},
+
+		//will be deleted once Collection works
+		TempReturn: function(){
+			return TempLog;
 		}
 	});
 
