@@ -27,6 +27,13 @@ Template.instructionsTemplate.events({
 //  VARIABLES  //
 /////////////////
 
+Template.instructionsTemplate.instructions = function () {
+	var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
+	var whichSchedule = Session.get("currentScheduleNumber");
+	var instructions = thisTdf.tdfs.tutor.schedule[whichSchedule].instructions;
+	return instructions;
+}
+
 Template.instructionsTemplate.username = function () {
 
     if (typeof Meteor.user() === "undefined") {

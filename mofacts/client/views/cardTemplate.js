@@ -160,22 +160,36 @@ function startTimer() {
 }
 
 function prepareCard() {
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    if (file.stimuli.setspec.schedule != undefined) {
+    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    if (file.tdfs.tutor.schedule != undefined) {
         if (Session.get("scheduleIndex") === undefined) {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
         }
-        if (Session.get("scheduleIndex") === file.stimuli.setspec.schedule[0].q.length){
+		sched = getCurrentScheduleNumber();
+		console.log("current schedule number: " + sched);
+		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
+			Meteor.call("addtime");
+			Router.go("stats");
+		}
+        if (Session.get("scheduleIndex") === file.tdfs.tutor.schedule[sched].q.length){
+			Session.set("scheduleIndex", 0);
+			Session.set("currentScheduleNumber", sched + 1);
+			
+		//	Router.go("instructions");
+			prepareCard();
+			
+			/*
             Meteor.call("addtime");
             Router.go("stats"); //Send user to stats page after test finishes
             //Add the timestamp for the End of test
-            
+            */
 
         } else {
             scheduledCard();  
         }      
     } else {
         randomCard();    
+
     }
 }
 
@@ -224,6 +238,10 @@ function scheduledCard() {
 
 function getCurrentTestName() {
     return Session.get("currentTest");
+}
+
+function getCurrentScheduleNumber() {
+	return Session.get("currentScheduleNumber");
 }
 
 function getCurrentTdfName() {
