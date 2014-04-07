@@ -213,8 +213,10 @@ function getStimAnswer(index) {
 
 function scheduledCard() {
     var index = Session.get("scheduleIndex");
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var which = file.stimuli.setspec.schedule[0].q[index];
+    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+	var set = file.tdfs.tutor.schedule[0].q[index];
+    var setSplit = set.split(",");
+	var which = setSplit[0];
     Session.set("currentQuestion", getStimQuestion(which));
     Session.set("currentAnswer", getStimAnswer(which));
     Session.set("scheduleIndex", index + 1);
@@ -222,6 +224,10 @@ function scheduledCard() {
 
 function getCurrentTestName() {
     return Session.get("currentTest");
+}
+
+function getCurrentTdfName() {
+	return Session.get("currentTdfName");
 }
 
 function getIndex(){
