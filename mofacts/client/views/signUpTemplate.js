@@ -49,20 +49,21 @@ Template.signUpTemplate.events({
                 var newUserName = Meteor.user().username;
                 if(newUserID !== null) {
                     UserProgress.insert({
-                          _id: newUserID
-                        , username: newUserName
-                        , currentStimuliTest: "NEW USER"
-                        , currentTestMode: "NEW USER"
-                        , progressDataArray: []
-                    }, function (error, id) { //callback function
-                        if (typeof error !== "undefined") {
-                            console.log("ERROR: The user was not logged in upon account creation!\n"+
-                                    "\t[Username:" + formUsername + "]" +
-                                    "\t" + error);
-                        } else {
-                            Router.go("profile");
-                        }
-                    });
+                                              _id: newUserID
+                                            , username: newUserName
+                                            , currentStimuliTest: "NEW USER"
+                                            , currentTestMode: "NEW USER"
+                                            , progressDataArray: []
+                                        }, 
+                                        function (error, id) { //callback function
+                                            if (typeof error !== "undefined") {
+                                                console.log("ERROR: The user was not logged in upon account creation!\n"+
+                                                        "\t[Username:" + formUsername + "]" +
+                                                        "\t" + error);
+                                            } else {
+                                                Router.go("profile");
+                                            }
+                                        });
                 } else {
                     console.log("ERROR: The user was not logged in upon account creation!\n"+
                             "\t[Username:" + formUsername + "]" +
