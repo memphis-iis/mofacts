@@ -46,6 +46,7 @@ Template.statsPageTemplate.rendered = function () {
     var totalCorrect = 0;
     var userResponse;
     var theAnswer;
+    var coloring = "\"black\"";
 
     var statsGet = UserProgress.find(
         { _id: Meteor.userId() },
@@ -59,8 +60,6 @@ Template.statsPageTemplate.rendered = function () {
             userResponse = (Object.progressDataArray[i].userAnswer);
             theAnswer = (Object.progressDataArray[i].answer[0]);
 
-            console.log(userResponse +"|"+theAnswer);
-
             if(userResponse.toLowerCase() === theAnswer.toLowerCase()){
                 totalCorrect++;
             }
@@ -71,18 +70,18 @@ Template.statsPageTemplate.rendered = function () {
     var Percentage = Math.round((totalCorrect/total)*100);
 
     $("#statsAndStuff").append(
-        "<div class=\"text-center\"> <center>" +
+        "<div class=\"text-center\"> <font color=" + coloring + "> <center>" +
         
-        "<H3> Your Score <dr>"
+        "<H3> <font color=" + coloring + "> Your Score <dr>"
         + Percentage + 
 
-        "% </H3> <dr><dr> <H4> You got " 
+        "% </font> </H3> <dr><dr> <H4> You got " 
         + totalCorrect + 
 
         " of the " 
         + total + 
 
-        " questions correct </H4> </center> </div>" +
+        " questions correct </H4> </font> </center> </div>" +
 
 
         "<dr><dr>" +
