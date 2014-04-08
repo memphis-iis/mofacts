@@ -122,6 +122,8 @@ Template.cardTemplate.invokeAfterLoad = function() {
     if(Session.get("currentQuestion") == undefined){
         prepareCard();
         recordCurrentTestData();
+        //if we are in a modeled drill/test
+        initializeActRModel();
     }
 }
 
@@ -251,13 +253,15 @@ function recordProgress ( questionIndex, question, answer, userAnswer ) {
         //add to the progressDataArray
         UserProgress.update(
             { _id: Meteor.userId() },
-            { $push: { progressDataArray :  {
-                                                  questionIndex: questionIndex
-                                                , question: question
-                                                , answer: answer
-                                                , userAnswer: userAnswer
-                                            }  
-                     }
+            { $push: 
+                { progressDataArray :  
+                    {
+                          questionIndex: questionIndex
+                        , question: question
+                        , answer: answer
+                        , userAnswer: userAnswer
+                    }  
+                }
             }
         );
 
@@ -280,14 +284,23 @@ function recordCurrentTestData() {
         //update the currentTest and mode
         UserProgress.update(
             { _id: Meteor.userId() }, //where _id === Meteor.userId()
-            { $set: {                  //set the current test and mode, and then clear the progress array.
-                          currentStimuliTest: getCurrentTestName()
-                        , currentTestMode: currentTestMode
-                        , progressDataArray: []
-                    }
+            { $set: 
+                {                  //set the current test and mode, and then clear the progress array.
+                      currentStimuliTest: getCurrentTestName()
+                    , currentTestMode: currentTestMode
+                    , progressDataArray: []
+                }
             }
         );
     }
+}
+
+function initializeActRModel() {
+    //TODO: IWB - 4/8/2014 This is where the cardProbabilities collection will be initialized.
+    cardProbabilities.insert({
+                                  _id: Meteor.userId()
+                                , probabilitiesArray: []
+                            });
 }
 
 function calculateCardProbabilities() {
