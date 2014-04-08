@@ -74,6 +74,15 @@ legend {
 	font-family: 'Lato', sans-serif;
 }
 
+#audio {
+	width: 100%;
+}
+
+img {
+	display: block;
+	margin: auto;
+}
+
 #signInButton {
 	background: #40a371;
 }

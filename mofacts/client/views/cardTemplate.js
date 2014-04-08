@@ -160,6 +160,7 @@ function startTimer() {
 function prepareCard() {
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
     if (file.tdfs.tutor.schedule != undefined) {
+		Session.set("isScheduledTest", true);
         if (Session.get("scheduleIndex") === undefined) {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
         }
@@ -182,7 +183,9 @@ function prepareCard() {
             //Add the timestamp for the End of test
             */
 
-        } else {
+        }  
+		
+		else {
             scheduledCard();  
         }      
     } else {
