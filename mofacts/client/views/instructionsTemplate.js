@@ -29,8 +29,13 @@ Template.instructionsTemplate.events({
 
 Template.instructionsTemplate.instructions = function () {
 	var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-	var whichSchedule = Session.get("currentScheduleNumber");
-	var instructions = thisTdf.tdfs.tutor.schedule[whichSchedule].instructions;
+	if (thisTdf.tdfs.tutor.schedule != undefined){
+		var whichSchedule = Session.get("currentScheduleNumber");
+		var instructions = thisTdf.tdfs.tutor.schedule[whichSchedule].instructions;
+	}
+	else {
+		var instructions = "Please enter answer in text box provided below questions."
+	}
 	return instructions;
 }
 
