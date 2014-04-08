@@ -67,16 +67,6 @@ Meteor.startup(function () {
 		//Saves timestamp to Server side
 		Userlog: function(usernamestuff){
 			console.log(usernamestuff + " has connected.")
-		},
-
-		//Will be deleted once Collection works
-		TempStorage: function(templog){
-			TempLog = TempLog + templog;
-		},
-
-		//will be deleted once Collection works
-		TempReturn: function(){
-			return TempLog;
 		}
 	});
 
