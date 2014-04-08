@@ -10,7 +10,6 @@ Template.cardTemplate.events({
             progress.forEach(function (user) {
                 console.log(user);
             });
-
         }
 	},
 	'keypress #userAnswer' : function (e) {
@@ -316,7 +315,7 @@ function recordCurrentTestData() {
 
 function initializeActRModel() {
     //TODO: IWB - 4/8/2014 This is where the cardProbabilities collection will be initialized.
-    cardProbabilities.insert({
+    CardProbabilities.insert({
                                   _id: Meteor.userId()
                                 , probabilitiesArray: []
                             });
