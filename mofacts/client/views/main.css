@@ -29,8 +29,28 @@ h3 {
     font-family: 'Lato', sans-serif;
 }
 
-label {
+h2 {
 	font-family: 'Lato', sans-serif;
+}
+
+#answerLabel {
+	font-family: 'Lato', sans-serif;
+	width: 100%;
+	background-color: #40a371;
+	text-align: center;
+	box-shadow: 1px 1px 1px 1px #4d5a42;	
+}
+
+#questionLabel {
+	font-family: 'Lato', sans-serif;
+	width: 100%;
+	background-color: #40a371;
+	text-align: center;
+	box-shadow: 1px 1px 1px 1px #4d5a42;
+}
+
+legend {
+	border-color: white;
 }
 
 #instructions {
@@ -39,12 +59,31 @@ label {
 }
 
 #signUpButton {
-	width: 170px;
 	background: #40a371;
 }
 
+#textQuesiton {
+	background:  #585858;
+	text-align: center;
+	font-family: 'Lato', sans-serif;
+}
+
+#answer {
+	background:  #585858;
+	text-align: center;
+	font-family: 'Lato', sans-serif;
+}
+
+#audio {
+	width: 100%;
+}
+
+img {
+	display: block;
+	margin: auto;
+}
+
 #signInButton {
-	width: 170px;
 	background: #40a371;
 }
 
@@ -99,6 +138,7 @@ legend {
 	border-color: #40a371;
 	background-color: #40a371;
 	font-family: 'Lato', sans-serif;
+	width: 100%;
 }
 
 .btn-primary:hover {
