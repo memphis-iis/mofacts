@@ -48,22 +48,40 @@ Template.signUpTemplate.events({
                 var newUserID = Meteor.userId();
                 var newUserName = Meteor.user().username;
                 if(newUserID !== null) {
-                    UserProgress.insert({
-                                              _id: newUserID
-                                            , username: newUserName
-                                            , currentStimuliTest: "NEW USER"
-                                            , currentTestMode: "NEW USER"
-                                            , progressDataArray: []
-                                        }, 
-                                        function (error, id) { //callback function
-                                            if (typeof error !== "undefined") {
-                                                console.log("ERROR: The user was not logged in upon account creation!\n"+
-                                                        "\t[Username:" + formUsername + "]" +
-                                                        "\t" + error);
-                                            } else {
-                                                Router.go("profile");
-                                            }
-                                        });
+                    UserProgress.insert(
+                        {
+                              _id: newUserID
+                            , username: newUserName
+                            , currentStimuliTest: "NEW USER"
+                            , currentTestMode: "NEW USER"
+                            , progressDataArray: []
+                        }, 
+                        function (error, id) { //callback function
+                            if (typeof error !== "undefined") {
+                                console.log("ERROR: The user was not logged in upon account creation!\n"+
+                                        "\t[Username:" + formUsername + "]" +
+                                        "\t" + error);
+                            } else {
+
+                                CardProbabilities.insert(
+                                    {     
+                                          _id: Meteor.userId()
+                                        , numQuestionsAnswered: 0
+                                        , cardsArray: [] 
+                                    },
+                                    function (error, id) {
+                                        if (typeof error !== "undefined") {
+                                            console.log("ERROR: The user was not logged in upon account creation!\n"+
+                                                    "\t[Username:" + formUsername + "]" +
+                                                    "\t" + error);
+                                        } else {
+                                            Router.go("profile");
+                                        }
+                                    }
+                                ); 
+                            }
+                        }
+                    );
                 } else {
                     console.log("ERROR: The user was not logged in upon account creation!\n"+
                             "\t[Username:" + formUsername + "]" +

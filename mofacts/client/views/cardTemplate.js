@@ -6,9 +6,14 @@ Template.cardTemplate.events({
 
 	'focus #userAnswer' : function() {
 		if(Session.get("debugging")){
-            var progress = UserProgress.find({_id: Meteor.userId()});
-            progress.forEach(function (user) {
-                console.log(user);
+            // var progress = UserProgress.find({_id: Meteor.userId()});
+            // progress.forEach(function (user) {
+            //     console.log(user);
+            // });
+            
+            var probabilities = CardProbabilities.find({_id: Meteor.userId()});
+            probabilities.forEach( function (prob) {
+                console.log(prob);
             });
         }
 	},
@@ -314,11 +319,38 @@ function recordCurrentTestData() {
 }
 
 function initializeActRModel() {
-    //TODO: IWB - 4/8/2014 This is where the cardProbabilities collection will be initialized.
-    CardProbabilities.insert({
-                                  _id: Meteor.userId()
-                                , probabilitiesArray: []
-                            });
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
+
+    //update the cards array to be empty
+    CardProbabilities.update(
+        { _id: Meteor.userId() },
+        { $set: 
+            {
+                  numQuestionsAnswered: 0
+                , cardsArray: [] 
+            }
+        }
+    );
+    //load all of the cards into the cards array.
+    for (var i = 0; i < numQuestions; ++i) {
+        CardProbabilities.update(
+            { _id: Meteor.userId() },
+            { $push:
+                { cardsArray :
+                    {
+                          question: getStimQuestion(i)
+                        , answer: getStimAnswer(i)
+                        , questionSeccessCount: 0
+                        , questionFailureCount: 0
+                        , trialsSinceLastSeen: 0
+                        , totalTrials: 0
+                    }  
+                }
+            }
+        );
+    };
+    
 }
 
 function calculateCardProbabilities() {
