@@ -10,7 +10,7 @@ Template.cardTemplate.events({
             // progress.forEach(function (user) {
             //     console.log(user);
             // });
-            
+
             var probabilities = CardProbabilities.find({_id: Meteor.userId()});
             probabilities.forEach( function (prob) {
                 console.log(prob);
@@ -52,7 +52,7 @@ Template.cardTemplate.events({
 
             //Get question Number
             index = getIndex();
-            console.log(index);
+            console.log("Index: " + index);
 
             //Get whether text, audio or picture
             var QType = getQuestionType();
@@ -73,6 +73,7 @@ Template.cardTemplate.events({
             //record progress in UserProgress collection.
             recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
+            incrementNumQuestionsAnswered();
             calculateCardProbabilities();
 
             //Reset timer for next question
@@ -341,16 +342,27 @@ function initializeActRModel() {
                     {
                           question: getStimQuestion(i)
                         , answer: getStimAnswer(i)
-                        , questionSeccessCount: 0
+                        , questionSuccessCount: 0
                         , questionFailureCount: 0
                         , trialsSinceLastSeen: 0
-                        , totalTrials: 0
+                        , probability: 0
+                        , hasBeenIntroduced: false
                     }  
                 }
             }
         );
     };
+
+    //has to be done once ahead of time to give valid values for the beginning of the test.
+    calculateCardProbabilities();
     
+}
+
+function incrementNumQuestionsAnswered() {
+    CardProbabilities.update(
+        { _id: Meteor.userId() },
+        { $inc: { numQuestionsAnswered: 1 } }
+    );
 }
 
 function calculateCardProbabilities() {
@@ -358,15 +370,31 @@ function calculateCardProbabilities() {
     //TODO: IWB - 03/30/2014: still need to get actual values for these variables.
     //TODO: IWB - 04/02/2014: may need an entire collection to keep track of these variables.
 
-    // var questionSuccessCount = 0;
-    // var questionFailureCount = 0;
-    // var totalQuestionStudies = questionSuccessCount + questionFailureCount;
-    // var trialsSinceLastSeen = 0;
-    // var totalTrials = 0;
+    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
 
-    // var x = -3.0 + (2.4 * questionSuccessCount) + (0.8 * questionFailureCount) + totalQuestionStudies - (0.3 * totalTrials);
+    for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
 
-    // var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
+        var questionSuccessCount = cardProbs.cardsArray[i].questionSuccessCount;
+        var questionFailureCount = cardProbs.cardsArray[i].questionFailureCount;
+        var totalQuestionStudies = questionSuccessCount + questionFailureCount;
+        var trialsSinceLastSeen = cardProbs.cardsArray[i].trialsSinceLastSeen;
+        var totalTrials = cardProbs.numQuestionsAnswered;
+        var trialsSinceLastSeenOverTotalTrials;
+
+        if (totalTrials != 0) {
+            trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen/totalTrials;
+        } else {
+            trialsSinceLastSeenOverTotalTrials = 0;
+        }
+
+        var x = -3.0 + (2.4 * questionSuccessCount) + (0.8 * questionFailureCount) + totalQuestionStudies - (0.3 * trialsSinceLastSeenOverTotalTrials);
+        var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
+
+        var setModifier = {$set: {}};
+        setModifier.$set["cardsArray." + i + ".probability"] = probability;
+        CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
+
+    }
 }
 
 function getNextCard() {
