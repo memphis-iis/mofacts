@@ -126,10 +126,13 @@ Template.cardTemplate.invokeAfterLoad = function() {
 	console.log('card loaded');
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-        prepareCard();
-        recordCurrentTestData();
         //if we are in a modeled drill/test
         initializeActRModel();
+        
+        prepareCard();
+        recordCurrentTestData();
+        
+        
     }
 }
 
@@ -375,17 +378,45 @@ function incrementNumQuestionsAnswered() {
 }
 
 function incrementCurrentQuestionSuccess() {
-
     var incModifier = {$inc: {}};
     incModifier.$inc["cardsArray." + (getIndex()) + ".questionSuccessCount"] = 1;
     CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 }
 
 function incrementCurentQuestionsFailed() {
-
     var incModifier = {$inc: {}};
     incModifier.$inc["cardsArray." + (getIndex()) + ".questionFailureCount"] = 1;
     CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
+}
+
+function resetTrialsSinceLastSeen( index ) {
+    var setModifier = {$set: {}};
+    setModifier.$set["cardsArray." + index + ".trialsSinceLastSeen"] = 0;
+    CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
+}
+
+function setHasBeenIntroducedFlag( index ) {
+    var setModifier = {$set: {}};
+    setModifier.$set["cardsArray." + index + ".hasBeenIntroduced"] = true;
+    CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
+}
+
+function setNextCardInfo( index ) {
+    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    Session.set("currentQuestion", cardProbs.cardsArray[index].question);
+    Session.set("currentAnswer", cardProbs.cardsArray[index].answer);
+    resetTrialsSinceLastSeen(index);
+    setHasBeenIntroducedFlag(index);
+}
+
+function introduceNewCard() {
+    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
+        if (cardProbs.cardsArray[i].hasBeenIntroduced === false) {
+            setNextCardInfo(i);
+            return;
+        }
+    }
 }
 
 function calculateCardProbabilities() {
@@ -404,7 +435,7 @@ function calculateCardProbabilities() {
         var totalTrials = cardProbs.numQuestionsAnswered;
         var trialsSinceLastSeenOverTotalTrials;
 
-        if (totalTrials != 0) {
+        if (totalTrials !== 0) { // can't devide by 0
             trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen/totalTrials;
         } else {
             trialsSinceLastSeenOverTotalTrials = 0;
@@ -413,10 +444,15 @@ function calculateCardProbabilities() {
         var x = -3.0 + (2.4 * questionSuccessCount) + (0.8 * questionFailureCount) + totalQuestionStudies - (0.3 * trialsSinceLastSeenOverTotalTrials);
         var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
 
+        //set probability
         var setModifier = {$set: {}};
         setModifier.$set["cardsArray." + i + ".probability"] = probability;
         CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
-
+        
+        //increment trialsSinceLastSeen
+        var incModifier = {$inc: {}};
+        incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
+        CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
     }
 }
 
@@ -426,62 +462,54 @@ function getNextCard() {
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
-        var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
-        for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
-            if (cardProbs.cardsArray[i].hasBeenIntroduced === false) {
-                Session.set("currentQuestion", cardProbs.cardsArray[i].question);
-                Session.set("currentAnswer", cardProbs.cardsArray[i].answer);
-                return;
-            }
-        }
+        introduceNewCard();
+        return;
     } else {
-        //var currentMaxProbabilityForSelection = 0;
-        //var currentLowestProbability = 1; //maximum probability of 1 or 100%
-        //var cardIndexWithLowestProbability = null;
-        //var cardIndexToShowNext = null;
-        //var numCardsChecked = 0;
-        //var numCardsBelow85 = 0;
+        var currentMaxProbabilityForSelection = 0;
+        var currentLowestProbability = 1; //maximum probability of 1 (or 100%)
+        var cardIndexWithLowestProbability = null;
+        var cardIndexToShowNext = null;
+        var numCardsChecked = 0;
+        var numCardsBelow85 = 0;
 
-        // forEach( card ) {
-        //     numCardsChecked++;
-        //
-        //     if (card.probability < currentLowestProbability) {
-        //            cardWithLowestProbability = card;
-        //            currentLowestProbability = card.probability;
-        //     }
-        //     
-        //     if (card.probability < 0.85) {
-        //         numCardsBelow85++;
-        //         if (card.probability > currentMaxProbabilityForSelection) {
-        //             if (card.trialsSinceLastSeen > 2) {
-        //
-        //                 (#3 in the algorithm)
-        //
-        //                 currentMaxProbabilityForSelection = card.probability;
-        //                 cardToShowNext = card;
-        //
-        //             }
-        //         }
-        //     }
-        //
-        //     if(numCardsChecked === totalNumberOfCards) {
-        //         if (cardToShowNext === null) {
-        //
-        //             (#5 in the algorithm)
-        //
-        //             cardToShowNext = cardWithLowestProbability;
-        //             //display some help text about overlearning.
-        //         }
-        //     } else if (numCardsBelow85 === 0) {
-        //          
-        //          (#4 in the algorithm)
-        //      
-        //          //introduce a new card
-        //     }
-        // }
+        var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+
+        for (var i = 0; i < cardProbs.cardsArray.length; ++i) {
+
+            var currentCardProbability = cardProbs.cardsArray[i].probability;
+
+            if (currentCardProbability < currentLowestProbability) {
+                cardIndexWithLowestProbability = i;
+                currentLowestProbability = currentCardProbability;
+            }
+
+            if (currentCardProbability < 0.85) {
+                ++numCardsBelow85;
+                if (currentCardProbability > currentMaxProbabilityForSelection) {
+                    if(cardProbs.cardsArray[i].trialsSinceLastSeen > 2) {
+                        //(#3 in the algorithm)
+                        currentMaxProbabilityForSelection = currentCardProbability;
+                        cardIndexToShowNext = i;
+                    }
+                }
+            }
+        };
+
+        if (numCardsBelow85 === 0) {
+            //(#4 in the algorithm) chose the card here.
+            introduceNewCard();
+            return;
+        } else if ( cardIndexToShowNext !== null ) {
+            //(#3 in the algorithm) chose the card here.
+            setNextCardInfo(cardIndexToShowNext);
+            return;
+        } else {
+            //(#5 in the algorithm) chose the card here.
+            setNextCardInfo(cardIndexWithLowestProbability);
+            //display some help text about overlearning.
+            return;
+        }
 
     }
-
-
 
 }
