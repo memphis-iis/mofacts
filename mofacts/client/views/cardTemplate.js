@@ -384,7 +384,7 @@ function incrementCurrentQuestionSuccess() {
 function incrementCurentQuestionsFailed() {
 
     var incModifier = {$inc: {}};
-    incModifier.$inc["cardsArray." + (getIndex()) + ".questionFailureCount"] = -1;
+    incModifier.$inc["cardsArray." + (getIndex()) + ".questionFailureCount"] = 1;
     CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 }
 
