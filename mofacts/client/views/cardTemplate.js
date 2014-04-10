@@ -47,11 +47,14 @@ Template.cardTemplate.events({
             //Check Correctness
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
+                incrementCurentQuestionsFailed();
+            } else {
+                incrementCurrentQuestionSuccess();
             }
             //---------
 
             //Get question Number
-            index = getIndex();
+            index = getIndex() + 1;
             console.log("Index: " + index);
 
             //Get whether text, audio or picture
@@ -165,6 +168,12 @@ function startTimer() {
 }
 
 function prepareCard() {
+
+    // IWB 4/9/2014 - this is for testing the simplified act-r model.
+
+    getNextCard();
+    return;
+
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
     if (file.tdfs.tutor.schedule != undefined) {
 		Session.set("isScheduledTest", true);
@@ -264,7 +273,7 @@ function getIndex(){
        var tempQ = getStimQuestion(i);
 
         if(tempQ.toString() == currentQ.toString()){
-            return i+1;
+            return i;
         }
     };
     
@@ -365,6 +374,20 @@ function incrementNumQuestionsAnswered() {
     );
 }
 
+function incrementCurrentQuestionSuccess() {
+
+    var incModifier = {$inc: {}};
+    incModifier.$inc["cardsArray." + (getIndex()) + ".questionSuccessCount"] = 1;
+    CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
+}
+
+function incrementCurentQuestionsFailed() {
+
+    var incModifier = {$inc: {}};
+    incModifier.$inc["cardsArray." + (getIndex()) + ".questionFailureCount"] = -1;
+    CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
+}
+
 function calculateCardProbabilities() {
 
     //TODO: IWB - 03/30/2014: still need to get actual values for these variables.
@@ -399,17 +422,23 @@ function calculateCardProbabilities() {
 
 function getNextCard() {
 
-    //TODO: IWB - 3/30/2014: still need to get actual values for these variables.
-
-    var numItemsPracticed = 0;
+    var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
+        var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+        for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
+            if (cardProbs.cardsArray[i].hasBeenIntroduced === false) {
+                Session.set("currentQuestion", cardProbs.cardsArray[i].question);
+                Session.set("currentAnswer", cardProbs.cardsArray[i].answer);
+                return;
+            }
+        }
     } else {
         //var currentMaxProbabilityForSelection = 0;
         //var currentLowestProbability = 1; //maximum probability of 1 or 100%
-        //var cardWithLowestProbability = null;
-        //var cardToShowNext = null;
+        //var cardIndexWithLowestProbability = null;
+        //var cardIndexToShowNext = null;
         //var numCardsChecked = 0;
         //var numCardsBelow85 = 0;
 
