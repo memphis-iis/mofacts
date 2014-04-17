@@ -110,7 +110,15 @@ Template.cardTemplate.rendered = function() {
     startOnRender = startTimer();
     start = 0;
 
-    //document.getElementById("answer").blur();
+    var counter = UserProgress.find(
+        { _id: Meteor.userId() },
+        {progressDataArray: 1});
+
+    counter.forEach(function (Object){
+        length = Object.progressDataArray.length;
+    });
+
+    timeoutfunction(length);
 
     if(getQuestionType() === "sound"){
         console.log("Sound")
@@ -511,5 +519,22 @@ function getNextCard() {
         }
 
     }
+
+}
+
+function timeoutfunction(index){
+
+    var counter = UserProgress.find(
+        { _id: Meteor.userId() },
+        {progressDataArray: 1});
+
+    counter.forEach(function (Object){
+        length = Object.progressDataArray.length;
+    });
+
+    Meteor.setTimeout(function(){
+        console.log(index + "|" + length);
+        //prepareCard();
+    }, 10000);
 
 }
