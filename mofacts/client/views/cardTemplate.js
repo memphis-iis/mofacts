@@ -19,6 +19,9 @@ Template.cardTemplate.events({
 	},
 	'keypress #userAnswer' : function (e) {
 
+        //for debugging, allow one to turn on or off the UserInteraction code.
+        var AllowUserInteraction = true;
+
 		var key=e.keyCode || e.which;
 		if (key==13){
 
@@ -48,8 +51,10 @@ Template.cardTemplate.events({
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
                 incrementCurentQuestionsFailed();
+                $("#UserInteraction").append("You are Incorrect." + " The correct answer is : " + answer);
             } else {
                 incrementCurrentQuestionSuccess();
+                $("#UserInteraction").append("You are Correct. " + "Great Job");
             }
             //---------
 
@@ -72,10 +77,25 @@ Template.cardTemplate.events({
             //Reset timer for next question
             start = startTimer();
 
-            //get a new card
-            prepareCard();
-            
-			$("#userAnswer").val("");
+            //timeout for adding a small delay so the User may read the correctness of his/her anwser
+            //Reveals Answer
+            if(AllowUserInteraction){
+                $("#UserInteraction").show();
+
+                Well = Meteor.setTimeout(function(){
+
+                    //get a new card
+                    prepareCard();
+
+                    $("#userAnswer").val("");
+                },1000);
+                //---------------
+
+            }else{
+                prepareCard();
+
+                $("#userAnswer").val("");
+            }   
 		}else{
             start = startTimer();
         }
@@ -101,6 +121,10 @@ Template.cardTemplate.rendered = function() {
     start = 0;
 
     //for debugging, allow one to turn on or off the timeout code.
+    //Note to Future Self : Look up clearTimeout(timeoutObject);
+
+    console.log("Index: " + getIndex());
+
     var AllowTimeouts = false;
 
     if(AllowTimeouts){
@@ -530,10 +554,9 @@ function timeoutfunction(index){
     //needs to be in tdf someday
     var delay = 15000;
 
-    Meteor.setTimeout(function(){
+    var timeoutVar;
 
-        console.log("Index: " + index);
-
+    timeoutVar = Meteor.setTimeout(function(){
 
             if(index === length){
 
@@ -544,6 +567,10 @@ function timeoutfunction(index){
                     ";" + 0 + "::" );
 
                 recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
+
+                incrementCurentQuestionsFailed();
+                incrementNumQuestionsAnswered();
+                calculateCardProbabilities();
 
                 prepareCard();
             }else{
