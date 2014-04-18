@@ -54,20 +54,10 @@ Template.cardTemplate.events({
             //---------
 
             //Get question Number
-            index = getIndex() + 1;
-            console.log("Index: " + index);
+            index = getIndex();
 
             //Get whether text, audio or picture
-            var QType = getQuestionType();
-            if (QType == "text"){
-                QType = "T";    //T for Text
-            } else if (QType == "image"){
-                QType = "I";    //I for Image
-            } else if (QType == "sound"){
-                QType = "A";    //A for Audio
-            } else {
-                QType = "NA";   //NA for Not Applicable
-            }
+            QType = findQTypeSimpified();
 
             //Write to Log
             Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
@@ -532,9 +522,47 @@ function timeoutfunction(index){
         length = Object.progressDataArray.length;
     });
 
-    Meteor.setTimeout(function(){
-        console.log(index + "|" + length);
-        //prepareCard();
-    }, 10000);
+    //needs to be in tdf someday
+    var delay = 15000;
 
+    Meteor.setTimeout(function(){
+
+        console.log("Index: " + index);
+
+
+            if(index === length){
+
+                console.log("TIMEOUT : " + index +"|"+length);
+
+                Meteor.call("writing",getIndex() + ";" + 
+                    findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
+                    ";" + 0 + "::" );
+
+                recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
+
+                prepareCard();
+            }else{
+                //Do Nothing
+            }
+
+            
+    }, delay);
 }
+
+
+function findQTypeSimpified(){
+
+    var QType = getQuestionType();
+        if (QType == "text"){
+            QType = "T";    //T for Text
+        } else if (QType == "image"){
+            QType = "I";    //I for Image
+        } else if (QType == "sound"){
+            QType = "A";    //A for Audio
+        } else {
+            QType = "NA";   //NA for Not Applicable
+        }
+
+    return QType;
+}
+
