@@ -100,15 +100,20 @@ Template.cardTemplate.rendered = function() {
     startOnRender = startTimer();
     start = 0;
 
-    var counter = UserProgress.find(
-        { _id: Meteor.userId() },
-        {progressDataArray: 1});
+    //for debugging, allow one to turn on or off the timeout code.
+    var AllowTimeouts = false;
 
-    counter.forEach(function (Object){
-        length = Object.progressDataArray.length;
-    });
+    if(AllowTimeouts){
+        var counter = UserProgress.find(
+            { _id: Meteor.userId() },
+            {progressDataArray: 1});
 
-    timeoutfunction(length);
+        counter.forEach(function (Object){
+            length = Object.progressDataArray.length;
+        });
+
+        timeoutfunction(length);
+    }
 
     if(getQuestionType() === "sound"){
         console.log("Sound")
