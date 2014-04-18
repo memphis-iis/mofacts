@@ -20,7 +20,7 @@ Template.cardTemplate.events({
 	'keypress #userAnswer' : function (e) {
 
         //for debugging, allow one to turn on or off the UserInteraction code.
-        var AllowUserInteraction = true;
+        var AllowUserInteraction = false;
 
 		var key=e.keyCode || e.which;
 		if (key==13){
