@@ -226,3 +226,9 @@ input:focus {
 	box-shadow: 1px 1px 1px 1px #118C4E;
 	border: none;
 }
+
+.multipleChoiceButton {
+	min-height: 50px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
