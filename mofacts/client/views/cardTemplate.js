@@ -394,7 +394,6 @@ function initializeActRModel() {
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
     calculateCardProbabilities();
-    
 }
 
 function incrementNumQuestionsAnswered() {
@@ -492,11 +491,10 @@ function getNextCard() {
         introduceNewCard();
         return;
     } else {
-        var currentMaxProbabilityForSelection = 0;
+        var currentMaxProbability = 0;
         var currentLowestProbability = 1; //maximum probability of 1 (or 100%)
         var cardIndexWithLowestProbability = null;
         var cardIndexToShowNext = null;
-        var numCardsChecked = 0;
         var numCardsBelow85 = 0;
 
         var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
@@ -512,10 +510,10 @@ function getNextCard() {
 
             if (currentCardProbability < 0.85) {
                 ++numCardsBelow85;
-                if (currentCardProbability > currentMaxProbabilityForSelection) {
+                if (currentCardProbability > currentMaxProbability) {
                     if(cardProbs.cardsArray[i].trialsSinceLastSeen > 2) {
                         //(#3 in the algorithm)
-                        currentMaxProbabilityForSelection = currentCardProbability;
+                        currentMaxProbability = currentCardProbability;
                         cardIndexToShowNext = i;
                     }
                 }
