@@ -368,6 +368,7 @@ function initializeActRModel() {
         { $set: 
             {
                   numQuestionsAnswered: 0
+                , numQuestionsIntroduced: 0
                 , cardsArray: [] 
             }
         }
@@ -435,18 +436,35 @@ function setNextCardInfo( index ) {
     setHasBeenIntroducedFlag(index);
 }
 
-function introduceNewCard() {
-    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
-    for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
-        if (cardProbs.cardsArray[i].hasBeenIntroduced === false) {
-            setNextCardInfo(i);
-            return;
+function incrementNumQuestionsIntroduced() {
+    CardProbabilities.update(
+        {_id: Meteor.userId()},
+        { $inc: { numQuestionsIntroduced: 1 } }
+    );
+}
+
+function getNumQuestionsIntroduced() {
+    return CardProbabilities.findOne(
+        { _id: Meteor.userId()},
+        { numQuestionsIntroduced: 1}
+    );
+}
+
+function getNumCardsBelow85( cardsArray ) {
+    var counter = 0;
+    for (var i = 0; i < cardsArray.length; ++i) {
+        if (cardsArray[i].probability < 0.85) {
+            ++counter;
         }
-    }
+    };
+    return counter;
 }
 
 function calculateCardProbabilities() {
 
+    if (Session.get("debugging")) {
+        console.log("calculating card probabilities...");
+    }
     //TODO: IWB - 03/30/2014: still need to get actual values for these variables.
     //TODO: IWB - 04/02/2014: may need an entire collection to keep track of these variables.
 
@@ -480,15 +498,32 @@ function calculateCardProbabilities() {
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
     }
+    if (Session.get("debugging")) {
+        console.log("...done calculating card probabilities.");
+    }
 }
 
 function getNextCard() {
 
+    if (Session.get("debugging")) {    
+        console.log("getting next card...");
+    }
+
     var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
+    var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
-        introduceNewCard();
+        var indexForNewCard = getIndexForNewCardToIntroduce( cardsArray );
+
+        if (indexForNewCard === -1) {
+            if (Session.get("debugging")) {
+                console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
+            }
+        } else {
+            introduceNextCard(indexForNewCard);
+        }
+        
         return;
     } else {
         var currentMaxProbability = 0;
@@ -497,47 +532,128 @@ function getNextCard() {
         var cardIndexToShowNext = null;
         var numCardsBelow85 = 0;
 
-        var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+        
+        var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
+        
 
-        for (var i = 0; i < cardProbs.cardsArray.length; ++i) {
-
-            var currentCardProbability = cardProbs.cardsArray[i].probability;
-
-            if (currentCardProbability < currentLowestProbability) {
-                cardIndexWithLowestProbability = i;
-                currentLowestProbability = currentCardProbability;
-            }
-
-            if (currentCardProbability < 0.85) {
-                ++numCardsBelow85;
-                if (currentCardProbability > currentMaxProbability) {
-                    if(cardProbs.cardsArray[i].trialsSinceLastSeen > 2) {
-                        //(#3 in the algorithm)
-                        currentMaxProbability = currentCardProbability;
-                        cardIndexToShowNext = i;
-                    }
-                }
-            }
-        };
-
-        if (numCardsBelow85 === 0) {
-            //(#4 in the algorithm) chose the card here.
-            introduceNewCard();
-            return;
-        } else if ( cardIndexToShowNext !== null ) {
-            //(#3 in the algorithm) chose the card here.
-            setNextCardInfo(cardIndexToShowNext);
-            return;
+        if ( nextCardIndex !== -1) {
+            //number 3 in the algorithm
+            setNextCardInfo(nextCardIndex);
         } else {
-            //(#5 in the algorithm) chose the card here.
-            setNextCardInfo(cardIndexWithLowestProbability);
-            //display some help text about overlearning.
-            return;
-        }
+            //numbers 4 and 5 in the algorithm.
+
+            if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced === cardsArray.length) {
+                //number 5 in the algorithm.
+                var indexForNewCard = selectLowestProbabilityCard(cardsArray);
+                introduceNextCard( indexForNewCard );
+            } else {
+                //number 4 in the algorithm.
+                var indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
+
+                if (indexForNewCard === -1) {
+                    //if we have introduced all of the cards.
+                    indexForNewCard = selectLowestProbabilityCard(cardsArray);
+                    introduceNextCard( indexForNewCard );
+                } else {
+                    introduceNextCard(indexForNewCard);
+                }
+                
+            }
+        } 
 
     }
-
 }
+
+function getIndexForNewCardToIntroduce( cardsArray ) {
+
+    if (Session.get("debugging")) {
+        console.log("getting index for new card to introduce.");
+    }
+
+    var indexToReturn = -1;
+
+    for(var i = 0; i < cardsArray.length; ++i) {
+        if (cardsArray[i].hasBeenIntroduced === false) {
+            indexToReturn = i;
+        }
+    }
+
+    if (Session.get("debugging")) {
+        var message = "";
+        if (indexToReturn === -1) {
+            message = "All cards have been introduced!";
+        } else {
+            message = "about to introduce " + indexToReturn;
+        }
+        console.log(message);
+    }
+
+    return indexToReturn;
+}
+
+function introduceNextCard( index ) {
+    if (Session.get("debugging")) {
+        console.log("introducing next Card with index: " + index);
+    }
+    setNextCardInfo(index);
+    incrementNumQuestionsIntroduced();
+}
+
+
+function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) {
+    if (Session.get("debugging")) {
+        console.log("selectHighestProbabilityAlreadyIntroducedCardLessThan85");
+    }
+    var currentMaxProbabilityLessThan85 = 0;
+    var indexToReturn = -1;
+
+    for (var i = 0; i < cardsArray.length; ++i) {
+
+        if (cardsArray[i].hasBeenIntroduced === true && cardsArray[i].trialsSinceLastSeen > 2) {
+
+            if (cardsArray[i].probability > currentMaxProbabilityLessThan85 && cardsArray[i].probability < 0.85) {
+                currentMaxProbabilityLessThan85 = cardsArray[i].probability;
+                indexToReturn = i;
+            }      
+        }
+    };
+
+    if (Session.get("debugging")) {
+        var message;
+        if (indexToReturn === -1) {
+            message = "no cards less than .85 already introduced.";
+        } else {
+            message = "indexToReturn: " + indexToReturn;
+        }
+        console.log(message);
+    }
+
+    return indexToReturn;
+}
+
+function selectLowestProbabilityCard( cardsArray ) {
+
+    if (Session.get("debugging")) {
+        console.log("selectLowestProbabilityCard");
+    }
+
+    var currentMinProbability = 1;
+    var indexToReturn = 0;
+
+    for (var i = 0; i < cardsArray.length; ++i) {
+        if (cardsArray[i].probability < currentMinProbability  && cardsArray[i].trialsSinceLastSeen > 2) {
+            currentMinProbability = cardsArray[i].probability;
+            indexToReturn = i;
+        }
+    };
+
+    if (Session.get("debugging")) {
+        console.log("indexToReturn: " + indexToReturn);
+    }
+
+    return indexToReturn;
+}
+
 
 function timeoutfunction(index){
 
