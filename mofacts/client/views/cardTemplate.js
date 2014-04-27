@@ -113,6 +113,9 @@ Template.cardTemplate.events({
     },
     'click .homeLink' : function () {
         Router.go("profile");
+    },
+    'click #overlearningButton' : function () {
+        Router.go("profile");
     }
 });
 
@@ -143,6 +146,9 @@ Template.cardTemplate.rendered = function() {
         console.log("Sound")
         document.getElementById('audio').play();
     }
+
+    
+
 }
 
 /////////////////
@@ -158,9 +164,28 @@ Template.cardTemplate.invokeAfterLoad = function() {
         
         prepareCard();
         recordCurrentTestData();
-        
+        Session.set("showOverlearningText", false);
         
     }
+
+    if (Session.get("showOverlearningText")) {
+        $("#overlearningRow").show();
+    }
+
+    /*
+
+    for all multiple choice answers in this question do {
+        $("#multipleChoiceContainer").append(
+            "<div class=\"row\" id=\"multipleChoiceRow_" + i + "\" hidden=\"true\">" +
+                "<div class=\"col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 multiple-choice-option\">" +
+                    "<button type=\"button\" id=\"multipleChoiceOption_" + i + "\" class=\"btn btn-primary multipleChoiceButton\">A:<!-- {{multipleChoiceAnswerA}} --></button>" +
+                "</div>" +
+            "</div>"
+        );
+    };
+
+    */
+
 }
 
 Template.cardTemplate.username = function () {
@@ -444,10 +469,9 @@ function incrementNumQuestionsIntroduced() {
 }
 
 function getNumQuestionsIntroduced() {
-    return CardProbabilities.findOne(
-        { _id: Meteor.userId()},
-        { numQuestionsIntroduced: 1}
-    );
+    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId()});
+    console.log(cardProbs);
+    return cardProbs.numQuestionsIntroduced;
 }
 
 function getNumCardsBelow85( cardsArray ) {
@@ -542,10 +566,12 @@ function getNextCard() {
         } else {
             //numbers 4 and 5 in the algorithm.
 
-            if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced === cardsArray.length) {
+            if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
                 //number 5 in the algorithm.
                 var indexForNewCard = selectLowestProbabilityCard(cardsArray);
                 introduceNextCard( indexForNewCard );
+                console.log("show overlearning row!");
+                Session.set("showOverlearningText", true);
             } else {
                 //number 4 in the algorithm.
                 var indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
@@ -588,6 +614,11 @@ function getIndexForNewCardToIntroduce( cardsArray ) {
         console.log(message);
     }
 
+    if (indexToReturn !== -1) {
+        // we introduced a new card.
+        incrementNumQuestionsIntroduced();
+    }
+
     return indexToReturn;
 }
 
@@ -596,7 +627,6 @@ function introduceNextCard( index ) {
         console.log("introducing next Card with index: " + index);
     }
     setNextCardInfo(index);
-    incrementNumQuestionsIntroduced();
 }
 
 
