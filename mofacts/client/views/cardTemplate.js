@@ -126,7 +126,7 @@ Template.cardTemplate.rendered = function() {
     //for debugging, allow one to turn on or off the timeout code.
     //Note to Future Self : Look up clearTimeout(timeoutObject);
 
-    console.log("Index: " + getIndex());
+    //console.log("Index: " + getIndex());
 
     var AllowTimeouts = false;
 
@@ -147,7 +147,10 @@ Template.cardTemplate.rendered = function() {
         document.getElementById('audio').play();
     }
 
-    
+
+    if (Session.get("showOverlearningText") == true) {
+        $("#overlearningRow").show();
+    }
 
 }
 
@@ -156,7 +159,11 @@ Template.cardTemplate.rendered = function() {
 /////////////////
 
 Template.cardTemplate.invokeAfterLoad = function() {
-	console.log('card loaded');
+	
+    if(Session.get("debugging")) {
+         console.log('card loaded');
+    }
+   
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
         //if we are in a modeled drill/test
@@ -166,10 +173,6 @@ Template.cardTemplate.invokeAfterLoad = function() {
         recordCurrentTestData();
         Session.set("showOverlearningText", false);
         
-    }
-
-    if (Session.get("showOverlearningText")) {
-        $("#overlearningRow").show();
     }
 
     /*
@@ -522,6 +525,7 @@ function calculateCardProbabilities() {
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
     }
+
     if (Session.get("debugging")) {
         console.log("...done calculating card probabilities.");
     }
@@ -547,41 +551,52 @@ function getNextCard() {
         } else {
             introduceNextCard(indexForNewCard);
         }
+
+        if (Session.get("debugging")) {    
+            console.log("...got next card #2");
+        }
         
         return;
     } else {
-        var currentMaxProbability = 0;
-        var currentLowestProbability = 1; //maximum probability of 1 (or 100%)
-        var cardIndexWithLowestProbability = null;
-        var cardIndexToShowNext = null;
-        var numCardsBelow85 = 0;
-
         
         var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
-        
 
         if ( nextCardIndex !== -1) {
             //number 3 in the algorithm
             setNextCardInfo(nextCardIndex);
+
+            if (Session.get("debugging")) {    
+                console.log("...got next card #3");
+            }
+
         } else {
             //numbers 4 and 5 in the algorithm.
 
             if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
                 //number 5 in the algorithm.
-                var indexForNewCard = selectLowestProbabilityCard(cardsArray);
+                var indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
                 introduceNextCard( indexForNewCard );
-                console.log("show overlearning row!");
+
                 Session.set("showOverlearningText", true);
+
+                if (Session.get("debugging")) {    
+                    console.log("...got next card #5");
+                }
+
             } else {
                 //number 4 in the algorithm.
                 var indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
 
                 if (indexForNewCard === -1) {
                     //if we have introduced all of the cards.
-                    indexForNewCard = selectLowestProbabilityCard(cardsArray);
+                    indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
                     introduceNextCard( indexForNewCard );
                 } else {
                     introduceNextCard(indexForNewCard);
+                }
+
+                if (Session.get("debugging")) {    
+                    console.log("...got next card #4");
                 }
                 
             }
@@ -661,7 +676,7 @@ function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) 
     return indexToReturn;
 }
 
-function selectLowestProbabilityCard( cardsArray ) {
+function selectLowestProbabilityCardIndex( cardsArray ) {
 
     if (Session.get("debugging")) {
         console.log("selectLowestProbabilityCard");
