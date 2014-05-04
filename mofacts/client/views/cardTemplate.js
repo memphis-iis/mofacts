@@ -166,13 +166,24 @@ Template.cardTemplate.invokeAfterLoad = function() {
    
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-        //if we are in a modeled drill/test
-        initializeActRModel();
+
+        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+
+        //check if tutor.setspec.isModeled is defined in the tdf
+        if (file.tdfs.tutor.setspec[0].isModeled != undefined) {
+            //if it is defined and is set to true, use the ACT-R Model methods.
+            if (file.tdfs.tutor.setspec[0].isModeled == "true") {
+                Session.set("usingACTRModel",true);
+                initializeActRModel();
+            } else {
+                Session.set("usingACTRModel",false);
+            }
+        }
+        
         
         prepareCard();
         recordCurrentTestData();
         Session.set("showOverlearningText", false);
-        
     }
 
     /*
@@ -227,12 +238,15 @@ function startTimer() {
 
 function prepareCard() {
 
-    // IWB 4/9/2014 - this is for testing the simplified act-r model.
-
-    getNextCard();
-    return;
-
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+
+    
+    if (Session.get("usingACTRModel")) {
+        getNextCardActRModel();
+        return;
+    }
+    
+
     if (file.tdfs.tutor.schedule != undefined) {
 		Session.set("isScheduledTest", true);
         if (Session.get("scheduleIndex") === undefined) {
@@ -263,6 +277,7 @@ function prepareCard() {
             scheduledCard();  
         }      
     } else {
+        Session.set("isScheduledTest", false);
         randomCard();    
 
     }
@@ -531,7 +546,7 @@ function calculateCardProbabilities() {
     }
 }
 
-function getNextCard() {
+function getNextCardActRModel() {
 
     if (Session.get("debugging")) {    
         console.log("getting next card...");

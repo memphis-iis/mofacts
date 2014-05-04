@@ -7,9 +7,10 @@
 		<shuffleclusters>0-16</shuffleclusters>
 		<lfparameter>0.80</lfparameter>
 		<eeglogged>true</eeglogged>
+		<isModeled>true</isModeled>
 	</setspec>
 	<schedule>
-		<instructions>Enter answer in the prompt box below each question.  Please attempt to answer all questions presented</instructions>
+		<instructions>Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.</instructions>
 		<q>0,s</q>
 		<q>1,s</q>
 		<q>2,s</q>
