@@ -2,6 +2,8 @@
 //  EVENTS  //
 //////////////
 
+var timeoutName;
+
 Template.cardTemplate.events({
 
 	'focus #userAnswer' : function() {
@@ -96,7 +98,7 @@ Template.cardTemplate.rendered = function() {
 
     //console.log("Index: " + getIndex());
 
-    var AllowTimeouts = false;
+    var AllowTimeouts = true;
 
     if(AllowTimeouts){
         var counter = UserProgress.find(
@@ -201,6 +203,9 @@ function handleUserInput( e , source ) {
     if (key==13){
 
         //Gets User Response
+        clearTimeout(timeoutName);
+        console.log("Timeout Cleared");
+
         var userAnswer;
         if ( source === "keypress") {
             userAnswer = document.getElementById('userAnswer').value.toLowerCase().trim();
@@ -228,7 +233,7 @@ function handleUserInput( e , source ) {
         );
         //---------
 
-        //Check Correctness
+        //Display Correctness
         userAnswer = userAnswer.toLowerCase().trim();
         answer = answer.toLowerCase().trim();
 
@@ -271,7 +276,7 @@ function handleUserInput( e , source ) {
         if(AllowUserInteraction){
             $("#UserInteraction").show();
 
-            Well = Meteor.setTimeout(function(){
+            Meteor.setTimeout(function(){
 
                 //get a new card
                 prepareCard();
@@ -788,14 +793,15 @@ function timeoutfunction(index){
     });
 
     //needs to be in tdf someday
-    var delay = 15000;
+    //Current 30 seconds 
+    var delay = 30 * 1000;
 
     var timeoutVar;
 
-    timeoutVar = Meteor.setTimeout(function(){
+    console.log("Timeout Set");
+    timeoutName = Meteor.setTimeout(function(){
 
             if(index === length){
-
                 console.log("TIMEOUT : " + index +"|"+length);
 
                 Meteor.call("writing",getIndex() + ";" + 
