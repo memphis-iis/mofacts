@@ -189,7 +189,7 @@ function handleUserInput( e , source ) {
 
 
     //for debugging, allow one to turn on or off the UserInteraction code.
-    var AllowUserInteraction = false;
+    var AllowUserInteraction = true;
 
     if ( source === "keypress") {
         var key=e.keyCode || e.which;
@@ -229,6 +229,9 @@ function handleUserInput( e , source ) {
         //---------
 
         //Check Correctness
+        userAnswer = userAnswer.toLowerCase().trim();
+        answer = answer.toLowerCase().trim();
+
         if (userAnswer.localeCompare(answer)) {
             isCorrect = false;
             incrementCurentQuestionsFailed();
@@ -314,7 +317,6 @@ function prepareCard() {
 		sched = getCurrentScheduleNumber();
 		console.log("current schedule number: " + sched);
 		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
-			Meteor.call("addtime");
 			Router.go("stats");
 		}
         if (Session.get("scheduleIndex") === file.tdfs.tutor.schedule[sched].q.length){

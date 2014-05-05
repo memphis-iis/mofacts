@@ -48,6 +48,8 @@ Template.statsPageTemplate.rendered = function () {
     var theAnswer;
     var coloring = "\"black\"";
 
+    Meteor.call("addtime");
+
     var statsGet = UserProgress.find(
         { _id: Meteor.userId() },
         {progressDataArray: 1});
