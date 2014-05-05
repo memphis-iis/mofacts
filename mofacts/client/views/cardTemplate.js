@@ -116,10 +116,52 @@ Template.cardTemplate.events({
     },
     'click #overlearningButton' : function () {
         Router.go("profile");
+    },
+    'click .multipleChoiceButton' : function (event) {
+        
     }
 });
 
 Template.cardTemplate.rendered = function() {
+
+
+    if ( Session.get("isScheduledTest") ) {
+
+        var scheduleNumber = getCurrentScheduleNumber();
+        //question index = sheduleIndex -1 because it has already been incremented for the next card at this point.
+        var questionIndex = Session.get("scheduleIndex") - 1;
+
+        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+
+        if (file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices != undefined) {
+            //check if the schedule's question tags have choices tags
+
+            $("#textEntryRow").hide();
+
+            var allChoices = file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices[0];
+            var choicesArray = allChoices.split(",");
+            for (var i = 0; i < choicesArray.length; ++i) {
+                var buttonParts = choicesArray[i].split(":");
+                var label = buttonParts[0];
+                var value = buttonParts[1];
+
+                //insert the real answer for this dummy value from the tdf.
+                if(value == "the_answer") {
+                    value = Session.get("currentAnswer");
+                }
+
+                //insert all of the multiple choice buttons with the appropriate values.
+                $("#multipleChoiceContainer").append(
+                    "<div class=\"col-lg-6\">" +
+                        "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
+                            label + ": " + value + 
+                        "</button>" +
+                    "</div>"
+                );
+            }
+        }
+    }
+
     startOnRender = startTimer();
     start = 0;
 
@@ -161,13 +203,13 @@ Template.cardTemplate.rendered = function() {
 Template.cardTemplate.invokeAfterLoad = function() {
 	
     if(Session.get("debugging")) {
-         console.log('card loaded');
+        console.log('card loaded');
     }
+
+    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
    
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-
-        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
         //check if tutor.setspec.isModeled is defined in the tdf
         if (file.tdfs.tutor.setspec[0].isModeled != undefined) {
@@ -185,20 +227,6 @@ Template.cardTemplate.invokeAfterLoad = function() {
         recordCurrentTestData();
         Session.set("showOverlearningText", false);
     }
-
-    /*
-
-    for all multiple choice answers in this question do {
-        $("#multipleChoiceContainer").append(
-            "<div class=\"row\" id=\"multipleChoiceRow_" + i + "\" hidden=\"true\">" +
-                "<div class=\"col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 multiple-choice-option\">" +
-                    "<button type=\"button\" id=\"multipleChoiceOption_" + i + "\" class=\"btn btn-primary multipleChoiceButton\">A:<!-- {{multipleChoiceAnswerA}} --></button>" +
-                "</div>" +
-            "</div>"
-        );
-    };
-
-    */
 
 }
 
@@ -259,6 +287,7 @@ function prepareCard() {
 			Router.go("stats");
 		}
         if (Session.get("scheduleIndex") === file.tdfs.tutor.schedule[sched].q.length){
+            //if we are at the end of this schedule
 			Session.set("scheduleIndex", 0);
 			Session.set("currentScheduleNumber", sched + 1);
 			

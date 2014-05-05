@@ -7,7 +7,7 @@
 		<shuffleclusters>0-16</shuffleclusters>
 		<lfparameter>0.80</lfparameter>
 		<eeglogged>true</eeglogged>
-		<isModeled>true</isModeled>
+		<isModeled>false</isModeled>
 	</setspec>
 	<schedule>
 		<instructions>Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.</instructions>
@@ -25,107 +25,67 @@
 	<schedule>
 		<instructions>Enter answer in the text box below each question.</instructions>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>2,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>3,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>2,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>3,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 	</schedule>
 	<schedule>
 		<instructions>Instructions:  Enter answer in the text box below each question.  Please attempt to answer all questions presented.</instructions>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>2,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>3,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>2,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>3,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>0,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>
-				a: food,b: drink,c: answer,d: elephant
-			</choices>
+			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
 		</q>
 	</schedule>
 	
