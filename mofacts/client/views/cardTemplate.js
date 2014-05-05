@@ -235,10 +235,10 @@ function handleUserInput( e , source ) {
         if (userAnswer.localeCompare(answer)) {
             isCorrect = false;
             incrementCurentQuestionsFailed();
-            $("#UserInteraction").append("You are Incorrect." + " The correct answer is : " + answer);
+            $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
         } else {
             incrementCurrentQuestionSuccess();
-            $("#UserInteraction").append("You are Correct. " + "Great Job");
+            $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
         }
         //---------
 
