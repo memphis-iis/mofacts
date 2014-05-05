@@ -35,6 +35,11 @@ Template.cardTemplate.events({
     'click .homeLink' : function () {
         Router.go("profile");
     },
+
+    'click .statsPageLink' : function () {
+        Router.go("stats");
+    },
+
     'click #overlearningButton' : function () {
         Router.go("profile");
     },
