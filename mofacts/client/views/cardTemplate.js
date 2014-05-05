@@ -3,6 +3,7 @@
 //////////////
 
 var timeoutName;
+var timeoutCount = -1;
 
 Template.cardTemplate.events({
 
@@ -101,6 +102,7 @@ Template.cardTemplate.rendered = function() {
     var AllowTimeouts = true;
 
     if(AllowTimeouts){
+        timeoutCount++;
         var counter = UserProgress.find(
             { _id: Meteor.userId() },
             {progressDataArray: 1});
@@ -109,7 +111,7 @@ Template.cardTemplate.rendered = function() {
             length = Object.progressDataArray.length;
         });
 
-        timeoutfunction(length);
+        timeoutfunction(length, timeoutCount);
     }
 
     if(getQuestionType() === "sound"){
@@ -204,7 +206,6 @@ function handleUserInput( e , source ) {
 
         //Gets User Response
         clearTimeout(timeoutName);
-        console.log("Timeout Cleared");
 
         var userAnswer;
         if ( source === "keypress") {
@@ -782,7 +783,7 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
 }
 
 
-function timeoutfunction(index){
+function timeoutfunction(index, timeoutNum){
 
     var counter = UserProgress.find(
         { _id: Meteor.userId() },
@@ -796,13 +797,10 @@ function timeoutfunction(index){
     //Current 30 seconds 
     var delay = 30 * 1000;
 
-    var timeoutVar;
-
-    console.log("Timeout Set");
     timeoutName = Meteor.setTimeout(function(){
 
-            if(index === length){
-                console.log("TIMEOUT : " + index +"|"+length);
+            if(index === length && timeoutNum > 0){
+                console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
                 Meteor.call("writing",getIndex() + ";" + 
                     findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
