@@ -18,87 +18,8 @@ Template.cardTemplate.events({
         }
 	},
 	'keypress #userAnswer' : function (e) {
-
-        //for debugging, allow one to turn on or off the UserInteraction code.
-        var AllowUserInteraction = false;
-
-		var key=e.keyCode || e.which;
-		if (key==13){
-
-            //Gets User Response
-			var userAnswer = document.getElementById('userAnswer').value.toLowerCase().trim();
-
-            //Check Correctness
-            var answer = document.getElementById('answer').textContent.toLowerCase().trim();
-			var isCorrect = true;
-            //---------
-
-            //Timer
-            var elapsed = new Date().getTime()-start;
-            var elapsedOnRender = new Date().getTime()-startOnRender;
-
-            //Display results
-            if (userAnswer === ""){
-                elapsed = 0;
-            }
-
-            console.log(
-			"You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
-			);
-            //---------
-
-            //Check Correctness
-            if (userAnswer.localeCompare(answer)) {
-                isCorrect = false;
-                incrementCurentQuestionsFailed();
-                $("#UserInteraction").append("You are Incorrect." + " The correct answer is : " + answer);
-            } else {
-                incrementCurrentQuestionSuccess();
-                $("#UserInteraction").append("You are Correct. " + "Great Job");
-            }
-            //---------
-
-            //Get question Number
-            index = getIndex();
-
-            //Get whether text, audio or picture
-            QType = findQTypeSimpified();
-
-            //Write to Log
-            Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
-                ";" + elapsed + "::" );
-
-            //record progress in UserProgress collection.
-            recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
-
-            incrementNumQuestionsAnswered();
-            calculateCardProbabilities();
-
-            //Reset timer for next question
-            start = startTimer();
-
-            //timeout for adding a small delay so the User may read the correctness of his/her anwser
-            //Reveals Answer
-            if(AllowUserInteraction){
-                $("#UserInteraction").show();
-
-                Well = Meteor.setTimeout(function(){
-
-                    //get a new card
-                    prepareCard();
-
-                    $("#userAnswer").val("");
-                },1000);
-                //---------------
-
-            }else{
-                prepareCard();
-
-                $("#userAnswer").val("");
-            }   
-		}else{
-            start = startTimer();
-        }
+        handleUserInput( e , "keypress");
+        
 	},
 	'click .logoutLink' : function () {
         Meteor.logout( function (error) {
@@ -118,7 +39,7 @@ Template.cardTemplate.events({
         Router.go("profile");
     },
     'click .multipleChoiceButton' : function (event) {
-        
+        handleUserInput( event , "buttonClick");
     }
 });
 
@@ -258,6 +179,105 @@ Template.cardTemplate.imageCard = function() {
 /////////////////
 //  FUNCTIONS  //
 /////////////////
+
+function handleUserInput( e , source ) {
+
+
+    //for debugging, allow one to turn on or off the UserInteraction code.
+    var AllowUserInteraction = false;
+
+    if ( source === "keypress") {
+        var key=e.keyCode || e.which;
+    } else if ( source === "buttonClick") {
+        //to save space we will just go ahead and act like it was a key press.
+        var key = 13;
+    }
+    
+    if (key==13){
+
+        //Gets User Response
+        var userAnswer;
+        if ( source === "keypress") {
+            userAnswer = document.getElementById('userAnswer').value.toLowerCase().trim();
+        } else if ( source === "buttonClick") {
+            userAnswer = e.target.name;
+        }
+
+        //Check Correctness
+        var answer = document.getElementById('answer').textContent.toLowerCase().trim();
+        var isCorrect = true;
+        //---------
+
+        //Timer
+        var elapsed = new Date().getTime()-start;
+        var elapsedOnRender = new Date().getTime()-startOnRender;
+
+        //Display results
+        if (userAnswer === ""){
+            elapsed = 0;
+        }
+
+        console.log(
+        "You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
+        );
+        //---------
+
+        //Check Correctness
+        if (userAnswer.localeCompare(answer)) {
+            isCorrect = false;
+            incrementCurentQuestionsFailed();
+            $("#UserInteraction").append("You are Incorrect." + " The correct answer is : " + answer);
+        } else {
+            incrementCurrentQuestionSuccess();
+            $("#UserInteraction").append("You are Correct. " + "Great Job");
+        }
+        //---------
+
+        //Get question Number
+        index = getIndex();
+
+        //Get whether text, audio or picture
+        QType = findQTypeSimpified();
+
+        //Write to Log
+        Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
+            ";" + elapsed + "::" );
+
+        //record progress in UserProgress collection.
+        recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
+
+        incrementNumQuestionsAnswered();
+        calculateCardProbabilities();
+
+        //Reset timer for next question
+        start = startTimer();
+
+        //timeout for adding a small delay so the User may read the correctness of his/her anwser
+        //Reveals Answer
+        if(AllowUserInteraction){
+            $("#UserInteraction").show();
+
+            Well = Meteor.setTimeout(function(){
+
+                //get a new card
+                prepareCard();
+
+                $("#userAnswer").val("");
+            },1000);
+            //---------------
+
+        }else{
+            prepareCard();
+
+            $("#userAnswer").val("");
+        }   
+    }else{
+        start = startTimer();
+    }
+}
+
+
+
 
 function startTimer() {
     var start = new Date().getTime();

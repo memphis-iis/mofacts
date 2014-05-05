@@ -25,67 +25,67 @@
 	<schedule>
 		<instructions>Enter answer in the text box below each question.</instructions>
 		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 		<q>2,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
 		<q>3,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
 		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 		<q>2,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
 		<q>3,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
 		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 	</schedule>
 	<schedule>
 		<instructions>Instructions:  Enter answer in the text box below each question.  Please attempt to answer all questions presented.</instructions>
-		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+		<q>2,t
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
-		<q>2,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+		<q>0,t
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
 		<q>3,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
-		</q>
-		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
-		</q>
-		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
 		<q>2,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
-		</q>
-		<q>3,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
-		</q>
-		<q>0,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
 		<q>1,t
-			<choices>a:food,b:drink,c:the_answer,d:elephant</choices>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
+		</q>
+		<q>0,t
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
+		</q>
+		<q>3,t
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
+		</q>
+		<q>2,t
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
+		</q>
+		<q>1,t
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 	</schedule>
 	
