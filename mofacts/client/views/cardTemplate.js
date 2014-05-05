@@ -209,11 +209,12 @@ function handleUserInput( e , source ) {
         //---------
 
         //Timer
-        var elapsed = new Date().getTime()-start;
+        var elapsed = new Date().getTime()-start
+
         var elapsedOnRender = new Date().getTime()-startOnRender;
 
         //Display results
-        if (userAnswer === ""){
+        if (userAnswer === "" || source === "buttonClick"){
             elapsed = 0;
         }
 
@@ -238,6 +239,11 @@ function handleUserInput( e , source ) {
 
         //Get whether text, audio or picture
         QType = findQTypeSimpified();
+        if(source === "buttonClick"){
+            //Assuming a multiple choice question if a button is clicked for an answer
+            //add "Mc" to the log to differentiate normal questions from multiple choices ones in the log
+            QType = "Mc"+QType;
+        }
 
         //Write to Log
         Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
