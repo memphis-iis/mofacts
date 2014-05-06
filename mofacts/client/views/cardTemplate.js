@@ -185,6 +185,19 @@ Template.cardTemplate.imageCard = function() {
     return getQuestionType() === "image";
 }
 
+//determine the type of question to display
+Template.cardTemplate.test = function() {
+    return getTestType() === "t";
+}
+
+Template.cardTemplate.study = function() {
+    return getTestType() === "s";
+}
+
+Template.cardTemplate.drill = function() {
+    return getTestType() === "d";
+}
+
 /////////////////
 //  FUNCTIONS  //
 /////////////////
@@ -215,7 +228,7 @@ function handleUserInput( e , source ) {
         }
 
         //Check Correctness
-        var answer = document.getElementById('answer').textContent.toLowerCase().trim();
+        var answer = Session.get("currentAnswer")[0].toLowerCase().trim();
         var isCorrect = true;
         //---------
 
@@ -235,16 +248,18 @@ function handleUserInput( e , source ) {
         //---------
 
         //Display Correctness
-        userAnswer = userAnswer.toLowerCase().trim();
-        answer = answer.toLowerCase().trim();
+        if(getTestType() === "d"){
+            userAnswer = userAnswer.toLowerCase().trim();
+            answer = answer.toLowerCase().trim();
 
-        if (userAnswer.localeCompare(answer)) {
-            isCorrect = false;
-            incrementCurentQuestionsFailed();
-            $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
-        } else {
-            incrementCurrentQuestionSuccess();
-            $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
+            if (userAnswer.localeCompare(answer)) {
+                isCorrect = false;
+                incrementCurentQuestionsFailed();
+                $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+            } else {
+                incrementCurrentQuestionSuccess();
+                $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
+            }
         }
         //---------
 
@@ -371,7 +386,6 @@ function getQuestionType() {
 //get the question at this index
 function getStimQuestion(index) {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    //console.log(file.stimuli.setspec)
     var questionName = file.stimuli.setspec.groups[0].group[1].name[0];
     return file.stimuli.setspec.clusters[0].cluster[index][questionName];
 }
@@ -389,6 +403,8 @@ function scheduledCard() {
 	var set = file.tdfs.tutor.schedule[0].q[index];
     var setSplit = set.split(",");
 	var which = setSplit[0];
+    //get the type of test (drill, test, study)
+    Session.set("testType", setSplit[1]);
     Session.set("currentQuestion", getStimQuestion(which));
     Session.set("currentAnswer", getStimAnswer(which));
     Session.set("scheduleIndex", index + 1);
@@ -619,6 +635,7 @@ function getNextCardActRModel() {
     if (Session.get("debugging")) {    
         console.log("getting next card...");
     }
+    Session.set("testType", "t");
 
     var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
     var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
@@ -838,3 +855,6 @@ function findQTypeSimpified(){
     return QType;
 }
 
+function getTestType(){
+    return Session.get("testType");
+}

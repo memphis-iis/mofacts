@@ -11,8 +11,8 @@
 	</setspec>
 	<schedule>
 		<instructions>Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.</instructions>
-		<q>0,s</q>
-		<q>1,s</q>
+		<q>0,d</q>
+		<q>1,t</q>
 		<q>2,s</q>
 		<q>3,s</q>
 		<q>0,s</q>
