@@ -10,10 +10,10 @@
         </group>		
     </groups>
     <clusters> 
-        <cluster><file>100Hz.wav</file><frequency>100Hz</frequency></cluster>    
-        <cluster><file>250Hz.wav</file><frequency>250Hz</frequency></cluster>     
-        <cluster><file>440Hz.wav</file><frequency>440Hz</frequency></cluster>   
-        <cluster><file>1kHz.wav</file><frequency>1kHz</frequency></cluster>      	
-        <cluster><file>10kHz.wav</file><frequency>10kHz</frequency></cluster>       	
+        <cluster><file>100Hz</file><frequency>100Hz</frequency></cluster>    
+        <cluster><file>250Hz</file><frequency>250Hz</frequency></cluster>     
+        <cluster><file>440Hz</file><frequency>440Hz</frequency></cluster>   
+        <cluster><file>1kHz</file><frequency>1kHz</frequency></cluster>      	
+        <cluster><file>10kHz</file><frequency>10kHz</frequency></cluster>       	
     </clusters>
 </setspec>

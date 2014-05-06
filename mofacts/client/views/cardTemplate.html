@@ -42,7 +42,8 @@
 				{{/if}}
 				{{#if audioCard}}
 				<audio controls id="audio">
-					<source src={{currentQuestion}} type="audio/wav">
+					<source src={{currentQuestion}}.mp3 type="audio/mpeg">
+					<source src={{currentQuestion}}.wav type="audio/wav">
 						Your browser does not support the audio element.
 					</audio>
 					{{/if}}
