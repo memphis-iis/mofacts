@@ -880,3 +880,36 @@ function findQTypeSimpified(){
 function getTestType(){
     return Session.get("testType");
 }
+
+function permute (perms) {
+    var final_perm = []
+    var groups = perms.split("|");
+    for(i=0; i < groups.length; i++){
+        alert(groups[i]);
+        var indexSets = groups[i].split(",");
+        permutedArray = shuffle(indexSets);
+        for(j=0; j < permutedArray.length; j++){
+            final_perm.push(permutedArray[j]);           
+        }
+    }
+    return final_perm;
+}
+
+function shuffle(array) {
+  var currentIndex = array.length
+    , temporaryValue
+    , randomIndex
+    ;
+
+  while (0 !== currentIndex) {
+
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
