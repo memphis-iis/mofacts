@@ -68,9 +68,15 @@ Template.cardTemplate.rendered = function() {
             //check if the schedule's question tags have choices tags
 
             $("#textEntryRow").hide();
+            $("#multipleChoiceInnerContainer").remove();
+
+            $("#multipleChoiceContainer").append(
+                "<div id=\"multipleChoiceInnerContainer\"></div>"
+            );
 
             var allChoices = file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices[0];
             var choicesArray = allChoices.split(",");
+
             for (var i = 0; i < choicesArray.length; ++i) {
                 var buttonParts = choicesArray[i].split(":");
                 var label = buttonParts[0];
@@ -82,7 +88,7 @@ Template.cardTemplate.rendered = function() {
                 }
 
                 //insert all of the multiple choice buttons with the appropriate values.
-                $("#multipleChoiceContainer").append(
+                $("#multipleChoiceInnerContainer").append(
                     "<div class=\"col-lg-6\">" +
                         "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
                             label + ": " + value + 
