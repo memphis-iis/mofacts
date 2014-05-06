@@ -11,80 +11,130 @@
 	</setspec>
 	<schedule>
 		<instructions>Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.</instructions>
-		<q>0,d</q>
-		<q>1,t</q>
-		<q>2,s</q>
-		<q>3,s</q>
-		<q>0,s</q>
-		<q>1,s</q>
-		<q>2,s</q>
-		<q>3,s</q>
-		<q>0,s</q>
-		<q>1,s</q>
+		<q>
+			<info>0,t</info>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
+		</q>
+		<q>
+			<info>1,t</info>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
+		</q>
+		<q>
+			<info>2,t</info>
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
+		</q>
+		<q>
+			<info>3,t</info>
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
+		</q>
+		<q>
+			<info>0,t</info>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
+		</q>
+		<q>
+			<info>1,t</info>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
+		</q>
+		<q>
+			<info>2,t</info>
+			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
+		</q>
+		<q>
+			<info>3,t</info>
+			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
+		</q>
+		<q>
+			<info>0,t</info>
+			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
+		</q>
+		<q>
+			<info>1,t</info>
+			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
+		</q>
 	</schedule>
 	<schedule>
 		<instructions>Enter answer in the text box below each question.</instructions>
-		<q>0,t
+		<q>
+			<info>0,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
-		<q>2,t
+		<q>
+			<info>2,t</info>
 			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
-		<q>3,t
+		<q>
+			<info>3,t</info>
 			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
-		<q>0,t
+		<q>
+			<info>0,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
-		<q>2,t
+		<q>
+			<info>2,t</info>
 			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
-		<q>3,t
+		<q>
+			<info>3,t</info>
 			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
-		<q>0,t
+		<q>
+			<info>0,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 	</schedule>
 	<schedule>
 		<instructions>Instructions:  Enter answer in the text box below each question.  Please attempt to answer all questions presented.</instructions>
-		<q>2,t
+		<q>
+			<info>2,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
-		<q>0,t
+		<q>
+			<info>0,t</info>
 			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
-		<q>3,t
+		<q>
+			<info>3,t</info>
 			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
-		<q>2,t
+		<q>
+			<info>2,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
-		<q>0,t
+		<q>
+			<info>0,t</info>
 			<choices>A:the_answer,B:elephant,C:food,D:drink</choices>
 		</q>
-		<q>3,t
+		<q>
+			<info>3,t</info>
 			<choices>A:elephant,B:food,C:drink,D:the_answer</choices>
 		</q>
-		<q>2,t
+		<q>
+			<info>2,t</info>
 			<choices>A:food,B:drink,C:the_answer,D:elephant</choices>
 		</q>
-		<q>1,t
+		<q>
+			<info>1,t</info>
 			<choices>A:drink,B:the_answer,C:elephant,D:food</choices>
 		</q>
 	</schedule>

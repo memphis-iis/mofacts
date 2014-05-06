@@ -62,6 +62,8 @@ Template.cardTemplate.rendered = function() {
 
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
+        console.log(file);
+
         if (file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices != undefined) {
             //check if the schedule's question tags have choices tags
 
@@ -254,10 +256,14 @@ function handleUserInput( e , source ) {
 
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
-                incrementCurentQuestionsFailed();
+                if (Session.get("isModeled")) {
+                    incrementCurentQuestionsFailed();
+                }
                 $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
             } else {
-                incrementCurrentQuestionSuccess();
+                if (Session.get("isModeled")) {
+                    incrementCurrentQuestionSuccess();
+                }
                 $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
             }
         }
@@ -281,8 +287,10 @@ function handleUserInput( e , source ) {
         //record progress in UserProgress collection.
         recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
-        incrementNumQuestionsAnswered();
-        calculateCardProbabilities();
+        if (Session.get("isModeled")) {
+            incrementNumQuestionsAnswered();
+            calculateCardProbabilities();
+        }
 
         //Reset timer for next question
         start = startTimer();
@@ -334,6 +342,7 @@ function prepareCard() {
 		Session.set("isScheduledTest", true);
         if (Session.get("scheduleIndex") === undefined) {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
+            //Session.set("currentScheduleNumber",0);
         }
 		sched = getCurrentScheduleNumber();
 		console.log("current schedule number: " + sched);
@@ -398,16 +407,23 @@ function getStimAnswer(index) {
 }
 
 function scheduledCard() {
-    var index = Session.get("scheduleIndex");
+    console.log("scheduleIndex...");
+
+    var questionIndex = Session.get("scheduleIndex");
+    var scheduleIndex = getCurrentScheduleNumber();
+
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-	var set = file.tdfs.tutor.schedule[0].q[index];
-    var setSplit = set.split(",");
-	var which = setSplit[0];
+	var info = file.tdfs.tutor.schedule[scheduleIndex].q[questionIndex].info[0]; //get the text out of the object with [0]
+
+    var splitInfo = info.split(",");
+	
     //get the type of test (drill, test, study)
-    Session.set("testType", setSplit[1]);
-    Session.set("currentQuestion", getStimQuestion(which));
-    Session.set("currentAnswer", getStimAnswer(which));
-    Session.set("scheduleIndex", index + 1);
+    Session.set("testType", splitInfo[1]);
+    Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
+    Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
+    Session.set("scheduleIndex", questionIndex + 1);
+
+    console.log("...scheduleIndex");
 }
 
 function getCurrentTestName() {
@@ -744,7 +760,6 @@ function introduceNextCard( index ) {
     setNextCardInfo(index);
 }
 
-
 function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) {
     if (Session.get("debugging")) {
         console.log("selectHighestProbabilityAlreadyIntroducedCardLessThan85");
@@ -799,7 +814,6 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
     return indexToReturn;
 }
 
-
 function timeoutfunction(index, timeoutNum){
 
     var counter = UserProgress.find(
@@ -825,9 +839,12 @@ function timeoutfunction(index, timeoutNum){
 
                 recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
-                incrementCurentQuestionsFailed();
-                incrementNumQuestionsAnswered();
-                calculateCardProbabilities();
+                if (Session.get("isModeled")) {
+                    incrementCurentQuestionsFailed();
+                    incrementNumQuestionsAnswered();
+                    calculateCardProbabilities();
+                }
+                
 
                 prepareCard();
             }else{
@@ -837,7 +854,6 @@ function timeoutfunction(index, timeoutNum){
             
     }, delay);
 }
-
 
 function findQTypeSimpified(){
 
