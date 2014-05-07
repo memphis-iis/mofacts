@@ -257,7 +257,7 @@ function handleUserInput( e , source ) {
         //---------
 
         //Display Correctness
-        if(getTestType() === "d"){
+        if ( getTestType() !== "s" ) {
             userAnswer = userAnswer.toLowerCase().trim();
             answer = answer.toLowerCase().trim();
 
@@ -266,12 +266,16 @@ function handleUserInput( e , source ) {
                 if (Session.get("isModeled")) {
                     incrementCurentQuestionsFailed();
                 }
-                $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+                if (getTestType() === "d") {
+                    $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+                }
             } else {
                 if (Session.get("isModeled")) {
                     incrementCurrentQuestionSuccess();
                 }
-                $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
+                if (getTestType() === "d") {
+                    $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
+                }
             }
         }
         //---------
