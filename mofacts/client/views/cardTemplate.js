@@ -4,6 +4,7 @@
 
 var timeoutName;
 var timeoutCount = -1;
+var permuted = [];
 
 Template.cardTemplate.events({
 
@@ -352,8 +353,8 @@ function prepareCard() {
         }
 		sched = getCurrentScheduleNumber();
 		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.schedule[sched].permute[0] !== undefined){
-		    var permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]);
-			alert(permuted);
+		    permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]); //If we're using permutations, permute the specified groups/items
+
 		}
 		console.log("current schedule number: " + sched);
 		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
@@ -421,9 +422,15 @@ function scheduledCard() {
 
     var questionIndex = Session.get("scheduleIndex");
     var scheduleIndex = getCurrentScheduleNumber();
-
+	var questionNumber;
+	if (permuted.length > 0){ //If we're using permutations, get index by perm array value (get the permuted item)
+		questionNumber = permuted[questionIndex];
+	}
+	else {
+		questionNumber = questionIndex;
+	}
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-	var info = file.tdfs.tutor.schedule[scheduleIndex].q[questionIndex].info[0]; //get the text out of the object with [0]
+	var info = file.tdfs.tutor.schedule[scheduleIndex].q[questionNumber].info[0]; //get the text out of the object with [0]
 
     var splitInfo = info.split(",");
 	
@@ -893,7 +900,8 @@ function permute (perms) {
         var indexSets = groups[i].split(",");
         permutedArray = shuffle(indexSets);
         for(j=0; j < permutedArray.length; j++){
-            final_perm.push(permutedArray[j]);           
+            final_perm.push(permutedArray[j]);
+          
         }
     }
     return final_perm;
