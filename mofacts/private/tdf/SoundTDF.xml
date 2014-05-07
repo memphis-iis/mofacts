@@ -8,7 +8,7 @@
                 <lfparameter>0.80</lfparameter>
                    <eeglogged>true</eeglogged>
         <isModeled>true</isModeled>
-        <timeoutInSeconds>30</timeoutInSeconds>
+        <timeoutInSeconds>15</timeoutInSeconds>
 	</setspec>
 	<deliveryparams>
             <verticalalign>true</verticalalign>

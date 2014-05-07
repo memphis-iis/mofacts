@@ -8,7 +8,7 @@
 		<lfparameter>0.80</lfparameter>
 		<eeglogged>true</eeglogged>
 		<isModeled>false</isModeled>
-		<timeoutInSeconds>30</timeoutInSeconds>
+		<timeoutInSeconds>15</timeoutInSeconds>
 	</setspec>
 	
 	<schedule>
