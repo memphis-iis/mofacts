@@ -291,8 +291,11 @@ function handleUserInput( e , source ) {
             QType = "Mc"+QType;
         }
 
+        //Gets the types type; study, drill, or test
+        var TType = getTestType();
+
         //Write to Log
-        Meteor.call("writing",index + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
+        Meteor.call("writing",index + ";" + TType + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
             ";" + elapsed + "::" );
 
         //record progress in UserProgress collection.
