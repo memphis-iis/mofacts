@@ -351,6 +351,10 @@ function prepareCard() {
             //Session.set("currentScheduleNumber",0);
         }
 		sched = getCurrentScheduleNumber();
+		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.schedule[sched].permute[0] !== undefined){
+		    var permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]);
+			alert(permuted);
+		}
 		console.log("current schedule number: " + sched);
 		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
 			Router.go("stats");
@@ -885,7 +889,7 @@ function permute (perms) {
     var final_perm = []
     var groups = perms.split("|");
     for(i=0; i < groups.length; i++){
-        alert(groups[i]);
+
         var indexSets = groups[i].split(",");
         permutedArray = shuffle(indexSets);
         for(j=0; j < permutedArray.length; j++){
