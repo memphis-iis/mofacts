@@ -842,8 +842,12 @@ function timeoutfunction(index, timeoutNum){
     });
 
     //needs to be in tdf someday
-    //Current 30 seconds 
-    var delay = 30 * 1000;
+    //the timeout in Seconds is multipled by 1000 to conver to milliseconds
+    
+    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
+    
+    var delay = tis * 1000;
 
     timeoutName = Meteor.setTimeout(function(){
 
