@@ -73,11 +73,20 @@ Meteor.startup(function () {
 	buildSchedule();
 });
 
+
+function parseXML(xml) {
+    var json = {};
+    xml2js.parseString(xml, function (err, result) {
+        json = result;
+    });
+    return json;
+}
+
 function getStimJSON(fileName) {
 	var future = new Future();
 	Assets.getText(fileName, function(err, data){
 		if (err) throw err;
-		var json = XML2JS.parse(data);
+		var json = parseXML(data);
 		future.return(json);
 	});
 	return future.wait();
@@ -87,4 +96,3 @@ function getStimJSON(fileName) {
 function buildSchedule() {
         	
 }
-

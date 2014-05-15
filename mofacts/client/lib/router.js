@@ -1,6 +1,6 @@
 Router.configure({
 //	autoRender: false,
-	layoutTemplate: 'baseTemplate'
+	layoutTemplate: 'DefaultLayout'
 });
 
 Router.map(function() {
