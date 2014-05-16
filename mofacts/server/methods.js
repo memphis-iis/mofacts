@@ -32,7 +32,8 @@ Meteor.startup(function () {
 		Tdfs.insert({fileName: fileName, tdfs: json});
 		
 	}
-		Meteor.methods({
+
+    Meteor.methods({
 
 		//Added addition stuff to Log
 		writing: function(stuff){
