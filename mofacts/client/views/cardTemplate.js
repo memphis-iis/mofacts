@@ -298,6 +298,17 @@ function handleUserInput( e , source ) {
         Meteor.call("writing",index + ";" + TType + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
             ";" + elapsed + "::" );
 
+        Meteor.call("userTime", Session.get("currentTest"), {
+            index: getIndex(),
+            ttype: TType,
+            qtype: findQTypeSimpified(),
+            answer: userAnswer,
+            isCorrect: isCorrect,
+            elapsedOnRender: elapsedOnRender,
+            elapsed: elapsed,
+            action: "answer"
+        });
+
         //record progress in UserProgress collection.
         recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
@@ -864,6 +875,13 @@ function timeoutfunction(index, timeoutNum){
                 Meteor.call("writing",getIndex() + ";" + 
                     findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
                     ";" + 0 + "::" );
+                
+                Meteor.call("userTime", Session.get("currentTest"), {
+                    index: getIndex(),
+                    qtype: findQTypeSimpified(),
+                    action: "[TIMEOUT]",
+                    delay: delay
+                });
 
                 recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 

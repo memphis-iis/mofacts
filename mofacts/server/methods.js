@@ -34,6 +34,22 @@ Meteor.startup(function () {
 	}
 
     Meteor.methods({
+        
+        //New functionality for logging to the DB
+        userTime: function(experiment, objectToLog) {
+            //Make sure we know when the server thought we were logging
+            objectToLog["serverSideTimestamp"] = Date.now();
+            
+            //We want to push the given object to an array named the
+            //as our current test/experiment
+            var action = {$push: {}};
+            action["$push"][experiment] = objectToLog;
+            UserTimesLog.update(
+                { _id: Meteor.userId() }, 
+                action,
+                { upsert: true }
+            );
+        },
 
 		//Added addition stuff to Log
 		writing: function(stuff){

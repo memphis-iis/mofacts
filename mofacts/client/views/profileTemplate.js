@@ -32,6 +32,10 @@ Template.profileTemplate.events({
         Meteor.call("naming", event.target.name);
         Meteor.call("timestamp");
         Meteor.call("writing", Meteor.user().username + "::" + event.target.name + "::");
+        Meteor.call("userTime", Session.get("currentTest"), {
+            event: "profile test selection",
+            target: event.target.name
+        });
         //---------
 
         //Display Current Test in Console Log
