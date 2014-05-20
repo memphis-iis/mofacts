@@ -53,86 +53,7 @@ Template.cardTemplate.events({
 });
 
 Template.cardTemplate.rendered = function() {
-
-
-    if ( Session.get("isScheduledTest") ) {
-
-        var scheduleNumber = getCurrentScheduleNumber();
-        //question index = sheduleIndex -1 because it has already been incremented for the next card at this point.
-        var questionIndex = Session.get("scheduleIndex") - 1;
-
-        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-
-        console.log(file);
-
-        if (file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices != undefined) {
-            //check if the schedule's question tags have choices tags
-
-            $("#textEntryRow").hide();
-            $("#multipleChoiceInnerContainer").remove();
-
-            $("#multipleChoiceContainer").append(
-                "<div id=\"multipleChoiceInnerContainer\"></div>"
-            );
-
-            var allChoices = file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices[0];
-            var choicesArray = allChoices.split(",");
-
-            for (var i = 0; i < choicesArray.length; ++i) {
-                var buttonParts = choicesArray[i].split(":");
-                var label = buttonParts[0];
-                var value = buttonParts[1];
-
-                //insert the real answer for this dummy value from the tdf.
-                if(value == "the_answer") {
-                    value = Session.get("currentAnswer");
-                }
-
-                //insert all of the multiple choice buttons with the appropriate values.
-                $("#multipleChoiceInnerContainer").append(
-                    "<div class=\"col-lg-6\">" +
-                        "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
-                            label + ": " + value + 
-                        "</button>" +
-                    "</div>"
-                );
-            }
-        }
-    }
-
-    startOnRender = startTimer();
-    start = 0;
-
-    //for debugging, allow one to turn on or off the timeout code.
-    //Note to Future Self : Look up clearTimeout(timeoutObject);
-
-    //console.log("Index: " + getIndex());
-
-    var AllowTimeouts = true;
-
-    if(AllowTimeouts){
-        timeoutCount++;
-        var counter = UserProgress.find(
-            { _id: Meteor.userId() },
-            {progressDataArray: 1});
-
-        counter.forEach(function (Object){
-            length = Object.progressDataArray.length;
-        });
-
-        timeoutfunction(length, timeoutCount);
-    }
-
-    if(getQuestionType() === "sound"){
-        console.log("Sound")
-        document.getElementById('audio').play();
-    }
-
-
-    if (Session.get("showOverlearningText") == true) {
-        $("#overlearningRow").show();
-    }
-
+	newQuestionHandler();
 }
 
 /////////////////
@@ -211,6 +132,90 @@ Template.cardTemplate.drill = function() {
 //  FUNCTIONS  //
 /////////////////
 
+function newQuestionHandler(){
+
+
+    if ( Session.get("isScheduledTest") ) {
+
+        var scheduleNumber = getCurrentScheduleNumber();
+        //question index = sheduleIndex -1 because it has already been incremented for the next card at this point.
+        var questionIndex = Session.get("scheduleIndex") - 1;
+
+        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+
+        console.log(file + "is a scheduled test");
+
+        if (file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices != undefined) {
+            //check if the schedule's question tags have choices tags
+
+            $("#textEntryRow").hide();
+            $("#multipleChoiceInnerContainer").remove();
+
+            $("#multipleChoiceContainer").append(
+                "<div id=\"multipleChoiceInnerContainer\"></div>"
+            );
+
+            var allChoices = file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices[0];
+            var choicesArray = allChoices.split(",");
+
+            for (var i = 0; i < choicesArray.length; ++i) {
+                var buttonParts = choicesArray[i].split(":");
+                var label = buttonParts[0];
+                var value = buttonParts[1];
+
+                //insert the real answer for this dummy value from the tdf.
+                if(value == "the_answer") {
+                    value = Session.get("currentAnswer");
+                }
+
+                //insert all of the multiple choice buttons with the appropriate values.
+                $("#multipleChoiceInnerContainer").append(
+                    "<div class=\"col-lg-6\">" +
+                        "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
+                            label + ": " + value + 
+                        "</button>" +
+                    "</div>"
+                );
+            }
+        }
+    }
+
+    startOnRender = startTimer();
+    start = 0;
+
+    //for debugging, allow one to turn on or off the timeout code.
+    //Note to Future Self : Look up clearTimeout(timeoutObject);
+
+    //console.log("Index: " + getIndex());
+
+    var AllowTimeouts = true;
+
+    if(AllowTimeouts){
+        timeoutCount++;
+        var counter = UserProgress.find(
+            { _id: Meteor.userId() },
+            {progressDataArray: 1});
+
+        counter.forEach(function (Object){
+            length = Object.progressDataArray.length;
+        });
+
+        timeoutfunction(length, timeoutCount);
+    }
+
+    if(getQuestionType() === "sound"){
+        console.log("Sound")
+        document.getElementById('audio').play();
+    }
+
+
+    if (Session.get("showOverlearningText") == true) {
+        $("#overlearningRow").show();
+    }
+
+	
+}
+
 function handleUserInput( e , source ) {
 
 
@@ -287,7 +292,7 @@ function handleUserInput( e , source ) {
         QType = findQTypeSimpified();
         if(source === "buttonClick"){
             //Assuming a multiple choice question if a button is clicked for an answer
-            //add "Mc" to the log to differentiate normal questions from multiple choices ones in the log
+            //add "Mc" to the log to differentiate normal questions from multiple ones ones in the log
             QType = "Mc"+QType;
         }
 
@@ -328,6 +333,7 @@ function handleUserInput( e , source ) {
             Meteor.setTimeout(function(){
 
                 //get a new card
+				
                 prepareCard();
 
                 $("#userAnswer").val("");
@@ -353,7 +359,7 @@ function startTimer() {
 }
 
 function prepareCard() {
-
+	console.log("entry");
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
     
@@ -370,22 +376,29 @@ function prepareCard() {
             //Session.set("currentScheduleNumber",0);
         }
 		sched = getCurrentScheduleNumber();
-		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.schedule[sched].permute[0] !== undefined){
-		    permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]); //If we're using permutations, permute the specified groups/items
-
-		}
-		console.log("current schedule number: " + sched);
+		console.log(sched + " is current sched number");
 		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
 			Router.go("stats");
+			return;
 		}
+		console.log(Session.get("scheduleIndex") + "schedule index before permute");
+		
+		
+		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.schedule[sched].permute !== undefined){
+		    
+			permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]); //If we're using permutations, permute the specified groups/items
+
+		}
+	
+
         if (Session.get("scheduleIndex") === file.tdfs.tutor.schedule[sched].q.length){
             //if we are at the end of this schedule
 			Session.set("scheduleIndex", 0);
 			Session.set("currentScheduleNumber", sched + 1);
-			
+			console.log("recurse");
 		//	Router.go("instructions");
 			prepareCard();
-			
+				
 			/*
             Meteor.call("addtime");
             Router.go("stats"); //Send user to stats page after test finishes
@@ -395,12 +408,13 @@ function prepareCard() {
         }  
 		
 		else {
-            scheduledCard();  
+            scheduledCard();
+		  
         }      
     } else {
         Session.set("isScheduledTest", false);
         randomCard();    
-
+		
     }
 }
 
@@ -415,6 +429,7 @@ function randomCard() {
     //set the question and answer
 	Session.set("currentQuestion", getStimQuestion(nextCardIndex));
 	Session.set("currentAnswer", getStimAnswer(nextCardIndex));
+	newQuestionHandler();
 }
 
 function getQuestionType() {
@@ -448,6 +463,7 @@ function scheduledCard() {
 		questionNumber = questionIndex;
 	}
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+	console.log(scheduleIndex + " schedule index before card");
 	var info = file.tdfs.tutor.schedule[scheduleIndex].q[questionNumber].info[0]; //get the text out of the object with [0]
 
     var splitInfo = info.split(",");
@@ -457,6 +473,7 @@ function scheduledCard() {
     Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
     Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
     Session.set("scheduleIndex", questionIndex + 1);
+	newQuestionHandler();
 
     console.log("...scheduleIndex");
 }
