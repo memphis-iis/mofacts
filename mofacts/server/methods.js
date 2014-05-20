@@ -40,10 +40,12 @@ Meteor.startup(function () {
             //Make sure we know when the server thought we were logging
             objectToLog["serverSideTimestamp"] = Date.now();
             
+            var experiment_key = (experiment + "").replace(/\./g, "_");
+            
             //We want to push the given object to an array named the
             //as our current test/experiment
             var action = {$push: {}};
-            action["$push"][experiment] = objectToLog;
+            action["$push"][experiment_key] = objectToLog;
             UserTimesLog.update(
                 { _id: Meteor.userId() }, 
                 action,
