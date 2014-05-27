@@ -9,30 +9,24 @@
             <type>text</type> 
         </group> 
     </groups> 
-  
 
- <clusters> 
-
-
-  
-<cluster><word>Asante</word><answer>Thank You</answer></cluster> 
-<cluster><word>chakula</word><answer>food</answer></cluster> 
-<cluster><word>Habari</word><answer>Hello</answer></cluster> 
-<cluster><word>manjano</word><answer>yellow</answer></cluster> 
-<cluster><word>leo</word><answer>today</answer></cluster> 
-<cluster><word>tano</word><answer>five</answer></cluster> 
-<cluster><word>kuku</word><answer>chicken</answer></cluster> 
-<cluster><word>samaki</word><answer>fish</answer></cluster> 
-<cluster><word>Kwaheri</word><answer>Goodbye</answer></cluster> 
-<cluster><word>mamba</word><answer>alligator</answer></cluster> 
-<cluster><word>tembo</word><answer>elephant</answer></cluster> 
-<cluster><word>bafu</word><answer>bathroom</answer></cluster> 
-<cluster><word>ukuta</word><answer>wall</answer></cluster> 
-<cluster><word>Mimi</word><answer>I</answer><answer>i</answer></cluster> 
-<cluster><word>rafiki</word><answer>friend</answer></cluster> 
-<cluster><word>viatu</word><answer>shoes</answer><answer>shoe</answer></cluster> 
-<cluster><word>babu</word><answer>grandfather</answer></cluster> 
-  
-  
-    </clusters> 
+    <clusters> 
+        <cluster><word>Asante</word><answer>Thank You</answer></cluster> 
+        <cluster><word>chakula</word><answer>food</answer></cluster> 
+        <cluster><word>Habari</word><answer>Hello</answer></cluster> 
+        <cluster><word>manjano</word><answer>yellow</answer></cluster> 
+        <cluster><word>leo</word><answer>today</answer></cluster> 
+        <cluster><word>tano</word><answer>five</answer></cluster> 
+        <cluster><word>kuku</word><answer>chicken</answer></cluster> 
+        <cluster><word>samaki</word><answer>fish</answer></cluster> 
+        <cluster><word>Kwaheri</word><answer>Goodbye</answer></cluster> 
+        <cluster><word>mamba</word><answer>alligator</answer></cluster> 
+        <cluster><word>tembo</word><answer>elephant</answer></cluster> 
+        <cluster><word>bafu</word><answer>bathroom</answer></cluster> 
+        <cluster><word>ukuta</word><answer>wall</answer></cluster> 
+        <cluster><word>Mimi</word><answer>I</answer><answer>i</answer></cluster> 
+        <cluster><word>rafiki</word><answer>friend</answer></cluster> 
+        <cluster><word>viatu</word><answer>shoes</answer><answer>shoe</answer></cluster> 
+        <cluster><word>babu</word><answer>grandfather</answer></cluster> 
+    </clusters>
 </setspec>
