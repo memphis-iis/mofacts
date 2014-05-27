@@ -39,7 +39,7 @@ resovles to the server in question.  On a Debian server, the default site
 can be configured by modifying `/etc/apache2/sites-enabled/000-default.conf`
 and adding:
 
-    <VirtualHost `*`:80>
+    <VirtualHost *:80>
         ServerName mofacts.optimallearning.org
         ProxyPass / http://127.0.0.1:3000/
         ProxyPassReverse / http://127.0.0.1:3000/
@@ -144,12 +144,12 @@ Now that the bundle has been extracted, any node.js packages requiring
 native OS support need to be rebuilt.  MoFaCT doesn't use of packages
 like that directly, but meteor uses the `fibers` package:
 
-    $ sudo rm -fr bundle/programs/server/node`_`modules/fibers
+    $ sudo rm -fr bundle/programs/server/node_modules/fibers
     $ sudo npm install fibers@1.0.1
     
 As a final step, the ownership of all involved files should be changed.
 
-    $ sudo chown -R www-data:www-data `*`
+    $ sudo chown -R www-data:www-data *
 
 
 Execution
