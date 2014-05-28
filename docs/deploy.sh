@@ -10,7 +10,7 @@ EXEC_USER=www-data
 
 #parameters for meteor
 export MONGO_URL='mongodb://localhost:27017/MoFaCT'
-export ROOT_URL='http://optimallearning.org'
+export ROOT_URL='http://mofacts.optimallearning.org'
 export BIND_IP='0.0.0.0'
 export PORT='3000'
 
