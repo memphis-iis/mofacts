@@ -11,6 +11,19 @@ requirements section and create your own script for deployment and
 execution.  The deploy.sh section describes the script in this directory
 provided for your convenience.
 
+*_Important:_* This document is for setting up a new server from scratch
+and documenting what was done for optimallearning.org.  If you are working
+on the optimallearning.org server, then you probably only care about
+deploying a new version of the MoFaCT system:
+
+ * Create a bundle on your dev system named mofacts.tar.gz
+ * Copy it to /var/www/mofacts/mofacts.tar.gz on optimallearning.org
+ * Log in to optimallearning.org, navigate to /var/www/mofacts, and
+   run ./deploy.sh
+   
+You'll note that these three steps are spelled out in detail in the
+deployment secction below.
+
 
 Requirements
 ---------------------------
