@@ -145,7 +145,7 @@ function newQuestionHandler(){
 
         console.log(file + "is a scheduled test");
 
-        if (file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices != undefined) {
+        if (file.tdfs.tutor.unit[scheduleNumber].schedule[0].q[questionIndex].choices != undefined) {
             //check if the schedule's question tags have choices tags
 
             $("#textEntryRow").hide();
@@ -155,7 +155,7 @@ function newQuestionHandler(){
                 "<div id=\"multipleChoiceInnerContainer\"></div>"
             );
 
-            var allChoices = file.tdfs.tutor.schedule[scheduleNumber].q[questionIndex].choices[0];
+            var allChoices = file.tdfs.tutor.unit[scheduleNumber].schedule[0].q[questionIndex].choices[0];
             var choicesArray = allChoices.split(",");
 
             for (var i = 0; i < choicesArray.length; ++i) {
@@ -369,7 +369,7 @@ function prepareCard() {
     }
     
 
-    if (file.tdfs.tutor.schedule != undefined) {
+    if (file.tdfs.tutor.unit != undefined) {
 		Session.set("isScheduledTest", true);
         if (Session.get("scheduleIndex") === undefined) {
             Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
@@ -377,21 +377,21 @@ function prepareCard() {
         }
 		sched = getCurrentScheduleNumber();
 		console.log(sched + " is current sched number");
-		if (file.tdfs.tutor.schedule[sched] === undefined) { //check to see if we've iterated over all schedules
+		if (file.tdfs.tutor.unit[sched] === undefined) { //check to see if we've iterated over all schedules
 			Router.go("stats");
 			return;
 		}
 		console.log(Session.get("scheduleIndex") + "schedule index before permute");
 		
 		
-		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.schedule[sched].permute !== undefined){
+		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.unit[sched].schedule[0].permute !== undefined){
 		    
-			permuted = permute(file.tdfs.tutor.schedule[sched].permute[0]); //If we're using permutations, permute the specified groups/items
+			permuted = permute(file.tdfs.tutor.unit[sched].schedule[0].permute[0]); //If we're using permutations, permute the specified groups/items
 
 		}
 	
 
-        if (Session.get("scheduleIndex") === file.tdfs.tutor.schedule[sched].q.length){
+        if (Session.get("scheduleIndex") === file.tdfs.tutor.unit[sched].schedule[0].q.length){
             //if we are at the end of this schedule
 			Session.set("scheduleIndex", 0);
 			Session.set("currentScheduleNumber", sched + 1);
@@ -464,7 +464,7 @@ function scheduledCard() {
 	}
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 	console.log(scheduleIndex + " schedule index before card");
-	var info = file.tdfs.tutor.schedule[scheduleIndex].q[questionNumber].info[0]; //get the text out of the object with [0]
+	var info = file.tdfs.tutor.unit[scheduleIndex].schedule[0].q[questionNumber].info[0]; //get the text out of the object with [0]
 
     var splitInfo = info.split(",");
 	
@@ -886,33 +886,33 @@ function timeoutfunction(index, timeoutNum){
 
     timeoutName = Meteor.setTimeout(function(){
 
-            if(index === length && timeoutNum > 0){
-                console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
+        if(index === length && timeoutNum > 0){
+            console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
-                Meteor.call("writing",getIndex() + ";" + 
-                    findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
-                    ";" + 0 + "::" );
-                
-                Meteor.call("userTime", Session.get("currentTest"), {
-                    index: getIndex(),
-                    qtype: findQTypeSimpified(),
-                    action: "[TIMEOUT]",
-                    delay: delay
-                });
+            Meteor.call("writing",getIndex() + ";" + 
+                findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
+                ";" + 0 + "::" );
+            
+            Meteor.call("userTime", Session.get("currentTest"), {
+                index: getIndex(),
+                qtype: findQTypeSimpified(),
+                action: "[TIMEOUT]",
+                delay: delay
+            });
 
-                recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
+            recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
-                if (Session.get("isModeled")) {
-                    incrementCurentQuestionsFailed();
-                    incrementNumQuestionsAnswered();
-                    calculateCardProbabilities();
-                }
-                
-
-                prepareCard();
-            }else{
-                //Do Nothing
+            if (Session.get("isModeled")) {
+                incrementCurentQuestionsFailed();
+                incrementNumQuestionsAnswered();
+                calculateCardProbabilities();
             }
+            
+
+            prepareCard();
+        }else{
+            //Do Nothing
+        }
 
             
     }, delay);
