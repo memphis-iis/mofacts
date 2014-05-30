@@ -2,6 +2,10 @@
 //  EVENTS  //
 //////////////
 
+//TODO: Search all files for `the_answer` and `schedule`
+//TODO: examine all console.log statements
+//TODO: test all 3 TDF's
+
 var timeoutName;
 var timeoutCount = -1;
 var permuted = [];
@@ -144,18 +148,22 @@ function newQuestionHandler(){
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
         console.log(file + "is a scheduled test");
+        
+        var currUnit = file.tdfs.tutor.unit[unitNumber];
 
-        if (file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices != undefined) {
-            //check if the unit's question tags have choices tags
-
+        if (currUnit.buttontrial && currUnit.buttontrial.length && currUnit.buttontrial[0] === "true") {
             $("#textEntryRow").hide();
             $("#multipleChoiceInnerContainer").remove();
 
             $("#multipleChoiceContainer").append(
                 "<div id=\"multipleChoiceInnerContainer\"></div>"
             );
-
-            var allChoices = file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices[0];
+            
+            //TODO: this comes from the stim file - from the cluster
+            var cluster = getStimCluster(getCurrentClusterIndex());
+            var allChoices = "A:the_answer,B:Hello,C:World";
+            
+            //var allChoices = file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices[0];
             var choicesArray = allChoices.split(",");
 
             for (var i = 0; i < choicesArray.length; ++i) {
@@ -185,8 +193,6 @@ function newQuestionHandler(){
 
     //for debugging, allow one to turn on or off the timeout code.
     //Note to Future Self : Look up clearTimeout(timeoutObject);
-
-    //console.log("Index: " + getIndex());
 
     var AllowTimeouts = true;
 
@@ -286,7 +292,7 @@ function handleUserInput( e , source ) {
         //---------
 
         //Get question Number
-        index = getIndex();
+        var index = getCurrentClusterIndex();
 
         //Get whether text, audio or picture
         QType = findQTypeSimpified();
@@ -304,7 +310,7 @@ function handleUserInput( e , source ) {
             ";" + elapsed + "::" );
 
         Meteor.call("userTime", Session.get("currentTest"), {
-            index: getIndex(),
+            index: index,
             ttype: TType,
             qtype: findQTypeSimpified(),
             answer: userAnswer,
@@ -398,7 +404,6 @@ function prepareCard() {
         }  
 		else {
             scheduledCard();
-		  
         }      
     }
     else {
@@ -416,27 +421,45 @@ function randomCard() {
     //get a valid index
 	var nextCardIndex = Math.floor((Math.random() * size));
     //set the question and answer
+    Session.set("clusterIndex", nextCardIndex);
+    Session.set("testType", "t"); //No test type given
 	Session.set("currentQuestion", getStimQuestion(nextCardIndex));
 	Session.set("currentAnswer", getStimAnswer(nextCardIndex));
 	newQuestionHandler();
 }
 
+function getStimCluster(index) {
+    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    return file.stimuli.setspec.clusters[0].cluster[index];
+}
+
+//Return the current question type
 function getQuestionType() {
-    return Stimuli.findOne({fileName: getCurrentTestName()}).stimuli.setspec.groups[0].group[1].type[0];
+    var type = "text"; //Default type
+        
+    //If we get called too soon, we just use the first cluster
+    var clusterIndex = getCurrentClusterIndex();
+    if (!clusterIndex && clusterIndex !== 0)
+        clusterIndex = 0;
+        
+    var cluster = getStimCluster(clusterIndex);
+    console.log("Question Type Cluster");
+    console.log(cluster);
+    if (cluster.displayType) {
+        type = cluster.displayType;
+    }
+    
+    return type;
 }
 
 //get the question at this index
 function getStimQuestion(index) {
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var questionName = file.stimuli.setspec.groups[0].group[1].name[0];
-    return file.stimuli.setspec.clusters[0].cluster[index][questionName];
+    return getStimCluster(index).display;
 }
 
 //get the answer at this index
 function getStimAnswer(index) {
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var answerName = file.stimuli.setspec.groups[0].group[0].name[0];
-    return file.stimuli.setspec.clusters[0].cluster[index][answerName];
+    return getStimCluster(index).response;
 }
 
 function scheduledCard() {
@@ -461,6 +484,7 @@ function scheduledCard() {
     var splitInfo = info.split(",");
 	
     //get the type of test (drill, test, study)
+    Session.set("clusterIndex", splitInfo[0]);
     Session.set("testType", splitInfo[1]);
     Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
     Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
@@ -484,18 +508,8 @@ function getCurrentTdfName() {
 	return Session.get("currentTdfName");
 }
 
-function getIndex(){
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
-    var currentQ = Session.get("currentQuestion");
-
-    for (var i = 0; i < file.stimuli.setspec.clusters[0].cluster.length; i++) {
-       var tempQ = getStimQuestion(i);
-
-        if(tempQ.toString() == currentQ.toString()){
-            return i;
-        }
-    };
-    
+function getCurrentClusterIndex() {
+    return Session.get("clusterIndex");
 }
 
 function recordProgress ( questionIndex, question, answer, userAnswer ) {
@@ -525,14 +539,15 @@ function recordCurrentTestData() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var currentTestMode;
 
+    //TODO: this is wrong? 
     if (file.stimuli.setspec.schedule != undefined) {
         currentTestMode = "BASIC SCHEDULE";
-    } else {
+    }
+    else {
         currentTestMode = "RANDOM";
     }
 
     if (Meteor.userId() !== null) {
-
         //update the currentTest and mode
         UserProgress.update(
             { _id: Meteor.userId() }, //where _id === Meteor.userId()
@@ -595,13 +610,13 @@ function incrementNumQuestionsAnswered() {
 
 function incrementCurrentQuestionSuccess() {
     var incModifier = {$inc: {}};
-    incModifier.$inc["cardsArray." + (getIndex()) + ".questionSuccessCount"] = 1;
+    incModifier.$inc["cardsArray." + (getCurrentClusterIndex()) + ".questionSuccessCount"] = 1;
     CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 }
 
 function incrementCurentQuestionsFailed() {
     var incModifier = {$inc: {}};
-    incModifier.$inc["cardsArray." + (getIndex()) + ".questionFailureCount"] = 1;
+    incModifier.$inc["cardsArray." + (getCurrentClusterIndex()) + ".questionFailureCount"] = 1;
     CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 }
 
@@ -883,18 +898,18 @@ function timeoutfunction(index, timeoutNum){
         if(index === length && timeoutNum > 0){
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
-            Meteor.call("writing",getIndex() + ";" + 
+            Meteor.call("writing",getCurrentClusterIndex() + ";" + 
                 findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
                 ";" + 0 + "::" );
             
             Meteor.call("userTime", Session.get("currentTest"), {
-                index: getIndex(),
+                index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
                 action: "[TIMEOUT]",
                 delay: delay
             });
 
-            recordProgress(getIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
+            recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
             if (Session.get("isModeled")) {
                 incrementCurentQuestionsFailed();
@@ -915,15 +930,16 @@ function timeoutfunction(index, timeoutNum){
 function findQTypeSimpified(){
 
     var QType = getQuestionType();
-        if (QType == "text"){
-            QType = "T";    //T for Text
-        } else if (QType == "image"){
-            QType = "I";    //I for Image
-        } else if (QType == "sound"){
-            QType = "A";    //A for Audio
-        } else {
-            QType = "NA";   //NA for Not Applicable
-        }
+    
+    if (QType == "text"){
+        QType = "T";    //T for Text
+    } else if (QType == "image"){
+        QType = "I";    //I for Image
+    } else if (QType == "sound"){
+        QType = "A";    //A for Audio
+    } else {
+        QType = "NA";   //NA for Not Applicable
+    }
 
     return QType;
 }

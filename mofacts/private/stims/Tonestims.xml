@@ -1,19 +1,29 @@
 <setspec>
-    <groups>
-        <group>
-            <name>frequency</name>
-            <type>text</type>
-        </group>  
-		<group>
-            <name>file</name>
-            <type>sound</type>
-        </group>		
-    </groups>
-    <clusters> 
-        <cluster><file>100Hz</file><frequency>100Hz</frequency></cluster>    
-        <cluster><file>250Hz</file><frequency>250Hz</frequency></cluster>     
-        <cluster><file>440Hz</file><frequency>440Hz</frequency></cluster>   
-        <cluster><file>1kHz</file><frequency>1kHz</frequency></cluster>      	
-        <cluster><file>10kHz</file><frequency>10kHz</frequency></cluster>       	
+    <clusters>
+        <cluster>
+            <displayType>Sound</displayType>
+            <display>100Hz</display>
+            <response>100Hz</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <display>250Hz</display>
+            <response>250Hz</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <display>440Hz</display>
+            <response>440Hz</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <display>1kHz</display>
+            <response>1kHz</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <display>10kHz</display>
+            <response>10kHz</response>
+        </cluster>
     </clusters>
 </setspec>

@@ -88,6 +88,8 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
+        <buttontrial>true</buttontrial> <!-- Multiple choice -->
+        
         <schedule>
             <permute>0,1,2,3,4|5,6,7|8,9</permute>
             <q><info>0,t</info></q>
@@ -126,48 +128,20 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
+        <buttontrial>true</buttontrial> <!-- Multiple choice -->
+
         <schedule>
             <permute>0,1,2,3,4|5,6,7|8,9</permute>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
         </schedule>
     </unit>
     
@@ -195,48 +169,19 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
+        <buttontrial>true</buttontrial> <!-- Multiple choice -->
+        
         <schedule>
-            <instructions>Enter answer in the text box below each question.</instructions>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>1,t</info></q>
         </schedule>
     </unit>
 
@@ -264,47 +209,19 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
+        <buttontrial>true</buttontrial> <!-- Multiple choice -->
+        
         <schedule>
-            <q>
-                <info>2,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
-            <q>
-                <info>0,t</info>
-                <choices>A:the_answer,B:elephant,C:food,D:drink</choices>
-            </q>
-            <q>
-                <info>3,t</info>
-                <choices>A:elephant,B:food,C:drink,D:the_answer</choices>
-            </q>
-            <q>
-                <info>2,t</info>
-                <choices>A:food,B:drink,C:the_answer,D:elephant</choices>
-            </q>
-            <q>
-                <info>1,t</info>
-                <choices>A:drink,B:the_answer,C:elephant,D:food</choices>
-            </q>
+            <q><info>2,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>1,t</info></q>
+            <q><info>0,t</info></q>
+            <q><info>3,t</info></q>
+            <q><info>2,t</info></q>
+            <q><info>1,t</info></q>
         </schedule>
     </unit>
     

@@ -1,17 +1,19 @@
 <setspec>
-    <groups>
-		<group>
-            <name>color</name>
-            <type>text</type>
-        </group>
-        <group>
-            <name>file</name>
-            <type>image</type>
-        </group>     
-    </groups>
-    <clusters> 
-        <cluster><file>dot_blue.png</file><color>Blue</color></cluster>    
-        <cluster><file>dot_red.png</file><color>Red</color></cluster>     
-        <cluster><file>dot_yellow.png</file><color>Yellow</color></cluster>    	
+    <clusters>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>dot_blue.png</display>
+            <response>Blue</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>dot_red.png</display>
+            <response>Red</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>dot_yellow.png</display>
+            <response>Yellow</response>
+        </cluster>
     </clusters>
 </setspec>
