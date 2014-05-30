@@ -99,25 +99,25 @@ Template.profileTemplate.username = function () {
 function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/ TDF
 	var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});
 	Session.set("currentTdfName", newTdf.fileName);
-	setScheduleNumber(newTdf.fileName); 
+	setUnitNumber(newTdf.fileName); 
 	var stimFileName = newTdf.tdfs.tutor.setspec[0].stimulusfile[0];
 	return stimFileName;
 }
 
-function setScheduleNumber(tdfName){ //sets the number of schedules in the current session
+function setUnitNumber(tdfName){ //sets the number of units in the current session
 	var newTdf = Tdfs.findOne({fileName: tdfName});
 	if (newTdf.tdfs.tutor.unit != undefined){
 		console.log("unit length is: " + newTdf.tdfs.tutor.unit.length);
-		Session.set("currentScheduleNumber", 0);
-		Session.set("scheduleNumber", newTdf.tdfs.tutor.unit.length);
+		Session.set("currentUnitNumber", 0);
+		Session.set("unitNumber", newTdf.tdfs.tutor.unit.length);
     }
 }
 
 function cleanUp() {
     Session.set("currentQuestion", undefined);
     Session.set("currentAnswer", undefined);
-    Session.set("scheduleIndex", undefined);
-	Session.set("currentScheduleNumber", 0);
+    Session.set("questionIndex", undefined);
+	Session.set("currentUnitNumber", 0);
 }
 
 function initializeProgressRecord () {

@@ -137,16 +137,16 @@ function newQuestionHandler(){
 
     if ( Session.get("isScheduledTest") ) {
 
-        var scheduleNumber = getCurrentScheduleNumber();
-        //question index = sheduleIndex -1 because it has already been incremented for the next card at this point.
-        var questionIndex = Session.get("scheduleIndex") - 1;
+        var unitNumber = getCurrentUnitNumber();
+        //question index = session's questionIndex -1 because it has already been incremented for the next card at this point.
+        var questionIndex = Session.get("questionIndex") - 1;
 
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
         console.log(file + "is a scheduled test");
 
-        if (file.tdfs.tutor.unit[scheduleNumber].schedule[0].q[questionIndex].choices != undefined) {
-            //check if the schedule's question tags have choices tags
+        if (file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices != undefined) {
+            //check if the unit's question tags have choices tags
 
             $("#textEntryRow").hide();
             $("#multipleChoiceInnerContainer").remove();
@@ -155,7 +155,7 @@ function newQuestionHandler(){
                 "<div id=\"multipleChoiceInnerContainer\"></div>"
             );
 
-            var allChoices = file.tdfs.tutor.unit[scheduleNumber].schedule[0].q[questionIndex].choices[0];
+            var allChoices = file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices[0];
             var choicesArray = allChoices.split(",");
 
             for (var i = 0; i < choicesArray.length; ++i) {
@@ -368,53 +368,42 @@ function prepareCard() {
         return;
     }
     
-
     if (file.tdfs.tutor.unit != undefined) {
 		Session.set("isScheduledTest", true);
-        if (Session.get("scheduleIndex") === undefined) {
-            Session.set("scheduleIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
-            //Session.set("currentScheduleNumber",0);
+        if (Session.get("questionIndex") === undefined) {
+            Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
+            //Session.set("currentUnitNumber",0);
         }
-		sched = getCurrentScheduleNumber();
-		console.log(sched + " is current sched number");
-		if (file.tdfs.tutor.unit[sched] === undefined) { //check to see if we've iterated over all schedules
+		var unit = getCurrentUnitNumber();
+		console.log(unit + " is current unit number");
+		if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
 			Router.go("stats");
 			return;
-		}
-		console.log(Session.get("scheduleIndex") + "schedule index before permute");
+		}	
 		
-		
-		if (Session.get("scheduleIndex") === 0 &&  file.tdfs.tutor.unit[sched].schedule[0].permute !== undefined){
-		    
-			permuted = permute(file.tdfs.tutor.unit[sched].schedule[0].permute[0]); //If we're using permutations, permute the specified groups/items
-
+        var schedule = file.tdfs.tutor.unit[unit].schedule[0];
+        
+        //If we're using permutations, permute the specified groups/items
+        //Note that permuted is defined at the top of this file
+		if (Session.get("questionIndex") === 0 &&  schedule.permute !== undefined){
+			permuted = permute(schedule.permute[0]);
 		}
 	
-
-        if (Session.get("scheduleIndex") === file.tdfs.tutor.unit[sched].schedule[0].q.length){
-            //if we are at the end of this schedule
-			Session.set("scheduleIndex", 0);
-			Session.set("currentScheduleNumber", sched + 1);
-			console.log("recurse");
-		//	Router.go("instructions");
+        if (Session.get("questionIndex") === schedule.q.length){
+            //if we are at the end of this unit
+			Session.set("questionIndex", 0);
+			Session.set("currentUnitNumber", unit + 1);
+            console.log("recurse");
 			prepareCard();
-				
-			/*
-            Meteor.call("addtime");
-            Router.go("stats"); //Send user to stats page after test finishes
-            //Add the timestamp for the End of test
-            */
-
         }  
-		
 		else {
             scheduledCard();
 		  
         }      
-    } else {
+    }
+    else {
         Session.set("isScheduledTest", false);
-        randomCard();    
-		
+        randomCard();
     }
 }
 
@@ -451,20 +440,23 @@ function getStimAnswer(index) {
 }
 
 function scheduledCard() {
-    console.log("scheduleIndex...");
+    var unit = getCurrentUnitNumber();
+    var questionIndex = Session.get("questionIndex");
 
-    var questionIndex = Session.get("scheduleIndex");
-    var scheduleIndex = getCurrentScheduleNumber();
-	var questionNumber;
-	if (permuted.length > 0){ //If we're using permutations, get index by perm array value (get the permuted item)
-		questionNumber = permuted[questionIndex];
+    //If we're using permutations, get index by perm array value (get
+    //the permuted item) - otherwise just use the index we have
+    var dispQuestionIndex;
+    if (permuted.length > 0){ 
+		dispQuestionIndex = permuted[questionIndex];
 	}
-	else {
-		questionNumber = questionIndex;
-	}
+    else {
+        dispQuestionIndex = questionIndex;
+    }
+    
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-	console.log(scheduleIndex + " schedule index before card");
-	var info = file.tdfs.tutor.unit[scheduleIndex].schedule[0].q[questionNumber].info[0]; //get the text out of the object with [0]
+
+	//get the text out of the object with [0]
+    var info = file.tdfs.tutor.unit[unit].schedule[0].q[dispQuestionIndex].info[0];
 
     var splitInfo = info.split(",");
 	
@@ -472,18 +464,20 @@ function scheduledCard() {
     Session.set("testType", splitInfo[1]);
     Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
     Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
-    Session.set("scheduleIndex", questionIndex + 1);
-	newQuestionHandler();
-
-    console.log("...scheduleIndex");
+    
+    //Note we increment the session's question index number - NOT the
+    //permuted index
+    Session.set("questionIndex", questionIndex + 1);
+	
+    newQuestionHandler();
 }
 
 function getCurrentTestName() {
     return Session.get("currentTest");
 }
 
-function getCurrentScheduleNumber() {
-	return Session.get("currentScheduleNumber");
+function getCurrentUnitNumber() {
+	return Session.get("currentUnitNumber");
 }
 
 function getCurrentTdfName() {

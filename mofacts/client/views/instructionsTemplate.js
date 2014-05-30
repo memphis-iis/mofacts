@@ -30,8 +30,8 @@ Template.instructionsTemplate.events({
 Template.instructionsTemplate.instructions = function () {
 	var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
 	if (thisTdf.tdfs.tutor.unit != undefined){
-		var whichSchedule = Session.get("currentScheduleNumber");
-		var instructions = thisTdf.tdfs.tutor.unit[whichSchedule].unitinstructions;
+		var unit = Session.get("currentUnitNumber");
+		var instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
 	}
 	else {
 		var instructions = "Please enter answer in text box provided below questions."
