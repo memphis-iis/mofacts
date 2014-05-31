@@ -86,7 +86,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
             }
         }
 
-
+        //TODO: create a schedule and save it in UserProgress (new section)
         prepareCard();
         recordCurrentTestData();
         Session.set("showOverlearningText", false);
