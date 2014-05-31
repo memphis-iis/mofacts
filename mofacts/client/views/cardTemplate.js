@@ -3,8 +3,12 @@
 //////////////
 
 //TODO: Search all files for `the_answer` and `schedule`
+
 //TODO: examine all console.log statements
 //TODO: test all 3 TDF's
+
+//TODO: we should be going back to instructions for each unit
+//TODO: we don't handle instruction-only units right now
 
 var timeoutName;
 var timeoutCount = -1;
@@ -137,10 +141,7 @@ Template.cardTemplate.drill = function() {
 /////////////////
 
 function newQuestionHandler(){
-
-
     if ( Session.get("isScheduledTest") ) {
-
         var unitNumber = getCurrentUnitNumber();
         //question index = session's questionIndex -1 because it has already been incremented for the next card at this point.
         var questionIndex = Session.get("questionIndex") - 1;
@@ -159,22 +160,40 @@ function newQuestionHandler(){
                 "<div id=\"multipleChoiceInnerContainer\"></div>"
             );
             
-            //TODO: this comes from the stim file - from the cluster
             var cluster = getStimCluster(getCurrentClusterIndex());
-            var allChoices = "A:the_answer,B:Hello,C:World";
             
-            //var allChoices = file.tdfs.tutor.unit[unitNumber].schedule[0].q[questionIndex].choices[0];
-            var choicesArray = allChoices.split(",");
+            var choicesArray = [];
+            if (cluster.falseResponse && cluster.falseResponse.length) {
+                for (var i = 0; i < cluster.falseResponse.length; ++i) {
+                    choicesArray.push(cluster.falseResponse[i]);
+                }
+            }
+            
+            if (choicesArray.length < 1) {
+                //Whoops - they didn't specify any alternate choices
+                console.log("A button trial requires some false responses");
+                currUnit.buttontrial = false;
+                newQuestionHandler(); //RECURSE
+                return;
+            }
+            
+            //Currently we only show 4 option button trials - so we only
+            //use 3 false responses
+            if (choicesArray.length > 3) {
+                shuffle(choicesArray);
+                choicesArray = choicesArray.splice(0, 3);
+            }
+            
+            //Need to make sure they also have a correct option :)
+            choicesArray.push(Session.get("currentAnswer"));
+            shuffle(choicesArray);
+            
+            //We can cheat here because we know from above we have <= 4 entries
+            var labelArray = ["A", "B", "C", "D"]; 
 
             for (var i = 0; i < choicesArray.length; ++i) {
-                var buttonParts = choicesArray[i].split(":");
-                var label = buttonParts[0];
-                var value = buttonParts[1];
-
-                //insert the real answer for this dummy value from the tdf.
-                if(value == "the_answer") {
-                    value = Session.get("currentAnswer");
-                }
+                var value = choicesArray[i];
+                var label = labelArray[i];
 
                 //insert all of the multiple choice buttons with the appropriate values.
                 $("#multipleChoiceInnerContainer").append(
