@@ -88,8 +88,6 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
-        <buttontrial>true</buttontrial> <!-- Multiple choice -->
-        
         <schedule>
             <permute>0,1,2,3,4|5,6,7|8,9</permute>
             <q><info>0,t</info></q>
