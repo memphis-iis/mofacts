@@ -443,13 +443,11 @@ function getQuestionType() {
         clusterIndex = 0;
         
     var cluster = getStimCluster(clusterIndex);
-    console.log("Question Type Cluster");
-    console.log(cluster);
-    if (cluster.displayType) {
-        type = cluster.displayType;
+    if (cluster.displayType && cluster.displayType.length) {
+        type = cluster.displayType[0];
     }
     
-    return type;
+    return ("" + type).toLowerCase();
 }
 
 //get the question at this index
