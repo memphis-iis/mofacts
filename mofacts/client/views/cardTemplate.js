@@ -2,13 +2,9 @@
 //  EVENTS  //
 //////////////
 
-//TODO: Search all files for `the_answer` and `schedule`
-
-//TODO: examine all console.log statements
-//TODO: test all 3 TDF's
-
 //TODO: we should be going back to instructions for each unit
 //TODO: we don't handle instruction-only units right now
+//TODO: reduce/refactor the server method calls
 
 var timeoutName;
 var timeoutCount = -1;
@@ -16,8 +12,8 @@ var permuted = [];
 
 Template.cardTemplate.events({
 
-	'focus #userAnswer' : function() {
-		if(Session.get("debugging")){
+    'focus #userAnswer' : function() {
+        if(Session.get("debugging")){
             // var progress = UserProgress.find({_id: Meteor.userId()});
             // progress.forEach(function (user) {
             //     console.log(user);
@@ -28,18 +24,18 @@ Template.cardTemplate.events({
                 console.log(prob);
             });
         }
-	},
-	'keypress #userAnswer' : function (e) {
+    },
+    'keypress #userAnswer' : function (e) {
         handleUserInput( e , "keypress");
-        
-	},
-	'click .logoutLink' : function () {
+
+    },
+    'click .logoutLink' : function () {
         Meteor.logout( function (error) {
             if (typeof error !== "undefined") {
                 //something happened during logout
-                console.log("User: " + Meteor.user() +" \n" +
-                            "\tError: " + error + "\n");
-            } else {
+                console.log("User:" + Meteor.user() +" ERROR:" + error);
+            }
+            else {
                 Router.go("signin");
             }
         });
@@ -61,7 +57,7 @@ Template.cardTemplate.events({
 });
 
 Template.cardTemplate.rendered = function() {
-	newQuestionHandler();
+    newQuestionHandler();
 }
 
 /////////////////
@@ -69,13 +65,13 @@ Template.cardTemplate.rendered = function() {
 /////////////////
 
 Template.cardTemplate.invokeAfterLoad = function() {
-	
+
     if(Session.get("debugging")) {
         console.log('card loaded');
     }
 
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-   
+
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
 
@@ -89,8 +85,8 @@ Template.cardTemplate.invokeAfterLoad = function() {
                 Session.set("usingACTRModel",false);
             }
         }
-        
-        
+
+
         prepareCard();
         recordCurrentTestData();
         Session.set("showOverlearningText", false);
@@ -99,14 +95,14 @@ Template.cardTemplate.invokeAfterLoad = function() {
 }
 
 Template.cardTemplate.username = function () {
-	if (typeof Meteor.user() === "undefined") {
+    if (typeof Meteor.user() === "undefined") {
         Router.go("signin");
         window.location.reload();
         //the reload is needed because for some reason the page contents show up as
         //empty unless we do the reload.
         return;
     } else {
-    	return Meteor.user().username;
+        return Meteor.user().username;
     }
 }
 
@@ -149,7 +145,7 @@ function newQuestionHandler(){
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
         console.log(file + "is a scheduled test");
-        
+
         var currUnit = file.tdfs.tutor.unit[unitNumber];
 
         if (currUnit.buttontrial && currUnit.buttontrial.length && currUnit.buttontrial[0] === "true") {
@@ -159,16 +155,16 @@ function newQuestionHandler(){
             $("#multipleChoiceContainer").append(
                 "<div id=\"multipleChoiceInnerContainer\"></div>"
             );
-            
+
             var cluster = getStimCluster(getCurrentClusterIndex());
-            
+
             var choicesArray = [];
             if (cluster.falseResponse && cluster.falseResponse.length) {
                 for (var i = 0; i < cluster.falseResponse.length; ++i) {
                     choicesArray.push(cluster.falseResponse[i]);
                 }
             }
-            
+
             if (choicesArray.length < 1) {
                 //Whoops - they didn't specify any alternate choices
                 console.log("A button trial requires some false responses");
@@ -176,20 +172,20 @@ function newQuestionHandler(){
                 newQuestionHandler(); //RECURSE
                 return;
             }
-            
+
             //Currently we only show 4 option button trials - so we only
             //use 3 false responses
             if (choicesArray.length > 3) {
                 shuffle(choicesArray);
                 choicesArray = choicesArray.splice(0, 3);
             }
-            
+
             //Need to make sure they also have a correct option :)
             choicesArray.push(Session.get("currentAnswer"));
             shuffle(choicesArray);
-            
+
             //We can cheat here because we know from above we have <= 4 entries
-            var labelArray = ["A", "B", "C", "D"]; 
+            var labelArray = ["A", "B", "C", "D"];
 
             for (var i = 0; i < choicesArray.length; ++i) {
                 var value = choicesArray[i];
@@ -199,7 +195,7 @@ function newQuestionHandler(){
                 $("#multipleChoiceInnerContainer").append(
                     "<div class=\"col-lg-6\">" +
                         "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
-                            label + ": " + value + 
+                            label + ": " + value +
                         "</button>" +
                     "</div>"
                 );
@@ -238,7 +234,7 @@ function newQuestionHandler(){
         $("#overlearningRow").show();
     }
 
-	
+
 }
 
 function handleUserInput( e , source ) {
@@ -253,7 +249,7 @@ function handleUserInput( e , source ) {
         //to save space we will just go ahead and act like it was a key press.
         var key = 13;
     }
-    
+
     if (key==13){
 
         //Gets User Response
@@ -281,10 +277,9 @@ function handleUserInput( e , source ) {
             elapsed = 0;
         }
 
-        console.log(
-        "You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
-        );
-        //---------
+        //console.log(
+        //    "You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
+        //);
 
         //Display Correctness
         if ( getTestType() !== "s" ) {
@@ -325,7 +320,7 @@ function handleUserInput( e , source ) {
         var TType = getTestType();
 
         //Write to Log
-        Meteor.call("writing",index + ";" + TType + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender + 
+        Meteor.call("writing",index + ";" + TType + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender +
             ";" + elapsed + "::" );
 
         Meteor.call("userTime", Session.get("currentTest"), {
@@ -358,7 +353,7 @@ function handleUserInput( e , source ) {
             Meteor.setTimeout(function(){
 
                 //get a new card
-				
+
                 prepareCard();
 
                 $("#userAnswer").val("");
@@ -369,7 +364,7 @@ function handleUserInput( e , source ) {
             prepareCard();
 
             $("#userAnswer").val("");
-        }   
+        }
     }else{
         start = startTimer();
     }
@@ -384,46 +379,44 @@ function startTimer() {
 }
 
 function prepareCard() {
-	console.log("entry");
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
-    
     if (Session.get("usingACTRModel")) {
         getNextCardActRModel();
         return;
     }
-    
+
     if (file.tdfs.tutor.unit != undefined) {
-		Session.set("isScheduledTest", true);
+        Session.set("isScheduledTest", true);
         if (Session.get("questionIndex") === undefined) {
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
             //Session.set("currentUnitNumber",0);
         }
-		var unit = getCurrentUnitNumber();
-		console.log(unit + " is current unit number");
-		if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
-			Router.go("stats");
-			return;
-		}	
-		
-        var schedule = file.tdfs.tutor.unit[unit].schedule[0];
         
+        var unit = getCurrentUnitNumber();
+        if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
+            Router.go("stats");
+            return;
+        }
+
+        //TODO: schedule should NOT come from tdf once assessment sess is done
+        var schedule = file.tdfs.tutor.unit[unit].schedule[0];
+
         //If we're using permutations, permute the specified groups/items
         //Note that permuted is defined at the top of this file
-		if (Session.get("questionIndex") === 0 &&  schedule.permute !== undefined){
-			permuted = permute(schedule.permute[0]);
-		}
-	
+        if (Session.get("questionIndex") === 0 &&  schedule.permute !== undefined){
+            permuted = permute(schedule.permute[0]);
+        }
+
         if (Session.get("questionIndex") === schedule.q.length){
             //if we are at the end of this unit
-			Session.set("questionIndex", 0);
-			Session.set("currentUnitNumber", unit + 1);
-            console.log("recurse");
-			prepareCard();
-        }  
-		else {
+            Session.set("questionIndex", 0);
+            Session.set("currentUnitNumber", unit + 1);
+            prepareCard();
+        }
+        else {
             scheduledCard();
-        }      
+        }
     }
     else {
         Session.set("isScheduledTest", false);
@@ -438,13 +431,13 @@ function randomCard() {
     var size = file.stimuli.setspec.clusters[0].cluster.length;
 
     //get a valid index
-	var nextCardIndex = Math.floor((Math.random() * size));
+    var nextCardIndex = Math.floor((Math.random() * size));
     //set the question and answer
     Session.set("clusterIndex", nextCardIndex);
     Session.set("testType", "t"); //No test type given
-	Session.set("currentQuestion", getStimQuestion(nextCardIndex));
-	Session.set("currentAnswer", getStimAnswer(nextCardIndex));
-	newQuestionHandler();
+    Session.set("currentQuestion", getStimQuestion(nextCardIndex));
+    Session.set("currentAnswer", getStimAnswer(nextCardIndex));
+    newQuestionHandler();
 }
 
 function getStimCluster(index) {
@@ -455,17 +448,17 @@ function getStimCluster(index) {
 //Return the current question type
 function getQuestionType() {
     var type = "text"; //Default type
-        
+
     //If we get called too soon, we just use the first cluster
     var clusterIndex = getCurrentClusterIndex();
     if (!clusterIndex && clusterIndex !== 0)
         clusterIndex = 0;
-        
+
     var cluster = getStimCluster(clusterIndex);
     if (cluster.displayType && cluster.displayType.length) {
         type = cluster.displayType[0];
     }
-    
+
     return ("" + type).toLowerCase();
 }
 
@@ -486,30 +479,30 @@ function scheduledCard() {
     //If we're using permutations, get index by perm array value (get
     //the permuted item) - otherwise just use the index we have
     var dispQuestionIndex;
-    if (permuted.length > 0){ 
-		dispQuestionIndex = permuted[questionIndex];
-	}
+    if (permuted.length > 0){
+        dispQuestionIndex = permuted[questionIndex];
+    }
     else {
         dispQuestionIndex = questionIndex;
     }
-    
+
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
-	//get the text out of the object with [0]
+    //TODO: schedule should NOT come from tdf once assessment sess is done
     var info = file.tdfs.tutor.unit[unit].schedule[0].q[dispQuestionIndex].info[0];
 
     var splitInfo = info.split(",");
-	
+
     //get the type of test (drill, test, study)
     Session.set("clusterIndex", splitInfo[0]);
     Session.set("testType", splitInfo[1]);
     Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
     Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
-    
+
     //Note we increment the session's question index number - NOT the
     //permuted index
     Session.set("questionIndex", questionIndex + 1);
-	
+
     newQuestionHandler();
 }
 
@@ -518,11 +511,11 @@ function getCurrentTestName() {
 }
 
 function getCurrentUnitNumber() {
-	return Session.get("currentUnitNumber");
+    return Session.get("currentUnitNumber");
 }
 
 function getCurrentTdfName() {
-	return Session.get("currentTdfName");
+    return Session.get("currentTdfName");
 }
 
 function getCurrentClusterIndex() {
@@ -536,19 +529,19 @@ function recordProgress ( questionIndex, question, answer, userAnswer ) {
         //add to the progressDataArray
         UserProgress.update(
             { _id: Meteor.userId() },
-            { $push: 
-                { progressDataArray :  
+            { $push:
+                { progressDataArray :
                     {
                           questionIndex: questionIndex
                         , question: question
                         , answer: answer
                         , userAnswer: userAnswer
-                    }  
+                    }
                 }
             }
         );
 
-    }  
+    }
 }
 
 function recordCurrentTestData() {
@@ -556,7 +549,7 @@ function recordCurrentTestData() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var currentTestMode;
 
-    //TODO: this is wrong? 
+    //TODO: this is wrong?
     if (file.stimuli.setspec.schedule != undefined) {
         currentTestMode = "BASIC SCHEDULE";
     }
@@ -568,7 +561,7 @@ function recordCurrentTestData() {
         //update the currentTest and mode
         UserProgress.update(
             { _id: Meteor.userId() }, //where _id === Meteor.userId()
-            { $set: 
+            { $set:
                 {                  //set the current test and mode, and then clear the progress array.
                       currentStimuliTest: getCurrentTestName()
                     , currentTestMode: currentTestMode
@@ -586,11 +579,11 @@ function initializeActRModel() {
     //update the cards array to be empty
     CardProbabilities.update(
         { _id: Meteor.userId() },
-        { $set: 
+        { $set:
             {
                   numQuestionsAnswered: 0
                 , numQuestionsIntroduced: 0
-                , cardsArray: [] 
+                , cardsArray: []
             }
         }
     );
@@ -608,7 +601,7 @@ function initializeActRModel() {
                         , trialsSinceLastSeen: 0
                         , probability: 0
                         , hasBeenIntroduced: false
-                    }  
+                    }
                 }
             }
         );
@@ -712,7 +705,7 @@ function calculateCardProbabilities() {
         var setModifier = {$set: {}};
         setModifier.$set["cardsArray." + i + ".probability"] = probability;
         CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
-        
+
         //increment trialsSinceLastSeen
         var incModifier = {$inc: {}};
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
@@ -726,7 +719,7 @@ function calculateCardProbabilities() {
 
 function getNextCardActRModel() {
 
-    if (Session.get("debugging")) {    
+    if (Session.get("debugging")) {
         console.log("getting next card...");
     }
     Session.set("testType", "t");
@@ -746,20 +739,20 @@ function getNextCardActRModel() {
             introduceNextCard(indexForNewCard);
         }
 
-        if (Session.get("debugging")) {    
+        if (Session.get("debugging")) {
             console.log("...got next card #2");
         }
-        
+
         return;
     } else {
-        
+
         var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
 
         if ( nextCardIndex !== -1) {
             //number 3 in the algorithm
             setNextCardInfo(nextCardIndex);
 
-            if (Session.get("debugging")) {    
+            if (Session.get("debugging")) {
                 console.log("...got next card #3");
             }
 
@@ -773,7 +766,7 @@ function getNextCardActRModel() {
 
                 Session.set("showOverlearningText", true);
 
-                if (Session.get("debugging")) {    
+                if (Session.get("debugging")) {
                     console.log("...got next card #5");
                 }
 
@@ -789,12 +782,12 @@ function getNextCardActRModel() {
                     introduceNextCard(indexForNewCard);
                 }
 
-                if (Session.get("debugging")) {    
+                if (Session.get("debugging")) {
                     console.log("...got next card #4");
                 }
-                
+
             }
-        } 
+        }
 
     }
 }
@@ -852,7 +845,7 @@ function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) 
             if (cardsArray[i].probability > currentMaxProbabilityLessThan85 && cardsArray[i].probability < 0.85) {
                 currentMaxProbabilityLessThan85 = cardsArray[i].probability;
                 indexToReturn = i;
-            }      
+            }
         }
     };
 
@@ -904,10 +897,10 @@ function timeoutfunction(index, timeoutNum){
 
     //needs to be in tdf someday
     //the timeout in Seconds is multipled by 1000 to conver to milliseconds
-    
+
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
     var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
-    
+
     var delay = tis * 1000;
 
     timeoutName = Meteor.setTimeout(function(){
@@ -915,10 +908,10 @@ function timeoutfunction(index, timeoutNum){
         if(index === length && timeoutNum > 0){
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
-            Meteor.call("writing",getCurrentClusterIndex() + ";" + 
-                findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay + 
+            Meteor.call("writing",getCurrentClusterIndex() + ";" +
+                findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay +
                 ";" + 0 + "::" );
-            
+
             Meteor.call("userTime", Session.get("currentTest"), {
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
@@ -933,21 +926,21 @@ function timeoutfunction(index, timeoutNum){
                 incrementNumQuestionsAnswered();
                 calculateCardProbabilities();
             }
-            
+
 
             prepareCard();
         }else{
             //Do Nothing
         }
 
-            
+
     }, delay);
 }
 
 function findQTypeSimpified(){
 
     var QType = getQuestionType();
-    
+
     if (QType == "text"){
         QType = "T";    //T for Text
     } else if (QType == "image"){
@@ -974,7 +967,7 @@ function permute (perms) {
         permutedArray = shuffle(indexSets);
         for(j=0; j < permutedArray.length; j++){
             final_perm.push(permutedArray[j]);
-          
+
         }
     }
     return final_perm;
