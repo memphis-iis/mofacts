@@ -4,6 +4,7 @@
 
 //TODO: we should be going back to instructions for each unit
 //TODO: we don't handle instruction-only units right now
+
 //TODO: reduce/refactor the server method calls
 
 var timeoutName;
@@ -85,10 +86,11 @@ Template.cardTemplate.invokeAfterLoad = function() {
                 Session.set("usingACTRModel",false);
             }
         }
+        
+        //Before the below options, reset current test data
+        resetCurrentTestData();
 
-        //TODO: create a schedule and save it in UserProgress (new section)
         prepareCard();
-        recordCurrentTestData();
         Session.set("showOverlearningText", false);
     }
 
@@ -399,13 +401,12 @@ function prepareCard() {
             return;
         }
 
-        //TODO: schedule should NOT come from tdf once assessment sess is done
-        var schedule = file.tdfs.tutor.unit[unit].schedule[0];
+        var schedule = getSchedule();
 
         //If we're using permutations, permute the specified groups/items
         //Note that permuted is defined at the top of this file
-        if (Session.get("questionIndex") === 0 &&  schedule.permute !== undefined){
-            permuted = permute(schedule.permute[0]);
+        if (Session.get("questionIndex") === 0 &&  schedule.permute){
+            permuted = permute(schedule.permute);
         }
 
         if (Session.get("questionIndex") === schedule.q.length){
@@ -486,18 +487,14 @@ function scheduledCard() {
         dispQuestionIndex = questionIndex;
     }
 
-    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-
-    //TODO: schedule should NOT come from tdf once assessment sess is done
-    var info = file.tdfs.tutor.unit[unit].schedule[0].q[dispQuestionIndex].info[0];
-
-    var splitInfo = info.split(",");
+    var questInfo = getSchedule().q[dispQuestionIndex];
+    var clusterIndex = questInfo.clusterIndex;
 
     //get the type of test (drill, test, study)
-    Session.set("clusterIndex", splitInfo[0]);
-    Session.set("testType", splitInfo[1]);
-    Session.set("currentQuestion", getStimQuestion(splitInfo[0]));
-    Session.set("currentAnswer", getStimAnswer(splitInfo[0]));
+    Session.set("clusterIndex", clusterIndex);
+    Session.set("testType", questInfo.testType);
+    Session.set("currentQuestion", getStimQuestion(clusterIndex));
+    Session.set("currentAnswer", getStimAnswer(clusterIndex));
 
     //Note we increment the session's question index number - NOT the
     //permuted index
@@ -544,7 +541,7 @@ function recordProgress ( questionIndex, question, answer, userAnswer ) {
     }
 }
 
-function recordCurrentTestData() {
+function resetCurrentTestData() {
 
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var currentTestMode;
@@ -560,16 +557,75 @@ function recordCurrentTestData() {
     if (Meteor.userId() !== null) {
         //update the currentTest and mode
         UserProgress.update(
-            { _id: Meteor.userId() }, //where _id === Meteor.userId()
+            { _id: Meteor.userId() },
             { $set:
-                {                  //set the current test and mode, and then clear the progress array.
-                      currentStimuliTest: getCurrentTestName()
-                    , currentTestMode: currentTestMode
-                    , progressDataArray: []
+                {
+                    //set the current test and mode, and then clear the progress array.
+                    currentStimuliTest: getCurrentTestName(),
+                    currentTestMode: currentTestMode,
+                    progressDataArray: [],
+                    currentSchedule: {}
                 }
             }
         );
     }
+}
+
+//Return the schedule for the current unit of the current lesson - 
+//If it diesn't exist, then create and store it in User Progress
+function getSchedule() {
+    //Retrieve current schedule
+    var progress = UserProgress.find({_id: Meteor.userId()});
+    
+    var unit = getCurrentUnitNumber();
+    var schedule = null;
+    if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
+        schedule = progress.currentSchedule;
+    }
+    
+    //Lazy create save if we don't have a correct schedule
+    if (schedule === null) {
+        var stims = Stimuli.findOne({fileName: getCurrentTestName()});
+        var clusters = stims.stimuli.setspec.clusters[0].cluster;
+        
+        //TODO: ACTUAL schedule using assessment session instead of just
+        //using 4 random clusters
+        var clusterIdx = [];
+        for(i = 0; i < clusters.length; ++i) {
+            clusterIdx.push(i);
+        }
+        clusterIdx = shuffle(clusterIdx).slice(0, 4);
+        
+        console.log("CLUSTER INDEXES FOR SCHEDULE");
+        console.log(clusterIdx);
+        
+        quests = [];
+        for(i = 0; i < clusterIdx.length; ++i) {
+            var idx = clusterIdx[i];
+            //TODO: not always a drill 
+            quests.push({
+                testType: "d",
+                clusterIndex: idx
+            });
+        }
+        
+        schedule = {
+            unitNumber: unit,
+            permute: "0,1|2,3", //TODO: obviously, this needs work
+            q: quests
+        };
+        
+        console.log("Created schedule for current unit:");
+        console.log(schedule);
+        
+        UserProgress.update(
+            { _id: Meteor.userId() },
+            { $set: { currentSchedule: schedule } }
+        );
+    }
+    
+    //Now they can have the schedule
+    return schedule;
 }
 
 function initializeActRModel() {
@@ -958,6 +1014,8 @@ function getTestType(){
     return Session.get("testType");
 }
 
+//NOTE - permuted array is a SHALLOW COPY - which is different from
+//shuffle below
 function permute (perms) {
     var final_perm = []
     var groups = perms.split("|");
@@ -973,6 +1031,7 @@ function permute (perms) {
     return final_perm;
 }
 
+//NOTE - in-place shuffle that returns a reference
 function shuffle(array) {
   var currentIndex = array.length
     , temporaryValue
