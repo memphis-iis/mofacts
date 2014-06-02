@@ -15,11 +15,6 @@ Template.cardTemplate.events({
 
     'focus #userAnswer' : function() {
         if(Session.get("debugging")){
-            // var progress = UserProgress.find({_id: Meteor.userId()});
-            // progress.forEach(function (user) {
-            //     console.log(user);
-            // });
-
             var probabilities = CardProbabilities.find({_id: Meteor.userId()});
             probabilities.forEach( function (prob) {
                 console.log(prob);
@@ -573,7 +568,7 @@ function resetCurrentTestData() {
 //If it diesn't exist, then create and store it in User Progress
 function getSchedule() {
     //Retrieve current schedule
-    var progress = UserProgress.find({_id: Meteor.userId()});
+    var progress = UserProgress.findOne({_id: Meteor.userId()});
     
     var unit = getCurrentUnitNumber();
     var schedule = null;
@@ -583,6 +578,9 @@ function getSchedule() {
     
     //Lazy create save if we don't have a correct schedule
     if (schedule === null) {
+        console.log("CREATING SCHEDULE, showing progress");
+        console.log(progress);
+        
         var stims = Stimuli.findOne({fileName: getCurrentTestName()});
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
         
