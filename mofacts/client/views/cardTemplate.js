@@ -294,14 +294,14 @@ function handleUserInput( e , source ) {
                     incrementCurentQuestionsFailed();
                 }
                 if (getTestType() === "d") {
-                    $("#UserInteraction").append("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+                    $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
                 }
             } else {
                 if (Session.get("isModeled")) {
                     incrementCurrentQuestionSuccess();
                 }
                 if (getTestType() === "d") {
-                    $("#UserInteraction").append("<font color= \"black\">You are Correct. " + "Great Job</font>");
+                    $("#UserInteraction").html("<font color= \"black\">You are Correct. " + "Great Job</font>");
                 }
             }
         }
@@ -346,28 +346,26 @@ function handleUserInput( e , source ) {
 
         //Reset timer for next question
         start = startTimer();
-
-        //timeout for adding a small delay so the User may read the correctness of his/her anwser
-        //Reveals Answer
-        if(AllowUserInteraction){
-            $("#UserInteraction").show();
-
-            Meteor.setTimeout(function(){
-
-                //get a new card
-
-                prepareCard();
-
-                $("#userAnswer").val("");
-            },1000);
-            //---------------
-
-        }else{
+        
+        //Whether timed or not, same logic for below
+        var setup = function() {
             prepareCard();
-
             $("#userAnswer").val("");
+            $("#UserInteraction").html("");
+        };
+        
+        if(AllowUserInteraction) {
+            //timeout for adding a small delay so the User may read
+            //the correctness of his/her anwser
+            $("#UserInteraction").show();
+            Meteor.setTimeout(setup, 1000);
         }
-    }else{
+        else {
+            $("#UserInteraction").hide();
+            setup();
+        }
+    }
+    else{
         start = startTimer();
     }
 }
@@ -602,15 +600,15 @@ function getSchedule() {
         quests = [];
         for(i = 0; i < clusterIdx.length; ++i) {
             var idx = clusterIdx[i];
-            //TODO: not always a drill 
             quests.push({
-                testType: "d",
+                testType: "d",    //TODO: not always a drill 
                 clusterIndex: idx
             });
         }
         
         schedule = {
             unitNumber: unit,
+            created: new Date(),
             permute: "0,1|2,3", //TODO: obviously, this needs work
             q: quests
         };
