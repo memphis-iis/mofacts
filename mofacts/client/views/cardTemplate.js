@@ -285,14 +285,14 @@ function handleUserInput( e , source ) {
 
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
-                if (Session.get("isModeled")) {
+                if (Session.get("usingACTRModel")) {
                     incrementCurentQuestionsFailed();
                 }
                 if (getTestType() === "d") {
                     $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
                 }
             } else {
-                if (Session.get("isModeled")) {
+                if (Session.get("usingACTRModel")) {
                     incrementCurrentQuestionSuccess();
                 }
                 if (getTestType() === "d") {
@@ -334,7 +334,7 @@ function handleUserInput( e , source ) {
         //record progress in UserProgress collection.
         recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
-        if (Session.get("isModeled")) {
+        if (Session.get("usingACTRModel")) {
             incrementNumQuestionsAnswered();
             calculateCardProbabilities();
         }
@@ -428,7 +428,7 @@ function randomCard() {
     var nextCardIndex = Math.floor((Math.random() * size));
     //set the question and answer
     Session.set("clusterIndex", nextCardIndex);
-    Session.set("testType", "t"); //No test type given
+    Session.set("testType", "d"); //No test type given
     Session.set("currentQuestion", getStimQuestion(nextCardIndex));
     Session.set("currentAnswer", getStimAnswer(nextCardIndex));
     newQuestionHandler();
@@ -536,24 +536,24 @@ function recordProgress ( questionIndex, question, answer, userAnswer ) {
 
 function resetCurrentTestData() {
 
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    var tutor = file.tdfs.tutor;
     var currentTestMode;
-
-    //TODO: this is wrong?
-    if (file.stimuli.setspec.schedule != undefined) {
-        currentTestMode = "BASIC SCHEDULE";
+    
+    if (tutor.unit && tutor.unit.length) {
+        currentTestMode = "SCHEDULED";
     }
     else {
         currentTestMode = "RANDOM";
     }
 
     if (Meteor.userId() !== null) {
-        //update the currentTest and mode
+        //update the currentTest and mode:
+        //set the current test and mode, and clear the progress array.
         UserProgress.update(
             { _id: Meteor.userId() },
-            { $set:
-                {
-                    //set the current test and mode, and then clear the progress array.
+            {
+                $set: {
                     currentStimuliTest: getCurrentTestName(),
                     currentTestMode: currentTestMode,
                     progressDataArray: [],
@@ -696,6 +696,7 @@ function setHasBeenIntroducedFlag( index ) {
 
 function setNextCardInfo( index ) {
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    Session.set("clusterIndex", index);
     Session.set("currentQuestion", cardProbs.cardsArray[index].question);
     Session.set("currentAnswer", cardProbs.cardsArray[index].answer);
     resetTrialsSinceLastSeen(index);
@@ -774,7 +775,7 @@ function getNextCardActRModel() {
     if (Session.get("debugging")) {
         console.log("getting next card...");
     }
-    Session.set("testType", "t");
+    Session.set("testType", "d");
 
     var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
     var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
@@ -973,7 +974,7 @@ function timeoutfunction(index, timeoutNum){
 
             recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
-            if (Session.get("isModeled")) {
+            if (Session.get("usingACTRModel")) {
                 incrementCurentQuestionsFailed();
                 incrementNumQuestionsAnswered();
                 calculateCardProbabilities();
