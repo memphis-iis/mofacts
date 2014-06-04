@@ -381,7 +381,7 @@ function prepareCard() {
         return;
     }
 
-    if (file.tdfs.tutor.unit != undefined) {
+    if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
         Session.set("isScheduledTest", true);
         if (Session.get("questionIndex") === undefined) {
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
@@ -584,35 +584,10 @@ function getSchedule() {
         var stims = Stimuli.findOne({fileName: getCurrentTestName()});
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
         
-        //TODO: ACTUAL schedule using assessment session instead of just
-        //using 4 random clusters
-        var clusterIdx = [];
-        for(i = 0; i < clusters.length; ++i) {
-            clusterIdx.push(i);
-        }
-        clusterIdx = shuffle(clusterIdx).slice(0, 4);
+        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+        var currUnit = file.tdfs.tutor.unit[unit];
         
-        console.log("CLUSTER INDEXES FOR SCHEDULE");
-        console.log(clusterIdx);
-        
-        quests = [];
-        for(i = 0; i < clusterIdx.length; ++i) {
-            var idx = clusterIdx[i];
-            quests.push({
-                testType: "d",    //TODO: not always a drill 
-                clusterIndex: idx
-            });
-        }
-        
-        schedule = {
-            unitNumber: unit,
-            created: new Date(),
-            permute: "0,1|2,3", //TODO: obviously, this needs work
-            q: quests
-        };
-        
-        console.log("Created schedule for current unit:");
-        console.log(schedule);
+        var schedule = AssessmentSession.createSchedule(clusters, unit, currUnit);
         
         UserProgress.update(
             { _id: Meteor.userId() },
