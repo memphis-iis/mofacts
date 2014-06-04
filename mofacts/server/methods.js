@@ -60,7 +60,7 @@ Meteor.startup(function () {
 		},
 		
 		recordActR: function(vals){
-			fs.appendFileSync(filepath + name + "_" + filename + "_ACTR_.txt" + endOfLine, vals)
+			fs.appendFileSync(filepath + name + "_" + filename + "_ACTR_.txt", vals)
 		},
 	
 		//Added addition stuff to Log
