@@ -58,6 +58,10 @@ Meteor.startup(function () {
 			fs.appendFileSync(filepath + name + "_" + filename +".txt", stuff)
 			Meteor.call("addtime");
 		},
+		
+		recordActR: function(vals){
+			fs.appendFileSync(filepath + name + "_" + filename + "_ACTR_.txt" + endOfLine, vals)
+		},
 	
 		//Added addition stuff to Log
 		addtime: function(){

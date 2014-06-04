@@ -763,6 +763,11 @@ function calculateCardProbabilities() {
         var incModifier = {$inc: {}};
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
+		
+		//Log values for ACT-R system
+		Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
+		+ " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
+		+ "\n");
     }
 
     if (Session.get("debugging")) {
