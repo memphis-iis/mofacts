@@ -92,8 +92,6 @@ Meteor.startup(function () {
 			console.log(usernamestuff + " has connected.")
 		}
 	});
-
-	buildSchedule();
 });
 
 
@@ -113,9 +111,4 @@ function getStimJSON(fileName) {
 		future.return(json);
 	});
 	return future.wait();
-}
-
-
-function buildSchedule() {
-        	
 }
