@@ -254,13 +254,13 @@ function handleUserInput( e , source ) {
 
         var userAnswer;
         if ( source === "keypress") {
-            userAnswer = document.getElementById('userAnswer').value.toLowerCase().trim();
+            userAnswer = Helpers.trim(document.getElementById('userAnswer').value.toLowerCase());
         } else if ( source === "buttonClick") {
             userAnswer = e.target.name;
         }
 
         //Check Correctness
-        var answer = Session.get("currentAnswer")[0].toLowerCase().trim();
+        var answer = Helpers.trim(Session.get("currentAnswer")[0].toLowerCase());
         var isCorrect = true;
         //---------
 
@@ -280,8 +280,8 @@ function handleUserInput( e , source ) {
 
         //Display Correctness
         if ( getTestType() !== "s" ) {
-            userAnswer = userAnswer.toLowerCase().trim();
-            answer = answer.toLowerCase().trim();
+            userAnswer = Helpers.trim(userAnswer.toLowerCase());
+            answer = Helpers.trim(answer.toLowerCase());
 
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
