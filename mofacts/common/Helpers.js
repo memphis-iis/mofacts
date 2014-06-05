@@ -19,7 +19,7 @@ Helpers = {
             return dispvals.join(",");
         } 
         else {
-            return "" + to_display;
+            return Helpers.trim("" + to_display);
         }
     },
     
