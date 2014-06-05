@@ -1,41 +1,162 @@
-//TODO: actually use the assessment session
-
 //TODO: make sure everything is zero-based (e.g. permutefinalresult is currently 1-based)
 
 AssessmentSession = {
-    //Given an array of clusters (from a simulus file), a unit 
-    //(from a TDF), and the unit number (since the schedule needs
-    //that info) - create a schedule using the assessmentsession
-    //settings in the unit as applied to the clusters
-    createSchedule: function(clusters, unitNumber, unit) {
+    /* Create a schedule using the assessmentsession settings in the
+     * unit as applied to the clusters
+     * 
+     * INPUTS:
+     *  setspec - the setspec object from the TDF
+     *  clusters - array of clusters (from the stimulus file)
+     *  unitNumber - number (index, 0-based) of the unit in the TDF
+     *  unit - current unit (as specified by unitNumber)
+     * 
+     * RETURNS: a schedule object
+    */
+    createSchedule: function(setspec, clusters, unitNumber, unit) {
         //First get the setting we'll use
-        var settings = AssessmentSession.loadAssessmentSettings(unit);
+        var settings = AssessmentSession.loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
         console.log(settings);
         
-        var clusterIdx = [];
-        for(i = 0; i < clusters.length; ++i) {
-            clusterIdx.push(i);
+        //Shuffle clusters at start
+        if (settings.randomClusters) {
+            Helpers.shuffle(settings.clusterNumbers);
         }
-        clusterIdx = Helpers.shuffle(clusterIdx).slice(0, 4);
         
-        console.log("CLUSTER INDEXES FOR SCHEDULE");
-        console.log(clusterIdx);
+        //Our question array should be pre-populated
+        //Remember that addressing a javascript array index forces the
+        //expansion of the array to that index
+        var quests = [];
+        quests[settings.scheduleSize-1] = {};
         
-        quests = [];
-        for(i = 0; i < clusterIdx.length; ++i) {
-            var idx = clusterIdx[i];
-            quests.push({
-                testType: "d",    //TODO: not always a drill 
-                clusterIndex: idx
-            });
+        //How you set a question
+        var setQuest = function(qidx, type, clusterIndex, condition) {
+            quests[qidx] = {
+                testType: type,
+                clusterIndex: clusterIndex,
+                condition: condition
+            };
+        };
+        
+        //For each group
+        for (var i = 0; i < settings.groupNames.length; ++i) {
+            //Get initial info for this group
+            var groupName = settings.groupNames[i];
+            var group = settings.groups[i]; //group = array of strings
+            var numTemplates = Helpers.intVal(settings.numTemplatesList[i]);
+            var templateSize = Helpers.intVal(settings.templateSizes[i]);
+            
+            //Generate template indices
+            var indices = [];
+            for (var z = 0; z < numTemplates; ++z) {
+                indices.push(z);
+            }
+            if (settings.randomConditions) {
+                Helpers.shuffle(indices);
+            }
+            
+            //For each template index
+            for (var j = 0; j < indices.length; ++j) {
+                var index = indices[j];
+                
+                //Find in initial position
+                var firstPos;
+                for(firstPos = 0; firstPos < settings.initialPositions.length; ++firstPos) {
+                    var entry = settings.initialPositions[firstPos];
+                    //TODO: note the 1-based assumption to be fixed later when initial positions are fixed
+                    if (groupName === entry[0] && Helpers.intVal(entry.substring(2)) == index + 1) {
+                        break; //FOUND
+                    }
+                }
+                
+                //Remove and use first cluster no matter what
+                var clusterNum = settings.clusterNumbers.shift();
+                
+                //If we didn't find the group, move to next group
+                if (firstPos >= settings.initialPositions.length) {
+                    break;
+                }
+                
+                //Choose random numbers to use throughout the template
+                var randOffset = Math.floor(Math.random() * settings.clusterSize);
+                
+                //Work through the group elements
+                for (var k = 0; k < templateSize; ++k) {
+                    var groupEntry = group[index * templateSize + k];
+                    var parts = groupEntry.split(",");
+                    
+                    var forward = true; //Note that we ignore the f/b setting in the group
+                    
+                    var type = parts[2].toUpperCase()[0];
+                    if (type === "T") {
+                        type = "D";
+                    }
+                    
+                    var showHint = false;
+                    if (parts[2].length > 1) {
+                        showHint = (parts[2].toUpperCase()[1] === "H");
+                    }
+                    
+                    var location = Helpers.intVal(parts[3]);
+                    
+                    //For proto, re-randomize for every k
+                    if (settings.specType === "proto") {
+                        randOffset = Math.floor(Math.random() * settings.clusterSize);
+                    }
+                    
+                    var offStr = parts[0].toLowerCase();
+                    if (offStr === "m") {
+                        //Trial from model
+                        setQuest(firstPos + location, type, 0, "select_"+type);
+                    }
+                    else {
+                        //Trial by other means
+                        var offset;
+                        if (offStr === "r") {
+                            offset = Math.floor(Math.random() * settings.ranChoices);
+                        }
+                        else {
+                            offset = Helpers.intVal(offStr);
+                        }
+                        
+                        var condition = groupName + "-" + index;
+                        
+                        var st = settings.specType.toLowerCase();
+                        if ( (settings.clusterSize == 1) && (st === "structuralpairs" || st === "structuralgroups") ) {
+                            condition += "-" + offset + "-0";
+                            offset = 0;
+                        }
+                        
+                        if (showHint) {
+                            condition += "-" + "H";
+                        }
+                        
+                        var pairNum = settings.clusterSize * clusterNum + offset;
+                        setQuest(firstPos + location, type, pairNum, condition);
+                    } //offset is Model or something else?
+                } //k (walk thru group elements)
+            } //j (each template index)
+        } //i (each group)
+        
+        //NOW we can create the final ordering of the questions
+        var finalQuests = [];
+        finalQuests[settings.scheduleSize-1] = {};
+        
+        for (var i = 0; i < settings.finalPermute.length; ++i) {
+            var targetIndexes = Helpers.rangeVal(settings.finalPermute[i]);
+            var randPerm = targetIndexes.slice(); //clone
+            Helpers.shuffle(randPerm);
+            
+            for(var j = 0; j < 0; ++j) {
+                finalQuests[targetIndex[j]] = quests[randPerm[j]];
+            }
         }
         
         var schedule = {
             unitNumber: unitNumber,
             created: new Date(),
             permute: "0,1|2,3", //TODO: obviously, this needs work
-            q: quests
+            q: finalQuests
         };
         
         console.log("Created schedule for current unit:");
@@ -46,8 +167,10 @@ AssessmentSession = {
     
     //Given a unit object loaded from a TDF, populate and return a settings
     //object with the parameters as specified by the Assessment Session
-    loadAssessmentSettings: function(unit) {
+    loadAssessmentSettings: function(setspec, unit) {
         var settings = {
+            clusterSize: 1,
+            specType: "unspecified",
             groupNames: [],
             templateSizes: [],
             numTemplatesList: [],
@@ -88,20 +211,16 @@ AssessmentSession = {
             return Helpers.display(src).toLowerCase === "true";
         }
         
-        var intVal = function(src) {
-            var val = parseInt(Helpers.display(src));
-            if (isNaN(val)) {
-                val = 0;
-            }            
-            return val;
-        }
+        //Get the setspec settings first
+        settings.clusterSize = Helpers.intVal(setspec.clustersize);
+        settings.specType = Helpers.display(setspec.clustermodel);
         
         //The "easy" "top-level" settings
         parseVals(assess.initialpositions, settings.initialPositions);
         parseVals(assess.permutefinalresult, settings.finalPermute);        
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
-        settings.ranChoices = intVal(assess.randomchoices);
+        settings.ranChoices = Helpers.intVal(assess.randomchoices);
         
         //Condition by group        
         by_group = Helpers.firstElement(assess.conditiontemplatesbygroup);
@@ -112,7 +231,7 @@ AssessmentSession = {
             parseVals(by_group.initialpositions,  settings.initialPositions);
             
             var new_group = [];
-            parseVals(by_group.group, new_group);
+            parseVals(by_group.group[0], new_group);
             if (new_group.length > 0) {
                 settings.groups.push(new_group);
             }
@@ -122,20 +241,10 @@ AssessmentSession = {
         var clusterList = [];
         parseVals(assess.clusterlist, clusterList);
         for (var i = 0; i < clusterList.length; ++i) {
-            var cluster = clusterList[i];
-            var idx = cluster.indexOf("-");
-            if (idx < 1) {
-                continue; //Invalid format
-            }
-            
-            var first = intVal(cluster.substring(0, idx));
-            var last  = intVal(cluster.substring(idx+1));
-            if (last < first) {
-                continue; //Invalid format
-            }
-            
-            for (var r = first; r <= last; ++r) {
-                settings.clusterNumbers.push(r);
+            var nums = Helpers.rangeVal(clusterList[i]);
+            for (var j = 0; j < nums.length; ++j) {
+                //TODO: this appears to work but is empty when it gets back to the caller
+                settings.clusterNumbers.push(nums[j]);
             }
         }
         

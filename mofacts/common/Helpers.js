@@ -23,26 +23,6 @@ Helpers = {
         }
     },
     
-    //Given an array, shuffle IN PLACE and then return the array
-    shuffle: function(array) {
-        if (!array || !array.length) {
-            return array;
-        }
-        
-        var currentIndex = array.length;
-        
-        while (currentIndex > 0) {
-            var randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-
-            var tmp = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = tmp;
-        }
-
-        return array;
-    },
-    
     //Given a string s, return it with all leading and trailing
     //whitespace removed
     trim: function(s) {        
@@ -81,5 +61,56 @@ Helpers = {
         catch(e) {
             return null;
         }
+    },
+    
+    intVal: function(src) {
+        var val = parseInt(Helpers.display(src));
+        if (isNaN(val)) {
+            val = 0;
+        }            
+        return val;
+    },
+    
+    //Given a string of format "a-b", return an array containing all
+    //numbers from a to b inclusive.  On errors, return an empty array
+    rangeVal: function(src) {
+        src = Helpers.trim(src);
+        var idx = src.indexOf("-");
+        if (idx < 1) {
+            return [];
+        }
+            
+        var first = Helpers.intVal(src.substring(0, idx));
+        var last  = Helpers.intVal(src.substring(idx+1));
+        if (last < first) {
+            return [];
+        }
+        
+        var range = [];
+        for (var r = first; r <= last; ++r) {
+            range.push(r);
+        }
+        
+        return range;
+    },
+    
+    //Given an array, shuffle IN PLACE and then return the array
+    shuffle: function(array) {
+        if (!array || !array.length) {
+            return array;
+        }
+        
+        var currentIndex = array.length;
+        
+        while (currentIndex > 0) {
+            var randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            var tmp = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = tmp;
+        }
+
+        return array;
     }
 }

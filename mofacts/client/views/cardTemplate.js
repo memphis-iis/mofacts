@@ -585,9 +585,10 @@ function getSchedule() {
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
         
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+        var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
         
-        var schedule = AssessmentSession.createSchedule(clusters, unit, currUnit);
+        var schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
         
         //We save the current schedule and also log it to the UserTime collection
         UserProgress.update(
