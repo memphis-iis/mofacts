@@ -41,5 +41,28 @@ Helpers = {
         }
 
         return array;
+    },
+    
+    //Given a string s, return it with all leading and trailing
+    //whitespace removed
+    trim: function(s) {        
+        //Handle non-strings and empty strings - first check existence,
+        //then force conversion to string (and implicit copy).
+        if (!s)
+            return "";
+        
+        var ss = "" + s;
+        if (!ss || !ss.length || ss.length < 1) {
+            return "";
+        }
+        
+        //Javascript strings support trim, but it doesn't exist in
+        //IE 8 (and earlier)
+        if (ss.trim) {
+            return ss.trim();
+        }
+        else {
+            return ss.replace(/^\s+|\s+$/gm, '');
+        }
     }
 }
