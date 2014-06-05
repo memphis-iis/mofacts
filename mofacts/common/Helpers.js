@@ -11,15 +11,15 @@ Helpers = {
         if (!to_display && to_display !== false) {
             return "";
         }
-        else if (todisplay && todisplay.length && todisplay.join) {
+        else if (to_display && to_display.length && to_display.join) {
             var dispvals = [];
-            for (var i = 0; i < todisplay.length; ++i) {
+            for (var i = 0; i < to_display.length; ++i) {
                 dispvals.push(Helpers.display(to_display[i]));
             }
             return dispvals.join(",");
         } 
         else {
-            return "" + dispvals;
+            return "" + to_display;
         }
     },
     

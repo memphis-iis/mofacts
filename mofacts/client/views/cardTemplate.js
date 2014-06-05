@@ -589,10 +589,18 @@ function getSchedule() {
         
         var schedule = AssessmentSession.createSchedule(clusters, unit, currUnit);
         
+        //We save the current schedule and also log it to the UserTime collection
         UserProgress.update(
             { _id: Meteor.userId() },
             { $set: { currentSchedule: schedule } }
         );
+        
+        Meteor.call("userTime", Session.get("currentTest"), {
+            action: "schedule",
+            unitname: Helpers.display(currUnit.unitname),
+            unitindex: unit,
+            schedule: schedule
+        });
     }
     
     //Now they can have the schedule
@@ -999,7 +1007,7 @@ function permute (perms) {
     for(i=0; i < groups.length; i++){
 
         var indexSets = groups[i].split(",");
-        permutedArray = shuffle(indexSets);
+        permutedArray = Helpers.shuffle(indexSets);
         for(j=0; j < permutedArray.length; j++){
             final_perm.push(permutedArray[j]);
 
