@@ -173,13 +173,13 @@ function newQuestionHandler(){
             //Currently we only show 4 option button trials - so we only
             //use 3 false responses
             if (choicesArray.length > 3) {
-                shuffle(choicesArray);
+                Helpers.shuffle(choicesArray);
                 choicesArray = choicesArray.splice(0, 3);
             }
 
             //Need to make sure they also have a correct option :)
             choicesArray.push(Session.get("currentAnswer"));
-            shuffle(choicesArray);
+            Helpers.shuffle(choicesArray);
 
             //We can cheat here because we know from above we have <= 4 entries
             var labelArray = ["A", "B", "C", "D"];
@@ -992,7 +992,7 @@ function getTestType(){
 }
 
 //NOTE - permuted array is a SHALLOW COPY - which is different from
-//shuffle below
+//shuffle in Helpers
 function permute (perms) {
     var final_perm = []
     var groups = perms.split("|");
@@ -1006,24 +1006,4 @@ function permute (perms) {
         }
     }
     return final_perm;
-}
-
-//NOTE - in-place shuffle that returns a reference
-function shuffle(array) {
-  var currentIndex = array.length
-    , temporaryValue
-    , randomIndex
-    ;
-
-  while (0 !== currentIndex) {
-
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
-  }
-
-  return array;
 }

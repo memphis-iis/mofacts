@@ -10,7 +10,7 @@ AssessmentSession = {
         for(i = 0; i < clusters.length; ++i) {
             clusterIdx.push(i);
         }
-        clusterIdx = AssessmentSession.shuffle(clusterIdx).slice(0, 4);
+        clusterIdx = Helpers.shuffle(clusterIdx).slice(0, 4);
         
         console.log("CLUSTER INDEXES FOR SCHEDULE");
         console.log(clusterIdx);
@@ -35,20 +35,5 @@ AssessmentSession = {
         console.log(schedule);
         
         return schedule;
-    },
-    
-    shuffle: function(array) {
-        var currentIndex = array.length;
-        
-        while (0 !== currentIndex) {
-            var randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-
-            var tmp = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = tmp;
-        }
-
-        return array;
     }
 };
