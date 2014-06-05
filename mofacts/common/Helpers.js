@@ -64,5 +64,22 @@ Helpers = {
         else {
             return ss.replace(/^\s+|\s+$/gm, '');
         }
+    },
+    
+    //Given an object presumed to be an array, return the first element.
+    //If not possible, return null
+    //TODO: we can use this LOTS of places
+    firstElement: function(obj) {
+        try {
+            if (obj && obj.length && obj.length > 0) {
+                return obj[0];
+            }
+            else {
+                return null;
+            }
+        }
+        catch(e) {
+            return null;
+        }
     }
 }
