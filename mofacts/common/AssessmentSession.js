@@ -1,4 +1,16 @@
-//TODO: wrap createSchedule in try/catch with message about flawed as/sched - and then return null
+/* AssessmentSession - this is the main logic for loading the necessary
+ * data from the TDF and Stimulus files and creating a schedule based
+ * on the assessment session configuration.
+ * */
+
+
+//TODO: if you want the assessment session format to be completely
+//      consistent, then the initial positions should be zero based
+//      (currently one-based, so A_1 would become A_0 and so on). Most
+//      of the change should be to the TDF files since only one line
+//      should need to changed (look for a "NOTE" comment around line
+//      93 or so).
+
 
 AssessmentSession = {
     /* Create a schedule using the assessmentsession settings in the
@@ -11,8 +23,25 @@ AssessmentSession = {
      *  unit - current unit (as specified by unitNumber)
      * 
      * RETURNS: a schedule object
+     * 
+     * NOTE: this is the "public" version, which is just a try-catch
+     *       wrapper around createScheduleImpl
     */
     createSchedule: function(setspec, clusters, unitNumber, unit) {
+        try {
+            return AssessmentSession.createScheduleImpl(setspec, clusters, unitNumber, unit);
+        }
+        catch(e) {
+            console.log("Error creating a schedule from the assessment session in the TDF...");
+            console.log(e);
+            return null;
+        }
+    },
+    
+    //"Private" implmentation version of createSchedule - should really
+    //be wrapped in an exception handler (see createSchedule for
+    //parameter descriptions)
+    createScheduleImpl: function(setspec, clusters, unitNumber, unit) {
         //First get the setting we'll use
         var settings = AssessmentSession.loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
@@ -63,7 +92,7 @@ AssessmentSession = {
                 var firstPos;
                 for(firstPos = 0; firstPos < settings.initialPositions.length; ++firstPos) {
                     var entry = settings.initialPositions[firstPos];
-                    //TODO: note the 1-based assumption to be fixed later when initial positions are fixed
+                    //NOTE the 1-based assumption for initial position values
                     if (groupName === entry[0] && Helpers.intVal(entry.substring(2)) == index + 1) {
                         break; //FOUND
                     }
@@ -250,7 +279,6 @@ AssessmentSession = {
         for (var i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {
-                //TODO: this appears to work but is empty when it gets back to the caller
                 settings.clusterNumbers.push(nums[j]);
             }
         }

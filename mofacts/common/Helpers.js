@@ -1,5 +1,7 @@
-//Simple helper functions that we might use across multiple files (on
-//both the client and the server)
+/* Helpers - Simple helper functions that we might use across multiple
+ * files (on both the client and the server)
+ * */
+
 Helpers = {
     //Given an object, convert it to a reasonable string for display:
     // - If it doesn't evaluate and isn't False, return empty string

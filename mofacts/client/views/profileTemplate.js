@@ -41,8 +41,6 @@ Template.profileTemplate.events({
         //Display Current Test in Console Log
         console.log("You clicked on: " + Session.get("currentTest"));
 
-        initializeProgressRecord();
-
         //make sure session variables are cleared from previous tests
         cleanUp();
         Router.go("instructions");
@@ -118,9 +116,4 @@ function cleanUp() {
     Session.set("currentAnswer", undefined);
     Session.set("questionIndex", undefined);
 	Session.set("currentUnitNumber", 0);
-}
-
-function initializeProgressRecord () {
-    // TODO: Here we will initialize the userProgress Collection
-    // with data about the current Test.
 }

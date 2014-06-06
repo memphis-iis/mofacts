@@ -2,10 +2,14 @@
 //  EVENTS  //
 //////////////
 
-//TODO: we should be going back to instructions for each unit
-//TODO: we don't handle instruction-only units right now
+//TODO: we should be going back to instructions for each unit - and we
+//      should be able to handle instruction-only units
 
-//TODO: reduce/refactor the server method calls
+//TODO: reduce/refactor the server method calls - naming, user, timestamp, 
+//      and Userlog can all be removed in favor of a unified logging call.
+//      (and the various logging calls could be changed to userTime calls
+//      as well - except for things we want ONLY in a text file and not
+//      in MongoDB)
 
 var timeoutName;
 var timeoutCount = -1;
@@ -588,10 +592,19 @@ function getSchedule() {
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
         
-        //TODO: if schedule is null then there was an error - should we stop
-        //      or continue in error mode?  Probably stop with an error since
-        //      the experiment is broken
         var schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
+        if (!schedule) {
+            //There was an error creating the schedule - there's really nothing
+            //left to do since the experiment is broken
+            Meteor.call("userTime", Session.get("currentTest"), {
+                action: "FAILURE to create schedule",
+                unitname: Helpers.display(currUnit.unitname),
+                unitindex: unit
+            });
+            alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+            Router.go("stats");
+            return;
+        }
         
         //We save the current schedule and also log it to the UserTime collection
         UserProgress.update(
@@ -751,10 +764,21 @@ function calculateCardProbabilities() {
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 		
-		//Log values for ACT-R system
+		//TODO: do we need to log to both the text file and MongoDB?
+        
+        //Log values for ACT-R system
 		Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
 		+ " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
 		+ "\n");
+        
+        Meteor.call("userTime", Session.get("currentTest"), {
+            questionSuccessCount: questionSuccessCount,
+            questionFailureCount: questionFailureCount,
+            trialsSinceLastSeen: trialsSinceLastSeen,
+            probability: probability,
+            totalTrials: totalTrials,
+            action: "ACT-R Calculation"
+        });
     }
 
     if (Session.get("debugging")) {
