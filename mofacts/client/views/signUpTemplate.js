@@ -4,7 +4,7 @@
 
 Template.signUpTemplate.events({
     'click #signInButton' : function () {
-		Router.go('signin');
+        Router.go('signin');
     },
     'click #signUpButton' : function () {
         var formUsername = signUpUsername.value;

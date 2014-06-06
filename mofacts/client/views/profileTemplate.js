@@ -22,7 +22,7 @@ Template.profileTemplate.events({
         console.log(event);
 
         Session.set("currentTest", getStimNameFromTdf(event.target.name));
-		
+        
 
         //Get Test Type
             //Whether it is a practice, drill, etc
@@ -52,14 +52,14 @@ Template.profileTemplate.events({
 /////////////////
 
 Template.profileTemplate.rendered = function () {
-	//this is called whenever the template is rendered.
-	var allTdfs = Tdfs.find({});
-	
+    //this is called whenever the template is rendered.
+    var allTdfs = Tdfs.find({});
+    
     allTdfs.forEach( function (tdfObject) {
 
         console.log("rendered: " + tdfObject.tdfs.tutor.setspec[0].stimulusfile[0]);
         
-      	var name = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+        var name = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
 
         if (typeof name !== "undefined") {
 
@@ -95,17 +95,17 @@ Template.profileTemplate.username = function () {
 /////////////////
 
 function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/ TDF
-	var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});
-	Session.set("currentTdfName", newTdf.fileName);
-	setUnitNumber(newTdf.fileName); 
-	var stimFileName = newTdf.tdfs.tutor.setspec[0].stimulusfile[0];
-	return stimFileName;
+    var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});
+    Session.set("currentTdfName", newTdf.fileName);
+    setUnitNumber(newTdf.fileName); 
+    var stimFileName = newTdf.tdfs.tutor.setspec[0].stimulusfile[0];
+    return stimFileName;
 }
 
 function setUnitNumber(tdfName){ //sets the number of units in the current session
-	var newTdf = Tdfs.findOne({fileName: tdfName});
-	if (newTdf.tdfs.tutor.unit != undefined){
-		console.log("unit length is: " + newTdf.tdfs.tutor.unit.length);
+    var newTdf = Tdfs.findOne({fileName: tdfName});
+    if (newTdf.tdfs.tutor.unit != undefined){
+        console.log("unit length is: " + newTdf.tdfs.tutor.unit.length);
     }
 }
 

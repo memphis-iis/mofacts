@@ -763,13 +763,13 @@ function calculateCardProbabilities() {
         var incModifier = {$inc: {}};
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
-		
-		//TODO: do we need to log to both the text file and MongoDB?
+        
+        //TODO: do we need to log to both the text file and MongoDB?
         
         //Log values for ACT-R system
-		Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
-		+ " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
-		+ "\n");
+        Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
+        + " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
+        + "\n");
         
         Meteor.call("userTime", Session.get("currentTest"), {
             questionSuccessCount: questionSuccessCount,

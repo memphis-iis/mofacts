@@ -10,7 +10,7 @@ Template.signInTemplate.events({
         UserPasswordCheck();
     },
     'click #signUpButton' : function () {
-		Router.go("signup");
+        Router.go("signup");
     },
     'focus #signInUsername' : function () {
         $("#invalidLogin").hide();
