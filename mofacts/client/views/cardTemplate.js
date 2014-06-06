@@ -731,8 +731,6 @@ function calculateCardProbabilities() {
     if (Session.get("debugging")) {
         console.log("calculating card probabilities...");
     }
-    //TODO: IWB - 03/30/2014: still need to get actual values for these variables.
-    //TODO: IWB - 04/02/2014: may need an entire collection to keep track of these variables.
 
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
 
