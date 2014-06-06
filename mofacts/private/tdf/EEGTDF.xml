@@ -105,7 +105,7 @@
             <randomizegroups>false</randomizegroups>
             <clusterlist>0-16</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>1-17</permutefinalresult>
+            <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>
 
@@ -151,7 +151,7 @@
             <randomizegroups>false</randomizegroups>
             <clusterlist>0-16</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>1-17</permutefinalresult>
+            <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>
     
@@ -198,7 +198,7 @@
             <randomizegroups>false</randomizegroups>
             <clusterlist>0-16</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>1-17</permutefinalresult>
+            <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>    
 </tutor>

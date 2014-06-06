@@ -588,6 +588,9 @@ function getSchedule() {
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
         
+        //TODO: if schedule is null then there was an error - should we stop
+        //      or continue in error mode?  Probably stop with an error since
+        //      the experiment is broken
         var schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
         
         //We save the current schedule and also log it to the UserTime collection

@@ -1,4 +1,4 @@
-//TODO: make sure everything is zero-based (e.g. permutefinalresult is currently 1-based)
+//TODO: wrap createSchedule in try/catch with message about flawed as/sched - and then return null
 
 AssessmentSession = {
     /* Create a schedule using the assessmentsession settings in the
@@ -147,15 +147,18 @@ AssessmentSession = {
             var randPerm = targetIndexes.slice(); //clone
             Helpers.shuffle(randPerm);
             
-            for(var j = 0; j < 0; ++j) {
-                finalQuests[targetIndex[j]] = quests[randPerm[j]];
+            for(var j = 0; j < targetIndexes.length; ++j) {
+                finalQuests[targetIndexes[j]] = quests[randPerm[j]];
             }
         }
         
+        //Note that our cardTemplate.js code has some fancy permutation
+        //logic, but that we don't currently use it from the assessment
+        //session
         var schedule = {
             unitNumber: unitNumber,
             created: new Date(),
-            permute: "0,1|2,3", //TODO: obviously, this needs work
+            permute: null,
             q: finalQuests
         };
         
@@ -180,8 +183,8 @@ AssessmentSession = {
             randomConditions: false,
             scheduleSize: 0,
             finalPermute: [],
-            ranChoices: 0,
-            clusterNumbers: []
+            clusterNumbers: [],
+            ranChoices: 0
         };
         
         if (!unit || !unit.assessmentsession) {
@@ -236,6 +239,10 @@ AssessmentSession = {
                 settings.groups.push(new_group);
             }
         }
+        
+        //Now that all possible changes to initial positions have been 
+        //done, we know our schedule size
+        settings.scheduleSize = settings.initialPositions.length;
         
         //Cluster Numbers
         var clusterList = [];
