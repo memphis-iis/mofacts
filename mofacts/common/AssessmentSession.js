@@ -61,7 +61,7 @@ AssessmentSession = {
         //How you set a question
         var setQuest = function(qidx, type, clusterIndex, condition) {
             quests[qidx] = {
-                testType: type,
+                testType: type.toLowerCase(),
                 clusterIndex: clusterIndex,
                 condition: condition
             };

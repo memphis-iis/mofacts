@@ -93,10 +93,10 @@
             <groupnames>A</groupnames> 
             <clustersrepeated>1</clustersrepeated>
             <templatesrepeated>17</templatesrepeated>
-            <group>0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0</group>
+            <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0</group>
             </conditiontemplatesbygroup>
             <initialpositions>
                 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 
@@ -139,10 +139,10 @@
             <groupnames>A</groupnames> 
             <clustersrepeated>1</clustersrepeated>
             <templatesrepeated>17</templatesrepeated>
-            <group>0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0</group>
+            <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0</group>
             </conditiontemplatesbygroup>
             <initialpositions>
                 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 
@@ -186,10 +186,10 @@
             <groupnames>A</groupnames> 
             <clustersrepeated>1</clustersrepeated>
             <templatesrepeated>17</templatesrepeated>
-            <group>0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0 0,f,s,0
-                0,f,s,0 0,f,s,0</group>
+            <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0</group>
             </conditiontemplatesbygroup>
             <initialpositions>
                 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 

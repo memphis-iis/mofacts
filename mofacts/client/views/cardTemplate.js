@@ -11,6 +11,8 @@
 //      as well - except for things we want ONLY in a text file and not
 //      in MongoDB)
 
+//TODO: levenshtein distance for fill-in-the-blank still missing
+
 var timeoutName;
 var timeoutCount = -1;
 var permuted = [];
@@ -182,7 +184,7 @@ function newQuestionHandler(){
             }
 
             //Need to make sure they also have a correct option :)
-            choicesArray.push(Session.get("currentAnswer"));
+            choicesArray.push(Session.get("currentAnswer")[0]);
             Helpers.shuffle(choicesArray);
 
             //We can cheat here because we know from above we have <= 4 entries
@@ -1022,7 +1024,7 @@ function findQTypeSimpified(){
 }
 
 function getTestType(){
-    return Session.get("testType");
+    return Helpers.trim(Session.get("testType")).toLowerCase();
 }
 
 //NOTE - permuted array is a SHALLOW COPY - which is different from

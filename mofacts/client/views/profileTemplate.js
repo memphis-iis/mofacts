@@ -106,14 +106,35 @@ function setUnitNumber(tdfName){ //sets the number of units in the current sessi
 	var newTdf = Tdfs.findOne({fileName: tdfName});
 	if (newTdf.tdfs.tutor.unit != undefined){
 		console.log("unit length is: " + newTdf.tdfs.tutor.unit.length);
-		Session.set("currentUnitNumber", 0);
-		Session.set("unitNumber", newTdf.tdfs.tutor.unit.length);
     }
 }
 
+/* All of our currently known session variables:
+ * clusterIndex
+ * currentAnswer
+ * currentQuestion
+ * currentTdfName
+ * currentTest
+ * currentUnitNumber
+ * debugging
+ * isScheduledTest
+ * questionIndex
+ * showOverlearningText
+ * testType
+ * usingACTRModel
+ * */
 function cleanUp() {
-    Session.set("currentQuestion", undefined);
+    //Note that we assume that currentTest and currentTdfName are
+    //already set (because getStimNameFromTdf should have already been
+    //called).  We also ignore debugging (for obvious reasons)
+    
+    Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
+    Session.set("currentQuestion", undefined);
+    Session.set("currentUnitNumber", 0);
+    Session.set("isScheduledTest", undefined);
     Session.set("questionIndex", undefined);
-	Session.set("currentUnitNumber", 0);
+    Session.set("showOverlearningText", undefined);
+    Session.set("testType", undefined);
+    Session.set("usingACTRModel", undefined);
 }
