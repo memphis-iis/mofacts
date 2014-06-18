@@ -342,6 +342,7 @@ function handleUserInput( e , source ) {
 
         if (Session.get("usingACTRModel")) {
             incrementNumQuestionsAnswered();
+			console.log("handle user input called")
             calculateCardProbabilities();
         }
 
@@ -662,6 +663,7 @@ function initializeActRModel() {
     };
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
+	console.log("init called");
     calculateCardProbabilities();
 }
 
@@ -767,9 +769,9 @@ function calculateCardProbabilities() {
         //TODO: do we need to log to both the text file and MongoDB?
         
         //Log values for ACT-R system
-        Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
-        + " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
-        + "\n");
+		
+
+		
         
         Meteor.call("userTime", Session.get("currentTest"), {
             questionSuccessCount: questionSuccessCount,
@@ -779,7 +781,11 @@ function calculateCardProbabilities() {
             totalTrials: totalTrials,
             action: "ACT-R Calculation"
         });
+	
     }
+    Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
+    + " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
+    + "\n");
 
     if (Session.get("debugging")) {
         console.log("...done calculating card probabilities.");
@@ -987,17 +993,29 @@ function timeoutfunction(index, timeoutNum){
                 action: "[TIMEOUT]",
                 delay: delay
             });
+            
+            if (getTestType() === "d") {
+                $("#UserInteraction").html("<font color= \"black\"> Timed out!" + " The correct answer is: " + Session.get("currentAnswer") +"</font>");
+	            $("#UserInteraction").show();
+            }
 
             recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
             if (Session.get("usingACTRModel")) {
                 incrementCurentQuestionsFailed();
                 incrementNumQuestionsAnswered();
+				console.log("timeout called");
                 calculateCardProbabilities();
             }
-
-
-            prepareCard();
+			
+			var clearInfo = function() {
+		    	$("#UserInteraction").html("");
+				prepareCard();
+			};
+			
+			Meteor.setTimeout(clearInfo, 3000);
+	
+            
         }else{
             //Do Nothing
         }
