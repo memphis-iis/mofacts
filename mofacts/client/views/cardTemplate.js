@@ -5,7 +5,7 @@
 //TODO: we should be going back to instructions for each unit - and we
 //      should be able to handle instruction-only units
 
-//TODO: reduce/refactor the server method calls - naming, user, timestamp, 
+//TODO: reduce/refactor the server method calls - naming, user, timestamp,
 //      and Userlog can all be removed in favor of a unified logging call.
 //      (and the various logging calls could be changed to userTime calls
 //      as well - except for things we want ONLY in a text file and not
@@ -87,7 +87,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
                 Session.set("usingACTRModel",false);
             }
         }
-        
+
         //Before the below options, reset current test data
         resetCurrentTestData();
 
@@ -140,6 +140,8 @@ Template.cardTemplate.drill = function() {
 /////////////////
 
 function newQuestionHandler(){
+    $("#userAnswer").focus();
+
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
         //question index = session's questionIndex -1 because it has already been incremented for the next card at this point.
@@ -291,19 +293,21 @@ function handleUserInput( e , source ) {
 
             if (userAnswer.localeCompare(answer)) {
                 isCorrect = false;
-                if (Session.get("usingACTRModel")) {
-                    incrementCurentQuestionsFailed();
-                }
                 if (getTestType() === "d") {
                     $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
                 }
-            } else {
                 if (Session.get("usingACTRModel")) {
-                    incrementCurrentQuestionSuccess();
+                    incrementCurentQuestionsFailed();
                 }
+
+            } else {
                 if (getTestType() === "d") {
                     $("#UserInteraction").html("<font color= \"black\">You are Correct. " + "Great Job</font>");
                 }
+                if (Session.get("usingACTRModel")) {
+                    incrementCurrentQuestionSuccess();
+                }
+
             }
         }
         //---------
@@ -348,14 +352,14 @@ function handleUserInput( e , source ) {
 
         //Reset timer for next question
         start = startTimer();
-        
+
         //Whether timed or not, same logic for below
         var setup = function() {
             prepareCard();
             $("#userAnswer").val("");
             $("#UserInteraction").html("");
         };
-        
+
         if(AllowUserInteraction) {
             //timeout for adding a small delay so the User may read
             //the correctness of his/her anwser
@@ -394,7 +398,7 @@ function prepareCard() {
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
             //Session.set("currentUnitNumber",0);
         }
-        
+
         var unit = getCurrentUnitNumber();
         if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
             Router.go("stats");
@@ -546,7 +550,7 @@ function resetCurrentTestData() {
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
     var tutor = file.tdfs.tutor;
     var currentTestMode;
-    
+
     if (tutor.unit && tutor.unit.length) {
         currentTestMode = "SCHEDULED";
     }
@@ -571,30 +575,30 @@ function resetCurrentTestData() {
     }
 }
 
-//Return the schedule for the current unit of the current lesson - 
+//Return the schedule for the current unit of the current lesson -
 //If it diesn't exist, then create and store it in User Progress
 function getSchedule() {
     //Retrieve current schedule
     var progress = UserProgress.findOne({_id: Meteor.userId()});
-    
+
     var unit = getCurrentUnitNumber();
     var schedule = null;
     if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
         schedule = progress.currentSchedule;
     }
-    
+
     //Lazy create save if we don't have a correct schedule
     if (schedule === null) {
         console.log("CREATING SCHEDULE, showing progress");
         console.log(progress);
-        
+
         var stims = Stimuli.findOne({fileName: getCurrentTestName()});
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
-        
+
         var file = Tdfs.findOne({fileName: getCurrentTdfName()});
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
-        
+
         var schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
         if (!schedule) {
             //There was an error creating the schedule - there's really nothing
@@ -608,13 +612,13 @@ function getSchedule() {
             Router.go("stats");
             return;
         }
-        
+
         //We save the current schedule and also log it to the UserTime collection
         UserProgress.update(
             { _id: Meteor.userId() },
             { $set: { currentSchedule: schedule } }
         );
-        
+
         Meteor.call("userTime", Session.get("currentTest"), {
             action: "schedule",
             unitname: Helpers.display(currUnit.unitname),
@@ -622,7 +626,7 @@ function getSchedule() {
             schedule: schedule
         });
     }
-    
+
     //Now they can have the schedule
     return schedule;
 }
@@ -737,6 +741,9 @@ function calculateCardProbabilities() {
     }
 
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    var setModifiers = [];
+    var incModifiers = [];
+    var logSet = []; //We'll pass this array off to the server later to update the log in DB
 
     for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
 
@@ -747,7 +754,7 @@ function calculateCardProbabilities() {
         var totalTrials = cardProbs.numQuestionsAnswered;
         var trialsSinceLastSeenOverTotalTrials;
 
-        if (totalTrials !== 0) { // can't devide by 0
+        if (totalTrials !== 0) { // can't divide by 0
             trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen/totalTrials;
         } else {
             trialsSinceLastSeenOverTotalTrials = 0;
@@ -757,22 +764,31 @@ function calculateCardProbabilities() {
         var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
 
         //set probability
-        var setModifier = {$set: {}};
+        var setModifier = {$set: {}}; //TODO: Add setModifier and incModifiers to arrays to iterate over and update on server
         setModifier.$set["cardsArray." + i + ".probability"] = probability;
-        CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
+        setModifiers.push(setModifier);
+        //CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
 
         //increment trialsSinceLastSeen
         var incModifier = {$inc: {}};
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
-        CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
-        
-        //TODO: do we need to log to both the text file and MongoDB?
-        
-        //Log values for ACT-R system
-		
+        incModifiers.push(incModifier);
+        //CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 
-		
-        
+        //TODO: do we need to log to both the text file and MongoDB?
+
+        logSet.push({ //we'll push this to the server to be logged en masse a little later
+            questionSuccessCount: questionSuccessCount,
+            questionFailureCount: questionFailureCount,
+            trialsSinceLastSeen: trialsSinceLastSeen,
+            probability: probability,
+            totalTrials: totalTrials,
+            action: "ACT-R Calculation"
+        });
+
+        console.log(logSet[i]);
+        //Log values for ACT-R system
+        /*
         Meteor.call("userTime", Session.get("currentTest"), {
             questionSuccessCount: questionSuccessCount,
             questionFailureCount: questionFailureCount,
@@ -781,9 +797,14 @@ function calculateCardProbabilities() {
             totalTrials: totalTrials,
             action: "ACT-R Calculation"
         });
-	
+        */
     }
-    Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount 
+
+    Meteor.call("userTime", Session.get("currentTest"), logSet);
+
+    Meteor.call("updateCardProbs", setModifiers, incModifiers);
+
+    Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount
     + " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
     + "\n");
 
@@ -799,8 +820,12 @@ function getNextCardActRModel() {
     }
     Session.set("testType", "d");
 
+    console.log("1");
+
     var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
     var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
+
+    console.log("2");
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
@@ -820,7 +845,7 @@ function getNextCardActRModel() {
 
         return;
     } else {
-
+        console.log("3");
         var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
 
         if ( nextCardIndex !== -1) {
@@ -833,7 +858,7 @@ function getNextCardActRModel() {
 
         } else {
             //numbers 4 and 5 in the algorithm.
-
+            console.log("4");
             if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
                 //number 5 in the algorithm.
                 var indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
@@ -993,7 +1018,7 @@ function timeoutfunction(index, timeoutNum){
                 action: "[TIMEOUT]",
                 delay: delay
             });
-            
+
             if (getTestType() === "d") {
                 $("#UserInteraction").html("<font color= \"black\"> Timed out!" + " The correct answer is: " + Session.get("currentAnswer") +"</font>");
 	            $("#UserInteraction").show();
@@ -1007,15 +1032,15 @@ function timeoutfunction(index, timeoutNum){
 				console.log("timeout called");
                 calculateCardProbabilities();
             }
-			
+
 			var clearInfo = function() {
 		    	$("#UserInteraction").html("");
 				prepareCard();
 			};
-			
+
 			Meteor.setTimeout(clearInfo, 3000);
-	
-            
+
+
         }else{
             //Do Nothing
         }

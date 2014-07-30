@@ -36,7 +36,20 @@ Meteor.startup(function () {
     Meteor.methods({
         
         //New functionality for logging to the DB
-        userTime: function(experiment, objectToLog) {
+        userTime: function(experiment, objectsToLog) {
+
+            for(i = 0; i < objectsToLog.length; i++) {
+                objectsToLog[i]["serverSideTimeStamp"] = Date.now();
+                var experiment_key = (experiment + "").replace(/\./g, "_");
+                var action = {$push: {}};
+                action["push"][experiment_key] = objectsToLog[i];
+                UserTimesLog.update(
+                    { _id: Meteor.userId() },
+                    action,
+                    {upsert: true}
+                );
+            }
+            /*
             //Make sure we know when the server thought we were logging
             objectToLog["serverSideTimestamp"] = Date.now();
             
@@ -51,6 +64,7 @@ Meteor.startup(function () {
                 action,
                 { upsert: true }
             );
+            */
         },
 
         //Added addition stuff to Log
@@ -90,6 +104,15 @@ Meteor.startup(function () {
         //Saves timestamp to Server side
         Userlog: function(usernamestuff){
             console.log(usernamestuff + " has connected.")
+        },
+
+        updateCardProbs: function(setModifiers, incModifiers){
+            for(i = 0; i < setModifiers.length; i++){
+                CardProbabilities.update({ _id: Meteor.userId() }, setModifiers[i]);
+            }
+            for(j = 0; j < incModifiers.length; j++){
+                CardProbabilities.update({ _id: Meteor.userId() }, incModifiers[i]);
+            }
         }
     });
 });
