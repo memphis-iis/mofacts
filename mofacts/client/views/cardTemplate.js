@@ -261,14 +261,14 @@ function handleUserInput( e , source ) {
         clearTimeout(timeoutName);
 
         var userAnswer;
-        if ( source === "keypress") {
+        if (source === "keypress") {
             userAnswer = Helpers.trim(document.getElementById('userAnswer').value.toLowerCase());
         } else if ( source === "buttonClick") {
             userAnswer = e.target.name;
         }
 
         //Check Correctness
-        var answer = Helpers.trim(Session.get("currentAnswer")[0].toLowerCase());
+        var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
         var isCorrect = true;
         //---------
 
@@ -440,8 +440,8 @@ function randomCard() {
     //set the question and answer
     Session.set("clusterIndex", nextCardIndex);
     Session.set("testType", "d"); //No test type given
-    Session.set("currentQuestion", getStimQuestion(nextCardIndex));
-    Session.set("currentAnswer", getStimAnswer(nextCardIndex));
+    Session.set("currentQuestion", getStimQuestion(nextCardIndex, 1));
+    Session.set("currentAnswer", getStimAnswer(nextCardIndex, 1));
     newQuestionHandler();
 }
 
@@ -468,13 +468,13 @@ function getQuestionType() {
 }
 
 //get the question at this index
-function getStimQuestion(index) {
-    return getStimCluster(index).display;
+function getStimQuestion(index, whichQuestion) {
+    return getStimCluster(index).display[whichQuestion];
 }
 
 //get the answer at this index
-function getStimAnswer(index) {
-    return getStimCluster(index).response;
+function getStimAnswer(index, whichAnswer) {
+    return getStimCluster(index).response[whichAnswer];
 }
 
 function scheduledCard() {
@@ -493,12 +493,14 @@ function scheduledCard() {
 
     var questInfo = getSchedule().q[dispQuestionIndex];
     var clusterIndex = questInfo.clusterIndex;
+    var whichStim = questInfo.whichStim;
+    console.log(clusterIndex + "//" + whichStim);
 
     //get the type of test (drill, test, study)
     Session.set("clusterIndex", clusterIndex);
     Session.set("testType", questInfo.testType);
-    Session.set("currentQuestion", getStimQuestion(clusterIndex));
-    Session.set("currentAnswer", getStimAnswer(clusterIndex));
+    Session.set("currentQuestion", getStimQuestion(clusterIndex, whichStim));
+    Session.set("currentAnswer", getStimAnswer(clusterIndex, whichStim));
 
     //Note we increment the session's question index number - NOT the
     //permuted index
@@ -653,8 +655,8 @@ function initializeActRModel() {
             { $push:
                 { cardsArray :
                     {
-                          question: getStimQuestion(i)
-                        , answer: getStimAnswer(i)
+                          question: getStimQuestion(i, 0)
+                        , answer: getStimAnswer(i, 0)
                         , questionSuccessCount: 0
                         , questionFailureCount: 0
                         , trialsSinceLastSeen: 0

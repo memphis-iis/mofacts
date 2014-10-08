@@ -59,11 +59,12 @@ AssessmentSession = {
         quests[settings.scheduleSize-1] = {};
         
         //How you set a question
-        var setQuest = function(qidx, type, clusterIndex, condition) {
+        var setQuest = function(qidx, type, clusterIndex, condition, whichStim) {
             quests[qidx] = {
                 testType: type.toLowerCase(),
                 clusterIndex: clusterIndex,
-                condition: condition
+                condition: condition,
+                whichStim : whichStim
             };
         };
         
@@ -133,19 +134,19 @@ AssessmentSession = {
                         randOffset = Math.floor(Math.random() * settings.clusterSize);
                     }
                     
-                    var offStr = parts[0].toLowerCase();
+                    var offStr = parts[0].toLowerCase(); //Selects stim from cluster w/ multiple stims
                     if (offStr === "m") {
                         //Trial from model
-                        setQuest(firstPos + location, type, 0, "select_"+type);
+                        setQuest(firstPos + location, type, 0, "select_"+type, offStr);
                     }
                     else {
                         //Trial by other means
                         var offset;
                         if (offStr === "r") {
-                            offset = Math.floor(Math.random() * settings.ranChoices);
+                            //offset = Math.floor(Math.random() * settings.ranChoices);
                         }
                         else {
-                            offset = Helpers.intVal(offStr);
+                            //offset = Helpers.intVal(offStr);
                         }
                         
                         var condition = groupName + "-" + index;
@@ -161,7 +162,7 @@ AssessmentSession = {
                         }
                         
                         var pairNum = settings.clusterSize * clusterNum + offset;
-                        setQuest(firstPos + location, type, pairNum, condition);
+                        setQuest(firstPos + location, type, pairNum, condition, offStr);
                     } //offset is Model or something else?
                 } //k (walk thru group elements)
             } //j (each template index)
