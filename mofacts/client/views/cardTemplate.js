@@ -16,6 +16,8 @@
 var timeoutName;
 var timeoutCount = -1;
 var permuted = [];
+var audioAdded = false;
+Session.set("isScheduledTest", true);
 
 Template.cardTemplate.events({
 
@@ -90,7 +92,6 @@ Template.cardTemplate.invokeAfterLoad = function() {
 
         //Before the below options, reset current test data
         resetCurrentTestData();
-
         prepareCard();
         Session.set("showOverlearningText", false);
     }
@@ -140,7 +141,9 @@ Template.cardTemplate.drill = function() {
 /////////////////
 
 function newQuestionHandler(){
+    alert("blah");
     $("#userAnswer").focus();
+
 
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
@@ -182,7 +185,7 @@ function newQuestionHandler(){
             //use 3 false responses
             if (choicesArray.length > 3) {
                 Helpers.shuffle(choicesArray);
-                choicesArray = choicesArray.splice(0, 3);
+                choicesArray = choicesArray.splice(0, 5);
             }
 
             //Need to make sure they also have a correct option :)
@@ -190,7 +193,7 @@ function newQuestionHandler(){
             Helpers.shuffle(choicesArray);
 
             //We can cheat here because we know from above we have <= 4 entries
-            var labelArray = ["A", "B", "C", "D"];
+            var labelArray = ["A", "B", "C", "D", "E", "F"];
 
             for (var i = 0; i < choicesArray.length; ++i) {
                 var value = choicesArray[i];
@@ -230,20 +233,16 @@ function newQuestionHandler(){
     }
 
     if(getQuestionType() === "sound"){
-        console.log("Sound")
-        document.getElementById('audio').play();
+        document.getElementById('audio').curTime = 0;
+        document.getElementById('audio').play();    
     }
-
 
     if (Session.get("showOverlearningText") == true) {
         $("#overlearningRow").show();
     }
-
-
 }
 
-function handleUserInput( e , source ) {
-
+function handleUserInput(e , source) {
 
     //for debugging, allow one to turn on or off the UserInteraction code.
     var AllowUserInteraction = true;
@@ -268,6 +267,8 @@ function handleUserInput( e , source ) {
         }
 
         //Check Correctness
+        console.log(Session["currentAnswer"]);
+        console.log(Session);
         var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
         var isCorrect = true;
         //---------
@@ -386,15 +387,17 @@ function startTimer() {
 
 function prepareCard() {
     var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-
+    alert("alert 401" + Session.get("usingACTRModel"));
     if (Session.get("usingACTRModel")) {
         getNextCardActRModel();
         return;
     }
-
+    alert("406 alert:" + file.tdfs.tutor.unit + "\n" + file.tdfs.tutor.unit.length);
+    alert(file.tdfs.tutor.unit && file.tdfs.tutor.unit.length);
     if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
         Session.set("isScheduledTest", true);
         if (Session.get("questionIndex") === undefined) {
+            alert("1");
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
             //Session.set("currentUnitNumber",0);
         }
@@ -402,6 +405,7 @@ function prepareCard() {
         var unit = getCurrentUnitNumber();
         if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
             Router.go("stats");
+            alert("2");
             return;
         }
 
@@ -410,16 +414,19 @@ function prepareCard() {
         //If we're using permutations, permute the specified groups/items
         //Note that permuted is defined at the top of this file
         if (Session.get("questionIndex") === 0 &&  schedule.permute){
+            alert("3");
             permuted = permute(schedule.permute);
         }
 
         if (Session.get("questionIndex") === schedule.q.length){
+             alert("4");
             //if we are at the end of this unit
             Session.set("questionIndex", 0);
             Session.set("currentUnitNumber", unit + 1);
             prepareCard();
         }
         else {
+            alert("5");
             scheduledCard();
         }
     }
@@ -505,7 +512,7 @@ function scheduledCard() {
     //Note we increment the session's question index number - NOT the
     //permuted index
     Session.set("questionIndex", questionIndex + 1);
-
+    alert("new quesiton handler");
     newQuestionHandler();
 }
 
