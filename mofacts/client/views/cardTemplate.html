@@ -41,12 +41,8 @@
 				<h2><div id="textQuesiton">{{currentQuestion}}</div></h2>
 				{{/if}}
 				{{#if audioCard}}
-				<audio controls id="audio">
-					<source src={{currentQuestion}}.mp3 type="audio/mpeg">
-					<source src={{currentQuestion}}.wav type="audio/wav">
-						Your browser does not support the audio element.
-					</audio>
-					{{/if}}
+				<img src="speaker.png" height="100" width="100">
+				{{/if}}
 					{{#if imageCard}}
 					<img src={{currentQuestion}}>
 					{{/if}}

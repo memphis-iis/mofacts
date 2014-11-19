@@ -3,41 +3,34 @@ Router.configure({
     layoutTemplate: 'DefaultLayout'
 });
 
-Router.map(function() {
+Router.route('/signin', function () {
+    this.render('signInTemplate')
+});
 
-    this.route('signin', {
-        path: '/signin',
-        template: 'signInTemplate'
-    }); 
-    
-    this.route('signup', {
-        path: '/signup',
-        template: 'signUpTemplate'
-    });
-    
-    this.route('home', {
-        path: '/',
-        template: 'signInTemplate'
-    });
+Router.route('/signup', function () {
+    this.render('signUpTemplate')
+});
 
-    this.route('profile', {
-        path: '/profile',
-        template: 'profileTemplate'
-    })
+Router.route('/', function () {
+    this.render('signInTemplate')
+});
 
-    this.route('card', {
-        path: '/card',
-        template: 'cardTemplate'
-    })
+Router.route('home', function () {
+    this.render('profileTemplate')
+});
 
-    this.route('instructions', {
-        path: '/instructions',
-        template: 'instructionsTemplate'
-    })
+Router.route('/profile', function () {
+    this.render('profileTemplate')
+});
 
-    this.route('stats', {
-        path: '/stats',
-        template: 'statsPageTemplate'
-    })
+Router.route('/card', function () {
+    this.render('cardTemplate')
+});
 
+Router.route('/instructions', function () {
+    this.render('instructionsTemplate')
+});
+
+Router.route('/stats', function () {
+    this.render('statsPageTemplate')
 });
