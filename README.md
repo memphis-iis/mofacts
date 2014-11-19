@@ -11,7 +11,6 @@ To get started:
 
     git clone https://bitbucket.org/ppavlik/mofacts.git
     cd mofacts/mofacts
-    mrt update
     meteor
 
 Please see the docs subdirectory for additional documentation.
