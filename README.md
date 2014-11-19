@@ -9,7 +9,7 @@ when working with MoFaCTS.
 
 To get started:
 
-    git clone https://bitbucket.org/paperziggurat/mofacts.git
+    git clone https://bitbucket.org/ppavlik/mofacts.git
     cd mofacts/mofacts
     mrt update
     meteor
