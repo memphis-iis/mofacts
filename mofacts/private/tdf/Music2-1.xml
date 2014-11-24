@@ -5,7 +5,7 @@
         <stimulusfile>Music2stim.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
         <clustersize>1</clustersize>
-        <shuffleclusters>0-16</shuffleclusters>
+        <shuffleclusters>0-11</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <eeglogged>true</eeglogged>
         <isModeled>false</isModeled>
@@ -72,15 +72,15 @@
         <unitinstructions>
             Pretest portion (48 practices)
 
-            Listen to each 2-second interval, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn. 
- 
+            Listen to each 2-second interval, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
+
             Goal: Practice the sound identification task, attempting to learn the interval between two musical tones. This pretest portion will get an initial measure of your skill in the task, and will be followed by 108 training practices, and finally a posttest of 24 practices.
         </unitinstructions>
-        
+
         <instructconfirm>false</instructconfirm>
         <messagescore>false</messagescore>
         <correctscore>1</correctscore>
-        <incorrectscore>0</incorrectscore>  
+        <incorrectscore>0</incorrectscore>
         <deliveryparams>
             <purestudy>10000</purestudy>
             <readyprompt>0</readyprompt>
@@ -93,8 +93,8 @@
         <unending>false</unending>
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
-        
-        <buttontrial>true</buttontrial> <!-- Multiple choice -->
+
+        <buttontrial>true</buttontrial> <!-- Multiple choice  -->
 
            <assessmentsession>
                <conditiontemplatesbygroup>
@@ -111,9 +111,9 @@
                    A_15 A_16 A_17
                </initialpositions>
                <randomizegroups>false</randomizegroups>
-               <clusterlist>0-16</clusterlist>
+               <clusterlist>0-11</clusterlist>
                <assignrandomclusters>false</assignrandomclusters>
-               <permutefinalresult>0-16</permutefinalresult>
+               <permutefinalresult>0-11</permutefinalresult>
            </assessmentsession>
     </unit>
 </tutor>

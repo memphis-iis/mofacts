@@ -140,6 +140,7 @@ Template.cardTemplate.drill = function() {
 /////////////////
 
 function newQuestionHandler(){
+    console.log("NQ handler");
     $("#userAnswer").focus();
 
     if ( Session.get("isScheduledTest") ) {
@@ -233,8 +234,6 @@ function newQuestionHandler(){
         var sound = new Howl({
             urls: [Session.get("currentQuestion") + '.mp3', Session.get("currentQuestion") + '.wav']
         }).play();
-        document.getElementById('audio').curTime = 0;
-        //document.getElementById('audio').play();
     }
 
 
@@ -361,13 +360,14 @@ function handleUserInput( e , source ) {
             prepareCard();
             $("#userAnswer").val("");
             $("#UserInteraction").html("");
+            $("#UserInteraction").hide();
         };
 
         if(AllowUserInteraction) {
             //timeout for adding a small delay so the User may read
-            //the correctness of his/her anwser
+            //the correctness of his/her answer
             $("#UserInteraction").show();
-            Meteor.setTimeout(setup, 1000);
+            Meteor.setTimeout(setup, 2000);
         }
         else {
             $("#UserInteraction").hide();
@@ -1043,7 +1043,7 @@ function timeoutfunction(index, timeoutNum){
 				prepareCard();
 			};
 
-			Meteor.setTimeout(clearInfo, 3000);
+			Meteor.setTimeout(clearInfo, 2000);
 
 
         }else{
