@@ -4,67 +4,93 @@ var filename, name, timestamp, TempLog = "";
 var filepath = '../../../../../server/';
 var endOfLine = Npm.require("os").EOL;
 
+//Helper functions
+
+function parseXML(xml) {
+    var json = {};
+    xml2js.parseString(xml, function (err, result) {
+        json = result;
+    });
+    return json;
+}
+
+function getStimJSON(fileName) {
+    var future = new Future();
+    Assets.getText(fileName, function(err, data){
+        if (err) throw err;
+        var json = parseXML(data);
+        future.return(json);
+    });
+    return future.wait();
+}
+
+//Server-side startup logic
+
 Meteor.startup(function () {
+    //Currently we re-load all tdf and stimuli from local files
     Stimuli.remove({});
     Tdfs.remove({});
     stimTdfPair.remove({});
-    var files = fs.readdirSync('./assets/app/stims/');
-    var tdffiles = fs.readdirSync('./assets/app/tdf/');
-    console.log(tdffiles);
-    console.log(files);
-    var stims = _(files).reject( function(fileName) {
-        return fileName.indexOf('.xml') < 0;
-    });
-    var tdfs = _(tdffiles).reject( function(fileName) {
-        return fileName.indexOf('.xml') < 0;
-    });
-
-    for(var i = 0; i < stims.length; i++){
-        var fileName = stims[i];
-        var json = getStimJSON('stims/' + fileName);
-        Stimuli.insert({fileName: fileName, stimuli: json});
-        
-    }
     
-    for(var i = 0; i < tdfs.length; i++){
-        var fileName = tdfs[i];
-        var json = getStimJSON('tdf/' + fileName);
-        Tdfs.insert({fileName: fileName, tdfs: json});
-        
-    }
-
+    var isXML = function (fn) { return fn.indexOf('.xml') >= 0; };
+    
+    _.each(
+        _.filter(fs.readdirSync('./assets/app/stims/'), isXML), 
+        function(ele, idx, lst) {
+            var json = getStimJSON('stims/' + ele);
+            Stimuli.insert({fileName: ele, stimuli: json});
+        }
+    );
+    
+    _.each(
+        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
+        function(ele, idx, lst) {
+            var json = getStimJSON('tdf/' + ele);
+            Tdfs.insert({fileName: ele, tdfs: json});
+        }
+    );
+    
+    //Set up our server-side methods
     Meteor.methods({
         
         //New functionality for logging to the DB
         userTime: function(experiment, objectsToLog) {
-
-            for(i = 0; i < objectsToLog.length; i++) {
-                objectsToLog[i]["serverSideTimeStamp"] = Date.now();
-                var experiment_key = (experiment + "").replace(/\./g, "_");
-                var action = {$push: {}};
-                action["push"][experiment_key] = objectsToLog[i];
-                UserTimesLog.update(
-                    { _id: Meteor.userId() },
-                    action,
-                    {upsert: true}
-                );
+            var objType = typeof objectsToLog;
+            var valsToPush = [];
+            
+            if (typeof objectsToLog === "undefined") {
+                //Nothing passed to us: use an empty object, which will
+                //contain only the current time
+                valsToPush.push({});
             }
-            /*
-            //Make sure we know when the server thought we were logging
-            objectToLog["serverSideTimestamp"] = Date.now();
+            else if (typeof objectsToLog.length === "undefined") {
+                //Not an array - they passed a single object
+                valsToPush.push(objectsToLog);                
+            }
+            else {
+                //Grab the entire array
+                for(i = 0; i < objectsToLog.length; i++) {
+                    valsToPush.push(objectsToLog[i]);
+                }
+            }
             
-            var experiment_key = (experiment + "").replace(/\./g, "_");
+            //Every object we log gets a server side time stamp
+            for(i = 0; i < valsToPush.length; i++) {
+                valsToPush[i]["serverSideTimeStamp"] = Date.now();
+            }
             
-            //We want to push the given object to an array named the
-            //as our current test/experiment
+            //Create action object: should look like:
+            // { $push: { <experiment_key>: { $each: <objectsToLog in array> } } }
             var action = {$push: {}};
-            action["$push"][experiment_key] = objectToLog;
+            var experiment_key = (experiment + "").replace(/\./g, "_");
+            var allVals = { $each: valsToPush };
+            action["$push"][experiment_key] = allVals;
+            
             UserTimesLog.update(
-                { _id: Meteor.userId() }, 
+                { _id: Meteor.userId() },
                 action,
-                { upsert: true }
+                {upsert: true}
             );
-            */
         },
 
         //Added addition stuff to Log
@@ -117,21 +143,3 @@ Meteor.startup(function () {
     });
 });
 
-
-function parseXML(xml) {
-    var json = {};
-    xml2js.parseString(xml, function (err, result) {
-        json = result;
-    });
-    return json;
-}
-
-function getStimJSON(fileName) {
-    var future = new Future();
-    Assets.getText(fileName, function(err, data){
-        if (err) throw err;
-        var json = parseXML(data);
-        future.return(json);
-    });
-    return future.wait();
-}
