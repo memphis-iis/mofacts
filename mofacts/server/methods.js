@@ -4,6 +4,8 @@ var filename, name, timestamp, TempLog = "";
 var filepath = '../../../../../server/';
 var endOfLine = Npm.require("os").EOL;
 
+//TODO: Update README with new meteor version and procedure for updating
+
 //Helper functions
 
 function parseXML(xml) {
