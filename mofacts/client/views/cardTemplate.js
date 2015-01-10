@@ -72,10 +72,9 @@ Template.cardTemplate.invokeAfterLoad = function() {
         console.log('card loaded');
     }
 
-    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
-
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
+        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
 
         //check if tutor.setspec.isModeled is defined in the tdf
         if (file.tdfs.tutor.setspec[0].isModeled != undefined) {
@@ -639,37 +638,30 @@ function getSchedule() {
 function initializeActRModel() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
+    
+    var initCardsArray = [];
+    for (var i = 0; i < numQuestions; ++i) {
+        initCardsArray.push({
+            question: getStimQuestion(i, 0),
+            answer: getStimAnswer(i, 0),
+            questionSuccessCount: 0,
+            questionFailureCount: 0,
+            trialsSinceLastSeen: 0,
+            probability: 0.0,
+            hasBeenIntroduced: false
+        });
+    }
 
     //update the cards array to be empty
     CardProbabilities.update(
         { _id: Meteor.userId() },
-        { $set:
-            {
-                  numQuestionsAnswered: 0
-                , numQuestionsIntroduced: 0
-                , cardsArray: []
-            }
-        }
+        { $set: {
+            numQuestionsAnswered: 0,
+            numQuestionsIntroduced: 0,
+            cardsArray: initCardsArray
+        }},
+        { upsert: true }
     );
-    //load all of the cards into the cards array.
-    for (var i = 0; i < numQuestions; ++i) {
-        CardProbabilities.update(
-            { _id: Meteor.userId() },
-            { $push:
-                { cardsArray :
-                    {
-                          question: getStimQuestion(i, 0)
-                        , answer: getStimAnswer(i, 0)
-                        , questionSuccessCount: 0
-                        , questionFailureCount: 0
-                        , trialsSinceLastSeen: 0
-                        , probability: 0
-                        , hasBeenIntroduced: false
-                    }
-                }
-            }
-        );
-    };
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
 	console.log("init called");
@@ -769,7 +761,7 @@ function calculateCardProbabilities() {
         var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
 
         //set probability
-        var setModifier = {$set: {}}; //TODO: Add setModifier and incModifiers to arrays to iterate over and update on server
+        var setModifier = {$set: {}};
         setModifier.$set["cardsArray." + i + ".probability"] = probability;
         setModifiers.push(setModifier);
         //CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
@@ -791,7 +783,7 @@ function calculateCardProbabilities() {
             action: "ACT-R Calculation"
         });
 
-        console.log(logSet[i]);
+        //console.log(logSet[i]);
         //Log values for ACT-R system
         /*
         Meteor.call("userTime", Session.get("currentTest"), {

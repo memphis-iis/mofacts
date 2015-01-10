@@ -134,13 +134,18 @@ Meteor.startup(function () {
             console.log(usernamestuff + " has connected.")
         },
 
+
+        //TODO: we could change this call to do a SINGLE database op
         updateCardProbs: function(setModifiers, incModifiers){
-            for(i = 0; i < setModifiers.length; i++){
-                CardProbabilities.update({ _id: Meteor.userId() }, setModifiers[i]);
-            }
-            for(j = 0; j < incModifiers.length; j++){
-                CardProbabilities.update({ _id: Meteor.userId() }, incModifiers[i]);
-            }
+            var target = {_id: Meteor.userId()};
+            
+            _.each(setModifiers, function(ele, idx) {
+                CardProbabilities.update(target, ele);
+            });
+            
+            _.each(incModifiers, function(ele, idx) {
+                CardProbabilities.update(target, ele);
+            });
         }
     });
 });
