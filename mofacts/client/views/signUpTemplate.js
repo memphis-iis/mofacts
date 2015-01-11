@@ -32,6 +32,7 @@ Template.signUpTemplate.events({
             $("#passwordTooShort").hide();
         }
 
+
         if(formPassword1 !== formPassword2) {
             $("#passwordMustMatch").show();
             return;
@@ -39,7 +40,7 @@ Template.signUpTemplate.events({
             $("#passwordMustMatch").hide();
         }
 
-        Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
+        Accounts.createUser({username: formUsername, password: newPass}, function (error) {
             if(typeof error !== "undefined") {
                 console.log("ERROR: There was an error creating the user account!\n" +
                             "\t[Username: " + formUsername + "]\n" +
@@ -87,6 +88,15 @@ Template.signUpTemplate.events({
                             "\t[Username:" + formUsername + "]" +
                             "\t" + error);
                 }
+            }
+            UserAccounts.insert({
+                id: newUserID
+            });
+            if (formPassword1 == null) {
+                OpenAccounts.insert({
+                    id: newUserID,
+                    username: formUsername
+                });
             }
         });
     },

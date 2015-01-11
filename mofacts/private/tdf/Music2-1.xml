@@ -10,6 +10,7 @@
         <eeglogged>true</eeglogged>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
+        <buttonorder>Major 3rd, Tritone, Perfect 5th, Major 7th, Minor 3rd, Octave</buttonorder>
     </setspec>
     
     <deliveryparams>

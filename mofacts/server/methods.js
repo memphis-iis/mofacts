@@ -5,6 +5,8 @@ var filepath = '../../../../../server/';
 var endOfLine = Npm.require("os").EOL;
 
 Meteor.startup(function () {
+
+
     Stimuli.remove({});
     Tdfs.remove({});
     stimTdfPair.remove({});
@@ -94,6 +96,7 @@ Meteor.startup(function () {
             name = names;
 
         },
+
 
         //Saves timestamp to Server side
         timestamp: function(){

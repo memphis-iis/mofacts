@@ -7,5 +7,8 @@ stimTdfPair = new Meteor.Collection("tdfValue");
 Paused = new Meteor.Collection("paused");
 UserProgress = new Meteor.Collection("userProgress");
 CardProbabilities = new Meteor.Collection("CardProbabilities");
+UserAccounts = new Meteor.Collection("reg_users");
+AdminAccounts = new Meteor.Collection("admins");
+OpenAccounts = new Meteor.Collection("opens");
 
 UserTimesLog = new Meteor.Collection("userTimesLog");

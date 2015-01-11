@@ -164,6 +164,11 @@ function newQuestionHandler(){
 
             var cluster = getStimCluster(getCurrentClusterIndex());
 
+            if (file.tdfs.tutor.setspec[0].buttonorder.length) { //are we using specified choice order for buttons?
+                var buttonOrderTag = file.tdfs.tutor.setspec[0].buttonorder + '';
+                var buttonOrder = buttonOrderTag.split(",");
+            }
+
             var choicesArray = [];
             if (cluster.falseResponse && cluster.falseResponse.length) {
                 for (var i = 0; i < cluster.falseResponse.length; ++i) {
@@ -179,8 +184,8 @@ function newQuestionHandler(){
                 return;
             }
 
-            //Currently we only show 4 option button trials - so we only
-            //use 3 false responses
+            //Currently we only show 5 option button trials - so we only
+            //use 4 false responses
             if (choicesArray.length > 3) {
                 Helpers.shuffle(choicesArray);
                 choicesArray = choicesArray.splice(0, 5);

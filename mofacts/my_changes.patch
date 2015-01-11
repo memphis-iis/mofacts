@@ -1,0 +1,450 @@
+From 866923c2ae11a53add0b5ef49ac15b51536d16a3 Mon Sep 17 00:00:00 2001
+From: paperziggurat <paperziggurat@gmail.com>
+Date: Fri, 14 Nov 2014 21:52:08 -0600
+Subject: [PATCH 1/2] removed debugging alerts
+
+---
+ mofacts/client/views/cardTemplate.js | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/mofacts/client/views/cardTemplate.js b/mofacts/client/views/cardTemplate.js
+index 4154525..86d039a 100644
+--- a/mofacts/client/views/cardTemplate.js
++++ b/mofacts/client/views/cardTemplate.js
+@@ -182,7 +182,7 @@ function newQuestionHandler(){
+             //use 3 false responses
+             if (choicesArray.length > 3) {
+                 Helpers.shuffle(choicesArray);
+-                choicesArray = choicesArray.splice(0, 3);
++                choicesArray = choicesArray.splice(0, 5);
+             }
+ 
+             //Need to make sure they also have a correct option :)
+@@ -190,7 +190,7 @@ function newQuestionHandler(){
+             Helpers.shuffle(choicesArray);
+ 
+             //We can cheat here because we know from above we have <= 4 entries
+-            var labelArray = ["A", "B", "C", "D"];
++            var labelArray = ["A", "B", "C", "D", "E", "F"];
+ 
+             for (var i = 0; i < choicesArray.length; ++i) {
+                 var value = choicesArray[i];
+@@ -231,6 +231,7 @@ function newQuestionHandler(){
+ 
+     if(getQuestionType() === "sound"){
+         console.log("Sound")
++        document.getElementById('audio').curTime = 0;
+         document.getElementById('audio').play();
+     }
+ 
+-- 
+1.9.3 (Apple Git-50)
+
+
+From 6d23de50ba37de76fe179bc7cd79593ab7658ec6 Mon Sep 17 00:00:00 2001
+From: paperziggurat <paperziggurat@gmail.com>
+Date: Sun, 23 Nov 2014 21:54:21 -0600
+Subject: [PATCH 2/2] removed overlap between feedback + next trial, added stim
+ file w/ multiple stims per cluster
+
+---
+ mofacts/client/views/cardTemplate.html |   9 +-
+ mofacts/client/views/cardTemplate.js   |  22 +++--
+ mofacts/private/stims/Music2stim.xml   | 166 +++++++++++++++++++--------------
+ mofacts/private/tdf/Music2-1.xml       |  54 ++++++++++-
+ 4 files changed, 162 insertions(+), 89 deletions(-)
+
+diff --git a/mofacts/client/views/cardTemplate.html b/mofacts/client/views/cardTemplate.html
+index c5da5a4..f98e993 100644
+--- a/mofacts/client/views/cardTemplate.html
++++ b/mofacts/client/views/cardTemplate.html
+@@ -41,12 +41,9 @@
+ 				<h2><div id="textQuesiton">{{currentQuestion}}</div></h2>
+ 				{{/if}}
+ 				{{#if audioCard}}
+-				<audio controls id="audio">
+-					<source src={{currentQuestion}}.mp3 type="audio/mpeg">
+-					<source src={{currentQuestion}}.wav type="audio/wav">
+-						Your browser does not support the audio element.
+-					</audio>
+-					{{/if}}
++				<img src="speaker.png" height="100" width="100">
++					<br>
++				{{/if}}
+ 					{{#if imageCard}}
+ 					<img src={{currentQuestion}}>
+ 					{{/if}}
+diff --git a/mofacts/client/views/cardTemplate.js b/mofacts/client/views/cardTemplate.js
+index 86d039a..3161a6f 100644
+--- a/mofacts/client/views/cardTemplate.js
++++ b/mofacts/client/views/cardTemplate.js
+@@ -140,6 +140,7 @@ Template.cardTemplate.drill = function() {
+ /////////////////
+ 
+ function newQuestionHandler(){
++    console.log("NQ handler");
+     $("#userAnswer").focus();
+ 
+     if ( Session.get("isScheduledTest") ) {
+@@ -186,21 +187,21 @@ function newQuestionHandler(){
+             }
+ 
+             //Need to make sure they also have a correct option :)
+-            choicesArray.push(Session.get("currentAnswer")[0]);
++            choicesArray.push(Session.get("currentAnswer"));
+             Helpers.shuffle(choicesArray);
+ 
+             //We can cheat here because we know from above we have <= 4 entries
+-            var labelArray = ["A", "B", "C", "D", "E", "F"];
++
+ 
+             for (var i = 0; i < choicesArray.length; ++i) {
+                 var value = choicesArray[i];
+-                var label = labelArray[i];
++              
+ 
+                 //insert all of the multiple choice buttons with the appropriate values.
+                 $("#multipleChoiceInnerContainer").append(
+                     "<div class=\"col-lg-6\">" +
+                         "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
+-                            label + ": " + value +
++                            value +
+                         "</button>" +
+                     "</div>"
+                 );
+@@ -230,9 +231,9 @@ function newQuestionHandler(){
+     }
+ 
+     if(getQuestionType() === "sound"){
+-        console.log("Sound")
+-        document.getElementById('audio').curTime = 0;
+-        document.getElementById('audio').play();
++        var sound = new Howl({
++            urls: [Session.get("currentQuestion") + '.mp3', Session.get("currentQuestion") + '.wav']
++        }).play();
+     }
+ 
+ 
+@@ -359,13 +360,14 @@ function handleUserInput( e , source ) {
+             prepareCard();
+             $("#userAnswer").val("");
+             $("#UserInteraction").html("");
++            $("#UserInteraction").hide();
+         };
+ 
+         if(AllowUserInteraction) {
+             //timeout for adding a small delay so the User may read
+-            //the correctness of his/her anwser
++            //the correctness of his/her answer
+             $("#UserInteraction").show();
+-            Meteor.setTimeout(setup, 1000);
++            Meteor.setTimeout(setup, 2000);
+         }
+         else {
+             $("#UserInteraction").hide();
+@@ -1041,7 +1043,7 @@ function timeoutfunction(index, timeoutNum){
+ 				prepareCard();
+ 			};
+ 
+-			Meteor.setTimeout(clearInfo, 3000);
++			Meteor.setTimeout(clearInfo, 2000);
+ 
+ 
+         }else{
+diff --git a/mofacts/private/stims/Music2stim.xml b/mofacts/private/stims/Music2stim.xml
+index 84338a2..65b7985 100644
+--- a/mofacts/private/stims/Music2stim.xml
++++ b/mofacts/private/stims/Music2stim.xml
+@@ -3,122 +3,146 @@
+         <cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/1</display>
+-            <response>Minor_3rd</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/2</display>
+-            <response>Major_3rd</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/3</display>
+-            <response>Tritone</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/4</display>
+-            <response>Perfect_5th</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/5</display>
+-            <response>Major_7th</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/6</display>
+-            <response>Octave</response>	
+-        </cluster>
+-        <cluster>
+-    		<displayType>Sound</displayType>	
++            <response>Minor 3rd</response>
+             <display>music2/7</display>
+-            <response>Minor_3rd</response>	
++            <response>Minor 3rd</response>            
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>    	
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
++            <display>music2/2</display>
++            <response>Major 3rd</response>
+             <display>music2/8</display>
+-            <response>Minor_3rd</response>	
++            <response>Major 3rd</response>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  	
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
++            <display>music2/3</display>
++            <response>Tritone</response>
+             <display>music2/9</display>
+-            <response>Major_3rd</response>	
++            <response>Tritone</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  	
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
++            <display>music2/4</display>
++            <response>Perfect 5th</response>
+             <display>music2/10</display>
+-            <response>Perfect_5th</response>	
++            <response>Perfect 5th</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
++            <display>music2/5</display>
++            <response>Major 7th</response>
+             <display>music2/11</display>
+-            <response>Major_7th</response>	
++            <response>Major 7th</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Octave</falseResponse>  
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
++            <display>music2/6</display>
++            <response>Octave</response>
+             <display>music2/12</display>
+-            <response>Octave</response>	
++            <response>Octave</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>  
+         </cluster>
+ 		<cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/13</display>
+-            <response>Minor_3rd</response>	
++            <response>Minor 3rd</response>
++            <display>music2/19</display>
++            <response>Minor 3rd</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  
+         </cluster>   
+ 		<cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/14</display>
+-            <response>Major_3rd</response>	
++            <response>Major 3rd</response>
++            <display>music2/20</display>
++            <response>Major 3rd</response>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  
+         </cluster>   
+         <cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/15</display>
+-            <response>Tritone</response>	
++            <response>Tritone</response>
++            <display>music2/21</display>
++            <response>Tritone</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  	
+         </cluster>   
+          <cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/16</display>
+-            <response>Perfect_5th</response>	
++            <response>Perfect 5th</response>
++             <display>music2/22</display>
++             <response>Perfect 5th</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Octave</falseResponse>  	
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/17</display>
+-            <response>Major_7th</response>	
++            <response>Major 7th</response>
++            <display>music2/23</display>
++            <response>Major 7th</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>
++            <falseResponse>Octave</falseResponse>  
+         </cluster>
+         <cluster>
+ 			<displayType>Sound</displayType>	
+             <display>music2/18</display>
+-            <response>Octave</response>	
+-        </cluster>  
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/19</display>
+-            <response>Minor_3rd</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/20</display>
+-            <response>Major_3rd</response>	
+-        </cluster>   
+-         <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/21</display>
+-            <response>Tritone</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/22</display>
+-            <response>Perfect_5th</response>	
+-        </cluster>
+-        <cluster>
+-			<displayType>Sound</displayType>	
+-            <display>music2/23</display>
+-            <response>Major_7th</response>	
+-        </cluster>  
+-        <cluster>
+-			<displayType>Sound</displayType>	
++            <response>Octave</response>
+             <display>music2/24</display>
+-            <response>Octave</response>	
+-        </cluster>   
++            <response>Octave</response>
++            <falseResponse>Major 3rd</falseResponse>
++            <falseResponse>Tritone</falseResponse>
++            <falseResponse>Perfect 5th</falseResponse>
++            <falseResponse>Major 7th</falseResponse>
++            <falseResponse>Minor 3rd</falseResponse>  
++        </cluster>  
+     </clusters>
+ </setspec>
+diff --git a/mofacts/private/tdf/Music2-1.xml b/mofacts/private/tdf/Music2-1.xml
+index bbe616b..e9ba111 100644
+--- a/mofacts/private/tdf/Music2-1.xml
++++ b/mofacts/private/tdf/Music2-1.xml
+@@ -5,10 +5,10 @@
+         <stimulusfile>Music2stim.xml</stimulusfile>
+         <clustermodel>structuralpairs</clustermodel>
+         <clustersize>1</clustersize>
+-        <shuffleclusters>0-16</shuffleclusters>
++        <shuffleclusters>0-11</shuffleclusters>
+         <lfparameter>0.80</lfparameter>
+         <eeglogged>true</eeglogged>
+-        <isModeled>true</isModeled>
++        <isModeled>false</isModeled>
+         <timeoutInSeconds>15</timeoutInSeconds>
+     </setspec>
+     
+@@ -66,4 +66,54 @@
+             <latencyscalar>3.22</latencyscalar>
+         </maxima>
+     </parameters>
++
++       <unit>
++        <unitname>Learning Trials Harmony Learning Experiment Pretest Harmony2</unitname>
++        <unitinstructions>
++            Pretest portion (48 practices)
++
++            Listen to each 2-second interval, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
++
++            Goal: Practice the sound identification task, attempting to learn the interval between two musical tones. This pretest portion will get an initial measure of your skill in the task, and will be followed by 108 training practices, and finally a posttest of 24 practices.
++        </unitinstructions>
++
++        <instructconfirm>false</instructconfirm>
++        <messagescore>false</messagescore>
++        <correctscore>1</correctscore>
++        <incorrectscore>0</incorrectscore>
++        <deliveryparams>
++            <purestudy>10000</purestudy>
++            <readyprompt>0</readyprompt>
++            <reviewstudy>10000</reviewstudy>
++            <correctprompt>0</correctprompt>
++            <drill>80000</drill>
++        </deliveryparams>
++        <allowquit>false</allowquit>
++        <allowpause>false</allowpause>
++        <unending>false</unending>
++        <unitconfigscreen>false</unitconfigscreen>
++        <unitendscreen>false</unitendscreen>
++
++        <buttontrial>true</buttontrial> <!-- Multiple choice  -->
++
++           <assessmentsession>
++               <conditiontemplatesbygroup>
++                   <groupnames>A</groupnames>
++                   <clustersrepeated>1</clustersrepeated>
++                   <templatesrepeated>17</templatesrepeated>
++                   <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
++                       0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
++                       0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
++                       0,f,d,0 0,f,d,0</group>
++               </conditiontemplatesbygroup>
++               <initialpositions>
++                   A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
++                   A_15 A_16 A_17
++               </initialpositions>
++               <randomizegroups>false</randomizegroups>
++               <clusterlist>0-11</clusterlist>
++               <assignrandomclusters>false</assignrandomclusters>
++               <permutefinalresult>0-11</permutefinalresult>
++           </assessmentsession>
++    </unit>
+ </tutor>
+-- 
+1.9.3 (Apple Git-50)
+
