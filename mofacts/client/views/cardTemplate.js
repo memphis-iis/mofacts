@@ -60,7 +60,7 @@ Template.cardTemplate.events({
 
 Template.cardTemplate.rendered = function() {
     newQuestionHandler();
-}
+};
 
 /////////////////
 //  VARIABLES  //
@@ -93,8 +93,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
         prepareCard();
         Session.set("showOverlearningText", false);
     }
-
-}
+};
 
 Template.cardTemplate.username = function () {
     if (typeof Meteor.user() === "undefined") {
@@ -106,33 +105,33 @@ Template.cardTemplate.username = function () {
     } else {
         return Meteor.user().username;
     }
-}
+};
 
 //determine the type of question to display
 Template.cardTemplate.textCard = function() {
     return getQuestionType() === "text";
-}
+};
 
 Template.cardTemplate.audioCard = function() {
     return getQuestionType() === "sound";
-}
+};
 
 Template.cardTemplate.imageCard = function() {
     return getQuestionType() === "image";
-}
+};
 
 //determine the type of question to display
 Template.cardTemplate.test = function() {
     return getTestType() === "t";
-}
+};
 
 Template.cardTemplate.study = function() {
     return getTestType() === "s";
-}
+};
 
 Template.cardTemplate.drill = function() {
     return getTestType() === "d";
-}
+};
 
 /////////////////
 //  FUNCTIONS  //
@@ -163,7 +162,8 @@ function newQuestionHandler(){
 
             var cluster = getStimCluster(getCurrentClusterIndex());
 
-            if (file.tdfs.tutor.setspec[0].buttonorder.length) { //are we using specified choice order for buttons?
+            //are we using specified choice order for buttons?
+            if (file.tdfs.tutor.setspec[0].buttonorder.length) { 
                 var buttonOrderTag = file.tdfs.tutor.setspec[0].buttonorder + '';
                 var buttonOrder = buttonOrderTag.split(",");
             }
@@ -196,7 +196,7 @@ function newQuestionHandler(){
 
             //We can cheat here because we know from above we have <= 4 entries
 
-            if (file.tdfs.tutor.setspec[0].buttonorder != undefined) {
+            if (typeof file.tdfs.tutor.setspec[0].buttonorder !== "undefined") {
                 var choiceLength = buttonOrder.length;
             }
             else {
@@ -204,7 +204,7 @@ function newQuestionHandler(){
             }
 
             for (var i = 0; i < choiceLength; ++i) {
-                if (file.tdfs.tutor.setspec[0].buttonorder != undefined) {
+                if (typeof file.tdfs.tutor.setspec[0].buttonorder !== "undefined") {
                     var value = buttonOrder[i]; //if the buttons are specified order, use this array to pick button values
                 }
                 else {
@@ -217,6 +217,7 @@ function newQuestionHandler(){
                         "</button>" +
                         "</div>"
                     );
+                }
             }
         }
     }
@@ -252,8 +253,6 @@ function newQuestionHandler(){
     if (Session.get("showOverlearningText") == true) {
         $("#overlearningRow").show();
     }
-
-
 }
 
 function handleUserInput( e , source ) {
@@ -1078,15 +1077,13 @@ function getTestType(){
 //NOTE - permuted array is a SHALLOW COPY - which is different from
 //shuffle in Helpers
 function permute (perms) {
-    var final_perm = []
+    var final_perm = [];
     var groups = perms.split("|");
-    for(i=0; i < groups.length; i++){
-
+    for(var i = 0; i < groups.length; i++) {
         var indexSets = groups[i].split(",");
         permutedArray = Helpers.shuffle(indexSets);
-        for(j=0; j < permutedArray.length; j++){
+        for(var j = 0; j < permutedArray.length; j++) {
             final_perm.push(permutedArray[j]);
-
         }
     }
     return final_perm;
