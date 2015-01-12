@@ -26,6 +26,19 @@ function getStimJSON(fileName) {
     return future.wait();
 }
 
+//Published to all clients (even without subscription calls)
+//TODO: This need to change based on current user ID and role
+Meteor.publish(null, function (){ 
+    return [
+        Stimuli.find({}),
+        Tdfs.find({}),
+        UserProgress.find({}),
+        CardProbabilities.find({}),
+        UserTimesLog.find({}),
+        Meteor.users.find({})
+    ];
+})
+
 //Server-side startup logic
 
 Meteor.startup(function () {
