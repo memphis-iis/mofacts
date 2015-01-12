@@ -1,105 +1,105 @@
 <template name="cardTemplate">
 
-	<nav class="navbar navbar-inverse" role="navigation">
-		<div class="container">
-			<div class="navbar-header">
+    <nav class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
 
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">MoFaCTS</a>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">MoFaCTS</a>
 
-			</div>  <!-- close header -->
+            </div>  <!-- close header -->
 
-			<div class="collapse navbar-collapse" id="navbarCollapse">
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<li><a href="#" class="homeLink">Home</a></li>
-							<li class="divider"></li>
-							<li><a href="#" class="logoutLink">Logout</a></li>
-							<li class="divider"></li>
-							<li><a href="#" class="statsPageLink">Results</a></li>
-						</ul>
-					</li>
-				</ul>
-			</div>  <!-- close navbar-collapse -->
-		</div>  <!-- close container -->
-	</nav>  <!-- close nav -->
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="homeLink">Home</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" class="logoutLink">Logout</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" class="statsPageLink">Results</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>  <!-- close navbar-collapse -->
+        </div>  <!-- close container -->
+    </nav>  <!-- close nav -->
 
-	<div class="container">
-		
-		<br>
-		<div class="row">
-			<div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
-				{{#if textCard}}
-				<h2><label id="questionLabel">Question:</label></h2>
-				<h2><div id="textQuesiton">{{currentQuestion}}</div></h2>
-				{{/if}}
-				{{#if audioCard}}
-				<img src="speaker.png" height="100" width="100">
-					<br>
-				{{/if}}
-					{{#if imageCard}}
-					<img src={{currentQuestion}}>
-					{{/if}}
-				</div>  <!-- close column -->
-			</div>  <!-- close row -->
-			
-			{{! only show if this is a study }}
-			{{#if study}}
-			<div class="row">
-				<div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
-					<h2><label id="answerLabel">Answer:</label></h2>
-					<h2><div id="answer">{{currentAnswer}}}</div></h2>
-				</div>  <!-- close column -->
-			</div>  <!-- close row -->
-			{{/if}}
+    <div class="container">
+        
+        <br>
+        <div class="row">
+            <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
+                {{#if textCard}}
+                <h2><label id="questionLabel">Question:</label></h2>
+                <h2><div id="textQuesiton">{{currentQuestion}}</div></h2>
+                {{/if}}
+                {{#if audioCard}}
+                <img src="speaker.png" height="100" width="100">
+                    <br>
+                {{/if}}
+                {{#if imageCard}}
+                    <img src={{currentQuestion}}>
+                {{/if}}
+                </div>  <!-- close column -->
+            </div>  <!-- close row -->
+            
+            {{! only show if this is a study }}
+            {{#if study}}
+            <div class="row">
+                <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
+                    <h2><label id="answerLabel">Answer:</label></h2>
+                    <h2><div id="answer">{{currentAnswer}}</div></h2>
+                </div>  <!-- close column -->
+            </div>  <!-- close row -->
+            {{/if}}
 
-			{{! always show this, except when we are studying }}
-			{{#unless study}}
-			<div class="row" id="textEntryRow">
-				<div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
-					<div class="panel panel-primary">
-						<div class="panel-heading text-center">Enter Your Answer Below</div>
-						<div class="panel-body">
-							<div class="row">
-								<div class="col-lg-offset-1 col-lg-10 text-center">
-									<input type="text" id="userAnswer">
-								</div>
-							</div>  <!-- close row -->
-						</div>
-					</div>
-				</div>  <!-- close column -->
-			</div>  <!-- close row -->
-
-
-			<div class="row">
-				<div class="col-lg-offset-4 col-lg-4">
-					<div class="row" id="multipleChoiceContainer">
-						<!-- will contain multiple choice buttons which are dynamically added. -->
-					</div>
-				</div>
-			</div>
-			{{/unless}}
-			<center>		
-				<div class="help-inline danger" id="UserInteraction" hidden ></div>
-			</center>
-
-			<div class="row">
-				<div hidden  class="span5 offset2" style="text-align: center;" id="overlearningRow">
-					<h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-					<button id="overlearningButton" type="button" class="btn btn-primary" style="width: auto;">Home</button>
-				</div>
-			</div>
-
-			{{invokeAfterLoad}}
-
-		</div> <!-- close container -->
+            {{! always show this, except when we are studying }}
+            {{#unless study}}
+            <div class="row" id="textEntryRow">
+                <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading text-center">Enter Your Answer Below</div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-lg-offset-1 col-lg-10 text-center">
+                                    <input type="text" id="userAnswer">
+                                </div>
+                            </div>  <!-- close row -->
+                        </div>
+                    </div>
+                </div>  <!-- close column -->
+            </div>  <!-- close row -->
 
 
-	</template>
+            <div class="row">
+                <div class="col-md-offset-4 col-md-4">
+                    <div class="row" id="multipleChoiceContainer">
+                        <!-- will contain multiple choice buttons which are dynamically added. -->
+                    </div>
+                </div>
+            </div>
+            {{/unless}}
+            <center>        
+                <div class="help-inline danger" id="UserInteraction" hidden ></div>
+            </center>
+
+            <div class="row">
+                <div hidden  class="span5 offset2" style="text-align: center;" id="overlearningRow">
+                    <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
+                    <button id="overlearningButton" type="button" class="btn btn-primary" style="width: auto;">Home</button>
+                </div>
+            </div>
+
+            {{invokeAfterLoad}}
+
+        </div> <!-- close container -->
+
+
+    </template>

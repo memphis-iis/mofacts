@@ -192,19 +192,27 @@ function newQuestionHandler(){
 
             //We can cheat here because we know from above we have <= 4 entries
 
+            if (file.tdfs.tutor.setspec[0].buttonorder != undefined) {
+                var choiceLength = buttonOrder.length;
+            }
+            else {
+                var choiceLength = choicesArray.length;
+            }
 
-            for (var i = 0; i < choicesArray.length; ++i) {
-                var value = choicesArray[i];
-              
-
-                //insert all of the multiple choice buttons with the appropriate values.
-                $("#multipleChoiceInnerContainer").append(
-                    "<div class=\"col-lg-6\">" +
+            for (var i = 0; i < choiceLength; ++i) {
+                if (file.tdfs.tutor.setspec[0].buttonorder != undefined) {
+                    var value = buttonOrder[i]; //if the buttons are specified order, use this array to pick button values
+                }
+                else {
+                    var value = choicesArray[i];
+                    //insert all of the multiple choice buttons with the appropriate values.
+                    $("#multipleChoiceInnerContainer").append(
+                        "<div class=\"col-lg-9\">" +
                         "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
-                            value +
+                        value +
                         "</button>" +
-                    "</div>"
-                );
+                        "</div>"
+                    );
             }
         }
     }
@@ -245,7 +253,6 @@ function newQuestionHandler(){
 }
 
 function handleUserInput( e , source ) {
-
 
     //for debugging, allow one to turn on or off the UserInteraction code.
     var AllowUserInteraction = true;
@@ -825,12 +832,8 @@ function getNextCardActRModel() {
     }
     Session.set("testType", "d");
 
-    console.log("1");
-
     var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
     var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
-
-    console.log("2");
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
@@ -849,8 +852,8 @@ function getNextCardActRModel() {
         }
 
         return;
-    } else {
-        console.log("3");
+    }
+    else {
         var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
 
         if ( nextCardIndex !== -1) {
