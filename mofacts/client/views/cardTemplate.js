@@ -359,7 +359,7 @@ function handleUserInput( e , source ) {
 
         if (Session.get("usingACTRModel")) {
             incrementNumQuestionsAnswered();
-			console.log("handle user input called")
+            console.log("handle user input called")
             calculateCardProbabilities();
         }
 
@@ -650,7 +650,7 @@ function getSchedule() {
 function initializeActRModel() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
-    
+
     var initCardsArray = [];
     for (var i = 0; i < numQuestions; ++i) {
         initCardsArray.push({
@@ -676,7 +676,7 @@ function initializeActRModel() {
     );
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
-	console.log("init called");
+    console.log("init called");
     calculateCardProbabilities();
 }
 
@@ -1026,7 +1026,7 @@ function timeoutfunction(index, timeoutNum){
 
             if (getTestType() === "d") {
                 $("#UserInteraction").html("<font color= \"black\"> Timed out!" + " The correct answer is: " + Session.get("currentAnswer") +"</font>");
-	            $("#UserInteraction").show();
+                $("#UserInteraction").show();
             }
 
             recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
@@ -1034,16 +1034,16 @@ function timeoutfunction(index, timeoutNum){
             if (Session.get("usingACTRModel")) {
                 incrementCurentQuestionsFailed();
                 incrementNumQuestionsAnswered();
-				console.log("timeout called");
+                console.log("timeout called");
                 calculateCardProbabilities();
             }
 
-			var clearInfo = function() {
-		    	$("#UserInteraction").html("");
-				prepareCard();
-			};
+            var clearInfo = function() {
+                $("#UserInteraction").html("");
+                prepareCard();
+            };
 
-			Meteor.setTimeout(clearInfo, 2000);
+            Meteor.setTimeout(clearInfo, 2000);
 
 
         }else{
