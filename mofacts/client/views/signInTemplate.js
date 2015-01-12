@@ -18,7 +18,7 @@ Template.signInTemplate.events({
     'focus #password' : function () {
         $("#invalidLogin").hide();
     },
-    
+
     'keypress #password' : function (e) {
 
         var key=e.keyCode || e.which;
@@ -39,6 +39,8 @@ Template.signInTemplate.events({
 function UserPasswordCheck(){
     var newUsername = signInUsername.value;
     var newPassword = password.value;
+
+    //TODO: going to role-based - remove open accounts
 
     if ((OpenAccounts.findOne({username: signInUsername.value}) && Meteor.users.findOne({username: signInUsername.value})) == undefined) {
 

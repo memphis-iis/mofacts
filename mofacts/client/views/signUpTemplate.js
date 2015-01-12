@@ -17,7 +17,7 @@ Template.signUpTemplate.events({
         } else {
             $("#usernameTooShort").hide();
         }
-        
+
         if(typeof Meteor.users.findOne({username: formUsername}) !== "undefined") {
             $("#usernameAlreadyInUse").show();
             return;
@@ -56,7 +56,7 @@ Template.signUpTemplate.events({
                             , currentStimuliTest: "NEW USER"
                             , currentTestMode: "NEW USER"
                             , progressDataArray: []
-                        }, 
+                        },
                         function (error, id) { //callback function
                             if (typeof error !== "undefined") {
                                 console.log("ERROR: The user was not logged in upon account creation!\n"+
@@ -65,10 +65,10 @@ Template.signUpTemplate.events({
                             } else {
 
                                 CardProbabilities.insert(
-                                    {     
+                                    {
                                           _id: Meteor.userId()
                                         , numQuestionsAnswered: 0
-                                        , cardsArray: [] 
+                                        , cardsArray: []
                                     },
                                     function (error, id) {
                                         if (typeof error !== "undefined") {
@@ -79,7 +79,7 @@ Template.signUpTemplate.events({
                                             Router.go("profile");
                                         }
                                     }
-                                ); 
+                                );
                             }
                         }
                     );
@@ -89,6 +89,8 @@ Template.signUpTemplate.events({
                             "\t" + error);
                 }
             }
+
+            //TODO: switching to role-based - also... on error?
             UserAccounts.insert({
                 id: newUserID
             });

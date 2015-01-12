@@ -16,7 +16,7 @@ Router.route('/', function () {
 });
 
 Router.route('/profile', function () {
-    //TODO: add roles to user accounts instead of using AdminAccounts collection
+    //TODO: role-based => not from a collection
     var useracc = UserAccounts.findOne({id: Meteor.userId()});
     if(typeof useracc !== "undefined") {
         this.render('profileTemplate');
