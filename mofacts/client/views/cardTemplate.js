@@ -68,7 +68,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
 
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("currentQuestion") == undefined){
-        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+        var file = getCurrentTdfFile();
 
         //check if tutor.setspec.isModeled is defined in the tdf
         if (file.tdfs.tutor.setspec[0].isModeled != undefined) {
@@ -140,7 +140,7 @@ function newQuestionHandler(){
         //question index = session's questionIndex -1 because it has already been incremented for the next card at this point.
         var questionIndex = Session.get("questionIndex") - 1;
 
-        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+        var file = getCurrentTdfFile();
 
         console.log(file + "is a scheduled test");
 
@@ -157,62 +157,58 @@ function newQuestionHandler(){
             var cluster = getStimCluster(getCurrentClusterIndex());
 
             //are we using specified choice order for buttons?
-            if (file.tdfs.tutor.setspec[0].buttonorder.length) { 
-                var buttonOrderTag = file.tdfs.tutor.setspec[0].buttonorder + '';
-                var buttonOrder = buttonOrderTag.split(",");
-            }
-
+            //Or do we get them from the cluster?
+            var buttonOrder = getCurrentTdfButtonOrder();
             var choicesArray = [];
-            if (cluster.falseResponse && cluster.falseResponse.length) {
-                for (var i = 0; i < cluster.falseResponse.length; ++i) {
-                    choicesArray.push(cluster.falseResponse[i]);
-                }
-            }
-
-            if (choicesArray.length < 1) {
-                //Whoops - they didn't specify any alternate choices
-                console.log("A button trial requires some false responses");
-                currUnit.buttontrial = false;
-                newQuestionHandler(); //RECURSE
-                return;
-            }
-
-            //Currently we only show 5 option button trials - so we only
-            //use 4 false responses
-            if (choicesArray.length > 3) {
-                Helpers.shuffle(choicesArray);
-                choicesArray = choicesArray.splice(0, 5);
-            }
-
-            //Need to make sure they also have a correct option :)
-            choicesArray.push(Session.get("currentAnswer"));
-            Helpers.shuffle(choicesArray);
-
-            //We can cheat here because we know from above we have <= 4 entries
-
-            if (typeof file.tdfs.tutor.setspec[0].buttonorder !== "undefined") {
-                var choiceLength = buttonOrder.length;
+            
+            if (buttonOrder.length > 0) {
+                //Top-level specification for buttons
+                choicesArray = buttonOrder;
             }
             else {
-                var choiceLength = choicesArray.length;
+                //Get from cluster
+                if (cluster.falseResponse && cluster.falseResponse.length) {
+                    for (var i = 0; i < cluster.falseResponse.length; ++i) {
+                        choicesArray.push(cluster.falseResponse[i]);
+                    }
+                }
+                
+                if (choicesArray.length < 1) {
+                    //Whoops - they didn't specify any alternate choices
+                    console.log("A button trial requires some false responses");
+                    currUnit.buttontrial = false;
+                    newQuestionHandler(); //RECURSE
+                    return;
+                }
+
+                //Currently we only show 5 option button trials - so we only
+                //use 4 false responses
+                if (choicesArray.length > 3) {
+                    Helpers.shuffle(choicesArray);
+                    choicesArray = choicesArray.splice(0, 5);
+                }
+
+                //Need to make sure they also have a correct option :)
+                choicesArray.push(Session.get("currentAnswer"));
+                Helpers.shuffle(choicesArray);
             }
 
-            for (var i = 0; i < choiceLength; ++i) {
-                if (typeof file.tdfs.tutor.setspec[0].buttonorder !== "undefined") {
-                    var value = buttonOrder[i]; //if the buttons are specified order, use this array to pick button values
-                }
-                else {
-                    var value = choicesArray[i];
-                    //insert all of the multiple choice buttons with the appropriate values.
-                    $("#multipleChoiceInnerContainer").append(
-                        "<div class=\"col-lg-9\">" +
-                        "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
-                        value +
-                        "</button>" +
-                        "</div>"
-                    );
-                }
+            //insert all of the multiple choice buttons with the appropriate values.
+            for (var i = 0; i < choicesArray.length; ++i) {
+                var value = choicesArray[i];
+                $("#multipleChoiceInnerContainer").append(
+                    "<div class=\"col-lg-9\">" +
+                    "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
+                    value +
+                    "</button>" +
+                    "</div>"
+                );
             }
+        }
+        else {
+            //Not a button trial
+            $("#textEntryRow").show();
+            $("#multipleChoiceInnerContainer").remove();
         }
     }
 
@@ -378,7 +374,7 @@ function startTimer() {
 }
 
 function prepareCard() {
-    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    var file = getCurrentTdfFile();
 
     if (Session.get("usingACTRModel")) {
         getNextCardActRModel();
@@ -514,6 +510,32 @@ function getCurrentTdfName() {
     return Session.get("currentTdfName");
 }
 
+function getCurrentTdfFile() {
+    return Tdfs.findOne({fileName: getCurrentTdfName()});
+}
+
+//Return the current button order as an array
+function getCurrentTdfButtonOrder() {
+    //Our default value
+    var btnOrder = [];
+    
+    try {
+        var file = getCurrentTdfFile();
+        if (file && file.tdfs.tutor.setspec[0].buttonorder) {
+            var btnOrderTxt = file.tdfs.tutor.setspec[0].buttonorder;
+            btnOrder = (btnOrderTxt + '').split(",");
+            if (!btnOrder || !btnOrder.length) {
+                btnOrder = []; //Just use empty array
+            }
+        }
+    }
+    catch(e) {
+        console.log("Error find button order (will use []): " + e);
+    }
+    
+    return btnOrder;
+}
+
 function getCurrentClusterIndex() {
     return Session.get("clusterIndex");
 }
@@ -542,7 +564,7 @@ function recordProgress ( questionIndex, question, answer, userAnswer ) {
 
 function resetCurrentTestData() {
 
-    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
     var currentTestMode;
 
@@ -590,7 +612,7 @@ function getSchedule() {
         var stims = Stimuli.findOne({fileName: getCurrentTestName()});
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
 
-        var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+        var file = getCurrentTdfFile();
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
 
@@ -966,7 +988,7 @@ function timeoutfunction(index, timeoutNum){
     //needs to be in tdf someday
     //the timeout in Seconds is multipled by 1000 to conver to milliseconds
 
-    var file = Tdfs.findOne({fileName: getCurrentTdfName()});
+    var file = getCurrentTdfFile();
     var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
 
     var delay = tis * 1000;

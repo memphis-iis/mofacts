@@ -32,8 +32,10 @@ AssessmentSession = {
             return AssessmentSession.createScheduleImpl(setspec, clusters, unitNumber, unit);
         }
         catch(e) {
-            console.log("Error creating a schedule from the assessment session in the TDF...");
-            console.log(e);
+            if (console && console.log) {
+                console.log("Error creating a schedule from the assessment session in the TDF...");
+                console.log(e);
+            }
             return null;
         }
     },
@@ -143,10 +145,10 @@ AssessmentSession = {
                         //Trial by other means
                         var offset;
                         if (offStr === "r") {
-                            //offset = Math.floor(Math.random() * settings.ranChoices);
+                            offset = Math.floor(Math.random() * settings.ranChoices);
                         }
                         else {
-                            //offset = Helpers.intVal(offStr);
+                            offset = Helpers.intVal(offStr);
                         }
                         
                         var condition = groupName + "-" + index;

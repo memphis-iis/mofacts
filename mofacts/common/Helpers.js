@@ -57,7 +57,6 @@ Helpers = {
     
     //Given an object presumed to be an array, return the first element.
     //If not possible, return null
-    //TODO: we can use this LOTS of places
     firstElement: function(obj) {
         try {
             if (obj && obj.length && obj.length > 0) {

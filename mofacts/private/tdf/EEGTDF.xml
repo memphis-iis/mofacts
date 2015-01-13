@@ -88,6 +88,8 @@
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
         
+        <buttontrial>true</buttontrial>
+
         <assessmentsession>
             <conditiontemplatesbygroup>
             <groupnames>A</groupnames> 
@@ -131,8 +133,6 @@
         <unending>false</unending>
         <unitconfigscreen>false</unitconfigscreen>
         <unitendscreen>false</unitendscreen>
-        
-        <buttontrial>true</buttontrial> <!-- Multiple choice -->
 
         <assessmentsession>
             <conditiontemplatesbygroup>
