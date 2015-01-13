@@ -26,17 +26,49 @@ function getStimJSON(fileName) {
     return future.wait();
 }
 
+function getRoles(fileName) {
+    var future = new Future();
+    Assets.getText(fileName, function(err, data) {
+        if (err) throw err;
+        if (!data) {
+            data = "[]"; //Always return at least an empty 
+        }
+        var roles = JSON.parse(data);
+        if (!!roles && roles.sort) {
+            roles.sort();
+        }
+        future.return(roles);
+    });
+    return future.wait();
+}
+
+//TODO: move sign up logic to a server method so we don't have to publish
+//      all user info to everyone
+
 //Published to all clients (even without subscription calls)
 //TODO: This need to change based on current user ID and role
 Meteor.publish(null, function (){ 
-    return [
+    //The default data published to everyone
+    var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
         UserProgress.find({}),
         CardProbabilities.find({}),
-        UserTimesLog.find({}),
-        Meteor.users.find({})
+        UserTimesLog.find({})
     ];
+    
+    /* TODO: when the server-method version of sign up is complete, put this back in
+    //Everyone can see themselves
+    var userQuery = { _id: this.userId };
+    var user = Meteor.users.findOne(userQuery);
+    if (Roles.userIsInRole(user, ["admin"])) {
+        userQuery = {}; //Let admins see other people
+    }
+    defaultData.push(Meteor.users.find(userQuery));
+    */
+    defaultData.push(Meteor.users.find({}));
+    
+    return defaultData;
 })
 
 //Server-side startup logic
@@ -63,6 +95,23 @@ Meteor.startup(function () {
             Tdfs.insert({fileName: ele, tdfs: json});
         }
     );
+    
+    var admins = getRoles("roles/admins.json");
+    var teachers = getRoles("roles/teachers.json");
+    
+    _.each(Meteor.users.find().fetch(), function(ele) {
+        var uname = "" + ele["username"];
+        if (!!uname) {
+            if (_.indexOf(admins, uname, true) >= 0) {
+                Roles.addUsersToRoles(ele._id, "admin");
+                console.log(uname + " is in admin role");
+            }
+            if (_.indexOf(teachers, uname, true) >= 0) {
+                Roles.addUsersToRoles(ele._id, "teacher");
+                console.log(uname + " is in teacher role");
+            }
+        }
+    });
 
     //Set up our server-side methods
     Meteor.methods({

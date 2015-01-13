@@ -10,34 +10,47 @@ Template.signUpTemplate.events({
         var formUsername = signUpUsername.value;
         var formPassword1 = password1.value;
         var formPassword2 = password2.value;
+        
+        //Hide previous errors
+        $(".errcheck").hide();
+        
+        var checks = [];
 
         if(formUsername.length < 6) {
-            $("#usernameTooShort").show();
-            return;
-        } else {
-            $("#usernameTooShort").hide();
+            checks.push("#usernameTooShort");
         }
 
         if(typeof Meteor.users.findOne({username: formUsername}) !== "undefined") {
-            $("#usernameAlreadyInUse").show();
-            return;
-        } else {
-            $("#usernameAlreadyInUse").hide();
+            checks.push("#usernameAlreadyInUse");
         }
-
-        if (formPassword1.length < 6) {
-             $("#passwordTooShort").show();
-             return;
-        } else {
-            $("#passwordTooShort").hide();
+        
+        if (formPassword1 === "" && formPassword2 === "") {
+            //Maybe they WANT an empty password?
+            if (confirm("Are you sure that you want to use an empty password")) {
+                formPassword1 = Helpers.blankPassword(formUserName);
+                formPassword2 = "" + formPassword1;
+            }
+            else {
+                checks.push("#passwordTooShort");
+            }
         }
+        else {
+            //"Regular" password checks
+            if (formPassword1.length < 6) {
+                checks.push("#passwordTooShort");
+            }
 
-
-        if(formPassword1 !== formPassword2) {
-            $("#passwordMustMatch").show();
+            if(formPassword1 !== formPassword2) {
+                checks.push("#passwordMustMatch");
+            }
+        }
+        
+        //Show any and all errors
+        if (checks.length > 0) {
+            _.each(checks, function(ele) {
+                $(ele).show();
+            });
             return;
-        } else {
-            $("#passwordMustMatch").hide();
         }
 
         Accounts.createUser({username: formUsername, password: newPass}, function (error) {

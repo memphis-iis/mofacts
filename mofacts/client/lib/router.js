@@ -1,5 +1,5 @@
 Router.configure({
-//  autoRender: false,
+    //autoRender: false,
     layoutTemplate: 'DefaultLayout'
 });
 
@@ -16,14 +16,7 @@ Router.route('/', function () {
 });
 
 Router.route('/profile', function () {
-    //TODO: role-based => not from a collection
-    var useracc = UserAccounts.findOne({id: Meteor.userId()});
-    if(typeof useracc !== "undefined") {
-        this.render('profileTemplate');
-    }
-    else if (AdminAccounts.findOne({id: Meteor.userId()}) != undefined) {
-        this.render('adminTemplate');
-    }
+    this.render('profileTemplate');
 });
 
 Router.route('/card', function () {
@@ -31,7 +24,9 @@ Router.route('/card', function () {
 });
 
 Router.route('/admin', function () {
-   this.render('adminTemplate');
+    //TODO: check admin role
+    //TODO: what about teachers?
+    this.render('adminTemplate');
 });
 
 Router.route('/instructions', function () {

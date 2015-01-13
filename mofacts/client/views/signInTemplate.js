@@ -39,46 +39,25 @@ Template.signInTemplate.events({
 function UserPasswordCheck(){
     var newUsername = signInUsername.value;
     var newPassword = password.value;
-
-    //TODO: going to role-based - remove open accounts
-
-    if ((OpenAccounts.findOne({username: signInUsername.value}) && Meteor.users.findOne({username: signInUsername.value})) == undefined) {
-
+    
+    if (!!newUsername & newPassword === "") {
+        newPassword = Helpers.blankPassword(newUsername);
     }
 
-    if (OpenAccounts.findOne({username: signInUsername.value}) != undefined) {
-        Meteor.loginWithPassword(newUsername, 'blankpassword', function(error) {
-            if (typeof error !== 'undefined') {
-                // console.log(error);
-                $("#invalidLogin").show();
-                return;
-            } else {
-                $("#invalidLogin").hide();
-                var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-                if(typeof console !== "undefined" && Session.get("debugging")) {
-                    console.log(currentUser + " was logged in successfully!");
-                    Meteor.call("Userlog", currentUser);
-                }
-                Router.go("profile");
+    Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+        if (typeof error !== 'undefined') {
+            // console.log(error);
+            $("#invalidLogin").show();
+            return;
+        }
+        else {
+            $("#invalidLogin").hide();
+            var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+            if(typeof console !== "undefined" && Session.get("debugging")) {
+                console.log(currentUser + " was logged in successfully!");
+                Meteor.call("Userlog", currentUser);
             }
-        });
-    } else {
-        Meteor.loginWithPassword(newUsername, newPassword, function(error) {
-            if (typeof error !== 'undefined') {
-                // console.log(error);
-                $("#invalidLogin").show();
-                return;
-            } else {
-                $("#invalidLogin").hide();
-                var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-                if(typeof console !== "undefined" && Session.get("debugging")) {
-                    console.log(currentUser + " was logged in successfully!");
-                    Meteor.call("Userlog", currentUser);
-                }
-                Router.go("profile");
-            }
-        });
-    }
-
-
+            Router.go("profile");
+        }
+    });
 }

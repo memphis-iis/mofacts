@@ -3,6 +3,13 @@
  * */
 
 Helpers = {
+    //Given a user ID, return the "dummy" password that stands in for a blank
+    //password. This is because we REALLY do want to use blanks passwords for
+    //some users
+    blankPassword: function(userName) {
+        return userName + "BlankPassword";
+    }
+    
     //Given an object, convert it to a reasonable string for display:
     // - If it doesn't evaluate and isn't False, return empty string
     // - if it's an array join the entries together with a comma

@@ -30,6 +30,16 @@
 	</nav>  <!-- close nav -->
 
 	<div class="container">
+        <div class="row">
+            Welcome! You are currently logged in as
+            {{#if isInRole 'admin,teacher'}}
+                {{#if isInRole 'admin'}}         an Admin  {{/if}}
+                {{#if isInRole 'admin,teacher'}} and       {{/if}}
+                {{#if isInRole 'teacher'}}       a Teacher {{/if}}
+            {{else}}
+                a student.
+            {{/if}}
+        </div>
 		<div class="row">
 			<div id="testContainingDiv">
 				<legend class="text-center">Your Available Tests</legend>
