@@ -8,7 +8,7 @@ Helpers = {
     //some users
     blankPassword: function(userName) {
         return userName + "BlankPassword";
-    }
+    },
     
     //Given an object, convert it to a reasonable string for display:
     // - If it doesn't evaluate and isn't False, return empty string

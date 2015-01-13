@@ -793,28 +793,11 @@ function calculateCardProbabilities() {
             totalTrials: totalTrials,
             action: "ACT-R Calculation"
         });
-
-        //console.log(logSet[i]);
-        //Log values for ACT-R system
-        /*
-        Meteor.call("userTime", Session.get("currentTest"), {
-            questionSuccessCount: questionSuccessCount,
-            questionFailureCount: questionFailureCount,
-            trialsSinceLastSeen: trialsSinceLastSeen,
-            probability: probability,
-            totalTrials: totalTrials,
-            action: "ACT-R Calculation"
-        });
-        */
     }
 
     Meteor.call("userTime", Session.get("currentTest"), logSet);
 
     Meteor.call("updateCardProbs", setModifiers, incModifiers);
-
-    Meteor.call("recordActR", "\nsuccessful: " + questionSuccessCount + " ; " + "failed: " + questionFailureCount
-    + " ; " + " since last seen: " + trialsSinceLastSeen + " ; " + "x: " +  x + " ; " + "probability: " + probability
-    + "\n");
 
     if (Session.get("debugging")) {
         console.log("...done calculating card probabilities.");
