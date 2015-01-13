@@ -389,7 +389,7 @@ function prepareCard() {
         }
 
         var unit = getCurrentUnitNumber();
-        if (file.tdfs.tutor.unit[unit] === undefined) { //check to see if we've iterated over all units
+        if (typeof file.tdfs.tutor.unit[unit] === "undefined") { //check to see if we've iterated over all units
             Router.go("stats");
             return;
         }
@@ -402,7 +402,7 @@ function prepareCard() {
             permuted = permute(schedule.permute);
         }
 
-        if (Session.get("questionIndex") === schedule.q.length){
+        if (Session.get("questionIndex") >= schedule.q.length){
             //if we are at the end of this unit
             Session.set("questionIndex", 0);
             Session.set("currentUnitNumber", unit + 1);
@@ -469,7 +469,8 @@ function getStimAnswer(index, whichAnswer) {
 function scheduledCard() {
     var unit = getCurrentUnitNumber();
     var questionIndex = Session.get("questionIndex");
-
+    console.log("scheduledCard => unit:" + unit + ",questionIndex:" + questionIndex);
+    
     //If we're using permutations, get index by perm array value (get
     //the permuted item) - otherwise just use the index we have
     var dispQuestionIndex;
@@ -479,11 +480,11 @@ function scheduledCard() {
     else {
         dispQuestionIndex = questionIndex;
     }
-
+    
     var questInfo = getSchedule().q[dispQuestionIndex];
     var clusterIndex = questInfo.clusterIndex;
     var whichStim = questInfo.whichStim;
-    console.log(clusterIndex + "//" + whichStim);
+    console.log("scheduledCard => clusterIndex:" + clusterIndex + ",whichStim:" + whichStim);
 
     //get the type of test (drill, test, study)
     Session.set("clusterIndex", clusterIndex);
