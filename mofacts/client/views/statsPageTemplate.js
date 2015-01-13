@@ -48,7 +48,15 @@ Template.statsPageTemplate.rendered = function () {
     var theAnswer;
     var coloring = "\"black\"";
 
-    Meteor.call("addtime");
+    var currentTest = Session.get("currentTest");
+    if (!currentTest) {
+        currentTest = "UnknownExperiment";
+    }
+    Meteor.call("userTime", currentTest, {
+        event: "stats page rendered",
+        target: "user screen"
+    });
+    
 
     var statsGet = UserProgress.find(
         { _id: Meteor.userId() },

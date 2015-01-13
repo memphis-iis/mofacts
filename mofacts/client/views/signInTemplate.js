@@ -52,10 +52,10 @@ function UserPasswordCheck(){
         }
         else {
             $("#invalidLogin").hide();
-            var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-            if(typeof console !== "undefined" && Session.get("debugging")) {
+            if (Session.get("debugging")) {
+                var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                 console.log(currentUser + " was logged in successfully!");
-                Meteor.call("Userlog", currentUser);
+                Meteor.call("debugLog", "Sign in was successful");
             }
             Router.go("profile");
         }

@@ -22,21 +22,12 @@ Template.profileTemplate.events({
         console.log(event);
 
         Session.set("currentTest", getStimNameFromTdf(event.target.name));
-        
 
-        //Get Test Type
-            //Whether it is a practice, drill, etc
-
-        //Saves User, Test, and Time to Server side and Log
-        Meteor.call("user", Meteor.user().username);
-        Meteor.call("naming", event.target.name);
-        Meteor.call("timestamp");
-        Meteor.call("writing", Meteor.user().username + "::" + event.target.name + "::");
+        //Save the test selection event
         Meteor.call("userTime", Session.get("currentTest"), {
             event: "profile test selection",
             target: event.target.name
         });
-        //---------
 
         //Display Current Test in Console Log
         console.log("You clicked on: " + Session.get("currentTest"));

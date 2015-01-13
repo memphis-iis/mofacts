@@ -1,7 +1,5 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
-var filename, name, timestamp, TempLog = "";
-var filepath = '../../../../../server/';
 var endOfLine = Npm.require("os").EOL;
 
 //TODO: Update README with new meteor version and procedure for updating
@@ -156,40 +154,18 @@ Meteor.startup(function () {
             );
         },
 
-        //Added addition stuff to Log
-        writing: function(stuff){
-            fs.appendFileSync(filepath + name + "_" + filename +".txt", stuff)
-            Meteor.call("addtime");
-        },
-
-        //Added addition stuff to Log
-        addtime: function(){
-            Meteor.call("timestamp");
-            fs.appendFileSync(filepath + name + "_" + filename +".txt", timestamp  + endOfLine)
-        },
-
-        //Saves test name to Server side
-        naming: function(name){
-            name = name.split(".",1);
-            filename = name;
-        },
-
-        //Saves username to Server side
-        user: function(names){
-            name = names;
-
-        },
-
-
-        //Saves timestamp to Server side
-        timestamp: function(){
-            var time = Date.now();
-            timestamp = time;
-        },
-
-        //Saves timestamp to Server side
-        Userlog: function(usernamestuff){
-            console.log(usernamestuff + " has connected.")
+        //Let client code send console output up to server
+        debugLog: function(logtxt) {
+            var usr = Meteor.user();
+            if (!usr) {
+                usr = "[No Current User]";
+            }
+            else {
+                usr = !!usr.username ? usr.username : usr._id;
+                usr = "[USER:" + usr + "]";
+            }
+            
+            console.log(usr + " " + logtxt);
         },
 
 

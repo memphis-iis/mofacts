@@ -5,12 +5,6 @@
 //TODO: we should be going back to instructions for each unit - and we
 //      should be able to handle instruction-only units
 
-//TODO: reduce/refactor the server method calls - naming, user, timestamp,
-//      and Userlog can all be removed in favor of a unified logging call.
-//      (and the various logging calls could be changed to userTime calls
-//      as well - except for things we want ONLY in a text file and not
-//      in MongoDB)
-
 //TODO: levenshtein distance for fill-in-the-blank still missing
 
 var timeoutName;
@@ -327,25 +321,11 @@ function handleUserInput( e , source ) {
         //Get question Number
         var index = getCurrentClusterIndex();
 
-        //Get whether text, audio or picture
-        QType = findQTypeSimpified();
-        if(source === "buttonClick"){
-            //Assuming a multiple choice question if a button is clicked for an answer
-            //add "Mc" to the log to differentiate normal questions from multiple ones ones in the log
-            QType = "Mc"+QType;
-        }
-
-        //Gets the types type; study, drill, or test
-        var TType = getTestType();
-
-        //Write to Log
-        Meteor.call("writing",index + ";" + TType + ";" + QType + ";" + userAnswer +";"+ isCorrect + ";" + elapsedOnRender +
-            ";" + elapsed + "::" );
-
         Meteor.call("userTime", Session.get("currentTest"), {
             index: index,
-            ttype: TType,
+            ttype: getTestType(),
             qtype: findQTypeSimpified(),
+            guiSource: source,
             answer: userAnswer,
             isCorrect: isCorrect,
             elapsedOnRender: elapsedOnRender,
@@ -783,7 +763,8 @@ function calculateCardProbabilities() {
         incModifiers.push(incModifier);
         //CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
 
-        //TODO: do we need to log to both the text file and MongoDB?
+        //TODO: Only log this info for the card that is seen (and include enough info to ident the question)
+        //TODO: in fact, we should see events for selection and answering with ident
 
         logSet.push({ //we'll push this to the server to be logged en masse a little later
             questionSuccessCount: questionSuccessCount,
@@ -994,10 +975,6 @@ function timeoutfunction(index, timeoutNum){
 
         if(index === length && timeoutNum > 0){
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
-
-            Meteor.call("writing",getCurrentClusterIndex() + ";" +
-                findQTypeSimpified() + ";" + "[TIMEOUT]" +";"+ "false" + ";" + delay +
-                ";" + 0 + "::" );
 
             Meteor.call("userTime", Session.get("currentTest"), {
                 index: getCurrentClusterIndex(),

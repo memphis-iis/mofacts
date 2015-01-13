@@ -27,7 +27,7 @@ Template.signUpTemplate.events({
         if (formPassword1 === "" && formPassword2 === "") {
             //Maybe they WANT an empty password?
             if (confirm("Are you sure that you want to use an empty password")) {
-                formPassword1 = Helpers.blankPassword(formUserName);
+                formPassword1 = Helpers.blankPassword(formUsername);
                 formPassword2 = "" + formPassword1;
             }
             else {
@@ -53,7 +53,7 @@ Template.signUpTemplate.events({
             return;
         }
 
-        Accounts.createUser({username: formUsername, password: newPass}, function (error) {
+        Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
             if(typeof error !== "undefined") {
                 console.log("ERROR: There was an error creating the user account!\n" +
                             "\t[Username: " + formUsername + "]\n" +
@@ -101,17 +101,6 @@ Template.signUpTemplate.events({
                             "\t[Username:" + formUsername + "]" +
                             "\t" + error);
                 }
-            }
-
-            //TODO: switching to role-based - also... on error?
-            UserAccounts.insert({
-                id: newUserID
-            });
-            if (formPassword1 == null) {
-                OpenAccounts.insert({
-                    id: newUserID,
-                    username: formUsername
-                });
             }
         });
     },
