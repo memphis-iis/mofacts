@@ -46,9 +46,8 @@ function UserPasswordCheck(){
 
     Meteor.loginWithPassword(newUsername, newPassword, function(error) {
         if (typeof error !== 'undefined') {
-            // console.log(error);
+            console.log("Login error: " + error);
             $("#invalidLogin").show();
-            return;
         }
         else {
             $("#invalidLogin").hide();

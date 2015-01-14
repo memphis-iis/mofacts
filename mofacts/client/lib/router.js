@@ -3,16 +3,25 @@ Router.configure({
     layoutTemplate: 'DefaultLayout'
 });
 
+Router.onBeforeAction(function() {
+    if (!Meteor.userId()) {
+        this.render('signInTemplate');
+    }
+    else {
+        this.next();
+    }
+});
+
 Router.route('/signin', function () {
-    this.render('signInTemplate')
+    this.render('signInTemplate');
 });
 
 Router.route('/signup', function () {
-    this.render('signUpTemplate')
+    this.render('signUpTemplate');
 });
 
 Router.route('/', function () {
-    this.render('signInTemplate')
+    this.render('signInTemplate');
 });
 
 Router.route('/profile', function () {
@@ -20,7 +29,7 @@ Router.route('/profile', function () {
 });
 
 Router.route('/card', function () {
-    this.render('cardTemplate')
+    this.render('cardTemplate');
 });
 
 Router.route('/admin', function () {
@@ -30,9 +39,9 @@ Router.route('/admin', function () {
 });
 
 Router.route('/instructions', function () {
-    this.render('instructionsTemplate')
+    this.render('instructionsTemplate');
 });
 
 Router.route('/stats', function () {
-    this.render('statsPageTemplate')
+    this.render('statsPageTemplate');
 });

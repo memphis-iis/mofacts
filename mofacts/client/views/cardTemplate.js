@@ -7,6 +7,10 @@
 
 //TODO: levenshtein distance for fill-in-the-blank still missing
 
+//TODO: when question is selected, we need to send it to userTime. There will
+//      be special info depending on whether the question is from a schedule,
+//      an ACT-R mode, or just random
+
 var timeoutName;
 var timeoutCount = -1;
 var permuted = [];
@@ -15,10 +19,10 @@ Template.cardTemplate.events({
 
     'focus #userAnswer' : function() {
         if(Session.get("debugging")){
-            var probabilities = CardProbabilities.find({_id: Meteor.userId()});
-            probabilities.forEach( function (prob) {
-                console.log(prob);
-            });
+            //var probabilities = CardProbabilities.find({_id: Meteor.userId()});
+            //probabilities.forEach( function (prob) {
+            //    console.log(prob);
+            //});
         }
     },
     'keypress #userAnswer' : function (e) {
@@ -32,21 +36,22 @@ Template.cardTemplate.events({
                 console.log("User:" + Meteor.user() +" ERROR:" + error);
             }
             else {
-                Router.go("signin");
+                Router.go("/signin");
             }
         });
     },
     'click .homeLink' : function () {
-        Router.go("profile");
+        Router.go("/profile");
     },
 
     'click .statsPageLink' : function () {
-        Router.go("stats");
+        Router.go("/stats");
     },
 
     'click #overlearningButton' : function () {
-        Router.go("profile");
+        Router.go("/profile");
     },
+    
     'click .multipleChoiceButton' : function (event) {
         handleUserInput( event , "buttonClick");
     }
@@ -92,11 +97,8 @@ Template.cardTemplate.invokeAfterLoad = function() {
 Template.cardTemplate.username = function () {
     if (typeof Meteor.user() === "undefined") {
         Router.go("signin");
-        window.location.reload();
-        //the reload is needed because for some reason the page contents show up as
-        //empty unless we do the reload.
-        return;
-    } else {
+    }
+    else {
         return Meteor.user().username;
     }
 };
@@ -246,123 +248,115 @@ function newQuestionHandler(){
 }
 
 function handleUserInput( e , source ) {
-
-    //for debugging, allow one to turn on or off the UserInteraction code.
-    var AllowUserInteraction = true;
-
-    if ( source === "keypress") {
-        var key=e.keyCode || e.which;
-    } else if ( source === "buttonClick") {
+    var key;
+    if (source === "keypress") {
+        key = e.keyCode || e.which;
+    }
+    else if (source === "buttonClick") {
         //to save space we will just go ahead and act like it was a key press.
-        var key = 13;
+        key = 13;
+    }
+    
+    //If we haven't seen the correct keypress, then we want to start the timer
+    //and leave
+    if (key != 13) {
+        start = startTimer();
+        return;
     }
 
-    if (key==13){
+    //Gets User Response
+    clearTimeout(timeoutName);
 
-        //Gets User Response
-        clearTimeout(timeoutName);
+    var userAnswer;
+    if (source === "keypress") {
+        userAnswer = Helpers.trim($('#userAnswer').val()).toLowerCase();
+    }
+    else if ( source === "buttonClick") {
+        userAnswer = e.target.name;
+    }
 
-        var userAnswer;
-        if (source === "keypress") {
-            userAnswer = Helpers.trim(document.getElementById('userAnswer').value.toLowerCase());
-        } else if ( source === "buttonClick") {
-            userAnswer = e.target.name;
-        }
+    //Check Correctness
+    var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
+    var isCorrect = true;
 
-        //Check Correctness
-        var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
-        var isCorrect = true;
-        //---------
+    //Timer stats
+    var nowTime = new Date().getTime();
+    var elapsed = nowTime - start
+    var elapsedOnRender = nowTime - startOnRender;
 
-        //Timer
-        var elapsed = new Date().getTime()-start
+    //Reset elapsed for blank answer or button click?
+    if (userAnswer === "" || source === "buttonClick"){
+        elapsed = 0;
+    }
 
-        var elapsedOnRender = new Date().getTime()-startOnRender;
+    //Display Correctness
+    if ( getTestType() !== "s" ) {
+        userAnswer = Helpers.trim(userAnswer.toLowerCase());
+        answer = Helpers.trim(answer.toLowerCase());
 
-        //Display results
-        if (userAnswer === "" || source === "buttonClick"){
-            elapsed = 0;
-        }
-
-        //console.log(
-        //    "You answered " + userAnswer + " in " + elapsed + " Milliseconds. The page was rendered for " + elapsedOnRender + " Milliseconds"
-        //);
-
-        //Display Correctness
-        if ( getTestType() !== "s" ) {
-            userAnswer = Helpers.trim(userAnswer.toLowerCase());
-            answer = Helpers.trim(answer.toLowerCase());
-
-            if (userAnswer.localeCompare(answer)) {
-                isCorrect = false;
-                if (getTestType() === "d") {
-                    $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
-                }
-                if (Session.get("usingACTRModel")) {
-                    incrementCurentQuestionsFailed();
-                }
-
-            } else {
-                if (getTestType() === "d") {
-                    $("#UserInteraction").html("<font color= \"black\">You are Correct. " + "Great Job</font>");
-                }
-                if (Session.get("usingACTRModel")) {
-                    incrementCurrentQuestionSuccess();
-                }
-
+        if (userAnswer.localeCompare(answer)) {
+            isCorrect = false;
+            if (getTestType() === "d") {
+                $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+            }
+            if (Session.get("usingACTRModel")) {
+                incrementCurentQuestionsFailed();
             }
         }
-        //---------
-
-        //Get question Number
-        var index = getCurrentClusterIndex();
-
-        Meteor.call("userTime", Session.get("currentTest"), {
-            index: index,
-            ttype: getTestType(),
-            qtype: findQTypeSimpified(),
-            guiSource: source,
-            answer: userAnswer,
-            isCorrect: isCorrect,
-            elapsedOnRender: elapsedOnRender,
-            elapsed: elapsed,
-            action: "answer"
-        });
-
-        //record progress in UserProgress collection.
-        recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
-
-        if (Session.get("usingACTRModel")) {
-            incrementNumQuestionsAnswered();
-            console.log("handle user input called")
-            calculateCardProbabilities();
-        }
-
-        //Reset timer for next question
-        start = startTimer();
-
-        //Whether timed or not, same logic for below
-        var setup = function() {
-            prepareCard();
-            $("#userAnswer").val("");
-            $("#UserInteraction").html("");
-            $("#UserInteraction").hide();
-        };
-
-        if(AllowUserInteraction) {
-            //timeout for adding a small delay so the User may read
-            //the correctness of his/her answer
-            $("#UserInteraction").show();
-            Meteor.setTimeout(setup, 2000);
-        }
         else {
-            $("#UserInteraction").hide();
-            setup();
+            if (getTestType() === "d") {
+                $("#UserInteraction").html("<font color= \"black\">You are Correct. " + "Great Job</font>");
+            }
+            if (Session.get("usingACTRModel")) {
+                incrementCurrentQuestionSuccess();
+            }
         }
     }
-    else{
-        start = startTimer();
+    //---------
+
+    //Get question Number
+    var index = getCurrentClusterIndex();
+
+    Meteor.call("userTime", Session.get("currentTest"), {
+        action: "answer",
+        index: index,
+        ttype: getTestType(),
+        qtype: findQTypeSimpified(),
+        guiSource: source,
+        answer: userAnswer,
+        isCorrect: isCorrect,
+        elapsedOnRender: elapsedOnRender,
+        elapsed: elapsed
+    });
+
+    //record progress in UserProgress collection.
+    recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
+
+    if (Session.get("usingACTRModel")) {
+        incrementNumQuestionsAnswered();
+        console.log("handle user input called")
+        calculateCardProbabilities();
     }
+
+    //Reset timer for next question
+    start = startTimer();
+
+    //Whether timed or not, same logic for below
+    var setup = function() {
+        prepareCard();
+        $("#userAnswer").val("");
+        $("#UserInteraction").html("").hide();
+    };
+
+    //timeout for adding a small delay so the User may read
+    //the correctness of his/her answer
+    $("#UserInteraction").show();
+    Meteor.setTimeout(setup, 2000);
+
+    //For debugging sometimes, you want to hide the user interaction and
+    //skip the timeout
+    //$("#UserInteraction").hide();
+    //setup();
 }
 
 
@@ -377,11 +371,11 @@ function prepareCard() {
     var file = getCurrentTdfFile();
 
     if (Session.get("usingACTRModel")) {
+        //ACT-R model
         getNextCardActRModel();
-        return;
     }
-
-    if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
+    else if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
+        //Scheduled (see assessment session)
         Session.set("isScheduledTest", true);
         if (Session.get("questionIndex") === undefined) {
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
@@ -413,6 +407,7 @@ function prepareCard() {
         }
     }
     else {
+        //Shrug - must just be random selection
         Session.set("isScheduledTest", false);
         randomCard();
     }
@@ -541,26 +536,22 @@ function getCurrentClusterIndex() {
     return Session.get("clusterIndex");
 }
 
-function recordProgress ( questionIndex, question, answer, userAnswer ) {
-
-    if (Meteor.userId() !== null) {
-
-        //add to the progressDataArray
-        UserProgress.update(
-            { _id: Meteor.userId() },
-            { $push:
-                { progressDataArray :
-                    {
-                          questionIndex: questionIndex
-                        , question: question
-                        , answer: answer
-                        , userAnswer: userAnswer
-                    }
-                }
-            }
-        );
-
+function recordProgress(questionIndex, question, answer, userAnswer) {
+    var uid = Meteor.userId();
+    if (!uid) {
+        return;
     }
+    
+    UserProgress.update( { _id: uid }, {
+        $push: { 
+            progressDataArray : {
+                questionIndex: questionIndex,
+                question: question,
+                answer: answer,
+                userAnswer: userAnswer
+            }
+        }
+    });
 }
 
 function resetCurrentTestData() {
@@ -746,16 +737,10 @@ function getNumCardsBelow85( cardsArray ) {
 }
 
 function calculateCardProbabilities() {
-
-    if (Session.get("debugging")) {
-        console.log("calculating card probabilities...");
-    }
-
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
     var setModifiers = [];
     var incModifiers = [];
-    var logSet = []; //We'll pass this array off to the server later to update the log in DB
-
+    
     for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
 
         var questionSuccessCount = cardProbs.cardsArray[i].questionSuccessCount;
@@ -778,117 +763,61 @@ function calculateCardProbabilities() {
         var setModifier = {$set: {}};
         setModifier.$set["cardsArray." + i + ".probability"] = probability;
         setModifiers.push(setModifier);
-        //CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
 
         //increment trialsSinceLastSeen
         var incModifier = {$inc: {}};
         incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
         incModifiers.push(incModifier);
-        //CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
-
-        //TODO: Only log this info for the card that is seen (and include enough info to ident the question)
-        //TODO: in fact, we should see events for selection and answering with ident
-
-        logSet.push({ //we'll push this to the server to be logged en masse a little later
-            questionSuccessCount: questionSuccessCount,
-            questionFailureCount: questionFailureCount,
-            trialsSinceLastSeen: trialsSinceLastSeen,
-            probability: probability,
-            totalTrials: totalTrials,
-            action: "ACT-R Calculation"
-        });
     }
-
-    Meteor.call("userTime", Session.get("currentTest"), logSet);
 
     Meteor.call("updateCardProbs", setModifiers, incModifiers);
-
-    if (Session.get("debugging")) {
-        console.log("...done calculating card probabilities.");
-    }
 }
 
 function getNextCardActRModel() {
-
-    if (Session.get("debugging")) {
-        console.log("getting next card...");
-    }
     Session.set("testType", "d");
 
-    var numItemsPracticed = CardProbabilities.findOne({ _id: Meteor.userId() }).numQuestionsAnswered;
-    var cardsArray = CardProbabilities.findOne({ _id: Meteor.userId() }).cardsArray;
+    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    var numItemsPracticed = cardProbs.numQuestionsAnswered;
+    var cardsArray = cardProbs.cardsArray;
+    
+    var indexForNewCard;
+    var showOverlearningText = false;
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
-        var indexForNewCard = getIndexForNewCardToIntroduce( cardsArray );
-
+        indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
         if (indexForNewCard === -1) {
             if (Session.get("debugging")) {
                 console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
             }
-        } else {
-            introduceNextCard(indexForNewCard);
+            return; //DOH!
         }
-
-        if (Session.get("debugging")) {
-            console.log("...got next card #2");
-        }
-
-        return;
     }
     else {
         var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
-
-        if ( nextCardIndex !== -1) {
-            //number 3 in the algorithm
-            setNextCardInfo(nextCardIndex);
-
-            if (Session.get("debugging")) {
-                console.log("...got next card #3");
-            }
-
-        } else {
+        if (nextCardIndex === -1) {
             //numbers 4 and 5 in the algorithm.
-            console.log("4");
             if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
                 //number 5 in the algorithm.
-                var indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
-                introduceNextCard( indexForNewCard );
-
-                Session.set("showOverlearningText", true);
-
-                if (Session.get("debugging")) {
-                    console.log("...got next card #5");
-                }
-
-            } else {
+                indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
+                showOverlearningText = true;
+            }
+            else {
                 //number 4 in the algorithm.
-                var indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
-
+                indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
                 if (indexForNewCard === -1) {
                     //if we have introduced all of the cards.
                     indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
-                    introduceNextCard( indexForNewCard );
-                } else {
-                    introduceNextCard(indexForNewCard);
                 }
-
-                if (Session.get("debugging")) {
-                    console.log("...got next card #4");
-                }
-
             }
         }
-
     }
+    
+    setNextCardInfo(indexForNewCard);
+    Session.set("showOverlearningText", showOverlearningText);
 }
 
 function getIndexForNewCardToIntroduce( cardsArray ) {
-
-    if (Session.get("debugging")) {
-        console.log("getting index for new card to introduce.");
-    }
-
     var indexToReturn = -1;
 
     for(var i = 0; i < cardsArray.length; ++i) {
@@ -898,13 +827,12 @@ function getIndexForNewCardToIntroduce( cardsArray ) {
     }
 
     if (Session.get("debugging")) {
-        var message = "";
         if (indexToReturn === -1) {
-            message = "All cards have been introduced!";
-        } else {
-            message = "about to introduce " + indexToReturn;
+            console.log("All cards have been introduced!");
         }
-        console.log(message);
+        else {
+            console.log("about to introduce " + indexToReturn);
+        }
     }
 
     if (indexToReturn !== -1) {
@@ -915,12 +843,6 @@ function getIndexForNewCardToIntroduce( cardsArray ) {
     return indexToReturn;
 }
 
-function introduceNextCard( index ) {
-    if (Session.get("debugging")) {
-        console.log("introducing next Card with index: " + index);
-    }
-    setNextCardInfo(index);
-}
 
 function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) {
     if (Session.get("debugging")) {
@@ -1000,9 +922,9 @@ function timeoutfunction(index, timeoutNum){
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
             Meteor.call("userTime", Session.get("currentTest"), {
+                action: "[TIMEOUT]",
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
-                action: "[TIMEOUT]",
                 delay: delay
             });
 
@@ -1036,19 +958,13 @@ function timeoutfunction(index, timeoutNum){
     }, delay);
 }
 
-function findQTypeSimpified(){
-
+function findQTypeSimpified() {
     var QType = getQuestionType();
 
-    if (QType == "text"){
-        QType = "T";    //T for Text
-    } else if (QType == "image"){
-        QType = "I";    //I for Image
-    } else if (QType == "sound"){
-        QType = "A";    //A for Audio
-    } else {
-        QType = "NA";   //NA for Not Applicable
-    }
+    if      (QType == "text")  QType = "T";    //T for Text
+    else if (QType == "image") QType = "I";    //I for Image
+    else if (QType == "sound") QType = "A";    //A for Audio
+    else                       QType = "NA";   //NA for Not Applicable
 
     return QType;
 }
