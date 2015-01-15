@@ -20,6 +20,9 @@ function clearCardPermuted() {
 var timeoutName = null;
 var timeoutCount = -1;
 
+//Note that this isn't just a convenience function - it should be called
+//before we route to other templates so that the timeout doesn't fire over
+//and over
 function clearCardTimeout() {
     if (!!timeoutName) {
         try {
@@ -58,6 +61,7 @@ Template.cardTemplate.events({
                 console.log("User:" + Meteor.user() +" ERROR:" + error);
             }
             else {
+                clearCardTimeout();
                 Router.go("/signin");
             }
         });
@@ -65,17 +69,20 @@ Template.cardTemplate.events({
     
     'click .homeLink' : function (event) {
         event.preventDefault();
+        clearCardTimeout();
         Router.go("/profile");
     },
 
     'click .statsPageLink' : function (event) {
         event.preventDefault();
+        clearCardTimeout();
         statsPageTemplateUpdate(); //In statsPageTemplate.js
         Router.go("/stats");
     },
 
     'click #overlearningButton' : function (event) {
         event.preventDefault();
+        clearCardTimeout();
         Router.go("/profile");
     },
     
@@ -92,42 +99,10 @@ Template.cardTemplate.rendered = function() {
     newQuestionHandler();
 };
 
-Template.cardTemplate.invokeAfterLoad = function() {
-
-    if(Session.get("debugging")) {
-        console.log('card loaded');
-    }
-
-    //the card loads frequently, but we only want to set this the first time
-    if(typeof Session.get("currentQuestion") === "undefined"){
-        //Clear anby previous permutation and/or timeout call
-        clearCardTimeout();
-        clearCardPermuted();
-        
-        var file = getCurrentTdfFile();
-
-        //check if tutor.setspec.isModeled is defined in the tdf
-        if (typeof file.tdfs.tutor.setspec[0].isModeled !== "undefined") {
-            //if it is defined and is set to true, use the ACT-R Model methods.
-            if (file.tdfs.tutor.setspec[0].isModeled == "true") {
-                Session.set("usingACTRModel",true);
-                initializeActRModel();
-            } else {
-                Session.set("usingACTRModel",false);
-            }
-        }
-
-        //Before the below options, reset current test data
-        resetCurrentTestData();
-
-        prepareCard();
-        Session.set("showOverlearningText", false);
-    }
-};
-
 Template.cardTemplate.helpers({
     username: function () {
         if (!haveMeteorUser()) {
+            clearCardTimeout();
             Router.go("signin");
         }
         else {
@@ -157,7 +132,40 @@ Template.cardTemplate.helpers({
 
     drill: function() {
         return getTestType() === "d";
-    },    
+    },
+    
+    invokeAfterLoad: function() {
+        if(Session.get("debugging")) {
+            console.log('card loaded');
+        }
+
+        //the card loads frequently, but we only want to set this the first time
+        if(typeof Session.get("currentQuestion") === "undefined") {
+            console.log("invokeAfterLoad => Performing init");
+            //Clear anby previous permutation and/or timeout call
+            clearCardTimeout();
+            clearCardPermuted();
+            
+            var file = getCurrentTdfFile();
+
+            //check if tutor.setspec.isModeled is defined in the tdf
+            if (typeof file.tdfs.tutor.setspec[0].isModeled !== "undefined") {
+                //if it is defined and is set to true, use the ACT-R Model methods.
+                if (file.tdfs.tutor.setspec[0].isModeled == "true") {
+                    Session.set("usingACTRModel",true);
+                    initializeActRModel();
+                } else {
+                    Session.set("usingACTRModel",false);
+                }
+            }
+
+            //Before the below options, reset current test data
+            resetCurrentTestData();
+
+            prepareCard();
+            Session.set("showOverlearningText", false);
+        }
+    },
 });
 
 
@@ -326,7 +334,7 @@ function handleUserInput( e , source ) {
         if (userAnswer.localeCompare(answer)) {
             isCorrect = false;
             if (getTestType() === "d") {
-                $("#UserInteraction").html("<font color= \"black\"> You are Incorrect." + " The correct answer is : " + answer +"</font>");
+                showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
             }
             if (Session.get("usingACTRModel")) {
                 incrementCurentQuestionsFailed();
@@ -334,7 +342,7 @@ function handleUserInput( e , source ) {
         }
         else {
             if (getTestType() === "d") {
-                $("#UserInteraction").html("<font color= \"black\">You are Correct. " + "Great Job</font>");
+                showUserInteraction(true, "Correct - Great Job!");
             }
             if (Session.get("usingACTRModel")) {
                 incrementCurrentQuestionSuccess();
@@ -374,7 +382,7 @@ function handleUserInput( e , source ) {
     var setup = function() {
         prepareCard();
         $("#userAnswer").val("");
-        $("#UserInteraction").html("").hide();
+        hideUserInteraction();
     };
 
     //timeout for adding a small delay so the User may read
@@ -413,6 +421,7 @@ function prepareCard() {
 
         var unit = getCurrentUnitNumber();
         if (typeof file.tdfs.tutor.unit[unit] === "undefined") { //check to see if we've iterated over all units
+            clearCardTimeout();
             statsPageTemplateUpdate(); //In statsPageTemplate.js
             Router.go("stats");
             return;
@@ -647,6 +656,7 @@ function getSchedule() {
                 unitindex: unit
             });
             alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+            clearCardTimeout();
             statsPageTemplateUpdate(); //In statsPageTemplate.js
             Router.go("stats");
             return;
@@ -737,8 +747,6 @@ function setHasBeenIntroducedFlag( index ) {
 function setNextCardInfo( index ) {
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
     Session.set("clusterIndex", index);
-    //TODO: getting exception here on countries of the world ON TIMEOUT?
-    //      To Repro: answer garbage but get Yemen correct
     Session.set("currentQuestion", cardProbs.cardsArray[index].question);
     Session.set("currentAnswer", cardProbs.cardsArray[index].answer);
     resetTrialsSinceLastSeen(index);
@@ -826,8 +834,8 @@ function getNextCardActRModel() {
         }
     }
     else {
-        var nextCardIndex = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
-        if (nextCardIndex === -1) {
+        indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
+        if (indexForNewCard === -1) {
             //numbers 4 and 5 in the algorithm.
             if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
                 //number 5 in the algorithm.
@@ -847,6 +855,7 @@ function getNextCardActRModel() {
     
     setNextCardInfo(indexForNewCard);
     Session.set("showOverlearningText", showOverlearningText);
+    newQuestionHandler();
 }
 
 function getIndexForNewCardToIntroduce( cardsArray ) {
@@ -959,8 +968,7 @@ function timeoutfunction(index) {
             });
 
             if (getTestType() === "d") {
-                $("#UserInteraction").html("<font color= \"black\"> Timed out!" + " The correct answer is: " + Session.get("currentAnswer") +"</font>");
-                $("#UserInteraction").show();
+                showUserInteraction(false, "Timed out! The correct answer is: " + Session.get("currentAnswer"));
             }
 
             recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
@@ -973,7 +981,7 @@ function timeoutfunction(index) {
             }
 
             var clearInfo = function() {
-                $("#UserInteraction").html("");
+                hideUserInteraction();
                 prepareCard();
             };
 
@@ -1014,4 +1022,21 @@ function permute (perms) {
         }
     }
     return final_perm;
+}
+
+
+function showUserInteraction(isGoodNews, news) {
+    $("#UserInteraction")
+        .removeClass("alert-success alert-danger")
+        .addClass("text-align alert")
+        .addClass(isGoodNews ? "alert-success" : "alert-danger")
+        .text(news)
+        .show();
+}
+
+function hideUserInteraction() {
+    $("#UserInteraction")
+        .removeClass("text-align alert alert-success alert-danger")
+        .html("")
+        .hide();
 }

@@ -5,6 +5,18 @@ body {
 	color: white;
 }
 
+.visible-text,
+.visible-text p, 
+.visible-text h1, 
+.visible-text h2, 
+.visible-text h3, 
+.visible-text h4, 
+.visible-text h5, 
+.visible-text h6 {
+    color: #000;
+}
+
+
 .navbar-inverse .navbar-collapse {
 	background-color: #585858;
 
