@@ -29,15 +29,16 @@ Template.instructionsTemplate.events({
 
 Template.instructionsTemplate.instructions = function () {
     var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-    if (thisTdf.tdfs.tutor.unit != undefined){
+    var instructions;
+    if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
         var unit = Session.get("currentUnitNumber");
-        var instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
+        instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
     }
     else {
-        var instructions = "Please enter answer in text box provided below questions."
+        instructions = "Please enter answer in text box provided below questions.";
     }
     return instructions;
-}
+};
 
 Template.instructionsTemplate.username = function () {
 
@@ -50,7 +51,7 @@ Template.instructionsTemplate.username = function () {
     } else {
         return Meteor.user().username;
     }
-}
+};
 
 /////////////////
 //  FUNCTIONS  //

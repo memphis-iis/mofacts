@@ -45,6 +45,7 @@ Template.cardTemplate.events({
     },
 
     'click .statsPageLink' : function () {
+        statsPageTemplateUpdate(); //In statsPageTemplate.js
         Router.go("/stats");
     },
 
@@ -72,11 +73,11 @@ Template.cardTemplate.invokeAfterLoad = function() {
     }
 
     //the card loads frequently, but we only want to set this the first time
-    if(Session.get("currentQuestion") == undefined){
+    if(typeof Session.get("currentQuestion") === "undefined"){
         var file = getCurrentTdfFile();
 
         //check if tutor.setspec.isModeled is defined in the tdf
-        if (file.tdfs.tutor.setspec[0].isModeled != undefined) {
+        if (typeof file.tdfs.tutor.setspec[0].isModeled !== "undefined") {
             //if it is defined and is set to true, use the ACT-R Model methods.
             if (file.tdfs.tutor.setspec[0].isModeled == "true") {
                 Session.set("usingACTRModel",true);
@@ -170,9 +171,9 @@ function newQuestionHandler(){
             else {
                 //Get from cluster
                 if (cluster.falseResponse && cluster.falseResponse.length) {
-                    for (var i = 0; i < cluster.falseResponse.length; ++i) {
-                        choicesArray.push(cluster.falseResponse[i]);
-                    }
+                    _.each(cluster.falseResponse, function(ele) {
+                        choicesArray.push(ele);
+                    });
                 }
                 
                 if (choicesArray.length < 1) {
@@ -196,8 +197,7 @@ function newQuestionHandler(){
             }
 
             //insert all of the multiple choice buttons with the appropriate values.
-            for (var i = 0; i < choicesArray.length; ++i) {
-                var value = choicesArray[i];
+            _.each(choicesArray, function(value, idx) {
                 $("#multipleChoiceInnerContainer").append(
                     "<div class=\"col-lg-9\">" +
                     "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
@@ -205,7 +205,7 @@ function newQuestionHandler(){
                     "</button>" +
                     "</div>"
                 );
-            }
+            });
         }
         else {
             //Not a button trial
@@ -242,7 +242,7 @@ function newQuestionHandler(){
     }
 
 
-    if (Session.get("showOverlearningText") == true) {
+    if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
 }
@@ -281,7 +281,7 @@ function handleUserInput( e , source ) {
 
     //Timer stats
     var nowTime = new Date().getTime();
-    var elapsed = nowTime - start
+    var elapsed = nowTime - start;
     var elapsedOnRender = nowTime - startOnRender;
 
     //Reset elapsed for blank answer or button click?
@@ -334,7 +334,7 @@ function handleUserInput( e , source ) {
 
     if (Session.get("usingACTRModel")) {
         incrementNumQuestionsAnswered();
-        console.log("handle user input called")
+        console.log("handle user input called");
         calculateCardProbabilities();
     }
 
@@ -364,7 +364,7 @@ function handleUserInput( e , source ) {
 
 function startTimer() {
     var start = new Date().getTime();
-    return start
+    return start;
 }
 
 function prepareCard() {
@@ -384,6 +384,7 @@ function prepareCard() {
 
         var unit = getCurrentUnitNumber();
         if (typeof file.tdfs.tutor.unit[unit] === "undefined") { //check to see if we've iterated over all units
+            statsPageTemplateUpdate(); //In statsPageTemplate.js
             Router.go("stats");
             return;
         }
@@ -608,7 +609,7 @@ function getSchedule() {
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
 
-        var schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
+        schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
         if (!schedule) {
             //There was an error creating the schedule - there's really nothing
             //left to do since the experiment is broken
@@ -618,6 +619,7 @@ function getSchedule() {
                 unitindex: unit
             });
             alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+            statsPageTemplateUpdate(); //In statsPageTemplate.js
             Router.go("stats");
             return;
         }
@@ -707,6 +709,8 @@ function setHasBeenIntroducedFlag( index ) {
 function setNextCardInfo( index ) {
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
     Session.set("clusterIndex", index);
+    //TODO: getting exception here on countries of the world ON TIMEOUT?
+    //      To Repro: answer garbage but get Yemen correct
     Session.set("currentQuestion", cardProbs.cardsArray[index].question);
     Session.set("currentAnswer", cardProbs.cardsArray[index].answer);
     resetTrialsSinceLastSeen(index);
@@ -732,7 +736,7 @@ function getNumCardsBelow85( cardsArray ) {
         if (cardsArray[i].probability < 0.85) {
             ++counter;
         }
-    };
+    }
     return counter;
 }
 
@@ -860,7 +864,7 @@ function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) 
                 indexToReturn = i;
             }
         }
-    };
+    }
 
     if (Session.get("debugging")) {
         var message;
@@ -889,7 +893,7 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
             currentMinProbability = cardsArray[i].probability;
             indexToReturn = i;
         }
-    };
+    }
 
     if (Session.get("debugging")) {
         console.log("indexToReturn: " + indexToReturn);

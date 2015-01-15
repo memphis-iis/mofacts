@@ -70,8 +70,10 @@ AssessmentSession = {
             };
         };
         
+        var i, j, k, z; //Loop indices
+        
         //For each group
-        for (var i = 0; i < settings.groupNames.length; ++i) {
+        for (i = 0; i < settings.groupNames.length; ++i) {
             //Get initial info for this group
             var groupName = settings.groupNames[i];
             var group = settings.groups[i]; //group = array of strings
@@ -80,7 +82,7 @@ AssessmentSession = {
             
             //Generate template indices
             var indices = [];
-            for (var z = 0; z < numTemplates; ++z) {
+            for (z = 0; z < numTemplates; ++z) {
                 indices.push(z);
             }
             if (settings.randomConditions) {
@@ -88,7 +90,7 @@ AssessmentSession = {
             }
             
             //For each template index
-            for (var j = 0; j < indices.length; ++j) {
+            for (j = 0; j < indices.length; ++j) {
                 var index = indices[j];
                 
                 //Find in initial position
@@ -113,7 +115,7 @@ AssessmentSession = {
                 var randOffset = Math.floor(Math.random() * settings.clusterSize);
                 
                 //Work through the group elements
-                for (var k = 0; k < templateSize; ++k) {
+                for (k = 0; k < templateSize; ++k) {
                     var groupEntry = group[index * templateSize + k];
                     var parts = groupEntry.split(",");
                     
@@ -174,12 +176,12 @@ AssessmentSession = {
         var finalQuests = [];
         finalQuests[settings.scheduleSize-1] = {};
         
-        for (var i = 0; i < settings.finalPermute.length; ++i) {
+        for (i = 0; i < settings.finalPermute.length; ++i) {
             var targetIndexes = Helpers.rangeVal(settings.finalPermute[i]);
             var randPerm = targetIndexes.slice(); //clone
             Helpers.shuffle(randPerm);
             
-            for(var j = 0; j < targetIndexes.length; ++j) {
+            for(j = 0; j < targetIndexes.length; ++j) {
                 finalQuests[targetIndexes[j]] = quests[randPerm[j]];
             }
         }
@@ -240,11 +242,11 @@ AssessmentSession = {
                     dest.push(fld);
                 }
             }
-        }
+        };
         
         var boolVal = function(src) {
             return Helpers.display(src).toLowerCase === "true";
-        }
+        };
         
         //Get the setspec settings first
         settings.clusterSize = Helpers.intVal(setspec.clustersize);

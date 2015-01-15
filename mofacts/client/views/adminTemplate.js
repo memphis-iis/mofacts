@@ -1,7 +1,7 @@
 //TODO: everything in this template
 
 Template.adminTemplate.rendered = function() {
-}
+};
 
 Template.adminTemplate.helpers({
    results: function() {

@@ -25,7 +25,7 @@ Template.profileTemplate.events({
 
         //Save the test selection event
         Meteor.call("userTime", Session.get("currentTest"), {
-            event: "profile test selection",
+            action: "profile test selection",
             target: event.target.name
         });
 
@@ -33,7 +33,7 @@ Template.profileTemplate.events({
         console.log("You clicked on: " + Session.get("currentTest"));
 
         //make sure session variables are cleared from previous tests
-        cleanUp();
+        sessionCleanUp();
         Router.go("instructions");
     }
 });
@@ -66,7 +66,7 @@ Template.profileTemplate.rendered = function () {
         }
 
     });
-}
+};
 
 Template.profileTemplate.username = function () {
 
@@ -79,7 +79,7 @@ Template.profileTemplate.username = function () {
     } else {
         return Meteor.user().username;
     }
-}
+};
 
 /////////////////
 //  FUNCTIONS  //
@@ -95,37 +95,7 @@ function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/
 
 function setUnitNumber(tdfName){ //sets the number of units in the current session
     var newTdf = Tdfs.findOne({fileName: tdfName});
-    if (newTdf.tdfs.tutor.unit != undefined){
+    if (typeof newTdf.tdfs.tutor.unit !== "undefined"){
         console.log("unit length is: " + newTdf.tdfs.tutor.unit.length);
     }
-}
-
-/* All of our currently known session variables:
- * clusterIndex
- * currentAnswer
- * currentQuestion
- * currentTdfName
- * currentTest
- * currentUnitNumber
- * debugging
- * isScheduledTest
- * questionIndex
- * showOverlearningText
- * testType
- * usingACTRModel
- * */
-function cleanUp() {
-    //Note that we assume that currentTest and currentTdfName are
-    //already set (because getStimNameFromTdf should have already been
-    //called).  We also ignore debugging (for obvious reasons)
-    
-    Session.set("clusterIndex", undefined);
-    Session.set("currentAnswer", undefined);
-    Session.set("currentQuestion", undefined);
-    Session.set("currentUnitNumber", 0);
-    Session.set("isScheduledTest", undefined);
-    Session.set("questionIndex", undefined);
-    Session.set("showOverlearningText", undefined);
-    Session.set("testType", undefined);
-    Session.set("usingACTRModel", undefined);
 }

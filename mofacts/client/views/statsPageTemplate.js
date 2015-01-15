@@ -1,7 +1,6 @@
+////////////////////////////////////////////////////////////////////////////
+// TEMPLATE EVENTS 
 
-//////////////
-//  EVENTS  //
-//////////////
 
 Template.statsPageTemplate.events({
     'click #continueButton' : function () {
@@ -10,12 +9,9 @@ Template.statsPageTemplate.events({
     'click .logoutLink' : function () {
         Meteor.logout( function (error) {
             if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User: " + Meteor.user() +" \n" +
-                            "\tError: " + error + "\n");
-            } else {
-                Router.go("signin");
+                console.log("Error Logging out [" + Meteor.user() + "] " + error);
             }
+            Router.go("signin");
         });
     },
     'click .homeLink' : function () {
@@ -23,92 +19,94 @@ Template.statsPageTemplate.events({
     }
 });
 
-/////////////////
-//  VARIABLES  //
-/////////////////
+////////////////////////////////////////////////////////////////////////////
+// TEMPLATE HELPERS
 
-Template.statsPageTemplate.username = function () {
+Template.statsPageTemplate.helpers({
+    username: function() {
+        if (typeof Meteor.user() === "undefined") {
+            Router.go("signin");
+            window.location.reload();
+            //the reload is needed because for some reason the page contents show up as
+            //empty unless we do the reload.
+            return;
+        } else {
+            return Meteor.user().username;
+        }
+    },
+    
+    statsRendered:   function() { return Session.get("statsRendered"); },
+    statsCorrect:    function() { return Session.get("statsCorrect"); },
+    statsTotal:      function() { return Session.get("statsTotal"); },
+    statsPercentage: function() { return Session.get("statsPercentage"); },
+});
 
-    if (typeof Meteor.user() === "undefined") {
-        Router.go("signin");
-        window.location.reload();
-        //the reload is needed because for some reason the page contents show up as
-        //empty unless we do the reload.
+
+////////////////////////////////////////////////////////////////////////////
+// IMPLEMENTATION FUNCTIONS
+
+//Calculates the stats displayed by this page
+statsPageTemplateUpdate = function() {    
+    //Set up the stats variables used in the HTML template
+    Session.set("statsRendered", false);
+    Session.set("statsCorrect", undefined);
+    Session.set("statsTotal", undefined);
+    Session.set("statsPercentage", undefined);
+    
+    //Must have a user to continue
+    if (!Meteor.userId()) {
         return;
-    } else {
-        return Meteor.user().username;
     }
-}
-
-Template.statsPageTemplate.rendered = function () {
-    var results;
-    var total = 0;
-    var totalCorrect = 0;
-    var userResponse;
-    var theAnswer;
-    var coloring = "\"black\"";
 
     var currentTest = Session.get("currentTest");
     if (!currentTest) {
         currentTest = "UnknownExperiment";
     }
     Meteor.call("userTime", currentTest, {
-        event: "stats page rendered",
+        action: "stats page rendered",
         target: "user screen"
     });
     
-
-    var statsGet = UserProgress.find(
-        { _id: Meteor.userId() },
-        {progressDataArray: 1});
-
-    statsGet.forEach(function (Object){
-        total = (Object.progressDataArray.length);
-        
-
-        for (var i = 0; i < total; i++) {
-            userResponse = (Object.progressDataArray[i].userAnswer);
-            theAnswer = (Object.progressDataArray[i].answer[0]);
-
-            if(userResponse.toLowerCase() === theAnswer.toLowerCase()){
-                totalCorrect++;
-            }
-
-        }
-    });
-
-    var Percentage = Math.round((totalCorrect/total)*100);
-
-    $("#statsAndStuff").append(
-        "<div class=\"text-center\"> <font color=" + coloring + "> <center>" +
-        
-        "<H3> <font color=" + coloring + "> Your Score <dr>"
-        + Percentage + 
-
-        "% </font> </H3> <dr><dr> <H4> You got " 
-        + totalCorrect + 
-
-        " of the " 
-        + total + 
-
-        " questions correct </H4> </font> </center> </div>" +
-
-
-        "<dr><dr>" +
-        "<div class=\"text-center\">" +
-            "<button type=\"button\" id=\"continueButton\" class=\"btn btn-primary\">Return to Home Screen</button>" +
-        "</div>" + 
-
-        "<center> <h6>" +
-
-        "Scoring does not take into account duplicate questions.<br>"+
-        "Duplicate questions count individually." +
-
-        "</h6> </center>");
+    if (Session.get("debugging")) {
+        console.log("Rendering stats for user");
+    }
     
-
-}
-
-/////////////////
-//  FUNCTIONS  //
-/////////////////
+    var currentUserProgress = UserProgress.findOne(
+        { _id: Meteor.userId() },
+        { progressDataArray: 1 }
+    );
+    
+    if (currentUserProgress) {
+        var total = currentUserProgress.progressDataArray.length;
+        var correct = 0;
+        
+        _.each(currentUserProgress.progressDataArray, function(item) {
+            var userResponse = Helpers.trim(item.userAnswer).toLowerCase();
+            var theAnswer    = Helpers.trim(item.answer    ).toLowerCase();
+            
+            console.log("Equal?", userResponse, theAnswer);
+            
+            if(userResponse === theAnswer) {
+                correct++;
+            }
+        });
+        
+        var percentage = 0.0;
+        if (total > 0) {
+            percentage =  Math.round( (correct / total) * 100.0) ;
+        }
+        
+        Session.set("statsRendered", true);
+        Session.set("statsCorrect", correct);
+        Session.set("statsTotal", total);
+        Session.set("statsPercentage", percentage);
+    }
+    
+    if (Session.get("debugging")) {
+        console.log("Stats Rendering: ", Session.get("statsRendered"),
+            Session.get("statsCorrect"),
+            Session.get("statsTotal"),
+            Session.get("statsPercentage")
+        );
+    }
+};

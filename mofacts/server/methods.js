@@ -1,3 +1,9 @@
+/*jshint sub:true*/
+
+//The jshint inline option above suppresses a warning about using sqaure
+//brackets instead of dot notation - that's because we prefer square brackets
+//for creating some MongoDB queries
+
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
@@ -67,7 +73,7 @@ Meteor.publish(null, function (){
     defaultData.push(Meteor.users.find({}));
     
     return defaultData;
-})
+});
 
 //Server-side startup logic
 
