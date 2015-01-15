@@ -1,12 +1,15 @@
-//////////////
-//  EVENTS  //
-//////////////
+////////////////////////////////////////////////////////////////////////////
+// Template event
 
 Template.signUpTemplate.events({
-    'click #signInButton' : function () {
+    'click #signInButton' : function (event) {
+        event.preventDefault();
         Router.go('signin');
     },
-    'click #signUpButton' : function () {
+    
+    'click #signUpButton' : function (event) {
+        event.preventDefault();
+        
         var formUsername = signUpUsername.value;
         var formPassword1 = password1.value;
         var formPassword2 = password2.value;
@@ -55,10 +58,9 @@ Template.signUpTemplate.events({
 
         Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
             if(typeof error !== "undefined") {
-                console.log("ERROR: There was an error creating the user account!\n" +
-                            "\t[Username: " + formUsername + "]\n" +
-                            "\t" + error);
-            } else {
+                console.log("Error creating the user account for user:", formUserName, error);
+            }
+            else {
                 var newUserID = Meteor.userId();
                 var newUserName = Meteor.user().username;
                 if(newUserID !== null) {
@@ -71,9 +73,7 @@ Template.signUpTemplate.events({
                     },
                     function (error, id) { //callback function
                         if (typeof error !== "undefined") {
-                            console.log("ERROR: The user was not logged in upon account creation!\n"+
-                                "\t[Username:" + formUsername + "]" +
-                                "\t" + error);
+                            console.log("Error setting up user progress for user:", formUserName, error);
                         }
                         else {
                             CardProbabilities.insert({
@@ -83,10 +83,9 @@ Template.signUpTemplate.events({
                             },
                             function (error, id) {
                                 if (typeof error !== "undefined") {
-                                    console.log("ERROR: The user was not logged in upon account creation!\n"+
-                                            "\t[Username:" + formUsername + "]" +
-                                            "\t" + error);
-                                } else {
+                                    console.log("Error setting up card probs for user:", formUserName, error);
+                                }
+                                else {
                                     Router.go("profile");
                                 }
                             });
@@ -101,40 +100,40 @@ Template.signUpTemplate.events({
             }
         });
     },
-    'blur #signUpUsername' : function () {
+    
+    'blur #signUpUsername' : function (event) {
         if(signUpUsername.value.length < 6) {
             $("#usernameTooShort").show();
-        } else {
+        }
+        else {
             $("#usernameTooShort").hide();
         }
 
         var userWithGivenUsername = Meteor.users.findOne({username: signUpUsername.value});
-        if(typeof userWithGivenUsername !== "undefined") {
+        if(userWithGivenUsername) {
             $("#usernameAlreadyInUse").show();
-        } else {
+        }
+        else {
             $("#usernameAlreadyInUse").hide();
         }
     },
+    
     'blur #password1' : function () {
-        if(password1.value.length < 6) {
+        var len = password1.value.length;
+        if(len > 1 && len < 6) {
             $("#passwordTooShort").show();
-        } else {
+        }
+        else {
             $("#passwordTooShort").hide();
         }
     },
+    
     'blur #password2' : function () {
         if(password1.value !== password2.value) {
             $("#passwordMustMatch").show();
-        } else {
+        }
+        else {
             $("#passwordMustMatch").hide();
         }
     }
 });
-
-/////////////////
-//  VARIABLES  //
-/////////////////
-
-/////////////////
-//  FUNCTIONS  //
-/////////////////

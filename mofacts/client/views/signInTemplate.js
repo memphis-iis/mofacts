@@ -1,42 +1,40 @@
-//////////////
-//  EVENTS  //
-//////////////
+////////////////////////////////////////////////////////////////////////////
+// Template Events
 
 Template.signInTemplate.events({
-    'click #signInButton' : function () {
+    'click #signInButton' : function (event) {
+        event.preventDefault();
         if (typeof console !== 'undefined' && Session.get("debugging")) {
             console.log("You are trying to sign in!");
         }
         UserPasswordCheck();
     },
-    'click #signUpButton' : function () {
+    
+    'click #signUpButton' : function (event) {
+        event.preventDefault();
         Router.go("signup");
     },
-    'focus #signInUsername' : function () {
+    
+    'focus #signInUsername' : function (event) {
         $("#invalidLogin").hide();
     },
+    
     'focus #password' : function () {
         $("#invalidLogin").hide();
     },
 
     'keypress #password' : function (e) {
-
         var key=e.keyCode || e.which;
-        if (key==13){
+        if (key == 13) {
             UserPasswordCheck();
         }
     }
 });
 
-/////////////////
-//  VARIABLES  //
-/////////////////
+////////////////////////////////////////////////////////////////////////////
+// Implementation functions
 
-/////////////////
-//  FUNCTIONS  //
-/////////////////
-
-function UserPasswordCheck(){
+function UserPasswordCheck() {
     var newUsername = signInUsername.value;
     var newPassword = password.value;
     

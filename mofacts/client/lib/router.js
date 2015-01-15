@@ -43,5 +43,6 @@ Router.route('/instructions', function () {
 });
 
 Router.route('/stats', function () {
+    console.log("About to render stats template"); //TODO: remove
     this.render('statsPageTemplate');
 });

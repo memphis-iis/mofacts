@@ -1,13 +1,14 @@
-
-//////////////
-//  EVENTS  //
-//////////////
+////////////////////////////////////////////////////////////////////////////
+// Template Events
 
 Template.instructionsTemplate.events({
-    'click #continueButton' : function () {
+    'click #continueButton' : function (event) {
+        event.preventDefault();
         Router.go("card");
     },
-    'click .logoutLink' : function () {
+    
+    'click .logoutLink' : function (event) {
+        event.preventDefault();
         Meteor.logout( function (error) {
             if (typeof error !== "undefined") {
                 //something happened during logout
@@ -18,41 +19,38 @@ Template.instructionsTemplate.events({
             }
         });
     },
-    'click .homeLink' : function () {
+    
+    'click .homeLink' : function (event) {
+        event.preventDefault();
         Router.go("profile");
     }
 });
 
-/////////////////
-//  VARIABLES  //
-/////////////////
+////////////////////////////////////////////////////////////////////////////
+// Template helpers
 
-Template.instructionsTemplate.instructions = function () {
-    var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-    var instructions;
-    if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-        var unit = Session.get("currentUnitNumber");
-        instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
-    }
-    else {
-        instructions = "Please enter answer in text box provided below questions.";
-    }
-    return instructions;
-};
+Template.instructionsTemplate.helpers({
+    instructions: function () {
+        var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
+        var instructions;
+        if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
+            var unit = Session.get("currentUnitNumber");
+            instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
+        }
+        else {
+            instructions = "Please enter answer in text box provided below questions.";
+        }
+        return instructions;
+    },
 
-Template.instructionsTemplate.username = function () {
-
-    if (typeof Meteor.user() === "undefined") {
-        Router.go("signin");
-        window.location.reload();
-        //the reload is needed because for some reason the page contents show up as
-        //empty unless we do the reload.
-        return;
-    } else {
-        return Meteor.user().username;
-    }
-};
-
-/////////////////
-//  FUNCTIONS  //
-/////////////////
+    username: function () {
+        if (!Meteor.userId()) {
+            Router.go("signin");
+            window.location.reload(); //TODO: can we remove this?
+            return;
+        }
+        else {
+            return Meteor.user().username;
+        }
+    },
+});

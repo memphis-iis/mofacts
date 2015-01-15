@@ -1,24 +1,27 @@
-
-//////////////
-//  EVENTS  //
-//////////////
+////////////////////////////////////////////////////////////////////////////
+// Template Events
 
 Template.profileTemplate.events({
-    'click .logoutLink' : function () {
+    'click .logoutLink' : function (event) {
+        event.preventDefault();
         Meteor.logout( function (error) {
             if (typeof error !== "undefined") {
                 //something happened during logout
-                console.log("User: " + Meteor.user() +" \n" +
-                            "\tError: " + error + "\n");
-            } else {
+                console.log("User:", Meteor.user(), "Error:", error);
+            }
+            else {
                 Router.go("signin");
             }
         });
     },
-    'click .homeLink' : function () {
+    
+    'click .homeLink' : function (event) {
+        event.preventDefault();
         Router.go("profile");
     },
+    
     'click .stimButton' : function (event) {
+        event.preventDefault();
         console.log(event);
 
         Session.set("currentTest", getStimNameFromTdf(event.target.name));
@@ -38,22 +41,32 @@ Template.profileTemplate.events({
     }
 });
 
-/////////////////
-//  VARIABLES  //
-/////////////////
+////////////////////////////////////////////////////////////////////////////
+// Template helpers
+
+Template.profileTemplate.helpers({
+    username: function () {
+        if (!Meteor.userId()) {
+            Router.go("signin");
+            window.location.reload(); //TODO: is this really needed?
+            return;
+        }
+        else {
+            return Meteor.user().username;
+        }
+    },
+});
 
 Template.profileTemplate.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
     
     allTdfs.forEach( function (tdfObject) {
-
         console.log("rendered: " + tdfObject.tdfs.tutor.setspec[0].stimulusfile[0]);
         
         var name = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
 
         if (typeof name !== "undefined") {
-
             $("#testContainingDiv").append(
                 "<div class=\"col-sm-3 col-md-3 col-lg-3 text-center\">" +
                     "<button type=\"button\" name=\"" + name + "\" class=\"btn btn-primary btn-block stimButton\">" + 
@@ -62,28 +75,12 @@ Template.profileTemplate.rendered = function () {
                     "</br>" +
                 "</div>"
             );
-
         }
-
     });
 };
 
-Template.profileTemplate.username = function () {
-
-    if (typeof Meteor.user() === "undefined") {
-        Router.go("signin");
-        window.location.reload();
-        //the reload is needed because for some reason the page contents show up as
-        //empty unless we do the reload.
-        return;
-    } else {
-        return Meteor.user().username;
-    }
-};
-
-/////////////////
-//  FUNCTIONS  //
-/////////////////
+////////////////////////////////////////////////////////////////////////////
+// Implementation functions
 
 function getStimNameFromTdf(lessonName){ //Find stimulus file name associated w/ TDF
     var newTdf = Tdfs.findOne({'tdfs.tutor.setspec.0.lessonname.0' : lessonName});

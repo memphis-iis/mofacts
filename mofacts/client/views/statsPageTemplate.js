@@ -22,8 +22,6 @@ Template.statsPageTemplate.events({
 ////////////////////////////////////////////////////////////////////////////
 // TEMPLATE HELPERS
 
-//TODO: switch all template-backing js files to .helpers instead of current setup
-
 Template.statsPageTemplate.helpers({
     username: function() {
         if (typeof Meteor.user() === "undefined") {

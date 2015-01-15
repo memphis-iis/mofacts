@@ -1,7 +1,3 @@
-//////////////
-//  EVENTS  //
-//////////////
-
 //TODO: we should be going back to instructions for each unit - and we
 //      should be able to handle instruction-only units
 
@@ -11,9 +7,34 @@
 //      be special info depending on whether the question is from a schedule,
 //      an ACT-R mode, or just random
 
-var timeoutName;
-var timeoutCount = -1;
+//TODO: need all events to properly handle preventDefault
+
+////////////////////////////////////////////////////////////////////////////
+// Global variables and helper functions for them
+
 var permuted = [];
+
+function clearCardPermuted() {
+    permuted = [];
+}
+
+var timeoutName = null;
+var timeoutCount = -1;
+
+function clearCardTimeout() {
+    if (!!timeoutName) {
+        try {
+            Meteor.clearTimeout(timeoutName);
+        }
+        catch(e) {
+            console.log("Error clearing meteor timeout", e, timeoutName);
+        }
+    }
+    timeoutName = null;
+}
+
+////////////////////////////////////////////////////////////////////////////
+// Events
 
 Template.cardTemplate.events({
 
@@ -25,12 +46,14 @@ Template.cardTemplate.events({
             //});
         }
     },
+    
     'keypress #userAnswer' : function (e) {
         handleUserInput( e , "keypress");
-
     },
-    'click .logoutLink' : function () {
+    
+    'click .logoutLink' : function (event) {
         Meteor.logout( function (error) {
+            event.preventDefault();
             if (typeof error !== "undefined") {
                 //something happened during logout
                 console.log("User:" + Meteor.user() +" ERROR:" + error);
@@ -40,31 +63,35 @@ Template.cardTemplate.events({
             }
         });
     },
-    'click .homeLink' : function () {
+    
+    'click .homeLink' : function (event) {
+        event.preventDefault();
         Router.go("/profile");
     },
 
-    'click .statsPageLink' : function () {
+    'click .statsPageLink' : function (event) {
+        event.preventDefault();
         statsPageTemplateUpdate(); //In statsPageTemplate.js
         Router.go("/stats");
     },
 
-    'click #overlearningButton' : function () {
+    'click #overlearningButton' : function (event) {
+        event.preventDefault();
         Router.go("/profile");
     },
     
     'click .multipleChoiceButton' : function (event) {
+        event.preventDefault();
         handleUserInput( event , "buttonClick");
     }
 });
 
+////////////////////////////////////////////////////////////////////////////
+// Template helpers and meteor events
+
 Template.cardTemplate.rendered = function() {
     newQuestionHandler();
 };
-
-/////////////////
-//  VARIABLES  //
-/////////////////
 
 Template.cardTemplate.invokeAfterLoad = function() {
 
@@ -74,6 +101,10 @@ Template.cardTemplate.invokeAfterLoad = function() {
 
     //the card loads frequently, but we only want to set this the first time
     if(typeof Session.get("currentQuestion") === "undefined"){
+        //Clear anby previous permutation and/or timeout call
+        clearCardTimeout();
+        clearCardPermuted();
+        
         var file = getCurrentTdfFile();
 
         //check if tutor.setspec.isModeled is defined in the tdf
@@ -95,44 +126,44 @@ Template.cardTemplate.invokeAfterLoad = function() {
     }
 };
 
-Template.cardTemplate.username = function () {
-    if (typeof Meteor.user() === "undefined") {
-        Router.go("signin");
-    }
-    else {
-        return Meteor.user().username;
-    }
-};
+Template.cardTemplate.helpers({
+    username: function () {
+        if (typeof Meteor.user() === "undefined") {
+            Router.go("signin");
+        }
+        else {
+            return Meteor.user().username;
+        }
+    },
 
-//determine the type of question to display
-Template.cardTemplate.textCard = function() {
-    return getQuestionType() === "text";
-};
+    textCard: function() {
+        return getQuestionType() === "text";
+    },
 
-Template.cardTemplate.audioCard = function() {
-    return getQuestionType() === "sound";
-};
+    audioCard: function() {
+        return getQuestionType() === "sound";
+    },
 
-Template.cardTemplate.imageCard = function() {
-    return getQuestionType() === "image";
-};
+    imageCard: function() {
+        return getQuestionType() === "image";
+    },
 
-//determine the type of question to display
-Template.cardTemplate.test = function() {
-    return getTestType() === "t";
-};
+    test: function() {
+        return getTestType() === "t";
+    },
 
-Template.cardTemplate.study = function() {
-    return getTestType() === "s";
-};
+    study: function() {
+        return getTestType() === "s";
+    },
 
-Template.cardTemplate.drill = function() {
-    return getTestType() === "d";
-};
+    drill: function() {
+        return getTestType() === "d";
+    },    
+});
 
-/////////////////
-//  FUNCTIONS  //
-/////////////////
+
+////////////////////////////////////////////////////////////////////////////
+// Implementation functions
 
 function newQuestionHandler(){
     console.log("NQ handler");
@@ -218,7 +249,6 @@ function newQuestionHandler(){
     start = 0;
 
     //for debugging, allow one to turn on or off the timeout code.
-    //Note to Future Self : Look up clearTimeout(timeoutObject);
 
     var AllowTimeouts = true;
 
@@ -232,7 +262,7 @@ function newQuestionHandler(){
             length = Object.progressDataArray.length;
         });
 
-        timeoutfunction(length, timeoutCount);
+        timeoutfunction(length);
     }
 
     if(getQuestionType() === "sound"){
@@ -264,8 +294,8 @@ function handleUserInput( e , source ) {
         return;
     }
 
-    //Gets User Response
-    clearTimeout(timeoutName);
+    //Stop current timeout
+    clearCardTimeout();
 
     var userAnswer;
     if (source === "keypress") {
@@ -555,8 +585,7 @@ function recordProgress(questionIndex, question, answer, userAnswer) {
     });
 }
 
-function resetCurrentTestData() {
-
+function resetCurrentTestData() {   
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
     var currentTestMode;
@@ -902,27 +931,25 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
     return indexToReturn;
 }
 
-function timeoutfunction(index, timeoutNum){
-
-    var counter = UserProgress.find(
-        { _id: Meteor.userId() },
-        {progressDataArray: 1});
-
-    counter.forEach(function (Object){
-        length = Object.progressDataArray.length;
-    });
-
-    //needs to be in tdf someday
-    //the timeout in Seconds is multipled by 1000 to conver to milliseconds
+function timeoutfunction(index) {
+    var progress = UserProgress.findOne(
+        { _id: Meteor.userId() }, 
+        { progressDataArray: 1 }
+    );
+    
+    var length = 0;
+    if (progress && progress.progressDataArray && progress.progressDataArray.length) {
+        length = progress.progressDataArray.length;
+    }
 
     var file = getCurrentTdfFile();
     var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
+    var delay = tis * 1000; //Need delay is milliseconds
+    
+    clearCardTimeout(); //No previous timeout now
 
-    var delay = tis * 1000;
-
-    timeoutName = Meteor.setTimeout(function(){
-
-        if(index === length && timeoutNum > 0){
+    timeoutName = Meteor.setTimeout(function() {
+        if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
             Meteor.call("userTime", Session.get("currentTest"), {
@@ -952,13 +979,11 @@ function timeoutfunction(index, timeoutNum){
             };
 
             Meteor.setTimeout(clearInfo, 2000);
-
-
-        }else{
+        }
+        else{
             //Do Nothing
         }
-
-
+        
     }, delay);
 }
 
