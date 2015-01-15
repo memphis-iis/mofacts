@@ -1,3 +1,10 @@
+//User helpers
+
+haveMeteorUser = function() {
+    return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
+};
+
+
 //Session helpers
 
 /* All of our currently known session variables:

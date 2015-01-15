@@ -46,10 +46,8 @@ Template.profileTemplate.events({
 
 Template.profileTemplate.helpers({
     username: function () {
-        if (!Meteor.userId()) {
+        if (!haveMeteorUser()) {
             Router.go("signin");
-            window.location.reload(); //TODO: is this really needed?
-            return;
         }
         else {
             return Meteor.user().username;

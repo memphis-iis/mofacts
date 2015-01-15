@@ -30,8 +30,14 @@ Template.instructionsTemplate.events({
 // Template helpers
 
 Template.instructionsTemplate.helpers({
-    instructions: function () {
+    instructions: function () {        
         var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
+        if (!thisTdf) {
+            //Whoops - no TDF at all
+            Router.go("profile");
+            return;
+        }
+        
         var instructions;
         if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
             var unit = Session.get("currentUnitNumber");
@@ -44,10 +50,8 @@ Template.instructionsTemplate.helpers({
     },
 
     username: function () {
-        if (!Meteor.userId()) {
+        if (!haveMeteorUser()) {
             Router.go("signin");
-            window.location.reload(); //TODO: can we remove this?
-            return;
         }
         else {
             return Meteor.user().username;

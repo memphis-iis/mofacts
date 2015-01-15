@@ -3,15 +3,6 @@ Router.configure({
     layoutTemplate: 'DefaultLayout'
 });
 
-Router.onBeforeAction(function() {
-    if (!Meteor.userId()) {
-        this.render('signInTemplate');
-    }
-    else {
-        this.next();
-    }
-});
-
 Router.route('/signin', function () {
     this.render('signInTemplate');
 });
@@ -43,6 +34,5 @@ Router.route('/instructions', function () {
 });
 
 Router.route('/stats', function () {
-    console.log("About to render stats template"); //TODO: remove
     this.render('statsPageTemplate');
 });

@@ -7,7 +7,6 @@
 //      be special info depending on whether the question is from a schedule,
 //      an ACT-R mode, or just random
 
-//TODO: need all events to properly handle preventDefault
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
@@ -128,7 +127,7 @@ Template.cardTemplate.invokeAfterLoad = function() {
 
 Template.cardTemplate.helpers({
     username: function () {
-        if (typeof Meteor.user() === "undefined") {
+        if (!haveMeteorUser()) {
             Router.go("signin");
         }
         else {
