@@ -46,8 +46,8 @@ npm-bcrypt@0.7.7
 observe-sequence@1.0.4
 ordered-dict@1.0.2
 ovcharik:howler@1.1.26
-peerlibrary:blocking@0.4.2
-peerlibrary:xml2js@0.4.4_3
+peerlibrary:blocking@0.5.1
+peerlibrary:xml2js@0.4.4_4
 random@1.0.2
 reactive-dict@1.0.5
 reactive-var@1.0.4
