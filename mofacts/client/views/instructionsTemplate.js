@@ -1,3 +1,7 @@
+//TODO: user times log once instruction is displayed
+
+//TODO: user times log when continuing on to content
+
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
