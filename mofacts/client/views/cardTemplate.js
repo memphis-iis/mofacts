@@ -354,7 +354,7 @@ function handleUserInput( e , source ) {
     //Get question Number
     var index = getCurrentClusterIndex();
 
-    Meteor.call("userTime", Session.get("currentTest"), {
+    Meteor.call("userTime", getCurrentTestName(), {
         action: "answer",
         index: index,
         ttype: getTestType(),
@@ -650,7 +650,7 @@ function getSchedule() {
         if (!schedule) {
             //There was an error creating the schedule - there's really nothing
             //left to do since the experiment is broken
-            Meteor.call("userTime", Session.get("currentTest"), {
+            Meteor.call("userTime", getCurrentTestName(), {
                 action: "FAILURE to create schedule",
                 unitname: Helpers.display(currUnit.unitname),
                 unitindex: unit
@@ -668,7 +668,7 @@ function getSchedule() {
             { $set: { currentSchedule: schedule } }
         );
 
-        Meteor.call("userTime", Session.get("currentTest"), {
+        Meteor.call("userTime", getCurrentTestName(), {
             action: "schedule",
             unitname: Helpers.display(currUnit.unitname),
             unitindex: unit,
@@ -960,7 +960,7 @@ function timeoutfunction(index) {
         if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
-            Meteor.call("userTime", Session.get("currentTest"), {
+            Meteor.call("userTime", getCurrentTestName(), {
                 action: "[TIMEOUT]",
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
