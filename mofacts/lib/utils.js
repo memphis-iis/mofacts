@@ -18,6 +18,7 @@ haveMeteorUser = function() {
  * isScheduledTest
  * questionIndex
  * showOverlearningText
+ * statsAnswerDetails        - Used by stats page template
  * statsRendered             - Used by stats page template
  * statsCorrect              - Used by stats page template
  * statsTotal                - Used by stats page template
@@ -37,6 +38,7 @@ sessionCleanUp = function() {
     Session.set("isScheduledTest", undefined);
     Session.set("questionIndex", undefined);
     Session.set("showOverlearningText", undefined);
+    Session.set("statsAnswerDetails", undefined);
     Session.set("statsRendered", false);
     Session.set("statsCorrect", undefined);
     Session.set("statsTotal", undefined);

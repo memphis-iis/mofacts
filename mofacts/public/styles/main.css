@@ -6,16 +6,17 @@ body {
 }
 
 .visible-text,
-.visible-text p, 
-.visible-text h1, 
-.visible-text h2, 
-.visible-text h3, 
-.visible-text h4, 
-.visible-text h5, 
-.visible-text h6 {
+.visible-text p,
+.visible-text h1,
+.visible-text h2,
+.visible-text h3,
+.visible-text h4,
+.visible-text h5,
+.visible-text h6,
+.visible-text th,
+.visible-text td {
     color: #000;
 }
-
 
 .navbar-inverse .navbar-collapse {
 	background-color: #585858;
@@ -50,7 +51,7 @@ h2 {
 	width: 100%;
 	background-color: #40a371;
 	text-align: center;
-	box-shadow: 1px 1px 1px 1px #4d5a42;	
+	box-shadow: 1px 1px 1px 1px #4d5a42;
 }
 
 #questionLabel {
@@ -139,7 +140,7 @@ legend {
 
 .dropdown-menu > li > a:focus {
 	background-color: #585858;
-	color: white;	
+	color: white;
 }
 
 .form-control {
@@ -182,7 +183,7 @@ legend {
 .dropdown-menu body {
 	color: white;
 	background-color: #585858;
-	font-family: 'Lato', sans-serif;	
+	font-family: 'Lato', sans-serif;
 }
 
 .panel, .panel-heading, .panel-body {
@@ -209,7 +210,7 @@ legend {
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
 	color: white;
 	background-color: #585858;
-	font-family: 'Lato', sans-serif;	
+	font-family: 'Lato', sans-serif;
 }
 
 .label-primary {
