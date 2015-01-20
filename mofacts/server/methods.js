@@ -78,16 +78,14 @@ Meteor.publish(null, function (){
 //Server-side startup logic
 
 Meteor.startup(function () {
-    //Currently we re-load all tdf and stimuli from local files
-    Stimuli.remove({});
-    Tdfs.remove({});
-
+    //Rewrite TDF and Stimuli documents if we have a file
     var isXML = function (fn) { return fn.indexOf('.xml') >= 0; };
 
     _.each(
         _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
         function(ele, idx, lst) {
             var json = getStimJSON('stims/' + ele);
+            Stimuli.remove({fileName: ele});
             Stimuli.insert({fileName: ele, stimuli: json});
         }
     );
@@ -96,6 +94,7 @@ Meteor.startup(function () {
         _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
         function(ele, idx, lst) {
             var json = getStimJSON('tdf/' + ele);
+            Tdfs.remove({fileName: ele});
             Tdfs.insert({fileName: ele, tdfs: json});
         }
     );
@@ -189,4 +188,3 @@ Meteor.startup(function () {
         }
     });
 });
-
