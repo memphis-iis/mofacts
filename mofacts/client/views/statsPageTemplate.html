@@ -75,12 +75,14 @@
                     <legend class="text-center"><h3>User Times Log (Desc Order)</h3></legend>
                     <table class="table table-bordered table-condensed">
                         <thead>
-                            <tr><th>ServerTime</th><th>Action</th><th>Data</th></tr>
+                            <tr><th>ServerTime</th><th>ClientTime</th><th>Drift</th><th>Action</th><th>Data</th></tr>
                         </thead>
                         <tbody>
                             {{#each statsUserTimeLogView}}
                                 <tr>
                                     <td class="nw">{{serverDate}}</td>
+                                    <td class="nw">{{clientDate}}</td>
+                                    <td class="nw">{{timeDrift}}</td>
                                     <td class="nw">{{action}}</td>
                                     <td style="font-size: 75%;">{{data}}</td>
                                 </tr>

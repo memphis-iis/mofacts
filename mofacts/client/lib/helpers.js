@@ -2,6 +2,26 @@
  * 
  * Client-side helper functions
  * */
+
+//Helper for calling server method
+
+recordUserTime = function(action, extendedData) {
+    var testName = Session.get("currentTest");
+    if (!testName) {
+        testName = "NO_CURRENT_TEST";
+    }
+    
+    var dataRec = _.extend({
+        action: action,
+        clientSideTimeStamp: Date.now()
+    }, extendedData);
+    
+    if (Session.get("debugging")) {
+        console.log("userTime", testName, action, dataRec);
+    }
+    
+    Meteor.call("userTime", testName, dataRec);
+};
  
 //UI helpers (for the HTML template)
  
@@ -20,3 +40,4 @@ UI.registerHelper('currentQuestion', function () {
 UI.registerHelper('currentAnswer', function () {
     return Session.get("currentAnswer");
 });
+

@@ -27,8 +27,7 @@ Template.profileTemplate.events({
         Session.set("currentTest", getStimNameFromTdf(event.target.name));
 
         //Save the test selection event
-        Meteor.call("userTime", Session.get("currentTest"), {
-            action: "profile test selection",
+        recordUserTime("profile test selection", {
             target: event.target.name
         });
 

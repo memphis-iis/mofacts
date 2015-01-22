@@ -278,7 +278,6 @@ function newQuestionHandler(){
         }).play();
     }
 
-
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
@@ -354,8 +353,7 @@ function handleUserInput( e , source ) {
     //Get question Number
     var index = getCurrentClusterIndex();
 
-    Meteor.call("userTime", getCurrentTestName(), {
-        action: "answer",
+    recordUserTime("answer", {
         index: index,
         ttype: getTestType(),
         qtype: findQTypeSimpified(),
@@ -650,8 +648,7 @@ function getSchedule() {
         if (!schedule) {
             //There was an error creating the schedule - there's really nothing
             //left to do since the experiment is broken
-            Meteor.call("userTime", getCurrentTestName(), {
-                action: "FAILURE to create schedule",
+            recordUserTime("FAILURE to create schedule", {
                 unitname: Helpers.display(currUnit.unitname),
                 unitindex: unit
             });
@@ -668,8 +665,7 @@ function getSchedule() {
             { $set: { currentSchedule: schedule } }
         );
 
-        Meteor.call("userTime", getCurrentTestName(), {
-            action: "schedule",
+        recordUserTime("schedule", {
             unitname: Helpers.display(currUnit.unitname),
             unitindex: unit,
             schedule: schedule
@@ -960,8 +956,7 @@ function timeoutfunction(index) {
         if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
 
-            Meteor.call("userTime", getCurrentTestName(), {
-                action: "[TIMEOUT]",
+            recordUserTime("[TIMEOUT]", {
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
                 delay: delay

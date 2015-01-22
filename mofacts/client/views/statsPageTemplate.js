@@ -62,13 +62,8 @@ statsPageTemplateUpdate = function() {
     if (!haveMeteorUser()) {
         return;
     }
-
-    var currentTest = Session.get("currentTest");
-    if (!currentTest) {
-        currentTest = "UnknownExperiment";
-    }
-    Meteor.call("userTime", currentTest, {
-        action: "stats page rendered",
+    
+    recordUserTime("stats page rendered", {
         target: "user screen"
     });
 
@@ -88,6 +83,9 @@ statsPageTemplateUpdate = function() {
         var correct = 0;
 
         _.each(currentUserProgress.progressDataArray, function(item) {
+            //TODO: we shouldn't be comparing here - we should be using a field
+            //      from the data structure set when the comparison is made
+            
             var userResponse = Helpers.trim(item.userAnswer).toLowerCase();
             var theAnswer    = Helpers.trim(item.answer    ).toLowerCase();
 
@@ -113,12 +111,31 @@ statsPageTemplateUpdate = function() {
         var userTimeLogView = [];
         if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
             var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+            
+            var currentTest = Session.get("currentTest");
+            if (!currentTest) {
+                currentTest = "NO_CURRENT_TEST";
+            }
             var expKey = currentTest.replace(/\./g, "_");
+            
+            var statFormatDate = function(ts) {
+                if (!ts) return "";
+                else     return new Date(ts).toLocaleString();
+            };
+            var drift = function(cli, srv) {
+                if (!cli || !srv) return "";
+                else              return Math.abs(cli - srv).toFixed(0) + " ms";
+            };
+            
             if (userLog && userLog[expKey] && userLog[expKey].length) {
                 userTimeLogView = _.map(userLog[expKey], function(entry) {
+                    var cliTS = entry.clientSideTimeStamp;
+                    var srvTS = entry.serverSideTimeStamp;
                     return {
                         action: entry.action,
-                        serverDate: new Date(entry.serverSideTimeStamp).toLocaleString(),
+                        serverDate: statFormatDate(srvTS),
+                        clientDate: statFormatDate(cliTS),
+                        timeDrift: drift(cliTS, srvTS),
                         data: JSON.stringify(entry)
                     };
                 });
@@ -142,3 +159,4 @@ statsPageTemplateUpdate = function() {
         );
     }
 };
+
