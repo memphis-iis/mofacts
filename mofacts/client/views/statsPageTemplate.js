@@ -3,20 +3,23 @@
 
 
 Template.statsPageTemplate.events({
-    'click #continueButton' : function () {
+    'click #continueButton' : function (event) {
+        event.preventDefault();
         Router.go("profile");
     },
 
-    'click .logoutLink' : function () {
+    'click .logoutLink' : function (event) {
         Meteor.logout( function (error) {
             if (typeof error !== "undefined") {
                 console.log("Error Logging out [" + Meteor.user() + "] " + error);
             }
+            event.preventDefault();
             Router.go("signin");
         });
     },
 
-    'click .homeLink' : function () {
+    'click .homeLink' : function (event) {
+        event.preventDefault();
         Router.go("profile");
     }
 });
@@ -34,11 +37,12 @@ Template.statsPageTemplate.helpers({
         }
     },
 
-    statsRendered:      function() { return Session.get("statsRendered"); },
-    statsCorrect:       function() { return Session.get("statsCorrect"); },
-    statsTotal:         function() { return Session.get("statsTotal"); },
-    statsPercentage:    function() { return Session.get("statsPercentage"); },
-    statsAnswerDetails: function() { return Session.get("statsAnswerDetails"); },
+    statsRendered:        function() { return Session.get("statsRendered"); },
+    statsCorrect:         function() { return Session.get("statsCorrect"); },
+    statsTotal:           function() { return Session.get("statsTotal"); },
+    statsPercentage:      function() { return Session.get("statsPercentage"); },
+    statsAnswerDetails:   function() { return Session.get("statsAnswerDetails"); },
+    statsUserTimeLogView: function() { return Session.get("statsUserTimeLogView"); },
 });
 
 
@@ -52,6 +56,7 @@ statsPageTemplateUpdate = function() {
     Session.set("statsCorrect", undefined);
     Session.set("statsTotal", undefined);
     Session.set("statsPercentage", undefined);
+    Session.set("statsUserTimeLogView", undefined);
 
     //Must have a user to continue
     if (!haveMeteorUser()) {
@@ -103,12 +108,30 @@ statsPageTemplateUpdate = function() {
         if (total > 0) {
             percentage =  Math.round( (correct / total) * 100.0) ;
         }
+        
+        //Simple debugging view of user time log in reverse order
+        var userTimeLogView = [];
+        if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+            var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+            var expKey = currentTest.replace(/\./g, "_");
+            if (userLog && userLog[expKey] && userLog[expKey].length) {
+                userTimeLogView = _.map(userLog[expKey], function(entry) {
+                    return {
+                        action: entry.action,
+                        serverDate: new Date(entry.serverSideTimeStamp).toLocaleString(),
+                        data: JSON.stringify(entry)
+                    };
+                });
+                userTimeLogView.reverse();
+            }
+        }
 
         Session.set("statsRendered", true);
         Session.set("statsCorrect", correct);
         Session.set("statsTotal", total);
         Session.set("statsPercentage", percentage);
         Session.set("statsAnswerDetails", answerDetails);
+        Session.set("statsUserTimeLogView", userTimeLogView);
     }
 
     if (Session.get("debugging")) {

@@ -23,6 +23,7 @@ haveMeteorUser = function() {
  * statsCorrect              - Used by stats page template
  * statsTotal                - Used by stats page template
  * statsPercentage           - Used by stats page template
+ * statsUserTimeLogView      - User by stats page template
  * testType
  * usingACTRModel
  * */
@@ -43,6 +44,7 @@ sessionCleanUp = function() {
     Session.set("statsCorrect", undefined);
     Session.set("statsTotal", undefined);
     Session.set("statsPercentage", undefined);
+    Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
     Session.set("usingACTRModel", undefined);
 };

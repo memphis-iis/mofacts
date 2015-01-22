@@ -36,7 +36,7 @@
             <div id="statsAndStuff" class="visible-text">
                 <div class="text-center">
                     <h3> Your Score: <br> {{statsPercentage}} % </h3>
-                    <h4> You got {{statCorrect}} of the {{statsTotal}} questions correct </h4>
+                    <h4> You got {{statsCorrect}} of the {{statsTotal}} questions correct </h4>
                 </div>
                 <div class="text-center">
                     <button type="button" id="continueButton" class="btn btn-primary">Return to Home Screen</button>
@@ -68,6 +68,26 @@
                     </table>
                 </div>
                 <div class="col-xs-1  col-sm-1  col-md-2 col-lg-3">&nbsp;</div>
+            </div>
+            
+            <div class="row" style="background-color:#fff;">
+                <div class="visible-text col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <legend class="text-center"><h3>User Times Log (Desc Order)</h3></legend>
+                    <table class="table table-bordered table-condensed">
+                        <thead>
+                            <tr><th>ServerTime</th><th>Action</th><th>Data</th></tr>
+                        </thead>
+                        <tbody>
+                            {{#each statsUserTimeLogView}}
+                                <tr>
+                                    <td class="nw">{{serverDate}}</td>
+                                    <td class="nw">{{action}}</td>
+                                    <td style="font-size: 75%;">{{data}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         {{/if}}
 	</div>

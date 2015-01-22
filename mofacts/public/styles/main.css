@@ -81,10 +81,12 @@ legend {
 	font-family: 'Lato', sans-serif;
 }
 
-#answer {
+#userAnswer {
 	background:  #585858;
 	text-align: center;
 	font-family: 'Lato', sans-serif;
+    background-color: #fff;
+    color: #000;
 }
 
 #audio {
@@ -248,4 +250,8 @@ input:focus {
 
 .text-center * {
     text-align: center;
+}
+
+.nw {
+    white-space: nowrap;
 }
