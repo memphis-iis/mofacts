@@ -172,7 +172,7 @@ Template.cardTemplate.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
-function newQuestionHandler(){
+function newQuestionHandler() {
     console.log("NQ handler");
     $("#userAnswer").focus();
 
@@ -281,6 +281,9 @@ function newQuestionHandler(){
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
+    
+    //All ready - time to allow them to enter data
+    allowUserInput();
 }
 
 function handleUserInput( e , source ) {
@@ -300,7 +303,8 @@ function handleUserInput( e , source ) {
         return;
     }
 
-    //Stop current timeout
+    //Stop current timeout and stop user input
+    stopUserInput();
     clearCardTimeout();
 
     var userAnswer;
@@ -955,6 +959,7 @@ function timeoutfunction(index) {
     timeoutName = Meteor.setTimeout(function() {
         if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
+            stopUserInput();
 
             recordUserTime("[TIMEOUT]", {
                 index: getCurrentClusterIndex(),
@@ -1034,4 +1039,12 @@ function hideUserInteraction() {
         .removeClass("text-align alert alert-success alert-danger")
         .html("")
         .hide();
+}
+
+function stopUserInput() {
+    $("#userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+}
+
+function allowUserInput() {
+    $("#userAnswer, #multipleChoiceContainer button").prop("disabled", false);
 }
