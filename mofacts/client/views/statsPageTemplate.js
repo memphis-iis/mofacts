@@ -62,7 +62,7 @@ statsPageTemplateUpdate = function() {
     if (!haveMeteorUser()) {
         return;
     }
-    
+
     recordUserTime("stats page rendered", {
         target: "user screen"
     });
@@ -83,14 +83,21 @@ statsPageTemplateUpdate = function() {
         var correct = 0;
 
         _.each(currentUserProgress.progressDataArray, function(item) {
-            //TODO: we shouldn't be comparing here - we should be using a field
-            //      from the data structure set when the comparison is made
-            
             var userResponse = Helpers.trim(item.userAnswer).toLowerCase();
             var theAnswer    = Helpers.trim(item.answer    ).toLowerCase();
 
+            var isCorrect = null;
+            if (typeof item.isCorrect !== "undefined") {
+                isCorrect = (item.isCorrect === "false" ? false : !!item.isCorrect);
+            }
+            else {
+                item.MISSING_IS_CORRECT = "Answer checked manually";
+                console.log("Found an answer without isCorrect flag");
+                isCorrect = (userResponse === theAnswer);
+            }
+
             var state = "danger";
-            if(userResponse === theAnswer) {
+            if(isCorrect) {
                 correct++;
                 state = "success";
             }
@@ -106,18 +113,18 @@ statsPageTemplateUpdate = function() {
         if (total > 0) {
             percentage =  Math.round( (correct / total) * 100.0) ;
         }
-        
+
         //Simple debugging view of user time log in reverse order
         var userTimeLogView = [];
         if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
             var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-            
+
             var currentTest = Session.get("currentTest");
             if (!currentTest) {
                 currentTest = "NO_CURRENT_TEST";
             }
             var expKey = currentTest.replace(/\./g, "_");
-            
+
             var statFormatDate = function(ts) {
                 if (!ts) return "";
                 else     return new Date(ts).toLocaleString();
@@ -126,7 +133,7 @@ statsPageTemplateUpdate = function() {
                 if (!cli || !srv) return "";
                 else              return Math.abs(cli - srv).toFixed(0) + " ms";
             };
-            
+
             if (userLog && userLog[expKey] && userLog[expKey].length) {
                 userTimeLogView = _.map(userLog[expKey], function(entry) {
                     var cliTS = entry.clientSideTimeStamp;
