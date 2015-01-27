@@ -803,17 +803,9 @@ function calculateCardProbabilities() {
         var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
 
         //set probability
-        var setModifier = {$set: {}};
-        setModifier.$set["cardsArray." + i + ".probability"] = probability;
-        setModifiers.push(setModifier);
-
-        //increment trialsSinceLastSeen
-        var incModifier = {$inc: {}};
-        incModifier.$inc["cardsArray." + i + ".trialsSinceLastSeen"] = 1;
-        incModifiers.push(incModifier);
+        //TODO: cardProbs.cardsArray[i].probability = probability
+        //TODO: cardProbs.cardsArray[i].trialsSinceLastSeen += 1 IFF selected (handle somewhere else)
     }
-
-    Meteor.call("updateCardProbs", setModifiers, incModifiers);
 }
 
 function getNextCardActRModel() {

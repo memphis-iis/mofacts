@@ -35,7 +35,7 @@ function getRoles(fileName) {
     Assets.getText(fileName, function(err, data) {
         if (err) throw err;
         if (!data) {
-            data = "[]"; //Always return at least an empty 
+            data = "[]"; //Always return at least an empty
         }
         var roles = JSON.parse(data);
         if (!!roles && roles.sort) {
@@ -51,7 +51,7 @@ function getRoles(fileName) {
 
 //Published to all clients (even without subscription calls)
 //TODO: This need to change based on current user ID and role
-Meteor.publish(null, function (){ 
+Meteor.publish(null, function (){
     //The default data published to everyone
     var defaultData = [
         Stimuli.find({}),
@@ -60,7 +60,7 @@ Meteor.publish(null, function (){
         CardProbabilities.find({}),
         UserTimesLog.find({})
     ];
-    
+
     /* TODO: when the server-method version of sign up is complete, put this back in
     //Everyone can see themselves
     var userQuery = { _id: this.userId };
@@ -71,7 +71,7 @@ Meteor.publish(null, function (){
     defaultData.push(Meteor.users.find(userQuery));
     */
     defaultData.push(Meteor.users.find({}));
-    
+
     return defaultData;
 });
 
@@ -98,10 +98,10 @@ Meteor.startup(function () {
             Tdfs.insert({fileName: ele, tdfs: json});
         }
     );
-    
+
     var admins = getRoles("roles/admins.json");
     var teachers = getRoles("roles/teachers.json");
-    
+
     _.each(Meteor.users.find().fetch(), function(ele) {
         var uname = "" + ele["username"];
         if (!!uname) {
@@ -169,22 +169,8 @@ Meteor.startup(function () {
                 usr = !!usr.username ? usr.username : usr._id;
                 usr = "[USER:" + usr + "]";
             }
-            
+
             console.log(usr + " " + logtxt);
         },
-
-
-        //TODO: we could change this call to do a SINGLE database op
-        updateCardProbs: function(setModifiers, incModifiers){
-            var target = {_id: Meteor.userId()};
-
-            _.each(setModifiers, function(ele, idx) {
-                CardProbabilities.update(target, ele);
-            });
-
-            _.each(incModifiers, function(ele, idx) {
-                CardProbabilities.update(target, ele);
-            });
-        }
     });
 });
