@@ -57,7 +57,6 @@ Meteor.publish(null, function (){
         Stimuli.find({}),
         Tdfs.find({}),
         UserProgress.find({}),
-        CardProbabilities.find({}),
         UserTimesLog.find({})
     ];
 
