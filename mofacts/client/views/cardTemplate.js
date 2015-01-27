@@ -3,10 +3,6 @@
 
 //TODO: levenshtein distance for fill-in-the-blank still missing
 
-//TODO: when question is selected, we need to send it to userTime. There will
-//      be special info depending on whether the question is from a schedule,
-//      an ACT-R mode, or just random
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
@@ -48,11 +44,11 @@ Template.cardTemplate.events({
             //});
         }
     },
-    
+
     'keypress #userAnswer' : function (e) {
         handleUserInput( e , "keypress");
     },
-    
+
     'click .logoutLink' : function (event) {
         Meteor.logout( function (error) {
             event.preventDefault();
@@ -66,7 +62,7 @@ Template.cardTemplate.events({
             }
         });
     },
-    
+
     'click .homeLink' : function (event) {
         event.preventDefault();
         clearCardTimeout();
@@ -85,7 +81,7 @@ Template.cardTemplate.events({
         clearCardTimeout();
         Router.go("/profile");
     },
-    
+
     'click .multipleChoiceButton' : function (event) {
         event.preventDefault();
         handleUserInput( event , "buttonClick");
@@ -133,7 +129,7 @@ Template.cardTemplate.helpers({
     drill: function() {
         return getTestType() === "d";
     },
-    
+
     invokeAfterLoad: function() {
         if(Session.get("debugging")) {
             console.log('card loaded');
@@ -145,7 +141,7 @@ Template.cardTemplate.helpers({
             //Clear anby previous permutation and/or timeout call
             clearCardTimeout();
             clearCardPermuted();
-            
+
             var file = getCurrentTdfFile();
 
             //check if tutor.setspec.isModeled is defined in the tdf
@@ -201,7 +197,7 @@ function newQuestionHandler() {
             //Or do we get them from the cluster?
             var buttonOrder = getCurrentTdfButtonOrder();
             var choicesArray = [];
-            
+
             if (buttonOrder.length > 0) {
                 //Top-level specification for buttons
                 choicesArray = buttonOrder;
@@ -213,7 +209,7 @@ function newQuestionHandler() {
                         choicesArray.push(ele);
                     });
                 }
-                
+
                 if (choicesArray.length < 1) {
                     //Whoops - they didn't specify any alternate choices
                     console.log("A button trial requires some false responses");
@@ -281,7 +277,7 @@ function newQuestionHandler() {
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
-    
+
     //All ready - time to allow them to enter data
     allowUserInput();
 }
@@ -295,7 +291,7 @@ function handleUserInput( e , source ) {
         //to save space we will just go ahead and act like it was a key press.
         key = 13;
     }
-    
+
     //If we haven't seen the correct keypress, then we want to start the timer
     //and leave
     if (key != 13) {
@@ -417,7 +413,6 @@ function prepareCard() {
         Session.set("isScheduledTest", true);
         if (Session.get("questionIndex") === undefined) {
             Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
-            //Session.set("currentUnitNumber",0);
         }
 
         var unit = getCurrentUnitNumber();
@@ -466,11 +461,11 @@ function randomCard() {
     Session.set("testType", "d"); //No test type given
     Session.set("currentQuestion", getStimQuestion(nextCardIndex, 1));
     Session.set("currentAnswer", getStimAnswer(nextCardIndex, 1));
-    
+
     recordUserTimeQuestion({
         selType: "random"
     });
-    
+
     newQuestionHandler();
 }
 
@@ -510,7 +505,7 @@ function scheduledCard() {
     var unit = getCurrentUnitNumber();
     var questionIndex = Session.get("questionIndex");
     console.log("scheduledCard => unit:" + unit + ",questionIndex:" + questionIndex);
-    
+
     //If we're using permutations, get index by perm array value (get
     //the permuted item) - otherwise just use the index we have
     var dispQuestionIndex;
@@ -520,7 +515,7 @@ function scheduledCard() {
     else {
         dispQuestionIndex = questionIndex;
     }
-    
+
     var questInfo = getSchedule().q[dispQuestionIndex];
     var clusterIndex = questInfo.clusterIndex;
     var whichStim = questInfo.whichStim;
@@ -535,7 +530,7 @@ function scheduledCard() {
     //Note we increment the session's question index number - NOT the
     //permuted index
     Session.set("questionIndex", questionIndex + 1);
-    
+
     recordUserTimeQuestion({
         selType: "schedule"
     });
@@ -563,7 +558,7 @@ function getCurrentTdfFile() {
 function getCurrentTdfButtonOrder() {
     //Our default value
     var btnOrder = [];
-    
+
     try {
         var file = getCurrentTdfFile();
         if (file && file.tdfs.tutor.setspec[0].buttonorder) {
@@ -577,7 +572,7 @@ function getCurrentTdfButtonOrder() {
     catch(e) {
         console.log("Error find button order (will use []): " + e);
     }
-    
+
     return btnOrder;
 }
 
@@ -590,9 +585,9 @@ function recordProgress(questionIndex, question, answer, userAnswer) {
     if (!uid) {
         return;
     }
-    
+
     UserProgress.update( { _id: uid }, {
-        $push: { 
+        $push: {
             progressDataArray : {
                 questionIndex: questionIndex,
                 question: question,
@@ -603,7 +598,7 @@ function recordProgress(questionIndex, question, answer, userAnswer) {
     });
 }
 
-function resetCurrentTestData() {   
+function resetCurrentTestData() {
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
     var currentTestMode;
@@ -788,7 +783,7 @@ function calculateCardProbabilities() {
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
     var setModifiers = [];
     var incModifiers = [];
-    
+
     for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
 
         var questionSuccessCount = cardProbs.cardsArray[i].questionSuccessCount;
@@ -827,7 +822,7 @@ function getNextCardActRModel() {
     var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
     var numItemsPracticed = cardProbs.numQuestionsAnswered;
     var cardsArray = cardProbs.cardsArray;
-    
+
     var indexForNewCard;
     var showOverlearningText = false;
 
@@ -860,15 +855,24 @@ function getNextCardActRModel() {
             }
         }
     }
-    
+
     setNextCardInfo(indexForNewCard);
     Session.set("showOverlearningText", showOverlearningText);
-    
-    //TODO: need to also log probability info
+
+    //Include the current probability data for the chosen question
+    //Note that we don't log question or answer in the card info (it's dup info)
+    var cardModelData = {};
+    if (indexForNewCard >= 0) {
+        cardModelData = cardsArray[indexForNewCard];
+    }
+    cardModelData = _.omit(cardModelData, ["question", "answer"]);
+
+
     recordUserTimeQuestion({
-        selType: "model"
+        selType: "model",
+        cardModelData: cardModelData,
     });
-    
+
     newQuestionHandler();
 }
 
@@ -955,10 +959,10 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
 
 function timeoutfunction(index) {
     var progress = UserProgress.findOne(
-        { _id: Meteor.userId() }, 
+        { _id: Meteor.userId() },
         { progressDataArray: 1 }
     );
-    
+
     var length = 0;
     if (progress && progress.progressDataArray && progress.progressDataArray.length) {
         length = progress.progressDataArray.length;
@@ -967,14 +971,14 @@ function timeoutfunction(index) {
     var file = getCurrentTdfFile();
     var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
     var delay = tis * 1000; //Need delay is milliseconds
-    
+
     clearCardTimeout(); //No previous timeout now
 
     timeoutName = Meteor.setTimeout(function() {
         if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
             stopUserInput();
-            
+
             var nowTime = getCurrentTimer();
             var elapsed = nowTime - start;
             var elapsedOnRender = nowTime - startOnRender;
@@ -1010,7 +1014,7 @@ function timeoutfunction(index) {
         else{
             //Do Nothing
         }
-        
+
     }, delay);
 }
 
