@@ -252,8 +252,8 @@ function newQuestionHandler() {
         }
     }
 
-    startOnRender = startTimer();
-    start = 0;
+    startOnRender = getCurrentTimer();
+    start = startOnRender; //Will be reset if they are typing, but not for button trials
 
     //for debugging, allow one to turn on or off the timeout code.
 
@@ -299,7 +299,7 @@ function handleUserInput( e , source ) {
     //If we haven't seen the correct keypress, then we want to start the timer
     //and leave
     if (key != 13) {
-        start = startTimer();
+        start = getCurrentTimer();
         return;
     }
 
@@ -320,7 +320,7 @@ function handleUserInput( e , source ) {
     var isCorrect = true;
 
     //Timer stats
-    var nowTime = new Date().getTime();
+    var nowTime = getCurrentTimer();
     var elapsed = nowTime - start;
     var elapsedOnRender = nowTime - startOnRender;
 
@@ -378,7 +378,7 @@ function handleUserInput( e , source ) {
     }
 
     //Reset timer for next question
-    start = startTimer();
+    start = getCurrentTimer();
 
     //Whether timed or not, same logic for below
     var setup = function() {
@@ -401,9 +401,8 @@ function handleUserInput( e , source ) {
 
 
 
-function startTimer() {
-    var start = new Date().getTime();
-    return start;
+function getCurrentTimer() {
+    return new Date().getTime();
 }
 
 function prepareCard() {
@@ -467,6 +466,11 @@ function randomCard() {
     Session.set("testType", "d"); //No test type given
     Session.set("currentQuestion", getStimQuestion(nextCardIndex, 1));
     Session.set("currentAnswer", getStimAnswer(nextCardIndex, 1));
+    
+    recordUserTimeQuestion({
+        selType: "random"
+    });
+    
     newQuestionHandler();
 }
 
@@ -531,6 +535,10 @@ function scheduledCard() {
     //Note we increment the session's question index number - NOT the
     //permuted index
     Session.set("questionIndex", questionIndex + 1);
+    
+    recordUserTimeQuestion({
+        selType: "schedule"
+    });
 
     newQuestionHandler();
 }
@@ -855,6 +863,12 @@ function getNextCardActRModel() {
     
     setNextCardInfo(indexForNewCard);
     Session.set("showOverlearningText", showOverlearningText);
+    
+    //TODO: need to also log probability info
+    recordUserTimeQuestion({
+        selType: "model"
+    });
+    
     newQuestionHandler();
 }
 
@@ -960,11 +974,17 @@ function timeoutfunction(index) {
         if(index === length && timeoutCount > 0) {
             console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
             stopUserInput();
+            
+            var nowTime = getCurrentTimer();
+            var elapsed = nowTime - start;
+            var elapsedOnRender = nowTime - startOnRender;
 
             recordUserTime("[TIMEOUT]", {
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
-                delay: delay
+                delay: delay,
+                elapsed: elapsed,
+                elapsedOnRender: elapsedOnRender
             });
 
             if (getTestType() === "d") {

@@ -22,6 +22,20 @@ recordUserTime = function(action, extendedData) {
     
     Meteor.call("userTime", testName, dataRec);
 };
+
+//Helper for question selection
+recordUserTimeQuestion = function(extendedData) {
+    var dataRec = _.extend({
+        clusterIndex:         Session.get("clusterIndex"),
+        questionIndex:        Session.get("questionIndex"),
+        currentUnit:          Session.get("currentUnitNumber"),
+        selectedQuestion:     Session.get("currentQuestion"),
+        selectedAnswer:       Session.get("currentAnswer"),
+        showOverlearningText: Session.get("showOverlearningText"),
+    }, extendedData || {});
+    
+    recordUserTime("question", dataRec);
+};
  
 //UI helpers (for the HTML template)
  
