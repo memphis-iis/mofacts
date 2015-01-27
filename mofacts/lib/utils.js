@@ -1,13 +1,20 @@
 //User helpers
 
+//Fairly safe function for insuring we have a valid, logged in Meteor user
 haveMeteorUser = function() {
     return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 };
 
+//Meteor sessions can be strange - this function allows us to pass in a 
+//function to mutate a session variable
+sessionEdit = function(varName, mutatorFunction) {
+    Session.set(varName, mutatorFunction(Session.get(varName)));
+};
 
 //Session helpers
 
 /* All of our currently known session variables:
+ * cardProbabilities         - For ACT-R model - was once a collection
  * clusterIndex
  * currentAnswer
  * currentQuestion
@@ -27,6 +34,23 @@ haveMeteorUser = function() {
  * testType
  * usingACTRModel
  * */
+ 
+//Card probabilities setup - used by ACT-R model
+sessionCardProbsInit = function(overrideData) {
+    var initVals = {
+        numQuestionsAnswered: 0,
+        numQuestionsIntroduced: 0,
+        cards: []
+    };
+    
+    if (!!overrideData) {
+        initVals = _.extend(overrideData, initVals);
+    }
+    
+    Session.set("cardProbabilities", initVals);
+};
+ 
+//Handle an entire session
 sessionCleanUp = function() {
     //Note that we assume that currentTest and currentTdfName are
     //already set (because getStimNameFromTdf should have already been
@@ -47,4 +71,7 @@ sessionCleanUp = function() {
     Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
     Session.set("usingACTRModel", undefined);
+    
+    //Special: we reset card probs to a default good state
+    sessionCardProbsInit();
 };

@@ -37,12 +37,7 @@ function clearCardTimeout() {
 Template.cardTemplate.events({
 
     'focus #userAnswer' : function() {
-        if(Session.get("debugging")){
-            //var probabilities = CardProbabilities.find({_id: Meteor.userId()});
-            //probabilities.forEach( function (prob) {
-            //    console.log(prob);
-            //});
-        }
+        //Not much right now
     },
 
     'keypress #userAnswer' : function (e) {
@@ -330,23 +325,31 @@ function handleUserInput( e , source ) {
         userAnswer = Helpers.trim(userAnswer.toLowerCase());
         answer = Helpers.trim(answer.toLowerCase());
 
+        var failCountInc = 0;
+        var successCountInc = 0;
+
         if (userAnswer.localeCompare(answer)) {
             isCorrect = false;
+            failCountInc = 1;
+
             if (getTestType() === "d") {
                 showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
             }
-            if (Session.get("usingACTRModel")) {
-                incrementCurentQuestionsFailed();
-            }
         }
         else {
+            successCountInc = 1;
             if (getTestType() === "d") {
                 showUserInteraction(true, "Correct - Great Job!");
             }
-            if (Session.get("usingACTRModel")) {
-                incrementCurrentQuestionSuccess();
-            }
         }
+
+        if (Session.get("usingACTRModel")) {
+            sessionEdit("cardProbabilities", function(obj) {
+                obj.questionSuccessCount += successCountInc;
+                obj.questionFailureCount += failCountInc;
+            });
+        }
+
     }
     //---------
 
@@ -368,7 +371,7 @@ function handleUserInput( e , source ) {
     recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
     if (Session.get("usingACTRModel")) {
-        incrementNumQuestionsAnswered();
+        sessionEdit("cardProbabilities", function(obj) { obj.numQuestionsAnswered += 1; });
         console.log("handle user input called");
         calculateCardProbabilities();
     }
@@ -687,9 +690,9 @@ function initializeActRModel() {
     var file = Stimuli.findOne({fileName: getCurrentTestName()});
     var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
 
-    var initCardsArray = [];
+    var initCards = [];
     for (var i = 0; i < numQuestions; ++i) {
-        initCardsArray.push({
+        initCards.push({
             question: getStimQuestion(i, 0),
             answer: getStimAnswer(i, 0),
             questionSuccessCount: 0,
@@ -701,126 +704,73 @@ function initializeActRModel() {
     }
 
     //update the cards array to be empty
-    CardProbabilities.update(
-        { _id: Meteor.userId() },
-        { $set: {
-            numQuestionsAnswered: 0,
-            numQuestionsIntroduced: 0,
-            cardsArray: initCardsArray
-        }},
-        { upsert: true }
-    );
+    sessionCardProbsInit({ cards: initCards });
+
+    //TODO: WTF is Session.get("cardProbabilities").cards empty?
+    //TODO: remove once bug is fix
+    console.log("act-r init debug");
+    console.log(numQuestions);
+    console.log(initCards);
+    console.log(Session.get("cardProbabilities").cards);
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
     console.log("init called");
     calculateCardProbabilities();
 }
 
-function incrementNumQuestionsAnswered() {
-    CardProbabilities.update(
-        { _id: Meteor.userId() },
-        { $inc: { numQuestionsAnswered: 1 } }
-    );
-}
-
-function incrementCurrentQuestionSuccess() {
-    var incModifier = {$inc: {}};
-    incModifier.$inc["cardsArray." + (getCurrentClusterIndex()) + ".questionSuccessCount"] = 1;
-    CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
-}
-
-function incrementCurentQuestionsFailed() {
-    var incModifier = {$inc: {}};
-    incModifier.$inc["cardsArray." + (getCurrentClusterIndex()) + ".questionFailureCount"] = 1;
-    CardProbabilities.update({ _id: Meteor.userId() }, incModifier);
-}
-
-function resetTrialsSinceLastSeen( index ) {
-    var setModifier = {$set: {}};
-    setModifier.$set["cardsArray." + index + ".trialsSinceLastSeen"] = 0;
-    CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
-}
-
-function setHasBeenIntroducedFlag( index ) {
-    var setModifier = {$set: {}};
-    setModifier.$set["cardsArray." + index + ".hasBeenIntroduced"] = true;
-    CardProbabilities.update({ _id: Meteor.userId() }, setModifier);
-}
-
-function setNextCardInfo( index ) {
-    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
-    Session.set("clusterIndex", index);
-    Session.set("currentQuestion", cardProbs.cardsArray[index].question);
-    Session.set("currentAnswer", cardProbs.cardsArray[index].answer);
-    resetTrialsSinceLastSeen(index);
-    setHasBeenIntroducedFlag(index);
-}
-
-function incrementNumQuestionsIntroduced() {
-    CardProbabilities.update(
-        {_id: Meteor.userId()},
-        { $inc: { numQuestionsIntroduced: 1 } }
-    );
-}
-
-function getNumQuestionsIntroduced() {
-    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId()});
-    console.log(cardProbs);
-    return cardProbs.numQuestionsIntroduced;
-}
-
-function getNumCardsBelow85( cardsArray ) {
+function getNumCardsBelow85(cards) {
     var counter = 0;
-    for (var i = 0; i < cardsArray.length; ++i) {
-        if (cardsArray[i].probability < 0.85) {
+    _.each(cards, function(card) {
+        if (card.probability < 0.85) {
             ++counter;
         }
-    }
+    });
     return counter;
 }
 
 function calculateCardProbabilities() {
-    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
-    var setModifiers = [];
-    var incModifiers = [];
+    var cardProbs = Session.get("cardProbabilities");
+    var totalTrials = cardProbs.numQuestionsAnswered;
+    var cards = cardProbs.cards;
 
-    for(var i = 0; i < cardProbs.cardsArray.length; ++i) {
-
-        var questionSuccessCount = cardProbs.cardsArray[i].questionSuccessCount;
-        var questionFailureCount = cardProbs.cardsArray[i].questionFailureCount;
+    _.each(cards, function(card) {
+        var questionSuccessCount = card.questionSuccessCount;
+        var questionFailureCount = card.questionFailureCount;
         var totalQuestionStudies = questionSuccessCount + questionFailureCount;
-        var trialsSinceLastSeen = cardProbs.cardsArray[i].trialsSinceLastSeen;
-        var totalTrials = cardProbs.numQuestionsAnswered;
-        var trialsSinceLastSeenOverTotalTrials;
+        var trialsSinceLastSeen = card.trialsSinceLastSeen;
 
-        if (totalTrials !== 0) { // can't divide by 0
-            trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen/totalTrials;
-        } else {
-            trialsSinceLastSeenOverTotalTrials = 0;
+        var trialsSinceLastSeenOverTotalTrials = 0.0;
+        if (totalTrials !== 0) {
+            trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen / totalTrials;
         }
 
-        var x = -3.0 + (2.4 * questionSuccessCount) + (0.8 * questionFailureCount) + totalQuestionStudies - (0.3 * trialsSinceLastSeenOverTotalTrials);
-        var probability = 1.0/( 1.0 + Math.pow(Math.E, -x) );
+        var x = -3.0 +
+                 (2.4 * questionSuccessCount) +
+                 (0.8 * questionFailureCount) +
+                 (1.0 * totalQuestionStudies) +
+                -(0.3 * trialsSinceLastSeenOverTotalTrials);
 
-        //set probability
-        //TODO: cardProbs.cardsArray[i].probability = probability
-        //TODO: cardProbs.cardsArray[i].trialsSinceLastSeen += 1 IFF selected (handle somewhere else)
-    }
+        var probability = 1.0 / (1.0 + Math.exp(-x));
+
+        card.probability = probability;
+    });
+
+    Session.set("cardProbabilities", cardProbs);
 }
 
 function getNextCardActRModel() {
     Session.set("testType", "d");
 
-    var cardProbs = CardProbabilities.findOne({ _id: Meteor.userId() });
+    var cardProbs = Session.get("cardProbabilities");
     var numItemsPracticed = cardProbs.numQuestionsAnswered;
-    var cardsArray = cardProbs.cardsArray;
+    var cards = cardProbs.cards;
 
     var indexForNewCard;
     var showOverlearningText = false;
 
     if (numItemsPracticed === 0) {
         //introduce new card.  (#2 in the algorithm)
-        indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
+        indexForNewCard = getIndexForNewCardToIntroduce(cards);
         if (indexForNewCard === -1) {
             if (Session.get("debugging")) {
                 console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
@@ -829,105 +779,113 @@ function getNextCardActRModel() {
         }
     }
     else {
-        indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cardsArray);
+        indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards);
         if (indexForNewCard === -1) {
             //numbers 4 and 5 in the algorithm.
-            if (getNumCardsBelow85(cardsArray) === 0 && getNumQuestionsIntroduced() === cardsArray.length) {
+            var numIntroduced = cardProbs.numQuestionsIntroduced;
+            if (getNumCardsBelow85(cardsArray) === 0 && numIntroduced === cards.length) {
                 //number 5 in the algorithm.
-                indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
+                indexForNewCard = selectLowestProbabilityCardIndex(cards);
                 showOverlearningText = true;
             }
             else {
                 //number 4 in the algorithm.
-                indexForNewCard = getIndexForNewCardToIntroduce(cardsArray);
+                indexForNewCard = getIndexForNewCardToIntroduce(cards);
                 if (indexForNewCard === -1) {
                     //if we have introduced all of the cards.
-                    indexForNewCard = selectLowestProbabilityCardIndex(cardsArray);
+                    indexForNewCard = selectLowestProbabilityCardIndex(cards);
                 }
             }
         }
     }
 
-    setNextCardInfo(indexForNewCard);
+    //Found!
+    var card = cards[indexForNewCard];
+
+    //Update our card probabilities
+    cardProbs.numQuestionsIntroduced += 1;
+    card.trialsSinceLastSeen = 0;
+    card.hasBeenIntroduced = true;
+
+    //Save the card selection
+    Session.set("clusterIndex", indexForNewCard);
+    Session.set("currentQuestion", card.question);
+    Session.set("currentAnswer", card.answer);
     Session.set("showOverlearningText", showOverlearningText);
 
-    //Include the current probability data for the chosen question
-    //Note that we don't log question or answer in the card info (it's dup info)
-    var cardModelData = {};
-    if (indexForNewCard >= 0) {
-        cardModelData = cardsArray[indexForNewCard];
-    }
-    cardModelData = _.omit(cardModelData, ["question", "answer"]);
+    //It has now been officially one more trial since all the other cards
+    //have been seen
+    _.each(cards, function(card, index) {
+        if (index != indexForNewCard) {
+            card.trialsSinceLastSeen += 1;
+        }
+    });
 
-
+    //Record the question and fire the new qustion handler
+    //Note that we include the current card data but we DON'T log question or
+    //answer in the card info (it's dup info)
     recordUserTimeQuestion({
         selType: "model",
-        cardModelData: cardModelData,
+        cardModelData: _.omit(card, ["question", "answer"]),
     });
+
+    Session.set("cardProbabilities", cardProbs);
 
     newQuestionHandler();
 }
 
-function getIndexForNewCardToIntroduce( cardsArray ) {
+function getIndexForNewCardToIntroduce(cards) {
     var indexToReturn = -1;
 
-    for(var i = 0; i < cardsArray.length; ++i) {
-        if (cardsArray[i].hasBeenIntroduced === false) {
-            indexToReturn = i;
+    _.each(cards, function(card, index) {
+        if (!card.hasBeenIntroduced) {
+            indexToReturn = index;
         }
-    }
+    });
 
     if (Session.get("debugging")) {
         if (indexToReturn === -1) {
             console.log("All cards have been introduced!");
         }
         else {
-            console.log("about to introduce " + indexToReturn);
+            console.log("About to intro card with index", indexToReturn);
         }
-    }
-
-    if (indexToReturn !== -1) {
-        // we introduced a new card.
-        incrementNumQuestionsIntroduced();
     }
 
     return indexToReturn;
 }
 
 
-function selectHighestProbabilityAlreadyIntroducedCardLessThan85 ( cardsArray ) {
+function selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards) {
     if (Session.get("debugging")) {
         console.log("selectHighestProbabilityAlreadyIntroducedCardLessThan85");
     }
+
     var currentMaxProbabilityLessThan85 = 0;
     var indexToReturn = -1;
 
-    for (var i = 0; i < cardsArray.length; ++i) {
-
-        if (cardsArray[i].hasBeenIntroduced === true && cardsArray[i].trialsSinceLastSeen > 2) {
-
-            if (cardsArray[i].probability > currentMaxProbabilityLessThan85 && cardsArray[i].probability < 0.85) {
-                currentMaxProbabilityLessThan85 = cardsArray[i].probability;
-                indexToReturn = i;
+    _.each(cards, function(card, index) {
+        if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
+            if (card.probability > currentMaxProbabilityLessThan85 && card.probability < 0.85) {
+                currentMaxProbabilityLessThan85 = card.probability;
+                indexToReturn = index;
             }
         }
-    }
+    });
 
     if (Session.get("debugging")) {
-        var message;
         if (indexToReturn === -1) {
-            message = "no cards less than .85 already introduced.";
-        } else {
-            message = "indexToReturn: " + indexToReturn;
+            console.log("no cards less than .85 already introduced");
         }
-        console.log(message);
+        else {
+            console.log("indexToReturn:", indexToReturn);
+        }
     }
 
     return indexToReturn;
 }
 
-function selectLowestProbabilityCardIndex( cardsArray ) {
-
+function selectLowestProbabilityCardIndex(cards) {
     if (Session.get("debugging")) {
         console.log("selectLowestProbabilityCard");
     }
@@ -935,12 +893,12 @@ function selectLowestProbabilityCardIndex( cardsArray ) {
     var currentMinProbability = 1;
     var indexToReturn = 0;
 
-    for (var i = 0; i < cardsArray.length; ++i) {
-        if (cardsArray[i].probability < currentMinProbability  && cardsArray[i].trialsSinceLastSeen > 2) {
-            currentMinProbability = cardsArray[i].probability;
-            indexToReturn = i;
+    _.each(cards, function(card, index) {
+        if (card.probability < currentMinProbability  && card.trialsSinceLastSeen > 2) {
+            currentMinProbability = card.probability;
+            indexToReturn = index;
         }
-    }
+    });
 
     if (Session.get("debugging")) {
         console.log("indexToReturn: " + indexToReturn);
@@ -990,8 +948,11 @@ function timeoutfunction(index) {
             recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
 
             if (Session.get("usingACTRModel")) {
-                incrementCurentQuestionsFailed();
-                incrementNumQuestionsAnswered();
+                var currIndex = getCurrentClusterIndex();
+                sessionEdit("cardProbabilities", function(cardProbs) {
+                    cardProbs.numQuestionsAnswered += 1;
+                    cardProbs.cards[currIndex].questionFailureCount += 1;
+                });
                 console.log("timeout called");
                 calculateCardProbabilities();
             }

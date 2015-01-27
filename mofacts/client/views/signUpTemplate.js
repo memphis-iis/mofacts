@@ -59,44 +59,36 @@ Template.signUpTemplate.events({
         Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
             if(typeof error !== "undefined") {
                 console.log("Error creating the user account for user:", formUserName, error);
+                alert("Unfortunately, a user account for " + formUserName + " could not be created: " + error);
+                return;
+            }
+            
+            //Clean up and init the session
+            sessionCleanUp();
+            
+            var newUserID = Meteor.userId();
+            var newUserName = Meteor.user().username;
+            if(newUserID !== null) {
+                UserProgress.insert({
+                    _id: newUserID,
+                    username: newUserName,
+                    currentStimuliTest: "NEW USER",
+                    currentTestMode: "NEW USER",
+                    progressDataArray: []
+                },
+                function (error, id) { //callback function
+                    if (typeof error !== "undefined") {
+                        console.log("Error setting up user progress for user:", formUserName, error);
+                    }
+                    else {
+                        Router.go("profile");
+                    }
+                });
             }
             else {
-                var newUserID = Meteor.userId();
-                var newUserName = Meteor.user().username;
-                if(newUserID !== null) {
-                    UserProgress.insert({
-                        _id: newUserID,
-                        username: newUserName,
-                        currentStimuliTest: "NEW USER",
-                        currentTestMode: "NEW USER",
-                        progressDataArray: []
-                    },
-                    function (error, id) { //callback function
-                        if (typeof error !== "undefined") {
-                            console.log("Error setting up user progress for user:", formUserName, error);
-                        }
-                        else {
-                            CardProbabilities.insert({
-                                _id: Meteor.userId(),
-                                numQuestionsAnswered: 0,
-                                cardsArray: []
-                            },
-                            function (error, id) {
-                                if (typeof error !== "undefined") {
-                                    console.log("Error setting up card probs for user:", formUserName, error);
-                                }
-                                else {
-                                    Router.go("profile");
-                                }
-                            });
-                        }
-                    });
-                }
-                else {
-                    console.log("ERROR: The user was not logged in upon account creation!\n"+
-                            "\t[Username:" + formUsername + "]" +
-                            "\t" + error);
-                }
+                console.log("ERROR: The user was not logged in upon account creation!\n"+
+                        "\t[Username:" + formUsername + "]" +
+                        "\t" + error);
             }
         });
     },
