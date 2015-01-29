@@ -331,13 +331,28 @@ function handleUserInput( e , source ) {
         answer = Helpers.trim(answer.toLowerCase());
 
         if (userAnswer.localeCompare(answer)) {
+        	console.log(1.0 - (getEditDistance(userAnswer,answer) / 
+        			(Math.max(userAnswer.length,answer.length))));
+        	if(1.0 - (getEditDistance(userAnswer,answer) / 
+        			(Math.max(userAnswer.length,answer.length)))>.75){
+        		if (getTestType() === "d") {
+                    showUserInteraction(true, "Close enough - Great Job!");
+                }
+                if (Session.get("usingACTRModel")) {
+                    incrementCurrentQuestionSuccess();
+                }
+        	} else{
+        		
+        		
+        		
+        	
             isCorrect = false;
             if (getTestType() === "d") {
                 showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
             }
             if (Session.get("usingACTRModel")) {
                 incrementCurentQuestionsFailed();
-            }
+            }}
         }
         else {
             if (getTestType() === "d") {
