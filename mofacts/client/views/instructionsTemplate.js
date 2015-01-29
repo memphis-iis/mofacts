@@ -1,6 +1,6 @@
-//TODO: user times log once instruction is displayed
-
-//TODO: user times log when continuing on to content
+//TODO: user times log for instruction display (both before and after)
+//TODO: should be able to show pictures AND instructions
+//TODO: should handle proper unit for instruction display
 
 ////////////////////////////////////////////////////////////////////////////
 // Template Events

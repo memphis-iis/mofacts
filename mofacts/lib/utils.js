@@ -1,5 +1,4 @@
-//TODO: re-factor into mulitple files once editdist is merged with our
-//      changes here
+//TODO: re-factor into mulitple files
 
 //////////////////////////////////////////////////////////////////////////
 //User helpers

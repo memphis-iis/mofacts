@@ -1,9 +1,6 @@
 //TODO: we should be going back to instructions for each unit - and we
 //      should be able to handle instruction-only units
 
-//TODO: levenshtein distance for fill-in-the-blank still missing
-
-
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
@@ -1029,6 +1026,7 @@ function resumeFromUserTimesLog() {
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
     _.each(entries, function(entry, index) {
+        //TODO: change assessment session to read schedule back from UserTimes?
         //What unit are we in? New schedule? handle question/answer for model and user progress
         //card probs
         //user progress
