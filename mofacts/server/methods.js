@@ -56,7 +56,6 @@ Meteor.publish(null, function (){
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserProgress.find({}),
         UserTimesLog.find({})
     ];
 

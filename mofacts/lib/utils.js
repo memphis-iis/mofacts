@@ -39,6 +39,27 @@ if (Meteor.isClient) {
         }
         return cardProbabilities;
     };
+
+    initUserProgress = function(overrideData) {
+        var initVals = {
+            currentStimuliTest: "NONE",
+            currentTestMode: "NONE",
+            progressDataArray: []
+        };
+
+        if (!!overrideData) {
+            initVals = _.extend(initVals, overrideData);
+        }
+
+        userProgress = initVals;
+    };
+
+    getUserProgress = function() {
+        if (!userProgress) {
+            initUserProgress();
+        }
+        return userProgress;
+    };
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -67,7 +88,8 @@ if (Meteor.isClient) {
  * */
 
 
-//Handle an entire session
+//Handle an entire session - note that we current don't limit this to the
+//client... but maybe we should?
 sessionCleanUp = function() {
     //Note that we assume that currentTest and currentTdfName are
     //already set (because getStimNameFromTdf should have already been
@@ -89,6 +111,9 @@ sessionCleanUp = function() {
     Session.set("testType", undefined);
     Session.set("usingACTRModel", undefined);
 
-    //Special: we reset card probs when we reset the session
-    initCardProbs();
+    //Special: we reset card probs and user progress when we reset the session
+    if (Meteor.isClient) {
+        initCardProbs();
+        initUserProgress();
+    }
 };

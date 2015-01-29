@@ -138,21 +138,29 @@ Template.cardTemplate.helpers({
             clearCardPermuted();
 
             var file = getCurrentTdfFile();
+            var tutor = file.tdfs.tutor;
 
             //check if tutor.setspec.isModeled is defined in the tdf
-            if (typeof file.tdfs.tutor.setspec[0].isModeled !== "undefined") {
+            if (typeof tutor.setspec[0].isModeled !== "undefined") {
                 //if it is defined and is set to true, use the ACT-R Model methods.
-                if (file.tdfs.tutor.setspec[0].isModeled == "true") {
+                if (tutor.setspec[0].isModeled == "true") {
                     Session.set("usingACTRModel",true);
                     initializeActRModel();
-                } else {
+                }
+                else {
                     Session.set("usingACTRModel",false);
                 }
             }
 
             //Before the below options, reset current test data
-            resetCurrentTestData();
+            initUserProgress({
+                currentStimuliTest: getCurrentTestName(),
+                currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
+                progressDataArray: [],
+                currentSchedule: {}
+            });
 
+            //Now do first setup
             prepareCard();
             Session.set("showOverlearningText", false);
         }
@@ -250,22 +258,18 @@ function newQuestionHandler() {
 
     var AllowTimeouts = true;
 
-    if(AllowTimeouts){
+    if(AllowTimeouts) {
         timeoutCount++;
-        var counter = UserProgress.find(
-            { _id: Meteor.userId() },
-            {progressDataArray: 1});
-
-        counter.forEach(function (Object){
-            length = Object.progressDataArray.length;
-        });
-
+        var length = getUserProgress().progressDataArray.length;
         timeoutfunction(length);
     }
 
     if(getQuestionType() === "sound"){
         var sound = new Howl({
-            urls: [Session.get("currentQuestion") + '.mp3', Session.get("currentQuestion") + '.wav']
+            urls: [
+                Session.get("currentQuestion") + '.mp3',
+                Session.get("currentQuestion") + '.wav'
+            ]
         }).play();
     }
 
@@ -366,7 +370,7 @@ function handleUserInput( e , source ) {
         elapsed: elapsed
     });
 
-    //record progress in UserProgress collection.
+    //record progress in userProgress.
     recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
     if (Session.get("usingACTRModel")) {
@@ -588,52 +592,21 @@ function recordProgress(questionIndex, question, answer, userAnswer) {
         return;
     }
 
-    UserProgress.update( { _id: uid }, {
-        $push: {
-            progressDataArray : {
-                questionIndex: questionIndex,
-                question: question,
-                answer: answer,
-                userAnswer: userAnswer
-            }
-        }
+    var prog = getUserProgress();
+    prog.progressDataArray.push({
+        questionIndex: questionIndex,
+        question: question,
+        answer: answer,
+        userAnswer: userAnswer
     });
 }
 
-function resetCurrentTestData() {
-    var file = getCurrentTdfFile();
-    var tutor = file.tdfs.tutor;
-    var currentTestMode;
-
-    if (tutor.unit && tutor.unit.length) {
-        currentTestMode = "SCHEDULED";
-    }
-    else {
-        currentTestMode = "RANDOM";
-    }
-
-    if (Meteor.userId() !== null) {
-        //update the currentTest and mode:
-        //set the current test and mode, and clear the progress array.
-        UserProgress.update(
-            { _id: Meteor.userId() },
-            {
-                $set: {
-                    currentStimuliTest: getCurrentTestName(),
-                    currentTestMode: currentTestMode,
-                    progressDataArray: [],
-                    currentSchedule: {}
-                }
-            }
-        );
-    }
-}
 
 //Return the schedule for the current unit of the current lesson -
 //If it diesn't exist, then create and store it in User Progress
 function getSchedule() {
     //Retrieve current schedule
-    var progress = UserProgress.findOne({_id: Meteor.userId()});
+    var progress = getUserProgress();
 
     var unit = getCurrentUnitNumber();
     var schedule = null;
@@ -669,10 +642,7 @@ function getSchedule() {
         }
 
         //We save the current schedule and also log it to the UserTime collection
-        UserProgress.update(
-            { _id: Meteor.userId() },
-            { $set: { currentSchedule: schedule } }
-        );
+        progress.currentSchedule = schedule;
 
         recordUserTime("schedule", {
             unitname: Helpers.display(currUnit.unitname),
@@ -896,13 +866,10 @@ function selectLowestProbabilityCardIndex(cards) {
 }
 
 function timeoutfunction(index) {
-    var progress = UserProgress.findOne(
-        { _id: Meteor.userId() },
-        { progressDataArray: 1 }
-    );
+    var progress = getUserProgress();
 
     var length = 0;
-    if (progress && progress.progressDataArray && progress.progressDataArray.length) {
+    if (progress.progressDataArray && progress.progressDataArray.length) {
         length = progress.progressDataArray.length;
     }
 

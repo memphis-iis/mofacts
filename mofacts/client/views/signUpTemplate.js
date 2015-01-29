@@ -6,17 +6,17 @@ Template.signUpTemplate.events({
         event.preventDefault();
         Router.go('signin');
     },
-    
+
     'click #signUpButton' : function (event) {
         event.preventDefault();
-        
+
         var formUsername = signUpUsername.value;
         var formPassword1 = password1.value;
         var formPassword2 = password2.value;
-        
+
         //Hide previous errors
         $(".errcheck").hide();
-        
+
         var checks = [];
 
         if(formUsername.length < 6) {
@@ -26,7 +26,7 @@ Template.signUpTemplate.events({
         if(typeof Meteor.users.findOne({username: formUsername}) !== "undefined") {
             checks.push("#usernameAlreadyInUse");
         }
-        
+
         if (formPassword1 === "" && formPassword2 === "") {
             //Maybe they WANT an empty password?
             if (confirm("Are you sure that you want to use an empty password")) {
@@ -47,7 +47,7 @@ Template.signUpTemplate.events({
                 checks.push("#passwordMustMatch");
             }
         }
-        
+
         //Show any and all errors
         if (checks.length > 0) {
             _.each(checks, function(ele) {
@@ -62,37 +62,23 @@ Template.signUpTemplate.events({
                 alert("Unfortunately, a user account for " + formUserName + " could not be created: " + error);
                 return;
             }
-            
+
             //Clean up and init the session
             sessionCleanUp();
-            
+
             var newUserID = Meteor.userId();
-            var newUserName = Meteor.user().username;
-            if(newUserID !== null) {
-                UserProgress.insert({
-                    _id: newUserID,
-                    username: newUserName,
-                    currentStimuliTest: "NEW USER",
-                    currentTestMode: "NEW USER",
-                    progressDataArray: []
-                },
-                function (error, id) { //callback function
-                    if (typeof error !== "undefined") {
-                        console.log("Error setting up user progress for user:", formUserName, error);
-                    }
-                    else {
-                        Router.go("profile");
-                    }
-                });
+            if(newUserID === null) {
+                //This means that we have an issue of some kind - but there's
+                //nothing that we can do? We'll just fall thru for now since
+                //we don't have a good way to fix this
+                console.log("ERROR: The user was not logged in on account creation?", formUsername);
+                alert("It appears that you couldn't be logged in as " + formUserName);
             }
-            else {
-                console.log("ERROR: The user was not logged in upon account creation!\n"+
-                        "\t[Username:" + formUsername + "]" +
-                        "\t" + error);
-            }
+
+            Router.go("profile");
         });
     },
-    
+
     'blur #signUpUsername' : function (event) {
         if(signUpUsername.value.length < 6) {
             $("#usernameTooShort").show();
@@ -109,7 +95,7 @@ Template.signUpTemplate.events({
             $("#usernameAlreadyInUse").hide();
         }
     },
-    
+
     'blur #password1' : function () {
         var len = password1.value.length;
         if(len > 1 && len < 6) {
@@ -119,7 +105,7 @@ Template.signUpTemplate.events({
             $("#passwordTooShort").hide();
         }
     },
-    
+
     'blur #password2' : function () {
         if(password1.value !== password2.value) {
             $("#passwordMustMatch").show();
