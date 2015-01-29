@@ -370,8 +370,10 @@ function handleUserInput( e , source ) {
         elapsed: elapsed
     });
 
-    //record progress in userProgress.
-    recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
+    //record progress in userProgress variable storage (note that this is
+    //helpful and used on the stats page, but the user times log is the
+    //"system of record"
+    recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
 
     if (Session.get("usingACTRModel")) {
         getCardProbs().numQuestionsAnswered += 1;
@@ -586,7 +588,7 @@ function getCurrentClusterIndex() {
     return Session.get("clusterIndex");
 }
 
-function recordProgress(questionIndex, question, answer, userAnswer) {
+function recordProgress(questionIndex, question, answer, userAnswer, isCorrect) {
     var uid = Meteor.userId();
     if (!uid) {
         return;
@@ -597,7 +599,8 @@ function recordProgress(questionIndex, question, answer, userAnswer) {
         questionIndex: questionIndex,
         question: question,
         answer: answer,
-        userAnswer: userAnswer
+        userAnswer: userAnswer,
+        isCorrect: isCorrect,
     });
 }
 
@@ -893,14 +896,15 @@ function timeoutfunction(index) {
                 qtype: findQTypeSimpified(),
                 delay: delay,
                 elapsed: elapsed,
-                elapsedOnRender: elapsedOnRender
+                elapsedOnRender: elapsedOnRender,
+                isCorrect: false,
             });
 
             if (getTestType() === "d") {
                 showUserInteraction(false, "Timed out! The correct answer is: " + Session.get("currentAnswer"));
             }
 
-            recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]");
+            recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]", false);
 
             if (Session.get("usingACTRModel")) {
                 var currIndex = getCurrentClusterIndex();
