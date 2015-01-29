@@ -1,3 +1,4 @@
+//////////////////////////////////////////////////////////////////////////
 //User helpers
 
 //Fairly safe function for insuring we have a valid, logged in Meteor user
@@ -5,12 +6,42 @@ haveMeteorUser = function() {
     return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 };
 
-//Meteor sessions can be strange - this function allows us to pass in a 
-//function to mutate a session variable
-sessionEdit = function(varName, mutatorFunction) {
-    Session.set(varName, mutatorFunction(Session.get(varName)));
-};
 
+//////////////////////////////////////////////////////////////////////////
+//Global variable helpers
+
+//Card probabilities setup and retrieval - used by ACT-R model
+//Note that this is only used on the client, but we want to make sure that
+//setting the cardProbabilities data structure is always available (and
+//thus is in the lib folder)
+
+if (Meteor.isClient) {
+    //Initialize card probabilities, with optional initial data
+    initCardProbs = function(overrideData) {
+        var initVals = {
+            numQuestionsAnswered: 0,
+            numQuestionsIntroduced: 0,
+            cards: []
+        };
+
+        if (!!overrideData) {
+            initVals = _.extend(initVals, overrideData);
+        }
+
+        cardProbabilities = initVals;
+    };
+
+    //Provide access to card probabilities. Note that this function provides
+    //an always-created object with lazy init.
+    getCardProbs = function() {
+        if (!cardProbabilities) {
+            initCardProbs();
+        }
+        return cardProbabilities;
+    };
+}
+
+//////////////////////////////////////////////////////////////////////////
 //Session helpers
 
 /* All of our currently known session variables:
@@ -34,28 +65,14 @@ sessionEdit = function(varName, mutatorFunction) {
  * testType
  * usingACTRModel
  * */
- 
-//Card probabilities setup - used by ACT-R model
-sessionCardProbsInit = function(overrideData) {
-    var initVals = {
-        numQuestionsAnswered: 0,
-        numQuestionsIntroduced: 0,
-        cards: []
-    };
-    
-    if (!!overrideData) {
-        initVals = _.extend(overrideData, initVals);
-    }
-    
-    Session.set("cardProbabilities", initVals);
-};
- 
+
+
 //Handle an entire session
 sessionCleanUp = function() {
     //Note that we assume that currentTest and currentTdfName are
     //already set (because getStimNameFromTdf should have already been
     //called).  We also ignore debugging (for obvious reasons)
-    
+
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("currentQuestion", undefined);
@@ -71,7 +88,7 @@ sessionCleanUp = function() {
     Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
     Session.set("usingACTRModel", undefined);
-    
-    //Special: we reset card probs to a default good state
-    sessionCardProbsInit();
+
+    //Special: we reset card probs when we reset the session
+    initCardProbs();
 };

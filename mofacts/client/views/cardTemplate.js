@@ -344,10 +344,9 @@ function handleUserInput( e , source ) {
         }
 
         if (Session.get("usingACTRModel")) {
-            sessionEdit("cardProbabilities", function(obj) {
-                obj.questionSuccessCount += successCountInc;
-                obj.questionFailureCount += failCountInc;
-            });
+            var cp = getCardProbs();
+            cp.questionSuccessCount += successCountInc;
+            cp.questionFailureCount += failCountInc;
         }
 
     }
@@ -371,7 +370,7 @@ function handleUserInput( e , source ) {
     recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer);
 
     if (Session.get("usingACTRModel")) {
-        sessionEdit("cardProbabilities", function(obj) { obj.numQuestionsAnswered += 1; });
+        getCardProbs().numQuestionsAnswered += 1;
         console.log("handle user input called");
         calculateCardProbabilities();
     }
@@ -703,15 +702,8 @@ function initializeActRModel() {
         });
     }
 
-    //update the cards array to be empty
-    sessionCardProbsInit({ cards: initCards });
-
-    //TODO: WTF is Session.get("cardProbabilities").cards empty?
-    //TODO: remove once bug is fix
-    console.log("act-r init debug");
-    console.log(numQuestions);
-    console.log(initCards);
-    console.log(Session.get("cardProbabilities").cards);
+    //Re-init the card probabilities
+    initCardProbs({ cards: initCards });
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
     console.log("init called");
@@ -729,7 +721,7 @@ function getNumCardsBelow85(cards) {
 }
 
 function calculateCardProbabilities() {
-    var cardProbs = Session.get("cardProbabilities");
+    var cardProbs = getCardProbs();
     var totalTrials = cardProbs.numQuestionsAnswered;
     var cards = cardProbs.cards;
 
@@ -754,14 +746,12 @@ function calculateCardProbabilities() {
 
         card.probability = probability;
     });
-
-    Session.set("cardProbabilities", cardProbs);
 }
 
 function getNextCardActRModel() {
     Session.set("testType", "d");
 
-    var cardProbs = Session.get("cardProbabilities");
+    var cardProbs = getCardProbs();
     var numItemsPracticed = cardProbs.numQuestionsAnswered;
     var cards = cardProbs.cards;
 
@@ -783,7 +773,7 @@ function getNextCardActRModel() {
         if (indexForNewCard === -1) {
             //numbers 4 and 5 in the algorithm.
             var numIntroduced = cardProbs.numQuestionsIntroduced;
-            if (getNumCardsBelow85(cardsArray) === 0 && numIntroduced === cards.length) {
+            if (getNumCardsBelow85(cards) === 0 && numIntroduced === cards.length) {
                 //number 5 in the algorithm.
                 indexForNewCard = selectLowestProbabilityCardIndex(cards);
                 showOverlearningText = true;
@@ -828,8 +818,6 @@ function getNextCardActRModel() {
         selType: "model",
         cardModelData: _.omit(card, ["question", "answer"]),
     });
-
-    Session.set("cardProbabilities", cardProbs);
 
     newQuestionHandler();
 }
@@ -949,10 +937,9 @@ function timeoutfunction(index) {
 
             if (Session.get("usingACTRModel")) {
                 var currIndex = getCurrentClusterIndex();
-                sessionEdit("cardProbabilities", function(cardProbs) {
-                    cardProbs.numQuestionsAnswered += 1;
-                    cardProbs.cards[currIndex].questionFailureCount += 1;
-                });
+                var cardProbs = getCardProbs();
+                cardProbs.numQuestionsAnswered += 1;
+                cardProbs.cards[currIndex].questionFailureCount += 1;
                 console.log("timeout called");
                 calculateCardProbabilities();
             }
