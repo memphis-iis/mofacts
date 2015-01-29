@@ -285,7 +285,6 @@ function handleUserInput( e , source ) {
 
     //Check Correctness
     var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
-    var isCorrect = true;
 
     //Timer stats
     var nowTime = getCurrentTimer();
@@ -297,24 +296,40 @@ function handleUserInput( e , source ) {
         elapsed = 0;
     }
 
+    //Will be set by checks below
+    var isCorrect;
+
     //Display Correctness
     if ( getTestType() !== "s" ) {
         userAnswer = Helpers.trim(userAnswer.toLowerCase());
         answer = Helpers.trim(answer.toLowerCase());
 
-        var failCountInc = 0;
-        var successCountInc = 0;
-
         if (userAnswer.localeCompare(answer)) {
-            isCorrect = false;
-            failCountInc = 1;
-
-            if (getTestType() === "d") {
-                showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
+            console.log(1.0 - (getEditDistance(userAnswer,answer) /
+                    (Math.max(userAnswer.length,answer.length))));
+            if(1.0 - (getEditDistance(userAnswer,answer) /
+                    (Math.max(userAnswer.length,answer.length)))> 0.75)
+            {
+                isCorrect = true;
+                if (getTestType() === "d") {
+                    showUserInteraction(true, "Close enough - Great Job!");
+                }
+                if (Session.get("usingACTRModel")) {
+                    incrementCurrentQuestionSuccess();
+                }
+            }
+            else {
+                isCorrect = false;
+                if (getTestType() === "d") {
+                    showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
+                }
+                if (Session.get("usingACTRModel")) {
+                    incrementCurentQuestionsFailed();
+                }
             }
         }
         else {
-            successCountInc = 1;
+            isCorrect = true;
             if (getTestType() === "d") {
                 showUserInteraction(true, "Correct - Great Job!");
             }
@@ -322,10 +337,9 @@ function handleUserInput( e , source ) {
 
         if (Session.get("usingACTRModel")) {
             var cp = getCardProbs();
-            cp.questionSuccessCount += successCountInc;
-            cp.questionFailureCount += failCountInc;
+            if (isCorrect) cp.questionSuccessCount += 1;
+            else           cp.questionFailureCount += 1;
         }
-
     }
     //---------
 
