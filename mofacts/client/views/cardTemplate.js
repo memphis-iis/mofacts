@@ -1022,23 +1022,86 @@ function resumeFromUserTimesLog() {
     //currentTest is also used for key into UserTimes
     //currentUnitNumber is the current unit and is an index into the tdf
 
+    //We'll be tracking the last question so that we can match with the answer
+    var lastQuestionEntry = null;
+    var needCurrentInstruction = false;
+
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
     _.each(entries, function(entry, index) {
-        //TODO: change assessment session to read schedule back from UserTimes?
-        //What unit are we in? New schedule? handle question/answer for model and user progress
-        //card probs
-        //user progress
+        if (!entry.action) {
+            console.log("Ignoring user times entry with no action");
+            return;
+        }
 
-        /* ENTRIES:
-         * => schedule
-         * => question - seltype random
-         * =>   ""     - seltype schedule
-         * =>   ""     - seltype model
-         * => answer
-         * => [TIMEOUT]
-         * => FAILURE to create schedule
-         * */
+        //Only examine the messages that we care about
+        var action = Helpers.trim(entry.action).toLowerCase();
+
+        if (action === "schedule") {
+            lastQuestionEntry = null; //Kills the last question
+            needCurrentInstruction = true; //Schedule is beginning of a unit
+            //TODO: read new schedule in (possibly with assessment session?)
+            //TODO: the current unit will be in the schedule
+        }
+
+        else if (action === "question") {
+            //Always save the last question
+            lastQuestionEntry = entry;
+
+            //Question means they got past instructions
+            needCurrentInstruction = true;
+
+            if (!entry.seltype) {
+                console.log("Ignoring user times entry question with no seltype");
+                return;
+            }
+
+            var seltype = Helpers.trim(entry.seltype).toLowerCase();
+            if (seltype == "random") {
+                //TODO: handle random question
+            }
+            else if (seltype == "schedule") {
+                //TODO: handle sched question
+            }
+            else if (seltype == "model") {
+                //TODO: handle model question
+            }
+            else {
+                console.log("Ignoring user times log entry for question with seltype", seltype);
+            }
+        }
+
+        else if (action === "answer" || action === "[timeout]") {
+            if (lastQuestionEntry === null) {
+                console.log("Ignore answer for no question", entry);
+                return;
+            }
+
+            //Did they get it right or wrong?
+            var wasCorrect;
+            if (action === "answer") {
+                if (typeof entry.isCorrect === "undefined") {
+                    console.log("Missing isCorrect on an answer - assuming false", entry);
+                    wasCorrect = false;
+                }
+                else {
+                    wasCorrect = entry.isCorrect;
+                }
+            }
+            else {
+                //timeout
+                wasCorrect = false;
+            }
+
+            //TODO: handle answer/timeout to question
+
+            //We know the last question no longer applies
+            lastQuestionEntry = null;
+        }
+
+        else {
+            console.log("Ignoring user times log entry with action", action);
+        }
     });
 }
