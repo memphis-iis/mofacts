@@ -1,3 +1,6 @@
+//TODO: re-factor into mulitple files once editdist is merged with our
+//      changes here
+
 //////////////////////////////////////////////////////////////////////////
 //User helpers
 
@@ -40,6 +43,7 @@ if (Meteor.isClient) {
         return cardProbabilities;
     };
 
+    //Initialize user progress storage, with optional initial data
     initUserProgress = function(overrideData) {
         var initVals = {
             currentStimuliTest: "NONE",
@@ -54,6 +58,8 @@ if (Meteor.isClient) {
         userProgress = initVals;
     };
 
+    //Provide access to user progress. Note that this function provides
+    //an always-created object with lazy init.
     getUserProgress = function() {
         if (!userProgress) {
             initUserProgress();

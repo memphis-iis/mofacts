@@ -133,34 +133,7 @@ Template.cardTemplate.helpers({
         //the card loads frequently, but we only want to set this the first time
         if(typeof Session.get("currentQuestion") === "undefined") {
             console.log("invokeAfterLoad => Performing init");
-            //Clear anby previous permutation and/or timeout call
-            clearCardTimeout();
-            clearCardPermuted();
-
-            var file = getCurrentTdfFile();
-            var tutor = file.tdfs.tutor;
-
-            //check if tutor.setspec.isModeled is defined in the tdf
-            if (typeof tutor.setspec[0].isModeled !== "undefined") {
-                //if it is defined and is set to true, use the ACT-R Model methods.
-                if (tutor.setspec[0].isModeled == "true") {
-                    Session.set("usingACTRModel",true);
-                    initializeActRModel();
-                }
-                else {
-                    Session.set("usingACTRModel",false);
-                }
-            }
-
-            //Before the below options, reset current test data
-            initUserProgress({
-                currentStimuliTest: getCurrentTestName(),
-                currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
-                progressDataArray: [],
-                currentSchedule: {}
-            });
-
-            //Now do first setup
+            resumeFromUserTimesLog();
             prepareCard();
             Session.set("showOverlearningText", false);
         }
@@ -982,4 +955,78 @@ function stopUserInput() {
 
 function allowUserInput() {
     $("#userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+}
+
+
+
+//Re-initialize our User Progress and Card Probabilities internal storage
+//from the user times log.
+function resumeFromUserTimesLog() {
+    console.log("Resuming from previous User Times info (if any)");
+
+    //Clear any previous permutation and/or timeout call
+    clearCardTimeout();
+    clearCardPermuted();
+
+    //Get TDF info
+    var file = getCurrentTdfFile();
+    var tutor = file.tdfs.tutor;
+
+    //check if tutor.setspec.isModeled is defined in the tdf
+    if (typeof tutor.setspec[0].isModeled !== "undefined") {
+        //if it is defined and is set to true, use the ACT-R Model methods.
+        if (tutor.setspec[0].isModeled == "true") {
+            Session.set("usingACTRModel",true);
+            initializeActRModel(); //Will handle card probs for us
+        }
+        else {
+            Session.set("usingACTRModel",false);
+            initCardProbs(); //Blank out since not using ACT-R model
+        }
+    }
+
+    //Before the below options, reset current test data
+    initUserProgress({
+        currentStimuliTest: getCurrentTestName(),
+        currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
+        progressDataArray: [],
+        currentSchedule: {}
+    });
+
+    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+
+    var currentTest = Session.get("currentTest");
+    if (!currentTest) {
+        currentTest = "NO_CURRENT_TEST";
+    }
+    var expKey = currentTest.replace(/\./g, "_");
+
+    var entries = [];
+    if (userLog && userLog[expKey] && userLog[expKey].length) {
+        entries = userLog[expKey];
+    }
+
+    //current tdf in session currentTdfName
+    //current stim in session currentTest
+    //currentTest is also used for key into UserTimes
+    //currentUnitNumber is the current unit and is an index into the tdf
+
+    //At this point, our state is set as if they just started this learning
+    //session for the first time. We need to loop thru the user times log
+    //entries and update that state
+    _.each(entries, function(entry, index) {
+        //What unit are we in? New schedule? handle question/answer for model and user progress
+        //card probs
+        //user progress
+
+        /* ENTRIES:
+         * => schedule
+         * => question - seltype random
+         * =>   ""     - seltype schedule
+         * =>   ""     - seltype model
+         * => answer
+         * => [TIMEOUT]
+         * => FAILURE to create schedule
+         * */
+    });
 }
