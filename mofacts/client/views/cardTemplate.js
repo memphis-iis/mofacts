@@ -746,27 +746,15 @@ function getNextCardActRModel() {
         }
     }
 
-    //Found!
+    //Found! Update everything and grab a reference to the card
+    modelCardSelected(indexForNewCard);
     var card = cards[indexForNewCard];
-
-    //Update our card probabilities
-    cardProbs.numQuestionsIntroduced += 1;
-    card.trialsSinceLastSeen = 0;
-    card.hasBeenIntroduced = true;
 
     //Save the card selection
     Session.set("clusterIndex", indexForNewCard);
     Session.set("currentQuestion", card.question);
     Session.set("currentAnswer", card.answer);
     Session.set("showOverlearningText", showOverlearningText);
-
-    //It has now been officially one more trial since all the other cards
-    //have been seen
-    _.each(cards, function(card, index) {
-        if (index != indexForNewCard) {
-            card.trialsSinceLastSeen += 1;
-        }
-    });
 
     //Record the question and fire the new qustion handler
     //Note that we include the current card data but we DON'T log question or
@@ -777,6 +765,26 @@ function getNextCardActRModel() {
     });
 
     newQuestionHandler();
+}
+
+//Called when a new card is selected to update stats
+function modelCardSelected(indexForNewCard) {
+    var cardProbs = getCardProbs();
+    cardProbs.numQuestionsIntroduced += 1;
+
+    var cards = cardProbs.cards;
+    //It has now been officially one more trial since all the other cards
+    //have been seen
+    _.each(cards, function(card, index) {
+        if (index != indexForNewCard) {
+            card.trialsSinceLastSeen += 1;
+        }
+    });
+
+    //Now card has been introduced/seen
+    var card = cards[indexForNewCard];
+    card.trialsSinceLastSeen = 0;
+    card.hasBeenIntroduced = true;
 }
 
 function getIndexForNewCardToIntroduce(cards) {
@@ -982,6 +990,7 @@ function resumeFromUserTimesLog() {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
+    var stims = null; //LAZY READ - see below
 
     //check if tutor.setspec.isModeled is defined in the tdf
     if (typeof tutor.setspec[0].isModeled !== "undefined") {
@@ -1017,14 +1026,25 @@ function resumeFromUserTimesLog() {
         entries = userLog[expKey];
     }
 
-    //current tdf in session currentTdfName
-    //current stim in session currentTest
-    //currentTest is also used for key into UserTimes
-    //currentUnitNumber is the current unit and is an index into the tdf
-
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
-    var needCurrentInstruction = false;
+    var needCurrentInstruction = true;
+
+    /* TODO: all of the following are properly set when we're done:
+     *  - clusterIndex
+     *  - currentAnswer
+     *  - currentQuestion
+     *  X currentTdfName
+     *  X currentTest (this is the stim file and the key to usertimes)
+     *  - currentUnitNumber (current unit AND index to unit in tdf
+     *  - isScheduledTest
+     *  - questionIndex
+     *  - showOverlearningText
+     *  - testType
+     * */
+
+    //TODO: when we add func to select a "sub-tdf" we'll need a user times
+    //      entry (and logic for reading it back)
 
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
@@ -1039,33 +1059,78 @@ function resumeFromUserTimesLog() {
         var action = Helpers.trim(entry.action).toLowerCase();
 
         if (action === "schedule") {
+            //Read in the previously created schedule
             lastQuestionEntry = null; //Kills the last question
-            needCurrentInstruction = true; //Schedule is beginning of a unit
-            //TODO: read new schedule in (possibly with assessment session?)
-            //TODO: the current unit will be in the schedule
+            needCurrentInstruction = false; //Schedule is beginning of a unit
+
+            var unit = entry.unitindex;
+            if (!unit && unit !== 0) {
+                //If we don't know the unit, then we can't proceed
+                console.log("Schedule Entry is missing unitindex", unit);
+                return;
+            }
+
+            if (!stims) {
+                stims = Stimuli.findOne({fileName: currentTest});
+            }
+
+            var clusters = stims.stimuli.setspec.clusters[0].cluster;
+            var setSpec = file.tdfs.tutor.setspec[0];
+            var currUnit = file.tdfs.tutor.unit[unit];
+            var schedule = entry.schedule;
+
+            if (!schedule) {
+                //There was an error creating the schedule - there's really nothing
+                //left to do since the experiment is broken
+                recordUserTime("FAILURE to read schedule from user time log", {
+                    unitname: Helpers.display(currUnit.unitname),
+                    unitindex: unit
+                });
+                alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+                clearCardTimeout();
+                statsPageTemplateUpdate(); //In statsPageTemplate.js
+                Router.go("stats");
+                return;
+            }
+
+            //Update what we know about the session
+            progress.currentSchedule = schedule;
+            Session.set("currentUnitNumber", unit);
+            Session.set("isScheduledTest", true);
+            Session.set("questionIndex", 0);
         }
 
         else if (action === "question") {
-            //Always save the last question
-            lastQuestionEntry = entry;
-
-            //Question means they got past instructions
-            needCurrentInstruction = true;
+            //Read in previously asked question
+            lastQuestionEntry = entry; //Always save the last question
+            needCurrentInstruction = false; //Question means they got past instructions
 
             if (!entry.seltype) {
                 console.log("Ignoring user times entry question with no seltype");
                 return;
             }
 
+            //Restore the session variables we save with each question
+            Session.set("clusterIndex",         entry.clusterIndex);
+            Session.set("questionIndex",        entry.questionIndex);
+            Session.set("currentUnitNumber",    entry.currentUnit);
+            Session.set("currentQuestion",      entry.selectedQuestion);
+            Session.set("currentAnswer",        entry.selectedAnswer);
+            Session.set("showOverlearningText", entry.showOverlearningText);
+
             var seltype = Helpers.trim(entry.seltype).toLowerCase();
             if (seltype == "random") {
-                //TODO: handle random question
+                //Currently nothing else needed
             }
             else if (seltype == "schedule") {
-                //TODO: handle sched question
+                //Currently nothing else needed
             }
             else if (seltype == "model") {
-                //TODO: handle model question
+                //Perform the stats update on card selection and then override
+                //with the saved data from the original question
+                var cardIndex = entry.clusterIndex;
+                modelCardSelected(cardIndex);
+                _.extend(cards[cardIndex], entry.cardModelData);
             }
             else {
                 console.log("Ignoring user times log entry for question with seltype", seltype);
@@ -1073,6 +1138,8 @@ function resumeFromUserTimesLog() {
         }
 
         else if (action === "answer" || action === "[timeout]") {
+            //Read in the previously recorded answer (even if it was a timeout)
+            needCurrentInstruction = false; //Answer means they got past the instructions
             if (lastQuestionEntry === null) {
                 console.log("Ignore answer for no question", entry);
                 return;
@@ -1090,11 +1157,12 @@ function resumeFromUserTimesLog() {
                 }
             }
             else {
-                //timeout
-                wasCorrect = false;
+                wasCorrect = false; //timeout is never correct
             }
 
             //TODO: handle answer/timeout to question
+
+            //TODO: did they complete the unit?
 
             //We know the last question no longer applies
             lastQuestionEntry = null;

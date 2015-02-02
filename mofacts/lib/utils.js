@@ -71,7 +71,6 @@ if (Meteor.isClient) {
 //Session helpers
 
 /* All of our currently known session variables:
- * cardProbabilities         - For ACT-R model - was once a collection
  * clusterIndex
  * currentAnswer
  * currentQuestion
