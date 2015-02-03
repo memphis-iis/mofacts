@@ -130,9 +130,8 @@ Template.cardTemplate.helpers({
         //the card loads frequently, but we only want to set this the first time
         if(typeof Session.get("currentQuestion") === "undefined") {
             console.log("invokeAfterLoad => Performing init");
-            resumeFromUserTimesLog();
-            prepareCard();
             Session.set("showOverlearningText", false);
+            resumeFromUserTimesLog();
         }
     },
 });
@@ -880,6 +879,9 @@ function timeoutfunction(index) {
             recordUserTime("[TIMEOUT]", {
                 index: getCurrentClusterIndex(),
                 qtype: findQTypeSimpified(),
+                ttype: getTestType(),
+                guiSource: "[timeout]",
+                answer: "[timeout]",
                 delay: delay,
                 elapsed: elapsed,
                 elapsedOnRender: elapsedOnRender,
@@ -1176,4 +1178,20 @@ function resumeFromUserTimesLog() {
             console.log("Ignoring user times log entry with action", action);
         }
     });
+
+    //Do any final handling they might need
+    if (needCurrentInstruction) {
+        console.log("Resume finished: instruction display is required");
+        Router.go("instructions"); //TODO: This isn't correct unless we've set a bunch of data up above
+    }
+    else if (!!lastQuestionEntry) {
+        //Question outstanding: force question display and let them give an answer
+        console.log("Resume finished: displaying current question");
+        newQuestionHandler();
+    }
+    else {
+        //We have an answer (or no questions at all) - run next question logic
+        console.log("Resume finished: next-question logic to commence");
+        prepareCard();
+    }
 }

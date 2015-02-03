@@ -3,8 +3,6 @@
  * on the assessment session configuration.
  * */
 
-//TODO: Should be able to reload an AssessmentSession by reading over UserTimes log
-
 //TODO: if you want the assessment session format to be completely
 //      consistent, then the initial positions should be zero based
 //      (currently one-based, so A_1 would become A_0 and so on). Most
