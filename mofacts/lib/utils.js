@@ -79,6 +79,7 @@ if (Meteor.isClient) {
  * currentUnitNumber
  * debugging                 - Generic debugging flag
  * isScheduledTest
+ * needResume
  * questionIndex
  * showOverlearningText
  * statsAnswerDetails        - Used by stats page template
@@ -103,6 +104,7 @@ sessionCleanUp = function() {
     Session.set("currentQuestion", undefined);
     Session.set("currentUnitNumber", 0);
     Session.set("isScheduledTest", undefined);
+    Session.set("needResume", false);
     Session.set("questionIndex", undefined);
     Session.set("showOverlearningText", undefined);
     Session.set("statsAnswerDetails", undefined);

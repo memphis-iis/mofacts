@@ -5,7 +5,7 @@
 
 //Helper for calling server method
 
-recordUserTime = function(action, extendedData) {
+recordUserTime = function(action, extendedData, callback) {
     var testName = Session.get("currentTest");
     if (!testName) {
         testName = "NO_CURRENT_TEST";
@@ -20,7 +20,12 @@ recordUserTime = function(action, extendedData) {
         console.log("userTime", testName, action, dataRec);
     }
     
-    Meteor.call("userTime", testName, dataRec);
+    if (!!callback) {
+        Meteor.call("userTime", testName, dataRec, callback);
+    }
+    else {
+        Meteor.call("userTime", testName, dataRec);
+    }
 };
 
 //Helper for question selection

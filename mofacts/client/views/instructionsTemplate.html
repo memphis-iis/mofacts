@@ -31,6 +31,10 @@
 
 	<div class="container">
 		<div class="row">
+            {{#if backgroundImage}}
+                <div><img src="{{backgroundImage}}"></div>
+            {{/if}}
+
 			<legend class="text-center">{{instructions}}</legend>
 
             <div class="form-group">

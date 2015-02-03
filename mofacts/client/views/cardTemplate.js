@@ -1,6 +1,3 @@
-//TODO: we should be going back to instructions for each unit - and we
-//      should be able to handle instruction-only units
-
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
@@ -124,12 +121,12 @@ Template.cardTemplate.helpers({
 
     invokeAfterLoad: function() {
         if(Session.get("debugging")) {
-            console.log('card loaded');
+            console.log('invokeAfterLoad init');
         }
 
         //the card loads frequently, but we only want to set this the first time
-        if(typeof Session.get("currentQuestion") === "undefined") {
-            console.log("invokeAfterLoad => Performing init");
+        if(Session.get("needResume")) {
+            console.log("invokeAfterLoad => Performing resume");
             Session.set("showOverlearningText", false);
             resumeFromUserTimesLog();
         }
@@ -146,12 +143,8 @@ function newQuestionHandler() {
 
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
-        //question index = session's questionIndex -1 because it has already been incremented for the next card at this point.
-        var questionIndex = Session.get("questionIndex") - 1;
 
         var file = getCurrentTdfFile();
-
-        console.log(file + "is a scheduled test");
 
         var currUnit = file.tdfs.tutor.unit[unitNumber];
 
@@ -354,7 +347,6 @@ function handleUserInput( e , source ) {
 
     if (Session.get("usingACTRModel")) {
         getCardProbs().numQuestionsAnswered += 1;
-        console.log("handle user input called");
         calculateCardProbabilities();
     }
 
@@ -396,34 +388,53 @@ function prepareCard() {
     else if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
         //Scheduled (see assessment session)
         Session.set("isScheduledTest", true);
+
         if (Session.get("questionIndex") === undefined) {
-            Session.set("questionIndex", 0); //Session var should allow for continuation of abandoned tests, but will need to be reset for re-tests
-        }
-
-        var unit = getCurrentUnitNumber();
-        if (typeof file.tdfs.tutor.unit[unit] === "undefined") { //check to see if we've iterated over all units
-            clearCardTimeout();
-            statsPageTemplateUpdate(); //In statsPageTemplate.js
-            Router.go("stats");
-            return;
-        }
-
-        var schedule = getSchedule();
-
-        //If we're using permutations, permute the specified groups/items
-        //Note that permuted is defined at the top of this file
-        if (Session.get("questionIndex") === 0 &&  schedule.permute){
-            permuted = permute(schedule.permute);
-        }
-
-        if (Session.get("questionIndex") >= schedule.q.length){
-            //if we are at the end of this unit
+            //At this point, a missing question index is assumed to mean "start
+            //with the first question"
             Session.set("questionIndex", 0);
-            Session.set("currentUnitNumber", unit + 1);
-            prepareCard();
+        }
+
+        var questionIndex = Session.get("questionIndex");
+        var unit = getCurrentUnitNumber();
+        console.log("prepareCard for Schedule (Unit,QIdx)=", unit, questionIndex);
+
+        //Grab the schedule - but only if we need it
+        var schedule = null;
+        if (unit < file.tdfs.tutor.unit.length) {
+            schedule = getSchedule();
+            //If we're using permutations, permute the specified groups/items
+            //Note that permuted is defined at the top of this file
+            if (questionIndex === 0 &&  schedule.permute) {
+                permuted = permute(schedule.permute);
+            }
+        }
+
+        if (schedule && questionIndex < schedule.q.length) {
+            //Just another card
+            scheduledCard();
         }
         else {
-            scheduledCard();
+            //We just finished a unit
+            clearCardTimeout();
+
+            Session.set("questionIndex", 0);
+            var newUnit = unit + 1;
+            Session.set("currentUnitNumber", newUnit);
+
+            if (newUnit < file.tdfs.tutor.unit.length) {
+                //Just hit a new unit - we need to restart with instructions
+                console.log("UNIT FINISHED: show instructions for next unit", newUnit);
+                Router.go("instructions");
+            }
+            else {
+                //We have run out of units
+                console.log("UNIT FINISHED: No More Units");
+                statsPageTemplateUpdate(); //In statsPageTemplate.js
+                Router.go("stats");
+            }
+
+            return;
         }
     }
     else {
@@ -656,7 +667,6 @@ function initializeActRModel() {
     initCardProbs({ cards: initCards });
 
     //has to be done once ahead of time to give valid values for the beginning of the test.
-    console.log("init called");
     calculateCardProbabilities();
 }
 
@@ -789,24 +799,11 @@ function getIndexForNewCardToIntroduce(cards) {
         }
     });
 
-    if (Session.get("debugging")) {
-        if (indexToReturn === -1) {
-            console.log("All cards have been introduced!");
-        }
-        else {
-            console.log("About to intro card with index", indexToReturn);
-        }
-    }
-
     return indexToReturn;
 }
 
 
 function selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards) {
-    if (Session.get("debugging")) {
-        console.log("selectHighestProbabilityAlreadyIntroducedCardLessThan85");
-    }
-
     var currentMaxProbabilityLessThan85 = 0;
     var indexToReturn = -1;
 
@@ -819,23 +816,10 @@ function selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards) {
         }
     });
 
-    if (Session.get("debugging")) {
-        if (indexToReturn === -1) {
-            console.log("no cards less than .85 already introduced");
-        }
-        else {
-            console.log("indexToReturn:", indexToReturn);
-        }
-    }
-
     return indexToReturn;
 }
 
 function selectLowestProbabilityCardIndex(cards) {
-    if (Session.get("debugging")) {
-        console.log("selectLowestProbabilityCard");
-    }
-
     var currentMinProbability = 1;
     var indexToReturn = 0;
 
@@ -845,10 +829,6 @@ function selectLowestProbabilityCardIndex(cards) {
             indexToReturn = index;
         }
     });
-
-    if (Session.get("debugging")) {
-        console.log("indexToReturn: " + indexToReturn);
-    }
 
     return indexToReturn;
 }
@@ -899,7 +879,6 @@ function timeoutfunction(index) {
                 var cardProbs = getCardProbs();
                 cardProbs.numQuestionsAnswered += 1;
                 cardProbs.cards[currIndex].questionFailureCount += 1;
-                console.log("timeout called");
                 calculateCardProbabilities();
             }
 
@@ -1025,7 +1004,11 @@ function resumeFromUserTimesLog() {
 
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
-    var needCurrentInstruction = true;
+
+    //prepareCard will handle whether or not new units see instructions, but
+    //it will miss instructions for the very first unit. Note that we only need
+    //to worry about this if we actually have units
+    var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
 
     //TODO: when we add func to select a "sub-tdf" we'll need a user times
     //      entry (and logic for reading it back)
@@ -1042,10 +1025,19 @@ function resumeFromUserTimesLog() {
         //Only examine the messages that we care about
         var action = Helpers.trim(entry.action).toLowerCase();
 
-        if (action === "schedule") {
+        if (action === "instructions") {
+            //They've been shown instructions for this unit
+            needFirstUnitInstructions = false;
+            var instructUnit = entry.currentUnit;
+            if (!!instructUnit || instructUnit === 0) {
+                Session.set("currentUnitNumber", instructUnit);
+            }
+        }
+
+        else if (action === "schedule") {
             //Read in the previously created schedule
             lastQuestionEntry = null; //Kills the last question
-            needCurrentInstruction = false; //Schedule is beginning of a unit
+            needFirstUnitInstructions = false;
 
             var unit = entry.unitindex;
             if (!unit && unit !== 0) {
@@ -1087,7 +1079,7 @@ function resumeFromUserTimesLog() {
         else if (action === "question") {
             //Read in previously asked question
             lastQuestionEntry = entry; //Always save the last question
-            needCurrentInstruction = false; //Question means they got past instructions
+            needFirstUnitInstructions = false;
 
             if (!entry.selType) {
                 console.log("Ignoring user times entry question with no selType", entry);
@@ -1128,6 +1120,7 @@ function resumeFromUserTimesLog() {
         else if (action === "answer" || action === "[timeout]") {
             //Read in the previously recorded answer (even if it was a timeout)
             needCurrentInstruction = false; //Answer means they got past the instructions
+            needFirstUnitInstructions = false;
             if (lastQuestionEntry === null) {
                 console.log("Ignore answer for no question", entry);
                 return;
@@ -1136,12 +1129,10 @@ function resumeFromUserTimesLog() {
             //Did they get it right or wrong?
             var wasCorrect;
             if (action === "answer") {
-                if (typeof entry.isCorrect === "undefined") {
+                wasCorrect = typeof entry.isCorrect !== "undefined" ? entry.isCorrect : null;
+                if (wasCorrect === null) {
                     console.log("Missing isCorrect on an answer - assuming false", entry);
                     wasCorrect = false;
-                }
-                else {
-                    wasCorrect = entry.isCorrect;
                 }
             }
             else {
@@ -1172,31 +1163,32 @@ function resumeFromUserTimesLog() {
 
             //We know the last question no longer applies
             lastQuestionEntry = null;
-
-            //TODO: did they complete the unit? - add this in when we finally have multi-unit support
         }
 
         else {
             console.log("Ignoring user times log entry with action", action);
         }
     });
-    
-    //TODO: remove this when instruction display is working (note that includes changing profile to go HERE and not instructions)
-    needCurrentInstruction = false;
 
-    //Do any final handling they might need
-    if (needCurrentInstruction) {
-        console.log("Resume finished: instruction display is required");
-        Router.go("instructions"); //TODO: This isn't correct unless we've set a bunch of data up above
+    //If we make it here, then we know we won't need a resume until something
+    //else happens
+    Session.set("needResume", false);
+
+    if (needFirstUnitInstructions) {
+        //They haven't seen our first instruction yet
+        console.log("RESUME FINISHED: displaying initial instructions");
+        Router.go("instructions");
     }
     else if (!!lastQuestionEntry) {
         //Question outstanding: force question display and let them give an answer
-        console.log("Resume finished: displaying current question");
+        console.log("RESUME FINISHED: displaying current question");
         newQuestionHandler();
     }
     else {
         //We have an answer (or no questions at all) - run next question logic
-        console.log("Resume finished: next-question logic to commence");
+        //Note that this will also handle new units, instructions, and whether
+        //or not they are completed
+        console.log("RESUME FINISHED: next-question logic to commence");
         prepareCard();
     }
 }

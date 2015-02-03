@@ -67,6 +67,18 @@
             <latencyscalar>3.22</latencyscalar>
         </maxima>
     </parameters>
+    
+    <unit>
+        <unitname>Introduction</unitname>
+        <picture>/resources/images/IntervalInstructions.jpg</picture>
+    </unit>
+    
+    <unit>
+        <unitname>Testing</unitname>
+        <unitinstructions>
+            This is just a test of an instruction-only unit
+        </unitinstructions>
+    </unit>
 
     <unit>
         <unitname>Learning Trials Harmony Learning Experiment Pretest Harmony2</unitname>
