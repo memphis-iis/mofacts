@@ -988,16 +988,17 @@ function resumeFromUserTimesLog() {
     var tutor = file.tdfs.tutor;
     var stims = null; //LAZY READ - see below
 
+    //Assume not modeled and and not using card probs
+    Session.set("usingACTRModel",false);
+    initCardProbs(); //Blank out since not using ACT-R model
+
     //check if tutor.setspec.isModeled is defined in the tdf
     if (typeof tutor.setspec[0].isModeled !== "undefined") {
         //if it is defined and is set to true, use the ACT-R Model methods.
         if (tutor.setspec[0].isModeled == "true") {
             Session.set("usingACTRModel",true);
+            console.log("INIT ACT-R Model for resume");
             initializeActRModel(); //Will handle card probs for us
-        }
-        else {
-            Session.set("usingACTRModel",false);
-            initCardProbs(); //Blank out since not using ACT-R model
         }
     }
 
@@ -1077,7 +1078,7 @@ function resumeFromUserTimesLog() {
             }
 
             //Update what we know about the session
-            progress.currentSchedule = schedule;
+            getUserProgress().currentSchedule = schedule;
             Session.set("currentUnitNumber", unit);
             Session.set("isScheduledTest", true);
             Session.set("questionIndex", 0);
@@ -1088,8 +1089,8 @@ function resumeFromUserTimesLog() {
             lastQuestionEntry = entry; //Always save the last question
             needCurrentInstruction = false; //Question means they got past instructions
 
-            if (!entry.seltype) {
-                console.log("Ignoring user times entry question with no seltype");
+            if (!entry.selType) {
+                console.log("Ignoring user times entry question with no selType", entry);
                 return;
             }
 
@@ -1102,22 +1103,25 @@ function resumeFromUserTimesLog() {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
-            var seltype = Helpers.trim(entry.seltype).toLowerCase();
-            if (seltype == "random") {
+            var selType = Helpers.trim(entry.selType).toLowerCase();
+            if (selType == "random") {
                 //Currently nothing else needed
             }
-            else if (seltype == "schedule") {
+            else if (selType == "schedule") {
                 //Currently nothing else needed
             }
-            else if (seltype == "model") {
+            else if (selType == "model") {
                 //Perform the stats update on card selection and then override
                 //with the saved data from the original question
                 var cardIndex = entry.clusterIndex;
+                if ((!cardIndex && cardIndex !== 0) || !entry.cardModelData) {
+                    console.log("Missing cardIndex or cardModelData - model may not resume correctly", entry);
+                }
                 modelCardSelected(cardIndex);
-                _.extend(cards[cardIndex], entry.cardModelData);
+                _.extend(getCardProbs().cards[cardIndex], entry.cardModelData);
             }
             else {
-                console.log("Ignoring user times log entry for question with seltype", seltype);
+                console.log("Ignoring user times log entry for question with selType", selType);
             }
         }
 
@@ -1160,10 +1164,8 @@ function resumeFromUserTimesLog() {
             //If we are an ACT-R model, finish up calculations
             if (Session.get("usingACTRModel")) {
                 var cardProbs = getCardProbs();
-
-                if (isCorrect) cp.questionSuccessCount += 1;
-                else           cp.questionFailureCount += 1;
-
+                if (wasCorrect) cardProbs.questionSuccessCount += 1;
+                else            cardProbs.questionFailureCount += 1;
                 cardProbs.numQuestionsAnswered += 1;
                 calculateCardProbabilities();
             }
@@ -1178,6 +1180,9 @@ function resumeFromUserTimesLog() {
             console.log("Ignoring user times log entry with action", action);
         }
     });
+    
+    //TODO: remove this when instruction display is working (note that includes changing profile to go HERE and not instructions)
+    needCurrentInstruction = false;
 
     //Do any final handling they might need
     if (needCurrentInstruction) {
