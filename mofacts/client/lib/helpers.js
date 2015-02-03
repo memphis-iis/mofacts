@@ -32,6 +32,7 @@ recordUserTimeQuestion = function(extendedData) {
         selectedQuestion:     Session.get("currentQuestion"),
         selectedAnswer:       Session.get("currentAnswer"),
         showOverlearningText: Session.get("showOverlearningText"),
+        testType:             Session.get("testType"),
     }, extendedData || {});
     
     recordUserTime("question", dataRec);

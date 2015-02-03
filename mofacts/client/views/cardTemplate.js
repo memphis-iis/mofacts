@@ -311,17 +311,11 @@ function handleUserInput( e , source ) {
                 if (getTestType() === "d") {
                     showUserInteraction(true, "Close enough - Great Job!");
                 }
-                if (Session.get("usingACTRModel")) {
-                    incrementCurrentQuestionSuccess();
-                }
             }
             else {
                 isCorrect = false;
                 if (getTestType() === "d") {
                     showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
-                }
-                if (Session.get("usingACTRModel")) {
-                    incrementCurentQuestionsFailed();
                 }
             }
         }
@@ -1030,19 +1024,6 @@ function resumeFromUserTimesLog() {
     var lastQuestionEntry = null;
     var needCurrentInstruction = true;
 
-    /* TODO: all of the following are properly set when we're done:
-     *  - clusterIndex
-     *  - currentAnswer
-     *  - currentQuestion
-     *  X currentTdfName
-     *  X currentTest (this is the stim file and the key to usertimes)
-     *  - currentUnitNumber (current unit AND index to unit in tdf
-     *  - isScheduledTest
-     *  - questionIndex
-     *  - showOverlearningText
-     *  - testType
-     * */
-
     //TODO: when we add func to select a "sub-tdf" we'll need a user times
     //      entry (and logic for reading it back)
 
@@ -1117,6 +1098,7 @@ function resumeFromUserTimesLog() {
             Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
+            Session.set("testType",             entry.testType);
 
             var seltype = Helpers.trim(entry.seltype).toLowerCase();
             if (seltype == "random") {
@@ -1160,12 +1142,34 @@ function resumeFromUserTimesLog() {
                 wasCorrect = false; //timeout is never correct
             }
 
-            //TODO: handle answer/timeout to question
+            //Test type is always recorded with an answer, so we just reset it
+            var testType = entry.ttype;
+            Session.set("testType", testType);
 
-            //TODO: did they complete the unit?
+            //The session variables should be set up correctly from the question
+            recordProgress(
+                getCurrentClusterIndex(),
+                Session.get("currentQuestion"),
+                Session.get("currentAnswer"),
+                entry.answer,
+                wasCorrect
+            );
+
+            //If we are an ACT-R model, finish up calculations
+            if (Session.get("usingACTRModel")) {
+                var cardProbs = getCardProbs();
+
+                if (isCorrect) cp.questionSuccessCount += 1;
+                else           cp.questionFailureCount += 1;
+
+                cardProbs.numQuestionsAnswered += 1;
+                calculateCardProbabilities();
+            }
 
             //We know the last question no longer applies
             lastQuestionEntry = null;
+
+            //TODO: did they complete the unit? - add this in when we finally have multi-unit support
         }
 
         else {
