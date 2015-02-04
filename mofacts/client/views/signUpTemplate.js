@@ -4,7 +4,7 @@
 Template.signUpTemplate.events({
     'click #signInButton' : function (event) {
         event.preventDefault();
-        Router.go('signin');
+        routeToSignin();
     },
 
     'click #signUpButton' : function (event) {
@@ -27,25 +27,13 @@ Template.signUpTemplate.events({
             checks.push("#usernameAlreadyInUse");
         }
 
-        if (formPassword1 === "" && formPassword2 === "") {
-            //Maybe they WANT an empty password?
-            if (confirm("Are you sure that you want to use an empty password")) {
-                formPassword1 = Helpers.blankPassword(formUsername);
-                formPassword2 = "" + formPassword1;
-            }
-            else {
-                checks.push("#passwordTooShort");
-            }
+        //"Regular" password checks
+        if (formPassword1.length < 6) {
+            checks.push("#passwordTooShort");
         }
-        else {
-            //"Regular" password checks
-            if (formPassword1.length < 6) {
-                checks.push("#passwordTooShort");
-            }
 
-            if(formPassword1 !== formPassword2) {
-                checks.push("#passwordMustMatch");
-            }
+        if(formPassword1 !== formPassword2) {
+            checks.push("#passwordMustMatch");
         }
 
         //Show any and all errors
@@ -98,7 +86,7 @@ Template.signUpTemplate.events({
 
     'blur #password1' : function () {
         var len = password1.value.length;
-        if(len > 1 && len < 6) {
+        if(len < 6) {
             $("#passwordTooShort").show();
         }
         else {

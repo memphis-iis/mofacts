@@ -12,6 +12,7 @@
  * currentUnitNumber
  * debugging                 - Generic debugging flag
  * isScheduledTest
+ * loginMode                 - NOTE that we don't touch in sessionCleanUp
  * needResume
  * questionIndex
  * showOverlearningText

@@ -14,7 +14,7 @@ Template.statsPageTemplate.events({
                 console.log("Error Logging out [" + Meteor.user() + "] " + error);
             }
             event.preventDefault();
-            Router.go("signin");
+            routeToSignin();
         });
     },
 
@@ -30,7 +30,7 @@ Template.statsPageTemplate.events({
 Template.statsPageTemplate.helpers({
     username: function() {
         if (!haveMeteorUser()) {
-            Router.go("signin");
+            routeToSignin();
         }
         else {
             return Meteor.user().username;

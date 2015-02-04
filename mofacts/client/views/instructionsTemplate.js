@@ -24,7 +24,7 @@ Template.instructionsTemplate.events({
                 //something happened during logout
                 console.log("User:", Meteor.user(), "Error:", error);
             }
-            Router.go("signin"); //Not much else to do now
+            routeToSignin(); //Not much else to do now
         });
     },
 
@@ -79,7 +79,7 @@ Template.instructionsTemplate.helpers({
 
     username: function () {
         if (!haveMeteorUser()) {
-            Router.go("signin");
+            routeToSignin();
         }
         else {
             return Meteor.user().username;

@@ -47,7 +47,7 @@ Template.cardTemplate.events({
             }
             else {
                 clearCardTimeout();
-                Router.go("/signin");
+                routeToSignin();
             }
         });
     },
@@ -88,7 +88,7 @@ Template.cardTemplate.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             clearCardTimeout();
-            Router.go("signin");
+            routeToSignin();
         }
         else {
             return Meteor.user().username;

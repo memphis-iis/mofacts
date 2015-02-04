@@ -1,6 +1,22 @@
+Session.set("loginMode", "normal");
+
+routeToSignin = function() {
+    if (Session.get("loginMode") === "experiment") {
+        Router.go("/experiment");
+    }
+    else {
+        Router.go("/signin");
+    }
+};
+
 Router.configure({
     //autoRender: false,
     layoutTemplate: 'DefaultLayout'
+});
+
+Router.route('/experiment', function() {
+    Session.set("loginMode", "experiment");
+    this.render('signInTemplate');
 });
 
 Router.route('/signin', function () {
@@ -24,8 +40,6 @@ Router.route('/card', function () {
 });
 
 Router.route('/admin', function () {
-    //TODO: check admin role
-    //TODO: what about teachers?
     this.render('adminTemplate');
 });
 

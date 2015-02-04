@@ -9,16 +9,16 @@ Template.signInTemplate.events({
         }
         UserPasswordCheck();
     },
-    
+
     'click #signUpButton' : function (event) {
         event.preventDefault();
         Router.go("signup");
     },
-    
+
     'focus #signInUsername' : function (event) {
         $("#invalidLogin").hide();
     },
-    
+
     'focus #password' : function () {
         $("#invalidLogin").hide();
     },
@@ -32,16 +32,64 @@ Template.signInTemplate.events({
 });
 
 ////////////////////////////////////////////////////////////////////////////
+// Template Heleprs
+
+Template.signInTemplate.helpers({
+    isExperiment: function() {
+        return Session.get("loginMode") === "experiment";
+    },
+
+    isNormal: function() {
+        return Session.get("loginMode") !== "experiment";
+    }
+});
+
+////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
 function UserPasswordCheck() {
+    var experiment = Session.get("loginMode") === "experiment";
     var newUsername = signInUsername.value;
-    var newPassword = password.value;
-    
+    var newPassword = (experiment ? "" : password.value);
+
     if (!!newUsername & newPassword === "") {
         newPassword = Helpers.blankPassword(newUsername);
     }
 
+    if (experiment) {
+        //Experiment mode - we create a user if one isn't already there
+        var userRec= Meteor.users.findOne({username: newUsername});
+        if (!userRec) {
+            //No user - must create one
+            Accounts.createUser({username: newUsername, password: newPassword}, function (error) {
+                if(typeof error !== "undefined") {
+                    console.log("Error creating the user account for user:", newUsername, error);
+                    alert("Unfortunately, a user account for " + newUsername + " could not be created: " + error);
+                    return;
+                }
+
+                //Clean up and init the session
+                sessionCleanUp();
+
+                var newUserID = Meteor.userId();
+                if(newUserID === null) {
+                    //This means that we have an issue of some kind - but there's
+                    //nothing that we can do? We'll just fall thru for now since
+                    //we don't have a good way to fix this
+                    console.log("ERROR: The user was not logged in on account creation?", newUsername);
+                    alert("It appears that you couldn't be logged in as " + newUsername);
+                }
+
+                Router.go("profile");
+            });
+
+            //No more processing
+            return;
+        }
+    }
+
+    //If we're here, either we're in experimental mode and we know the user
+    //exists **OR** it's a "normal" login
     Meteor.loginWithPassword(newUsername, newPassword, function(error) {
         if (typeof error !== 'undefined') {
             console.log("Login error: " + error);

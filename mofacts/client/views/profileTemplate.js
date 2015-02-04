@@ -10,7 +10,7 @@ Template.profileTemplate.events({
                 console.log("User:", Meteor.user(), "Error:", error);
             }
             else {
-                Router.go("signin");
+                routeToSignin();
             }
         });
     },
@@ -49,7 +49,7 @@ Template.profileTemplate.events({
 Template.profileTemplate.helpers({
     username: function () {
         if (!haveMeteorUser()) {
-            Router.go("signin");
+            routeToSignin();
         }
         else {
             return Meteor.user().username;

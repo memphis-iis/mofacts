@@ -46,11 +46,7 @@ recordUserTimeQuestion = function(extendedData) {
 //UI helpers (for the HTML template)
  
 UI.registerHelper('equals', function (arg1, arg2, options) {
-    if (arg1 === arg2) {
-        return true;
-    } else {
-        return false;
-    }
+    return (arg1 === arg2);
 });
 
 UI.registerHelper('currentQuestion', function () {
@@ -60,4 +56,3 @@ UI.registerHelper('currentQuestion', function () {
 UI.registerHelper('currentAnswer', function () {
     return Session.get("currentAnswer");
 });
-
