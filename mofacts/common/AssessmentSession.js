@@ -3,6 +3,17 @@
  * on the assessment session configuration.
  * */
 
+//TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
+//      way to only generate them once. Current plan:
+//      - Add method to get clusters from the stim file (right now we just
+//        read them out before calling createSchedule)
+//      - Add the clusters to user progress
+//      - Change the docs for createSchedule to read that clusters should come
+//        from the call created above
+//      - Change call sites of createSchedule to pre-create the clusters
+//      - Update user times logging and resume to write out clusters
+//      - Evaluate all places where we mess with the stimulus file
+
 //TODO: if you want the assessment session format to be completely
 //      consistent, then the initial positions should be zero based
 //      (currently one-based, so A_1 would become A_0 and so on). Most
