@@ -66,7 +66,7 @@ Template.cardTemplate.events({
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        leavePage("/profile");
+        leavePage("profile");
     },
 
     'click .statsPageLink' : function (event) {
@@ -91,7 +91,16 @@ Template.cardTemplate.events({
 // Template helpers and meteor events
 
 Template.cardTemplate.rendered = function() {
-    newQuestionHandler();
+    if(Session.get("debugging")) {
+        console.log('cards template rendered');
+    }
+
+    //the card loads frequently, but we only want to set this the first time
+    if(Session.get("needResume")) {
+        console.log("cards template rendered => Performing resume");
+        Session.set("showOverlearningText", false);
+        resumeFromUserTimesLog();
+    }
 };
 
 Template.cardTemplate.helpers({
@@ -128,19 +137,6 @@ Template.cardTemplate.helpers({
     drill: function() {
         return getTestType() === "d";
     },
-
-    invokeAfterLoad: function() {
-        if(Session.get("debugging")) {
-            console.log('invokeAfterLoad init');
-        }
-
-        //the card loads frequently, but we only want to set this the first time
-        if(Session.get("needResume")) {
-            console.log("invokeAfterLoad => Performing resume");
-            Session.set("showOverlearningText", false);
-            resumeFromUserTimesLog();
-        }
-    },
 });
 
 
@@ -149,6 +145,7 @@ Template.cardTemplate.helpers({
 
 function newQuestionHandler() {
     console.log("NQ handler");
+
     $("#userAnswer").focus();
 
     if ( Session.get("isScheduledTest") ) {
@@ -157,13 +154,11 @@ function newQuestionHandler() {
         var currUnit = file.tdfs.tutor.unit[unitNumber];
         var schedule = getSchedule();
 
+        //Always clear the multiple choice container
+        $("#multipleChoiceContainer").html("");
+
         if (schedule && schedule.isButtonTrial) {
             $("#textEntryRow").hide();
-            $("#multipleChoiceInnerContainer").remove();
-
-            $("#multipleChoiceContainer").append(
-                "<div id=\"multipleChoiceInnerContainer\"></div>"
-            );
 
             var cluster = getStimCluster(getCurrentClusterIndex());
 
@@ -206,19 +201,18 @@ function newQuestionHandler() {
 
             //insert all of the multiple choice buttons with the appropriate values.
             _.each(choicesArray, function(value, idx) {
-                $("#multipleChoiceInnerContainer").append(
-                    "<div class=\"col-lg-9\">" +
-                    "<button type=\"button\" name=\"" + value + "\" class=\"btn btn-primary btn-block multipleChoiceButton\">" +
+                $("#multipleChoiceContainer").append($(
+                    "<div>" +
+                    "<button type='button' name='" + value + "' class='btn btn-primary btn-block multipleChoiceButton'>" +
                     value +
                     "</button>" +
                     "</div>"
-                );
+                ));
             });
         }
         else {
             //Not a button trial
             $("#textEntryRow").show();
-            $("#multipleChoiceInnerContainer").remove();
         }
     }
 
@@ -1085,7 +1079,6 @@ function resumeFromUserTimesLog() {
 
     //Before the below options, reset current test data
     initUserProgress({
-        currentStimuliTest: currentStimName,
         currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
         progressDataArray: [],
         currentSchedule: {}
