@@ -33,7 +33,7 @@ Template.profileTemplate.events({
         console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
         Session.set("currentTdfName", tdffilename);
-        Session.set("currentTest", stimulusfile);
+        Session.set("currentStimName", stimulusfile);
 
         //Save the test selection event
         recordUserTime("profile test selection", {

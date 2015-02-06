@@ -1,25 +1,25 @@
 /* client/lib/helpers.js
- * 
+ *
  * Client-side helper functions
  * */
 
 //Helper for calling server method
 
 recordUserTime = function(action, extendedData, callback) {
-    var testName = Session.get("currentTest");
+    var testName = Session.get("currentStimName");
     if (!testName) {
         testName = "NO_CURRENT_TEST";
     }
-    
+
     var dataRec = _.extend({
         action: action,
         clientSideTimeStamp: Date.now()
     }, extendedData);
-    
+
     if (Session.get("debugging")) {
         console.log("userTime", testName, action, dataRec);
     }
-    
+
     if (!!callback) {
         Meteor.call("userTime", testName, dataRec, callback);
     }
@@ -39,12 +39,12 @@ recordUserTimeQuestion = function(extendedData) {
         showOverlearningText: Session.get("showOverlearningText"),
         testType:             Session.get("testType"),
     }, extendedData || {});
-    
+
     recordUserTime("question", dataRec);
 };
- 
+
 //UI helpers (for the HTML template)
- 
+
 UI.registerHelper('equals', function (arg1, arg2, options) {
     return (arg1 === arg2);
 });

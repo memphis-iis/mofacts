@@ -8,7 +8,7 @@
  * currentAnswer
  * currentQuestion
  * currentTdfName
- * currentTest
+ * currentStimName
  * currentUnitNumber
  * debugging                 - Generic debugging flag
  * isScheduledTest
@@ -29,9 +29,8 @@
 //Handle an entire session - note that we current don't limit this to the
 //client... but maybe we should?
 sessionCleanUp = function() {
-    //Note that we assume that currentTest and currentTdfName are
-    //already set (because getStimNameFromTdf should have already been
-    //called).  We also ignore debugging (for obvious reasons)
+    //Note that we assume that currentStimName and currentTdfName are
+    //already set. We also ignore debugging (for obvious reasons)
 
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);

@@ -116,11 +116,11 @@ statsPageTemplateUpdate = function() {
     if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
         var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
 
-        var currentTest = Session.get("currentTest");
-        if (!currentTest) {
-            currentTest = "NO_CURRENT_TEST";
+        var currentStimName = Session.get("currentStimName");
+        if (!currentStimName) {
+            currentStimName = "NO_CURRENT_STIMULUS_FILE";
         }
-        var expKey = currentTest.replace(/\./g, "_");
+        var expKey = currentStimName.replace(/\./g, "_");
 
         var statFormatDate = function(ts) {
             if (!ts) return "";

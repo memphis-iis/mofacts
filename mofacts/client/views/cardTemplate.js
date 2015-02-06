@@ -546,7 +546,7 @@ function prepareCard() {
 
 function randomCard() {
     //get the file from the collection
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var file = Stimuli.findOne({fileName: getCurrentStimName()});
     //get the cluster size (avoids out of bounds error)
     var size = file.stimuli.setspec.clusters[0].cluster.length;
 
@@ -566,7 +566,7 @@ function randomCard() {
 }
 
 function getStimCluster(index) {
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var file = Stimuli.findOne({fileName: getCurrentStimName()});
     return file.stimuli.setspec.clusters[0].cluster[index];
 }
 
@@ -634,8 +634,8 @@ function scheduledCard() {
     newQuestionHandler();
 }
 
-function getCurrentTestName() {
-    return Session.get("currentTest");
+function getCurrentStimName() {
+    return Session.get("currentStimName");
 }
 
 function getCurrentUnitNumber() {
@@ -710,7 +710,7 @@ function getSchedule() {
         console.log("CREATING SCHEDULE, showing progress");
         console.log(progress);
 
-        var stims = Stimuli.findOne({fileName: getCurrentTestName()});
+        var stims = Stimuli.findOne({fileName: getCurrentStimName()});
         var clusters = stims.stimuli.setspec.clusters[0].cluster;
 
         var file = getCurrentTdfFile();
@@ -747,7 +747,7 @@ function getSchedule() {
 }
 
 function initializeActRModel() {
-    var file = Stimuli.findOne({fileName: getCurrentTestName()});
+    var file = Stimuli.findOne({fileName: getCurrentStimName()});
     var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
 
     var initCards = [];
@@ -1083,7 +1083,7 @@ function resumeFromUserTimesLog() {
 
     //Before the below options, reset current test data
     initUserProgress({
-        currentStimuliTest: getCurrentTestName(),
+        currentStimuliTest: getCurrentStimName(),
         currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
         progressDataArray: [],
         currentSchedule: {}
@@ -1091,11 +1091,11 @@ function resumeFromUserTimesLog() {
 
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
 
-    var currentTest = Session.get("currentTest");
-    if (!currentTest) {
-        currentTest = "NO_CURRENT_TEST";
+    var currentStimName = Session.get("currentStimName");
+    if (!currentStimName) {
+        currentStimName = "NO_CURRENT_STIMULUS_FILE";
     }
-    var expKey = currentTest.replace(/\./g, "_");
+    var expKey = currentStimName.replace(/\./g, "_");
 
     var entries = [];
     if (userLog && userLog[expKey] && userLog[expKey].length) {
@@ -1147,7 +1147,7 @@ function resumeFromUserTimesLog() {
             }
 
             if (!stims) {
-                stims = Stimuli.findOne({fileName: currentTest});
+                stims = Stimuli.findOne({fileName: currentStimName});
             }
 
             var clusters = stims.stimuli.setspec.clusters[0].cluster;
