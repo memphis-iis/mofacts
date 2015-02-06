@@ -30,6 +30,17 @@ function clearCardTimeout() {
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
+function leavePage(dest) {
+    clearCardTimeout();
+    clearPlayingSound();
+    if (typeof dest === "function") {
+        dest();
+    }
+    else {
+        Router.go(dest);
+    }
+}
+
 Template.cardTemplate.events({
 
     'focus #userAnswer' : function() {
@@ -48,29 +59,26 @@ Template.cardTemplate.events({
                 console.log("User:" + Meteor.user() +" ERROR:" + error);
             }
             else {
-                clearCardTimeout();
-                routeToSignin();
+                leavePage(routeToSignin);
             }
         });
     },
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        clearCardTimeout();
-        Router.go("/profile");
+        leavePage("/profile");
     },
 
     'click .statsPageLink' : function (event) {
         event.preventDefault();
         clearCardTimeout();
         statsPageTemplateUpdate(); //In statsPageTemplate.js
-        Router.go("/stats");
+        leavePage("stats");
     },
 
     'click #overlearningButton' : function (event) {
         event.preventDefault();
-        clearCardTimeout();
-        Router.go("/profile");
+        leavePage("profile");
     },
 
     'click .multipleChoiceButton' : function (event) {
@@ -239,8 +247,8 @@ function newQuestionHandler() {
     allowUserInput();
 }
 
-function playCurrentQuestionSound() {
-    //Stop previous sound
+//Stop previous sound
+function clearPlayingSound() {
     if (!!currentQuestionSound) {
         try {
             currentQuestionSound.stop();
@@ -249,6 +257,12 @@ function playCurrentQuestionSound() {
         }
         currentQuestionSound = null;
     }
+}
+
+//Play a sound matching the current question
+function playCurrentQuestionSound() {
+    //We currently only play one sound at a time
+    clearPlayingSound();
 
     //Reset sound and play it
     currentQuestionSound = new Howl({
@@ -376,7 +390,8 @@ function handleUserInput( e , source ) {
         }
     }
 
-    Meteor.setTimeout(function() {
+    clearCardTimeout();
+    timeoutName = Meteor.setTimeout(function() {
         prepareCard();
         $("#userAnswer").val("");
         hideUserInteraction();
@@ -510,13 +525,13 @@ function prepareCard() {
             if (newUnit < file.tdfs.tutor.unit.length) {
                 //Just hit a new unit - we need to restart with instructions
                 console.log("UNIT FINISHED: show instructions for next unit", newUnit);
-                Router.go("instructions");
+                leavePage("instructions");
             }
             else {
                 //We have run out of units
                 console.log("UNIT FINISHED: No More Units");
                 statsPageTemplateUpdate(); //In statsPageTemplate.js
-                Router.go("stats");
+                leavePage("stats");
             }
 
             return;
@@ -713,7 +728,7 @@ function getSchedule() {
             alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
             clearCardTimeout();
             statsPageTemplateUpdate(); //In statsPageTemplate.js
-            Router.go("stats");
+            leavePage("stats");
             return;
         }
 
@@ -1150,7 +1165,7 @@ function resumeFromUserTimesLog() {
                 alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
                 clearCardTimeout();
                 statsPageTemplateUpdate(); //In statsPageTemplate.js
-                Router.go("stats");
+                leavePage("stats");
                 return;
             }
 
@@ -1262,7 +1277,7 @@ function resumeFromUserTimesLog() {
     if (needFirstUnitInstructions) {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");
-        Router.go("instructions");
+        leavePage("instructions");
     }
     else if (!!lastQuestionEntry) {
         //Question outstanding: force question display and let them give an answer
