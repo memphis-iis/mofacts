@@ -1,6 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
+var currentQuestionSound = null;
+
 var permuted = [];
 
 function clearCardPermuted() {
@@ -143,12 +145,11 @@ function newQuestionHandler() {
 
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
-
         var file = getCurrentTdfFile();
-
         var currUnit = file.tdfs.tutor.unit[unitNumber];
+        var schedule = getSchedule();
 
-        if (currUnit.buttontrial && currUnit.buttontrial.length && currUnit.buttontrial[0] === "true") {
+        if (schedule && schedule.isButtonTrial) {
             $("#textEntryRow").hide();
             $("#multipleChoiceInnerContainer").remove();
 
@@ -227,12 +228,7 @@ function newQuestionHandler() {
     }
 
     if(getQuestionType() === "sound"){
-        var sound = new Howl({
-            urls: [
-                Session.get("currentQuestion") + '.mp3',
-                Session.get("currentQuestion") + '.wav'
-            ]
-        }).play();
+        playCurrentQuestionSound();
     }
 
     if (Session.get("showOverlearningText")) {
@@ -241,6 +237,39 @@ function newQuestionHandler() {
 
     //All ready - time to allow them to enter data
     allowUserInput();
+}
+
+function playCurrentQuestionSound() {
+    //Stop previous sound
+    if (!!currentQuestionSound) {
+        try {
+            currentQuestionSound.stop();
+        }
+        catch(e) {
+        }
+        currentQuestionSound = null;
+    }
+
+    //Reset sound and play it
+    currentQuestionSound = new Howl({
+        urls: [
+            Session.get("currentQuestion") + '.mp3',
+            Session.get("currentQuestion") + '.wav'
+        ],
+
+        onplay: function() {
+            currentQuestionSound.isCurrentlyPlaying = true;
+        },
+
+        onend: function() {
+            currentQuestionSound.isCurrentlyPlaying = false;
+        },
+    });
+
+    //In case our caller checks before the sound has a chance to load, we
+    //mark the howler instance as playing
+    currentQuestionSound.isCurrentlyPlaying = true;
+    currentQuestionSound.play();
 }
 
 function handleUserInput( e , source ) {
@@ -285,46 +314,10 @@ function handleUserInput( e , source ) {
         elapsed = 0;
     }
 
-    //Will be set by checks below
-    var isCorrect;
-
-    //Display Correctness
-    if ( getTestType() !== "s" ) {
-        userAnswer = Helpers.trim(userAnswer.toLowerCase());
-        answer = Helpers.trim(answer.toLowerCase());
-
-        if (userAnswer.localeCompare(answer)) {
-            console.log(1.0 - (getEditDistance(userAnswer,answer) /
-                    (Math.max(userAnswer.length,answer.length))));
-            if(1.0 - (getEditDistance(userAnswer,answer) /
-                    (Math.max(userAnswer.length,answer.length)))> 0.75)
-            {
-                isCorrect = true;
-                if (getTestType() === "d") {
-                    showUserInteraction(true, "Close enough - Great Job!");
-                }
-            }
-            else {
-                isCorrect = false;
-                if (getTestType() === "d") {
-                    showUserInteraction(false, "You are Incorrect. The correct answer is : " + answer);
-                }
-            }
-        }
-        else {
-            isCorrect = true;
-            if (getTestType() === "d") {
-                showUserInteraction(true, "Correct - Great Job!");
-            }
-        }
-
-        if (Session.get("usingACTRModel")) {
-            var cp = getCardProbs();
-            if (isCorrect) cp.questionSuccessCount += 1;
-            else           cp.questionFailureCount += 1;
-        }
-    }
-    //---------
+    //Show user feedback and find out if they answered correctly
+    //Note that userAnswerFeedback will display text and/or media - it is
+    //our responsbility to decide when to hide it and move on
+    var isCorrect = userAnswerFeedback(answer, userAnswer);
 
     //Get question Number
     var index = getCurrentClusterIndex();
@@ -353,25 +346,117 @@ function handleUserInput( e , source ) {
     //Reset timer for next question
     start = getCurrentTimer();
 
-    //Whether timed or not, same logic for below
-    var setup = function() {
-        prepareCard();
-        $("#userAnswer").val("");
-        hideUserInteraction();
-    };
-
     //timeout for adding a small delay so the User may read
     //the correctness of his/her answer
     $("#UserInteraction").show();
-    Meteor.setTimeout(setup, 2000);
 
-    //For debugging sometimes, you want to hide the user interaction and
-    //skip the timeout
-    //$("#UserInteraction").hide();
-    //setup();
+    //Figure out timeout
+    var timeout = 0;
+    if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
+        //They got the answer wrong on a drill in a scheduled test, so we need
+        //to check the unit for review study time.
+        try {
+            var file = getCurrentTdfFile();
+            var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
+            timeout = Helpers.intVal(unit.deliveryparams[0].reviewstudy[0]);
+        }
+        catch(err) {
+            if (Session.get("debugging")) {
+                console.log("Issue finding unit/deliveryparams/reviewstudy", err);
+            }
+        }
+    }
+
+    //If not timeout, default to 2 seconds so they can read the message
+    if (!timeout || timeout < 1) {
+        //Default to 2 seconds and add a second if sound is playing
+        timeout = 2000;
+        if (currentQuestionSound && currentQuestionSound.isCurrentlyPlaying) {
+            timeout += 1000;
+        }
+    }
+
+    Meteor.setTimeout(function() {
+        prepareCard();
+        $("#userAnswer").val("");
+        hideUserInteraction();
+    }, timeout);
 }
 
+//Take care of user feedback - and return whether or not the user correctly
+//answered the question
+function userAnswerFeedback(answer, userAnswer) {
+    //Nothing to evaluate
+    if (getTestType() === "s") {
+        return null;
+    }
 
+    var isCorrect = null;
+
+    answer = Helpers.trim(answer.toLowerCase());
+    userAnswer = Helpers.trim(userAnswer.toLowerCase());
+
+    var isDrill = (getTestType() === "d");
+    var isSound = (getQuestionType() === "sound");
+
+    //We know if it's a button trial from the schedule
+    var isButtonTrial = false;
+    var progress = getUserProgress();
+    if (progress && progress.currentSchedule) {
+        isButtonTrial = !!progress.currentSchedule.isButtonTrial;
+    }
+
+    //Helper for correctness logic below
+    var handleAnswerState = function(goodNews, msg) {
+        isCorrect = goodNews;
+        if (isDrill) {
+            showUserInteraction(goodNews, msg);
+        }
+    };
+
+    //How was their answer?
+    if (userAnswer.localeCompare(answer) === 0) {
+        //Right
+        handleAnswerState(true, "Correct - Great Job!");
+    }
+    else if (!isButtonTrial) {
+        //Not exact, but if they are entering text, they might be close enough
+        var editDistScore = 1.0 - (
+            getEditDistance(userAnswer, answer) /
+            Math.max(userAnswer.length, answer.length)
+        );
+        if(editDistScore > 0.75) {
+            handleAnswerState(true, "Close enough - Great Job!");
+        }
+        else {
+            handleAnswerState(false, "You are Incorrect. The correct answer is : " + answer);
+        }
+    }
+    else {
+        //Wrong
+        handleAnswerState(false, "You are Incorrect. The correct answer is : " + answer);
+    }
+
+    //Update any model parameters based on their answer's correctness
+    if (Session.get("usingACTRModel")) {
+        var cp = getCardProbs();
+        if (isCorrect) cp.questionSuccessCount += 1;
+        else           cp.questionFailureCount += 1;
+    }
+
+    //If they are incorrect on a drill, we might need to do extra work for
+    //their review period
+    if (isDrill && !isCorrect) {
+        //Cheat and inject a review message
+        $("#UserInteraction").append($("<p>&nbsp;</p><p class='text-danger'>Please Review</p>"));
+        //If necessary, replay the sound
+        if (isSound) {
+            playCurrentQuestionSound();
+        }
+    }
+
+    return isCorrect;
+}
 
 
 function getCurrentTimer() {
