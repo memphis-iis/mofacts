@@ -2,7 +2,7 @@
  * files (on both the client and the server)
  * */
 
-Helpers = {
+Helpers = {    
     //Given a user ID, return the "dummy" password that stands in for a blank
     //password. This is because we REALLY do want to use blanks passwords for
     //some users

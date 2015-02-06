@@ -115,12 +115,7 @@ statsPageTemplateUpdate = function() {
     var userTimeLogView = [];
     if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
         var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-
-        var currentStimName = Session.get("currentStimName");
-        if (!currentStimName) {
-            currentStimName = "NO_CURRENT_STIMULUS_FILE";
-        }
-        var expKey = currentStimName.replace(/\./g, "_");
+        var expKey = userTimesExpKey(true);
 
         var statFormatDate = function(ts) {
             if (!ts) return "";

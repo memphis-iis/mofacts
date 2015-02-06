@@ -3,13 +3,26 @@
  * Client-side helper functions
  * */
 
-//Helper for calling server method
-
-recordUserTime = function(action, extendedData, callback) {
-    var testName = Session.get("currentStimName");
-    if (!testName) {
-        testName = "NO_CURRENT_TEST";
+//Because the experiment key is used multiple places, we centralize it here.
+//By default we assume that they just want the "raw" version suitable for
+//using for a Meteor.call("userTime", ...) call. However, if fixForDirectAccess
+//it true(-ish), we'll fix up the value we return
+userTimesExpKey = function(fixForDirectAccess) {
+    var expKey = Session.get("currentTdfName");
+    if (!expKey) {
+        expKey = "NO_CURRENT_EXP_KEY";
     }
+
+    if (!!fixForDirectAccess) {
+        expKey = expKey.replace(/\./g, "_");
+    }
+
+    return expKey;
+};
+
+//Helper for calling server method
+recordUserTime = function(action, extendedData, callback) {
+    var testName = userTimesExpKey();
 
     var dataRec = _.extend({
         action: action,

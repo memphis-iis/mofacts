@@ -32,6 +32,10 @@ Template.profileTemplate.events({
 
         console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
+        //make sure session variables are cleared from previous tests
+        sessionCleanUp();
+
+        //Set the session variables we know
         Session.set("currentTdfName", tdffilename);
         Session.set("currentStimName", stimulusfile);
 
@@ -43,8 +47,6 @@ Template.profileTemplate.events({
             stimulusfile: stimulusfile
         });
 
-        //make sure session variables are cleared from previous tests
-        sessionCleanUp();
         //Go directly to the card session - which will decide whether or
         //not to show instruction
         Session.set("needResume", true);

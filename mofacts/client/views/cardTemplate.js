@@ -1081,21 +1081,18 @@ function resumeFromUserTimesLog() {
         }
     }
 
+    var currentStimName = getCurrentStimName();
+
     //Before the below options, reset current test data
     initUserProgress({
-        currentStimuliTest: getCurrentStimName(),
+        currentStimuliTest: currentStimName,
         currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
         progressDataArray: [],
         currentSchedule: {}
     });
 
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-
-    var currentStimName = Session.get("currentStimName");
-    if (!currentStimName) {
-        currentStimName = "NO_CURRENT_STIMULUS_FILE";
-    }
-    var expKey = currentStimName.replace(/\./g, "_");
+    var expKey = userTimesExpKey(true);
 
     var entries = [];
     if (userLog && userLog[expKey] && userLog[expKey].length) {
