@@ -36,6 +36,10 @@ Template.profileTemplate.events({
         sessionCleanUp();
 
         //Set the session variables we know
+        //Note that we assume the root and current TDF names are the same.
+        //The resume logic in the the card template will determine if the
+        //current TDF should be changed due to an experimental condition
+        Session.set("currentRootTdfName", tdffilename);
         Session.set("currentTdfName", tdffilename);
         Session.set("currentStimName", stimulusfile);
 

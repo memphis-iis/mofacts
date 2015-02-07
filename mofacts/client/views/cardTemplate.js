@@ -1,3 +1,5 @@
+//TODO: Need to change music to have exp conditions and then test it
+
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
@@ -1046,9 +1048,29 @@ function allowUserInput() {
 }
 
 
+////////////////////////////////////////////////////////////////////////////
+// BEGIN Resume Logic
+
+//Helper for getting the relevant user times log
+function getCurrentUserTimesLog() {
+    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+    var expKey = userTimesExpKey(true);
+
+    var entries = [];
+    if (userLog && userLog[expKey] && userLog[expKey].length) {
+        entries = userLog[expKey];
+    }
+
+    return entries;
+}
 
 //Re-initialize our User Progress and Card Probabilities internal storage
-//from the user times log.
+//from the user times log. Note that most of the logic will be in
+//processUserTimesLog. This function just does some initial set up, insures
+//that experimental conditions are correct, and uses processUserTimesLog as
+//a callback. This callback pattern is important because it allows us to be
+//sure our server-side call regarding experimental conditions has completed
+//before continuing to resume the session
 function resumeFromUserTimesLog() {
     console.log("Resuming from previous User Times info (if any)");
 
@@ -1056,6 +1078,88 @@ function resumeFromUserTimesLog() {
     clearCardTimeout();
     clearCardPermuted();
 
+    //So here's the place where we'll use the ROOT tdf instead of just the
+    //current TDF. It's how we'll find out if we need to perform experimental
+    //condition selection. It will be our responsibility to update
+    //currentTdfName and currentStimName based on experimental conditions
+    //(if necessary)
+    var rootTDF = Tdfs.findOne({fileName: Session.get("currentRootTdfName")});
+    if (!rootTDF) {
+        console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
+        alert("Unfortunately, something is broken and this lesson cannot continue");
+        leavePage("profile");
+        return;
+    }
+
+    var setspec = rootTDF.tdfs.tutor.setspec[0];
+    var needExpCondition = (setspec.condition && setspec.condition.length);
+    var conditionAction;
+    var conditionData = {};
+
+    if (needExpCondition) {
+        //Find the correct exp condition
+        console.log("Experimental condition is required: searching");
+        var prevCondition = _.find(getCurrentUserTimesLog(), function(entry) {
+            return entry && entry.action && entry.action === "expcondition";
+        });
+
+        var subTdf = null;
+
+        if (prevCondition) {
+            //Use previous condition and log a notification that we did so
+            console.log("Found previous experimental condition: using that");
+            subTdf = entry.selectedTdf;
+            conditionAction = "condition-notify";
+            conditionData.note = "Using previous condition: " + subTdf;
+        }
+        else {
+            //Select condition and save it
+            console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
+            subTdf = _.sample(setspec.condition);
+            conditionAction = "expcondition";
+            conditionData.note = "Selected from " + Helpers.display(setspec.condition.length) + " conditions";
+        }
+
+        if (!subTdf) {
+            console.log("No experimental condition could be selected!");
+            alert("Unfortunately, something is broken and this lesson cannot continue");
+            leavePage("profile");
+            return;
+        }
+
+        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
+        conditionData.selectedTdf = subTdf;
+
+        //Now we have a different current TDF (but root stays the same)
+        Session.set("currentTdfName", subTdf);
+
+        //Also need to read new stimulus file (and note that we allow an exception
+        //to kill us if the current tdf is broken and has no stimulus file)
+        Session.set("currentStimName", getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+    }
+    else {
+        //Just notify that we're skipping
+        console.log("No Experimental condition is required: continuing");
+        conditionAction = "condition-notify";
+        conditionData.note = "No exp condition necessary";
+    }
+
+    //Add some session data to the log message we're sending
+    conditionData = _.extend(conditionData, {
+        currentRootTdfName: Session.get("currentRootTdfName"),
+        currentTdfName: Session.get("currentTdfName"),
+        currentStimName: Session.get("currentStimName")
+    });
+
+    //Notice that no matter what, we log something about condition data
+    //ALSO NOTICE that we'll be calling processUserTimesLog after the server
+    //returns and we know we've logged what happened
+    recordUserTime(conditionAction, conditionData, processUserTimesLog);
+}
+
+//We process the user times log, assuming resumeFromUserTimesLog has properly
+//set up the TDF/Stim session variables
+function processUserTimesLog() {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
@@ -1084,14 +1188,6 @@ function resumeFromUserTimesLog() {
         currentSchedule: {}
     });
 
-    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-    var expKey = userTimesExpKey(true);
-
-    var entries = [];
-    if (userLog && userLog[expKey] && userLog[expKey].length) {
-        entries = userLog[expKey];
-    }
-
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
 
@@ -1100,13 +1196,10 @@ function resumeFromUserTimesLog() {
     //to worry about this if we actually have units
     var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
 
-    //TODO: when we add func to select a "sub-tdf" we'll need a user times
-    //      entry (and logic for reading it back)
-
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
-    _.each(entries, function(entry, index) {
+    _.each(getCurrentUserTimesLog(), function(entry, index) {
         if (!entry.action) {
             console.log("Ignoring user times entry with no action");
             return;

@@ -8,7 +8,9 @@
 //using for a Meteor.call("userTime", ...) call. However, if fixForDirectAccess
 //it true(-ish), we'll fix up the value we return
 userTimesExpKey = function(fixForDirectAccess) {
-    var expKey = Session.get("currentTdfName");
+    //NOTE: we use currentRootTdfName instead of currentTdfName so multiple
+    //experimental conditions log to the same base TDF
+    var expKey = Session.get("currentRootTdfName");
     if (!expKey) {
         expKey = "NO_CURRENT_EXP_KEY";
     }
