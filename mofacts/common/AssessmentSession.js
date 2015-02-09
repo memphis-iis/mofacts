@@ -176,7 +176,7 @@ AssessmentSession = {
                         }
 
                         var pairNum = settings.clusterSize * clusterNum + offset;
-                        setQuest(firstPos + location, type, pairNum, condition, offStr);
+                        setQuest(firstPos + location, type, pairNum, condition, offset);
                     } //offset is Model or something else?
                 } //k (walk thru group elements)
             } //j (each template index)
@@ -295,10 +295,17 @@ AssessmentSession = {
             parseVals(by_group.templatesrepeated, settings.numTemplatesList);
             parseVals(by_group.initialpositions,  settings.initialPositions);
 
-            var new_group = [];
-            parseVals(arrVal(by_group.group), new_group);
-            if (new_group.length > 0) {
-                settings.groups.push(new_group);
+
+            _.each(by_group.group, function(tdf_group) {
+                var new_group = [];
+                parseVals(tdf_group, new_group);
+                if (new_group.length > 0) {
+                    settings.groups.push(new_group);
+                }
+            });
+
+            if (settings.groups.length != settings.groupNames.length) {
+                console.log("WARNING! Num group names doesn't match num groups", setting.groupNames, settings.groups);
             }
         }
 

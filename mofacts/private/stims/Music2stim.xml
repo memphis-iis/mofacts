@@ -42,6 +42,7 @@
             <display>music2/12</display>
             <response>Octave</response>
         </cluster>
+
 		<cluster>
 			<displayType>Sound</displayType>
             <display>music2/13</display>

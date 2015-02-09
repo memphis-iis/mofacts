@@ -1257,6 +1257,12 @@ function processUserTimesLog() {
             Session.set("currentUnitNumber", unit);
             Session.set("isScheduledTest", true);
             Session.set("questionIndex", 0);
+
+            //Blank out things that should restart with a schedule
+            Session.set("clusterIndex", undefined);
+            Session.set("currentQuestion", undefined);
+            Session.set("currentAnswer", undefined);
+            Session.set("testType", undefined);
         }
 
         else if (action === "question") {
