@@ -268,11 +268,15 @@ function playCurrentQuestionSound() {
         ],
 
         onplay: function() {
-            currentQuestionSound.isCurrentlyPlaying = true;
+            if (currentQuestionSound) {
+                currentQuestionSound.isCurrentlyPlaying = true;
+            }
         },
 
         onend: function() {
-            currentQuestionSound.isCurrentlyPlaying = false;
+            if (currentQuestionSound) {
+                currentQuestionSound.isCurrentlyPlaying = false;
+            }
         },
     });
 
