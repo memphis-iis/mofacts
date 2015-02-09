@@ -1,0 +1,244 @@
+<tutor>
+    <setspec>
+        <name>Melody2</name> <!-- TAKEN FROM Music2-4.xml -->
+        <lessonname>Music2-4</lessonname>
+        <stimulusfile>Music2stim.xml</stimulusfile>
+        <clustermodel>structuralpairs</clustermodel>
+        <clustersize>1</clustersize>
+        <isModeled>false</isModeled>
+        <timeoutInSeconds>15</timeoutInSeconds>
+        <buttonorder>Major 3rd, Tritone, Perfect 5th, Major 7th, Minor 3rd, Octave</buttonorder>
+    </setspec>
+
+    <unit>
+        <unitname>Introduction</unitname>
+        <picture>/resources/images/IntervalInstructions.jpg</picture>
+    </unit>
+
+    <unit>
+        <unitname>Learning Trials Harmony Learning Experiment Pretest Melody2</unitname>
+
+        <unitinstructions>Pretest portion (48 practices)
+
+            Listen to each 2-second interval, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
+
+            Goal: Practice the sound identification task, attempting to learn the interval between two musical tones. This pretest portion will get an initial measure of your skill in the task, and will be followed by 108 training practices, and finally a posttest of 24 practices.
+        </unitinstructions>
+
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>120000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+
+        <buttontrial>true</buttontrial>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>4</clustersrepeated>
+                <templatesrepeated>12</templatesrepeated>
+                <group>0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_1
+                A_2 A_2
+                A_3 A_3
+                A_4 A_4
+                A_5 A_5
+                A_6 A_6
+                A_7 A_7
+                A_8 A_8
+                A_9 A_9
+                A_10 A_10
+                A_11 A_11
+                A_12 A_12
+
+                A_1 A_1
+                A_2 A_2
+                A_3 A_3
+                A_4 A_4
+                A_5 A_5
+                A_6 A_6
+                A_7 A_7
+                A_8 A_8
+                A_9 A_9
+                A_10 A_10
+                A_11 A_11
+                A_12 A_12
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-11</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-23 24-47</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Learning Trials Harmony Learning Experiment Training Melody2</unitname>
+        <unitinstructions>Training portion (108 practices)
+
+            Listen to each sound and indicate which musical interval you just heard.
+        </unitinstructions>
+
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>120000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+
+        <buttontrial>true</buttontrial>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A B C</groupnames> 
+                <clustersrepeated>18 18 18</clustersrepeated>
+                <templatesrepeated>2 2 2</templatesrepeated>
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 
+                    r,f,t,12 r,f,t,13 r,f,t,14 
+                    r,f,t,42 r,f,t,43 r,f,t,44 
+                    r,f,t,54 r,f,t,55 r,f,t,56 
+                    r,f,t,66 r,f,t,67 r,f,t,68 
+                    r,f,t,96 r,f,t,97 r,f,t,98 
+ 
+                    r,f,t,0 r,f,t,1 r,f,t,2 
+                    r,f,t,12 r,f,t,13 r,f,t,14 
+                    r,f,t,42 r,f,t,43 r,f,t,44 
+                    r,f,t,54 r,f,t,55 r,f,t,56 
+                    r,f,t,66 r,f,t,67 r,f,t,68 
+                    r,f,t,96 r,f,t,97 r,f,t,98 
+                </group>
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
+                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
+ 
+                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
+                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
+                </group>
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+ 
+                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+                </group>
+            </conditiontemplatesbygroup>
+            <randomchoices>2</randomchoices>
+            <initialpositions> 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_1 B_1 B_1 B_1 B_1 B_1 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_1 B_1 B_1 B_1 B_1 B_1 
+                C_1 C_1 C_1 C_1 C_1 C_1 
+                C_1 C_1 C_1 C_1 C_1 C_1 
+                C_1 C_1 C_1 C_1 C_1 C_1 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_1 B_1 B_1 B_1 B_1 B_1 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_2 B_2 B_2 B_2 B_2 B_2 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_2 B_2 B_2 B_2 B_2 B_2 
+                C_2 C_2 C_2 C_2 C_2 C_2 
+                C_2 C_2 C_2 C_2 C_2 C_2 
+                C_2 C_2 C_2 C_2 C_2 C_2 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2 
+                B_2 B_2 B_2 B_2 B_2 B_2 
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>6-11</clusterlist>
+            <assignrandomclusters>true</assignrandomclusters>
+            <permutefinalresult>0-11 12-41 42-53 54-65 66-95 96-107</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Learning Trials Harmony Learning Experiment Posttest Melody2</unitname>
+        <unitinstructions>Posttest portion (24 practices)
+
+            Listen to each sound and indicate which musical interval you just heard.
+        </unitinstructions>
+
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>120000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+
+        <buttontrial>true</buttontrial>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>2</clustersrepeated>
+                <templatesrepeated>12</templatesrepeated>
+                <group>0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                    0,f,t,0 1,f,t,1
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_1
+                A_2 A_2
+                A_3 A_3
+                A_4 A_4
+                A_5 A_5
+                A_6 A_6
+                A_7 A_7
+                A_8 A_8
+                A_9 A_9
+                A_10 A_10
+                A_11 A_11
+                A_12 A_12
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-11</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-23</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>last</unitname>
+        <instructions>You have now completed the experiment. Please enter the code - springer - into the Amazon Turk website for this HIT, and we will check your data for payment approval.</instructions>
+    </unit>
+</tutor>
