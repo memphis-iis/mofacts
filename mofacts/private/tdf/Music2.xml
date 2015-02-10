@@ -1,0 +1,12 @@
+<tutor>
+    <setspec>
+        <lessonname>Music Intervals</lessonname>
+        <stimulusfile>Music2stim.xml</stimulusfile>
+        <condition>Music2-0.xml</condition>
+        <condition>Music2-1.xml</condition>
+        <condition>Music2-2.xml</condition>
+        <condition>Music2-3.xml</condition>
+        <condition>Music2-4.xml</condition>
+        <condition>Music2-5.xml</condition>
+    </setspec>
+</tutor>

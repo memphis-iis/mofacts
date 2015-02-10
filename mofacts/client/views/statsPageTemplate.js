@@ -1,3 +1,6 @@
+//TODO: Hide the teacher/admin info under a button that needs to be clicked
+//      to reveal
+
 ////////////////////////////////////////////////////////////////////////////
 // TEMPLATE EVENTS
 
@@ -63,10 +66,21 @@ statsPageTemplateUpdate = function() {
         return;
     }
 
-    recordUserTime("stats page rendered", {
-        target: "user screen"
-    });
+    //Record this page being rendered in the user times log - and wait for
+    //the log to complete. This should give us the best chance at rendering
+    //the most complete page
+    recordUserTime("stats page rendered",
+        { target: "user screen" },
+        function() {
+            statsPageTemplateUpdateImpl();
+            Router.go("stats");
+        }
+    );
+};
 
+//Actual logic called by statsPageTemplateUpdate above after server-side
+//user time log is finished
+function statsPageTemplateUpdateImpl() {
     if (Session.get("debugging")) {
         console.log("Rendering stats for user");
     }
@@ -115,12 +129,7 @@ statsPageTemplateUpdate = function() {
     var userTimeLogView = [];
     if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
         var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-
-        var currentTest = Session.get("currentTest");
-        if (!currentTest) {
-            currentTest = "NO_CURRENT_TEST";
-        }
-        var expKey = currentTest.replace(/\./g, "_");
+        var expKey = userTimesExpKey(true);
 
         var statFormatDate = function(ts) {
             if (!ts) return "";
@@ -161,4 +170,4 @@ statsPageTemplateUpdate = function() {
             Session.get("statsPercentage")
         );
     }
-};
+}

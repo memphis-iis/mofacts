@@ -1,149 +1,89 @@
 <setspec>
     <clusters>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/1</display>
             <response>Minor 3rd</response>
             <display>music2/7</display>
-            <response>Minor 3rd</response>            
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>    	
+            <response>Minor 3rd</response>
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/2</display>
             <response>Major 3rd</response>
             <display>music2/8</display>
             <response>Major 3rd</response>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  	
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/3</display>
             <response>Tritone</response>
             <display>music2/9</display>
             <response>Tritone</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  	
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/4</display>
             <response>Perfect 5th</response>
             <display>music2/10</display>
             <response>Perfect 5th</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/5</display>
             <response>Major 7th</response>
             <display>music2/11</display>
             <response>Major 7th</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Octave</falseResponse>  
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/6</display>
             <response>Octave</response>
             <display>music2/12</display>
             <response>Octave</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>  
         </cluster>
+
 		<cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/13</display>
             <response>Minor 3rd</response>
             <display>music2/19</display>
             <response>Minor 3rd</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  
-        </cluster>   
+        </cluster>
 		<cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/14</display>
             <response>Major 3rd</response>
             <display>music2/20</display>
             <response>Major 3rd</response>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  
-        </cluster>   
+        </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/15</display>
             <response>Tritone</response>
             <display>music2/21</display>
             <response>Tritone</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  	
-        </cluster>   
+        </cluster>
          <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/16</display>
             <response>Perfect 5th</response>
              <display>music2/22</display>
              <response>Perfect 5th</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Octave</falseResponse>  	
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/17</display>
             <response>Major 7th</response>
             <display>music2/23</display>
             <response>Major 7th</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>
-            <falseResponse>Octave</falseResponse>  
         </cluster>
         <cluster>
-			<displayType>Sound</displayType>	
+			<displayType>Sound</displayType>
             <display>music2/18</display>
             <response>Octave</response>
             <display>music2/24</display>
             <response>Octave</response>
-            <falseResponse>Major 3rd</falseResponse>
-            <falseResponse>Tritone</falseResponse>
-            <falseResponse>Perfect 5th</falseResponse>
-            <falseResponse>Major 7th</falseResponse>
-            <falseResponse>Minor 3rd</falseResponse>  
-        </cluster>  
+        </cluster>
     </clusters>
 </setspec>
-

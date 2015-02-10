@@ -4,9 +4,6 @@
 Template.signInTemplate.events({
     'click #signInButton' : function (event) {
         event.preventDefault();
-        if (typeof console !== 'undefined' && Session.get("debugging")) {
-            console.log("You are trying to sign in!");
-        }
         UserPasswordCheck();
     },
 
@@ -23,9 +20,10 @@ Template.signInTemplate.events({
         $("#invalidLogin").hide();
     },
 
-    'keypress #password' : function (e) {
-        var key=e.keyCode || e.which;
+    'keypress .accept-enter-key' : function (event) {
+        var key = event.keyCode || event.which;
         if (key == 13) {
+            event.preventDefault();
             UserPasswordCheck();
         }
     }

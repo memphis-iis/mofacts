@@ -50,7 +50,7 @@ function getRoles(fileName) {
 //      all user info to everyone
 
 //Published to all clients (even without subscription calls)
-//TODO: This need to change based on current user ID and role
+//TODO: This needs to change based on current user ID and role
 Meteor.publish(null, function (){
     //The default data published to everyone
     var defaultData = [

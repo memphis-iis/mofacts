@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
-        <name>Harmony2</name> <!-- TAKEN FROM Music2-1.xml -->
-        <lessonname>Music2-1</lessonname>
+        <name>Melody1</name> <!-- TAKEN FROM Music2-3.xml -->
+        <lessonname>Music2-3</lessonname>
         <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>Music2stim.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
@@ -17,7 +17,7 @@
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Pretest Harmony2</unitname>
+        <unitname>Learning Trials Harmony Learning Experiment Pretest Melody1</unitname>
 
         <unitinstructions>Pretest portion (48 practices)
 
@@ -92,7 +92,7 @@
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Training Harmony2</unitname>
+        <unitname>Learning Trials Harmony Learning Experiment Training Melody1</unitname>
         <unitinstructions>Training portion (108 practices)
 
             Listen to each sound and indicate which musical interval you just heard.
@@ -115,53 +115,50 @@
                 <groupnames>A B C</groupnames> 
                 <clustersrepeated>18 18 18</clustersrepeated>
                 <templatesrepeated>2 2 2</templatesrepeated>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 
-                    r,f,t,12 r,f,t,13 r,f,t,14 
-                    r,f,t,42 r,f,t,43 r,f,t,44 
+                <group>r,f,t,0 r,f,t,1 r,f,t,2
+                    r,f,t,30 r,f,t,31 r,f,t,32
+                    r,f,t,42 r,f,t,43 r,f,t,44
                     r,f,t,54 r,f,t,55 r,f,t,56 
-                    r,f,t,66 r,f,t,67 r,f,t,68 
-                    r,f,t,96 r,f,t,97 r,f,t,98 
+                    r,f,t,84 r,f,t,85 r,f,t,86 
+                    r,f,t,96 r,f,t,97 r,f,t,98
  
-                    r,f,t,0 r,f,t,1 r,f,t,2 
-                    r,f,t,12 r,f,t,13 r,f,t,14 
-                    r,f,t,42 r,f,t,43 r,f,t,44 
+                    r,f,t,0 r,f,t,1 r,f,t,2
+                    r,f,t,30 r,f,t,31 r,f,t,32
+                    r,f,t,42 r,f,t,43 r,f,t,44
                     r,f,t,54 r,f,t,55 r,f,t,56 
-                    r,f,t,66 r,f,t,67 r,f,t,68 
-                    r,f,t,96 r,f,t,97 r,f,t,98 
+                    r,f,t,84 r,f,t,85 r,f,t,86 
+                    r,f,t,96 r,f,t,97 r,f,t,98
                 </group>
                 <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
+                    r,f,t,30 r,f,t,31 r,f,t,32 r,f,t,33 r,f,t,34 r,f,t,35 
                     r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
- 
+
                     r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
+                    r,f,t,30 r,f,t,31 r,f,t,32 r,f,t,33 r,f,t,34 r,f,t,35 
                     r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
                 </group>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
+                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11 
                     r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
  
-                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
+                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
+                    r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11 
                     r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
                 </group>
             </conditiontemplatesbygroup>
             <randomchoices>2</randomchoices>
-            <initialpositions> 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_1 B_1 B_1 B_1 B_1 B_1 
- 
+            <initialpositions>
                 A_1 A_1 A_1 A_2 A_2 A_2 
                 B_1 B_1 B_1 B_1 B_1 B_1 
                 C_1 C_1 C_1 C_1 C_1 C_1 
                 C_1 C_1 C_1 C_1 C_1 C_1 
                 C_1 C_1 C_1 C_1 C_1 C_1 
  
-                A_1 A_1 A_1 A_2 A_2 A_2 
+                A_1 A_1 A_1 A_2 A_2 A_2
                 B_1 B_1 B_1 B_1 B_1 B_1 
  
                 A_1 A_1 A_1 A_2 A_2 A_2 
-                B_2 B_2 B_2 B_2 B_2 B_2 
+                B_1 B_1 B_1 B_1 B_1 B_1 
  
                 A_1 A_1 A_1 A_2 A_2 A_2 
                 B_2 B_2 B_2 B_2 B_2 B_2 
@@ -170,22 +167,25 @@
                 C_2 C_2 C_2 C_2 C_2 C_2 
  
                 A_1 A_1 A_1 A_2 A_2 A_2 
+                B_2 B_2 B_2 B_2 B_2 B_2 
+ 
+                A_1 A_1 A_1 A_2 A_2 A_2
                 B_2 B_2 B_2 B_2 B_2 B_2 
             </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>0-5</clusterlist>
+            <clusterlist>6-11</clusterlist>
             <assignrandomclusters>true</assignrandomclusters>
-            <permutefinalresult>0-11 12-41 42-53 54-65 66-95 96-107</permutefinalresult>
+            <permutefinalresult>0-29 30-41 42-53 54-83 84-95 96-107</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Posttest Harmony2</unitname>
+        <unitname>Learning Trials Harmony Learning Experiment Posttest Melody1</unitname>
         <unitinstructions>Posttest portion (24 practices)
 
             Listen to each sound and indicate which musical interval you just heard.
         </unitinstructions>
-        
+
         <deliveryparams>
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
@@ -195,9 +195,9 @@
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
-        
+
         <buttontrial>true</buttontrial>
-        
+
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>

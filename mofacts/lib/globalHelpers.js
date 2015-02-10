@@ -38,7 +38,6 @@ if (Meteor.isClient) {
     //Initialize user progress storage, with optional initial data
     initUserProgress = function(overrideData) {
         var initVals = {
-            currentStimuliTest: "NONE",
             currentTestMode: "NONE",
             progressDataArray: []
         };
