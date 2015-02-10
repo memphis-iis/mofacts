@@ -1112,7 +1112,7 @@ function resumeFromUserTimesLog() {
         if (prevCondition) {
             //Use previous condition and log a notification that we did so
             console.log("Found previous experimental condition: using that");
-            subTdf = entry.selectedTdf;
+            subTdf = prevCondition.selectedTdf;
             conditionAction = "condition-notify";
             conditionData.note = "Using previous condition: " + subTdf;
         }

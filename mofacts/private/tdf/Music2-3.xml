@@ -2,6 +2,7 @@
     <setspec>
         <name>Melody1</name> <!-- TAKEN FROM Music2-3.xml -->
         <lessonname>Music2-3</lessonname>
+        <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>Music2stim.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
         <clustersize>1</clustersize>

@@ -100,6 +100,20 @@ Template.profileTemplate.rendered = function () {
             return;
         }
 
+        var userselect = true;
+        if (setspec.userselect && setspec.userselect.length) {
+            userselect = setspec.userselect[0];
+            if (userselect && userselect.toLowerCase() === "false") {
+                //We require that they explicitly have the string "false"
+                //to disable display
+                userselect = false;
+            }
+        }
+        if (!userselect) {
+            console.log("Skipping due to userselect=false for ", name);
+            return;
+        }
+
         var stimulusFile = "";
         if (setspec.stimulusfile && setspec.stimulusfile.length) {
             stimulusFile = setspec.stimulusfile[0];
