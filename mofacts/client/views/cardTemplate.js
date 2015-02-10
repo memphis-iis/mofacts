@@ -454,11 +454,11 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
     else if (!isButtonTrial) {
         var file = getCurrentTdfFile();
         var spec = file.tdfs.tutor.setspec[0];
-        
+
         var lfparameter = null;
         if (spec && spec.lfparameter && spec.lfparameter.length)
             lfparameter = parseFloat(spec.lfparameter[0]);
-        
+
         //Not exact, but if they are entering text, they might be close enough
         var editDistScore = 1.0 - (
             getEditDistance(userAnswer, answer) /
@@ -467,7 +467,7 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
         if (Session.get("debugging")) {
             console.log("Edit Dist Score", editDistScore, "lfparameter", lfparameter);
         }
-        
+
         if(!!lfparameter && editDistScore > lfparameter) {
             handleAnswerState(true, "Close enough - Great Job!");
         }
