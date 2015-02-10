@@ -1,3 +1,10 @@
+//TODO: We have three separate ways of handling a TDF: scheduled with units,
+//      model-based (ACT-R), and "vanilla random". This file should refactor
+//      the vanilla random functionality into an object. Then we can extract
+//      the schedule and model logic into separate files - resumeFromUserTimes
+//      would either use the default object or _.extend it with one of the other
+//      two objects
+
 //TODO: Need to change music to have exp conditions and then test it
 
 ////////////////////////////////////////////////////////////////////////////
