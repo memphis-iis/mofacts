@@ -68,7 +68,13 @@
     <unit>
         <unitname>Swahili Pre-test</unitname>
         <unitinstructions>
-            Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.
+            <![CDATA[
+                Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.
+                Also, click on 
+                <a href='https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form'
+                   target="_blank"
+                >The Survey</a>
+            ]]>
         </unitinstructions>
         
         <instructconfirm>false</instructconfirm>
