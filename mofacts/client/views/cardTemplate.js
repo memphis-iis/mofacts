@@ -81,8 +81,7 @@ Template.cardTemplate.events({
     'click .statsPageLink' : function (event) {
         event.preventDefault();
         clearCardTimeout();
-        statsPageTemplateUpdate(); //In statsPageTemplate.js
-        leavePage("stats");
+        leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
     },
 
     'click #overlearningButton' : function (event) {
@@ -293,9 +292,14 @@ function playCurrentQuestionSound() {
     currentQuestionSound.play();
 }
 
-function handleUserInput( e , source ) {
+function handleUserInput(e , source) {
+    var isTimeout = false;
     var key;
-    if (source === "keypress") {
+    if (source === "timeout") {
+        key = 13;
+        isTimeout = true;
+    }
+    else if (source === "keypress") {
         key = e.keyCode || e.which;
     }
     else if (source === "buttonClick") {
@@ -315,10 +319,13 @@ function handleUserInput( e , source ) {
     clearCardTimeout();
 
     var userAnswer;
-    if (source === "keypress") {
+    if (isTimeout) {
+        userAnswer = "[timeout]";
+    }
+    else if (source === "keypress") {
         userAnswer = Helpers.trim($('#userAnswer').val()).toLowerCase();
     }
-    else if ( source === "buttonClick") {
+    else if (source === "buttonClick") {
         userAnswer = e.target.name;
     }
 
@@ -338,12 +345,12 @@ function handleUserInput( e , source ) {
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    var isCorrect = userAnswerFeedback(answer, userAnswer);
+    var isCorrect = userAnswerFeedback(answer, userAnswer, isTimeout);
 
     //Get question Number
     var index = getCurrentClusterIndex();
 
-    recordUserTime("answer", {
+    recordUserTime(isTimeout ? "[timeout]" : "answer", {
         index: index,
         ttype: getTestType(),
         qtype: findQTypeSimpified(),
@@ -358,11 +365,6 @@ function handleUserInput( e , source ) {
     //helpful and used on the stats page, but the user times log is the
     //"system of record"
     recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
-    if (Session.get("usingACTRModel")) {
-        getCardProbs().numQuestionsAnswered += 1;
-        calculateCardProbabilities();
-    }
 
     //Reset timer for next question
     start = getCurrentTimer();
@@ -407,7 +409,7 @@ function handleUserInput( e , source ) {
 
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question
-function userAnswerFeedback(answer, userAnswer) {
+function userAnswerFeedback(answer, userAnswer, isTimeout) {
     //Nothing to evaluate
     if (getTestType() === "s") {
         return null;
@@ -437,7 +439,11 @@ function userAnswerFeedback(answer, userAnswer) {
     };
 
     //How was their answer?
-    if (userAnswer.localeCompare(answer) === 0) {
+    if (!!isTimeout) {
+        //Timeout - doesn't matter what the answer says!
+        handleAnswerState(false, "Sorry - time ran out. The correct answer is: " + answer);
+    }
+    else if (userAnswer.localeCompare(answer) === 0) {
         //Right
         handleAnswerState(true, "Correct - Great Job!");
     }
@@ -461,9 +467,7 @@ function userAnswerFeedback(answer, userAnswer) {
 
     //Update any model parameters based on their answer's correctness
     if (Session.get("usingACTRModel")) {
-        var cp = getCardProbs();
-        if (isCorrect) cp.questionSuccessCount += 1;
-        else           cp.questionFailureCount += 1;
+        modelCardAnswered(isCorrect);
     }
 
     //If they are incorrect on a drill, we might need to do extra work for
@@ -537,8 +541,7 @@ function prepareCard() {
             else {
                 //We have run out of units
                 console.log("UNIT FINISHED: No More Units");
-                statsPageTemplateUpdate(); //In statsPageTemplate.js
-                leavePage("stats");
+                leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
             }
 
             return;
@@ -734,8 +737,7 @@ function getSchedule() {
             });
             alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
             clearCardTimeout();
-            statsPageTemplateUpdate(); //In statsPageTemplate.js
-            leavePage("stats");
+            leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
             return;
         }
 
@@ -897,6 +899,27 @@ function modelCardSelected(indexForNewCard) {
     card.hasBeenIntroduced = true;
 }
 
+//Called when a card is answered to update stats
+function modelCardAnswered(wasCorrect) {
+    var cardProbs = getCardProbs();
+    cardProbs.numQuestionsAnswered += 1;
+
+    var card = null;
+    try {
+        card = cardProbs.cards[Session.get("clusterIndex")];
+    }
+    catch(err) {
+        console.log("Error getting card for update", err);
+    }
+
+    if (card) {
+        if (wasCorrect) card.questionSuccessCount += 1;
+        else            card.questionFailureCount += 1;
+    }
+
+    calculateCardProbabilities();
+}
+
 function getIndexForNewCardToIntroduce(cards) {
     var indexToReturn = -1;
 
@@ -955,51 +978,11 @@ function timeoutfunction(index) {
     clearCardTimeout(); //No previous timeout now
 
     timeoutName = Meteor.setTimeout(function() {
-        if(index === length && timeoutCount > 0) {
-            console.log("TIMEOUT "+timeoutCount+": " + index +"|"+length);
+        if (index === length && timeoutCount > 0) {
+            console.log("TIMEOUT", timeoutCount, index, length);
             stopUserInput();
-
-            var nowTime = getCurrentTimer();
-            var elapsed = nowTime - start;
-            var elapsedOnRender = nowTime - startOnRender;
-
-            recordUserTime("[TIMEOUT]", {
-                index: getCurrentClusterIndex(),
-                qtype: findQTypeSimpified(),
-                ttype: getTestType(),
-                guiSource: "[timeout]",
-                answer: "[timeout]",
-                delay: delay,
-                elapsed: elapsed,
-                elapsedOnRender: elapsedOnRender,
-                isCorrect: false,
-            });
-
-            if (getTestType() === "d") {
-                showUserInteraction(false, "Timed out! The correct answer is: " + Session.get("currentAnswer"));
-            }
-
-            recordProgress(getCurrentClusterIndex(), Session.get("currentQuestion"), Session.get("currentAnswer"), "[TIMEOUT]", false);
-
-            if (Session.get("usingACTRModel")) {
-                var currIndex = getCurrentClusterIndex();
-                var cardProbs = getCardProbs();
-                cardProbs.numQuestionsAnswered += 1;
-                cardProbs.cards[currIndex].questionFailureCount += 1;
-                calculateCardProbabilities();
-            }
-
-            var clearInfo = function() {
-                hideUserInteraction();
-                prepareCard();
-            };
-
-            Meteor.setTimeout(clearInfo, 2000);
+            handleUserInput({}, "timeout");
         }
-        else{
-            //Do Nothing
-        }
-
     }, delay);
 }
 
@@ -1258,8 +1241,7 @@ function processUserTimesLog() {
                 });
                 alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
                 clearCardTimeout();
-                statsPageTemplateUpdate(); //In statsPageTemplate.js
-                leavePage("stats");
+                leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
                 return;
             }
 
@@ -1354,11 +1336,7 @@ function processUserTimesLog() {
 
             //If we are an ACT-R model, finish up calculations
             if (Session.get("usingACTRModel")) {
-                var cardProbs = getCardProbs();
-                if (wasCorrect) cardProbs.questionSuccessCount += 1;
-                else            cardProbs.questionFailureCount += 1;
-                cardProbs.numQuestionsAnswered += 1;
-                calculateCardProbabilities();
+                modelCardAnswered(wasCorrect);
             }
 
             //We know the last question no longer applies

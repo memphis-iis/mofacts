@@ -63,10 +63,21 @@ statsPageTemplateUpdate = function() {
         return;
     }
 
-    recordUserTime("stats page rendered", {
-        target: "user screen"
-    });
+    //Record this page being rendered in the user times log - and wait for
+    //the log to complete. This should give us the best chance at rendering
+    //the most complete page
+    recordUserTime("stats page rendered",
+        { target: "user screen" },
+        function() {
+            statsPageTemplateUpdateImpl();
+            Router.go("stats");
+        }
+    );
+};
 
+//Actual logic called by statsPageTemplateUpdate above after server-side
+//user time log is finished
+function statsPageTemplateUpdateImpl() {
     if (Session.get("debugging")) {
         console.log("Rendering stats for user");
     }
@@ -156,4 +167,4 @@ statsPageTemplateUpdate = function() {
             Session.get("statsPercentage")
         );
     }
-};
+}
