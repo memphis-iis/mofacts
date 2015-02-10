@@ -5,7 +5,11 @@
 //      would either use the default object or _.extend it with one of the other
 //      two objects
 
-//TODO: Need to change music to have exp conditions and then test it
+//TODO: It would be nice to have some debugging tools - if you are admin or
+//      teacher, you should be able to:
+//      - Rewrite history to set an experimental condition
+//      - Fast forward through a unit so you can get to later units faster
+//      - See the card probabilities in a popup to check what's going on
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
