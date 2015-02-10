@@ -43,12 +43,25 @@ Template.profileTemplate.events({
         Session.set("currentTdfName", tdffilename);
         Session.set("currentStimName", stimulusfile);
 
+        //Get some basic info about the current user's environment
+        var userAgent = "[Could not read user agent string]";
+        var prefLang = "[N/A]";
+        try {
+            userAgent = Helpers.display(navigator.userAgent);
+            prefLang = Helpers.display(navigator.language);
+        }
+        catch(err) {
+            console.log("Error getting browser info", err);
+        }
+
         //Save the test selection event
         recordUserTime("profile test selection", {
             target: lessonName,
             tdfkey: tdfkey,
             tdffilename: tdffilename,
-            stimulusfile: stimulusfile
+            stimulusfile: stimulusfile,
+            userAgent: userAgent,
+            browserLanguage: prefLang
         });
 
         //Go directly to the card session - which will decide whether or
