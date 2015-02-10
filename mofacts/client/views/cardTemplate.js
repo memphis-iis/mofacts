@@ -3,6 +3,7 @@
 
 var permuted = [];
 
+
 function clearCardPermuted() {
     permuted = [];
 }
@@ -139,7 +140,6 @@ Template.cardTemplate.helpers({
 
 function newQuestionHandler() {
     console.log("NQ handler");
-    $("#userAnswer").focus();
 
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
@@ -210,6 +210,7 @@ function newQuestionHandler() {
             //Not a button trial
             $("#textEntryRow").show();
             $("#multipleChoiceInnerContainer").remove();
+
         }
     }
 
@@ -239,6 +240,7 @@ function newQuestionHandler() {
         $("#overlearningRow").show();
     }
 
+    //$("#userAnswer").focus();
     //All ready - time to allow them to enter data
     allowUserInput();
 }
@@ -287,6 +289,13 @@ function handleUserInput( e , source ) {
 
     //Will be set by checks below
     var isCorrect;
+    
+    var file = getCurrentTdfFile();
+    var spec = file.tdfs.tutor.setspec[0];
+
+    var lfparameter = null;
+    if (spec && spec.lfparameter)
+        lfparameter = parseFloat(spec.lfparameter);
 
     //Display Correctness
     if ( getTestType() !== "s" ) {
@@ -297,7 +306,7 @@ function handleUserInput( e , source ) {
             console.log(1.0 - (getEditDistance(userAnswer,answer) /
                     (Math.max(userAnswer.length,answer.length))));
             if(1.0 - (getEditDistance(userAnswer,answer) /
-                    (Math.max(userAnswer.length,answer.length)))> 0.75)
+                    (Math.max(userAnswer.length,answer.length)))> lfparameter)
             {
                 isCorrect = true;
                 if (getTestType() === "d") {
