@@ -241,6 +241,14 @@
 
     <unit>
         <unitname>last</unitname>
-        <instructions>You have now completed the experiment. Please enter the code - springer - into the Amazon Turk website for this HIT, and we will check your data for payment approval.</instructions>
+        <instructions><![CDATA[
+            You have now completed the experiment. Please complete the survey located
+            <a href='https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form'
+               target="_blank"
+               >here</a>.
+            Once you are done with the survey, please enter the code - springer -
+            into the Amazon Turk website for this HIT, and we will check your data for
+            payment approval.
+        ]]></instructions>
     </unit>
 </tutor>
