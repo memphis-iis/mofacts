@@ -1,5 +1,3 @@
-//TODO: insure all links and routes start with '/' since we can have multiple URL levels now
-
 // Note that these three session variables aren't touched by the helpers in
 // lib/sessionUtils.js. They are only set here in our client-side routing
 Session.set("loginMode", "normal");
@@ -7,7 +5,6 @@ Session.set("experimentTarget", "");
 Session.set("experimentXCond", "");
 
 //TODO: test the various ways to use the new URL's
-//TODO: auto-select test in profile template
 //TODO: honor experimentXCond
 
 routeToSignin = function() {

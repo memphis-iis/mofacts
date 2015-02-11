@@ -13,9 +13,9 @@
  * currentUnitNumber
  * debugging                 - Generic debugging flag
  * isScheduledTest
- * loginMode                 - NOTE that we don't touch in sessionCleanUp
- * experimentTarget          - NOTE that we don't touch in sessionCleanUp
- * experimentXCond           - NOTE that we don't touch in sessionCleanUp
+ * loginMode                 - untouched in sessionCleanUp
+ * experimentTarget          - untouched in sessionCleanUp
+ * experimentXCond           - untouched in sessionCleanUp
  * needResume
  * questionIndex
  * showOverlearningText

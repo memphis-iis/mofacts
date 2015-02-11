@@ -2,6 +2,7 @@
     <setspec>
         <lessonname>Music Intervals</lessonname>
         <stimulusfile>Music2stim.xml</stimulusfile>
+        <experimentTarget>mia</experimentTarget>
         <condition>Music2-0.xml</condition>
         <condition>Music2-1.xml</condition>
         <condition>Music2-2.xml</condition>
