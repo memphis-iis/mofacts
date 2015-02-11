@@ -111,15 +111,24 @@ Deployment
 
 Deploying MoFaCTs should be done the same as any other meteor application.
 First you should bundle the application and copy that bundle to the server
-where you will be deploying:
+where you will be deploying. In the past you would do this with the bundle
+command. However, newer versions of Meteor now use the build command:
 
     $ cd mofacts/mofacts
-    $ meteor bundle mofacts.tar.gz
-    $ scp mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
+    $ meteor build ./build  --architecture os.linux.x86_64
+    $ scp build/mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
 
-Note that deploy.sh expects the bundle name to be mofacts.tar.gz. 
-There is nothing special about the file name, so if you are manually
-deploying you may use whatever file name you wish.
+Some important notes!!! The architecture switch is based on the optimal
+learning server. If that should change for some reason, you'll need a
+different parameter. You should also note the main change from bundle command:
+we no longer specify the bundle name. In addition, we must specify a directory.
+We specify `build`, but there's nothing special about the name. For convenience,
+we've added mofacts/build to the main .gitignore file for this project so that
+you don't automatically add the build folder (and your latest bundle) to the
+git repo.
+
+Note that deploy.sh expects the bundle name to be mofacts.tar.gz. Currently
+this is the name selected by `meteor build`, so there shouldn't be a problem.
 
 At this point, you could simply log in to the server and let the script
 take over for you:
