@@ -12,7 +12,7 @@ Session.set("experimentXCond", "");
 
 routeToSignin = function() {
     if (Session.get("loginMode") === "experiment") {
-        var routeParts = ['experiment'];
+        var routeParts = ['/experiment'];
 
         var target = Session.get("experimentTarget");
         if (target) {
@@ -23,7 +23,7 @@ routeToSignin = function() {
             }
         }
 
-        Router.go('/' + routeParts.join('/'));
+        Router.go(routeParts.join('/'));
     }
     else {
         Router.go("/signin");

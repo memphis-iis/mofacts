@@ -9,7 +9,7 @@ Template.signInTemplate.events({
 
     'click #signUpButton' : function (event) {
         event.preventDefault();
-        Router.go("signup");
+        Router.go("/signup");
     },
 
     'focus #signInUsername' : function (event) {
@@ -78,7 +78,7 @@ function UserPasswordCheck() {
                     alert("It appears that you couldn't be logged in as " + newUsername);
                 }
 
-                Router.go("profile");
+                Router.go("/profile");
             });
 
             //No more processing
@@ -100,7 +100,7 @@ function UserPasswordCheck() {
                 console.log(currentUser + " was logged in successfully!");
                 Meteor.call("debugLog", "Sign in was successful");
             }
-            Router.go("profile");
+            Router.go("/profile");
         }
     });
 }

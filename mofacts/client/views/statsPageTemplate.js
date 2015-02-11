@@ -8,7 +8,7 @@
 Template.statsPageTemplate.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
-        Router.go("profile");
+        Router.go("/profile");
     },
 
     'click .logoutLink' : function (event) {
@@ -23,7 +23,7 @@ Template.statsPageTemplate.events({
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        Router.go("profile");
+        Router.go("/profile");
     }
 });
 
@@ -73,7 +73,7 @@ statsPageTemplateUpdate = function() {
         { target: "user screen" },
         function() {
             statsPageTemplateUpdateImpl();
-            Router.go("stats");
+            Router.go("/stats");
         }
     );
 };

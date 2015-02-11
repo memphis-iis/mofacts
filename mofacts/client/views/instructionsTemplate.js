@@ -13,7 +13,7 @@ Template.instructionsTemplate.events({
         }, function(error, result) {
             //We know they'll need to resume now
             Session.set("needResume", true);
-            Router.go("card");
+            Router.go("/card");
         });
     },
 
@@ -30,7 +30,7 @@ Template.instructionsTemplate.events({
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        Router.go("profile");
+        Router.go("/profile");
     }
 });
 
@@ -62,7 +62,7 @@ Template.instructionsTemplate.helpers({
         var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
         if (!thisTdf) {
             //Whoops - no TDF at all
-            Router.go("profile");
+            Router.go("/profile");
             return;
         }
 

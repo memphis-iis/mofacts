@@ -80,7 +80,7 @@ Template.cardTemplate.events({
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        leavePage("profile");
+        leavePage("/profile");
     },
 
     'click .statsPageLink' : function (event) {
@@ -91,7 +91,7 @@ Template.cardTemplate.events({
 
     'click #overlearningButton' : function (event) {
         event.preventDefault();
-        leavePage("profile");
+        leavePage("/profile");
     },
 
     'click .multipleChoiceButton' : function (event) {
@@ -551,7 +551,7 @@ function prepareCard() {
             if (newUnit < file.tdfs.tutor.unit.length) {
                 //Just hit a new unit - we need to restart with instructions
                 console.log("UNIT FINISHED: show instructions for next unit", newUnit);
-                leavePage("instructions");
+                leavePage("/instructions");
             }
             else {
                 //We have run out of units
@@ -1096,7 +1096,7 @@ function resumeFromUserTimesLog() {
     if (!rootTDF) {
         console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
         alert("Unfortunately, something is broken and this lesson cannot continue");
-        leavePage("profile");
+        leavePage("/profile");
         return;
     }
 
@@ -1132,7 +1132,7 @@ function resumeFromUserTimesLog() {
         if (!subTdf) {
             console.log("No experimental condition could be selected!");
             alert("Unfortunately, something is broken and this lesson cannot continue");
-            leavePage("profile");
+            leavePage("/profile");
             return;
         }
 
@@ -1370,7 +1370,7 @@ function processUserTimesLog() {
     if (needFirstUnitInstructions) {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");
-        leavePage("instructions");
+        leavePage("/instructions");
     }
     else if (!!lastQuestionEntry) {
         //Question outstanding: force question display and let them give an answer

@@ -17,7 +17,7 @@ Template.profileTemplate.events({
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        Router.go("profile");
+        Router.go("/profile");
     },
 
     'click .stimButton' : function (event) {
@@ -67,7 +67,7 @@ Template.profileTemplate.events({
         //Go directly to the card session - which will decide whether or
         //not to show instruction
         Session.set("needResume", true);
-        Router.go("card");
+        Router.go("/card");
     }
 });
 

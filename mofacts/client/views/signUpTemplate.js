@@ -63,7 +63,7 @@ Template.signUpTemplate.events({
                 alert("It appears that you couldn't be logged in as " + formUserName);
             }
 
-            Router.go("profile");
+            Router.go("/profile");
         });
     },
 
