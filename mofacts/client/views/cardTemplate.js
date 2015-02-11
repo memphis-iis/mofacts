@@ -545,6 +545,7 @@ function prepareCard() {
             clearCardTimeout();
 
             Session.set("questionIndex", 0);
+            Session.set("clusterIndex", undefined);
             var newUnit = unit + 1;
             Session.set("currentUnitNumber", newUnit);
 
