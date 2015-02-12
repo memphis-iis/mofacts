@@ -1088,6 +1088,14 @@ function resumeFromUserTimesLog() {
     clearCardTimeout();
     clearCardPermuted();
 
+    //Clear any previous session data about unit/question/answer
+    Session.set("currentUnitNumber", undefined);
+    Session.set("questionIndex", undefined);
+    Session.set("clusterIndex", undefined);
+    Session.set("currentQuestion", undefined);
+    Session.set("currentAnswer", undefined);
+    Session.set("testType", undefined);
+
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
     //condition selection. It will be our responsibility to update
@@ -1224,6 +1232,11 @@ function processUserTimesLog() {
             var instructUnit = entry.currentUnit;
             if (!!instructUnit || instructUnit === 0) {
                 Session.set("currentUnitNumber", instructUnit);
+                Session.set("questionIndex", 0);
+                Session.set("clusterIndex", undefined);
+                Session.set("currentQuestion", undefined);
+                Session.set("currentAnswer", undefined);
+                Session.set("testType", undefined);
             }
         }
 
