@@ -1145,8 +1145,8 @@ function resumeFromUserTimesLog() {
             return;
         }
 
-        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
         conditionData.selectedTdf = subTdf;
+        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
 
         //Now we have a different current TDF (but root stays the same)
         Session.set("currentTdfName", subTdf);
@@ -1205,6 +1205,11 @@ function processUserTimesLog() {
         progressDataArray: [],
         currentSchedule: {}
     });
+
+    //If we are scheduled, then default the current unit number
+    if (getUserProgress().currentTestMode === "SCHEDULED") {
+        Session.set("currentUnitNumber", 0);
+    }
 
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
