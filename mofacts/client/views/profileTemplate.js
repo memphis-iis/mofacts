@@ -63,7 +63,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     }
 
     //Save the test selection event
-    recordUserTime("profile test selection", {
+    recordUserTime("profile tdf selection", {
         target: lessonName,
         tdfkey: tdfkey,
         tdffilename: tdffilename,
