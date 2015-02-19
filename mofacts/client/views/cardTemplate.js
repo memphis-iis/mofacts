@@ -429,13 +429,18 @@ function handleUserInput(e , source) {
     var timeout = 0;
 
     if (getTestType() === "s") {
+        //Just a study
         timeout = Helpers.intVal(deliveryParms.purestudy[0]);
     }
     else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
+        //Got a drill wrong on a scheduled test - should use review timeout
         timeout = Helpers.intVal(deliveryParms.reviewstudy[0]);
     }
     else {
-        timeout = Helpers.intVal(deliveryParms.correctprompt[0]);
+        //Correct! should use a correct timeout
+        //Special default for correct - we use 1ms instead of 0 to avoid
+        //the generic fallback to 2 seconds below
+        timeout = Helpers.intVal(deliveryParms.correctprompt[0]) || 1;
     }
 
     //If not timeout, default to 2 seconds so they can read the message
@@ -445,6 +450,7 @@ function handleUserInput(e , source) {
         if (currentQuestionSound && currentQuestionSound.isCurrentlyPlaying) {
             timeout += 1000;
         }
+        console.log("NO CORRECT TIMEOUT SPECIFIED! Using", timeout);
     }
 
     //Stop previous timeout
