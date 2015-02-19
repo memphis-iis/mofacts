@@ -4,9 +4,6 @@ Session.set("loginMode", "normal");
 Session.set("experimentTarget", "");
 Session.set("experimentXCond", "");
 
-//TODO: test the various ways to use the new URL's
-//TODO: honor experimentXCond
-
 routeToSignin = function() {
     if (Session.get("loginMode") === "experiment") {
         var routeParts = ['/experiment'];

@@ -8,8 +8,6 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
 
-//TODO: Update README with new meteor version and procedure for updating
-
 //Helper functions
 
 function parseXML(xml) {
