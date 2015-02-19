@@ -24,7 +24,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -56,7 +56,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -88,7 +88,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -120,7 +120,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -152,7 +152,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -184,7 +184,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -221,7 +221,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -279,7 +279,7 @@
             <permutefinalresult>0-35 36-71</permutefinalresult>
         </assessmentsession>
     </unit>
-    
+
     <unit>
         <unitname>Musical Interval Study Practice Harmony1</unitname>
         <unitinstructions>Training portion (108 practices)
@@ -291,7 +291,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>120000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -368,12 +368,12 @@
                 96-107</permutefinalresult>
         </assessmentsession>
     </unit>
-    
+
     <unit>
         <instructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </instructions>
         <unitname>Session 1 end</unitname>
     </unit>
-    
+
     <unit>
         <unitname>Musical Interval Study Posttest Harmony1</unitname>
 
@@ -386,7 +386,7 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
@@ -397,7 +397,7 @@
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
-                <clustersrepeated>4</clustersrepeated>
+                <clustersrepeated>6</clustersrepeated>
                 <templatesrepeated>12</templatesrepeated>
                 <group>0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
                        0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
