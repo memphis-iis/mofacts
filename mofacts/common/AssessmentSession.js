@@ -157,6 +157,8 @@ AssessmentSession = {
                         //Trial by other means
                         var offset;
                         if (offStr === "r") {
+                            //TODO: if ranChoices is single number keep this logic - if it's a space-delimited
+                            //      string of numbers, choose offset randomly from that list
                             offset = Math.floor(Math.random() * settings.ranChoices);
                         }
                         else {

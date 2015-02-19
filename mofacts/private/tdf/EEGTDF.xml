@@ -118,6 +118,16 @@
     </unit>
 
     <unit>
+        <unitname>Lock out test</unitname>
+        <lockoutminutes>5</lockoutminutes>
+        <unitinstructions>
+            <![CDATA[
+                Further progress is blocked until the sepecified time has elapsed
+            ]]>
+        </unitinstructions>
+    </unit>
+
+    <unit>
         <unitname>Swahili Test 2</unitname>
         <unitinstructions>
             Answer multiple choice questions.  Please attempt to answer all questions presented.

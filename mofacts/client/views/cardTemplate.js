@@ -1,3 +1,33 @@
+//TODO: schedule with null entries creates an error
+
+/* TODO: this minimal format for trials
+{
+    action: "trial"
+    clientSideTimeStamp: ddddddd,
+    serverSideTimeStamp: ddddddd,
+
+    question: {
+        startTime: ddd
+    },
+
+    answer: {
+        startLatency: dddd,
+        endLatency: dddd
+    }
+}
+ * */
+
+//TODO: whichStim in schedule should be logged with the trial
+//TODO: correctprompt should be honored (re)
+//TODO: reviewstudy timeout must start AFTER sound finishes
+
+//TODO: elapsed, elapsedOnRender go away for:
+//      startLatency - time from question to first letter
+//      endLatency - startLatency to enter/click
+//      (Note they'll be the same for button trials)
+
+//TODO: actual answer timeout is reset on keystroke
+
 //TODO: We have three separate ways of handling a TDF: scheduled with units,
 //      model-based (ACT-R), and "vanilla random". This file should refactor
 //      the vanilla random functionality into an object. Then we can extract

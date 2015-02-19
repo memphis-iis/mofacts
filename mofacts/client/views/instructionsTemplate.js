@@ -1,4 +1,35 @@
 ////////////////////////////////////////////////////////////////////////////
+// Utility functions used below
+
+//Return currently references TDF unit
+function currTdfUnit() {
+    var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
+    if (!thisTdf) {
+        return null;
+    }
+
+    var currUnit = null;
+    if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
+        var unitIdx = Session.get("currentUnitNumber");
+        currUnit = thisTdf.tdfs.tutor.unit[unitIdx];
+    }
+
+    return currUnit || null;
+}
+
+//Return current TDF unit's lockout minutes (or 0 if none-specified)
+function currLockOutMinutes() {
+    var currUnit = currTdfUnit();
+    var lockoutminutes = 0;
+
+    if (currUnit && currUnit.lockoutminutes) {
+        lockoutminutes = Helpers.intVal(currUnit.lockoutminutes);
+    }
+
+    return lockoutminutes;
+}
+
+////////////////////////////////////////////////////////////////////////////
 // Template Events
 
 Template.instructionsTemplate.events({
@@ -39,18 +70,9 @@ Template.instructionsTemplate.events({
 
 Template.instructionsTemplate.helpers({
     backgroundImage: function() {
-        var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-        if (!thisTdf) {
-            return;
-        }
-
-        var currUnit;
-        if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-            var unitIdx = Session.get("currentUnitNumber");
-            currUnit = thisTdf.tdfs.tutor.unit[unitIdx];
-        }
-
+        var currUnit = currTdfUnit();
         var img = "";
+
         if (currUnit && currUnit.picture) {
             img = currUnit.picture;
         }
@@ -59,22 +81,22 @@ Template.instructionsTemplate.helpers({
     },
 
     instructions: function () {
-        var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-        if (!thisTdf) {
-            //Whoops - no TDF at all
-            Router.go("/profile");
-            return;
+        var currUnit = currTdfUnit();
+        var instructions = null;
+
+        if (currUnit) {
+            instructions = currUnit.unitinstructions;
         }
 
-        var instructions;
-        if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-            var unit = Session.get("currentUnitNumber");
-            instructions = thisTdf.tdfs.tutor.unit[unit].unitinstructions;
-        }
-        else {
-            instructions = "Please do your best to answer each question.";
-        }
-        return instructions;
+        return instructions || "Please do your best to answer each question.";
+    },
+
+    islockout: function() {
+        return currLockOutMinutes() > 0;
+    },
+
+    lockoutminutes: function() {
+        return currLockOutMinutes();
     },
 
     username: function () {

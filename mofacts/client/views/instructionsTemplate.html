@@ -1,47 +1,51 @@
 <template name="instructionsTemplate">
 
-	<nav class="navbar navbar-inverse" role="navigation">
-		<div class="container">
-			<div class="navbar-header">
+    <nav class="navbar navbar-inverse" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
 
-				<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
-					<span class="sr-only">Toggle navigation</span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-					<span class="icon-bar"></span>
-				</button>
-				<a class="navbar-brand" href="#">MoFaCTS</a>
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">MoFaCTS</a>
 
-			</div>  <!-- close header -->
+            </div>  <!-- close header -->
 
-			<div class="collapse navbar-collapse" id="navbarCollapse">
-				<ul class="nav navbar-nav navbar-right">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
-						<ul class="dropdown-menu">
-							<li><a href="#" class="homeLink">Home</a></li>
-							<li class="divider"></li>
-							<li><a href="#" class="logoutLink">Logout</a></li>
-						</ul>
-					</li>
-				</ul>
-			</div>  <!-- close navbar-collapse -->
-		</div>  <!-- close container -->
-	</nav>  <!-- close nav -->
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-togg="dropdown">{{username}} <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" class="homeLink">Home</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" class="logoutLink">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>  <!-- close navbar-collapse -->
+        </div>  <!-- close container -->
+    </nav>  <!-- close nav -->
 
-	<div class="container">
-		<div class="row">
+    <div class="container">
+        <div class="row">
             {{#if backgroundImage}}
                 <div><img src="{{backgroundImage}}"></div>
             {{/if}}
 
-			<legend class="text-center">{{{instructions}}}</legend>
+            <legend class="text-center">{{{instructions}}}</legend>
 
             <div class="form-group">
                 <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
-                    <button type="button" id="continueButton" class="btn btn-primary">Continue</button>
+                    {{#if islockout}}
+                        TODO: lockout for {{lockoutminutes}} minutes
+                    {{else}}
+                        <button type="button" id="continueButton" class="btn btn-primary">Continue</button>
+                    {{/if}}
                 </div>
             </div>
-		</div>
-	</div>
+        </div>
+    </div>
 </template>
