@@ -429,8 +429,9 @@ function handleUserInput(e , source) {
     var timeout = 0;
 
     if (getTestType() === "s") {
-        //Just a study
-        timeout = Helpers.intVal(deliveryParms.purestudy[0]);
+        //Just a study - note that the purestudy timeout is used for the
+        //QUESTION timeout, not the display timeout after the ANSWER
+        timeout = 1;
     }
     else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
         //Got a drill wrong on a scheduled test - should use review timeout
@@ -1049,8 +1050,19 @@ function timeoutfunction(index) {
     }
 
     var file = getCurrentTdfFile();
-    var tis = file.tdfs.tutor.setspec[0].timeoutInSeconds[0];
-    var delay = tis * 1000; //Need delay is milliseconds
+
+    var delayMs = 1; //default just in case
+
+    //If this is scheduled TDF and the current test is a study, use the timeout
+    //for purestudy. Otherwise use the top-level setspec timeout in seconds
+    if (getTestType() === "s" && Session.get("isScheduledTest")) {
+        var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
+        delayMs = Helpers.intVal(unit.deliveryparams[0].purestudy[0]);
+    }
+    else {
+        var tis = Helpers.intVal(file.tdfs.tutor.setspec[0].timeoutInSeconds[0]);
+        delayMs = tis * 1000; //Need delay is milliseconds
+    }
 
     clearCardTimeout(); //No previous timeout now
 
@@ -1060,7 +1072,7 @@ function timeoutfunction(index) {
             stopUserInput();
             handleUserInput({}, "timeout");
         }
-    }, delay);
+    }, delayMs);
 }
 
 function findQTypeSimpified() {
@@ -1111,11 +1123,11 @@ function hideUserInteraction() {
 }
 
 function stopUserInput() {
-    $("#userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
 }
 
 function allowUserInput() {
-    $("#userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
 }
 
 
