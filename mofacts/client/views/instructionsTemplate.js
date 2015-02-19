@@ -1,4 +1,36 @@
 ////////////////////////////////////////////////////////////////////////////
+// Instruction timer and leaving this page - we don't want to leave a
+// timer running!
+
+var lockoutInterval = null;
+var lockoutFreeTime = null;
+
+function startLockoutInterval() {
+    clearLockoutInterval();
+    //See below for lockoutPeriodicCheck - notice that we also do an immediate
+    //check and then start the interval
+    lockoutPeriodicCheck();
+    lockoutInterval = Meteor.setInterval(lockoutPeriodicCheck, 250);
+}
+
+function clearLockoutInterval() {
+    if (!!lockoutInterval) {
+        Meteor.clearInterval(lockoutInterval);
+    }
+    lockoutInterval = null;
+}
+
+function leavePage(dest) {
+    clearLockoutInterval();
+    if (typeof dest === "function") {
+        dest();
+    }
+    else {
+        Router.go(dest);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
 //Return currently references TDF unit
@@ -29,6 +61,23 @@ function currLockOutMinutes() {
     return lockoutminutes;
 }
 
+//Called intermittently to see if we are still locked out
+function lockoutPeriodicCheck() {
+    if (!lockoutFreeTime) {
+        //TODO: figure out time to free the lockout
+    }
+
+    if (Date.now() >= lockoutFreeTime) {
+        //TODO: blank time remaining
+        //TODO: enable continue button
+        clearLockoutInterval();
+    }
+    else {
+        //TODO: update time remaining
+        //TODO: insure continue button disabled
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
@@ -44,7 +93,7 @@ Template.instructionsTemplate.events({
         }, function(error, result) {
             //We know they'll need to resume now
             Session.set("needResume", true);
-            Router.go("/card");
+            leavePage("/card");
         });
     },
 
@@ -55,13 +104,13 @@ Template.instructionsTemplate.events({
                 //something happened during logout
                 console.log("User:", Meteor.user(), "Error:", error);
             }
-            routeToSignin(); //Not much else to do now
+            leavePage(routeToSignin); //Not much else to do now
         });
     },
 
     'click .homeLink' : function (event) {
         event.preventDefault();
-        Router.go("/profile");
+        leavePage("/profile");
     }
 });
 
@@ -101,10 +150,16 @@ Template.instructionsTemplate.helpers({
 
     username: function () {
         if (!haveMeteorUser()) {
-            routeToSignin();
+            leavePage(routeToSignin);
         }
         else {
             return Meteor.user().username;
         }
     },
 });
+
+Template.instructionsTemplate.rendered = function() {
+    if (currLockOutMinutes() > 0) {
+        startLockoutInterval();
+    }
+};
