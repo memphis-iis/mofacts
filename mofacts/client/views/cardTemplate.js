@@ -127,6 +127,11 @@ Template.cardTemplate.events({
     'click .multipleChoiceButton' : function (event) {
         event.preventDefault();
         handleUserInput( event , "buttonClick");
+    },
+    
+    'click #continueStudy': function(event) {
+        event.preventDefault();
+        handleUserInput( event , "buttonClick");
     }
 });
 
@@ -444,9 +449,11 @@ function handleUserInput(e , source) {
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question
 function userAnswerFeedback(answer, userAnswer, isTimeout) {
-    //Nothing to evaluate
+    //Nothing to evaluate - it was a study. To make things easier, we just
+    //pretend they answered exactly correct
     if (getTestType() === "s") {
-        return null;
+        userAnswer = answer;
+        isTimeout = false;
     }
 
     var isCorrect = null;
