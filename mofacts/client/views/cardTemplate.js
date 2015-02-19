@@ -52,7 +52,6 @@ function clearCardPermuted() {
 }
 
 var timeoutName = null;
-var timeoutCount = -1;
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
@@ -268,7 +267,6 @@ function newQuestionHandler() {
     var AllowTimeouts = true;
 
     if(AllowTimeouts) {
-        timeoutCount++;
         var length = getUserProgress().progressDataArray.length;
         setQuestionTimeout();
     }
@@ -1061,7 +1059,6 @@ function setQuestionTimeout() {
     }
 
     timeoutName = Meteor.setTimeout(function() {
-        console.log("TIMEOUT", timeoutCount);
         stopUserInput();
         handleUserInput({}, "timeout");
     }, delayMs);
