@@ -1,5 +1,10 @@
 //TODO: schedule with null entries creates an error
 
+//TODO: elapsed, elapsedOnRender go away for:
+//      startLatency - time from question to first letter
+//      endLatency - startLatency to enter/click
+//      (Note they'll be the same for button trials)
+
 /* TODO: this minimal format for trials
 {
     action: "trial"
@@ -18,14 +23,9 @@
  * */
 
 //TODO: whichStim in schedule should be logged with the trial
+
 //TODO: correctprompt should be honored (re)
 //TODO: reviewstudy timeout must start AFTER sound finishes
-
-//TODO: elapsed, elapsedOnRender go away for:
-//      startLatency - time from question to first letter
-//      endLatency - startLatency to enter/click
-//      (Note they'll be the same for button trials)
-
 //TODO: actual answer timeout is reset on keystroke
 
 //TODO: We have three separate ways of handling a TDF: scheduled with units,
@@ -128,7 +128,7 @@ Template.cardTemplate.events({
         event.preventDefault();
         handleUserInput( event , "buttonClick");
     },
-    
+
     'click #continueStudy': function(event) {
         event.preventDefault();
         handleUserInput( event , "buttonClick");
@@ -301,7 +301,7 @@ function clearPlayingSound() {
 }
 
 //Play a sound matching the current question
-function playCurrentQuestionSound() {
+function playCurrentQuestionSound(onEndCallback) {
     //We currently only play one sound at a time
     clearPlayingSound();
 
@@ -321,6 +321,9 @@ function playCurrentQuestionSound() {
         onend: function() {
             if (currentQuestionSound) {
                 currentQuestionSound.isCurrentlyPlaying = false;
+            }
+            if (!!onEndCallback) {
+                onEndCallback();
             }
         },
     });
@@ -408,25 +411,35 @@ function handleUserInput(e , source) {
     //Reset timer for next question
     start = getCurrentTimer();
 
+    //TODO: timeout after sound stops
+
     //timeout for adding a small delay so the User may read
     //the correctness of his/her answer
     $("#UserInteraction").show();
 
     //Figure out timeout
+    var deliveryParms = {};
+    try {
+        var file = getCurrentTdfFile();
+        var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
+        deliveryParms = unit.deliveryparams[0];
+    }
+    catch(err) {
+        if (Session.get("debugging")) {
+            console.log("Issue finding unit/deliveryparams", err);
+        }
+    }
+
     var timeout = 0;
-    if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
-        //They got the answer wrong on a drill in a scheduled test, so we need
-        //to check the unit for review study time.
-        try {
-            var file = getCurrentTdfFile();
-            var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
-            timeout = Helpers.intVal(unit.deliveryparams[0].reviewstudy[0]);
-        }
-        catch(err) {
-            if (Session.get("debugging")) {
-                console.log("Issue finding unit/deliveryparams/reviewstudy", err);
-            }
-        }
+
+    if (getTestType() === "s") {
+        timeout = Helpers.intVal(deliveryParms.purestudy[0]);
+    }
+    else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
+        timeout = Helpers.intVal(deliveryParms.reviewstudy[0]);
+    }
+    else {
+        timeout = Helpers.intVal(deliveryParms.correctprompt[0]);
     }
 
     //If not timeout, default to 2 seconds so they can read the message
@@ -438,12 +451,26 @@ function handleUserInput(e , source) {
         }
     }
 
+    //Stop previous timeout
     clearCardTimeout();
-    timeoutName = Meteor.setTimeout(function() {
-        prepareCard();
-        $("#userAnswer").val("");
-        hideUserInteraction();
-    }, timeout);
+
+    //Create the action we're about to call
+    var resetAfterTimeout = function() {
+        timeoutName = Meteor.setTimeout(function() {
+            prepareCard();
+            $("#userAnswer").val("");
+            hideUserInteraction();
+        }, timeout);
+    };
+
+    //If incorrect answer for a drill on a sound, we need to replay the sound.
+    //Otherwise, we can just use our reset logic directly
+    if (getQuestionType() === "sound" && !isCorrect && getTestType() === "d") {
+        playCurrentQuestionSound(resetAfterTimeout);
+    }
+    else {
+        resetAfterTimeout();
+    }
 }
 
 //Take care of user feedback - and return whether or not the user correctly
@@ -462,7 +489,6 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
     userAnswer = Helpers.trim(userAnswer.toLowerCase());
 
     var isDrill = (getTestType() === "d");
-    var isSound = (getQuestionType() === "sound");
 
     //We know if it's a button trial from the schedule
     var isButtonTrial = false;
@@ -527,10 +553,6 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
     if (isDrill && !isCorrect) {
         //Cheat and inject a review message
         $("#UserInteraction").append($("<p>&nbsp;</p><p class='text-danger'>Please Review</p>"));
-        //If necessary, replay the sound
-        if (isSound) {
-            playCurrentQuestionSound();
-        }
     }
 
     return isCorrect;
