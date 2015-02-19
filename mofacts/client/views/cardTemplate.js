@@ -1,4 +1,4 @@
-//TODO: schedule with null entries creates an error
+//TODO: schedule with null entries should create an error
 
 //TODO: elapsed, elapsedOnRender go away for:
 //      startLatency - time from question to first letter
@@ -24,8 +24,6 @@
 
 //TODO: whichStim in schedule should be logged with the trial
 
-//TODO: correctprompt should be honored (re)
-//TODO: reviewstudy timeout must start AFTER sound finishes
 //TODO: actual answer timeout is reset on keystroke
 
 //TODO: We have three separate ways of handling a TDF: scheduled with units,
@@ -410,8 +408,6 @@ function handleUserInput(e , source) {
 
     //Reset timer for next question
     start = getCurrentTimer();
-
-    //TODO: timeout after sound stops
 
     //timeout for adding a small delay so the User may read
     //the correctness of his/her answer
