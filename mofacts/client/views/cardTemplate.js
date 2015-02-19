@@ -270,7 +270,7 @@ function newQuestionHandler() {
     if(AllowTimeouts) {
         timeoutCount++;
         var length = getUserProgress().progressDataArray.length;
-        timeoutfunction(length);
+        setQuestionTimeout();
     }
 
     if(getQuestionType() === "sound"){
@@ -1041,20 +1041,16 @@ function selectLowestProbabilityCardIndex(cards) {
     return indexToReturn;
 }
 
-function timeoutfunction(index) {
-    var progress = getUserProgress();
-
-    var length = 0;
-    if (progress.progressDataArray && progress.progressDataArray.length) {
-        length = progress.progressDataArray.length;
-    }
+function setQuestionTimeout() {
+    clearCardTimeout(); //No previous timeout now
 
     var file = getCurrentTdfFile();
 
     var delayMs = 1; //default just in case
 
     //If this is scheduled TDF and the current test is a study, use the timeout
-    //for purestudy. Otherwise use the top-level setspec timeout in seconds
+    //for purestudy for the current unit. Otherwise use the top-level setspec
+    //timeout in seconds
     if (getTestType() === "s" && Session.get("isScheduledTest")) {
         var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
         delayMs = Helpers.intVal(unit.deliveryparams[0].purestudy[0]);
@@ -1064,14 +1060,10 @@ function timeoutfunction(index) {
         delayMs = tis * 1000; //Need delay is milliseconds
     }
 
-    clearCardTimeout(); //No previous timeout now
-
     timeoutName = Meteor.setTimeout(function() {
-        if (index === length && timeoutCount > 0) {
-            console.log("TIMEOUT", timeoutCount, index, length);
-            stopUserInput();
-            handleUserInput({}, "timeout");
-        }
+        console.log("TIMEOUT", timeoutCount);
+        stopUserInput();
+        handleUserInput({}, "timeout");
     }, delayMs);
 }
 
