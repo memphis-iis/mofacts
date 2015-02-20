@@ -1,3 +1,5 @@
+//TODO: document all deliveryparams fields for a unit and how we handle them
+
 //TODO: schedule with null entries should create an error
 
 //TODO: elapsed, elapsedOnRender go away for:
