@@ -370,7 +370,7 @@
     </unit>
 
     <unit>
-        <instructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </instructions>
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
         <unitname>Session 1 end</unitname>
     </unit>
 
