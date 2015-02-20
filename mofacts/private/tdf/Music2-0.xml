@@ -450,11 +450,11 @@
 
     <unit>
         <unitname>last</unitname>
-        <instructions><![CDATA[
+        <unitinstructions><![CDATA[
             You have now completed the posttest. Please complete the survey located
             <a href='https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form'
                target="_blank"
                >here</a>.
-            We will evaluate your response within a few days for consideration of the $3 bonus.  ]]></instructions>
+            We will evaluate your response within a few days for consideration of the $3 bonus.  ]]></unitinstructions>
     </unit>
 </tutor>
