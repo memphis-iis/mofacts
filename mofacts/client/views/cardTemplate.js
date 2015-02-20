@@ -51,7 +51,11 @@ function clearCardPermuted() {
     permuted = [];
 }
 
+//We need to track the name/ID for clear and reset. We need the function and
+//delay used for reset
 var timeoutName = null;
+var timeoutFunc = null;
+var timeoutDelay = null;
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
@@ -66,6 +70,25 @@ function clearCardTimeout() {
         }
     }
     timeoutName = null;
+    timeoutFunc = null;
+    timeoutDelay = null;
+}
+
+//Start a timeout count
+//Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
+function beginMainCardTimeout(delay, func) {
+    clearCardTimeout();
+    timeoutFunc = func;
+    timeoutDelay = delay;
+    timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
+}
+
+//Reset the previously set timeout counter
+function resetMainCardTimeout() {
+    var savedFunc = timeoutFunc;
+    var savedDelay = timeoutDelay;
+    clearCardTimeout();
+    beginMainCardTimeout(savedDelay, savedFunc);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -345,9 +368,10 @@ function handleUserInput(e , source) {
         key = 13;
     }
 
-    //If we haven't seen the correct keypress, then we want to start the timer
-    //and leave
+    //If we haven't seen the correct keypress, then we want to reset our
+    //timeout, grab the current time, and leave
     if (key != 13) {
+        resetMainCardTimeout();
         start = getCurrentTimer();
         return;
     }
@@ -419,9 +443,7 @@ function handleUserInput(e , source) {
         deliveryParms = unit.deliveryparams[0];
     }
     catch(err) {
-        if (Session.get("debugging")) {
-            console.log("Issue finding unit/deliveryparams", err);
-        }
+        //Nothing - we expect a failure like this for some TDF's
     }
 
     var timeout = 0;
@@ -433,13 +455,18 @@ function handleUserInput(e , source) {
     }
     else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
         //Got a drill wrong on a scheduled test - should use review timeout
-        timeout = Helpers.intVal(deliveryParms.reviewstudy[0]);
+        timeout = Helpers.intVal(Helpers.firstElement(deliveryParms.reviewstudy)) || 0;
     }
-    else {
+    else if (isCorrect) {
         //Correct! should use a correct timeout
         //Special default for correct - we use 1ms instead of 0 to avoid
         //the generic fallback to 2 seconds below
-        timeout = Helpers.intVal(deliveryParms.correctprompt[0]) || 1;
+        timeout = Helpers.intVal(Helpers.firstElement(deliveryParms.correctprompt)) || 1;
+    }
+    else {
+        //Not a study, not correct, either a test or not scheduled or both.
+        //we'll force ourselves to punt below with default values
+        timeout = 0;
     }
 
     //If not timeout, default to 2 seconds so they can read the message
@@ -457,11 +484,11 @@ function handleUserInput(e , source) {
 
     //Create the action we're about to call
     var resetAfterTimeout = function() {
-        timeoutName = Meteor.setTimeout(function() {
+        beginMainCardTimeout(timeout, function() {
             prepareCard();
             $("#userAnswer").val("");
             hideUserInteraction();
-        }, timeout);
+        });
     };
 
     //If incorrect answer for a drill on a sound, we need to replay the sound.
@@ -1058,10 +1085,10 @@ function setQuestionTimeout() {
         delayMs = tis * 1000; //Need delay is milliseconds
     }
 
-    timeoutName = Meteor.setTimeout(function() {
+    beginMainCardTimeout(delayMs, function() {
         stopUserInput();
         handleUserInput({}, "timeout");
-    }, delayMs);
+    });
 }
 
 function findQTypeSimpified() {
