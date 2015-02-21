@@ -1,14 +1,14 @@
 <tutor>
     <setspec>
-        <name>Melody3</name> <!-- TAKEN FROM Music2-5.xml -->
-        <lessonname>Music2-5</lessonname>
+        <name>Melody3</name> <!-- TAKEN FROM Music2-0.xml -->
+        <lessonname>Music2-0</lessonname>
         <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>Music2stim.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
-        <buttonorder>Major 3rd, Tritone, Perfect 5th, Major 7th, Minor 3rd, Octave</buttonorder>
+        <buttonorder>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonorder>
     </setspec>
 
     <unit>
@@ -17,82 +17,271 @@
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Pretest Melody3</unitname>
-
-        <unitinstructions>Pretest portion (48 practices)
-
-            Listen to each 2-second interval, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
-
-            Goal: Practice the sound identification task, attempting to learn the interval between two musical tones. This pretest portion will get an initial measure of your skill in the task, and will be followed by 108 training practices, and finally a posttest of 24 practices.
+        <unitname>Minor 3rd</unitname>
+        <unitinstructions> Click the OK button to hear one example of a minor 3rd as a harmony and as a melody (not necessarily in that order).
         </unitinstructions>
-
         <deliveryparams>
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <drill>120000</drill>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
-
         <buttontrial>true</buttontrial>
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
-                <clustersrepeated>4</clustersrepeated>
-                <templatesrepeated>12</templatesrepeated>
-                <group>0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                    0,f,t,0 1,f,t,1 0,f,t,24 1,f,t,25
-                </group>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
             </conditiontemplatesbygroup>
             <initialpositions>
-                A_1 A_1
-                A_2 A_2
-                A_3 A_3
-                A_4 A_4
-                A_5 A_5
-                A_6 A_6
-                A_7 A_7
-                A_8 A_8
-                A_9 A_9
-                A_10 A_10
-                A_11 A_11
-                A_12 A_12
-
-                A_1 A_1
-                A_2 A_2
-                A_3 A_3
-                A_4 A_4
-                A_5 A_5
-                A_6 A_6
-                A_7 A_7
-                A_8 A_8
-                A_9 A_9
-                A_10 A_10
-                A_11 A_11
-                A_12 A_12
+                A_1 A_2
             </initialpositions>
+            <randomchoices>3</randomchoices>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>0-11</clusterlist>
+            <clusterlist>0-0 6-6</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-23 24-47</permutefinalresult>
+            <permutefinalresult>0-1</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Training Melody3</unitname>
+        <unitname>Major 3rd</unitname>
+        <unitinstructions> Click the OK button to hear one example of a major 3rd as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>1-1 7-7</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Tritone</unitname>
+        <unitinstructions> Click the OK button to hear one example of a tritone as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>2-2 8-8</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Perfect 5th</unitname>
+        <unitinstructions> Click the OK button to hear one example of a perfect 5th as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>3-3 9-9</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Major 7th</unitname>
+        <unitinstructions> Click the OK button to hear one example of a major 7th as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>4-4 10-10</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Octave</unitname>
+        <unitinstructions> Click the OK button to hear one example of an octave as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>5-5 11-11</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Musical Interval Study Pretest Melody3</unitname>
+
+        <unitinstructions>Pretest portion (72 sounds)
+
+            Listen to each sound, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
+
+            This pretest will get an initial measure of your skill in the task, and will be followed by 108 practice sounds, and (either 1 or 7 days later) a posttest of 72 sounds.
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+         <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>6</clustersrepeated>
+                <templatesrepeated>12</templatesrepeated>
+                <group>0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_1 A_1
+                A_2 A_2 A_2
+                A_3 A_3 A_3
+                A_4 A_4 A_4
+                A_5 A_5 A_5
+                A_6 A_6 A_6
+                A_7 A_7 A_7
+                A_8 A_8 A_8
+                A_9 A_9 A_9
+                A_10 A_10 A_10
+                A_11 A_11 A_11
+                A_12 A_12 A_12
+
+                A_1 A_1 A_1
+                A_2 A_2 A_2
+                A_3 A_3 A_3
+                A_4 A_4 A_4
+                A_5 A_5 A_5
+                A_6 A_6 A_6
+                A_7 A_7 A_7
+                A_8 A_8 A_8
+                A_9 A_9 A_9
+                A_10 A_10 A_10
+                A_11 A_11 A_11
+                A_12 A_12 A_12
+                     </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-11</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-35 36-71</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Musical Interval Study Practice Melody3</unitname>
         <unitinstructions>Training portion (108 practices)
 
             Listen to each sound and indicate which musical interval you just heard.
@@ -102,15 +291,15 @@
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
+            <correctprompt>1000</correctprompt>
             <drill>120000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
 
         <buttontrial>true</buttontrial>
-        
-        <assessmentsession>
+
+          <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A B C</groupnames> 
                 <clustersrepeated>18 18 18</clustersrepeated>
@@ -175,23 +364,30 @@
             <randomizegroups>false</randomizegroups>
             <clusterlist>6-11</clusterlist>
             <assignrandomclusters>true</assignrandomclusters>
-            <permutefinalresult>0-11 12-23 24-53 54-65 66-77 78-107</permutefinalresult>
+            <permutefinalresult>0-11 12-23 24-53 54-65 66-77 
+                78-107</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
-        <unitname>Learning Trials Harmony Learning Experiment Posttest Melody3</unitname>
-        <unitinstructions>Posttest portion (24 practices)
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
+        <unitname>Session 1 end</unitname>
+    </unit>
 
-            Listen to each sound and indicate which musical interval you just heard.
+    <unit>
+        <unitname>Musical Interval Study Posttest Melody3</unitname>
+
+        <unitinstructions>Posttest portion (72 sounds)
+
+            Listen to each sound, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
         </unitinstructions>
 
         <deliveryparams>
             <purestudy>3000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>3000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <drill>120000</drill>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
@@ -201,53 +397,64 @@
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
-                <clustersrepeated>2</clustersrepeated>
+                <clustersrepeated>6</clustersrepeated>
                 <templatesrepeated>12</templatesrepeated>
-                <group>0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
-                    0,f,t,0 1,f,t,1
+                <group>0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
                 </group>
             </conditiontemplatesbygroup>
             <initialpositions>
-                A_1 A_1
-                A_2 A_2
-                A_3 A_3
-                A_4 A_4
-                A_5 A_5
-                A_6 A_6
-                A_7 A_7
-                A_8 A_8
-                A_9 A_9
-                A_10 A_10
-                A_11 A_11
-                A_12 A_12
+                A_1 A_1 A_1
+                A_2 A_2 A_2
+                A_3 A_3 A_3
+                A_4 A_4 A_4
+                A_5 A_5 A_5
+                A_6 A_6 A_6
+                A_7 A_7 A_7
+                A_8 A_8 A_8
+                A_9 A_9 A_9
+                A_10 A_10 A_10
+                A_11 A_11 A_11
+                A_12 A_12 A_12
+
+                A_1 A_1 A_1
+                A_2 A_2 A_2
+                A_3 A_3 A_3
+                A_4 A_4 A_4
+                A_5 A_5 A_5
+                A_6 A_6 A_6
+                A_7 A_7 A_7
+                A_8 A_8 A_8
+                A_9 A_9 A_9
+                A_10 A_10 A_10
+                A_11 A_11 A_11
+                A_12 A_12 A_12
+
             </initialpositions>
             <randomizegroups>false</randomizegroups>
             <clusterlist>0-11</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-23</permutefinalresult>
+            <permutefinalresult>0-35 36-71</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
         <unitname>last</unitname>
-        <instructions><![CDATA[
-            You have now completed the experiment. Please complete the survey located
+        <unitinstructions><![CDATA[
+            You have now completed the posttest. Please complete the survey located
             <a href='https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form'
                target="_blank"
                >here</a>.
-            Once you are done with the survey, please enter the code - springer -
-            into the Amazon Turk website for this HIT, and we will check your data for
-            payment approval.
-        ]]></instructions>
+            We will evaluate your response within a few days for consideration of the $3 bonus.  ]]></unitinstructions>
     </unit>
 </tutor>
