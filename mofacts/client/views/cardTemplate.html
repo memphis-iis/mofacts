@@ -58,10 +58,12 @@
                 <h2><label id="answerLabel">{{currentAnswer}}</label></h2>
                 <br>
                 <div>
+                    {{#if skipstudy}}
                     <button type='button' id='continueStudy' name='continueStudy' class='btn btn-primary btn-block'>
                         Continue
                     </button>
-                </div>                
+                    {{/if}}
+                </div>
             </div>  <!-- close column -->
         </div>  <!-- close row -->
     {{/if}}

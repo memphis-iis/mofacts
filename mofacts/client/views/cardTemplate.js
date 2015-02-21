@@ -1,4 +1,11 @@
-//TODO: document all deliveryparams fields for a unit and how we handle them
+//TODO: insure userselect = false before we deploy to server
+
+//TODO: document all deliveryparams fields for a unit and how we handle them,
+//      which will include the function getCurrentDeliveryParams
+
+//TODO: A lot of our helper functions in this module are based solely on the
+//      Session, the TDF, and/or stim data - they should be refactored to
+//      another file/module
 
 //TODO: schedule with null entries should create an error
 
@@ -206,6 +213,10 @@ Template.cardTemplate.helpers({
 
     drill: function() {
         return getTestType() === "d";
+    },
+
+    skipstudy: function() {
+        return getCurrentDeliveryParams().skipstudy;
     },
 });
 
@@ -438,16 +449,7 @@ function handleUserInput(e , source) {
     $("#UserInteraction").show();
 
     //Figure out timeout
-    var deliveryParms = {};
-    try {
-        var file = getCurrentTdfFile();
-        var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
-        deliveryParms = unit.deliveryparams[0];
-    }
-    catch(err) {
-        //Nothing - we expect a failure like this for some TDF's
-    }
-
+    var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
 
     if (getTestType() === "s") {
@@ -457,13 +459,13 @@ function handleUserInput(e , source) {
     }
     else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
         //Got a drill wrong on a scheduled test - should use review timeout
-        timeout = Helpers.intVal(Helpers.firstElement(deliveryParms.reviewstudy)) || 0;
+        timeout = Helpers.intVal(deliveryParams.reviewstudy) || 0;
     }
     else if (isCorrect) {
         //Correct! should use a correct timeout
         //Special default for correct - we use 1ms instead of 0 to avoid
         //the generic fallback to 2 seconds below
-        timeout = Helpers.intVal(Helpers.firstElement(deliveryParms.correctprompt)) || 1;
+        timeout = Helpers.intVal(deliveryParams.correctprompt) || 1;
     }
     else {
         //Not a study, not correct, either a test or not scheduled or both.
@@ -763,6 +765,42 @@ function getCurrentTdfName() {
 
 function getCurrentTdfFile() {
     return Tdfs.findOne({fileName: getCurrentTdfName()});
+}
+
+//Return the delivery parms for the current unit. Note that we provide default
+//values AND eliminate the single-value array issue from our XML-2-JSON mapping
+function getCurrentDeliveryParams() {
+    //Note that we will only extract values that have a specified default
+    //value here.
+    var deliveryParams = {
+        purestudy: 0,
+        skipstudy: false,
+        reviewstudy: 0,
+        correctprompt: 0
+    };
+
+    var file = getCurrentTdfFile();
+    var unitnum = getCurrentUnitNumber();
+    if (file && (unitnum || unitnum === 0)) {
+        var found = null;
+        try {
+            found = Helpers.firstElement(file.tdfs.tutor.unit[unitnum].deliveryparams);
+        }
+        catch(err) {
+            //Nothing - we don't a unit or the unit doesn't have del parms
+        }
+
+        if (found) {
+            for(var fieldName in deliveryParams) {
+                var fieldVal = Helpers.firstElement(found[fieldName]);
+                if (fieldVal) {
+                    deliveryParams[fieldName] = fieldVal;
+                }
+            }
+        }
+    }
+
+    return deliveryParams;
 }
 
 //Return the current button order as an array
@@ -1080,7 +1118,7 @@ function setQuestionTimeout() {
     //timeout in seconds
     if (getTestType() === "s" && Session.get("isScheduledTest")) {
         var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
-        delayMs = Helpers.intVal(unit.deliveryparams[0].purestudy[0]);
+        delayMs = Helpers.intVal(getCurrentDeliveryParams().purestudy);
     }
     else {
         var tis = Helpers.intVal(file.tdfs.tutor.setspec[0].timeoutInSeconds[0]);
