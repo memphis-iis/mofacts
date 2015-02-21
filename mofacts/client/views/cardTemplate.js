@@ -779,8 +779,22 @@ function getCurrentDeliveryParams() {
         correctprompt: 0
     };
 
+    var xlateBool = function(v) {
+        return  v ? Helpers.trim(v).toLowerCase() === "true" : false;
+    };
+
+    var xlations = {
+        purestudy: Helpers.intVal,
+        skipstudy: xlateBool,
+        reviewstudy: Helpers.intVal,
+        correctprompt: Helpers.intVal
+    };
+
     var file = getCurrentTdfFile();
     var unitnum = getCurrentUnitNumber();
+    var modified = false;
+    var fieldName; //Used in loops below
+
     if (file && (unitnum || unitnum === 0)) {
         var found = null;
         try {
@@ -791,12 +805,23 @@ function getCurrentDeliveryParams() {
         }
 
         if (found) {
-            for(var fieldName in deliveryParams) {
+            for(fieldName in deliveryParams) {
                 var fieldVal = Helpers.firstElement(found[fieldName]);
                 if (fieldVal) {
                     deliveryParams[fieldName] = fieldVal;
+                    modified = true;
                 }
             }
+        }
+    }
+
+    //If we changed anything from the default, we should make sure
+    //everything is properly xlated
+    if (modified) {
+        for(fieldName in deliveryParams) {
+            var currVal = deliveryParams[fieldName];
+            var xlation = xlations[fieldName];
+            deliveryParams[fieldName] = xlation(currVal);
         }
     }
 
