@@ -372,6 +372,16 @@
     <unit>
         <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
         <unitname>Session 1 end</unitname>
+
+        <deliveryparams>
+            <lockoutminutes>2</lockoutminutes> <!-- 2 minutes -->
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>1440</lockoutminutes> <!-- 24 hours -->
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>10080</lockoutminutes> <!-- 24*7 = 7 days -->
+        </deliveryparams>
     </unit>
 
     <unit>

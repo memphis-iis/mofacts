@@ -301,65 +301,65 @@
 
          <assessmentsession>
             <conditiontemplatesbygroup>
-                <groupnames>A B C</groupnames> 
+                <groupnames>A B C</groupnames>
                 <clustersrepeated>18 18 18</clustersrepeated>
                 <templatesrepeated>2 2 2</templatesrepeated>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 
-                    r,f,t,12 r,f,t,13 r,f,t,14 
-                    r,f,t,42 r,f,t,43 r,f,t,44 
-                    r,f,t,54 r,f,t,55 r,f,t,56 
-                    r,f,t,66 r,f,t,67 r,f,t,68 
-                    r,f,t,96 r,f,t,97 r,f,t,98 
- 
-                    r,f,t,0 r,f,t,1 r,f,t,2 
-                    r,f,t,12 r,f,t,13 r,f,t,14 
-                    r,f,t,42 r,f,t,43 r,f,t,44 
-                    r,f,t,54 r,f,t,55 r,f,t,56 
-                    r,f,t,66 r,f,t,67 r,f,t,68 
-                    r,f,t,96 r,f,t,97 r,f,t,98 
+                <group>r,f,t,0 r,f,t,1 r,f,t,2
+                    r,f,t,12 r,f,t,13 r,f,t,14
+                    r,f,t,42 r,f,t,43 r,f,t,44
+                    r,f,t,54 r,f,t,55 r,f,t,56
+                    r,f,t,66 r,f,t,67 r,f,t,68
+                    r,f,t,96 r,f,t,97 r,f,t,98
+
+                    r,f,t,0 r,f,t,1 r,f,t,2
+                    r,f,t,12 r,f,t,13 r,f,t,14
+                    r,f,t,42 r,f,t,43 r,f,t,44
+                    r,f,t,54 r,f,t,55 r,f,t,56
+                    r,f,t,66 r,f,t,67 r,f,t,68
+                    r,f,t,96 r,f,t,97 r,f,t,98
                 </group>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
-                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
- 
-                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
-                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17 
-                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47 
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47
+
+                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
+                    r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+                    r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47
                 </group>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
                     r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
                     r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
- 
-                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5 
+
+                    r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
                     r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
                     r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
                 </group>
             </conditiontemplatesbygroup>
             <randomchoices>2</randomchoices>
-            <initialpositions> 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_1 B_1 B_1 B_1 B_1 B_1 
- 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_1 B_1 B_1 B_1 B_1 B_1 
-                C_1 C_1 C_1 C_1 C_1 C_1 
-                C_1 C_1 C_1 C_1 C_1 C_1 
-                C_1 C_1 C_1 C_1 C_1 C_1 
- 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_1 B_1 B_1 B_1 B_1 B_1 
- 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_2 B_2 B_2 B_2 B_2 B_2 
- 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_2 B_2 B_2 B_2 B_2 B_2 
-                C_2 C_2 C_2 C_2 C_2 C_2 
-                C_2 C_2 C_2 C_2 C_2 C_2 
-                C_2 C_2 C_2 C_2 C_2 C_2 
- 
-                A_1 A_1 A_1 A_2 A_2 A_2 
-                B_2 B_2 B_2 B_2 B_2 B_2 
+            <initialpositions>
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_1 B_1 B_1 B_1 B_1 B_1
+
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_1 B_1 B_1 B_1 B_1 B_1
+                C_1 C_1 C_1 C_1 C_1 C_1
+                C_1 C_1 C_1 C_1 C_1 C_1
+                C_1 C_1 C_1 C_1 C_1 C_1
+
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_1 B_1 B_1 B_1 B_1 B_1
+
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_2 B_2 B_2 B_2 B_2 B_2
+
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_2 B_2 B_2 B_2 B_2 B_2
+                C_2 C_2 C_2 C_2 C_2 C_2
+                C_2 C_2 C_2 C_2 C_2 C_2
+                C_2 C_2 C_2 C_2 C_2 C_2
+
+                A_1 A_1 A_1 A_2 A_2 A_2
+                B_2 B_2 B_2 B_2 B_2 B_2
             </initialpositions>
             <randomizegroups>false</randomizegroups>
             <clusterlist>6-11</clusterlist>
@@ -371,6 +371,16 @@
     <unit>
         <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
         <unitname>Session 1 end</unitname>
+
+        <deliveryparams>
+            <lockoutminutes>2</lockoutminutes> <!-- 2 minutes -->
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>1440</lockoutminutes> <!-- 24 hours -->
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>10080</lockoutminutes> <!-- 24*7 = 7 days -->
+        </deliveryparams>
     </unit>
 
     <unit>
