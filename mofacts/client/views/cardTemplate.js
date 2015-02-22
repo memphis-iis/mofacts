@@ -298,26 +298,20 @@ function newQuestionHandler() {
     startOnRender = getCurrentTimer();
     start = startOnRender; //Will be reset if they are typing, but not for button trials
 
-    //for debugging, allow one to turn on or off the timeout code.
-
-    var AllowTimeouts = true;
-
-    if(AllowTimeouts) {
-        var length = getUserProgress().progressDataArray.length;
-        setQuestionTimeout();
-    }
-
-    if(getQuestionType() === "sound"){
-        playCurrentQuestionSound();
-    }
+    setQuestionTimeout();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
 
-    //$("#userAnswer").focus();
-    //All ready - time to allow them to enter data
-    allowUserInput();
+    if(getQuestionType() === "sound"){
+        //We don't allow user input until the sound is finished playing
+        playCurrentQuestionSound(allowUserInput);
+    }
+    else {
+        //Not a sound - can unlock now for data entry now
+        allowUserInput();
+    }
 }
 
 //Stop previous sound
