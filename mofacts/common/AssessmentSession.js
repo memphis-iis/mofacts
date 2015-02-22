@@ -38,8 +38,10 @@ AssessmentSession = {
      *       wrapper around createScheduleImpl
     */
     createSchedule: function(setspec, clusters, unitNumber, unit) {
+        var schedule;
+
         try {
-            return AssessmentSession.createScheduleImpl(setspec, clusters, unitNumber, unit);
+            schedule = AssessmentSession.createScheduleImpl(setspec, clusters, unitNumber, unit);
         }
         catch(e) {
             if (console && console.log) {
@@ -48,6 +50,21 @@ AssessmentSession = {
             }
             return null;
         }
+
+        //Here is where we can actually throw an exception back to our caller:
+        //Currently that's just if we create a schedule with null q entries
+        var nullCount = 0;
+        _.each(schedule.q, function(entry) {
+            if (entry === null) {
+                nullCount++;
+            }
+        });
+        if (nullCount > 0) {
+            console.log("About to throw exception for bad schedule", schedule);
+            throw "The newly created schedule contains " + nullCount + " null question entries";
+        }
+
+        return schedule;
     },
 
     //"Private" implmentation version of createSchedule - should really
