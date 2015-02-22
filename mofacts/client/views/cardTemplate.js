@@ -1,13 +1,9 @@
-//TODO: insure userselect = false before we deploy to server
-
 //TODO: document all deliveryparams fields for a unit and how we handle them,
 //      which will include the function getCurrentDeliveryParams
 
 //TODO: A lot of our helper functions in this module are based solely on the
 //      Session, the TDF, and/or stim data - they should be refactored to
 //      another file/module
-
-//TODO: schedule with null entries should create an error
 
 //TODO: elapsed, elapsedOnRender go away for:
 //      startLatency - time from question to first letter
@@ -32,8 +28,6 @@
  * */
 
 //TODO: whichStim in schedule should be logged with the trial
-
-//TODO: actual answer timeout is reset on keystroke
 
 //TODO: We have three separate ways of handling a TDF: scheduled with units,
 //      model-based (ACT-R), and "vanilla random". This file should refactor
