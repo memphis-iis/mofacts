@@ -40,9 +40,10 @@ function currLockOutMinutes() {
     var lockoutminutes = 0;
 
     if (deliveryParams && deliveryParams.lockoutminutes) {
-        lockoutminutes = Helpers.intVal(Helpers.firstElement(deliveryParams.lockoutminutes));
+        lockoutminutes = Helpers.intVal(deliveryParams.lockoutminutes);
     }
 
+    console.log("LOCKOUT:", lockoutminutes);
     return lockoutminutes;
 }
 

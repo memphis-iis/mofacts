@@ -98,7 +98,8 @@ getCurrentDeliveryParams = function () {
         purestudy: 0,
         skipstudy: false,
         reviewstudy: 0,
-        correctprompt: 0
+        correctprompt: 0,
+        lockoutminutes: 0,
     };
 
     var xlateBool = function(v) {
@@ -109,7 +110,8 @@ getCurrentDeliveryParams = function () {
         purestudy: Helpers.intVal,
         skipstudy: xlateBool,
         reviewstudy: Helpers.intVal,
-        correctprompt: Helpers.intVal
+        correctprompt: Helpers.intVal,
+        lockoutminutes: Helpers.intVal,
     };
 
     var currUnit = getCurrentTdfUnit();
