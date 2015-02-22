@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <lessonname>Learn Swahili!</lessonname>
-        <stimulusfile>EEGstims.xml</stimulusfile>
+        <stimulusfile>Swahilistims.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
         <clustersize>1</clustersize>
         <shuffleclusters>0-16</shuffleclusters>
