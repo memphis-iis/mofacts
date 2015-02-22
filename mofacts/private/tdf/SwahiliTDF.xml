@@ -8,6 +8,7 @@
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
+        <experimentTarget>swa</experimentTarget>
     </setspec>
 
     <unit>
@@ -24,7 +25,7 @@
             if no xcond is specified via URL
         -->
         <deliveryparams>
-            <lockoutminutes>60</lockoutminutes>
+            <lockoutminutes>1</lockoutminutes>
         </deliveryparams>
         <deliveryparams>
             <lockoutminutes>4320</lockoutminutes>
