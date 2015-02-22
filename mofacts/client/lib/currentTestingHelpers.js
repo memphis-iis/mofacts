@@ -7,13 +7,13 @@
  * */
 
 //Return the current stim file cluster
-function getStimCluster(index) {
+getStimCluster = function (index) {
     var file = Stimuli.findOne({fileName: getCurrentStimName()});
     return file.stimuli.setspec.clusters[0].cluster[index];
-}
+};
 
 //Return the current question type
-function getQuestionType() {
+getQuestionType = function () {
     var type = "text"; //Default type
 
     //If we get called too soon, we just use the first cluster
@@ -27,9 +27,9 @@ function getQuestionType() {
     }
 
     return ("" + type).toLowerCase();
-}
+};
 
-function findQTypeSimpified() {
+findQTypeSimpified = function () {
     var QType = getQuestionType();
 
     if      (QType == "text")  QType = "T";    //T for Text
@@ -38,43 +38,43 @@ function findQTypeSimpified() {
     else                       QType = "NA";   //NA for Not Applicable
 
     return QType;
-}
+};
 
-function getTestType(){
+getTestType = function () {
     return Helpers.trim(Session.get("testType")).toLowerCase();
-}
+};
 
-function getCurrentClusterIndex() {
+getCurrentClusterIndex = function () {
     return Session.get("clusterIndex");
-}
+};
 
 //get the question at this index
-function getStimQuestion(index, whichQuestion) {
+getStimQuestion = function (index, whichQuestion) {
     return getStimCluster(index).display[whichQuestion];
-}
+};
 
 //get the answer at this index
-function getStimAnswer(index, whichAnswer) {
+getStimAnswer = function (index, whichAnswer) {
     return getStimCluster(index).response[whichAnswer];
-}
+};
 
-function getCurrentStimName() {
+getCurrentStimName = function () {
     return Session.get("currentStimName");
-}
+};
 
-function getCurrentUnitNumber() {
+getCurrentUnitNumber = function () {
     return Session.get("currentUnitNumber");
-}
+};
 
-function getCurrentTdfName() {
+getCurrentTdfName = function () {
     return Session.get("currentTdfName");
-}
+};
 
-function getCurrentTdfFile() {
+getCurrentTdfFile = function () {
     return Tdfs.findOne({fileName: getCurrentTdfName()});
-}
+};
 
-function getCurrentTdfUnit() {
+getCurrentTdfUnit = function () {
     var thisTdf = getCurrentTdfFile();
     if (!thisTdf) {
         return null;
@@ -87,11 +87,11 @@ function getCurrentTdfUnit() {
     }
 
     return currUnit || null;
-}
+};
 
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
-function getCurrentDeliveryParams() {
+getCurrentDeliveryParams = function () {
     //Note that we will only extract values that have a specified default
     //value here.
     var deliveryParams = {
@@ -147,10 +147,10 @@ function getCurrentDeliveryParams() {
     }
 
     return deliveryParams;
-}
+};
 
 //Return the current button order as an array
-function getCurrentTdfButtonOrder() {
+getCurrentTdfButtonOrder = function () {
     //Our default value
     var btnOrder = [];
 
@@ -169,4 +169,4 @@ function getCurrentTdfButtonOrder() {
     }
 
     return btnOrder;
-}
+};
