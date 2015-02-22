@@ -112,7 +112,8 @@ Template.instructionsTemplate.events({
         //call back to redirect to the card display screen to make sure that
         //everything has been properly logged on the server
         recordUserTime("instructions", {
-            currentUnit: Session.get("currentUnitNumber")
+            currentUnit: Session.get("currentUnitNumber"),
+            xcondition: Session.get("experimentXCond")
         }, function(error, result) {
             //We know they'll need to resume now
             Session.set("needResume", true);
