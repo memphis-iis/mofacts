@@ -1,0 +1,111 @@
+<tutor>
+    <setspec>
+        <lessonname>Learn Swahili!</lessonname>
+        <stimulusfile>Swahilistims.xml</stimulusfile>
+        <clustermodel>structuralpairs</clustermodel>
+        <clustersize>1</clustersize>
+        <shuffleclusters>0-16</shuffleclusters>
+        <lfparameter>0.80</lfparameter>
+        <eeglogged>true</eeglogged>
+        <isModeled>false</isModeled>
+        <timeoutInSeconds>15</timeoutInSeconds>
+    </setspec>
+
+    <unit>
+        <unitname>Pre-Lock</unitname>
+        <unitinstructions>
+            Should not be locked
+        </unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Lock out test</unitname>
+        <lockoutminutes xcond="a">4320</lockoutminutes>
+        <lockoutminutes xcond="b">4320</lockoutminutes>
+        <unitinstructions>
+            <![CDATA[
+                You have completed Session 1. You must wait to begin Session 2.
+            ]]>
+        </unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Swahili Pre-test</unitname>
+        <unitinstructions>
+            <![CDATA[
+                Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.
+                Also, if you want to you can test this
+                <a href='https://www.google.com/'
+                   target="_blank"
+                >Special Link</a>
+            ]]>
+        </unitinstructions>
+        
+        <deliveryparams>
+            <purestudy>10000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>10000</reviewstudy>
+            <correctprompt>0</correctprompt>
+            <drill>80000</drill>
+        </deliveryparams>
+        
+        <buttontrial>true</buttontrial>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+            <groupnames>A</groupnames>
+            <clustersrepeated>1</clustersrepeated>
+            <templatesrepeated>17</templatesrepeated>
+            <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
+                A_15 A_16 A_17
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-16</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-16</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Swahili Pre-test</unitname>
+        <unitinstructions>
+            Let's see if you can remember the answers!
+        </unitinstructions>
+        
+        <deliveryparams>
+            <purestudy>10000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>10000</reviewstudy>
+            <correctprompt>0</correctprompt>
+            <drill>80000</drill>
+        </deliveryparams>
+        
+        <buttontrial>false</buttontrial> <!-- fill in the blank -->
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+            <groupnames>A</groupnames>
+            <clustersrepeated>1</clustersrepeated>
+            <templatesrepeated>17</templatesrepeated>
+            <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+                0,f,d,0 0,f,d,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
+                A_15 A_16 A_17
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-16</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-16</permutefinalresult>
+        </assessmentsession>
+    </unit>
+</tutor>
