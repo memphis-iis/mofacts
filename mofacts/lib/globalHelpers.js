@@ -5,6 +5,13 @@
 // before code in other dirs, but currently we only defined these functions
 // on the client
 
+//Poly-fills for missing functionality
+if (!Date.now) {
+    Date.now = function now() {
+        return new Date().getTime();
+    };
+}
+
 //Card probabilities setup and retrieval - used by ACT-R model
 //Note that this is only used on the client, but we want to make sure that
 //setting the cardProbabilities data structure is always available (and

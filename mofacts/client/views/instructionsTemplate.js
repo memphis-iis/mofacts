@@ -34,29 +34,13 @@ function leavePage(dest) {
 ////////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
-//Return currently references TDF unit
-function currTdfUnit() {
-    var thisTdf = Tdfs.findOne({fileName: Session.get("currentTdfName")});
-    if (!thisTdf) {
-        return null;
-    }
-
-    var currUnit = null;
-    if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-        var unitIdx = Session.get("currentUnitNumber");
-        currUnit = thisTdf.tdfs.tutor.unit[unitIdx];
-    }
-
-    return currUnit || null;
-}
-
 //Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-    var currUnit = currTdfUnit();
+    var deliveryParams = getCurrentDeliveryParams();
     var lockoutminutes = 0;
 
-    if (currUnit && currUnit.lockoutminutes) {
-        lockoutminutes = Helpers.intVal(Helpers.firstElement(currUnit.lockoutminutes));
+    if (deliveryParams && deliveryParams.lockoutminutes) {
+        lockoutminutes = Helpers.intVal(Helpers.firstElement(deliveryParams.lockoutminutes));
     }
 
     return lockoutminutes;
@@ -157,7 +141,7 @@ Template.instructionsTemplate.events({
 
 Template.instructionsTemplate.helpers({
     backgroundImage: function() {
-        var currUnit = currTdfUnit();
+        var currUnit = getCurrentTdfUnit();
         var img = "";
 
         if (currUnit && currUnit.picture) {
@@ -168,7 +152,7 @@ Template.instructionsTemplate.helpers({
     },
 
     instructions: function () {
-        var currUnit = currTdfUnit();
+        var currUnit = getCurrentTdfUnit();
         var instructions = null;
 
         if (currUnit) {
