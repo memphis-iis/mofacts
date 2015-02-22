@@ -91,6 +91,9 @@ getCurrentTdfUnit = function () {
 
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
+//
+//IMPORTANT: we also support selecting one of multiple delivery params via
+//experimentXCond (which is specified in the URL)
 getCurrentDeliveryParams = function () {
     //Note that we will only extract values that have a specified default
     //value here.
@@ -120,13 +123,18 @@ getCurrentDeliveryParams = function () {
 
     if (!!currUnit) {
         var found = null;
-        try {
-            found = Helpers.firstElement(currUnit.deliveryparams);
-        }
-        catch(err) {
-            //Nothing - we don't a unit or the unit doesn't have del parms
+
+        if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
+            //Note that if there is no XCond or if they specify something
+            //wacky we'll just go with index 0
+            var xcondIndex = Helpers.intVal(Session.get("experimentXCond"));
+            if (xcondIndex < 0 || xcondIndex >= currUnit.deliveryparams.length) {
+                xcondIndex = 0; //Incorrect index gets 0
+            }
+            found = currUnit.deliveryparams[xcondIndex];
         }
 
+        //If found del params, then use any values we find
         if (found) {
             for(fieldName in deliveryParams) {
                 var fieldVal = Helpers.firstElement(found[fieldName]);
@@ -144,7 +152,9 @@ getCurrentDeliveryParams = function () {
         for(fieldName in deliveryParams) {
             var currVal = deliveryParams[fieldName];
             var xlation = xlations[fieldName];
-            deliveryParams[fieldName] = xlation(currVal);
+            if (xlation) {
+                deliveryParams[fieldName] = xlation(currVal);
+            }
         }
     }
 
