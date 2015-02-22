@@ -89,7 +89,7 @@ function lockoutPeriodicCheck() {
         //Still locked
 
         //Figure out how to display time remaining
-        var timeLeft = lockFreeTime - Date.now(); //Start in ms
+        var timeLeft = lockoutFreeTime - Date.now(); //Start in ms
 
         timeLeft = Math.floor(timeLeft / 1000);
         var secs = timeLeft % 60;
@@ -100,7 +100,7 @@ function lockoutPeriodicCheck() {
         timeLeft = Math.floor(timeLeft / 24);
         var days = timeLeft;
 
-        var timeLeftDisplay = "Time Remaining:";
+        var timeLeftDisplay = "Time Remaining: ";
         if (days > 0) {
             timeLeftDisplay += days.toString() + " days, ";
         }
@@ -111,7 +111,7 @@ function lockoutPeriodicCheck() {
         //Insure they can see the lockout message, update the time remaining
         //message, and disable the continue button
         $("#lockoutDisplay").show();
-        $("#lockoutTimeRemaining").text("Time Remaining: " + timeLeftDisplay);
+        $("#lockoutTimeRemaining").text(timeLeftDisplay);
         $("#continueButton").prop("disabled", true);
     }
 }
