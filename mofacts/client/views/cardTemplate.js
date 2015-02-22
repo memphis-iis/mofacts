@@ -306,6 +306,7 @@ function newQuestionHandler() {
 
     if(getQuestionType() === "sound"){
         //We don't allow user input until the sound is finished playing
+        stopUserInput();
         playCurrentQuestionSound(allowUserInput);
     }
     else {
