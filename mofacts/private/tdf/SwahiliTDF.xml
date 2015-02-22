@@ -6,7 +6,6 @@
         <clustersize>1</clustersize>
         <shuffleclusters>0-16</shuffleclusters>
         <lfparameter>0.80</lfparameter>
-        <eeglogged>true</eeglogged>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
     </setspec>
@@ -20,10 +19,14 @@
 
     <unit>
         <unitname>Lock out test</unitname>
-        <lockoutminutes xcond="a">4320</lockoutminutes>
-        <lockoutminutes xcond="b">4320</lockoutminutes>
+
+        <deliveryparams>
+            <lockoutminutes>4320</lockoutminutes>
+        </deliveryparams>
+
         <unitinstructions>
             <![CDATA[
+                <em>xcond A:</em>
                 You have completed Session 1. You must wait to begin Session 2.
             ]]>
         </unitinstructions>
@@ -40,15 +43,14 @@
                 >Special Link</a>
             ]]>
         </unitinstructions>
-        
+
         <deliveryparams>
             <purestudy>10000</purestudy>
-            <readyprompt>0</readyprompt>
+            <skipstudy>false</skipstudy>
             <reviewstudy>10000</reviewstudy>
-            <correctprompt>0</correctprompt>
-            <drill>80000</drill>
+            <correctprompt>500</correctprompt>
         </deliveryparams>
-        
+
         <buttontrial>true</buttontrial>
 
         <assessmentsession>
@@ -77,15 +79,14 @@
         <unitinstructions>
             Let's see if you can remember the answers!
         </unitinstructions>
-        
+
         <deliveryparams>
             <purestudy>10000</purestudy>
-            <readyprompt>0</readyprompt>
+            <skipstudy>false</skipstudy>
             <reviewstudy>10000</reviewstudy>
-            <correctprompt>0</correctprompt>
-            <drill>80000</drill>
+            <correctprompt>500</correctprompt>
         </deliveryparams>
-        
+
         <buttontrial>false</buttontrial> <!-- fill in the blank -->
 
         <assessmentsession>
