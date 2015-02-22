@@ -18,6 +18,7 @@ function clearLockoutInterval() {
         Meteor.clearInterval(lockoutInterval);
     }
     lockoutInterval = null;
+    lockoutFreeTime = null;
 }
 
 function leavePage(dest) {
@@ -55,7 +56,7 @@ function currLockOutMinutes() {
     var lockoutminutes = 0;
 
     if (currUnit && currUnit.lockoutminutes) {
-        lockoutminutes = Helpers.intVal(currUnit.lockoutminutes);
+        lockoutminutes = Helpers.intVal(Helpers.firstElement(currUnit.lockoutminutes));
     }
 
     return lockoutminutes;
@@ -64,17 +65,54 @@ function currLockOutMinutes() {
 //Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
-        //TODO: figure out time to free the lockout
+        var lastTimestamp = Session.get("lastTimestamp");
+        if (!lastTimestamp) {
+            lastTimestamp = Date.now();
+        }
+
+        var lockoutMins = currLockOutMinutes();
+        if (lockoutMins) {
+            var lockoutMs = lockoutMins * (60 * 1000); //Minutes to millisecs
+            lockoutFreeTime = lastTimestamp + lockoutMs;
+        }
     }
 
     if (Date.now() >= lockoutFreeTime) {
-        //TODO: blank time remaining
-        //TODO: enable continue button
+        //All done - clear out time remaining, hide the display, enable the
+        //continue button, and stop the lockout timer
+        $("#lockoutTimeRemaining").html("");
+        $("#lockoutDisplay").hide();
+        $("#continueButton").prop("disabled", false);
         clearLockoutInterval();
     }
     else {
-        //TODO: update time remaining
-        //TODO: insure continue button disabled
+        //Still locked
+
+        //Figure out how to display time remaining
+        var timeLeft = lockFreeTime - Date.now(); //Start in ms
+
+        timeLeft = Math.floor(timeLeft / 1000);
+        var secs = timeLeft % 60;
+        timeLeft = Math.floor(timeLeft / 60);
+        var mins = timeLeft % 60;
+        timeLeft = Math.floor(timeLeft / 60);
+        var hrs  = timeLeft % 24;
+        timeLeft = Math.floor(timeLeft / 24);
+        var days = timeLeft;
+
+        var timeLeftDisplay = "Time Remaining:";
+        if (days > 0) {
+            timeLeftDisplay += days.toString() + " days, ";
+        }
+        timeLeftDisplay += hrs.toString()  + " hours, " +
+                           mins.toString() + " minutes, " +
+                           secs.toString() + " seconds";
+
+        //Insure they can see the lockout message, update the time remaining
+        //message, and disable the continue button
+        $("#lockoutDisplay").show();
+        $("#lockoutTimeRemaining").text("Time Remaining: " + timeLeftDisplay);
+        $("#continueButton").prop("disabled", true);
     }
 }
 

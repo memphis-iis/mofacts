@@ -6,7 +6,7 @@
 //Because the experiment key is used multiple places, we centralize it here.
 //By default we assume that they just want the "raw" version suitable for
 //using for a Meteor.call("userTime", ...) call. However, if fixForDirectAccess
-//it true(-ish), we'll fix up the value we return
+//is true(-ish), we'll fix up the value we return
 userTimesExpKey = function(fixForDirectAccess) {
     //NOTE: we use currentRootTdfName instead of currentTdfName so multiple
     //experimental conditions log to the same base TDF

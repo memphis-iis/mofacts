@@ -12,18 +12,19 @@
  * currentStimName
  * currentUnitNumber
  * debugging                 - Generic debugging flag
- * isScheduledTest
- * loginMode                 - untouched in sessionCleanUp
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
+ * isScheduledTest
+ * lastTimestamp             - set only by resume logic in cardTemplate
+ * loginMode                 - untouched in sessionCleanUp
  * needResume
  * questionIndex
  * showOverlearningText
  * statsAnswerDetails        - Used by stats page template
- * statsRendered             - Used by stats page template
  * statsCorrect              - Used by stats page template
- * statsTotal                - Used by stats page template
  * statsPercentage           - Used by stats page template
+ * statsRendered             - Used by stats page template
+ * statsTotal                - Used by stats page template
  * statsUserTimeLogView      - User by stats page template
  * testType
  * usingACTRModel
@@ -40,6 +41,7 @@ sessionCleanUp = function() {
     Session.set("currentQuestion", undefined);
     Session.set("currentUnitNumber", 0);
     Session.set("isScheduledTest", undefined);
+    Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
     Session.set("showOverlearningText", undefined);

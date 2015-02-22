@@ -1238,6 +1238,7 @@ function resumeFromUserTimesLog() {
     Session.set("currentQuestion", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
+    Session.set("lastTimestamp", 0);
 
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
@@ -1373,6 +1374,10 @@ function processUserTimesLog() {
 
         //Only examine the messages that we care about
         var action = Helpers.trim(entry.action).toLowerCase();
+
+        //Generally we use the last timestamp for our major actions. This will
+        //currently only be set to false in the default/fall-thru else block
+        var recordTimestamp = true;
 
         if (action === "instructions") {
             //They've been shown instructions for this unit
@@ -1521,7 +1526,12 @@ function processUserTimesLog() {
         }
 
         else {
+            recordTimestamp = false; //Don't use the timestamp for this one
             console.log("Ignoring user times log entry with action", action);
+        }
+
+        if (recordTimestamp && entry.clientSideTimeStamp) {
+            Session.set("lastTimestamp", entry.clientSideTimeStamp);
         }
     });
 

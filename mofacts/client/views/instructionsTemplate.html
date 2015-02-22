@@ -40,10 +40,17 @@
             <div class="form-group">
                 <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
                     {{#if islockout}}
-                        TODO: lockout for {{lockoutminutes}} minutes
-                    {{else}}
-                        <button type="button" id="continueButton" class="btn btn-primary">Continue</button>
+                        <div id="lockoutDisplay">
+                            <h3 id="lockoutMessage">
+                                The rest of the content has been locked until a
+                                certain amount of time has elapsed.
+                            </h3>
+                            <h2 id="lockoutTimeRemaining">&nbsp;</h2>
+                        </div>
                     {{/if}}
+                    <button type="button" id="continueButton" class="btn btn-primary">
+                        Continue
+                    </button>
                 </div>
             </div>
         </div>
