@@ -194,7 +194,10 @@ AssessmentSession = {
                             condition += "-" + "H";
                         }
 
-                        var pairNum = settings.clusterSize * clusterNum + offset;
+                        //Note that the offset is to one of the display/response pairs in
+                        //cluster[pairNum], which is different from FaCT - and implies
+                        //that we currently only support a clusterSize of 1
+                        var pairNum = settings.clusterSize * clusterNum;
                         setQuest(firstPos + location, type, pairNum, condition, offset);
                     } //offset is Model or something else?
                 } //k (walk thru group elements)
@@ -256,17 +259,24 @@ AssessmentSession = {
             return settings;
         }
 
-        var assess = Helpers.firstElement(unit.assessmentsession);
-        if (!assess) {
+        var rawAssess = Helpers.firstElement(unit.assessmentsession);
+        if (!rawAssess) {
             return settings;
         }
+
+        //Everything comes from the asessment session as a single-value array,
+        //so just parse all that right now
+        var assess = {};
+        _.each(rawAssess, function(val, name) {
+            assess[name] = Helpers.firstElement(val);
+        });
 
         //Some simple helpers for parsing
         var parseVals = function(src, dest) {
             if (!src) {
                 return;
             }
-            var fields = Helpers.trim(src).split(" ");
+            var fields = Helpers.trim(src).split(/\s/);
             for(var i = 0; i < fields.length; ++i) {
                 var fld = Helpers.trim(fields[i]);
                 if (fld && fld.length > 0) {
@@ -280,20 +290,6 @@ AssessmentSession = {
             return Helpers.display(src).toLowerCase() === "true";
         };
 
-        //Some fields are stored as array due to XML/JSON mapping but we really
-        //only need to look for a single valued array and take that value
-        var arrVal = function(src) {
-            var ret = null;
-            try {
-                if (src && src.length) {
-                    ret = src[0];
-                }
-            }
-            catch(e) {
-            }
-            return ret;
-        };
-
         //Get the setspec settings first
         settings.clusterSize = Helpers.intVal(setspec.clustersize);
         settings.specType = Helpers.display(setspec.clustermodel);
@@ -304,16 +300,20 @@ AssessmentSession = {
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
         settings.ranChoices = Helpers.intVal(assess.randomchoices);
-        settings.isButtonTrial = boolVal(arrVal(unit.buttontrial));
+        settings.isButtonTrial = boolVal(Helpers.firstElement(unit.buttontrial));
 
-        //Condition by group
-        by_group = Helpers.firstElement(assess.conditiontemplatesbygroup);
+        //Condition by group, but remove the default single-val arrays
+        //NOTE: since there could be 0-N group entries, we leave that as an array
+        var by_group = {};
+        _.each(assess.conditiontemplatesbygroup, function(val, name) {
+            by_group[name] = name === "group" ? val : Helpers.firstElement(val);
+        });
+
         if (by_group) {
             parseVals(by_group.groupnames,        settings.groupNames);
             parseVals(by_group.clustersrepeated,  settings.templateSizes);
             parseVals(by_group.templatesrepeated, settings.numTemplatesList);
             parseVals(by_group.initialpositions,  settings.initialPositions);
-
 
             _.each(by_group.group, function(tdf_group) {
                 var new_group = [];
@@ -324,7 +324,7 @@ AssessmentSession = {
             });
 
             if (settings.groups.length != settings.groupNames.length) {
-                console.log("WARNING! Num group names doesn't match num groups", setting.groupNames, settings.groups);
+                console.log("WARNING! Num group names doesn't match num groups", settings.groupNames, settings.groups);
             }
         }
 
@@ -338,7 +338,7 @@ AssessmentSession = {
         for (var i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {
-                settings.clusterNumbers.push(nums[j]);
+                settings.clusterNumbers.push(Helpers.intVal(nums[j]));
             }
         }
 

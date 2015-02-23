@@ -23,8 +23,6 @@
 }
  * */
 
-//TODO: whichStim in schedule should be logged with the trial
-
 //TODO: We have three separate ways of handling a TDF: scheduled with units,
 //      model-based (ACT-R), and "vanilla random". This file should refactor
 //      the vanilla random functionality into an object. Then we can extract
@@ -652,8 +650,8 @@ function randomCard() {
     //set the question and answer
     Session.set("clusterIndex", nextCardIndex);
     Session.set("testType", "d"); //No test type given
-    Session.set("currentQuestion", getStimQuestion(nextCardIndex, 1));
-    Session.set("currentAnswer", getStimAnswer(nextCardIndex, 1));
+    Session.set("currentQuestion", getStimQuestion(nextCardIndex, 0));
+    Session.set("currentAnswer", getStimAnswer(nextCardIndex, 0));
 
     recordUserTimeQuestion({
         selType: "random"
@@ -693,7 +691,8 @@ function scheduledCard() {
     Session.set("questionIndex", questionIndex + 1);
 
     recordUserTimeQuestion({
-        selType: "schedule"
+        selType: "schedule",
+        whichStim: whichStim
     });
 
     newQuestionHandler();

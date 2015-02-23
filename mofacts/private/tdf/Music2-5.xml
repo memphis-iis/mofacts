@@ -4,7 +4,7 @@
         <lessonname>Music2-0</lessonname>
         <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>Music2stim.xml</stimulusfile>
-        <clustermodel>structuralpairs</clustermodel>
+        <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
