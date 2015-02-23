@@ -100,8 +100,23 @@
         <div class="col-xs-1  col-sm-1  col-md-2 col-lg-3">&nbsp;</div>
     </div>
 
+    {{#if isInRole 'teacher'}}
     <div class="row">
-        <div hidden  class="span5 offset2" style="text-align: center;" id="overlearningRow">
+        <div class="col-lg-12 visible-text text-center">
+            {{#if currentAnswer}}
+                <h5>
+                    Teacher Aid: {{currentAnswer}}
+                </h5>
+            {{/if}}
+            {{#if currentProgress}}
+                <h5>Current Progress: {{currentProgress}}</h5>
+            {{/if}}
+        </div>
+    </div>
+    {{/if}}
+
+    <div class="row">
+        <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
             <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
             <button id="overlearningButton" type="button" class="btn btn-primary" style="width: auto;">Home</button>
         </div>

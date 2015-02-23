@@ -14,3 +14,7 @@ UI.registerHelper('currentQuestion', function () {
 UI.registerHelper('currentAnswer', function () {
     return Session.get("currentAnswer");
 });
+
+UI.registerHelper('currentProgress', function () {
+    return Session.get("questionIndex");
+});

@@ -80,6 +80,7 @@ Meteor.startup(function () {
     _.each(
         _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
         function(ele, idx, lst) {
+            console.log("Updating Stim in DB from ", ele);
             var json = getStimJSON('stims/' + ele);
             Stimuli.remove({fileName: ele});
             Stimuli.insert({fileName: ele, stimuli: json});
@@ -89,6 +90,7 @@ Meteor.startup(function () {
     _.each(
         _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
         function(ele, idx, lst) {
+            console.log("Updating TDF in DB from ", ele);
             var json = getStimJSON('tdf/' + ele);
             Tdfs.remove({fileName: ele});
             Tdfs.insert({fileName: ele, tdfs: json});
