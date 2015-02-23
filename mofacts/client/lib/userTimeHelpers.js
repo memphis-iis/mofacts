@@ -35,6 +35,10 @@ recordUserTime = function(action, extendedData, callback) {
         console.log("userTime", testName, action, dataRec);
     }
 
+    if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], action)) {
+        Session.set("lastTimestamp", dataRec.clientSideTimeStamp);
+    }
+
     if (!!callback) {
         Meteor.call("userTime", testName, dataRec, callback);
     }
