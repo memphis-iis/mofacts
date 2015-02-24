@@ -567,7 +567,9 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
     //their review period
     if (isDrill && !isCorrect) {
         //Cheat and inject a review message
-        $("#UserInteraction").append($("<p>&nbsp;</p><p class='text-danger'>Please Review</p>"));
+        $("#UserInteraction").append(
+            $("<p class='text-danger'></p>").html("") //No review message currently
+        );
     }
 
     return isCorrect;
