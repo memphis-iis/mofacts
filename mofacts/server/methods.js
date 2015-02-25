@@ -44,8 +44,6 @@ function getRoles(fileName) {
     return future.wait();
 }
 
-//TODO: move sign up logic to a server method so we don't have to publish
-//      all user info to everyone
 
 //Published to all clients (even without subscription calls)
 //TODO: This needs to change based on current user ID and role

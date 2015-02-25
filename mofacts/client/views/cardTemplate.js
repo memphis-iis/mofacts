@@ -23,18 +23,6 @@
 }
  * */
 
-//TODO: We have three separate ways of handling a TDF: scheduled with units,
-//      model-based (ACT-R), and "vanilla random". This file should refactor
-//      the vanilla random functionality into an object. Then we can extract
-//      the schedule and model logic into separate files - resumeFromUserTimes
-//      would either use the default object or _.extend it with one of the other
-//      two objects
-
-//TODO: It would be nice to have some debugging tools - if you are admin or
-//      teacher, you should be able to:
-//      - Rewrite history to set an experimental condition
-//      - Fast forward through a unit so you can get to later units faster
-//      - See the card probabilities in a popup to check what's going on
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
