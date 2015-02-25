@@ -22,8 +22,10 @@
                         <li><a href="#" class="homeLink">Home</a></li>
                         <li class="divider"></li>
                         <li><a href="#" class="logoutLink">Logout</a></li>
+                        {{#if isInRole 'admin,teacher'}}
                         <li class="divider"></li>
-                        <li><a href="#" class="statsPageLink">Results</a></li>
+                        <li><a href="#" class="statsPageLink">Results and Stats</a></li>
+                        {{/if}}
                     </ul>
                 </li>
             </ul>

@@ -1,3 +1,6 @@
+//TODO: if our admin/teacher-only stats page were cleaned up, then it would
+//      be nice to support a unit that displayed that kind of information
+
 //TODO: document all deliveryparams fields for a unit and how we handle them,
 //      which will include the function getCurrentDeliveryParams
 
@@ -614,9 +617,9 @@ function prepareCard() {
                 leavePage("/instructions");
             }
             else {
-                //We have run out of units
+                //We have run out of units - return home for now
                 console.log("UNIT FINISHED: No More Units");
-                leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
+                leavePage("/profile");
             }
 
             return;
@@ -738,7 +741,7 @@ function getSchedule() {
             });
             alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
             clearCardTimeout();
-            leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
+            leavePage("/profile");
             return;
         }
 
@@ -1252,7 +1255,7 @@ function processUserTimesLog() {
                 });
                 alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
                 clearCardTimeout();
-                leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
+                leavePage("/profile");
                 return;
             }
 
