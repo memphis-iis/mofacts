@@ -23,10 +23,6 @@ Template.signUpTemplate.events({
             checks.push("#usernameTooShort");
         }
 
-        if(typeof Meteor.users.findOne({username: formUsername}) !== "undefined") {
-            checks.push("#usernameAlreadyInUse");
-        }
-
         //"Regular" password checks
         if (formPassword1.length < 6) {
             checks.push("#passwordTooShort");
@@ -44,26 +40,50 @@ Template.signUpTemplate.events({
             return;
         }
 
-        Accounts.createUser({username: formUsername, password: formPassword1}, function (error) {
-            if(typeof error !== "undefined") {
-                console.log("Error creating the user account for user:", formUserName, error);
-                alert("Unfortunately, a user account for " + formUserName + " could not be created: " + error);
+        Meteor.call("signUpUser", formUsername, formPassword1, function(error, result) {
+            var errorMsgs = [];
+
+            if (typeof error !== "undefined") {
+                errorMsgs.push(error);
+            }
+
+            if (!!result && result.length) {
+                _.each(result, function(msg) {
+                    errorMsgs.push(msg);
+                });
+            }
+
+            //If there was a call failure or server returned error message,
+            //then we can't proceed
+            if (errorMsgs.length > 0) {
+                var serverErrors = $("#serverErrors")
+                    .html(errorMsgs.join("<br>"))
+                    .show();
                 return;
             }
 
-            //Clean up and init the session
+            //Everything was OK if we make it here - now we init the session,
+            //login, and proceed to the pofile screen
+
             sessionCleanUp();
 
-            var newUserID = Meteor.userId();
-            if(newUserID === null) {
-                //This means that we have an issue of some kind - but there's
-                //nothing that we can do? We'll just fall thru for now since
-                //we don't have a good way to fix this
-                console.log("ERROR: The user was not logged in on account creation?", formUsername);
-                alert("It appears that you couldn't be logged in as " + formUserName);
-            }
-
-            Router.go("/profile");
+            Meteor.loginWithPassword(formUsername, formPassword1, function(error) {
+                if (typeof error !== 'undefined') {
+                    //This means that we have an issue of some kind - but there's
+                    //nothing that we can do? We'll just fall thru for now since
+                    //we don't have a good way to fix this
+                    console.log("ERROR: The user was not logged in on account creation?", formUsername);
+                    alert("It appears that you couldn't be logged in as " + formUserName);
+                }
+                else {
+                    if (Session.get("debugging")) {
+                        var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+                        console.log(currentUser + " was logged in successfully!");
+                        Meteor.call("debugLog", "Sign in was successful");
+                    }
+                    Router.go("/profile");
+                }
+            });
         });
     },
 
@@ -73,14 +93,6 @@ Template.signUpTemplate.events({
         }
         else {
             $("#usernameTooShort").hide();
-        }
-
-        var userWithGivenUsername = Meteor.users.findOne({username: signUpUsername.value});
-        if(userWithGivenUsername) {
-            $("#usernameAlreadyInUse").show();
-        }
-        else {
-            $("#usernameAlreadyInUse").hide();
         }
     },
 

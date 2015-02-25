@@ -49,12 +49,16 @@ function getRoles(fileName) {
 
 //Published to all clients (even without subscription calls)
 //TODO: This needs to change based on current user ID and role
-Meteor.publish(null, function (){
-    //The default data published to everyone
+Meteor.publish(null, function () {
+    //Only valid way to get the user ID for publications
+    var userId = this.userId;
+
+    //The default data published to everyone - all TDF's and stims, and the
+    //user times data for them
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({})
+        UserTimesLog.find({_id:userId})
     ];
 
     /* TODO: when the server-method version of sign up is complete, put this back in
@@ -116,6 +120,40 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+
+        //Functionality to create a new user ID: return null on success. Return
+        //an array of error messages on failure
+        signUpUser: function(newUserName, newUserPassword) {
+            var checks = [];
+
+            if (!newUserName) {
+                checks.push("Blank user names aren't allowed");
+            }
+            else if(typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
+                checks.push("User is already in use");
+            }
+
+            if (!newUserPassword || newUserPassword.length < 6) {
+                checks.push("Passwords must be at least 6 characters long");
+            }
+
+            if (checks.length > 0) {
+                return checks; //Nothing to create
+            }
+
+            //Now we can actually create the user
+            //Note that on the server we just get back the ID and have nothing
+            //to do right now
+            var createdId = Accounts.createUser({username: newUserName, password: newUserPassword});
+
+            //Remeber we return a LIST of errors
+            if (!createdId) {
+                return ["Unknown failure creating user account"];
+            }
+            else {
+                return null;
+            }
+        },
 
         //New functionality for logging to the DB
         userTime: function(experiment, objectsToLog) {
