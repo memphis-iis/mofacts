@@ -222,8 +222,9 @@ legend {
 
 .instruction-text {
     font-family: 'Lato', Arial, sans-serif;
-    font-size: 16pt;
+    font-size: 18pt;
     color: #000;
+    padding-bottom: 2em;
 }
 
 #textQuesiton {

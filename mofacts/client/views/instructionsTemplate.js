@@ -182,7 +182,7 @@ Template.instructionsTemplate.helpers({
     },
     
     havemoreunits: function() {
-        return getUnitsRemaining > 0;
+        return getUnitsRemaining() > 0;
     },
 });
 
