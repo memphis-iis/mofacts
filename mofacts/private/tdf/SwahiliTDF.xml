@@ -12,9 +12,9 @@
     </setspec>
 
     <unit>
-        <unitname>Pre-Lock</unitname>
+        <unitname>Instructions</unitname>
         <unitinstructions>
-            Should not be locked
+            Welcome to a basic lesson on Swahili!
         </unitinstructions>
     </unit>
 
@@ -36,7 +36,7 @@
 
         <unitinstructions>
             <![CDATA[
-                You have completed Session 1. You must wait to begin Session 2.
+                Please for a few minutes before continuing
             ]]>
         </unitinstructions>
     </unit>
@@ -117,5 +117,12 @@
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
+    </unit>
+    
+    <unit>
+        <unitname>Final</unitname>
+        <unitinstructions>
+            You have completed all the units that are available
+        </unitinstructions>
     </unit>
 </tutor>
