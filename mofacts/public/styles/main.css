@@ -220,6 +220,12 @@ legend {
 	font-family: 'Lato', sans-serif;
 }
 
+.instruction-text {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 16pt;
+    color: #000;
+}
+
 #textQuesiton {
 	font-family: 'Lato', sans-serif;
 }

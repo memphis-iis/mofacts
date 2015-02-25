@@ -89,6 +89,31 @@ getCurrentTdfUnit = function () {
     return currUnit || null;
 };
 
+//Get units left to display/execute - note that the current unit isn't
+//counted. Ex: if you have three units (0, 1, 2) and unit 1 is the current
+//unit, then you have 1 unit remaining. If there are no units or there is
+//we return 0
+getUnitsRemaining = function() {
+    var unitsLeft = 0;
+
+    var thisTdf = getCurrentTdfFile();
+    if (!!thisTdf) {
+        var unitCount = 0;
+        if (typeof thisTdf.tdfs.tutor.unit !== "undefined" && thisTdf.tdfs.tutor.unit.length) {
+            unitCount = thisTdf.tdfs.tutor.unit.length;
+        }
+        if (unitCount > 0) {
+            var unitIdx = getCurrentUnitNumber() || 0;
+            unitsLeft = (unitCount - unitIdx) - 1;
+            if (unitsLeft < 0) {
+                unitsLeft = 0;
+            }
+        }
+    }
+
+    return unitsLeft;
+};
+
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
 //

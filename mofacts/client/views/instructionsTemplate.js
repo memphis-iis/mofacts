@@ -180,6 +180,10 @@ Template.instructionsTemplate.helpers({
             return Meteor.user().username;
         }
     },
+    
+    havemoreunits: function() {
+        return getUnitsRemaining > 0;
+    },
 });
 
 Template.instructionsTemplate.rendered = function() {
