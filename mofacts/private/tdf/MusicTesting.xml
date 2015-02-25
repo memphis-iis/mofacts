@@ -1,0 +1,60 @@
+<tutor>
+    <setspec>
+        <name>Music Interval Testing</name>
+        <lessonname>MusicIntTesting</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>Music2stim.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <isModeled>false</isModeled>
+        <timeoutInSeconds>15</timeoutInSeconds>
+        <buttonorder>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonorder>
+    </setspec>
+
+    <unit>
+        <unitname>Introduction</unitname>
+        <picture>/resources/images/IntervalInstructions.jpg</picture>
+    </unit>
+
+    <unit>
+        <unitname>Minor 3rd</unitname>
+        <unitinstructions> Click the OK button to hear one example of a minor 3rd as a harmony and as a melody (not necessarily in that order).
+        </unitinstructions>
+        <deliveryparams>
+            <purestudy>3000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>r,f,s,0 r,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomchoices>3</randomchoices>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-0 6-6</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-1</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions><![CDATA[
+            You have now completed the posttest. Please complete the survey located here
+            <a href='https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form'
+               target="_blank"
+               >https://docs.google.com/forms/d/1q020_MDsqTo88PMUFs6pvZ3QmyLHyR35E5pa96-M0B4/viewform?usp=send_form</a>.
+            We will evaluate your response within a few days for consideration of the $3 bonus.  ]]></unitinstructions>
+    </unit>
+</tutor>
