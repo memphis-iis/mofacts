@@ -215,7 +215,7 @@
 
             Listen to each sound, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
 
-            This pretest will get an initial measure of your skill in the task, and will be followed by 108 practice sounds, and (either 1 or 7 days later) a posttest of 72 sounds.
+            This pretest will get an initial measure of your skill in the task, and will be followed by 108 practice sounds, and (either 2 minutes, 1 day, or 7 days later) a posttest of 72 sounds.
         </unitinstructions>
         <deliveryparams>
             <purestudy>3000</purestudy>
@@ -370,7 +370,11 @@
     </unit>
 
     <unit>
-        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. 
+        
+        If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
+        
+        If the countdown below is 1 day or 7 days: No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2.</unitinstructions>
         <unitname>Session 1 end</unitname>
 
         <deliveryparams>
