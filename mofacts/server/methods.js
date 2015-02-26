@@ -46,29 +46,18 @@ function getRoles(fileName) {
 
 
 //Published to all clients (even without subscription calls)
-//TODO: This needs to change based on current user ID and role
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
     var userId = this.userId;
 
     //The default data published to everyone - all TDF's and stims, and the
-    //user times data for them
+    //user data (user times log and user record) for them
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({_id:userId})
+        UserTimesLog.find({_id:userId}),
+        Meteor.users.find({_id:userId})
     ];
-
-    /* TODO: when the server-method version of sign up is complete, put this back in
-    //Everyone can see themselves
-    var userQuery = { _id: this.userId };
-    var user = Meteor.users.findOne(userQuery);
-    if (Roles.userIsInRole(user, ["admin"])) {
-        userQuery = {}; //Let admins see other people
-    }
-    defaultData.push(Meteor.users.find(userQuery));
-    */
-    defaultData.push(Meteor.users.find({}));
 
     return defaultData;
 });
@@ -120,15 +109,19 @@ Meteor.startup(function () {
     Meteor.methods({
 
         //Functionality to create a new user ID: return null on success. Return
-        //an array of error messages on failure
-        signUpUser: function(newUserName, newUserPassword) {
+        //an array of error messages on failure. If previous OK is true, then
+        //we silently skip duplicate users (this is mainly for experimental
+        //participants who are created on the fly)
+        signUpUser: function(newUserName, newUserPassword, previousOK) {
             var checks = [];
 
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
             }
             else if(typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
-                checks.push("User is already in use");
+                if (!previousOK) {
+                    checks.push("User is already in use");
+                }
             }
 
             if (!newUserPassword || newUserPassword.length < 6) {
@@ -151,6 +144,12 @@ Meteor.startup(function () {
             else {
                 return null;
             }
+        },
+
+        //Handle experimental users - we create the user if missing (otherwise
+        //everything is fine). We return null on success or an array of error
+        //messages if there was a problem
+        experimentalUser: function(newUserName, newUserPassword) {
         },
 
         //New functionality for logging to the DB

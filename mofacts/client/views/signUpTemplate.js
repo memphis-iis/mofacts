@@ -56,7 +56,7 @@ Template.signUpTemplate.events({
             //If there was a call failure or server returned error message,
             //then we can't proceed
             if (errorMsgs.length > 0) {
-                var serverErrors = $("#serverErrors")
+                $("#serverErrors")
                     .html(errorMsgs.join("<br>"))
                     .show();
                 return;
