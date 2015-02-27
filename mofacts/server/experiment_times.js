@@ -16,20 +16,122 @@
  * the underscore library (since we might run as a Mongo script)
  * */
 
-//Get our default output record
-function populateRecord(username, lastinstruct, lastq, lasta) {
-    var rec = {
-        //TODO: default vals
+(function() { //Begin IIFE pattern
+
+// Define an ordering for the fields and the column name we'll put in the
+// output file. Note that these names must match the fields used in populate
+// record.
+var FIELDS = [
+    "username",
+    "selectedTdf",
+    "unit",
+    "unitname",
+    "xcondition",
+    "questionIndex",
+    "clusterIndex",
+    "whichStim",
+    "questionValue",
+    "correctAnswer",
+    "stimDisplayedTime",
+    "isOverlearning",
+    "userAnswer",
+    "answerGivenTime",
+    "howAnswered",
+    "answerCorrect",
+    "trialType",
+    "qtype",
+    "note",
+];
+
+//We don't rely on any other files in we're run as a script, so we have some
+//helpers here
+
+//Return a displayable string for given value (note we don't do anything fancy)
+function disp(val) {
+    if (!val && val !== false && val !== 0) {
+        return "";
+    }
+    else {
+        return ('' + val).trim();
+    }
+}
+
+//String together all arguments using the disp function
+function msg() {
+    if (!arguments) {
+        return "";
+    }
+
+    //Remember, arguments looks like an array, but it is NOT an array
+    var all = [];
+    for (var i = 0; i < arguments.length; ++i) {
+        all.push(disp(arguments[i]));
+    }
+
+    return all.join(' ');
+}
+
+//Create our output record
+function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta) {
+    //Return the default value if the given value isn't "truthy" BUT numeric
+    //zero (0) is considered "truthy".
+    var d = function(val, defval) {
+        if (!val && val !== 0) return defval;
+        else                   return val;
     };
 
-    //TODO: actual values
+    //We might append a warning message
+    var note = "";
+    if ( lasta.action !== "[timeout]" && d(lastq.clusterIndex, -1) !== d(lasta.index, -2) ) {
+        note = msg(
+            "QUESTION/ANSWER INDEX MISMATCH => q-index:",
+            lastq.clusterIndex,
+            ", a-index:",
+            disp(lasta.index)
+        );
+    }
 
-    return rec;
+    return {
+        //Unit is special: we take the larget from our various sources
+        unit: Math.max(
+            d(lastq.currentUnit,        -1),
+            d(lastschedule.unitindex,   -1),
+            d(lastinstruct.currentUnit, -1)
+        ),
+
+        username:          d(username                   ,''),
+        selectedTdf:       d(lastexpcond.selectedTdf    ,''),
+        unitname:          d(lastschedule.unitname      ,''),
+        xcondition:        d(lastinstruct.xcondition    ,''),
+        questionIndex:     d(lastq.questionIndex        ,-1),
+        clusterIndex:      d(lastq.clusterIndex         ,-1),
+        whichStim:         d(lastq.whichStim            ,-1),
+        questionValue:     d(lastq.selectedQuestion     ,''),
+        correctAnswer:     d(lastq.selectedAnswer       ,''),
+        stimDisplayedTime: d(lastq.clientSideTimeStamp  ,0),
+        isOverlearning:    d(lastq.showOverlearningText ,false),
+        userAnswer:        d(lasta.answer               ,''),
+        answerGivenTime:   d(lasta.clientSideTimeStamp  ,0),
+        howAnswered:       d(lasta.guiSource            ,''),
+        answerCorrect:     d(lasta.isCorrect            ,null),
+        trialType:         d(lasta.ttype                ,''),
+        qtype:             d(lasta.qtype                ,''),
+        note:              d(note                       ,''),
+    };
+}
+
+//Helper to transform our output record into a delimited record
+function delimitedRecord(rec) {
+    vals = new Array(FIELDS.length);
+    for(var i = 0; i < FIELDS.length; ++i) {
+        vals[i] = disp(rec[FIELDS[i]]);
+    }
+    return vals.join('\t');
 }
 
 //Iterate over a user times log cursor and call the callback function with a
-//record populated via populate record
-function processUserLog(userTimesDoc, expName, callback) {
+//record populated with current information in log
+function processUserLog(username, userTimesDoc, expName, callback) {
     var expKey = ('' + expName).replace(/\./g, "_");
     if (!(expKey in userTimesDoc)) {
         return;
@@ -40,19 +142,39 @@ function processUserLog(userTimesDoc, expName, callback) {
         return;
     }
 
-    var username = ""; //TODO: get user name from userTimesDoc._id
+    //There can be duplicate records in the event of connection reset - the
+    //client side libs will resend Meteor method calls if they never got an
+    //ACK back. Since we grab a timestamp on the client, we can eliminate
+    //these spurious dups. Just to be safe we track both timestamp and action
+    var previousRecords = {};
 
-    var lastinstruct, lastq;
+    //Note our defaults in case there are errors
+    var lastschedule = {};
+    var lastexpcond = {selectedTdf: expName};
+    var lastinstruct = {};
+    var lastq = {};
 
     for(var i = 0; i < recs.length; ++i) {
         var rec = recs[i];
-        if (!rec || !rec.action) {
+        if (!rec || !rec.action || !rec.clientSideTimeStamp) {
             continue;
         }
 
+        var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
+        if (uniqifier in previousRecords) {
+            continue; //dup detected
+        }
+        previousRecords[uniqifier] = true;
+
         var act = ('' + rec.action).trim().toLowerCase();
 
-        if (act === "instruction") {
+        if (act === "expcondition" || act === "condition-notify") {
+            lastexpcond = rec;
+        }
+        else if (act === "schedule") {
+            lastschedule = rec;
+        }
+        else if (act === "instructions") {
             lastinstruct = rec;
             lastq = null;
         }
@@ -60,7 +182,7 @@ function processUserLog(userTimesDoc, expName, callback) {
             lastq = rec;
         }
         else if (act === "answer" || act === "[timeout]") {
-            callback(populateRecord(username, lastinstruct, lastq, rec));
+            callback(populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec));
         }
     }
 }
@@ -72,7 +194,8 @@ if (typeof Meteor !== "undefined" && Meteor.isServer) {
         var results = [];
 
         UserTimesLog.find({}).forEach(function(entry) {
-            processUserLog(entry, expName, function(rec) {
+            var username = Meteor.users.findOne({_id: entry._id}).username;
+            processUserLog(username, entry, expName, function(rec) {
                 results.push(rec);
             });
         });
@@ -90,11 +213,19 @@ if (typeof Meteor === "undefined" && typeof print !== "undefined") {
             return;
         }
 
+        var header = {};
+        FIELDS.forEach(function (f) {
+            header[f] = f;
+        });
+        print(delimitedRecord(header));
+
         db.userTimesLog.find().forEach(function (entry) {
-            //TODO: we need a formatter to create the file format for us instead of just print json
-            processUserLog(entry, experiment, function(rec) {
-                printjsononeline(rec);
+            var username = db.users.findOne({_id: entry._id}).username;
+            processUserLog(username, entry, experiment, function(rec) {
+                print(delimitedRecord(rec));
             });
         });
     })();
 }
+
+})(); //end IIFE
