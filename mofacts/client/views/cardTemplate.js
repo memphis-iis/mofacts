@@ -4,28 +4,6 @@
 //TODO: document all deliveryparams fields for a unit and how we handle them,
 //      which will include the function getCurrentDeliveryParams
 
-//TODO: elapsed, elapsedOnRender go away for:
-//      startLatency - time from question to first letter
-//      endLatency - startLatency to enter/click
-//      (Note they'll be the same for button trials)
-
-/* TODO: this minimal format for trials
-{
-    action: "trial"
-    clientSideTimeStamp: ddddddd,
-    serverSideTimeStamp: ddddddd,
-
-    question: {
-        startTime: ddd
-    },
-
-    answer: {
-        startLatency: dddd,
-        endLatency: dddd
-    }
-}
- * */
-
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
@@ -396,11 +374,9 @@ function handleUserInput(e , source) {
     //our responsbility to decide when to hide it and move on
     var isCorrect = userAnswerFeedback(answer, userAnswer, isTimeout);
 
-    //Get question Number
-    var index = getCurrentClusterIndex();
-
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
-        index: index,
+        questionIndex: Session.get("questionIndex"),
+        index: getCurrentClusterIndex(),
         ttype: getTestType(),
         qtype: findQTypeSimpified(),
         guiSource: source,
@@ -413,7 +389,7 @@ function handleUserInput(e , source) {
     //record progress in userProgress variable storage (note that this is
     //helpful and used on the stats page, but the user times log is the
     //"system of record"
-    recordProgress(index, Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
+    recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
 
     //Reset timer for next question
     start = Date.now();
@@ -691,14 +667,20 @@ function scheduledCard() {
     newQuestionHandler();
 }
 
-function recordProgress(questionIndex, question, answer, userAnswer, isCorrect) {
+function recordProgress(question, answer, userAnswer, isCorrect) {
     var uid = Meteor.userId();
     if (!uid) {
         return;
     }
 
+    var questionIndex = Session.get("questionIndex");
+    if (!questionIndex && questionIndex !== 0) {
+        questionIndex = null;
+    }
+
     var prog = getUserProgress();
     prog.progressDataArray.push({
+        clusterIndex: getCurrentClusterIndex(),
         questionIndex: questionIndex,
         question: question,
         answer: answer,
@@ -1341,7 +1323,6 @@ function processUserTimesLog() {
 
             //The session variables should be set up correctly from the question
             recordProgress(
-                getCurrentClusterIndex(),
                 Session.get("currentQuestion"),
                 Session.get("currentAnswer"),
                 entry.answer,
