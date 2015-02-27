@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Learn Swahili!</lessonname>
         <stimulusfile>Swahilistims.xml</stimulusfile>
-        <clustermodel>structuralpairs</clustermodel>
+        <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <shuffleclusters>0-16</shuffleclusters>
         <lfparameter>0.80</lfparameter>
@@ -19,44 +19,16 @@
     </unit>
 
     <unit>
-        <unitname>Lock out test</unitname>
-
-        <!-- Create deliveryparam 0, 1, and 2: remember that 0 will be used
-            if no xcond is specified via URL
-        -->
-        <deliveryparams>
-            <lockoutminutes>1</lockoutminutes>
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>4320</lockoutminutes>
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>20160</lockoutminutes>
-        </deliveryparams>
-
-        <unitinstructions>
-            <![CDATA[
-                Please for a few minutes before continuing
-            ]]>
-        </unitinstructions>
-    </unit>
-
-    <unit>
-        <unitname>Swahili Pre-test</unitname>
-        <unitinstructions>
-            <![CDATA[
-                Enter answer in the prompt box below each question.  Please attempt to answer all questions presented.
-                Also, if you want to you can test this
-                <a href='https://www.google.com/'
-                   target="_blank"
-                >Special Link</a>
-            ]]>
-        </unitinstructions>
+        <unitname>Swahili Training</unitname>
+        <unitinstructions><![CDATA[
+            Enter answer in the prompt box below each question.  Please
+            attempt to answer all questions presented.
+        ]]></unitinstructions>
 
         <deliveryparams>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>10000</reviewstudy>
+            <reviewstudy>2000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
 
@@ -84,7 +56,7 @@
     </unit>
 
     <unit>
-        <unitname>Swahili Pre-test</unitname>
+        <unitname>Swahili Post-test</unitname>
         <unitinstructions>
             Let's see if you can remember the answers!
         </unitinstructions>
@@ -92,7 +64,7 @@
         <deliveryparams>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>10000</reviewstudy>
+            <reviewstudy>2000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
 
@@ -118,7 +90,7 @@
             <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>
-    
+
     <unit>
         <unitname>Final</unitname>
         <unitinstructions>
