@@ -1,6 +1,3 @@
-//TODO: Hide the teacher/admin info under a button that needs to be clicked
-//      to reveal
-
 ////////////////////////////////////////////////////////////////////////////
 // TEMPLATE EVENTS
 
