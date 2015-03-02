@@ -14,6 +14,26 @@
  *
  * Note that unlike other Meteor code, we don't assume that we have access to
  * the underscore library (since we might run as a Mongo script)
+ *
+ *
+ * A note concerning indexes
+ * ***************************
+ *
+ * It can be confusing to keep track of what is 0-indexed and what is
+ * 1-indexed in this system. The two main things to watch out for are
+ * questionIndex and schedule item (question condition).
+ *
+ * questionIndex refers to the 0-based array of questions in the schedule
+ * and is treated as a zero-based index while trials are being conducted
+ * (see cardTemplate.js). However, when it is written to the userTimes log
+ * as a field (for question/action/[timeout] actions) it is written as a
+ * 1-based field.
+ *
+ * When a schedule is created from an assessment session, there is a condition
+ * field written which corresponds the entry in the "initialpositions" section
+ * of the assessment session. In the TDF, these positions are given by group
+ * name and 1-based index (e.g. A_1, A_2, B_1). However, the condition in the
+ * schedule item is written 0-based (e.g. A-0).
  * */
 
 (function() { //Begin IIFE pattern
@@ -35,7 +55,10 @@ var FIELDS = [
     "stimDisplayedTime",
     "isOverlearning",
     "userAnswer",
+    "schedCondition",
     "answerGivenTime",
+    "startLatency",
+    "endLatency",
     "howAnswered",
     "answerCorrect",
     "trialType",
@@ -71,6 +94,23 @@ function msg() {
     return all.join(' ');
 }
 
+//Helper to parse a schedule condition - see note above about 0 and 1 based
+//indexes for why we do some of our manipulation below
+function parseSchedItemCondition(cond) {
+    if (typeof cond === "undefined" || !cond)
+        return "UNKNOWN";
+
+    var fields = ('' + cond).trim().split('-');
+    if (fields.length !== 2)
+        return cond;
+
+    var num = parseInt(fields[1]);
+    if (isNaN(num))
+        return cond;
+
+    return fields[0] + "_" + (num + 1).toString();
+}
+
 //Create our output record
 function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta) {
     //Return the default value if the given value isn't "truthy" BUT numeric
@@ -80,15 +120,57 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         else                   return val;
     };
 
+    //Get the "actual" schedule object out of the last sched entry
+    var sched = !!lastschedule ? lastschedule.schedule : null;
+
     //We might append a warning message
     var note = "";
     if ( lasta.action !== "[timeout]" && d(lastq.clusterIndex, -1) !== d(lasta.index, -2) ) {
-        note = msg(
-            "QUESTION/ANSWER INDEX MISMATCH => q-index:",
+        note += msg(
+            "QUESTION/ANSWER CLUSTER INDEX MISMATCH => q-clusterIndex:",
             lastq.clusterIndex,
             ", a-index:",
-            disp(lasta.index)
+            disp(lasta.index),
+            " "
         );
+    }
+    if ( sched && sched.q && d(lastq.questionIndex, -1) !== d(lasta.questionIndex, -2) ) {
+        //TODO: put this in when we know that all questions actually have a question index
+        //      (we didn't always log it)
+        /*
+        note += msg(
+            "QUESTION/ANSWER Q-INDEX MISMATCH => q-questionIndex:",
+            d(lastq.questionIndex, 'missing'),
+            ", a-questionIndex:",
+            d(lasta.questionIndex, 'missing'),
+            " "
+        );
+        */
+    }
+
+    //TODO: we need logging improvements for these fields if the trial is button-based
+    var startLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
+    var endLatency = startLatency;
+
+    //See note above about indexes and 0 vs 1 based
+    var schedCondition;
+    if (sched && sched.q && sched.q.length) {
+        var schedItemIndex = d(lastq.questionIndex, 0) - 1;
+        if (schedItemIndex < sched.q.length) {
+            schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
+        }
+        else {
+            note += msg(
+                "SCHEDULE Q-INDEX MISMATCH => sched.q.length:",
+                d(sched.q.length, 'missing'),
+                ", lastq.questionIndex-1:",
+                d(schedItemIndex, 'missing'),
+                " "
+            );
+        }
+    }
+    else {
+        schedCondition = "N/A";
     }
 
     return {
@@ -111,7 +193,10 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         stimDisplayedTime: d(lastq.clientSideTimeStamp  ,0),
         isOverlearning:    d(lastq.showOverlearningText ,false),
         userAnswer:        d(lasta.answer               ,''),
+        schedCondition:    d(schedCondition             ,''),
         answerGivenTime:   d(lasta.clientSideTimeStamp  ,0),
+        startLatency:      d(startLatency               ,0),
+        endLatency:        d(endLatency                 ,0),
         howAnswered:       d(lasta.guiSource            ,''),
         answerCorrect:     d(lasta.isCorrect            ,null),
         trialType:         d(lasta.ttype                ,''),
