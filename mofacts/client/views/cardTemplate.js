@@ -1,23 +1,24 @@
-/* TODO: Phil Questions
- *
- * - cloze matching - is three or more OK (instead of exactly 10)?
- *
- * - permutefinalresult - blanks or incomplete coverage - that doesn't eliminate anything?
- *
- * - With shuffle/swap clusters, do we log clusterIndex that points to the
- *   stim file OR to shuffled/swapped clusters? or both? Well, almost certainly
- *   both but how do we label them
- * */
+//TODO: final unit - in experiment leave alone, not-exp after unit redirect to profile (xtra lo pri)
+
+//TODO: cloze test TDF should be SVO3
+
+//TODO: test missing and blank permutefinalresult
 
 //TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
 //      way to only generate them once. Current plan:
-//      - Switch to expecting stim clusters in session. On resume we'll (re-)populate
-//        the session from the user log. If no user log entry, then we'll
-//        create it. (This will be just like expcondition).
-//      - Update currentTestingHelpers to look for the session entry instead
-//        of using stim file directly
+//      - Everywhere we expect to access clusters via index, we need to map that
+//        index first via our shuffle/swap functionality
+//      - We will store that mapping in an vector so that mappedClusters[clusterIndex]
+//        will translate clusterIndex into the correct index to use
+//      - On resume, set this session value from the user times log - if it isn't
+//        present in the log then we need to generate it (just like expcondition)
+//      - Update currentTestingHelpers to use this mapping from the session
+//        instead of using stim file directly
 //      - Find all other places where we mess with the stimulus file and change
 //        it to work with the currentTestingHelpers accessors
+//      - IMPORTANT: when logging trial to user times log, clusterIndex is the
+//        post-mapping number. We should also log shufIndex which is the
+//        PRE-mapping number.
 
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
 //      be nice to support a unit that displayed that kind of information
