@@ -24,7 +24,7 @@
 
             Goal: Type the missing word within 12 seconds to score a point.
         </unitinstructions>
-        
+
         <deliveryparams>
             <purestudy>1</purestudy>
             <readyprompt>0</readyprompt>
@@ -32,7 +32,7 @@
             <correctprompt>500</correctprompt>
             <drill>12000</drill>
         </deliveryparams>
-        
+
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
@@ -64,5 +64,10 @@
             <assignrandomclusters>false</assignrandomclusters>
             <randomchoices>2</randomchoices>
         </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Final</unitname>
+        <unitinstructions>Thank you for testing</unitinstructions>
     </unit>
 </tutor>
