@@ -1,13 +1,23 @@
-//TODO: cloze matching - it three or more OK (instead of exactly 10)?
-
-/* TODO: Questions about permutation
+/* TODO: Phil Questions
  *
- * - So we'll always have permutefinalresult in an assessment session?
+ * - cloze matching - is three or more OK (instead of exactly 10)?
+ *
+ * - permutefinalresult - blanks or incomplete coverage - that doesn't eliminate anything?
  *
  * - With shuffle/swap clusters, do we log clusterIndex that points to the
- *   stim file OR to shuffled/swapped clusters? or both?
- *
+ *   stim file OR to shuffled/swapped clusters? or both? Well, almost certainly
+ *   both but how do we label them
  * */
+
+//TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
+//      way to only generate them once. Current plan:
+//      - Switch to expecting stim clusters in session. On resume we'll (re-)populate
+//        the session from the user log. If no user log entry, then we'll
+//        create it. (This will be just like expcondition).
+//      - Update currentTestingHelpers to look for the session entry instead
+//        of using stim file directly
+//      - Find all other places where we mess with the stimulus file and change
+//        it to work with the currentTestingHelpers accessors
 
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
 //      be nice to support a unit that displayed that kind of information
