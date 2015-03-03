@@ -148,10 +148,24 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         */
     }
 
-    //TODO: we need logging improvements for these fields if the trial is button-based
-    var startLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
-    var endLatency = startLatency;
+    //Grab the latency number. Note that if we don't have them (they were added
+    //later) then we calculate the latency numbers - note that some trials
+    //(button trials) or timeouts might not have a first action timestamp, so
+    //we use the client-side timestamp. That means for button trials,
+    //startLatency = endLatency
+    var firstAction = lasta.firstActionTimestamp || lasta.clientSideTimeStamp;
 
+    var startLatency = lasta.startLatency || 0;
+    if (!startLatency) {
+        startLatency = firstAction - lastq.clientSideTimeStamp;
+    }
+
+    var endLatency = lasta.endLatency || 0;
+    if (!endLatency) {
+        endLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
+    }
+
+    //Figure out schedule item condition
     //See note above about indexes and 0 vs 1 based
     var schedCondition;
     if (sched && sched.q && sched.q.length) {
@@ -173,6 +187,7 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         schedCondition = "N/A";
     }
 
+    //All done - put the record together
     return {
         //Unit is special: we take the larget from our various sources
         unit: Math.max(

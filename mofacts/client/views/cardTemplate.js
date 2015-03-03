@@ -8,20 +8,20 @@
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
-var currentQuestionSound = null;
-
 var permuted = [];
-
-
-function clearCardPermuted() {
-    permuted = [];
-}
+var trialTimestamp = 0;
+var keypressTimestamp = 0;
+var currentQuestionSound = null; //See later in this file for sound functions
 
 //We need to track the name/ID for clear and reset. We need the function and
 //delay used for reset
 var timeoutName = null;
 var timeoutFunc = null;
 var timeoutDelay = null;
+
+function clearCardPermuted() {
+    permuted = [];
+}
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
@@ -252,19 +252,22 @@ function newQuestionHandler() {
         }
     }
 
-    startOnRender = Date.now();
-    start = startOnRender; //Will be reset if they are typing, but not for button trials
-
     setQuestionTimeout();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
 
+    //No user input (re-enabled below) and reset keypress timestamp.
+    stopUserInput();
+    keypressTimestamp = 0;
+    trialTimestamp = Date.now();
+
     if(getQuestionType() === "sound"){
         //We don't allow user input until the sound is finished playing
-        stopUserInput();
-        playCurrentQuestionSound(allowUserInput);
+        playCurrentQuestionSound(function() {
+            allowUserInput();
+        });
     }
     else {
         //Not a sound - can unlock now for data entry now
@@ -327,6 +330,10 @@ function handleUserInput(e , source) {
     }
     else if (source === "keypress") {
         key = e.keyCode || e.which;
+        //Do we need to capture the first keypress timestamp?
+        if (!keypressTimestamp) {
+            keypressTimestamp = Date.now();
+        }
     }
     else if (source === "buttonClick") {
         //to save space we will just go ahead and act like it was a key press.
@@ -334,10 +341,9 @@ function handleUserInput(e , source) {
     }
 
     //If we haven't seen the correct keypress, then we want to reset our
-    //timeout, grab the current time, and leave
+    //timeout and leave
     if (key != 13) {
         resetMainCardTimeout();
-        start = Date.now();
         return;
     }
 
@@ -359,20 +365,29 @@ function handleUserInput(e , source) {
     //Check Correctness
     var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
 
-    //Timer stats
-    var nowTime = Date.now();
-    var elapsed = nowTime - start;
-    var elapsedOnRender = nowTime - startOnRender;
-
-    //Reset elapsed for blank answer or button click?
-    if (userAnswer === "" || source === "buttonClick"){
-        elapsed = 0;
-    }
-
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
     var isCorrect = userAnswerFeedback(answer, userAnswer, isTimeout);
+
+    //Note that actually provide the client-side timestamp since we need it
+    //Pretty much everywhere else relies on recordUserTime to provide it.
+    //We also get the timestamp of the first keypress for the current trial.
+    //Of course for things like a button trial, we won't have it
+    var timestamp = Date.now();
+    var firstActionTimestamp = keypressTimestamp || timestamp;
+
+    //Note that if something messed up and we can't calculate start/end
+    //latency, we'll punt and the output script (experiment_times.js) will
+    //need to construct the times
+    var startLatency, endLatency;
+    if (trialTimestamp) {
+        startLatency = firstActionTimestamp - trialTimestamp;
+        endLatency = timestamp - trialTimestamp;
+    }
+    else {
+        console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
+    }
 
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
         questionIndex: Session.get("questionIndex"),
@@ -382,17 +397,17 @@ function handleUserInput(e , source) {
         guiSource: source,
         answer: userAnswer,
         isCorrect: isCorrect,
-        elapsedOnRender: elapsedOnRender,
-        elapsed: elapsed
+        trialStartTimestamp: trialTimestamp,
+        clientSideTimeStamp: timestamp,
+        firstActionTimestamp: firstActionTimestamp,
+        startLatency: startLatency,
+        endLatency: endLatency
     });
 
     //record progress in userProgress variable storage (note that this is
     //helpful and used on the stats page, but the user times log is the
     //"system of record"
     recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
-    //Reset timer for next question
-    start = Date.now();
 
     //timeout for adding a small delay so the User may read
     //the correctness of his/her answer
@@ -1044,6 +1059,8 @@ function resumeFromUserTimesLog() {
     //Clear any previous permutation and/or timeout call
     clearCardTimeout();
     clearCardPermuted();
+    keypressTimestamp = 0;
+    trialTimestamp = 0;
 
     //Clear any previous session data about unit/question/answer
     Session.set("currentUnitNumber", undefined);
