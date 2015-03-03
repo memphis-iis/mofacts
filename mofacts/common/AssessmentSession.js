@@ -3,14 +3,6 @@
  * on the assessment session configuration.
  * */
 
-//TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
-//      way to only generate them once. Current plan:
-//      - Add method to get clusters from the stim file (right now we just
-//        read them out before calling createSchedule)
-//      - Add the clusters to user progress
-//      - Update user times logging and resume to write out clusters
-//      - Evaluate all places where we mess with the stimulus file
-
 AssessmentSession = {
     /* Create a schedule using the assessmentsession settings in the
      * unit as applied to the clusters in the stimulus file
@@ -162,9 +154,11 @@ AssessmentSession = {
                         //Trial by other means
                         var offset;
                         if (offStr === "r") {
-                            //TODO: if ranChoices is single number keep this logic - if it's a space-delimited
-                            //      string of numbers, choose offset randomly from that list
-                            offset = Math.floor(Math.random() * settings.ranChoices);
+                            //See loadAssessmentSettings below - ranChoices should
+                            //be populated with the possible offsets already
+                            if (settings.ranChoices.length < 1)
+                                throw "Random offset, but randomcchoices isn't set";
+                            offset = Helpers.randomChoice(settings.ranChoices);
                         }
                         else {
                             offset = Helpers.intVal(offStr);
@@ -242,7 +236,7 @@ AssessmentSession = {
             scheduleSize: 0,
             finalPermute: [],
             clusterNumbers: [],
-            ranChoices: 0,
+            ranChoices: [],
             isButtonTrial: false,
         };
 
@@ -290,8 +284,29 @@ AssessmentSession = {
         parseVals(assess.permutefinalresult, settings.finalPermute);
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
-        settings.ranChoices = Helpers.intVal(assess.randomchoices);
         settings.isButtonTrial = boolVal(Helpers.firstElement(unit.buttontrial));
+
+        //Unlike finalPermute, which is always a series of space-delimited
+        //strings that represent rangeVals, ranChoices can be a single number N
+        //(which is equivalent to [0,N) where N is that number) or a rangeVal
+        //([X,Y] where the string is X-Y). SO - we convert this into a list of
+        //all possible random choices
+        var randomChoicesParts = [];
+        parseVals(assess.randomchoices, randomChoicesParts);
+        _.each(randomChoicesParts, function(item) {
+            if (item.indexOf('-') < 0) {
+                //Single number - convert to range
+                var val = Helpers.intVal(item);
+                if (!val) {
+                    throw "Invalid randomchoices paramter: " + assess.randomchoices;
+                }
+                item = "0-" + (val-1).toString();
+            }
+
+            _.each(Helpers.rangeVal(item), function(subitem) {
+                settings.ranChoices.push(subitem);
+            });
+        });
 
         //Condition by group, but remove the default single-val arrays
         //NOTE: since there could be 0-N group entries, we leave that as an array

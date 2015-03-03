@@ -120,5 +120,15 @@ Helpers = {
         }
 
         return array;
+    },
+
+    //Given an array, select and return one item at random. If the array is
+    //empty, then undefined is returned
+    randomChoice: function(array) {
+        var choice;
+        if (array && array.length) {
+            choice = array[Math.floor(Math.random() * array.length)];
+        }
+        return choice;
     }
 };
