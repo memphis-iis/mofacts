@@ -1,3 +1,12 @@
+/* TODO: Questions about permutation
+ * 
+ * - So we'll always have permutefinalresult in an assessment session?
+ * 
+ * - With shuffle/swap clusters, do we log clusterIndex that points to the
+ *   stim file OR to shuffled/swapped clusters? or both?
+ * 
+ * */
+
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
 //      be nice to support a unit that displayed that kind of information
 
@@ -8,7 +17,6 @@
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
-var permuted = [];
 var trialTimestamp = 0;
 var keypressTimestamp = 0;
 var currentQuestionSound = null; //See later in this file for sound functions
@@ -18,10 +26,6 @@ var currentQuestionSound = null; //See later in this file for sound functions
 var timeoutName = null;
 var timeoutFunc = null;
 var timeoutDelay = null;
-
-function clearCardPermuted() {
-    permuted = [];
-}
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
@@ -582,11 +586,6 @@ function prepareCard() {
         var schedule = null;
         if (unit < file.tdfs.tutor.unit.length) {
             schedule = getSchedule();
-            //If we're using permutations, permute the specified groups/items
-            //Note that permuted is defined at the top of this file
-            if (questionIndex === 0 &&  schedule.permute) {
-                permuted = permute(schedule.permute);
-            }
         }
 
         if (schedule && questionIndex < schedule.q.length) {
@@ -649,17 +648,7 @@ function scheduledCard() {
     var questionIndex = Session.get("questionIndex");
     console.log("scheduledCard => unit:" + unit + ",questionIndex:" + questionIndex);
 
-    //If we're using permutations, get index by perm array value (get
-    //the permuted item) - otherwise just use the index we have
-    var dispQuestionIndex;
-    if (permuted.length > 0){
-        dispQuestionIndex = permuted[questionIndex];
-    }
-    else {
-        dispQuestionIndex = questionIndex;
-    }
-
-    var questInfo = getSchedule().q[dispQuestionIndex];
+    var questInfo = getSchedule().q[questionIndex];
     var clusterIndex = questInfo.clusterIndex;
     var whichStim = questInfo.whichStim;
     console.log("scheduledCard => clusterIndex:" + clusterIndex + ",whichStim:" + whichStim);
@@ -670,8 +659,7 @@ function scheduledCard() {
     Session.set("currentQuestion", getStimQuestion(clusterIndex, whichStim));
     Session.set("currentAnswer", getStimAnswer(clusterIndex, whichStim));
 
-    //Note we increment the session's question index number - NOT the
-    //permuted index
+    //Note we increment the session's question index number
     Session.set("questionIndex", questionIndex + 1);
 
     recordUserTimeQuestion({
@@ -989,21 +977,6 @@ function setQuestionTimeout() {
     });
 }
 
-//NOTE - permuted array is a SHALLOW COPY - which is different from
-//shuffle in Helpers
-function permute (perms) {
-    var final_perm = [];
-    var groups = perms.split("|");
-    for(var i = 0; i < groups.length; i++) {
-        var indexSets = groups[i].split(",");
-        permutedArray = Helpers.shuffle(indexSets);
-        for(var j = 0; j < permutedArray.length; j++) {
-            final_perm.push(permutedArray[j]);
-        }
-    }
-    return final_perm;
-}
-
 
 function showUserInteraction(isGoodNews, news) {
     $("#UserInteraction")
@@ -1059,7 +1032,6 @@ function resumeFromUserTimesLog() {
 
     //Clear any previous permutation and/or timeout call
     clearCardTimeout();
-    clearCardPermuted();
     keypressTimestamp = 0;
     trialTimestamp = 0;
 
