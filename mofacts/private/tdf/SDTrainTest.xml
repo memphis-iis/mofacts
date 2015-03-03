@@ -17,6 +17,51 @@
     </unit>
 
    <unit>
+        <unitname>Statistic SD Pre-Study</unitname>
+        <unitinstructions>Please study
+        </unitinstructions>
+
+        <deliveryparams>
+            <purestudy>10000</purestudy>
+            <skipstudy>true</skipstudy>
+            <reviewstudy>1</reviewstudy>
+            <correctprompt>1</correctprompt>
+        </deliveryparams>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>31</templatesrepeated>
+                <group>
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0 r,f,s,0
+                    r,f,s,0 r,f,s,0 r,f,s,0
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1  A_2  A_3  A_4  A_5
+                A_6  A_7  A_8  A_9  A_10
+                A_11 A_12 A_13 A_14 A_15
+                A_16 A_17 A_18 A_19 A_20
+                A_21 A_22 A_23 A_24 A_25
+                A_26 A_27 A_28 A_29 A_30
+                A_31
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-30</clusterlist>
+            <permutefinalresult></permutefinalresult>
+            <assignrandomclusters>false</assignrandomclusters>
+            <randomchoices>2</randomchoices>
+        </assessmentsession>
+    </unit>
+
+   <unit>
         <unitname>Statistic SD Unit</unitname>
         <unitinstructions>Statistics Memory Experiment
 
@@ -27,10 +72,9 @@
 
         <deliveryparams>
             <purestudy>1</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>12000</reviewstudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>5000</reviewstudy>
             <correctprompt>500</correctprompt>
-            <drill>12000</drill>
         </deliveryparams>
 
         <assessmentsession>

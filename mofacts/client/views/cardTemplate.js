@@ -1,3 +1,5 @@
+//TODO: cloze matching - it three or more OK (instead of exactly 10)?
+
 /* TODO: Questions about permutation
  *
  * - So we'll always have permutefinalresult in an assessment session?
@@ -265,6 +267,16 @@ function newQuestionHandler() {
         }
     }
 
+    //If this is a study-trial and we are displaying a cloze, then we should
+    //construct the question to display the actual information. NOTE that we
+    //use a regex so that we can do a global(all matches) replace on 3 or
+    //more underscores
+    if (getTestType() === "s" && getQuestionType() === "cloze") {
+        Session.set("currentQuestion", Session.get("currentQuestion")
+            .replace(/___+/g, Session.get("currentAnswer"))
+        );
+    }
+
     setQuestionTimeout();
 
     if (Session.get("showOverlearningText")) {
@@ -276,7 +288,7 @@ function newQuestionHandler() {
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
-    if(getQuestionType() === "sound"){
+    if(getQuestionType() === "sound") {
         //We don't allow user input until the sound is finished playing
         playCurrentQuestionSound(function() {
             allowUserInput();
