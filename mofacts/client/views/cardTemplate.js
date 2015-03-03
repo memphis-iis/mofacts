@@ -1027,6 +1027,7 @@ function stopUserInput() {
 
 function allowUserInput() {
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+    $("#userAnswer").focus();
 }
 
 
