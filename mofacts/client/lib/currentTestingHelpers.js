@@ -32,10 +32,11 @@ getQuestionType = function () {
 findQTypeSimpified = function () {
     var QType = getQuestionType();
 
-    if      (QType == "text")  QType = "T";    //T for Text
-    else if (QType == "image") QType = "I";    //I for Image
-    else if (QType == "sound") QType = "A";    //A for Audio
-    else                       QType = "NA";   //NA for Not Applicable
+    if      (QType === "text")  QType = "T";    //T for Text
+    else if (QType === "image") QType = "I";    //I for Image
+    else if (QType === "sound") QType = "A";    //A for Audio
+    else if (QType === "cloze") QType = "C";    //C for Cloze
+    else                        QType = "NA";   //NA for Not Applicable
 
     return QType;
 };

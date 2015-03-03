@@ -1,10 +1,10 @@
 /* TODO: Questions about permutation
- * 
+ *
  * - So we'll always have permutefinalresult in an assessment session?
- * 
+ *
  * - With shuffle/swap clusters, do we log clusterIndex that points to the
  *   stim file OR to shuffled/swapped clusters? or both?
- * 
+ *
  * */
 
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
@@ -162,6 +162,14 @@ Template.cardTemplate.helpers({
 
     imageCard: function() {
         return getQuestionType() === "image";
+    },
+
+    clozeCard: function() {
+        return getQuestionType() === "cloze";
+    },
+
+    textOrClozeCard: function() {
+        return textCard() || clozeCard();
     },
 
     test: function() {
