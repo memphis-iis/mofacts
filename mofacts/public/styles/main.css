@@ -75,7 +75,7 @@ legend {
 	background: #40a371;
 }
 
-#textQuesiton {
+#textQuestion {
 	background:  #585858;
 	text-align: center;
 	font-family: 'Lato', sans-serif;
@@ -225,10 +225,6 @@ legend {
     font-size: 18pt;
     color: #000;
     padding-bottom: 2em;
-}
-
-#textQuesiton {
-	font-family: 'Lato', sans-serif;
 }
 
 .label-success {
