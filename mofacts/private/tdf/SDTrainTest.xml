@@ -1,0 +1,68 @@
+<tutor>
+    <setspec>
+        <name>SDTrainTest</name>
+        <lessonname>SDTrainTest</lessonname>
+        <stimulusfile>SDTrainTestStims.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <xshuffleclusters>0-30</xshuffleclusters>
+        <lfparameter>.85</lfparameter>
+        <isModeled>false</isModeled>
+        <timeoutInSeconds>15</timeoutInSeconds>
+    </setspec>
+
+    <unit>
+        <unitname>Introduction</unitname>
+        <unitinstructions>This is a system testing module for Cloze trials</unitinstructions>
+    </unit>
+
+   <unit>
+        <unitname>Statistic SD Unit</unitname>
+        <unitinstructions>Statistics Memory Experiment
+
+            Task: Please fill in the missing word or hit ENTER to see the fill in.
+
+            Goal: Type the missing word within 12 seconds to score a point.
+        </unitinstructions>
+        
+        <deliveryparams>
+            <purestudy>1</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>12000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>12000</drill>
+        </deliveryparams>
+        
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>31</templatesrepeated>
+                <group>
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0
+                    r,f,d,0 r,f,d,0 r,f,d,0
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1  A_2  A_3  A_4  A_5
+                A_6  A_7  A_8  A_9  A_10
+                A_11 A_12 A_13 A_14 A_15
+                A_16 A_17 A_18 A_19 A_20
+                A_21 A_22 A_23 A_24 A_25
+                A_26 A_27 A_28 A_29 A_30
+                A_31
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-30</clusterlist>
+            <permutefinalresult></permutefinalresult>
+            <assignrandomclusters>false</assignrandomclusters>
+            <randomchoices>2</randomchoices>
+        </assessmentsession>
+    </unit1>
+</tutor>
