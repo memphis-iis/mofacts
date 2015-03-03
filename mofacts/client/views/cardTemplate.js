@@ -169,7 +169,8 @@ Template.cardTemplate.helpers({
     },
 
     textOrClozeCard: function() {
-        return textCard() || clozeCard();
+        var qt = getQuestionType();
+        return qt === "text" || qt === "cloze";
     },
 
     test: function() {

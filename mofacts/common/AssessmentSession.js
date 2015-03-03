@@ -204,19 +204,22 @@ AssessmentSession = {
             } //j (each template index)
         } //i (each group)
 
-        //NOW we can create the final ordering of the questions
+        //NOW we can create the final ordering of the questions - we start with
+        //a default copy and then do any final permutation
         var finalQuests = [];
-        finalQuests[settings.scheduleSize-1] = {};
+        _.each(quests, function(obj) {
+            finalQuests.push(obj);
+        });
 
-        for (i = 0; i < settings.finalPermute.length; ++i) {
-            var targetIndexes = Helpers.rangeVal(settings.finalPermute[i]);
+        _.each(settings.finalPermute, function(singlePerm) {
+            var targetIndexes = Helpers.rangeVal(singlePerm);
             var randPerm = targetIndexes.slice(); //clone
             Helpers.shuffle(randPerm);
 
             for(j = 0; j < targetIndexes.length; ++j) {
                 finalQuests[targetIndexes[j]] = quests[randPerm[j]];
             }
-        }
+        });
 
         //Note that our cardTemplate.js code has some fancy permutation
         //logic, but that we don't currently use it from the assessment
