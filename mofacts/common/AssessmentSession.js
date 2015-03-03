@@ -8,27 +8,15 @@
 //      - Add method to get clusters from the stim file (right now we just
 //        read them out before calling createSchedule)
 //      - Add the clusters to user progress
-//      - Change the docs for createSchedule to read that clusters should come
-//        from the call created above
-//      - Change call sites of createSchedule to pre-create the clusters
 //      - Update user times logging and resume to write out clusters
 //      - Evaluate all places where we mess with the stimulus file
 
-//TODO: if you want the assessment session format to be completely
-//      consistent, then the initial positions should be zero based
-//      (currently one-based, so A_1 would become A_0 and so on). Most
-//      of the change should be to the TDF files since only one line
-//      should need to changed (look for a "NOTE" comment around line
-//      93 or so).
-
-
 AssessmentSession = {
     /* Create a schedule using the assessmentsession settings in the
-     * unit as applied to the clusters
+     * unit as applied to the clusters in the stimulus file
      *
      * INPUTS:
      *  setspec - the setspec object from the TDF
-     *  clusters - array of clusters (from the stimulus file)
      *  unitNumber - number (index, 0-based) of the unit in the TDF
      *  unit - current unit (as specified by unitNumber)
      *
@@ -37,11 +25,11 @@ AssessmentSession = {
      * NOTE: this is the "public" version, which is just a try-catch
      *       wrapper around createScheduleImpl
     */
-    createSchedule: function(setspec, clusters, unitNumber, unit) {
+    createSchedule: function(setspec, unitNumber, unit) {
         var schedule;
 
         try {
-            schedule = AssessmentSession.createScheduleImpl(setspec, clusters, unitNumber, unit);
+            schedule = AssessmentSession.createScheduleImpl(setspec, unitNumber, unit);
         }
         catch(e) {
             if (console && console.log) {
@@ -70,7 +58,7 @@ AssessmentSession = {
     //"Private" implmentation version of createSchedule - should really
     //be wrapped in an exception handler (see createSchedule for
     //parameter descriptions)
-    createScheduleImpl: function(setspec, clusters, unitNumber, unit) {
+    createScheduleImpl: function(setspec, unitNumber, unit) {
         //First get the setting we'll use
         var settings = AssessmentSession.loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");

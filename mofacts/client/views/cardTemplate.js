@@ -646,7 +646,9 @@ function prepareCard() {
 function randomCard() {
     //get the file from the collection
     var file = Stimuli.findOne({fileName: getCurrentStimName()});
+
     //get the cluster size (avoids out of bounds error)
+    //TODO: take into account init (before units) shuffle/swap for clusters
     var size = file.stimuli.setspec.clusters[0].cluster.length;
 
     //get a valid index
@@ -731,13 +733,12 @@ function getSchedule() {
         console.log(progress);
 
         var stims = Stimuli.findOne({fileName: getCurrentStimName()});
-        var clusters = stims.stimuli.setspec.clusters[0].cluster;
 
         var file = getCurrentTdfFile();
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
 
-        schedule = AssessmentSession.createSchedule(setSpec, clusters, unit, currUnit);
+        schedule = AssessmentSession.createSchedule(setSpec, unit, currUnit);
         if (!schedule) {
             //There was an error creating the schedule - there's really nothing
             //left to do since the experiment is broken
@@ -767,6 +768,7 @@ function getSchedule() {
 
 function initializeActRModel() {
     var file = Stimuli.findOne({fileName: getCurrentStimName()});
+    //TODO: take into account init (before units) shuffle/swap for clusters
     var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
 
     var initCards = [];
@@ -1234,6 +1236,7 @@ function processUserTimesLog() {
                 stims = Stimuli.findOne({fileName: currentStimName});
             }
 
+            //TODO: take into account init (before units) shuffle/swap for clusters
             var clusters = stims.stimuli.setspec.clusters[0].cluster;
             var setSpec = file.tdfs.tutor.setspec[0];
             var currUnit = file.tdfs.tutor.unit[unit];

@@ -9,6 +9,7 @@
 //Return the current stim file cluster
 getStimCluster = function (index) {
     var file = Stimuli.findOne({fileName: getCurrentStimName()});
+    //TODO: take into account init (before units) shuffle/swap for clusters
     return file.stimuli.setspec.clusters[0].cluster[index];
 };
 
