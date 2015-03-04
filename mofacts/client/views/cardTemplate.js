@@ -2,8 +2,6 @@
 
 //TODO: cloze test TDF should be SVO3
 
-//TODO: test missing and blank permutefinalresult
-
 //TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
 //      way to only generate them once. Current plan:
 //      - Everywhere we expect to access clusters via index, we need to map that
