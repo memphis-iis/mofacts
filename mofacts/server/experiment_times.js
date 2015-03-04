@@ -135,8 +135,10 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         );
     }
     if ( sched && sched.q && d(lastq.questionIndex, -1) !== d(lasta.questionIndex, -2) ) {
-        //TODO: put this in when we know that all questions actually have a question index
-        //      (we didn't always log it)
+        //Currently we have some legacy data in the user time log where not
+        //every question/answer has a questionIndex for both question and
+        //answer. If the data has been completely reset recently, then we
+        //put this code back in.
         /*
         note += msg(
             "QUESTION/ANSWER Q-INDEX MISMATCH => q-questionIndex:",
