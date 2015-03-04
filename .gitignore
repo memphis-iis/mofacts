@@ -4,3 +4,4 @@
 .settings
 mofacts/build
 .pyc
+.test_results
