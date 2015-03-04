@@ -57,7 +57,7 @@
             <clusterlist>0-30</clusterlist>
             <permutefinalresult></permutefinalresult>
             <assignrandomclusters>false</assignrandomclusters>
-            <randomchoices>2</randomchoices>
+            <randomchoices>0-0 1-1 2</randomchoices>
         </assessmentsession>
     </unit>
 
