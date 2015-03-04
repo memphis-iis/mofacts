@@ -1,7 +1,3 @@
-assert = require("assert");
-
-_ = require("../.meteor/local/build/programs/server/packages/underscore.js");
-
 require("./dinky_test.js");
 require("./sd_fixtures.js");
 

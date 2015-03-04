@@ -1,5 +1,8 @@
-//Silly little test framework
+//For everyone
+assert = require("assert");
+_ = require("../.meteor/local/build/programs/server/packages/underscore.js");//Silly little test framework
 
+//Just for us
 var fs = require('fs');
 
 var failure_count = 0;
