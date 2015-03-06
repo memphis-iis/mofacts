@@ -54,7 +54,17 @@ test_suite("shuffle_swap", function() {
     });
 
     unit_test("Swap Only", function(logger) {
-        //TODO
+        var mapping;
+
+        mapping = createStimClusterMapping(10, "", "0-4 5-9");
+        var c = 0;
+        while (in_order(mapping)) {
+            mapping = createStimClusterMapping(10, "", "0-4 5-9");
+            if (c++ > 10) {
+                assert.fail("No swap in 10 tries?");
+            }
+        }
+        assert.deepEqual([5,6,7,8,9,0,1,2,3,4], mapping);
     });
 
     unit_test("Shuffle and Swap", function(logger) {
