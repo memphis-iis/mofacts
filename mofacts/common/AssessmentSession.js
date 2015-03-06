@@ -256,20 +256,6 @@ AssessmentSession = {
             assess[name] = Helpers.firstElement(val);
         });
 
-        //Some simple helpers for parsing
-        var parseVals = function(src, dest) {
-            if (!src) {
-                return;
-            }
-            var fields = Helpers.trim(src).split(/\s/);
-            for(var i = 0; i < fields.length; ++i) {
-                var fld = Helpers.trim(fields[i]);
-                if (fld && fld.length > 0) {
-                    dest.push(fld);
-                }
-            }
-        };
-
         //Interpret TDF string booleans
         var boolVal = function(src) {
             return Helpers.display(src).toLowerCase() === "true";
@@ -280,8 +266,8 @@ AssessmentSession = {
         settings.specType = Helpers.display(setspec.clustermodel);
 
         //The "easy" "top-level" settings
-        parseVals(assess.initialpositions, settings.initialPositions);
-        parseVals(assess.permutefinalresult, settings.finalPermute);
+        Helpers.extractDelimFields(assess.initialpositions, settings.initialPositions);
+        Helpers.extractDelimFields(assess.permutefinalresult, settings.finalPermute);
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
         settings.isButtonTrial = boolVal(Helpers.firstElement(unit.buttontrial));
@@ -292,7 +278,7 @@ AssessmentSession = {
         //([X,Y] where the string is X-Y). SO - we convert this into a list of
         //all possible random choices
         var randomChoicesParts = [];
-        parseVals(assess.randomchoices, randomChoicesParts);
+        Helpers.extractDelimFields(assess.randomchoices, randomChoicesParts);
         _.each(randomChoicesParts, function(item) {
             if (item.indexOf('-') < 0) {
                 //Single number - convert to range
@@ -316,14 +302,14 @@ AssessmentSession = {
         });
 
         if (by_group) {
-            parseVals(by_group.groupnames,        settings.groupNames);
-            parseVals(by_group.clustersrepeated,  settings.templateSizes);
-            parseVals(by_group.templatesrepeated, settings.numTemplatesList);
-            parseVals(by_group.initialpositions,  settings.initialPositions);
+            Helpers.extractDelimFields(by_group.groupnames,        settings.groupNames);
+            Helpers.extractDelimFields(by_group.clustersrepeated,  settings.templateSizes);
+            Helpers.extractDelimFields(by_group.templatesrepeated, settings.numTemplatesList);
+            Helpers.extractDelimFields(by_group.initialpositions,  settings.initialPositions);
 
             _.each(by_group.group, function(tdf_group) {
                 var new_group = [];
-                parseVals(tdf_group, new_group);
+                Helpers.extractDelimFields(tdf_group, new_group);
                 if (new_group.length > 0) {
                     settings.groups.push(new_group);
                 }
@@ -340,7 +326,7 @@ AssessmentSession = {
 
         //Cluster Numbers
         var clusterList = [];
-        parseVals(assess.clusterlist, clusterList);
+        Helpers.extractDelimFields(assess.clusterlist, clusterList);
         for (var i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {

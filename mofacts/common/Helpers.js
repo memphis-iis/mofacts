@@ -79,6 +79,22 @@ Helpers = {
         return val;
     },
 
+    //Extract space-delimited fields from src and push them to dest. Note that
+    //dest is changed, but is NOT cleared before commencing. Also note that
+    //false-ish values and whitespace-only strings are silently discarded
+    extractDelimFields: function(src, dest) {
+        if (!src) {
+            return;
+        }
+        var fields = Helpers.trim(src).split(/\s/);
+        for(var i = 0; i < fields.length; ++i) {
+            var fld = Helpers.trim(fields[i]);
+            if (fld && fld.length > 0) {
+                dest.push(fld);
+            }
+        }
+    },
+
     //Given a string of format "a-b", return an array containing all
     //numbers from a to b inclusive.  On errors, return an empty array
     rangeVal: function(src) {
