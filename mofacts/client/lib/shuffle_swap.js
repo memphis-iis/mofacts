@@ -13,8 +13,24 @@ createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters)
         mapping.push(i);
     }
 
+    //Shufle the given ranges of cards (like permutefinalresult)
     if (!!shuffleclusters) {
-        //TODO
+        var shuffleRanges = [];
+        Helpers.extractDelimFields(shuffleclusters, shuffleRanges);
+
+        var shuffled = mapping.slice(); //work on a copy
+
+        _.each(shuffleRanges, function(rng) {
+            var targetIndexes = Helpers.rangeVal(rng);
+            var randPerm = targetIndexes.slice(); //clone
+            Helpers.shuffle(randPerm);
+
+            for(j = 0; j < targetIndexes.length; ++j) {
+                shuffled[targetIndexes[j]] = mapping[randPerm[j]];
+            }
+        });
+
+        mapping = shuffled.slice();
     }
 
     if (!!swapclusters) {
