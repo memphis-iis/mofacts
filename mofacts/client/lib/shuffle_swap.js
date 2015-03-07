@@ -49,7 +49,7 @@ createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters)
         };
 
         var swapRangesSrc = [];
-        Helpers.extractDelimFields(shuffleclusters, swapRangesSrc);
+        Helpers.extractDelimFields(swapclusters, swapRangesSrc);
         var swapIndexSrc = rangeFlatten(swapRangesSrc);
 
         var swapRangesDest = swapRangesSrc.slice();
