@@ -653,15 +653,8 @@ function prepareCard() {
 }
 
 function randomCard() {
-    //get the file from the collection
-    var file = Stimuli.findOne({fileName: getCurrentStimName()});
-
-    //get the cluster size (avoids out of bounds error)
-    //TODO: take into account init (before units) shuffle/swap for clusters
-    var size = file.stimuli.setspec.clusters[0].cluster.length;
-
     //get a valid index
-    var nextCardIndex = Math.floor((Math.random() * size));
+    var nextCardIndex = Math.floor((Math.random() * getStimClusterCount()));
     //set the question and answer
     Session.set("clusterIndex", nextCardIndex);
     Session.set("testType", "d"); //No test type given
@@ -741,8 +734,6 @@ function getSchedule() {
         console.log("CREATING SCHEDULE, showing progress");
         console.log(progress);
 
-        var stims = Stimuli.findOne({fileName: getCurrentStimName()});
-
         var file = getCurrentTdfFile();
         var setSpec = file.tdfs.tutor.setspec[0];
         var currUnit = file.tdfs.tutor.unit[unit];
@@ -755,7 +746,7 @@ function getSchedule() {
                 unitname: Helpers.display(currUnit.unitname),
                 unitindex: unit
             });
-            alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+            alert("There is an issue with the TDF - experiment cannot continue");
             clearCardTimeout();
             leavePage("/profile");
             return;
@@ -776,9 +767,7 @@ function getSchedule() {
 }
 
 function initializeActRModel() {
-    var file = Stimuli.findOne({fileName: getCurrentStimName()});
-    //TODO: take into account init (before units) shuffle/swap for clusters
-    var numQuestions = file.stimuli.setspec.clusters[0].cluster.length;
+    var numQuestions = getStimClusterCount();
 
     var initCards = [];
     for (var i = 0; i < numQuestions; ++i) {
@@ -1161,7 +1150,6 @@ function processUserTimesLog() {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
-    var stims = null; //LAZY READ - see below
 
     //Assume not modeled and and not using card probs
     Session.set("usingACTRModel",false);
@@ -1241,12 +1229,6 @@ function processUserTimesLog() {
                 return;
             }
 
-            if (!stims) {
-                stims = Stimuli.findOne({fileName: currentStimName});
-            }
-
-            //TODO: take into account init (before units) shuffle/swap for clusters
-            var clusters = stims.stimuli.setspec.clusters[0].cluster;
             var setSpec = file.tdfs.tutor.setspec[0];
             var currUnit = file.tdfs.tutor.unit[unit];
             var schedule = entry.schedule;

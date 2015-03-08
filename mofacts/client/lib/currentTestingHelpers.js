@@ -6,11 +6,17 @@
  * a better list of Session variables we currently use.
  * */
 
+//Return the total number of stim clusters
+getStimClusterCount = function() {
+    return Stimuli.findOne({fileName: getCurrentStimName()})
+        .stimuli.setspec.clusters[0].cluster.length;
+};
+
 //Return the current stim file cluster
 getStimCluster = function (index) {
-    var file = Stimuli.findOne({fileName: getCurrentStimName()});
     //TODO: take into account init (before units) shuffle/swap for clusters
-    return file.stimuli.setspec.clusters[0].cluster[index];
+    return Stimuli.findOne({fileName: getCurrentStimName()})
+        .stimuli.setspec.clusters[0].cluster[index];
 };
 
 //Return the current question type
