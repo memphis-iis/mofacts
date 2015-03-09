@@ -6,6 +6,20 @@
  * a better list of Session variables we currently use.
  * */
 
+//Return the current cluster index into the stimulus file. Note that this
+//returns the "raw" or "unmapped" cluster index. If you want the properly
+//mapped index that includes initial shuffles and swaps from setspec, then
+//you should call getStimCluster (which will have the pre and post mapped
+//indexes added as a property)
+getCurrentClusterIndex = function () {
+    return Session.get("clusterIndex");
+};
+
+//Allow setting the current cluster index
+setCurrentClusterIndex = function(newIdx) {
+    Session.set("clusterIndex", newIdx);
+};
+
 //Return the total number of stim clusters
 getStimClusterCount = function() {
     return Stimuli.findOne({fileName: getCurrentStimName()})
@@ -52,18 +66,24 @@ getTestType = function () {
     return Helpers.trim(Session.get("testType")).toLowerCase();
 };
 
-getCurrentClusterIndex = function () {
-    return Session.get("clusterIndex");
-};
-
-//get the question at this index
+//get the question at this index - note that the cluster index will be mapped
+//in getStimCluster
 getStimQuestion = function (index, whichQuestion) {
     return getStimCluster(index).display[whichQuestion];
 };
 
-//get the answer at this index
+//get the answer at this index - note that the cluster index will be mapped
+//in getStimCluster
 getStimAnswer = function (index, whichAnswer) {
     return getStimCluster(index).response[whichAnswer];
+};
+
+//Simplified Q/A getters
+getCurrentStimQuestion = function(whichQuestion) {
+    return getStimQuestion(getCurrentClusterIndex(), whichQuestion);
+};
+getCurrentStimAnswer = function(whichAnswer) {
+    return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
 };
 
 getCurrentStimName = function () {

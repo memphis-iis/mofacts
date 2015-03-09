@@ -661,11 +661,13 @@ function prepareCard() {
 function randomCard() {
     //get a valid index
     var nextCardIndex = Math.floor((Math.random() * getStimClusterCount()));
-    //set the question and answer
-    Session.set("clusterIndex", nextCardIndex);
+
+    //set the question and answer (and note that the we just assume whichStim=0)
+    setCurrentClusterIndex(nextCardIndex);
+    Session.set("currentQuestion", getCurrentStimQuestion(0));
+    Session.set("currentAnswer", getCurrentStimAnswer(0));
+
     Session.set("testType", "d"); //No test type given
-    Session.set("currentQuestion", getStimQuestion(nextCardIndex, 0));
-    Session.set("currentAnswer", getStimAnswer(nextCardIndex, 0));
 
     recordUserTimeQuestion({
         selType: "random"
@@ -684,11 +686,13 @@ function scheduledCard() {
     var whichStim = questInfo.whichStim;
     console.log("scheduledCard => clusterIndex:" + clusterIndex + ",whichStim:" + whichStim);
 
-    //get the type of test (drill, test, study)
-    Session.set("clusterIndex", clusterIndex);
+    //Set current Q/A info
+    setCurrentClusterIndex(clusterIndex);
+    Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
+    Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
+
+    //Set type of test (drill, test, study)
     Session.set("testType", questInfo.testType);
-    Session.set("currentQuestion", getStimQuestion(clusterIndex, whichStim));
-    Session.set("currentAnswer", getStimAnswer(clusterIndex, whichStim));
 
     //Note we increment the session's question index number
     Session.set("questionIndex", questionIndex + 1);
@@ -772,6 +776,8 @@ function getSchedule() {
     return schedule;
 }
 
+//Note that when we initialize the mode, we are defaulting to only using
+//the first (index 0) stimulus/response
 function initializeActRModel() {
     var numQuestions = getStimClusterCount();
 
@@ -879,7 +885,7 @@ function getNextCardActRModel() {
     var card = cards[indexForNewCard];
 
     //Save the card selection
-    Session.set("clusterIndex", indexForNewCard);
+    setCurrentClusterIndex(indexForNewCard);
     Session.set("currentQuestion", card.question);
     Session.set("currentAnswer", card.answer);
     Session.set("showOverlearningText", showOverlearningText);
@@ -922,7 +928,7 @@ function modelCardAnswered(wasCorrect) {
 
     var card = null;
     try {
-        card = cardProbs.cards[Session.get("clusterIndex")];
+        card = cardProbs.cards[getCurrentClusterIndex()];
     }
     catch(err) {
         console.log("Error getting card for update", err);
@@ -990,7 +996,6 @@ function setQuestionTimeout() {
     //for purestudy for the current unit. Otherwise use the top-level setspec
     //timeout in seconds
     if (getTestType() === "s" && Session.get("isScheduledTest")) {
-        var unit = file.tdfs.tutor.unit[getCurrentUnitNumber()];
         delayMs = Helpers.intVal(getCurrentDeliveryParams().purestudy);
     }
     else {
