@@ -204,17 +204,17 @@
         </cluster>
 
         <cluster><displayType>Cloze</displayType>
-            <display><![CDATA[Although statistics can be intimidating, the term "standard deviation" simply<br>refers to the _______ (or "standard") difference (or "deviation") between<br>any given observation and the average score]]></display>
-            <response>typical</response>
-            <display><![CDATA[Although statistics can be intimidating, the term "standard deviation" simply<br>refers to the typical (or "standard") difference (or "deviation") between<br>any given observation and the _______ score]]></display>
-            <response>average</response>
+            <display><![CDATA[(Test NextLast/Stim0) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
+            <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
+            <display><![CDATA[(Test NextLast/Stim1) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
+            <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
         </cluster>
 
         <cluster><displayType>Cloze</displayType>
-            <display><![CDATA[_______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
-            <response>standard deviation</response>
-            <display><![CDATA[Standard deviation is a convenient way to discuss the typical difference from<br>the sample mean because it is in the same _______ as the observations.]]></display>
-            <response>metric</response>
+            <display><![CDATA[(Test Last/Stim0) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
+            <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
+            <display><![CDATA[(Test Last/Stim1) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
+            <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
         </cluster>
 
     </clusters>

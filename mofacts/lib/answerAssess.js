@@ -42,12 +42,27 @@ function matchBranching(answer, userAnswer) {
     return [isCorrect, matchText];
 }
 
+//Return the text of the "correct" (the first) branch
+function branchingCorrectText(answer) {
+    var result = "";
+
+    var branches = Helpers.trim(answer).split(';');
+    if (branches.length > 0) {
+        var flds = branches[0].split('~');
+        if (flds.length == 2) {
+            result = flds[1];
+        }
+    }
+
+    return result;
+}
+
 Answers = {
     //Given the "raw" answer text from a cluster (in the response tag), return
     //an answer suitable for display (including on a button). Note that this
     //may be an empty string (for instance, if it's a branched answer)
     getDisplayAnswerText: function(answer) {
-        return answerIsBranched(answer) ? "" : answer;
+        return answerIsBranched(answer) ? branchingCorrectText(answer) : answer;
     },
 
     //Returns the close study question. For a branched response, we take the
@@ -58,13 +73,7 @@ Answers = {
 
         if (answerIsBranched(answer)) {
             //Branched = use first entry's text
-            var branches = Helpers.trim(answer).split(';');
-            if (branches.length > 0) {
-                var flds = branches[0].split('~');
-                if (flds.length == 2) {
-                    result = flds[1];
-                }
-            }
+            result = branchingCorrectText(answer);
         }
         else {
             //Fill in the blank

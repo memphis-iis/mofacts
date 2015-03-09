@@ -521,10 +521,13 @@ function userAnswerFeedback(userAnswer, isTimeout) {
         }
     };
 
+    var correctAndText;
+
     //How was their answer?
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
-        handleAnswerState(false, "Sorry - time ran out. The correct answer is: " + answer);
+        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
+        handleAnswerState(false, "Sorry - time ran out. " + correctAndText[1]);
     }
     else if (isCorrect) {
         //We've already marked this as a correct answer
@@ -536,7 +539,7 @@ function userAnswerFeedback(userAnswer, isTimeout) {
             setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
         }
 
-        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), spec);
+        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
         handleAnswerState(correctAndText[0], correctAndText[1]);
     }
 
