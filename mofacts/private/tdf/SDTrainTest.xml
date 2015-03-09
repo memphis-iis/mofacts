@@ -5,7 +5,8 @@
         <stimulusfile>SDTrainTestStims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
-        <xshuffleclusters>0-30</xshuffleclusters>
+        <shuffleclusters>0-28</shuffleclusters>
+        <swapclusters>0-28 29-29 30-30</swapclusters>
         <lfparameter>.85</lfparameter>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>

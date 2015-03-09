@@ -22,38 +22,52 @@ userTimesExpKey = function(fixForDirectAccess) {
     return expKey;
 };
 
-//Helper for calling server method
-recordUserTime = function(action, extendedData, callback) {
-    var testName = userTimesExpKey();
-
+//Helper to create a user time record - you should only need this if you
+//want to call recordUserTimeMulti directly
+createUserTimeRecord = function(action, extendedData) {
     var dataRec = _.extend({
         action: action,
         clientSideTimeStamp: Date.now()
     }, extendedData);
 
     if (Session.get("debugging")) {
-        console.log("userTime", testName, action, dataRec);
+        console.log("userTime", dataRec);
     }
 
     if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], action)) {
         Session.set("lastTimestamp", dataRec.clientSideTimeStamp);
     }
 
+    return dataRec;
+};
+
+//Call the server method, allowing multiple data recs.
+//
+//dataRecs should be EITHER a single record created with createUserTimeRecord
+//*OR* an array of objects created with createUserTimeRecord
+recordUserTimeMulti = function(dataRecs, callback) {
+    var testName = userTimesExpKey();
     if (!!callback) {
-        Meteor.call("userTime", testName, dataRec, callback);
+        Meteor.call("userTime", testName, dataRecs, callback);
     }
     else {
-        Meteor.call("userTime", testName, dataRec);
+        Meteor.call("userTime", testName, dataRecs);
     }
+};
+
+//Helper for calling server method - you can send multiple records at once
+//by using the less-helpful recordUserTimeMulti
+recordUserTime = function(action, extendedData, callback) {
+    recordUserTimeMulti(createUserTimeRecord(action, extendedData), callback);
 };
 
 //Helper for question selection
 recordUserTimeQuestion = function(extendedData) {
-    //TODO: clusterIndex and shufIndex should be read from the object returned
-    //      by getStimCluster(Session.get("clusterIndex")) because it will
-    //      handle cluster shuffles and swaps
+    var currCluster = getStimCluster(getCurrentClusterIndex());
+
     var dataRec = _.extend({
-        clusterIndex:         Session.get("clusterIndex"),
+        clusterIndex:         currCluster.clusterIndex,
+        shufIndex:            currCluster.shufIndex,
         questionIndex:        Session.get("questionIndex"),
         currentUnit:          Session.get("currentUnitNumber"),
         selectedQuestion:     Session.get("currentQuestion"),

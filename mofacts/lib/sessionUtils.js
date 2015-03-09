@@ -5,6 +5,7 @@
  * All of our currently known session variables
  * *****************************************************************
  * clusterIndex
+ * clusterMapping            - For an entire experiment
  * currentAnswer
  * currentQuestion
  * currentRootTdfName

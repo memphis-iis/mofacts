@@ -26,11 +26,28 @@ getStimClusterCount = function() {
         .stimuli.setspec.clusters[0].cluster.length;
 };
 
-//Return the current stim file cluster
+//Return the stim file cluster matching the index AFTER mapping it per the
+//current sessions cluster mapping
 getStimCluster = function (index) {
-    //TODO: take into account init (before units) shuffle/swap for clusters
-    return Stimuli.findOne({fileName: getCurrentStimName()})
-        .stimuli.setspec.clusters[0].cluster[index];
+    var clusterMapping = Session.get("clusterMapping");
+    if(!clusterMapping) {
+        console.log("No cluster mapping available for stimulus clusters");
+        throw "No cluster mapping available for stimulus clusters";
+    }
+
+    var mappedIndex = clusterMapping[index];
+    var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
+        .stimuli
+        .setspec
+        .clusters[0]
+        .cluster[mappedIndex];
+
+    //When we log, we want to be able to record the origin index as shufIndex
+    //and the mapped index as clusterIndex
+    cluster.shufIndex = index;
+    cluster.clusterIndex = mappedIndex;
+
+    return cluster;
 };
 
 //Return the current question type

@@ -2,26 +2,6 @@
 
 //TODO: cloze test TDF should be SVO3
 
-//TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
-//      way to only generate them once. Current plan:
-//      - We no longer access the stimuli clusters directly - use helper functions
-//        from currentTestingHelpers.js
-//      - We will store that mapping in an vector so that mappedClusters[clusterIndex]
-//        will translate a cluster index into the correct index to use. This
-//        will ONLY be used for xlation in getStimCluster in currentTestingHelpers.js
-//      - As a result, everything keeps using the "original" pre-swap/shuffle
-//        stimuli, but with some changes...
-//      - When logging, we can't just log the clusterIndex in the session -
-//        we need to call getStimCluster and read the clusterIndex and shufIndex
-//        from the object returned. (Note that shufIndex will be the original
-//        index and clusterIndex will be the mapped index - so clusterIndex in
-//        the object will be the correct index into the stimulus file if you're
-//        looking at the user times log)
-//      - On resume, set this session value from the user times log - if it isn't
-//        present in the log then we need to generate it (just like expcondition)
-//      - Update currentTestingHelpers to use this mapping from the session
-//        instead of using stim file directly
-
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
 //      be nice to support a unit that displayed that kind of information
 
@@ -427,11 +407,14 @@ function handleUserInput(e , source) {
         console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
     }
 
-    //TODO: index shouldn't be set from session - read from cluster like the
-    //      user time question helper in userTimeHelpers.js
+    //Note that we need to log from data in the cluster returned from
+    //getStimCluster so that we honor cluster mapping
+    var currCluster = getStimCluster(getCurrentClusterIndex());
+
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
         questionIndex: Session.get("questionIndex"),
-        index: getCurrentClusterIndex(),
+        index: currCluster.clusterIndex,
+        shufIndex: currCluster.shufIndex,
         ttype: getTestType(),
         qtype: findQTypeSimpified(),
         guiSource: source,
@@ -1068,6 +1051,7 @@ function resumeFromUserTimesLog() {
     trialTimestamp = 0;
 
     //Clear any previous session data about unit/question/answer
+    Session.set("clusterMapping", undefined);
     Session.set("currentUnitNumber", undefined);
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
@@ -1094,10 +1078,12 @@ function resumeFromUserTimesLog() {
     var conditionAction;
     var conditionData = {};
 
+    var userTimesLog = getCurrentUserTimesLog();
+
+    //We must always check for experiment condition
     if (needExpCondition) {
-        //Find the correct exp condition
         console.log("Experimental condition is required: searching");
-        var prevCondition = _.find(getCurrentUserTimesLog(), function(entry) {
+        var prevCondition = _.find(userTimesLog, function(entry) {
             return entry && entry.action && entry.action === "expcondition";
         });
 
@@ -1149,10 +1135,47 @@ function resumeFromUserTimesLog() {
         currentStimName: Session.get("currentStimName")
     });
 
+    //Now we can create our record for the server - note that we use an array
+    //since we might add other records below
+    var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
+
+    //Find previous cluster mapping (or create if it's missing)
+    //NOTE that we need to wait until the exp condition is selected above so
+    //that we go to the correct TDF
+    var clusterMapping = _.find(userTimesLog, function(entry) {
+        return entry && entry.action && entry.action === "cluster-mapping";
+    });
+    if (!clusterMapping) {
+        //No cluster mapping! Need to create it and store for resume
+        var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+        clusterMapping = createStimClusterMapping(
+            getStimClusterCount(),
+            Helpers.firstElement(setSpec.shuffleclusters) || "",
+            Helpers.firstElement(setSpec.swapclusters) || "");
+
+        serverRecords.push(createUserTimeRecord("cluster-mapping", {
+            clusterMapping: clusterMapping
+        }));
+
+        console.log("Cluster mapping created", clusterMapping);
+    }
+    else {
+        //Found the cluster mapping record - extract the embedded mapping
+        clusterMapping = clusterMapping.clusterMapping;
+    }
+
+    if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
+        console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
+        throw "The cluster mapping is invalid - can not continue";
+    }
+
+    //Go ahead and save the cluster mapping we found/created
+    Session.set("clusterMapping", clusterMapping);
+
     //Notice that no matter what, we log something about condition data
     //ALSO NOTICE that we'll be calling processUserTimesLog after the server
     //returns and we know we've logged what happened
-    recordUserTime(conditionAction, conditionData, processUserTimesLog);
+    recordUserTimeMulti(serverRecords, processUserTimesLog);
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly

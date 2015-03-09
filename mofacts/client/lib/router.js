@@ -3,6 +3,7 @@
 Session.set("loginMode", "normal");
 Session.set("experimentTarget", "");
 Session.set("experimentXCond", "");
+Session.set("clusterMapping", "");
 
 routeToSignin = function() {
     if (Session.get("loginMode") === "experiment") {
@@ -39,6 +40,7 @@ Router.route('/experiment/:target?/:xcond?', function() {
 
     console.log("EXPERIMENT target:", target, "xcond", xcond);
 
+    Session.set("clusterMapping", "");
     this.render('signInTemplate');
 });
 
@@ -55,6 +57,7 @@ Router.route('/', function () {
 });
 
 Router.route('/profile', function () {
+    Session.set("clusterMapping", "");
     this.render('profileTemplate');
 });
 
