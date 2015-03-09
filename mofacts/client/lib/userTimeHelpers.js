@@ -49,6 +49,9 @@ recordUserTime = function(action, extendedData, callback) {
 
 //Helper for question selection
 recordUserTimeQuestion = function(extendedData) {
+    //TODO: clusterIndex and shufIndex should be read from the object returned
+    //      by getStimCluster(Session.get("clusterIndex")) because it will
+    //      handle cluster shuffles and swaps
     var dataRec = _.extend({
         clusterIndex:         Session.get("clusterIndex"),
         questionIndex:        Session.get("questionIndex"),

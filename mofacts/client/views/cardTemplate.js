@@ -4,19 +4,23 @@
 
 //TODO: Handle setspec's shuffleclusters and swapclusters, which INCLUDES a
 //      way to only generate them once. Current plan:
-//      - Everywhere we expect to access clusters via index, we need to map that
-//        index first via our shuffle/swap functionality
+//      - We no longer access the stimuli clusters directly - use helper functions
+//        from currentTestingHelpers.js
 //      - We will store that mapping in an vector so that mappedClusters[clusterIndex]
-//        will translate clusterIndex into the correct index to use
+//        will translate a cluster index into the correct index to use. This
+//        will ONLY be used for xlation in getStimCluster in currentTestingHelpers.js
+//      - As a result, everything keeps using the "original" pre-swap/shuffle
+//        stimuli, but with some changes...
+//      - When logging, we can't just log the clusterIndex in the session -
+//        we need to call getStimCluster and read the clusterIndex and shufIndex
+//        from the object returned. (Note that shufIndex will be the original
+//        index and clusterIndex will be the mapped index - so clusterIndex in
+//        the object will be the correct index into the stimulus file if you're
+//        looking at the user times log)
 //      - On resume, set this session value from the user times log - if it isn't
 //        present in the log then we need to generate it (just like expcondition)
 //      - Update currentTestingHelpers to use this mapping from the session
 //        instead of using stim file directly
-//      - Find all other places where we mess with the stimulus file and change
-//        it to work with the currentTestingHelpers accessors
-//      - IMPORTANT: when logging trial to user times log, clusterIndex is the
-//        post-mapping number. We should also log shufIndex which is the
-//        PRE-mapping number.
 
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
 //      be nice to support a unit that displayed that kind of information
@@ -423,6 +427,8 @@ function handleUserInput(e , source) {
         console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
     }
 
+    //TODO: index shouldn't be set from session - read from cluster like the
+    //      user time question helper in userTimeHelpers.js
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
         questionIndex: Session.get("questionIndex"),
         index: getCurrentClusterIndex(),
