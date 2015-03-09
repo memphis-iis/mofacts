@@ -11,7 +11,11 @@ UI.registerHelper('currentQuestion', function () {
     return Session.get("currentQuestion");
 });
 
-UI.registerHelper('currentAnswer', function () {
+UI.registerHelper('displayAnswer', function () {
+    return Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+});
+
+UI.registerHelper('rawAnswer', function () {
     return Session.get("currentAnswer");
 });
 

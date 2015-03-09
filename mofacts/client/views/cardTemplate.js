@@ -239,7 +239,9 @@ function newQuestionHandler() {
                 }
 
                 //Need to make sure they also have a correct option :)
-                choicesArray.push(Session.get("currentAnswer"));
+                var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+                if (!!correctAnswer)
+                    choicesArray.push(correctAnswer);
                 Helpers.shuffle(choicesArray);
             }
 
@@ -265,9 +267,10 @@ function newQuestionHandler() {
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
     if (getTestType() === "s" && getQuestionType() === "cloze") {
-        Session.set("currentQuestion", Session.get("currentQuestion")
-            .replace(/___+/g, Session.get("currentAnswer"))
-        );
+        Session.set("currentQuestion", Answers.clozeStudy(
+            Session.get("currentQuestion"),
+            Session.get("currentAnswer")
+        ));
     }
 
     setQuestionTimeout();
@@ -380,13 +383,10 @@ function handleUserInput(e , source) {
         userAnswer = e.target.name;
     }
 
-    //Check Correctness
-    var answer = Helpers.trim(Session.get("currentAnswer").toLowerCase());
-
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    var isCorrect = userAnswerFeedback(answer, userAnswer, isTimeout);
+    var isCorrect = userAnswerFeedback(userAnswer, isTimeout);
 
     //Note that actually provide the client-side timestamp since we need it
     //Pretty much everywhere else relies on recordUserTime to provide it.
@@ -495,20 +495,15 @@ function handleUserInput(e , source) {
 
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question
-function userAnswerFeedback(answer, userAnswer, isTimeout) {
+function userAnswerFeedback(userAnswer, isTimeout) {
+    var isCorrect = null;
+
     //Nothing to evaluate - it was a study. To make things easier, we just
     //pretend they answered exactly correct
     if (getTestType() === "s") {
-        userAnswer = answer;
+        isCorrect = true;
         isTimeout = false;
     }
-
-    var isCorrect = null;
-
-    answer = Helpers.trim(answer.toLowerCase());
-    userAnswer = Helpers.trim(userAnswer.toLowerCase());
-
-    var isDrill = (getTestType() === "d");
 
     //We know if it's a button trial from the schedule
     var isButtonTrial = false;
@@ -517,7 +512,8 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
         isButtonTrial = !!progress.currentSchedule.isButtonTrial;
     }
 
-    //Helper for correctness logic below
+    //Helpers for correctness logic below
+    var isDrill = (getTestType() === "d");
     var handleAnswerState = function(goodNews, msg) {
         isCorrect = goodNews;
         if (isDrill) {
@@ -530,37 +526,18 @@ function userAnswerFeedback(answer, userAnswer, isTimeout) {
         //Timeout - doesn't matter what the answer says!
         handleAnswerState(false, "Sorry - time ran out. The correct answer is: " + answer);
     }
-    else if (userAnswer.localeCompare(answer) === 0) {
-        //Right
-        handleAnswerState(true, "Correct - Great Job!");
-    }
-    else if (!isButtonTrial) {
-        var file = getCurrentTdfFile();
-        var spec = file.tdfs.tutor.setspec[0];
-
-        var lfparameter = null;
-        if (spec && spec.lfparameter && spec.lfparameter.length)
-            lfparameter = parseFloat(spec.lfparameter[0]);
-
-        //Not exact, but if they are entering text, they might be close enough
-        var editDistScore = 1.0 - (
-            getEditDistance(userAnswer, answer) /
-            Math.max(userAnswer.length, answer.length)
-        );
-        if (Session.get("debugging")) {
-            console.log("Edit Dist Score", editDistScore, "lfparameter", lfparameter);
-        }
-
-        if(!!lfparameter && editDistScore > lfparameter) {
-            handleAnswerState(true, "Close enough - Great Job!");
-        }
-        else {
-            handleAnswerState(false, "You are Incorrect. The correct answer is : " + answer);
-        }
+    else if (isCorrect) {
+        //We've already marked this as a correct answer
+        handleAnswerState(true, "Please study the answer");
     }
     else {
-        //Wrong
-        handleAnswerState(false, "You are Incorrect. The correct answer is : " + answer);
+        var setspec = null;
+        if (!isButtonTrial) {
+            setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+        }
+
+        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), spec);
+        handleAnswerState(correctAndText[0], correctAndText[1]);
     }
 
     //Update any model parameters based on their answer's correctness
