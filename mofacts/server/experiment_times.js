@@ -295,12 +295,17 @@ function processUserLog(username, userTimesDoc, expName, callback) {
 //array of objects
 if (typeof Meteor !== "undefined" && Meteor.isServer) {
     createExperimentExport = function(expName) {
-        var results = [];
+        var header = {};
+        FIELDS.forEach(function (f) {
+            header[f] = f;
+        });
+
+        var results = [delimitedRecord(header)];
 
         UserTimesLog.find({}).forEach(function(entry) {
             var username = Meteor.users.findOne({_id: entry._id}).username;
             processUserLog(username, entry, expName, function(rec) {
-                results.push(rec);
+                results.push(delimitedRecord(rec));
             });
         });
 

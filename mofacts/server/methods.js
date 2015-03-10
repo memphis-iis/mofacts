@@ -207,3 +207,29 @@ Meteor.startup(function () {
         },
     });
 });
+
+//We use a special server-side route for our experimental data download
+Router.route("experiment-data", {
+    where: "server",
+
+    path: "/experiment-data/:expKey",
+
+    action: function() {
+        var exp = this.params.expKey;
+
+        if (!exp) {
+            this.response.writeHead(404);
+            this.response.end("No experiment specified");
+            return;
+        }
+
+        console.log("Sending all experimental data for", exp);
+
+        this.response.writeHead(200, {
+            "Content-Type": "text/tab-separated-values",
+            "Content-Disposition": "attachment; filename=" + exp + "-data.tab"
+        });
+
+        this.response.end(createExperimentExport(exp).join('\r\n'));
+    }
+});

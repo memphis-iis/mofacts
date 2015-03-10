@@ -39,8 +39,17 @@
                 a student.
             {{/if}}
         </div>
+
 		<div class="row" id="testButtonContainer">
             <legend class="text-center">Your Available Modules</legend>
 		</div>
+
+        {{#if isInRole 'admin,teacher'}}
+        <br><br>
+        <div class="row" id="testButtonContainer">
+            <legend class="text-center">Experimental Data Download</legend>
+            <div id="expDataDownloadContainer" class="col-lg-12"></div>
+		</div>
+        {{/if}}
 	</div>
 </template>

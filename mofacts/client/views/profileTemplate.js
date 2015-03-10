@@ -20,6 +20,11 @@ Template.profileTemplate.events({
         Router.go("/profile");
     },
 
+    'click .adminLink' : function (event) {
+        event.preventDefault();
+        Router.go("/admin");
+    },
+
     'click .stimButton' : function (event) {
         event.preventDefault();
         console.log(event);
@@ -96,6 +101,8 @@ Template.profileTemplate.helpers({
 Template.profileTemplate.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
+
+    $("#expDataDownloadContainer").html("");
 
     var addButton = function(btnObj) {
         $("#testButtonContainer").append(
@@ -180,6 +187,14 @@ Template.profileTemplate.rendered = function () {
                 .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
                 .html(name)
+        );
+
+        $("#expDataDownloadContainer").append(
+            $("<div></div>").append(
+                $("<a class='exp-data-link' target='_blank'></a>")
+                    .attr("href", "/experiment-data/" + tdfObject.fileName)
+                    .text("Download data for " + name)
+            )
         );
     });
 
