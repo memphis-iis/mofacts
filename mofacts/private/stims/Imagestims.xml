@@ -7,13 +7,13 @@
         </cluster>
         <cluster>
             <displayType>Image</displayType>
-            <display>dot_red.png</display>
-            <response>Red</response>
+            <display>dot_yellow.png</display>
+            <response>Yellow</response>
         </cluster>
         <cluster>
             <displayType>Image</displayType>
-            <display>dot_yellow.png</display>
-            <response>Yellow</response>
+            <display>dot_red.png</display>
+            <response>Red</response>
         </cluster>
     </clusters>
 </setspec>
