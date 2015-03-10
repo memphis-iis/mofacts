@@ -1,5 +1,3 @@
-//TODO: download experiment data from TDF list selection (using experiment_times.js)
-
 Template.adminTemplate.rendered = function() {
 };
 
