@@ -62,6 +62,12 @@ h2 {
 	box-shadow: 1px 1px 1px 1px #4d5a42;
 }
 
+#cardTemplateQuestionImg {
+    width:auto;
+    height:340px; /* Height is expected to be changed: see index.js */
+}
+
+
 legend {
 	border-color: white;
 }

@@ -38,17 +38,17 @@
     <br>
 
     <div class="row">
-        <div class="col-xs-offset-2 col-xs-8 col-sm-offset-2 col-sm-8 col-md-offset-3 col-md-6 col-lg-offset-3 col-lg-6">
+        <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-3 col-lg-6">
             {{#if textOrClozeCard}}
                 <h2><label id="questionLabel">Question:</label></h2>
                 <h2><div id="textQuestion">{{{currentQuestion}}}</div></h2>
             {{/if}}
             {{#if audioCard}}
-                <img src="speaker.png" height="100" width="100">
+                <img src="speaker.png" style="width:100px; height:100px;">
                 <br>
             {{/if}}
             {{#if imageCard}}
-                <img src={{currentQuestion}}>
+                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
             {{/if}}
         </div>  <!-- close column -->
     </div>  <!-- close row -->
