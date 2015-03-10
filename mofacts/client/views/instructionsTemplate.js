@@ -180,9 +180,16 @@ Template.instructionsTemplate.helpers({
             return Meteor.user().username;
         }
     },
-    
-    havemoreunits: function() {
-        return getUnitsRemaining() > 0;
+
+    allowcontinue: function() {
+        //If we're in experiment mode, they can only continue if there are
+        //units left. Otherwise they can always go
+        if (Session.get("loginMode") === "experiment") {
+            return getUnitsRemaining() > 0;
+        }
+        else {
+            return true;
+        }
     },
 });
 

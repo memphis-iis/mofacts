@@ -1,5 +1,3 @@
-//TODO: final unit - in experiment leave alone, not-exp after unit redirect to profile (xtra lo pri)
-
 //TODO: cloze test TDF should be SVO3
 
 //TODO: if our admin/teacher-only stats page were cleaned up, then it would
