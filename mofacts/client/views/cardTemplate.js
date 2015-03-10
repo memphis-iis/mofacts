@@ -1,15 +1,11 @@
-//TODO: cloze test TDF should be SVO3
-
-//TODO: if our admin/teacher-only stats page were cleaned up, then it would
-//      be nice to support a unit that displayed that kind of information
-
-//TODO: document all deliveryparams fields for a unit and how we handle them,
-//      which will include the function getCurrentDeliveryParams
+//TODO: Support a unit directive for displaying stats/scores for current
+//      learning and/or assessment sessions
 
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
+var unitStartTimestamp = 0;
 var trialTimestamp = 0;
 var keypressTimestamp = 0;
 var currentQuestionSound = null; //See later in this file for sound functions
@@ -115,6 +111,19 @@ Template.cardTemplate.events({
     'click #continueStudy': function(event) {
         event.preventDefault();
         handleUserInput( event , "buttonClick");
+    },
+
+    'click .instructModalDismiss': function(event) {
+        event.preventDefault();
+        $("#finalInstructionsDlg").modal('hide');
+        if (Session.get("loginMode") === "experiment") {
+            //Experiment user - no where to go?
+            leavePage(routeToSignin);
+        }
+        else {
+            //"regular" logged-in user - go back to home page
+            leavePage("/profile");
+        }
     }
 });
 
@@ -125,6 +134,14 @@ Template.cardTemplate.rendered = function() {
     if(Session.get("debugging")) {
         console.log('cards template rendered');
     }
+
+    //Reset resizing for card images (see also index.js)
+    $("#cardTemplateQuestionImg").load(function(evt) {
+        redoCardImage();
+    });
+
+    //Always hide the final instructions box
+    $("#finalInstructionsDlg").modal('hide');
 
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("needResume")) {
@@ -188,7 +205,39 @@ Template.cardTemplate.helpers({
 // Implementation functions
 
 function newQuestionHandler() {
-    console.log("NQ handler");
+    console.log("NQ handler", (Date.now() - unitStartTimestamp||1) / 1000.0);
+
+    //If we are using a model, check to see if we've exceeded practice time
+    if (Session.get("usingACTRModel") && unitStartTimestamp > 0) {
+        //Do we have a time limit?
+        var tutor = getCurrentTdfFile().tdfs.tutor;
+        var params = Helpers.firstElement(tutor.deliveryparams);
+
+        var practiceTime = 0;
+        var finalInstruct = "";
+
+        if (params) {
+            practiceTime = Helpers.intVal(Helpers.firstElement(params.practiceseconds));
+            finalInstruct = Helpers.trim(Helpers.firstElement(params.finalInstructions));
+        }
+
+        if (practiceTime) {
+            //Note that we need seconds
+            var unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+            if (unitElapsedTime > practiceTime) {
+                if (!finalInstruct || finalInstruct.length < 1) {
+                    finalInstruct = "You have practiced enough. Thank you for using this tutor.";
+                }
+
+                clearCardTimeout();
+                clearPlayingSound();
+                stopUserInput();
+                $("#finalInstructionsText").text(finalInstruct);
+                $("#finalInstructionsDlg").modal('show');
+                return;
+            }
+        }
+    }
 
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
@@ -521,6 +570,11 @@ function userAnswerFeedback(userAnswer, isTimeout) {
 
     var correctAndText;
 
+    var setspec = null;
+    if (!isButtonTrial) {
+        setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+    }
+
     //How was their answer?
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
@@ -532,11 +586,6 @@ function userAnswerFeedback(userAnswer, isTimeout) {
         handleAnswerState(true, "Please study the answer");
     }
     else {
-        var setspec = null;
-        if (!isButtonTrial) {
-            setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-        }
-
         correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
         handleAnswerState(correctAndText[0], correctAndText[1]);
     }
@@ -1013,6 +1062,13 @@ function getCurrentUserTimesLog() {
     return entries;
 }
 
+//ONLY ONE RESUME CAN RUN AT A TIME - we set this at the beginng of resumeFromUserTimesLog
+//and then unset it after a callback from the server succeeds. AS A RESULT, unhandled
+//exception in resumeFromUserTimesLog will break our resume logic until the user has
+//reloaded the page and started over. This is actually a good thing, since a broken resume
+//should stop us cold.
+var inResume = false;
+
 //Re-initialize our User Progress and Card Probabilities internal storage
 //from the user times log. Note that most of the logic will be in
 //processUserTimesLog. This function just does some initial set up, insures
@@ -1021,12 +1077,19 @@ function getCurrentUserTimesLog() {
 //sure our server-side call regarding experimental conditions has completed
 //before continuing to resume the session
 function resumeFromUserTimesLog() {
+    if (inResume) {
+        console.log("RESUME DENIED - already running in resume");
+        return;
+    }
+    inResume = true;
+
     console.log("Resuming from previous User Times info (if any)");
 
     //Clear any previous permutation and/or timeout call
     clearCardTimeout();
     keypressTimestamp = 0;
     trialTimestamp = 0;
+    unitStartTimestamp = Date.now();
 
     //Clear any previous session data about unit/question/answer
     Session.set("clusterMapping", undefined);
@@ -1153,7 +1216,10 @@ function resumeFromUserTimesLog() {
     //Notice that no matter what, we log something about condition data
     //ALSO NOTICE that we'll be calling processUserTimesLog after the server
     //returns and we know we've logged what happened
-    recordUserTimeMulti(serverRecords, processUserTimesLog);
+    recordUserTimeMulti(serverRecords, function() {
+        processUserTimesLog();
+        inResume = false; //Can finally turn off resume protection
+    });
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
@@ -1282,7 +1348,14 @@ function processUserTimesLog() {
             }
 
             //Restore the session variables we save with each question
-            Session.set("clusterIndex",         entry.clusterIndex);
+            //REMEMBER - the logged card had its mapped index logged as
+            //clusterIndex, but we use the UN-mapped index right up until we
+            //send the log or access a stimulus cluster. Luckily the unmapped
+            //index should have been logged as shufIndex. Note that if there
+            //isn't a shufIndex, we just use the clusterIndex
+            var cardIndex = entry.shufIndex || entry.clusterIndex;
+
+            Session.set("clusterIndex",         cardIndex);
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentQuestion",      entry.selectedQuestion);
@@ -1300,10 +1373,6 @@ function processUserTimesLog() {
             else if (selType == "model") {
                 //Perform the stats update on card selection and then override
                 //with the saved data from the original question
-                var cardIndex = entry.clusterIndex;
-                if ((!cardIndex && cardIndex !== 0) || !entry.cardModelData) {
-                    console.log("Missing cardIndex or cardModelData - model may not resume correctly", entry);
-                }
                 modelCardSelected(cardIndex);
                 _.extend(getCardProbs().cards[cardIndex], entry.cardModelData);
             }
