@@ -227,7 +227,7 @@ Router.route("experiment-data", {
 
         this.response.writeHead(200, {
             "Content-Type": "text/tab-separated-values",
-            "Content-Disposition": "attachment; filename=" + exp + "-data.tab"
+            "Content-Disposition": "attachment; filename=" + exp + "-data.tsv"
         });
 
         this.response.end(createExperimentExport(exp).join('\r\n'));

@@ -303,7 +303,14 @@ if (typeof Meteor !== "undefined" && Meteor.isServer) {
         var results = [delimitedRecord(header)];
 
         UserTimesLog.find({}).forEach(function(entry) {
-            var username = Meteor.users.findOne({_id: entry._id}).username;
+            var userRec = Meteor.users.findOne({_id: entry._id});
+            if (!userRec || !userRec.username) {
+                console.log("Skipping output for ", entry._id);
+                return;
+            }
+
+            var username = userRec.username;
+
             processUserLog(username, entry, expName, function(rec) {
                 results.push(delimitedRecord(rec));
             });
