@@ -794,8 +794,6 @@ function initializeActRModel() {
     var initCards = [];
     for (var i = 0; i < numQuestions; ++i) {
         initCards.push({
-            question: getStimQuestion(i, 0),
-            answer: getStimAnswer(i, 0),
             questionSuccessCount: 0,
             questionFailureCount: 0,
             trialsSinceLastSeen: 0,
@@ -896,8 +894,8 @@ function getNextCardActRModel() {
 
     //Save the card selection
     setCurrentClusterIndex(indexForNewCard);
-    Session.set("currentQuestion", card.question);
-    Session.set("currentAnswer", card.answer);
+    Session.set("currentQuestion", getStimQuestion(indexForNewCard, 0));
+    Session.set("currentAnswer", getStimAnswer(indexForNewCard, 0));
     Session.set("showOverlearningText", showOverlearningText);
 
     //Record the question and fire the new qustion handler
@@ -1059,7 +1057,24 @@ function getCurrentUserTimesLog() {
         entries = userLog[expKey];
     }
 
-    return entries;
+    var previousRecords = {};
+    var records = [];
+
+    for(var i = 0; i < entries.length; ++i) {
+        var rec = entries[i];
+
+        //Suppress duplicates like we do on the server side for file export
+        var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
+        if (uniqifier in previousRecords) {
+            continue; //dup detected
+        }
+        previousRecords[uniqifier] = true;
+
+        //We don't do much other than save the record
+        records.push(rec);
+    }
+
+    return records;
 }
 
 //ONLY ONE RESUME CAN RUN AT A TIME - we set this at the beginng of resumeFromUserTimesLog
