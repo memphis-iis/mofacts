@@ -1,4 +1,6 @@
-function redoCardImage() {
+//This will be setup for window resize, but is made global so that the
+//card template page can hook it up as well
+redoCardImage = function() {
     //Note that just in case we can't get the height on the window we punt
     //with a default that is reasonable a lot of the time
     var wid = $(window).width() || 640;
@@ -20,7 +22,7 @@ function redoCardImage() {
     $("#cardTemplateQuestionImg")
         .css("height", hgt)
         .css("width", wid);
-}
+};
 
 Meteor.startup(function() {
     Session.set("debugging", true);
@@ -28,9 +30,6 @@ Meteor.startup(function() {
 
     //Include any special jQuery handling we need
     $(window).resize(function(evt) {
-        redoCardImage();
-    });
-    $("#cardTemplateQuestionImg").load(function(evt) {
         redoCardImage();
     });
 });
