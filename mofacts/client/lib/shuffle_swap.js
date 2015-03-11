@@ -35,7 +35,6 @@ createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters)
         mapping = shuffled.slice();
     }
 
-    //TODO: Phil - should we blow up if the shuffle size are unequal?
     //Swap out sections of clusters (one step up from our shuffle above)
     if (!!swapclusters) {
         //Get the chunks that we'll be swapping. Each chunk is in the format
