@@ -10,6 +10,7 @@ var suite_count = 0;
 var test_count = 0;
 var console_buffer = [];
 var suites = [];
+var all_suites = [];
 
 clear_test_report = function() {
     failure_count = 0;
@@ -17,6 +18,7 @@ clear_test_report = function() {
     test_count = 0;
     console_buffer = [];
     suites = [];
+    all_suites = [];
 };
 clear_test_report();
 
@@ -54,7 +56,9 @@ function dump_excep(func, e) {
 test_suite = function(suite_name, func) {
     try {
         suites.push(suite_name);
+        all_suites.push(suite_name);
         suite_count += 1;
+        console.real_log("BEGIN Test Suite", suite_name);
         func();
     }
     catch(e) {
@@ -62,6 +66,7 @@ test_suite = function(suite_name, func) {
         console.real_log("Test suite FAILURE");
         dump_excep(console.real_log, e);
     }
+    console.real_log("END Test Suite", suite_name);
     suites.pop();
 };
 
@@ -104,6 +109,14 @@ test_report = function() {
     console.real_log("Unit Tests:   ", test_count);
     console.real_log("Failure Count:", failure_count);
     console.real_log("Dumping buffered output to .test_results");
-    fs.writeFileSync(".test_results", console_buffer.join(''));
+
+    //Add report heading and footing
+    console_buffer.unshift(
+        "FULL TEST OUTPUT on " + (new Date()).toString()  + "\n" +
+        "All Suites Seen: " + all_suites.join(',') + '\n'
+    );
+    console_buffer.push("\n=================================================\n\n\n")
+
+    fs.appendFileSync(".test_results", console_buffer.join(''));
     clear_test_report();
 };
