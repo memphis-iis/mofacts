@@ -55,10 +55,14 @@ test_suite("shuffle_swap", function() {
 
     unit_test("Swap Only", function(logger) {
         var mapping;
+        var c;
 
-        var c = 0;
+        //Vanilla swaps - same size, contiguous, and covering
+        logger.log("Vanilla swaps");
+        c = 0;
         while (c < 10) {
             mapping = createStimClusterMapping(10, "", "0-4 5-9");
+            logger.log("Order ==", in_order(mapping), mapping);
             if (!in_order(mapping))
                 break;
             c++;
@@ -66,6 +70,20 @@ test_suite("shuffle_swap", function() {
 
         assert.equal(true, c < 10, "no shuffling in 10 tries?");
         assert.deepEqual([5,6,7,8,9,0,1,2,3,4], mapping);
+
+        //Hard swaps - non-contiguous and differently sized
+        logger.log("Hard swaps");
+        c = 0;
+        while (c < 10) {
+            mapping = createStimClusterMapping(10, "", "1-4 6-8");
+            logger.log("Order ==", in_order(mapping), mapping);
+            if (!in_order(mapping))
+                break;
+            c++;
+        }
+
+        assert.equal(true, c < 10, "no shuffling in 10 tries?");
+        assert.deepEqual([0,6,7,8,5,1,2,3,4,9], mapping);
     });
 
     unit_test("Shuffle and Swap", function(logger) {
@@ -76,39 +94,34 @@ test_suite("shuffle_swap", function() {
         assert.deepEqual([0,9], min_max(mapping));
         assert.equal(10, _.uniq(mapping).length);
 
-        var shuf1 = false, shuf2 = false;
-
-        var c = 0;
-        while ( !(shuf1 && shuf2) ) {
+        var shuf1 = false, shuf2 = false, c = 0;
+        while ( !(shuf1 && shuf2) && (++c < 20) ) {
             mapping = createStimClusterMapping(10, "0-4 5-9", "0-4 5-9");
-            console.log(mapping);
+            logger.log(mapping);
+            if (in_order(mapping.slice(0,5)) || in_order(mapping.slice(5))) {
+                logger.log("rejected");
+                continue; //We want everything shuffled
+            }
+
             if (mapping[0] < mapping[5]) {
                 shuf1 = true;
-                assert.equal(false, in_order(mapping.slice(0,5)));
                 assert.deepEqual([0,4], min_max(mapping.slice(0,5)));
                 assert.equal(5, _.uniq(mapping.slice(0,5)).length);
 
-                assert.equal(false, in_order(mapping.slice(5)));
                 assert.deepEqual([5,9], min_max(mapping.slice(5)));
                 assert.equal(5, _.uniq(mapping.slice(5)).length);
             }
             else {
                 shuf2 = true;
-                assert.equal(false, in_order(mapping.slice(5)));
                 assert.deepEqual([0,4], min_max(mapping.slice(5)));
                 assert.equal(5, _.uniq(mapping.slice(5)).length);
 
-                assert.equal(false, in_order(mapping.slice(0,5)));
                 assert.deepEqual([5,9], min_max(mapping.slice(0,5)));
                 assert.equal(5, _.uniq(mapping.slice(0,5)).length);
             }
-
-            if (++c >= 10) {
-                break;
-            }
         }
 
-        assert.equal(true, c < 10, "no shuffling in 10 tries?");
+        assert.equal(true, c < 20, "no shuffling in 20 tries?");
     });
 });
 
