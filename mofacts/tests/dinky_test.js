@@ -66,13 +66,21 @@ test_suite = function(suite_name, func) {
 };
 
 unit_test = function(unit_name, func) {
+    var format_msg = function() {
+        var output = [curr_suite(), unit_name, "=>"];
+        for(var i = 0; i < arguments.length; ++i) {
+            output.push(("" + arguments[i]).trim());
+        }
+        return output.join(' ');
+    };
+
     var logger = {
         print: function() {
-            var output = [curr_suite(), unit_name, "=>"];
-            for(var i = 0; i < arguments.length; ++i) {
-                output.push(("" + arguments[i]).trim());
-            }
-            console.real_log(output.join(' '));
+            console.real_log(format_msg.apply(this, arguments));
+        },
+
+        log: function() {
+            console.log(format_msg.apply(this, arguments));
         }
     };
 
