@@ -38,30 +38,48 @@ createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters)
     //TODO: Phil - should we blow up if the shuffle size are unequal?
     //Swap out sections of clusters (one step up from our shuffle above)
     if (!!swapclusters) {
-        var rangeFlatten = function(ranges) {
-            var output = [];
-            _.each(ranges, function(rng) {
-                Helpers.rangeVal(rng).forEach(function(num) {
-                    output.push(num);
-                });
-            });
-            return output;
-        };
+        //Get the chunks that we'll be swapping. Each chunk is in the format
+        //of an array of integral indexes (after the map). We actually get
+        //TWO lists of chunks - one in order and one that is the actual swap
+        var ranges = [];
+        Helpers.extractDelimFields(swapclusters, ranges);
+        var swapChunks = _.map(ranges, Helpers.rangeVal);
+        var sortChunks = _.map(ranges, Helpers.rangeVal);
 
-        var swapRangesSrc = [];
-        Helpers.extractDelimFields(swapclusters, swapRangesSrc);
-        var swapIndexSrc = rangeFlatten(swapRangesSrc);
+        //Now insure our sorted chunks are actually in order - we sort
+        //numerically by the first index
+        sortChunks.sort(function(lhs, rhs) {
+            var lv = lhs[0], rv = rhs[0];
+            if      (lv < rv) return -1;
+            else if (lv > rv) return 1;
+            else              return 0;
+        });
 
-        var swapRangesDest = swapRangesSrc.slice();
-        Helpers.shuffle(swapRangesDest);
-        var swapIndexDest = rangeFlatten(swapRangesDest);
+        //Now get a permuted copy of our chunks
+        Helpers.shuffle(swapChunks);
 
-        var swapped = mapping.slice(); //work on a copy
+        var swapped = [];
+        i = 0;
+        while (i < mapping.length) {
+            if (sortChunks.length > 0 && i == sortChunks[0][0]) {
+                //Swap chunk - grab the permuted chunk and add the mapped numbers
+                var chunk = swapChunks.shift();
+                for (var chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
+                    swapped.push(mapping[chunk[chunkIdx]]);
+                }
 
-        for(i = 0; i < swapIndexSrc.length; ++i) {
-            swapped[swapIndexSrc[i]] = mapping[swapIndexDest[i]];
+                //advance to the next chunk
+                i += sortChunks.shift().length;
+            }
+            else {
+                //Not part of a swapped chunk - keep this number and just move
+                //to the next number
+                swapped.push(mapping[i]);
+                i++;
+            }
         }
 
+        //All done
         mapping = swapped.slice();
     }
 
