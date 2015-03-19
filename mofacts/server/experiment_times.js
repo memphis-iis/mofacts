@@ -38,6 +38,15 @@
 
 (function() { //Begin IIFE pattern
 
+//Fake a console.log if we don't have a console but we do have a print function
+if (typeof console === "undefined" && typeof print !== "undefined") {
+    console = {
+        log: function() {
+            print.apply(this, arguments);
+        }
+    };
+}
+
 // Define an ordering for the fields and the column name we'll put in the
 // output file. Note that these names must match the fields used in populate
 // record.
@@ -173,7 +182,7 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
     var schedCondition;
     if (sched && sched.q && sched.q.length) {
         var schedItemIndex = d(lastq.questionIndex, 0) - 1;
-        if (schedItemIndex < sched.q.length) {
+        if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
             schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
         }
         else {
@@ -286,7 +295,23 @@ function processUserLog(username, userTimesDoc, expName, callback) {
             lastq = rec;
         }
         else if (act === "answer" || act === "[timeout]") {
-            callback(populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec));
+            var populated = null;
+            try {
+                populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec);
+            }
+            catch(e) {
+                console.log("There was an error populating the record - it will be skipped", e);
+                console.log(username, 
+                    JSON.stringify(lastexpcond), 
+                    JSON.stringify(lastschedule), 
+                    JSON.stringify(lastinstruct), 
+                    JSON.stringify(lastq), 
+                    JSON.stringify(rec)
+                );
+            }
+            if (populated) {
+                callback(populated);
+            }
         }
     }
 }
@@ -323,7 +348,7 @@ if (typeof Meteor !== "undefined" && Meteor.isServer) {
 //If not running under Meteor and we have the mongo console print function,
 //We run directly!
 if (typeof Meteor === "undefined" && typeof print !== "undefined") {
-    (function() {
+    (function() {        
         if (typeof experiment === "undefined") {
             print("You must specify an experiment when running this as a mongo script");
             return;
