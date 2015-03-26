@@ -44,7 +44,7 @@ observe-sequence@1.0.5
 ordered-dict@1.0.3
 ovcharik:howler@1.1.26
 peerlibrary:blocking@0.5.2
-peerlibrary:xml2js@0.4.5_1
+peerlibrary:xml2js@0.4.5_2
 random@1.0.3
 reactive-dict@1.1.0
 reactive-var@1.0.5
