@@ -6,3 +6,4 @@ mofacts/build
 .pyc
 .test_results
 .test*.sh
+.vagrant
