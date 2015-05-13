@@ -6,6 +6,9 @@ echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
+# Change mongo to listen on all addresses (which is fine since we're walled off)
+sed "s/bind_ip/#bind_ip/" < /etc/mongod.conf | sudo tee /etc/mongod.conf
+
 # Install meteor
 curl https://install.meteor.com/ | sh
 
