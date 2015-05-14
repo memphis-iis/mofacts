@@ -27,7 +27,7 @@ sudo service mongod restart
 
 
 # Install meteor
-curl https://install.meteor.com/ | sh
+curl --progress-bar https://install.meteor.com/ | sh
 
 
 # Remove Ubuntu's landscape stuff and clear login messages
