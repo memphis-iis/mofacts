@@ -2,7 +2,7 @@
 
 
 # Make a symbolic link to the sync'ed directory for more "natural" work
-ln -s /vagrant ~/mofacts
+ln -s /vagrant $HOME/mofacts
 
 
 # Install MongoDB
@@ -28,6 +28,26 @@ sudo service mongod restart
 
 # Install meteor
 curl --progress-bar https://install.meteor.com/ | sh
+
+# In case we're running on a Windows host, we force the use of mounting instead
+# of symlinks for meteor packages
+cd $HOME/mofacts/mofacts
+
+sudo umount .meteor/local -f
+rm .meteor/local -rf
+mkdir -p .meteor/local
+
+sudo umount packages -f
+rm packages -rf
+mkdir -p packages
+
+mkdir -p $HOME/.meteor/local
+sudo mount --bind $HOME/.meteor/local .meteor/local
+
+mkdir -p $HOME/.meteor/packages
+sudo mount --bind $HOME/.meteor/packages packages
+
+meteor update
 
 
 # Remove Ubuntu's landscape stuff and clear login messages

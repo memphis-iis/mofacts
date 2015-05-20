@@ -1,5 +1,22 @@
 #!/bin/bash
 
+echo "Removing use of symlinks from shared folder"
+sudo umount .meteor/local -f
+rm .meteor/local -rf
+mkdir -p .meteor/local
+
+sudo umount packages -f
+rm packages -rf
+mkdir -p packages
+
+mkdir -p $HOME/.meteor/local
+sudo mount --bind $HOME/.meteor/local .meteor/local
+
+mkdir -p $HOME/.meteor/packages
+sudo mount --bind $HOME/.meteor/packages packages
+
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
+
+echo "Running meteor"
 meteor
