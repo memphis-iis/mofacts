@@ -13,7 +13,9 @@
  * The first branch is assumed to be the "correct answer" match, while the
  * rest are matches for potential incorrect answers.
  * */
-
+function capFirst(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 //Return true if the answer is a "branched answer"
 function answerIsBranched(answer) {
     return Helpers.trim(answer).indexOf(';') >= 0;
@@ -99,7 +101,7 @@ Answers = {
             if (userInput.localeCompare(answer) === 0) {
                 //Exact match!
                 isCorrect = true;
-                matchText = "Correct - Great Job!";
+                matchText = "Correct";
             }
             else {
                 //See if they were close enough
@@ -118,13 +120,13 @@ Answers = {
 
                     if (editDistScore >= lfparameter) {
                         isCorrect = true;
-                        matchText = "Close enough - good job!";
+                        matchText = "Close enough";
                     }
                 }
             }
 
             if (!matchText) {
-                matchText = isCorrect ? "Correct" : "Incorrect - the answer is " + answer;
+                matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
             }
 
             return [isCorrect, matchText];

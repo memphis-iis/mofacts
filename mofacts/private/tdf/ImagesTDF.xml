@@ -10,6 +10,7 @@
         <isModeled>true</isModeled>
         <timeoutInSeconds>5</timeoutInSeconds>
         <experimentTarget>imgtest</experimentTarget>
+        <userselect>false</userselect>
     </setspec>
     
     <deliveryparams>

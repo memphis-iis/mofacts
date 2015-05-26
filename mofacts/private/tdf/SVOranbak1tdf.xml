@@ -1,0 +1,127 @@
+<tutor>
+    <setspec>
+        <name>Statistics Practice</name> <!-- TAKEN FROM Music2-0.xml -->
+        <lessonname> SVOranbak1tdf.xml </lessonname>
+        <userselect>false</userselect> <!-- Don't show up for users -->
+        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <isModeled>false</isModeled>
+   <lfparameter>.85</lfparameter>
+        <timeoutInSeconds>15</timeoutInSeconds>
+    </setspec>
+    <unit>
+        <unitname>Statistics Practice</unitname>
+        <unitinstructions><![CDATA[
+            Memory for Statistics Experiment<br><br>
+ 
+            Task: You will see a sequence of sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 8 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.
+            Hit ENTER after typing to submit your response.  ]]></unitinstructions>
+        <deliveryparams>
+           <purestudy>8000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>8000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>12000</drill>
+        </deliveryparams>
+        <assessmentsession> 
+<conditiontemplatesbygroup>
+                <groupnames>A B C D E F G H</groupnames> 
+                <clustersrepeated>8 4 2 8 4 2 4 2</clustersrepeated> 
+                <templatesrepeated>2 2 2 2 2 2 2 2</templatesrepeated>
+ <group> r,f,d,0 r,f,d,1 r,f,d,6 r,f,d,7 r,f,d,15 r,f,d,16 r,f,d,26 r,f,d,27  
+ 1,f,d,0 1,f,d,1 1,f,d,8 1,f,d,9 1,f,d,18 1,f,d,19 1,f,d,27 1,f,d,28 </group> 
+<group> r,f,d,0 r,f,d,1 r,f,d,11 r,f,d,12  
+ 1,f,d,0 1,f,d,1 1,f,d,9 1,f,d,10 </group> 
+<group> r,f,d,0 r,f,d,1  
+ 1,f,d,0 1,f,d,1 </group> 
+<group> r,f,d,0 r,f,d,8 r,f,d,18 r,f,d,27 r,f,d,34 r,f,d,40 r,f,d,49 r,f,d,60  
+ 1,f,d,0 1,f,d,8 1,f,d,18 1,f,d,27 1,f,d,34 1,f,d,40 1,f,d,49 1,f,d,60 </group> 
+<group> r,f,d,0 r,f,d,6 r,f,d,15 r,f,d,26  
+ 1,f,d,0 1,f,d,8 1,f,d,18 1,f,d,27 </group> 
+<group> r,f,d,0 r,f,d,11  
+ 1,f,d,0 1,f,d,10 </group> 
+<group> r,f,d,0 r,f,d,18 r,f,d,31 r,f,d,52  
+ 1,f,d,0 1,f,d,19 1,f,d,34 1,f,d,50 </group> 
+<group> r,f,d,0 r,f,d,21  
+ 1,f,d,0 1,f,d,18 </group> 
+</conditiontemplatesbygroup>
+<randomchoices>4</randomchoices>
+<initialpositions>A_2  A_2	D_2	D_1	E_2	G_2						
+C_2	C_2	A_2	A_2	D_2	D_1	E_2	F_2	G_1	H_2		
+B_2	B_2	A_2	A_2	D_2	D_1	E_2	F_2	G_2			
+B_2	B_2	A_2	A_2	D_2	D_1	E_2	G_1	H_2			
+A_1	A_1	D_2	D_1	E_1	G_2						
+A_1	A_1	D_2	D_1	E_1	G_1	H_1					
+B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_2			
+C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
+</initialpositions> 
+      <randomizegroups>false</randomizegroups> 
+      <clusterlist>0-15</clusterlist> 
+      <permutefinalresult> 0-5 6-15 16-24 25-33 34-39 40-46 47-55 56-67</permutefinalresult>
+<assignrandomclusters>false</assignrandomclusters>
+            <randomchoices>4</randomchoices> </assessmentsession>
+    </unit>
+
+<unit>
+<unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. 
+
+If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
+
+If the countdown below is 1 day or 3 days: No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
+<unitname>Lockout unit</unitname>
+<deliveryparams>
+<lockoutminutes>2</lockoutminutes> <!-- 2 minutes -->
+</deliveryparams>
+<deliveryparams>
+<lockoutminutes>1440</lockoutminutes> <!-- 24 hours -->
+</deliveryparams>
+<deliveryparams>
+<lockoutminutes>4320</lockoutminutes> <!-- 24*3 = 3 days -->
+</deliveryparams>
+</unit>
+<unit>
+<unitname>Posttest</unitname>
+<unitinstructions>Memory for Statistics Experiment
+
+Thanks for continuing. You have 54 sentences remaining. </unitinstructions>
+<deliveryparams>
+<purestudy>8000</purestudy>
+<readyprompt>0</readyprompt>
+<reviewstudy>8000</reviewstudy>
+<correctprompt>500</correctprompt>
+<drill>12000</drill>
+</deliveryparams>
+<assessmentsession>
+<conditiontemplatesbygroup>
+<groupnames>A</groupnames> 
+<clustersrepeated>3</clustersrepeated>
+<templatesrepeated>18</templatesrepeated>
+<group>
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+</group>
+</conditiontemplatesbygroup>
+<initialpositions>
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+</initialpositions>
+<randomizegroups>false</randomizegroups>
+<clusterlist>0-17</clusterlist>
+<permutefinalresult>0-17 18-35 36-53</permutefinalresult>
+<assignrandomclusters>true</assignrandomclusters>
+<randomchoices> 0 2 3 </randomchoices>
+</assessmentsession>
+</unit>
+<unit>
+<unitname>last</unitname>
+<unitinstructions>You have now completed the posttest. Please complete 2 quick survey questions, which follow this screen immediately.
+
+We will check your completion within a few days and confirm the $3 bonus.</unitinstructions>
+</unit>
+</tutor>

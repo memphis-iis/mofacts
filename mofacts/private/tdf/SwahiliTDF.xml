@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>Learn Swahili!</lessonname>
+        <lessonname>Swahili Vocabulary</lessonname>
         <stimulusfile>Swahilistims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
