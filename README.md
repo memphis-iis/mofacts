@@ -108,7 +108,7 @@ Once the virtual machine starts up, you can connect to it and run code. Assuming
 that you're still in the same command prompt that you opened above:
 
     $ vagrant ssh
-
+    *ssh is in the git/bin directory and may need to be added to path manually
 The command prompt should look different now: you are at a shell prompt in the
 virtual machine. Since your mofacts repository is shared with the VM, you can
 just `cd` into it to start the application. A handy script is provided to force
