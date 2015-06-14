@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <setspec> 
     <clusters>
-        <cluster>
-            <display>Although __________ are variable they are intended to represent the population from which they come.</display>
-            <response>samples</response>
-            <display>Although samples are __________ they are intended to represent the population from which they come.</display>
-            <response>variable</response>
-            <display>Although samples are variable they are intended to __________ the population from which they come.</display>
-            <response>represent</response>
-            <display>Although samples are variable they are intended to represent the __________ from which they come.</display>
-            <response>population</response>
+        <cluster> <displayType>Cloze</displayType>
+            <display>Although __________ are variable they are intended to represent the population from which they come. </display>
+            <response>samples~Correct;statistics~Statistics is incorrect. The correct response is samples. Statistics describes the features of a sample which in turn may represent a population.;observations~Observations is incorrect. The correct response is samples. Observations are the behaviors or actions of a sample not a population.;.*~Incorrect. The correct fill-in is 'samples'.</response> 
+            <display>Although samples are __________ they are intended to represent the population from which they come. </display>
+            <response>variable~Correct;random~Random is incorrect. The correct answer is variable. Random is too strong a word here, since some samples are not always random, but may be biased. Even biased samples are variable, except for the strange case of a degenerate disrtibution.;small~Small is incorrect. The correct answer is variable. While samples in normal situations are smaller than the population, they still may be very very large, restrained by only the size of the population.;.*~Incorrect. The correct fill-in is 'variable'.</response> 
+            <display>Although samples are variable they are intended to __________ the population from which they come. </display>
+            <response>represent~Correct;describe~;sample~Sample is incorrect. The correct response is represent. The response should describe the relationship between sample and population therefore represent is a proper descriptive word.;.*~Incorrect. The correct fill-in is 'represent'.</response> 
+            <display>Although samples are variable they are intended to represent the __________ from which they come. </display>
+            <response>population~Correct;sample~Sample is incorrect. The correct response is population. While English allows us to take a sample of a sample, this is not generally done in statistic. Rather in statistics the sample is taken from the population, which we use the sample ot make inferences about.;.*~Incorrect. The correct fill-in is 'population'.</response>
         </cluster>
         <cluster>
             <display>When a study __________ human subjects, the sample is the group of people who participated in the study.</display>

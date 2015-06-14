@@ -129,9 +129,9 @@ AssessmentSession = {
                     var forward = true; //Note that we ignore the f/b setting in the group
 
                     var type = parts[2].toUpperCase()[0];
-                    if (type === "T") {
-                        type = "D";
-                    }
+                 //   if (type === "T") {
+                 //       type = "D";
+                 //   }
 
                     var showHint = false;
                     if (parts[2].length > 1) {

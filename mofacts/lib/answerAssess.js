@@ -52,7 +52,7 @@ function branchingCorrectText(answer) {
     if (branches.length > 0) {
         var flds = branches[0].split('~');
         if (flds.length == 2) {
-            result = flds[1];
+            result = flds[0];
         }
     }
 
@@ -75,13 +75,12 @@ Answers = {
 
         if (answerIsBranched(answer)) {
             //Branched = use first entry's text
-            result = branchingCorrectText(answer);
+            answer = branchingCorrectText(answer);
         }
-        else {
-            //Fill in the blank
+      
+          //Fill in the blank
             result = question.replace(/___+/g, answer);
-        }
-
+        
         return result;
     },
 

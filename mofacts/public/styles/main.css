@@ -27,7 +27,6 @@ body {
 
 .navbar-inverse {
 	background-color: #585858;
-	box-shadow: 2px 2px 2px 2px #4d5a42;
 }
 
 .btn {
@@ -36,7 +35,6 @@ body {
 	border-color: #118C4E;
 	font-family: 'Lato', sans-serif;
 	font-size: 16px;
-	box-shadow: 1px 1px 1px 1px #4d5a42;
 }
 
 h3 {
@@ -48,34 +46,16 @@ h2 {
 	font-family: 'Lato', sans-serif;
 }
 
-#answerLabel {
-	font-family: 'Lato', sans-serif;
-	width: 100%;
-	background-color: #40a371;
-	text-align: center;
-	box-shadow: 1px 1px 1px 1px #4d5a42;
-}
-
-#questionLabel {
-	font-family: 'Lato', sans-serif;
-	width: 100%;
-	background-color: #40a371;
-	text-align: center;
-	box-shadow: 1px 1px 1px 1px #4d5a42;
-}
-
 #cardTemplateQuestionImg {
     width:auto;
     height:340px; /* Height is expected to be changed: see index.js */
 }
-
 
 legend {
 	border-color: white;
 }
 
 #instructions {
-	text-shadow: none;
 	font-size: 18px;
 }
 
@@ -83,19 +63,6 @@ legend {
 	background: #40a371;
 }
 
-#textQuestion {
-	background:  #585858;
-	text-align: center;
-	font-family: 'Lato', sans-serif;
-}
-
-#userAnswer {
-	background:  #585858;
-	text-align: center;
-	font-family: 'Lato', sans-serif;
-    background-color: #fff;
-    color: #000;
-}
 
 #audio {
 	width: 100%;
@@ -125,7 +92,6 @@ legend {
 	color: white;
 	font-family: 'Lato', sans-serif;
 	font-size: 32px;
-	text-shadow: 1px 2px 4px black;
 }
 
 .stimButton {
@@ -140,7 +106,6 @@ legend {
 	color: white;
 	font-family: 'Lato', sans-serif;
 	font-size: 28px;
-	text-shadow: 1px 2px 4px black;
 }
 
 .dropdown-menu {
