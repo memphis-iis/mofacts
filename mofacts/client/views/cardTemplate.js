@@ -129,6 +129,11 @@ Template.cardTemplate.events({
 
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers and meteor events
+Template.inputF.rendered = function()
+{
+    
+    this.$('input').focus() 
+    };
 
 Template.cardTemplate.rendered = function() {
     if(Session.get("debugging")) {
@@ -193,6 +198,14 @@ Template.cardTemplate.helpers({
 
     drill: function() {
         return getTestType() === "d";
+    },
+    trial: function() {
+        var type = getTestType();
+        return type === "d" || type === "s" || type === "t";
+    },
+    testordrill: function() {
+        var type = getTestType();
+        return type === "d" || type === "t";
     },
 
     skipstudy: function() {
@@ -486,7 +499,8 @@ function handleUserInput(e , source) {
     //Figure out timeout
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
-
+    var file = getCurrentTdfFile();
+timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
     if (getTestType() === "s") {
         //Just a study - note that the purestudy timeout is used for the
         //QUESTION timeout, not the display timeout after the ANSWER
@@ -496,16 +510,22 @@ function handleUserInput(e , source) {
         //Got a drill wrong on a scheduled test - should use review timeout
         timeout = Helpers.intVal(deliveryParams.reviewstudy) || 0;
     }
+    else if (!isCorrect && getTestType() === "t" && Session.get("isScheduledTest")) {
+        //Got a drill wrong on a scheduled test - should use review timeout
+        timeout = 0;
+    }
     else if (isCorrect) {
         //Correct! should use a correct timeout
         //Special default for correct - we use 1ms instead of 0 to avoid
         //the generic fallback to 2 seconds below
-        timeout = Helpers.intVal(deliveryParams.correctprompt) || 1;
+        //TODO: help fails for learning session units and is set to 1000ms
+        timeout = Helpers.intVal(deliveryParams.correctprompt) || 1000;
     }
     else {
         //Not a study, not correct, either a test or not scheduled or both.
         //we'll force ourselves to punt below with default values
         timeout = 0;
+        timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
     }
 
     //If not timeout, default to 2 seconds so they can read the message
@@ -1040,7 +1060,7 @@ function stopUserInput() {
 
 function allowUserInput() {
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-    $("#userAnswer").focus();
+    
 }
 
 

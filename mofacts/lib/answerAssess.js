@@ -52,7 +52,7 @@ function branchingCorrectText(answer) {
     if (branches.length > 0) {
         var flds = branches[0].split('~');
         if (flds.length == 2) {
-            result = flds[1];
+            result = flds[0];
         }
     }
 
@@ -75,13 +75,12 @@ Answers = {
 
         if (answerIsBranched(answer)) {
             //Branched = use first entry's text
-            result = branchingCorrectText(answer);
+            answer = branchingCorrectText(answer);
         }
-        else {
-            //Fill in the blank
+      
+          //Fill in the blank
             result = question.replace(/___+/g, answer);
-        }
-
+        
         return result;
     },
 
@@ -101,7 +100,7 @@ Answers = {
             if (userInput.localeCompare(answer) === 0) {
                 //Exact match!
                 isCorrect = true;
-                matchText = "Correct";
+                matchText = "Correct.";
             }
             else {
                 //See if they were close enough
@@ -120,13 +119,19 @@ Answers = {
 
                     if (editDistScore >= lfparameter) {
                         isCorrect = true;
-                        matchText = "Close enough";
+                        matchText = "Close enough to the correct answer '"+ answer + "'.";
                     }
                 }
             }
 
             if (!matchText) {
-                matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
+                if (userInput === "") {
+                    matchText = "The correct answer is " + answer + ".";
+                }
+                else
+                {
+                    matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
+                }
             }
 
             return [isCorrect, matchText];
