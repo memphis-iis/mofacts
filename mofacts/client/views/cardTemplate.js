@@ -1,9 +1,31 @@
 //TODO: Support a unit directive for displaying stats/scores for current
 //      learning and/or assessment sessions
 
+/***************************************************************************
+ * cardTemplate.js - the implementation behind cardTemplate.html (and thus
+ * the main GUI implementation for MoFaCTS).
+ *
+ * There is quite a bit of logic in this file, but most of it is commented locally.
+ * One note to keep in mind that much of the direct access to the TDF and Stim
+ * files has been abstracted out to places like currentTestingHelpers.js
+ *
+ * This is important because that abstract is used to do things like support
+ * multiple deliveryParam (the x-condition logic) and centralize some of the
+ * checked that we do to make sure everything is functioning correctly.
+ * */
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
+
+var buttonList = new Mongo.Collection(null); //local-only - no database
+
+function clearButtonList() {
+    //In theory, they could put something without temp defined and we would
+    //keep it for the session. In truth, we just want a field to specify in
+    //the query.
+    buttonList.remove({'temp': 1});
+}
 
 var unitStartTimestamp = 0;
 var trialTimestamp = 0;
@@ -131,9 +153,8 @@ Template.cardTemplate.events({
 // Template helpers and meteor events
 Template.inputF.rendered = function()
 {
-    
-    this.$('input').focus() 
-    };
+    this.$('input').focus()
+};
 
 Template.cardTemplate.rendered = function() {
     if(Session.get("debugging")) {
@@ -150,6 +171,9 @@ Template.cardTemplate.rendered = function() {
 
     //the card loads frequently, but we only want to set this the first time
     if(Session.get("needResume")) {
+        Session.set("buttonTrial", false);
+        clearButtonList();
+
         console.log("cards template rendered => Performing resume");
         Session.set("showOverlearningText", false);
         resumeFromUserTimesLog();
@@ -211,11 +235,20 @@ Template.cardTemplate.helpers({
     skipstudy: function() {
         return getCurrentDeliveryParams().skipstudy;
     },
+
+    buttonTrial: function() {
+        return Session.get("buttonTrial");
+    },
+
+    buttonList: function() {
+        return buttonList.find({}, {sort: {idx: 1}});
+    }
 });
 
 
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
+
 
 function newQuestionHandler() {
     console.log("NQ handler", (Date.now() - unitStartTimestamp||1) / 1000.0);
@@ -262,6 +295,7 @@ function newQuestionHandler() {
         $("#multipleChoiceContainer").html("");
 
         if (schedule && schedule.isButtonTrial) {
+            Session.set("buttonTrial", true);
             $("#textEntryRow").hide();
 
             var cluster = getStimCluster(getCurrentClusterIndex());
@@ -305,19 +339,23 @@ function newQuestionHandler() {
                 Helpers.shuffle(choicesArray);
             }
 
-            //insert all of the multiple choice buttons with the appropriate values.
-            _.each(choicesArray, function(value, idx) {
-                $("#multipleChoiceContainer").append($(
-                    "<div>" +
-                    "<button type='button' name='" + value + "' class='btn btn-primary btn-block multipleChoiceButton'>" +
-                    value +
-                    "</button>" +
-                    "</div>"
-                ));
+            Session.set("buttonTrial", true);
+            clearButtonList();
+
+            _.each(choicesArray, function(val, idx) {
+                buttonList.insert({
+                    temp: 1,         //Deleted when clearing
+                    idx: idx,        //Will be ordered by array index
+                    buttonName: val, //Currently, name and value are the same
+                    buttonValue: val
+                });
             });
         }
         else {
             //Not a button trial
+            Session.set("buttonTrial", false);
+            clearButtonList();
+
             $("#textEntryRow").show();
         }
     }
@@ -500,7 +538,7 @@ function handleUserInput(e , source) {
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
     var file = getCurrentTdfFile();
-timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
+
     if (getTestType() === "s") {
         //Just a study - note that the purestudy timeout is used for the
         //QUESTION timeout, not the display timeout after the ANSWER
@@ -523,9 +561,9 @@ timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0
     }
     else {
         //Not a study, not correct, either a test or not scheduled or both.
-        //we'll force ourselves to punt below with default values
-        timeout = 0;
-        timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
+        //If they specified a reviewstudy delivery param in the first unit, then
+        //we can try that one
+        timeout = Helpers.intVal(getCurrentDeliveryParams(getCurrentTdfUnit(0)).reviewstudy);
     }
 
     //If not timeout, default to 2 seconds so they can read the message
@@ -1060,7 +1098,6 @@ function stopUserInput() {
 
 function allowUserInput() {
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-    
 }
 
 

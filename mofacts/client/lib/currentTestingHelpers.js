@@ -125,7 +125,9 @@ getCurrentTdfFile = function () {
     return Tdfs.findOne({fileName: getCurrentTdfName()});
 };
 
-getCurrentTdfUnit = function () {
+//Note that unit number used can be overridden - otherwise we just use the
+//currentUnitNumber
+getCurrentTdfUnit = function (unitIdx) {
     var thisTdf = getCurrentTdfFile();
     if (!thisTdf) {
         return null;
@@ -133,7 +135,9 @@ getCurrentTdfUnit = function () {
 
     var currUnit = null;
     if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-        var unitIdx = getCurrentUnitNumber();
+        //If they didn't override the unit idx, then use the current
+        if (!unitIdx && unitIdx !== 0)
+            unitIdx = getCurrentUnitNumber();
         currUnit = thisTdf.tdfs.tutor.unit[unitIdx];
     }
 
@@ -168,9 +172,17 @@ getUnitsRemaining = function() {
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
 //
+//NOTE that the default mode is to use the current unit (thus the name), but we
+//allow callers to override the unit assumed to be current
+//
 //IMPORTANT: we also support selecting one of multiple delivery params via
 //experimentXCond (which is specified in the URL)
-getCurrentDeliveryParams = function () {
+getCurrentDeliveryParams = function (currUnit) {
+    //If they didn't specify the unit, assume that current unit
+    if (!currUnit) {
+        currUnit = getCurrentTdfUnit();
+    }
+
     //Note that we will only extract values that have a specified default
     //value here.
     var deliveryParams = {
@@ -181,6 +193,7 @@ getCurrentDeliveryParams = function () {
         lockoutminutes: 0,
     };
 
+    //We've defined defaults - also define translatations for values
     var xlateBool = function(v) {
         return  v ? Helpers.trim(v).toLowerCase() === "true" : false;
     };
@@ -193,7 +206,6 @@ getCurrentDeliveryParams = function () {
         lockoutminutes: Helpers.intVal,
     };
 
-    var currUnit = getCurrentTdfUnit();
     var modified = false;
     var fieldName; //Used in loops below
 

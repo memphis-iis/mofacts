@@ -1,6 +1,6 @@
 <template name="inputF">
     <h3> <input id="userAnswer" class="alert alert-warning"
-                style="display:table-cell;width:100%;" value="{{userAnswer}}"></h3>
+                style="display:table-cell;width:100%;"></h3>
 </template>
 
 <template name="cardTemplate">
@@ -34,12 +34,14 @@
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
 
+
+
     <div class="container">
-        {{#if trial}}    
-        <div class="row">         
+        {{#if trial}}
+        <div class="row">
             <h3 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info"
                 id="textQuestion" >
-                {{#if textOrClozeCard}}               
+                {{#if textOrClozeCard}}
                 {{{currentQuestion}}}
                 {{/if}}
                 {{#if audioCard}}
@@ -70,23 +72,30 @@
         {{/if}}
 
         {{#if testordrill}}
-        <div class="row" id="textEntryRow">
-            <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                {{> inputF}}
-            </div>
-        </div>  <!-- close row -->
-
-        <div class="row">
-            <div class="col-md-offset-4 col-md-4">
-                <div id="multipleChoiceContainer">
-                    <!-- will contain multiple choice buttons which are dynamically added. -->
+            {{#unless buttonTrial}}
+            <div class="row" id="textEntryRow">
+                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                    {{> inputF}}
                 </div>
-            </div>
-        </div> <!-- close row -->
+            </div>  <!-- close row -->
+            {{/unless}}
+
+            <div class="row">
+                <div class="col-md-offset-4 col-md-4">
+                    <div id="multipleChoiceContainer">
+                        <!-- will contain multiple choice buttons which are dynamically added. -->
+                        {{#each buttonList}}
+                        <div><button type='button' name='{{buttonName}}' class='btn btn-primary btn-block multipleChoiceButton'>
+                            {{buttonValue}}
+                        </button></div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div> <!-- close row -->
         {{/if}}
 
         <div class="row">
-            <h3 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8" id="UserInteraction" hidden></h3>       
+            <h3 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8" id="UserInteraction" hidden></h3>
         </div>
 
 
