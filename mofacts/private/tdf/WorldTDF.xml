@@ -9,14 +9,14 @@
         <isModeled>true</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
     </setspec>
-
+<unit>
     <deliveryparams>
         <purestudy>10000</purestudy>
         <skipstudy>false</skipstudy>
         <reviewstudy>10000</reviewstudy>
         <correctprompt>500</correctprompt>
-
         <practiceseconds>1800</practiceseconds>
         <finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
     </deliveryparams>
+</unit>
 </tutor>

@@ -100,7 +100,7 @@ Answers = {
             if (userInput.localeCompare(answer) === 0) {
                 //Exact match!
                 isCorrect = true;
-                matchText = "Correct";
+                matchText = "Correct.";
             }
             else {
                 //See if they were close enough
@@ -119,13 +119,19 @@ Answers = {
 
                     if (editDistScore >= lfparameter) {
                         isCorrect = true;
-                        matchText = "Close enough";
+                        matchText = "Close enough to the correct answer '"+ answer + "'.";
                     }
                 }
             }
 
             if (!matchText) {
-                matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
+                if (userInput === "") {
+                    matchText = "The correct answer is " + answer + ".";
+                }
+                else
+                {
+                    matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
+                }
             }
 
             return [isCorrect, matchText];

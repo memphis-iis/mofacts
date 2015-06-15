@@ -499,7 +499,8 @@ function handleUserInput(e , source) {
     //Figure out timeout
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
-
+    var file = getCurrentTdfFile();
+timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
     if (getTestType() === "s") {
         //Just a study - note that the purestudy timeout is used for the
         //QUESTION timeout, not the display timeout after the ANSWER
@@ -524,6 +525,7 @@ function handleUserInput(e , source) {
         //Not a study, not correct, either a test or not scheduled or both.
         //we'll force ourselves to punt below with default values
         timeout = 0;
+        timeout = Helpers.intVal(file.tdfs.tutor.unit[0].deliveryparams[0].reviewstudy[0]);
     }
 
     //If not timeout, default to 2 seconds so they can read the message
