@@ -142,7 +142,7 @@ SDTDF = function() { return {
                                         "31"
                                     ],
                                     "group" : [
-                                        "\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0 r,f,d,0\n                    r,f,d,0 r,f,d,0 r,f,d,0\n                "
+                                        "\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0 r,b,d,0\n                    r,b,d,0 r,b,d,0 r,b,d,0\n                "
                                     ]
                                 }
                             ],

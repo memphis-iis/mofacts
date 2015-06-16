@@ -6,6 +6,48 @@ require("../common/AssessmentSession.js");
 
 test_suite("permutefinal", function() {
     var tdffile = SDTDF();
+    var setspec = tdffile.tdfs.tutor.setspec[0];
+
+    unit_test("ButtonTrialDefault", function(logger) {
+        var unitIndex = 1;
+        var unit = tdffile.tdfs.tutor.unit[unitIndex];
+        var sched = AssessmentSession.createSchedule(setspec, unitIndex, unit);
+
+        assert.equal(unitIndex, sched.unitNumber);
+        assert.equal(31, sched.q.length);
+
+        var noForceCount = 0;
+        _.each(sched.q, function(q) {
+            if (q.forceButtonTrial === false) {
+                noForceCount++;
+            }
+            else {
+                assert.equal(false, !q.forceButtonTrial || typeof q.forceButtonTrial === "undefined");
+            }
+        });
+        assert.equal(31, noForceCount);
+    });
+
+    unit_test("ButtonTrialForcedOn", function(logger) {
+        var unitIndex = 2;
+        var unit = tdffile.tdfs.tutor.unit[unitIndex];
+        var sched = AssessmentSession.createSchedule(setspec, unitIndex, unit);
+
+        assert.equal(unitIndex, sched.unitNumber);
+        assert.equal(31, sched.q.length);
+
+        var forceCount = 0;
+        _.each(sched.q, function(q) {
+            if (q.forceButtonTrial === true) {
+                forceCount++;
+            }
+        });
+        assert.equal(31, forceCount);
+    });
+});
+
+test_suite("permutefinal", function() {
+    var tdffile = SDTDF();
     var unitIndex = 1;
     var unit = tdffile.tdfs.tutor.unit[unitIndex];
     var setspec = tdffile.tdfs.tutor.setspec[0];

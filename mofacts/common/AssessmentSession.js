@@ -68,12 +68,13 @@ AssessmentSession = {
         quests[settings.scheduleSize-1] = {};
 
         //How you set a question
-        var setQuest = function(qidx, type, clusterIndex, condition, whichStim) {
+        var setQuest = function(qidx, type, clusterIndex, condition, whichStim, forceButtonTrial) {
             quests[qidx] = {
                 testType: type.toLowerCase(),
                 clusterIndex: clusterIndex,
                 condition: condition,
-                whichStim : whichStim
+                whichStim : whichStim,
+                forceButtonTrial: forceButtonTrial
             };
         };
 
@@ -123,15 +124,23 @@ AssessmentSession = {
 
                 //Work through the group elements
                 for (k = 0; k < templateSize; ++k) {
+                    //"parts" is a comma-delimited entry with 4 components:
+                    // 0 - the offset (whichStim) - can be numeric or "r" for random
+                    // 1 - legacy was f/b, now "b" forces a button trial
+                    // 2 - trial type (t, d, s)
+                    // 3 - location (added to qidx)
                     var groupEntry = group[index * templateSize + k];
                     var parts = groupEntry.split(",");
 
-                    var forward = true; //Note that we ignore the f/b setting in the group
+                    var forceButtonTrial = false;
+                    if (parts[1].toLowerCase()[0] === "b") {
+                        forceButtonTrial = true;
+                    }
 
                     var type = parts[2].toUpperCase()[0];
-                 //   if (type === "T") {
-                 //       type = "D";
-                 //   }
+                    //if (type === "T") {
+                    //    type = "D";
+                    //}
 
                     var showHint = false;
                     if (parts[2].length > 1) {
@@ -148,7 +157,7 @@ AssessmentSession = {
                     var offStr = parts[0].toLowerCase(); //Selects stim from cluster w/ multiple stims
                     if (offStr === "m") {
                         //Trial from model
-                        setQuest(firstPos + location, type, 0, "select_"+type, offStr);
+                        setQuest(firstPos + location, type, 0, "select_"+type, offStr, forceButtonTrial);
                     }
                     else {
                         //Trial by other means
@@ -180,7 +189,7 @@ AssessmentSession = {
                         //cluster[pairNum], which is different from FaCT - and implies
                         //that we currently only support a clusterSize of 1
                         var pairNum = settings.clusterSize * clusterNum;
-                        setQuest(firstPos + location, type, pairNum, condition, offset);
+                        setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
                     } //offset is Model or something else?
                 } //k (walk thru group elements)
             } //j (each template index)
