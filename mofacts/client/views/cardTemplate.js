@@ -153,7 +153,7 @@ Template.cardTemplate.events({
 // Template helpers and meteor events
 Template.inputF.rendered = function()
 {
-    this.$('input').focus()
+    this.$('input').focus();
 };
 
 Template.cardTemplate.rendered = function() {
@@ -289,12 +289,8 @@ function newQuestionHandler() {
         var unitNumber = getCurrentUnitNumber();
         var file = getCurrentTdfFile();
         var currUnit = file.tdfs.tutor.unit[unitNumber];
-        var schedule = getSchedule();
 
-        //Always clear the multiple choice container
-        $("#multipleChoiceContainer").html("");
-
-        if (schedule && schedule.isButtonTrial) {
+        if (getButtonTrial()) {
             Session.set("buttonTrial", true);
             $("#textEntryRow").hide();
 
@@ -339,8 +335,8 @@ function newQuestionHandler() {
                 Helpers.shuffle(choicesArray);
             }
 
-            Session.set("buttonTrial", true);
             clearButtonList();
+            Session.set("buttonTrial", true);
 
             _.each(choicesArray, function(val, idx) {
                 buttonList.insert({
@@ -353,8 +349,8 @@ function newQuestionHandler() {
         }
         else {
             //Not a button trial
-            Session.set("buttonTrial", false);
             clearButtonList();
+            Session.set("buttonTrial", false);
 
             $("#textEntryRow").show();
         }
@@ -598,6 +594,26 @@ function handleUserInput(e , source) {
     }
 }
 
+function getButtonTrial() {
+    //Default to false
+    var isButtonTrial = false;
+
+    var progress = getUserProgress();
+    if (progress && progress.currentSchedule) {
+        //We are scheduled that means the schedule knows if we are a button trial
+        //AND the current schedule question info may override that setting
+        var questInfo = currentScheduledQInfo();
+        if (questInfo && questInfo.forceButtonTrial) {
+            isButtonTrial = true;  //Override for one q
+        }
+        else if (!!progress.currentSchedule.isButtonTrial) {
+            isButtonTrial = true;  //Entire schedule is a button trial
+        }
+    }
+
+    return isButtonTrial;
+}
+
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question
 function userAnswerFeedback(userAnswer, isTimeout) {
@@ -608,13 +624,6 @@ function userAnswerFeedback(userAnswer, isTimeout) {
     if (getTestType() === "s") {
         isCorrect = true;
         isTimeout = false;
-    }
-
-    //We know if it's a button trial from the schedule
-    var isButtonTrial = false;
-    var progress = getUserProgress();
-    if (progress && progress.currentSchedule) {
-        isButtonTrial = !!progress.currentSchedule.isButtonTrial;
     }
 
     //Helpers for correctness logic below
@@ -629,7 +638,7 @@ function userAnswerFeedback(userAnswer, isTimeout) {
     var correctAndText;
 
     var setspec = null;
-    if (!isButtonTrial) {
+    if (!getButtonTrial()) {
         setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     }
 
@@ -744,15 +753,24 @@ function randomCard() {
     newQuestionHandler();
 }
 
+//Return the current q info in the schedule - note that we don't check to make
+//sure that the caller SHOULD be calling us
+function currentScheduledQInfo() {
+    return getSchedule().q[Session.get("questionIndex")];
+}
+
 function scheduledCard() {
     var unit = getCurrentUnitNumber();
     var questionIndex = Session.get("questionIndex");
-    console.log("scheduledCard => unit:" + unit + ",questionIndex:" + questionIndex);
-
-    var questInfo = getSchedule().q[questionIndex];
+    var questInfo = currentScheduledQInfo();
     var clusterIndex = questInfo.clusterIndex;
     var whichStim = questInfo.whichStim;
-    console.log("scheduledCard => clusterIndex:" + clusterIndex + ",whichStim:" + whichStim);
+
+    console.log("scheduledCard => ",
+        "unit:", unit,
+        "questionIndex:", questionIndex,
+        "clusterIndex:", clusterIndex,
+        "whichStim:", whichStim);
 
     //Set current Q/A info
     setCurrentClusterIndex(clusterIndex);
@@ -796,7 +814,7 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
 }
 
 //Return the schedule for the current unit of the current lesson -
-//If it diesn't exist, then create and store it in User Progress
+//If it doesn't exist, then create and store it in User Progress
 function getSchedule() {
     //Retrieve current schedule
     var progress = getUserProgress();
