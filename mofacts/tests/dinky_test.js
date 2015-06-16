@@ -31,6 +31,9 @@ console.log = function() {
             v = JSON.stringify(v);
         }
         console_buffer.push(v);
+	if (i !== arguments.length - 1) {
+		console_buffer.push(' ');
+	}
     }
     console_buffer.push('\n');
 };
