@@ -109,6 +109,25 @@ getCurrentStimAnswer = function(whichAnswer) {
     return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
 };
 
+//Return the list of false responses corresponding to the current question/answer
+getCurrentFalseResponses = function(whichAnswer) {
+    var cluster = getStimCluster(getCurrentClusterIndex());
+
+    if (!cluster || !cluster.falseResponse || cluster.falseResponse.length < 1) {
+        return []; //No false responses
+    }
+
+    //If we have the same number of response and falseResponse, then the stim file
+    //is using the "new" formatted false response per display/response pair.
+    //Otherwise, we assume the "old" style and they get everything
+    if (cluster.response.length === cluster.falseResponse.length) {
+        return Helpers.trim(cluster.falseResponse[whichAnswer]).split(';');
+    }
+    else {
+        return cluster.falseResponse;
+    }
+};
+
 getCurrentStimName = function () {
     return Session.get("currentStimName");
 };

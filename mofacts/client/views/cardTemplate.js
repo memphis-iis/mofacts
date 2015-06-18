@@ -1,3 +1,5 @@
+//TODO: Test the new falseResponse stuff
+
 //TODO: Support a unit directive for displaying stats/scores for current
 //      learning and/or assessment sessions
 
@@ -306,9 +308,10 @@ function newQuestionHandler() {
                 choicesArray = buttonOrder;
             }
             else {
-                //Get from cluster
-                if (cluster.falseResponse && cluster.falseResponse.length) {
-                    _.each(cluster.falseResponse, function(ele) {
+                //Specified in the scheduled stim cluster
+                var currentSchedQuest = currentScheduledQInfo();
+                if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
+                    _.each(getCurrentFalseResponses(currentSchedQuest.whichStim), function(ele) {
                         choicesArray.push(ele);
                     });
                 }
