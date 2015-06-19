@@ -49,8 +49,9 @@ Template.signInTemplate.helpers({
 function signinNotify() {
     if (Session.get("debugging")) {
         var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-        console.log(currentUser + " was logged in successfully!");
+        console.log(currentUser + " was logged in successfully! Current route is ", Router.current().route.getName());
         Meteor.call("debugLog", "Sign in was successful");
+        console.trace(); //TODO: remove
     }
     Router.go("/profile");
 }
