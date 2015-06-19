@@ -178,6 +178,8 @@ Template.cardTemplate.rendered = function() {
 
         console.log("cards template rendered => Performing resume");
         Session.set("showOverlearningText", false);
+
+        Session.set("needResume", false); //Turn this off to keep from re-resuming
         resumeFromUserTimesLog();
     }
 };
@@ -1296,6 +1298,7 @@ function resumeFromUserTimesLog() {
     else {
         //Found the cluster mapping record - extract the embedded mapping
         clusterMapping = clusterMapping.clusterMapping;
+        console.log("Cluster mapping found", clusterMapping);
     }
 
     if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
