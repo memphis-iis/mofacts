@@ -1,5 +1,3 @@
-//TODO: Test the new falseResponse stuff
-
 //TODO: Support a unit directive for displaying stats/scores for current
 //      learning and/or assessment sessions
 
@@ -321,9 +319,7 @@ function newQuestionHandler() {
                 if (choicesArray.length < 1) {
                     //Whoops - they didn't specify any alternate choices
                     console.log("A button trial requires some false responses");
-                    currUnit.buttontrial = false;
-                    newQuestionHandler(); //RECURSE
-                    return;
+                    throw new Error("Bad TDF or Stim file");
                 }
 
                 //Currently we only show 5 option button trials - so we only
