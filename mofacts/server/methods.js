@@ -119,9 +119,10 @@ Meteor.startup(function () {
                 checks.push("Blank user names aren't allowed");
             }
             else if(typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
-                if (!previousOK) {
-                    checks.push("User is already in use");
+                if (previousOK) {
+                    return null; //User has already been created - nothing to do
                 }
+                checks.push("User is already in use");
             }
 
             if (!newUserPassword || newUserPassword.length < 6) {

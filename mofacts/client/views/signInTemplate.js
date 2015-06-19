@@ -51,7 +51,6 @@ function signinNotify() {
         var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
         console.log(currentUser + " was logged in successfully! Current route is ", Router.current().route.getName());
         Meteor.call("debugLog", "Sign in was successful");
-        console.trace(); //TODO: remove
     }
     Router.go("/profile");
 }
@@ -87,6 +86,7 @@ function UserPasswordCheck() {
             //If there was a call failure or server returned error message,
             //then we can't proceed
             if (errorMsgs.length > 0) {
+                console.log("Experiment user login errors:", errorMsgs);
                 $("#serverErrors")
                     .html(errorMsgs.join("<br>"))
                     .show();
@@ -94,7 +94,7 @@ function UserPasswordCheck() {
             }
 
             //Everything was OK if we make it here - now we init the session,
-            //login, and proceed to the pofile screen
+            //login, and proceed to the profile screen
 
             sessionCleanUp();
 
@@ -107,10 +107,10 @@ function UserPasswordCheck() {
                     signinNotify();
                 }
             });
-
-            //No more processing
-            return;
         });
+
+        //No more processing
+        return;
     }
 
     //If we're here, either we're in experimental mode and we know the user
