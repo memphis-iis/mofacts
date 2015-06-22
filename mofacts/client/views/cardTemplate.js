@@ -287,6 +287,8 @@ function newQuestionHandler() {
         }
     }
 
+    var textFocus = false; //We'll set to true if needed
+
     if ( Session.get("isScheduledTest") ) {
         var unitNumber = getCurrentUnitNumber();
         var file = getCurrentTdfFile();
@@ -352,7 +354,7 @@ function newQuestionHandler() {
             //Not a button trial
             clearButtonList();
             Session.set("buttonTrial", false);
-
+            textFocus = true; //Need the text box focused
             $("#textEntryRow").show();
         }
     }
@@ -382,12 +384,12 @@ function newQuestionHandler() {
     if(getQuestionType() === "sound") {
         //We don't allow user input until the sound is finished playing
         playCurrentQuestionSound(function() {
-            allowUserInput();
+            allowUserInput(textFocus);
         });
     }
     else {
         //Not a sound - can unlock now for data entry now
-        allowUserInput();
+        allowUserInput(textFocus);
     }
 }
 
@@ -1115,8 +1117,17 @@ function stopUserInput() {
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
 }
 
-function allowUserInput() {
+function allowUserInput(textFocus) {
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+
+    if (typeof textFocus !== "undefined" && !!textFocus) {
+        try {
+            $("#userAnswer").focus();
+        }
+        catch(e) {
+            //Nothing to do
+        }
+    }
 }
 
 
