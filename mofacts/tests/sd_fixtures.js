@@ -28,9 +28,6 @@ SDTDF = function() { return {
                     ],
                     "isModeled" : [
                         "false"
-                    ],
-                    "timeoutInSeconds" : [
-                        "15"
                     ]
                 }
             ],

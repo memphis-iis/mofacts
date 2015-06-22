@@ -4,7 +4,7 @@ require("./sd_fixtures.js");
 require("../common/Helpers.js");
 require("../common/AssessmentSession.js");
 
-test_suite("permutefinal", function() {
+test_suite("buttonTrials", function() {
     var tdffile = SDTDF();
     var setspec = tdffile.tdfs.tutor.setspec[0];
 

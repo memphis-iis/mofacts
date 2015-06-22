@@ -28,9 +28,6 @@ MusicTDF = function() { return {
                     "isModeled" : [
                         "false"
                     ],
-                    "timeoutInSeconds" : [
-                        "15"
-                    ],
                     "buttonorder" : [
                         "Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd"
                     ]
@@ -68,12 +65,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -142,12 +133,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -216,12 +201,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -290,12 +269,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -364,12 +337,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -438,12 +405,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -512,12 +473,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -583,12 +538,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "120000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
@@ -684,12 +633,6 @@ MusicTDF = function() { return {
                             ],
                             "drill" : [
                                 "10000"
-                            ],
-                            "timebeforefeedback" : [
-                                "500"
-                            ],
-                            "timeuntilstimulus" : [
-                                "500"
                             ]
                         }
                     ],
