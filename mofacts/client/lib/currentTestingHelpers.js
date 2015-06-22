@@ -206,10 +206,11 @@ getCurrentDeliveryParams = function (currUnit) {
     //value here.
     var deliveryParams = {
         purestudy: 0,
-        skipstudy: false,
+        drill: 0,
         reviewstudy: 0,
         correctprompt: 0,
-        lockoutminutes: 0,
+        skipstudy: false,
+        lockoutminutes: 0
     };
 
     //We've defined defaults - also define translatations for values

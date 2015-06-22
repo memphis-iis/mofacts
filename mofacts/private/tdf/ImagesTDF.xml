@@ -12,13 +12,15 @@
         <userselect>false</userselect>
     </setspec>
     
-    <deliveryparams>
-        <purestudy>10000</purestudy>
-        <skipstudy>false</skipstudy>
-        <reviewstudy>10000</reviewstudy>
-        <correctprompt>500</correctprompt>
-
-        <practiceseconds>15</practiceseconds>
-        <finalInstructions>All done!</finalInstructions>
-    </deliveryparams>
+    <unit>
+        <deliveryparams>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>10000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <drill>10000</drill>
+            <practiceseconds>15</practiceseconds>
+            <finalInstructions>All done!</finalInstructions>
+        </deliveryparams>
+    </unit>
 </tutor>

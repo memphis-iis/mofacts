@@ -9,18 +9,10 @@
         <isModeled>true</isModeled>
     </setspec>
     
-    <deliveryparams>
-        <purestudy>10000</purestudy>
-        <drill>10000</drill>
-        <skipstudy>false</skipstudy>
-        <reviewstudy>10000</reviewstudy>
-        <correctprompt>500</correctprompt>
-        <practiceseconds>1800</practiceseconds>
-    </deliveryparams>
-    
     <unit>
         <deliveryparams>
             <purestudy>10000</purestudy>
+            <drill>10000</drill>
             <skipstudy>false</skipstudy>
             <reviewstudy>10000</reviewstudy>
             <correctprompt>500</correctprompt>

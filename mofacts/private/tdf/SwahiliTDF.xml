@@ -25,6 +25,7 @@
         ]]></unitinstructions>
 
         <deliveryparams>
+            <drill>10000</drill>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
             <reviewstudy>2000</reviewstudy>
@@ -61,6 +62,7 @@
         </unitinstructions>
 
         <deliveryparams>
+            <drill>10000</drill>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
             <reviewstudy>2000</reviewstudy>

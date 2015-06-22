@@ -26,9 +26,7 @@
  *
  * Currently we use the appropriate deliveryparams section. For scheduled trials
  * we use the deliveryparams of the current unit. Note that "x-conditions" can be
- * used to select from multiple deliveryparams in any unit. Also note that a TDF
- * without a current unit is assumed to have a deliveryparams section "at the top"
- * of the TDF as a direct child of the <tutor> tag.
+ * used to select from multiple deliveryparams in any unit.
  *
  * All timeouts are specified in milliseconds and should be at least one (1).
  *
@@ -594,7 +592,7 @@ function handleUserInput(e , source) {
     }
     else if (getTestType() === "d") {
         //Drill - the timeout depends on how they did
-        if (isCorrect()) {
+        if (isCorrect) {
             timeout = Helpers.intVal(deliveryParams.correctprompt);
         }
         else {
@@ -1138,7 +1136,7 @@ function setQuestionTimeout() {
 
     var file = getCurrentTdfFile();
 
-    var delayMs = 1; //default just in case
+    var delayMs = 0;
 
     //If this is scheduled TDF and the current test is a study, use the timeout
     //for purestudy for the current unit. Otherwise use the top-level setspec
@@ -1150,6 +1148,8 @@ function setQuestionTimeout() {
         return;
     }
 
+    console.log("setQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
+
     if (getTestType() === "s") {
         //Study
         delayMs = Helpers.intVal(deliveryParams.purestudy);
@@ -1157,6 +1157,10 @@ function setQuestionTimeout() {
     else {
         //Not study - must be drill or test
         delayMs = Helpers.intVal(deliveryParams.drill);
+    }
+
+    if (delayMs < 1) {
+        failNoDeliveryParams("Could not find appropriate question timeout");
     }
 
     beginMainCardTimeout(delayMs, function() {
