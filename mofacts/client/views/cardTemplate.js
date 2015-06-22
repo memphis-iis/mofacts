@@ -537,6 +537,21 @@ function handleUserInput(e , source) {
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
     var file = getCurrentTdfFile();
+    
+    //TODO: test file for Jackie
+    
+    //TODO: always an error to use a hard-coded time - should crash and stop
+    
+    /* TODO
+     *  <purestudy>3000</purestudy> "s" trial timeout
+        <readyprompt>0</readyprompt> time between two trials (where we say "ready") - currently not implemented
+        <reviewstudy>3000</reviewstudy> after a drill ("d" trial) and there was an error
+        <correctprompt>1000</correctprompt> timeout when "correct" message is displayed (for "d" trials)
+        <drill>10000</drill> for "t" or "d", timeout if no type/button click
+        <timebeforefeedback>500</timebeforefeedback> - timeout before review played
+        <timeuntilstimulus>500</timeuntilstimulus> - time between trial start and sound is played
+     * 
+     * */
 
     if (getTestType() === "s") {
         //Just a study - note that the purestudy timeout is used for the
