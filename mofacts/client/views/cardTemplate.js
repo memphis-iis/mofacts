@@ -1,5 +1,11 @@
+//TODO: test file for Jackie
+
 //TODO: Support a unit directive for displaying stats/scores for current
 //      learning and/or assessment sessions
+
+//TODO: We currently don't support the timeout property "readyprompt" (in
+//      /tutor/unit/deliveryparams). It is the time between two trials (where
+//      we say "ready")
 
 /***************************************************************************
  * cardTemplate.js - the implementation behind cardTemplate.html (and thus
@@ -12,6 +18,43 @@
  * This is important because that abstract is used to do things like support
  * multiple deliveryParam (the x-condition logic) and centralize some of the
  * checked that we do to make sure everything is functioning correctly.
+ *
+ ***************************************************************************
+ *
+ * Timeout logic overview
+ * ------------------------
+ *
+ * Currently we use the appropriate deliveryparams section. For scheduled trials
+ * we use the deliveryparams of the current unit. Note that "x-conditions" can be
+ * used to select from multiple deliveryparams in any unit. Also note that a TDF
+ * without a current unit is assumed to have a deliveryparams section "at the top"
+ * of the TDF as a direct child of the <tutor> tag.
+ *
+ * All timeouts are specified in milliseconds and should be at least one (1).
+ *
+ * There are two settings that correspond to what most people think of as the
+ * "trial timeout". That is the amount of time that may elapse from the beginning
+ * of a trial before the user runs out of time to answer (see the function
+ * setQuestionTimeout):
+ *
+ *     purestudy - The amount of time a "study" trial is displayed
+ *
+ *     drill     - The amount of time a user has to answer a drill or test trial
+ *
+ * There are two "timeouts" that are used after the user has answered (see
+ * the function handleUserInput):
+ *
+ *     reviewstudy    - If a user answers a drill trial incorrectly, the correct
+ *                      answer is displayed for this long
+ *
+ *     correctprompt  - If a user gets a drill trial correct, the amount of time
+ *                      the feedback message is shown
+ *
+ * Note that if the trial is "test", feedback is show for neither correct nor
+ * incorrect responses.
+ *
+ * Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
+ * timebeforefeedback are not currently implemented.
  * */
 
 
@@ -537,57 +580,37 @@ function handleUserInput(e , source) {
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
     var file = getCurrentTdfFile();
-    
-    //TODO: test file for Jackie
-    
-    //TODO: always an error to use a hard-coded time - should crash and stop
-    
-    /* TODO
-     *  <purestudy>3000</purestudy> "s" trial timeout
-        <readyprompt>0</readyprompt> time between two trials (where we say "ready") - currently not implemented
-        <reviewstudy>3000</reviewstudy> after a drill ("d" trial) and there was an error
-        <correctprompt>1000</correctprompt> timeout when "correct" message is displayed (for "d" trials)
-        <drill>10000</drill> for "t" or "d", timeout if no type/button click
-        <timebeforefeedback>500</timebeforefeedback> - timeout before review played
-        <timeuntilstimulus>500</timeuntilstimulus> - time between trial start and sound is played
-     * 
-     * */
 
     if (getTestType() === "s") {
-        //Just a study - note that the purestudy timeout is used for the
-        //QUESTION timeout, not the display timeout after the ANSWER
+        //Just a study - note that the purestudy timeout is used for the QUESTION
+        //timeout, not the display timeout after the ANSWER. However, we need a
+        //timeout for our logic below so just use the minimum
         timeout = 1;
     }
-    else if (!isCorrect && getTestType() === "d" && Session.get("isScheduledTest")) {
-        //Got a drill wrong on a scheduled test - should use review timeout
-        timeout = Helpers.intVal(deliveryParams.reviewstudy) || 0;
+    else if (getTestType() === "t") {
+        //A test - we don't have timeouts since they don't get feedback about
+        //how they did (that's what drills are for)
+        timeout = 1;
     }
-    else if (!isCorrect && getTestType() === "t" && Session.get("isScheduledTest")) {
-        //Got a drill wrong on a scheduled test - should use review timeout
-        timeout = 0;
-    }
-    else if (isCorrect) {
-        //Correct! should use a correct timeout
-        //Special default for correct - we use 1ms instead of 0 to avoid
-        //the generic fallback to 2 seconds below
-        //TODO: help fails for learning session units and is set to 1000ms
-        timeout = Helpers.intVal(deliveryParams.correctprompt) || 1000;
+    else if (getTestType() === "d") {
+        //Drill - the timeout depends on how they did
+        if (isCorrect()) {
+            timeout = Helpers.intVal(deliveryParams.correctprompt);
+        }
+        else {
+            timeout = Helpers.intVal(deliveryParams.reviewstudy);
+        }
     }
     else {
-        //Not a study, not correct, either a test or not scheduled or both.
-        //If they specified a reviewstudy delivery param in the first unit, then
-        //we can try that one
-        timeout = Helpers.intVal(getCurrentDeliveryParams(getCurrentTdfUnit(0)).reviewstudy);
+        //We don't know what to do since this is an unsupported test type - fail
+        failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
+        return;
     }
 
-    //If not timeout, default to 2 seconds so they can read the message
-    if (!timeout || timeout < 1) {
-        //Default to 2 seconds and add a second if sound is playing
-        timeout = 2000;
-        if (currentQuestionSound && currentQuestionSound.isCurrentlyPlaying) {
-            timeout += 1000;
-        }
-        console.log("NO CORRECT TIMEOUT SPECIFIED! Using", timeout);
+    //We need at least a timeout of 1ms
+    if (timeout < 1) {
+        failNoDeliveryParams("No correct timeout specified");
+        return;
     }
 
     //Stop previous timeout
@@ -1087,6 +1110,29 @@ function selectLowestProbabilityCardIndex(cards) {
     return indexToReturn;
 }
 
+function failNoDeliveryParams(customMsg) {
+    var errMsg;
+
+    if (typeof customMsg !== "undefined") {
+        errMsg = customMsg;
+    }
+    else {
+        errMsg = "There were no available delivery params to check for timeout values. ";
+        if (Session.get("isScheduledTest")) {
+            errMsg += "The current unit is missing a delivery params section";
+        }
+        else {
+            errMsg += "There is no top-level delivery params section for learning sessions";
+        }
+    }
+
+    console.log(errMsg);
+    alert(errMsg); //Note that we actually show an alert
+    clearCardTimeout();
+    clearPlayingSound();
+    throw new Error("The current TDF is malformed");
+}
+
 function setQuestionTimeout() {
     clearCardTimeout(); //No previous timeout now
 
@@ -1097,12 +1143,20 @@ function setQuestionTimeout() {
     //If this is scheduled TDF and the current test is a study, use the timeout
     //for purestudy for the current unit. Otherwise use the top-level setspec
     //timeout in seconds
-    if (getTestType() === "s" && Session.get("isScheduledTest")) {
-        delayMs = Helpers.intVal(getCurrentDeliveryParams().purestudy);
+
+    var deliveryParams = getCurrentDeliveryParams();
+    if (!deliveryParams) {
+        failNoDeliveryParams();
+        return;
+    }
+
+    if (getTestType() === "s") {
+        //Study
+        delayMs = Helpers.intVal(deliveryParams.purestudy);
     }
     else {
-        var tis = Helpers.intVal(file.tdfs.tutor.setspec[0].timeoutInSeconds[0]);
-        delayMs = tis * 1000; //Need delay is milliseconds
+        //Not study - must be drill or test
+        delayMs = Helpers.intVal(deliveryParams.drill);
     }
 
     beginMainCardTimeout(delayMs, function() {

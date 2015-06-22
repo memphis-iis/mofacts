@@ -8,7 +8,6 @@
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
    <lfparameter>.85</lfparameter>
-        <timeoutInSeconds>15</timeoutInSeconds>
     </setspec>
     <unit>
         <unitname>Statistics Practice</unitname>

@@ -8,7 +8,6 @@
         <swapclusters>0-1 2-2</swapclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>true</isModeled>
-        <timeoutInSeconds>5</timeoutInSeconds>
         <experimentTarget>imgtest</experimentTarget>
         <userselect>false</userselect>
     </setspec>

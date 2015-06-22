@@ -228,18 +228,31 @@ getCurrentDeliveryParams = function (currUnit) {
     var modified = false;
     var fieldName; //Used in loops below
 
+    //Use the current unit specified to get the deliveryparams array. If there
+    //isn't a unit then we use the top-level deliveryparams (if there are)
+    var sourceDelParams = null;
     if (!!currUnit) {
-        var found = null;
-
+        //We have a unit
         if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
-            //Note that if there is no XCond or if they specify something
-            //wacky we'll just go with index 0
-            var xcondIndex = Helpers.intVal(Session.get("experimentXCond"));
-            if (xcondIndex < 0 || xcondIndex >= currUnit.deliveryparams.length) {
-                xcondIndex = 0; //Incorrect index gets 0
-            }
-            found = currUnit.deliveryparams[xcondIndex];
+            sourceDelParams = currUnit.deliveryparams;
         }
+    }
+    else {
+        //No unit - we look for the top-level deliveryparams
+        var tdf = getCurrentTdfFile();
+        if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
+            sourceDelParams = tdf.tdfs.tutor.deliveryparams;
+        }
+    }
+
+    if (sourceDelParams && sourceDelParams.length) {
+        //Note that if there is no XCond or if they specify something
+        //wacky we'll just go with index 0
+        var xcondIndex = Helpers.intVal(Session.get("experimentXCond"));
+        if (xcondIndex < 0 || xcondIndex >= sourceDelParams.length) {
+            xcondIndex = 0; //Incorrect index gets 0
+        }
+        var found = sourceDelParams[xcondIndex];
 
         //If found del params, then use any values we find
         if (found) {
