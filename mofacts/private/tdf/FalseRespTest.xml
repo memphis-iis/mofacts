@@ -1,0 +1,46 @@
+<tutor>
+    <setspec>
+        <lessonname>False Response Test</lessonname>
+        <stimulusfile>FalseRespTest.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <shuffleclusters>0-0</shuffleclusters>
+        <lfparameter>0.80</lfparameter>
+        <isModeled>false</isModeled>
+        <userselect>true</userselect> <!-- Change to false when done testing -->
+    </setspec>
+
+    <unit>
+        <unitname>Show the questions</unitname>
+        <unitinstructions><![CDATA[
+            You should see both kinds of false responses
+        ]]></unitinstructions>
+
+        <deliveryparams>
+            <drill>10000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>2000</reviewstudy>
+            <correctprompt>500</correctprompt>
+        </deliveryparams>
+
+        <buttontrial>true</buttontrial>
+
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>0,f,d,0 1,f,d,0
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-1</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+    </unit>
+</tutor>

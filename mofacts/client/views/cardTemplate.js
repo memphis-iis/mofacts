@@ -1,5 +1,3 @@
-//TODO: test file for Jackie
-
 //TODO: Support a unit directive for displaying stats/scores for current
 //      learning and/or assessment sessions
 
@@ -795,13 +793,15 @@ function randomCard() {
 //Return the current q info in the schedule - note that we don't check to make
 //sure that the caller SHOULD be calling us
 function currentScheduledQInfo() {
-    return getSchedule().q[Session.get("questionIndex")];
+    //Note that scheduledCard increments questionIndex - so we subtract
+    //one. Also note that this is whay scheduledCard doesn't call us
+    return getSchedule().q[Session.get("questionIndex") - 1];
 }
 
 function scheduledCard() {
     var unit = getCurrentUnitNumber();
     var questionIndex = Session.get("questionIndex");
-    var questInfo = currentScheduledQInfo();
+    var questInfo = getSchedule().q[questionIndex];
     var clusterIndex = questInfo.clusterIndex;
     var whichStim = questInfo.whichStim;
 
