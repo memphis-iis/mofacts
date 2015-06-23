@@ -73,6 +73,8 @@ var FIELDS = [
     "answerCorrect",
     "trialType",
     "qtype",
+    "wasButtonTrial",
+    "buttonOrder",
     "note",
 ];
 
@@ -229,6 +231,8 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         answerCorrect:     d(lasta.isCorrect            , null),
         trialType:         d(lasta.ttype                , ''),
         qtype:             d(lasta.qtype                , ''),
+        wasButtonTrial:    d(lasta.wasButtonTrial       , false),
+        buttonOrder:       d(lasta.buttonOrder          , ''),
         note:              d(note                       , ''),
     };
 }
@@ -301,11 +305,11 @@ function processUserLog(username, userTimesDoc, expName, callback) {
             }
             catch(e) {
                 console.log("There was an error populating the record - it will be skipped", e);
-                console.log(username, 
-                    JSON.stringify(lastexpcond), 
-                    JSON.stringify(lastschedule), 
-                    JSON.stringify(lastinstruct), 
-                    JSON.stringify(lastq), 
+                console.log(username,
+                    JSON.stringify(lastexpcond),
+                    JSON.stringify(lastschedule),
+                    JSON.stringify(lastinstruct),
+                    JSON.stringify(lastq),
                     JSON.stringify(rec)
                 );
             }
@@ -348,7 +352,7 @@ if (typeof Meteor !== "undefined" && Meteor.isServer) {
 //If not running under Meteor and we have the mongo console print function,
 //We run directly!
 if (typeof Meteor === "undefined" && typeof print !== "undefined") {
-    (function() {        
+    (function() {
         if (typeof experiment === "undefined") {
             print("You must specify an experiment when running this as a mongo script");
             return;

@@ -337,6 +337,10 @@ function newQuestionHandler() {
             Session.set("buttonTrial", true);
             $("#textEntryRow").hide();
 
+            //TODO: we should be setting whether or not it's a button trial *AND*
+            //      the choices array when we log the question info (i.e. in
+            //      scheduledCard - and one day in the model card setup)
+
             var cluster = getStimCluster(getCurrentClusterIndex());
 
             //are we using specified choice order for buttons?
@@ -543,6 +547,16 @@ function handleUserInput(e , source) {
         console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
     }
 
+    //Figure out button trial entries
+    var buttonEntries = "";
+    var wasButtonTrial = !!Session.get("buttonTrial");
+    if (wasButtonTrial) {
+        buttonEntries = _.map(
+            buttonList.find({}, {sort: {idx: 1}}).fetch(),
+            function(val) { return val.buttonValue; }
+        ).join(',');
+    }
+
     //Note that we need to log from data in the cluster returned from
     //getStimCluster so that we honor cluster mapping
     var currCluster = getStimCluster(getCurrentClusterIndex());
@@ -560,7 +574,9 @@ function handleUserInput(e , source) {
         clientSideTimeStamp: timestamp,
         firstActionTimestamp: firstActionTimestamp,
         startLatency: startLatency,
-        endLatency: endLatency
+        endLatency: endLatency,
+        wasButtonTrial: wasButtonTrial,
+        buttonOrder: buttonEntries
     });
 
     //record progress in userProgress variable storage (note that this is
