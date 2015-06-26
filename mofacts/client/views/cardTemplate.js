@@ -5,53 +5,51 @@
 //      /tutor/unit/deliveryparams). It is the time between two trials (where
 //      we say "ready")
 
-/***************************************************************************
- * cardTemplate.js - the implementation behind cardTemplate.html (and thus
- * the main GUI implementation for MoFaCTS).
- *
- * There is quite a bit of logic in this file, but most of it is commented locally.
- * One note to keep in mind that much of the direct access to the TDF and Stim
- * files has been abstracted out to places like currentTestingHelpers.js
- *
- * This is important because that abstract is used to do things like support
- * multiple deliveryParam (the x-condition logic) and centralize some of the
- * checked that we do to make sure everything is functioning correctly.
- *
- ***************************************************************************
- *
- * Timeout logic overview
- * ------------------------
- *
- * Currently we use the appropriate deliveryparams section. For scheduled trials
- * we use the deliveryparams of the current unit. Note that "x-conditions" can be
- * used to select from multiple deliveryparams in any unit.
- *
- * All timeouts are specified in milliseconds and should be at least one (1).
- *
- * There are two settings that correspond to what most people think of as the
- * "trial timeout". That is the amount of time that may elapse from the beginning
- * of a trial before the user runs out of time to answer (see the function
- * setQuestionTimeout):
- *
- *     purestudy - The amount of time a "study" trial is displayed
- *
- *     drill     - The amount of time a user has to answer a drill or test trial
- *
- * There are two "timeouts" that are used after the user has answered (see
- * the function handleUserInput):
- *
- *     reviewstudy    - If a user answers a drill trial incorrectly, the correct
- *                      answer is displayed for this long
- *
- *     correctprompt  - If a user gets a drill trial correct, the amount of time
- *                      the feedback message is shown
- *
- * Note that if the trial is "test", feedback is show for neither correct nor
- * incorrect responses.
- *
- * Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
- * timebeforefeedback are not currently implemented.
- * */
+//
+//  cardTemplate.js - the implementation behind cardTemplate.html (and thus
+//  the main GUI implementation for MoFaCTS).
+// 
+//  There is quite a bit of logic in this file, but most of it is commented locally.
+//  One note to keep in mind that much of the direct access to the TDF and Stim
+//  files has been abstracted out to places like currentTestingHelpers.js
+// 
+//  This is important because that abstract is used to do things like support
+//  multiple deliveryParam (the x-condition logic) and centralize some of the
+//  checked that we do to make sure everything is functioning correctly.
+// 
+// 
+//  Timeout logic overview
+//  ------------------------
+// 
+//  Currently we use the appropriate deliveryparams section. For scheduled trials
+//  we use the deliveryparams of the current unit. Note that "x-conditions" can be
+//  used to select from multiple deliveryparams in any unit.
+// 
+//  All timeouts are specified in milliseconds and should be at least one (1).
+// 
+//  There are two settings that correspond to what most people think of as the
+//  "trial timeout". That is the amount of time that may elapse from the beginning
+//  of a trial before the user runs out of time to answer (see the function
+//  setQuestionTimeout):
+// 
+//      purestudy - The amount of time a "study" trial is displayed
+// 
+//      drill     - The amount of time a user has to answer a drill or test trial
+// 
+//  There are two "timeouts" that are used after the user has answered (see
+//  the function handleUserInput):
+// 
+//      reviewstudy    - If a user answers a drill trial incorrectly, the correct
+//                       answer is displayed for this long
+// 
+//      correctprompt  - If a user gets a drill trial correct, the amount of time
+//                       the feedback message is shown
+// 
+//  Note that if the trial is "test", feedback is show for neither correct nor
+//  incorrect responses.
+// 
+//  Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
+//  timebeforefeedback are not currently implemented.
 
 
 ////////////////////////////////////////////////////////////////////////////
@@ -190,10 +188,6 @@ Template.cardTemplate.events({
 
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers and meteor events
-Template.inputF.rendered = function()
-{
-    this.$('input').focus();
-};
 
 Template.cardTemplate.rendered = function() {
     if(Session.get("debugging")) {
@@ -293,20 +287,6 @@ Template.cardTemplate.helpers({
     buttonList: function() {
         return buttonList.find({}, {sort: {idx: 1}});
     }
-});
-
-Template.inputF.helpers({
-   
-    fontsmall: function() {
-        return getCurrentDeliveryParams().fontsize===1;
-    },
- fontmedium: function() {
-        return getCurrentDeliveryParams().fontsize===2;
-    },
-     fontlarge: function() {
-        return getCurrentDeliveryParams().fontsize===3;
-    }
-  
 });
 
 

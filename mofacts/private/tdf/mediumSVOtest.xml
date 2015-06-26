@@ -18,9 +18,9 @@
             Hit ENTER after typing to submit your response.  ]]></unitinstructions>
         <deliveryparams>
             <fontsize>2</fontsize>
-           <purestudy>8000</purestudy>
+           <purestudy>12000</purestudy>
             <readyprompt>0</readyprompt>
-            <reviewstudy>8000</reviewstudy>
+            <reviewstudy>24000</reviewstudy>
             <correctprompt>1500</correctprompt>
             <drill>12000</drill>
         </deliveryparams>

@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>Response Types Test</lessonname>
+        <lessonname>Response Types test</lessonname>
         <stimulusfile>FalseRespTest.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
@@ -20,7 +20,7 @@
             <drill>10000</drill>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>2000</reviewstudy>
+            <reviewstudy>6000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
 

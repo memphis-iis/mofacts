@@ -7,3 +7,5 @@ mofacts/build
 .test_results
 .test*.sh
 .vagrant
+/nbproject/private/
+/nbproject/
