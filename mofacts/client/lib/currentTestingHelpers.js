@@ -210,7 +210,8 @@ getCurrentDeliveryParams = function (currUnit) {
         reviewstudy: 0,
         correctprompt: 0,
         skipstudy: false,
-        lockoutminutes: 0
+        lockoutminutes: 0,
+        fontsize: 2
     };
 
     //We've defined defaults - also define translatations for values
@@ -224,6 +225,7 @@ getCurrentDeliveryParams = function (currUnit) {
         reviewstudy: Helpers.intVal,
         correctprompt: Helpers.intVal,
         lockoutminutes: Helpers.intVal,
+        fontsize: Helpers.intVal
     };
 
     var modified = false;

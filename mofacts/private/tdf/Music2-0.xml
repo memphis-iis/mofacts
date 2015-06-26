@@ -231,18 +231,18 @@
                 <groupnames>A</groupnames>
                 <clustersrepeated>6</clustersrepeated>
                 <templatesrepeated>12</templatesrepeated>
-                <group>0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                <group>0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
                 </group>
             </conditiontemplatesbygroup>
             <initialpositions>
@@ -303,35 +303,35 @@
                 <groupnames>A B C</groupnames>
                 <clustersrepeated>18 18 18</clustersrepeated>
                 <templatesrepeated>2 2 2</templatesrepeated>
-                <group>r,f,t,0  r,f,t,1  r,f,t,2
-                       r,f,t,30 r,f,t,31 r,f,t,32
-                       r,f,t,42 r,f,t,43 r,f,t,44
-                       r,f,t,54 r,f,t,55 r,f,t,56
-                       r,f,t,84 r,f,t,85 r,f,t,86
-                       r,f,t,96 r,f,t,97 r,f,t,98
+                <group>r,f,d,0  r,f,d,1  r,f,d,2
+                       r,f,d,30 r,f,d,31 r,f,d,32
+                       r,f,d,42 r,f,d,43 r,f,d,44
+                       r,f,d,54 r,f,d,55 r,f,d,56
+                       r,f,d,84 r,f,d,85 r,f,d,86
+                       r,f,d,96 r,f,d,97 r,f,d,98
 
-                       r,f,t,0  r,f,t,1  r,f,t,2
-                       r,f,t,30 r,f,t,31 r,f,t,32
-                       r,f,t,42 r,f,t,43 r,f,t,44
-                       r,f,t,54 r,f,t,55 r,f,t,56
-                       r,f,t,84 r,f,t,85 r,f,t,86
-                       r,f,t,96 r,f,t,97 r,f,t,98
+                       r,f,d,0  r,f,d,1  r,f,d,2
+                       r,f,d,30 r,f,d,31 r,f,d,32
+                       r,f,d,42 r,f,d,43 r,f,d,44
+                       r,f,d,54 r,f,d,55 r,f,d,56
+                       r,f,d,84 r,f,d,85 r,f,d,86
+                       r,f,d,96 r,f,d,97 r,f,d,98
                 </group>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
-                       r,f,t,30 r,f,t,31 r,f,t,32 r,f,t,33 r,f,t,34 r,f,t,35
-                       r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47
+                <group>r,f,d,0 r,f,d,1 r,f,d,2 r,f,d,3 r,f,d,4 r,f,d,5
+                       r,f,d,30 r,f,d,31 r,f,d,32 r,f,d,33 r,f,d,34 r,f,d,35
+                       r,f,d,42 r,f,d,43 r,f,d,44 r,f,d,45 r,f,d,46 r,f,d,47
 
-                       r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
-                       r,f,t,30 r,f,t,31 r,f,t,32 r,f,t,33 r,f,t,34 r,f,t,35
-                       r,f,t,42 r,f,t,43 r,f,t,44 r,f,t,45 r,f,t,46 r,f,t,47
+                       r,f,d,0 r,f,d,1 r,f,d,2 r,f,d,3 r,f,d,4 r,f,d,5
+                       r,f,d,30 r,f,d,31 r,f,d,32 r,f,d,33 r,f,d,34 r,f,d,35
+                       r,f,d,42 r,f,d,43 r,f,d,44 r,f,d,45 r,f,d,46 r,f,d,47
                 </group>
-                <group>r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
-                       r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
-                       r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+                <group>r,f,d,0 r,f,d,1 r,f,d,2 r,f,d,3 r,f,d,4 r,f,d,5
+                       r,f,d,6 r,f,d,7 r,f,d,8 r,f,d,9 r,f,d,10 r,f,d,11
+                       r,f,d,12 r,f,d,13 r,f,d,14 r,f,d,15 r,f,d,16 r,f,d,17
 
-                       r,f,t,0 r,f,t,1 r,f,t,2 r,f,t,3 r,f,t,4 r,f,t,5
-                       r,f,t,6 r,f,t,7 r,f,t,8 r,f,t,9 r,f,t,10 r,f,t,11
-                       r,f,t,12 r,f,t,13 r,f,t,14 r,f,t,15 r,f,t,16 r,f,t,17
+                       r,f,d,0 r,f,d,1 r,f,d,2 r,f,d,3 r,f,d,4 r,f,d,5
+                       r,f,d,6 r,f,d,7 r,f,d,8 r,f,d,9 r,f,d,10 r,f,d,11
+                       r,f,d,12 r,f,d,13 r,f,d,14 r,f,d,15 r,f,d,16 r,f,d,17
                 </group>
             </conditiontemplatesbygroup>
             <randomchoices>2</randomchoices>
@@ -412,18 +412,18 @@
                 <groupnames>A</groupnames>
                 <clustersrepeated>6</clustersrepeated>
                 <templatesrepeated>12</templatesrepeated>
-                <group>0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
-                       0,f,t,0 1,f,t,1 2,f,t,2 0,f,t,36 1,f,t,37 2,f,t,38
+                <group>0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
+                       0,f,d,0 1,f,d,1 2,f,d,2 0,f,d,36 1,f,d,37 2,f,d,38
                 </group>
             </conditiontemplatesbygroup>
             <initialpositions>

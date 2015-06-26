@@ -272,7 +272,16 @@ Template.cardTemplate.helpers({
         var type = getTestType();
         return type === "d" || type === "t";
     },
-
+    
+    fontsmall: function() {
+        return getCurrentDeliveryParams().fontsize===1;
+    },
+ fontmedium: function() {
+        return getCurrentDeliveryParams().fontsize===2;
+    },
+     fontlarge: function() {
+        return getCurrentDeliveryParams().fontsize===3;
+    },
     skipstudy: function() {
         return getCurrentDeliveryParams().skipstudy;
     },
@@ -284,6 +293,20 @@ Template.cardTemplate.helpers({
     buttonList: function() {
         return buttonList.find({}, {sort: {idx: 1}});
     }
+});
+
+Template.inputF.helpers({
+   
+    fontsmall: function() {
+        return getCurrentDeliveryParams().fontsize===1;
+    },
+ fontmedium: function() {
+        return getCurrentDeliveryParams().fontsize===2;
+    },
+     fontlarge: function() {
+        return getCurrentDeliveryParams().fontsize===3;
+    }
+  
 });
 
 

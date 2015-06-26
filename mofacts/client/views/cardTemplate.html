@@ -1,6 +1,10 @@
 <template name="inputF">
-    <h3> <input id="userAnswer" class="alert alert-warning"
-                style="display:table-cell;width:100%;"></h3>
+     {{#if fontsmall}}<h5> <input id="userAnswer" class="alert alert-warning"
+                style="display:table-cell;width:100%;"></h5>{{/if}}
+       {{#if fontmedium}}<h3> <input id="userAnswer" class="alert alert-warning"
+                style="display:table-cell;width:100%;"></h3>{{/if}}         
+                {{#if fontlarge}}<h1> <input id="userAnswer" class="alert alert-warning"
+                style="display:table-cell;width:100%;"></h1>{{/if}}  
 </template>
 
 <template name="cardTemplate">
@@ -34,9 +38,73 @@
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
 
-
-
     <div class="container">
+        {{#if fontsmall}}
+        
+        {{#if trial}}
+        <div class="row">
+            <h5 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info"
+                id="textQuestion" >
+                {{#if textOrClozeCard}}
+                {{{currentQuestion}}}
+                {{/if}}
+                {{#if audioCard}}
+                <img src="speaker.png" style="width:100px; height:100px;">
+                {{/if}}
+                {{#if imageCard}}
+                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
+                {{/if}}
+            </h5>
+        </div>  <!-- close row -->
+        {{/if}}
+
+        {{#if study}}
+        <div class="row">
+            <h5 class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
+                {{#unless clozeCard}}
+                <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
+                {{/unless}}
+                <div>
+                    {{#if skipstudy}}
+                    <button type='button' id='continueStudy' name='continueStudy' class='btn btn-primary btn-block'>
+                        Continue
+                    </button>
+                    {{/if}}
+                </div>
+            </h5>  <!-- close column -->
+        </div>  <!-- close row -->
+        {{/if}}
+
+        {{#if testordrill}}
+            {{#unless buttonTrial}}
+            <div class="row" id="textEntryRow">
+                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                    {{> inputF}}
+                </div>
+            </div>  <!-- close row -->
+            {{/unless}}
+
+            <div class="row">
+                <div class="col-md-offset-4 col-md-4">
+                    <div id="multipleChoiceContainer">
+                        <!-- will contain multiple choice buttons which are dynamically added. -->
+                        {{#each buttonList}}
+                        <div><button type='button' name='{{buttonName}}' class='btn btn-primary btn-block multipleChoiceButton'>
+                            {{buttonValue}}
+                        </button></div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div> <!-- close row -->
+        {{/if}}
+
+        <div class="row">
+            <h5 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8" id="UserInteraction" hidden></h5>
+        </div>
+
+{{/if}}
+        {{#if fontmedium}}
+        
         {{#if trial}}
         <div class="row">
             <h3 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info"
@@ -58,7 +126,7 @@
         <div class="row">
             <h3 class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
                 {{#unless clozeCard}}
-                <p id="answerLabel">{{displayAnswer}}</p>
+                <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
                 {{/unless}}
                 <div>
                     {{#if skipstudy}}
@@ -98,7 +166,72 @@
             <h3 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8" id="UserInteraction" hidden></h3>
         </div>
 
+{{/if}}
 
+       {{#if fontlarge}}
+        
+        {{#if trial}}
+        <div class="row">
+            <h1 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info"
+                id="textQuestion" >
+                {{#if textOrClozeCard}}
+                {{{currentQuestion}}}
+                {{/if}}
+                {{#if audioCard}}
+                <img src="speaker.png" style="width:100px; height:100px;">
+                {{/if}}
+                {{#if imageCard}}
+                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
+                {{/if}}
+            </h1>
+        </div>  <!-- close row -->
+        {{/if}}
+
+        {{#if study}}
+        <div class="row">
+            <h1 class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4">
+                {{#unless clozeCard}}
+                <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
+                {{/unless}}
+                <div>
+                    {{#if skipstudy}}
+                    <button type='button' id='continueStudy' name='continueStudy' class='btn btn-primary btn-block'>
+                        Continue
+                    </button>
+                    {{/if}}
+                </div>
+            </h1>  <!-- close column -->
+        </div>  <!-- close row -->
+        {{/if}}
+
+        {{#if testordrill}}
+            {{#unless buttonTrial}}
+            <div class="row" id="textEntryRow">
+                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                    {{> inputF}}
+                </div>
+            </div>  <!-- close row -->
+            {{/unless}}
+
+            <div class="row">
+                <div class="col-md-offset-4 col-md-4">
+                    <div id="multipleChoiceContainer">
+                        <!-- will contain multiple choice buttons which are dynamically added. -->
+                        {{#each buttonList}}
+                        <div><button type='button' name='{{buttonName}}' class='btn btn-primary btn-block multipleChoiceButton'>
+                            {{buttonValue}}
+                        </button></div>
+                        {{/each}}
+                    </div>
+                </div>
+            </div> <!-- close row -->
+        {{/if}}
+
+        <div class="row">
+            <h1 class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8" id="UserInteraction" hidden></h1>
+        </div>
+
+{{/if}}
 
         {{#if isInRole 'teacher'}}
         <div class="row">
@@ -146,5 +279,5 @@
         </div>
 
     </div> <!-- close container -->
-
+  
 </template>
