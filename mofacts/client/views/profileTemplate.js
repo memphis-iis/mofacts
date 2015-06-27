@@ -181,7 +181,7 @@ Template.profileTemplate.rendered = function () {
 
         addButton(
             $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
-                .addClass("btn btn-primary btn-block stimButton")
+                .addClass("btn  btn-block stimButton")
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
                 .data("tdfkey", tdfObject._id)

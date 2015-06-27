@@ -10,7 +10,13 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="#">MoFaCTS</a>
+				<a class="navbar-brand" href="#">MoFaCTS                               
+              {{#if isInRole 'admin,teacher'}}
+                {{#if isInRole 'admin'}}Administrator{{/if}}
+                {{#if isInRole 'teacher'}}Teacher {{/if}}
+            {{else}}Student{{/if}}
+                                
+                                </a>
 
 			</div>  <!-- close header -->
 
@@ -30,20 +36,11 @@
 	</nav>  <!-- close nav -->
 
 	<div class="container">
-        <div class="row visible-text">
-            Welcome! You are currently logged in as
-            {{#if isInRole 'admin,teacher'}}
-                {{#if isInRole 'admin'}}   an Admin  {{/if}}
-                {{#if isInRole 'teacher'}} a Teacher {{/if}}
-            {{else}}
-                a student.
-            {{/if}}
-        </div>
-
+     
 		<div class="row" id="testButtonContainer">
             <legend class="text-center">Your Available Modules</legend>
 		</div>
-
+            
         {{#if isInRole 'admin,teacher'}}
         <br><br>
         <div class="row" id="testButtonContainer">

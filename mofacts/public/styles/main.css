@@ -1,8 +1,9 @@
 /** Example button override **/
 body {
-	background-color: #C1E1A6;
-	font-family: 'Lato', sans-serif;
-	color: white;
+    background-color: #C1E1A6;
+    font-family: 'Lato', sans-serif;
+    color: #585858;
+    font-size: 18px;
 }
 
 .visible-text,
@@ -20,30 +21,39 @@ body {
     color: #000;
 }
 
-.navbar-inverse .navbar-collapse {
-	background-color: #585858;
-
+h1 {	color: #C1E1A6;
+     font-family: 'Lato', sans-serif;
 }
 
-.navbar-inverse {
-	background-color: #585858;
+h2 {color: #C1E1A6;
+    font-family: 'Lato', sans-serif;
+}
+h3 {	color: #C1E1A6;
+     font-family: 'Lato', sans-serif;
 }
 
-.btn {
-    border-radius: 0px;
-	background-color: #118C4E;
-	border-color: #118C4E;
-	font-family: 'Lato', sans-serif;
-	font-size: 16px;
+h4 {color: #C1E1A6;
+    font-family: 'Lato', sans-serif;
+}
+h5 {	color: #C1E1A6;
+     font-family: 'Lato', sans-serif;
 }
 
-h3 {
-	color: white;
+h6 {color: #C1E1A6;
     font-family: 'Lato', sans-serif;
 }
 
-h2 {
-	font-family: 'Lato', sans-serif;
+.navbar-inverse {
+    background-color: #585858;
+}
+
+.btn { color:white;
+    border-radius: 0px;
+    background-color: #118C4E;
+    border-color: #118C4E;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    white-space:normal;
 }
 
 #cardTemplateQuestionImg {
@@ -51,183 +61,136 @@ h2 {
     height:340px; /* Height is expected to be changed: see index.js */
 }
 
-legend {
-	border-color: white;
-}
-
-#instructions {
-	font-size: 18px;
-}
-
 #signUpButton {
-	background: #40a371;
+    background: #118C4E;
 }
-
 
 #audio {
-	width: 100%;
+    width: 100%;
 }
 
 img {
-	display: block;
-	margin: auto;
+    display: block;
+    margin: auto;
 }
 
 #signInButton {
-	background: #40a371;
+    background: #118C4E;
 }
-
-.btn-primary {
-	border: none;
-	background: #40a371;
-	border-color: #40a371;
-}
-
 
 .form-group {
-	margin-bottom: 8px;
+    margin-bottom: 8px;
 }
 
 legend {
-	color: white;
-	font-family: 'Lato', sans-serif;
-	font-size: 32px;
+    color: #585858;
+    font-family: 'Lato', sans-serif;
+   font-size: 28px;
+    border-color: #C1E1A6;
 }
 
 .stimButton {
-	height: 75px;
+    height: 75px;
 }
 
 .navbar {
-	border-radius: 0px;
+    border-radius: 0px;
 }
 
 .navbar-inverse .navbar-brand {
 	color: white;
-	font-family: 'Lato', sans-serif;
-	font-size: 28px;
+    font-family: 'Lato', sans-serif;
+    font-size: 28px;
 }
 
 .dropdown-menu {
-	background-color: #585858;
+    background-color: #585858;
 	color: white;
 }
 
 .dropdown-menu > li > a:focus {
-	background-color: #585858;
+    background-color: #585858;
 	color: white;
 }
 
 .form-control {
-	border-radius: 0px;
+    border-radius: 0px;
 }
 
 .btn {
-	border-color: #40a371;
-	background-color: #40a371;
-	font-family: 'Lato', sans-serif;
-	width: 100%;
+    border: none;
+    background: #118C4E;
+    font-family: 'Lato', sans-serif;
+    width: 100%;
 }
 
-.btn-primary:hover {
-	background-color: #40a371;
+.btn:hover {
+    background-color: #585858;
+    color:white;
 }
 
 .form-control:focus {
-	box-shadow: 1px 1px 1px 1px #118C4E;
-	border: black;
-}
-
-.label {
-	border-radius: 0px;
+    box-shadow: 1px 1px 1px 1px #118C4E;
+    border: black;
 }
 
 .dropdown-menu > li > a {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
-	border-color: black;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
+    border-color: black;
 }
 
 .dropdown-menu body {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
 }
 
 .panel, .panel-heading, .panel-body {
-	border-radius: 0px;
+    border-radius: 0px;
 }
 
 .center-fill-parent {
-	width: 100%;
-	margin: auto;
+    width: 100%;
+    margin: auto;
 }
 
 .navbar-inverse .navbar-nav > li > a {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
 }
 
 .navbar-inverse .navbar-nav > li > a:focus {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
 	color: white;
-	background-color: #585858;
-	font-family: 'Lato', sans-serif;
-}
-
-.label-primary {
-	background-color: #40a371;
-	font-family: 'Lato', sans-serif;
-}
-
-.instruction-text {
-    font-family: 'Lato', Arial, sans-serif;
-    font-size: 18pt;
-    color: #000;
-    padding-bottom: 2em;
-}
-
-.label-success {
-	background-color: #40a371;
-}
-
-.panel-primary > .panel-heading {
-	background-color: #40a371;
-	border-color: #40a371;
-}
-
-.panel-primary {
-	border-color: #40a371;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
 }
 
 input:focus {
-	box-shadow: 1px 1px 1px 1px #118C4E;
-	border: none;
+    box-shadow: 1px 1px 1px 1px #118C4E;
+    border: none;
 }
 
 .multipleChoiceButton {
-	min-height: 50px;
-	margin-top: 5px;
-	margin-bottom: 5px;
+    min-height: 50px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .text-center * {
     text-align: center;
-}
-
-.nw {
-    white-space: nowrap;
 }
