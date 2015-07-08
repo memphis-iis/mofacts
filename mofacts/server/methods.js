@@ -213,10 +213,14 @@ Meteor.startup(function () {
 Router.route("experiment-data", {
     where: "server",
 
-    path: "/experiment-data/:expKey",
+
+//how does this line function to create a link target
+//where is params read from
+    path: "/experiment-data/:expKey/:format",
 
     action: function() {
         var exp = this.params.expKey;
+        var fmt = this.params.format;
 
         if (!exp) {
             this.response.writeHead(404);
@@ -228,9 +232,10 @@ Router.route("experiment-data", {
 
         this.response.writeHead(200, {
             "Content-Type": "text/tab-separated-values",
-            "Content-Disposition": "attachment; filename=" + exp + "-data.tsv"
+            "Content-Disposition": "attachment; filename=" + fmt+exp+ "-data.tsv"
         });
 
-        this.response.end(createExperimentExport(exp).join('\r\n'));
+        this.response.end(createExperimentExport(exp,fmt).join('\r\n'));
+        
     }
 });

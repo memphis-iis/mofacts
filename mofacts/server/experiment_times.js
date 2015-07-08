@@ -78,6 +78,50 @@ var FIELDS = [
     "note",
 ];
 
+var FIELDSDS = [    
+    //Needed*******************
+    //Session ID
+    
+    //Not needed***************
+    //Time Zone == UTC
+    //Tutor Response Type
+    //Tutor Response Subtype
+    //POroblem View
+    
+    "Anon Student Id",          //username
+    "Session ID",               //not sure yet
+    "Condition Namea",           //new field? always == 'tdf file'************
+    "Condition Typea",           //selectedTdf 
+    "Condition Nameb",           //new field? always == 'xcondition'************
+    "Condition Typeb",           //xcondition
+    "Condition Namec",           //new field? always == 'schedule condition" ***********
+    "Condition Typec",           //schedCondition
+    "Condition Named",           //new field? always == 'how answered'*******
+    "Condition Typed",           //howAnswered
+    "Condition Namee",           //new field? always == 'button trial'***********
+    "Condition Typee",           //wasButtonTrial      
+    "Level (Unit)",             //unit
+    "Level (Unitname)",         //unitname
+    "Problem Name",             //questionValue
+    "Step Name",                //new field repeats questionValue
+    "Time",                     //stimDisplayedTime
+    "Input",                    //userAnswer
+    "Outcome",                  //answerCorrect recoded as CORRECT or INCORRECT
+    "Student Response Type",    //trialType
+    "Student Response Subtype", //qtype
+    "CF (Display Order)",       //questionIndex
+    "CF (Stim File Index)",     //clusterIndex
+    "CF (Set Shuffled Index)",  //shufIndex
+    "CF (Stimulus Version)",    //whichStim
+    "CF (Correct Answer)",       //CF correctAnswer
+    "CF (Overlearning)",     //CF isOverlearning
+    "CF (Response Time)",       //answerGivenTime
+    "CF (Start Latency)",       //startLatency check first trial discrepancy********
+    "CF (End Latency)",          //endLatency
+    "CF (Button Order)",        //CF buttonOrder
+    "CF (Note)",                //CF note
+];
+
 //We don't rely on any other files in we're run as a script, so we have some
 //helpers here
 
@@ -124,7 +168,7 @@ function parseSchedItemCondition(cond) {
 }
 
 //Create our output record
-function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta) {
+function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta, format) {
     //Return the default value if the given value isn't "truthy" BUT numeric
     //zero (0) is considered "truthy".
     var d = function(val, defval) {
@@ -200,7 +244,7 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
     else {
         schedCondition = "N/A";
     }
-
+if (format==='basic'){
     //All done - put the record together
     return {
         //Unit is special: we take the larget from our various sources
@@ -234,21 +278,72 @@ function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq
         wasButtonTrial:    d(lasta.wasButtonTrial       , false),
         buttonOrder:       d(lasta.buttonOrder          , ''),
         note:              d(note                       , ''),
-    };
+    };}
+else
+{
+    var temp=null;
+    if(lasta.isCorrect){temp="CORRECT";} 
+    if(!lasta.isCorrect){temp="INCORRECT";}
+    if(lasta.ttype==="s"){temp="STUDY";}
+        return {          
+            
+            
+    "Anon Student Id":          d(username                   , ''),
+    "Session ID":                (new Date(d(lastq.clientSideTimeStamp  , 0))).toUTCString().substr(0,16) + " " +d(lastexpcond.selectedTdf    , ''),//hack
+    "Condition Namea":           'tdf file',
+    "Condition Typea":           d(lastexpcond.selectedTdf    , ''), 
+    "Condition Nameb":           'xcondition',
+    "Condition Typeb":           d(lastinstruct.xcondition    , ''),
+    "Condition Namec":           'schedule condition',
+    "Condition Typec":           d(schedCondition             , ''),
+    "Condition Named":           'how answered',
+    "Condition Typed":           d(lasta.guiSource            , ''),
+    "Condition Namee":          'button trial',
+    "Condition Typee":          d(lasta.wasButtonTrial       , false),
+    "Level (Unit)":             Math.max(d(lastq.currentUnit,-1), d(lastschedule.unitindex,-1), d(lastinstruct.currentUnit,-1)),            
+    "Level (Unitname)":         d(lastschedule.unitname      , ''),
+    "Problem Name":             d(lastq.selectedQuestion     , ''),
+    "Step Name":                d(lastq.selectedQuestion     , ''),
+    "Time":                     d(lastq.clientSideTimeStamp  , 0),
+    "Input":                    d(lasta.answer               , ''),
+    "Outcome":                  d(temp            , null),    //answerCorrect recoded as CORRECT or INCORRECT
+    "Student Response Type":    d(lasta.ttype                , ''),      // where is ttype set?
+    "Student Response Subtype": d(lasta.qtype                , ''),
+    "CF (Display Order)":       d(lastq.questionIndex        , -1),
+    "CF (Stim File Index)":     d(lastq.clusterIndex         , -1),
+    "CF (Set Shuffled Index)":  d(lastq.shufIndex            , d(lastq.clusterIndex, -1)), //why?
+    "CF (Stimulus Version)":    d(lastq.whichStim            , -1),
+    "CF (Correct Answer)":      d(lastq.selectedAnswer       , ''),
+    "CF (Overlearning)":        d(lastq.showOverlearningText , false),
+    "CF (Response Time)":       d(lasta.clientSideTimeStamp  , 0),
+    "CF (Start Latency)":       d(startLatency               , 0),
+    "CF (End Latency)":         d(endLatency                 , 0),
+    "CF (Button Order)":        d(lasta.buttonOrder          , ''),
+    "CF (Note)":                d(note                       , ''),
+    };}
+
 }
 
 //Helper to transform our output record into a delimited record
-function delimitedRecord(rec) {
-    vals = new Array(FIELDS.length);
-    for(var i = 0; i < FIELDS.length; ++i) {
-        vals[i] = disp(rec[FIELDS[i]]);
+    function delimitedRecord(rec, format) {
+        if (format === 'basic') {
+            vals = new Array(FIELDS.length);
+            for (var i = 0; i < FIELDS.length; ++i) {
+                vals[i] = disp(rec[FIELDS[i]]);
+            }
+        }
+        else {
+            vals = new Array(FIELDSDS.length);
+            for (var i = 0; i < FIELDSDS.length; ++i) {
+                vals[i] = disp(rec[FIELDSDS[i]]);
+            }
+        }
+        return vals.join('\t');
     }
-    return vals.join('\t');
-}
 
 //Iterate over a user times log cursor and call the callback function with a
 //record populated with current information in log
-function processUserLog(username, userTimesDoc, expName, callback) {
+function processUserLog(username, userTimesDoc, expName, format, callback) {
     var expKey = ('' + expName).replace(/\./g, "_");
     if (!(expKey in userTimesDoc)) {
         return;
@@ -301,7 +396,7 @@ function processUserLog(username, userTimesDoc, expName, callback) {
         else if (act === "answer" || act === "[timeout]") {
             var populated = null;
             try {
-                populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec);
+                populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec, format);
             }
             catch(e) {
                 console.log("There was an error populating the record - it will be skipped", e);
@@ -323,13 +418,24 @@ function processUserLog(username, userTimesDoc, expName, callback) {
 //If running on the server in Meteor, support a function that returns an
 //array of objects
 if (typeof Meteor !== "undefined" && Meteor.isServer) {
-    createExperimentExport = function(expName) {
-        var header = {};
-        FIELDS.forEach(function (f) {
-            header[f] = f;
-        });
+    createExperimentExport = function(expName, format) {
+            var header = {};
 
-        var results = [delimitedRecord(header)];
+            if (format === "basic") {
+                FIELDS.forEach(function (f) {
+                    header[f] = f;
+                });
+            }
+            else
+            {
+                FIELDSDS.forEach(function (f) {
+                    var t=f;
+                    if(f.substr(0,14) ==='Condition Name'){t = 'Condition Name';};
+                    if(f.substr(0,14) ==='Condition Type'){t = 'Condition Type';};
+                    header[f]=t;})
+            }
+    
+        var results = [delimitedRecord(header,format)];
 
         UserTimesLog.find({}).forEach(function(entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
@@ -340,8 +446,8 @@ if (typeof Meteor !== "undefined" && Meteor.isServer) {
 
             var username = userRec.username;
 
-            processUserLog(username, entry, expName, function(rec) {
-                results.push(delimitedRecord(rec));
+            processUserLog(username, entry, expName,format, function(rec) {
+                results.push(delimitedRecord(rec,format));
             });
         });
 
@@ -359,15 +465,24 @@ if (typeof Meteor === "undefined" && typeof print !== "undefined") {
         }
 
         var header = {};
-        FIELDS.forEach(function (f) {
-            header[f] = f;
-        });
-        print(delimitedRecord(header));
+        if (format === "basic") {
+                FIELDS.forEach(function (f) {
+                    header[f] = f;
+                });
+            }
+            else
+            {
+                FIELDSDS.forEach(function (f) {
+                    header[f] = f;
+                });
+            }
+    
+        print(delimitedRecord(header,format));
 
         db.userTimesLog.find().forEach(function (entry) {
             var username = db.users.findOne({_id: entry._id}).username;
-            processUserLog(username, entry, experiment, function(rec) {
-                print(delimitedRecord(rec));
+            processUserLog(username, entry, experiment,format, function(rec) {
+                print(delimitedRecord(rec,format));
             });
         });
     })();

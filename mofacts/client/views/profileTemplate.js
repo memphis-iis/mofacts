@@ -192,8 +192,15 @@ Template.profileTemplate.rendered = function () {
         $("#expDataDownloadContainer").append(
             $("<div></div>").append(
                 $("<a class='exp-data-link' target='_blank'></a>")
-                    .attr("href", "/experiment-data/" + tdfObject.fileName)
-                    .text("Download data for " + name)
+                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
+                    .text("Download data for " + name + " datashop.")
+            )
+        );
+  $("#expDataDownloadContainer").append(
+            $("<div></div>").append(
+                $("<a class='exp-data-link' target='_blank'></a>")
+                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/basic")
+                    .text("Download data for " + name + " basic.")
             )
         );
     });
