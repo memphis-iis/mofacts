@@ -20,8 +20,9 @@ function parseXML(xml) {
 
 function getStimJSON(fileName) {
     var future = new Future();
-    Assets.getText(fileName, function(err, data){
-        if (err) throw err;
+    Assets.getText(fileName, function (err, data) {
+        if (err)
+            throw err;
         var json = parseXML(data);
         future.return(json);
     });
@@ -30,8 +31,9 @@ function getStimJSON(fileName) {
 
 function getRoles(fileName) {
     var future = new Future();
-    Assets.getText(fileName, function(err, data) {
-        if (err) throw err;
+    Assets.getText(fileName, function (err, data) {
+        if (err)
+            throw err;
         if (!data) {
             data = "[]"; //Always return at least an empty
         }
@@ -55,8 +57,8 @@ Meteor.publish(null, function () {
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({_id:userId}),
-        Meteor.users.find({_id:userId})
+        UserTimesLog.find({_id: userId}),
+        Meteor.users.find({_id: userId})
     ];
 
     return defaultData;
@@ -66,32 +68,34 @@ Meteor.publish(null, function () {
 
 Meteor.startup(function () {
     //Rewrite TDF and Stimuli documents if we have a file
-    var isXML = function (fn) { return fn.indexOf('.xml') >= 0; };
+    var isXML = function (fn) {
+        return fn.indexOf('.xml') >= 0;
+    };
 
     _.each(
-        _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
-        function(ele, idx, lst) {
-            console.log("Updating Stim in DB from ", ele);
-            var json = getStimJSON('stims/' + ele);
-            Stimuli.remove({fileName: ele});
-            Stimuli.insert({fileName: ele, stimuli: json});
-        }
+            _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
+            function (ele, idx, lst) {
+                console.log("Updating Stim in DB from ", ele);
+                var json = getStimJSON('stims/' + ele);
+                Stimuli.remove({fileName: ele});
+                Stimuli.insert({fileName: ele, stimuli: json});
+            }
     );
 
     _.each(
-        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-        function(ele, idx, lst) {
-            console.log("Updating TDF in DB from ", ele);
-            var json = getStimJSON('tdf/' + ele);
-            Tdfs.remove({fileName: ele});
-            Tdfs.insert({fileName: ele, tdfs: json});
-        }
+            _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
+            function (ele, idx, lst) {
+                console.log("Updating TDF in DB from ", ele);
+                var json = getStimJSON('tdf/' + ele);
+                Tdfs.remove({fileName: ele});
+                Tdfs.insert({fileName: ele, tdfs: json});
+            }
     );
 
     var admins = getRoles("roles/admins.json");
     var teachers = getRoles("roles/teachers.json");
 
-    _.each(Meteor.users.find().fetch(), function(ele) {
+    _.each(Meteor.users.find().fetch(), function (ele) {
         var uname = "" + ele["username"];
         if (!!uname) {
             if (_.indexOf(admins, uname, true) >= 0) {
@@ -107,18 +111,17 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
-
         //Functionality to create a new user ID: return null on success. Return
         //an array of error messages on failure. If previous OK is true, then
         //we silently skip duplicate users (this is mainly for experimental
         //participants who are created on the fly)
-        signUpUser: function(newUserName, newUserPassword, previousOK) {
+        signUpUser: function (newUserName, newUserPassword, previousOK) {
             var checks = [];
 
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
             }
-            else if(typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
+            else if (typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
                 if (previousOK) {
                     return null; //User has already been created - nothing to do
                 }
@@ -146,15 +149,13 @@ Meteor.startup(function () {
                 return null;
             }
         },
-
         //Handle experimental users - we create the user if missing (otherwise
         //everything is fine). We return null on success or an array of error
         //messages if there was a problem
-        experimentalUser: function(newUserName, newUserPassword) {
+        experimentalUser: function (newUserName, newUserPassword) {
         },
-
         //New functionality for logging to the DB
-        userTime: function(experiment, objectsToLog) {
+        userTime: function (experiment, objectsToLog) {
             var objType = typeof objectsToLog;
             var valsToPush = [];
 
@@ -169,13 +170,13 @@ Meteor.startup(function () {
             }
             else {
                 //Grab the entire array
-                for(i = 0; i < objectsToLog.length; i++) {
+                for (i = 0; i < objectsToLog.length; i++) {
                     valsToPush.push(objectsToLog[i]);
                 }
             }
 
             //Every object we log gets a server side time stamp
-            for(i = 0; i < valsToPush.length; i++) {
+            for (i = 0; i < valsToPush.length; i++) {
                 valsToPush[i]["serverSideTimeStamp"] = Date.now();
             }
 
@@ -183,18 +184,17 @@ Meteor.startup(function () {
             // { $push: { <experiment_key>: { $each: <objectsToLog in array> } } }
             var action = {$push: {}};
             var experiment_key = (experiment + "").replace(/\./g, "_");
-            var allVals = { $each: valsToPush };
+            var allVals = {$each: valsToPush};
             action["$push"][experiment_key] = allVals;
 
             UserTimesLog.update(
-                { _id: Meteor.userId() },
-                action,
-                {upsert: true}
+                    {_id: Meteor.userId()},
+            action,
+                    {upsert: true}
             );
         },
-
         //Let client code send console output up to server
-        debugLog: function(logtxt) {
+        debugLog: function (logtxt) {
             var usr = Meteor.user();
             if (!usr) {
                 usr = "[No Current User]";
@@ -212,13 +212,10 @@ Meteor.startup(function () {
 //We use a special server-side route for our experimental data download
 Router.route("experiment-data", {
     where: "server",
-
-
 //how does this line function to create a link target
 //where is params read from
     path: "/experiment-data/:expKey/:format",
-
-    action: function() {
+    action: function () {
         var exp = this.params.expKey;
         var fmt = this.params.format;
 
@@ -227,15 +224,22 @@ Router.route("experiment-data", {
             this.response.end("No experiment specified");
             return;
         }
+        
+        var suffix = '';
+        if (fmt === 'basic') {
+            suffix = 'tsv';
+        } else {
+            suffix = 'txt';
+        }
 
         console.log("Sending all experimental data for", exp);
 
         this.response.writeHead(200, {
             "Content-Type": "text/tab-separated-values",
-            "Content-Disposition": "attachment; filename=" + fmt+exp+ "-data.tsv"
+            "Content-Disposition": "attachment; filename=" + fmt + exp + "-data."+suffix
         });
 
-        this.response.end(createExperimentExport(exp,fmt).join('\r\n'));
-        
+        this.response.end(createExperimentExport(exp, fmt).join('\r\n'));
+
     }
 });
