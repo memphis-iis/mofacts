@@ -193,16 +193,16 @@ Template.profileTemplate.rendered = function () {
             $("<div></div>").append(
                 $("<a class='exp-data-link' target='_blank'></a>")
                     .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                    .text("Download data for " + name + " datashop.")
+                    .text("Download: " + name + " (DataShop format)")
             )
         );
-  $("#expDataDownloadContainer").append(
-            $("<div></div>").append(
-                $("<a class='exp-data-link' target='_blank'></a>")
-                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/basic")
-                    .text("Download data for " + name + " basic.")
-            )
-        );
+//  $("#expDataDownloadContainer").append(
+//            $("<div></div>").append(
+//                $("<a class='exp-data-link' target='_blank'></a>")
+//                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/basic")
+//                    .text("Download data for " + name + " basic.")
+//            )
+//        );
     });
 
     //Did we find something to auto-jump to?

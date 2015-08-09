@@ -124,6 +124,8 @@
         "CF (End Latency)", //endLatency
         "CF (Button Order)", //CF buttonOrder
         "CF (Note)", //CF note
+        "KC()",
+                "KC Category()"
     ];
 
 //We don't rely on any other files in we're run as a script, so we have some
@@ -346,6 +348,8 @@
                 "CF (End Latency)": d(endLatency, 0),
                 "CF (Button Order)": d(lasta.buttonOrder, ''),
                 "CF (Note)": d(note, ''),
+                "KC()": d(lastq.selectedQuestion, ''),
+                "KC Category()":'',
             };
         }
 
