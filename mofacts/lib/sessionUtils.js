@@ -16,7 +16,7 @@
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
  * isScheduledTest
- * lastTimestamp             - set only by resume logic in cardTemplate
+ * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
  * needResume
  * questionIndex

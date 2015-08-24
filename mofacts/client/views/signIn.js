@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.signInTemplate.events({
+Template.signIn.events({
     'click #signInButton' : function (event) {
         event.preventDefault();
         UserPasswordCheck();
@@ -32,7 +32,7 @@ Template.signInTemplate.events({
 ////////////////////////////////////////////////////////////////////////////
 // Template Heleprs
 
-Template.signInTemplate.helpers({
+Template.signIn.helpers({
     isExperiment: function() {
         return Session.get("loginMode") === "experiment";
     },

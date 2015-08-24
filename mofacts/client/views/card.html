@@ -1,5 +1,5 @@
 
-<template name="cardTemplate">
+<template name="card">
     <nav class="navbar navbar-inverse" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -44,7 +44,7 @@
                 <img src="speaker.png" style="width:100px; height:100px;">
                 {{/if}}
                 {{#if imageCard}}
-                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
+                <img id="cardQuestionImg" src={{currentQuestion}}>
                 {{/if}}
             </h5>
         </div>  <!-- close row -->
@@ -108,7 +108,7 @@
                 <img src="speaker.png" style="width:100px; height:100px;">
                 {{/if}}
                 {{#if imageCard}}
-                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
+                <img id="cardQuestionImg" src={{currentQuestion}}>
                 {{/if}}
             </h3>
         </div>  <!-- close row -->
@@ -173,7 +173,7 @@
                 <img src="speaker.png" style="width:100px; height:100px;">
                 {{/if}}
                 {{#if imageCard}}
-                <img id="cardTemplateQuestionImg" src={{currentQuestion}}>
+                <img id="cardQuestionImg" src={{currentQuestion}}>
                 {{/if}}
             </h1>
         </div>  <!-- close row -->

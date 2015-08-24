@@ -19,7 +19,7 @@ redoCardImage = function() {
         wid = "90%";
     }
 
-    $("#cardTemplateQuestionImg")
+    $("#cardQuestionImg")
         .css("height", hgt)
         .css("width", wid);
 };

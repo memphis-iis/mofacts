@@ -1,7 +1,7 @@
 /* client/lib/currentTestingHelpers.js
  *
  * Client-side helper functions for getting current information about testing
- * and/or the current trial. Much of this functionality began in cardTemplate.js
+ * and/or the current trial. Much of this functionality began in card.js
  * but has been moved here for easier use. See also lib/sessionUtils.js for
  * a better list of Session variables we currently use.
  * */

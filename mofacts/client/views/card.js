@@ -6,7 +6,7 @@
 //      we say "ready")
 
 //
-//  cardTemplate.js - the implementation behind cardTemplate.html (and thus
+//  card.js - the implementation behind card.html (and thus
 //  the main GUI implementation for MoFaCTS).
 // 
 //  There is quite a bit of logic in this file, but most of it is commented locally.
@@ -123,7 +123,7 @@ function leavePage(dest) {
     }
 }
 
-Template.cardTemplate.events({
+Template.card.events({
 
     'focus #userAnswer' : function() {
         //Not much right now
@@ -154,7 +154,7 @@ Template.cardTemplate.events({
     'click .statsPageLink' : function (event) {
         event.preventDefault();
         clearCardTimeout();
-        leavePage(statsPageTemplateUpdate); //In statsPageTemplate.js
+        leavePage(statsPageUpdate); //In statsPage.js
     },
 
     'click #overlearningButton' : function (event) {
@@ -189,13 +189,13 @@ Template.cardTemplate.events({
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers and meteor events
 
-Template.cardTemplate.rendered = function() {
+Template.card.rendered = function() {
     if(Session.get("debugging")) {
         console.log('cards template rendered');
     }
 
     //Reset resizing for card images (see also index.js)
-    $("#cardTemplateQuestionImg").load(function(evt) {
+    $("#cardQuestionImg").load(function(evt) {
         redoCardImage();
     });
 
@@ -215,7 +215,7 @@ Template.cardTemplate.rendered = function() {
     }
 };
 
-Template.cardTemplate.helpers({
+Template.card.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             clearCardTimeout();

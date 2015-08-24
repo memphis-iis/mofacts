@@ -41,38 +41,38 @@ Router.route('/experiment/:target?/:xcond?', function() {
     console.log("EXPERIMENT target:", target, "xcond", xcond);
 
     Session.set("clusterMapping", "");
-    this.render('signInTemplate');
+    this.render('signIn');
 });
 
 Router.route('/signin', function () {
-    this.render('signInTemplate');
+    this.render('signIn');
 });
 
 Router.route('/signup', function () {
-    this.render('signUpTemplate');
+    this.render('signUp');
 });
 
 Router.route('/', function () {
-    this.render('signInTemplate');
+    this.render('signIn');
 });
 
 Router.route('/profile', function () {
     Session.set("clusterMapping", "");
-    this.render('profileTemplate');
+    this.render('profile');
 });
 
 Router.route('/card', function () {
-    this.render('cardTemplate');
+    this.render('card');
 });
 
 Router.route('/admin', function () {
-    this.render('adminTemplate');
+    this.render('admin');
 });
 
 Router.route('/instructions', function () {
-    this.render('instructionsTemplate');
+    this.render('instructions');
 });
 
 Router.route('/stats', function () {
-    this.render('statsPageTemplate');
+    this.render('statsPage');
 });

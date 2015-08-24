@@ -2,7 +2,7 @@
 // TEMPLATE EVENTS
 
 
-Template.statsPageTemplate.events({
+Template.statsPage.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
         Router.go("/profile");
@@ -27,7 +27,7 @@ Template.statsPageTemplate.events({
 ////////////////////////////////////////////////////////////////////////////
 // TEMPLATE HELPERS
 
-Template.statsPageTemplate.helpers({
+Template.statsPage.helpers({
     username: function() {
         if (!haveMeteorUser()) {
             routeToSignin();
@@ -50,7 +50,7 @@ Template.statsPageTemplate.helpers({
 // IMPLEMENTATION FUNCTIONS
 
 //Calculates the stats displayed by this page
-statsPageTemplateUpdate = function() {
+statsPageUpdate = function() {
     //Set up the stats variables used in the HTML template
     Session.set("statsRendered", false);
     Session.set("statsCorrect", undefined);
@@ -69,22 +69,22 @@ statsPageTemplateUpdate = function() {
     recordUserTime("stats page rendered",
         { target: "user screen" },
         function() {
-            statsPageTemplateUpdateImpl();
+            statsPageUpdateImpl();
             Router.go("/stats");
         }
     );
 };
 
-//Actual logic called by statsPageTemplateUpdate above after server-side
+//Actual logic called by statsPageUpdate above after server-side
 //user time log is finished
-function statsPageTemplateUpdateImpl() {
+function statsPageUpdateImpl() {
     if (Session.get("debugging")) {
         console.log("Rendering stats for user");
     }
 
     var answerDetails = [];
 
-    //Just use the user progress storage handled by cardTemplate
+    //Just use the user progress storage handled by card
     var currentUserProgress = getUserProgress();
 
     var total = currentUserProgress.progressDataArray.length;

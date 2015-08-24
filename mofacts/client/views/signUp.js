@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template event
 
-Template.signUpTemplate.events({
+Template.signUp.events({
     'click #signInButton' : function (event) {
         event.preventDefault();
         routeToSignin();

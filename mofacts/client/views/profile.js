@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.profileTemplate.events({
+Template.profile.events({
     'click .logoutLink' : function (event) {
         event.preventDefault();
         Meteor.logout( function (error) {
@@ -87,7 +87,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers
 
-Template.profileTemplate.helpers({
+Template.profile.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
@@ -98,7 +98,7 @@ Template.profileTemplate.helpers({
     },
 });
 
-Template.profileTemplate.rendered = function () {
+Template.profile.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 

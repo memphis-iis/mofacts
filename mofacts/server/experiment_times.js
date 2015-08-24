@@ -25,7 +25,7 @@
  *
  * questionIndex refers to the 0-based array of questions in the schedule
  * and is treated as a zero-based index while trials are being conducted
- * (see cardTemplate.js). However, when it is written to the userTimes log
+ * (see card.js). However, when it is written to the userTimes log
  * as a field (for question/action/[timeout] actions) it is written as a
  * 1-based field.
  *
@@ -309,7 +309,7 @@
                 temp3 = "HINT_MSG";
             }
             if (!lasta.isCorrect && lasta.ttype === "d") {
-                temp3 = "HINT_MSG";
+                temp3 = "RESULT";
             }
             return {
                 "Anon Student Id": d(username, ''),

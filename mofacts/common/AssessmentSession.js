@@ -212,7 +212,7 @@ AssessmentSession = {
             }
         });
 
-        //Note that our cardTemplate.js code has some fancy permutation
+        //Note that our card.js code has some fancy permutation
         //logic, but that we don't currently use it from the assessment
         //session
         var schedule = {

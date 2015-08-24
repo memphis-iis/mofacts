@@ -1,4 +1,4 @@
-Template.adminTemplate.helpers({
+Template.admin.helpers({
    results: function() {
        return Meteor.user();
    }

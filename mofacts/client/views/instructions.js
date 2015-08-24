@@ -104,7 +104,7 @@ function lockoutPeriodicCheck() {
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.instructionsTemplate.events({
+Template.instructions.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
 
@@ -141,7 +141,7 @@ Template.instructionsTemplate.events({
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers
 
-Template.instructionsTemplate.helpers({
+Template.instructions.helpers({
     backgroundImage: function() {
         var currUnit = getCurrentTdfUnit();
         var img = "";
@@ -193,7 +193,7 @@ Template.instructionsTemplate.helpers({
     },
 });
 
-Template.instructionsTemplate.rendered = function() {
+Template.instructions.rendered = function() {
     if (currLockOutMinutes() > 0) {
         startLockoutInterval();
     }
