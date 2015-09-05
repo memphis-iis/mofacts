@@ -17,7 +17,7 @@
         <unitinstructions>This is a system testing module for Cloze trials</unitinstructions>
     </unit>
 
-   <unit>
+    <unit>
         <unitname>Statistic SD Pre-Study</unitname>
         <unitinstructions>Please study
         </unitinstructions>
@@ -62,7 +62,7 @@
         </assessmentsession>
     </unit>
 
-   <unit>
+    <unit>
         <unitname>Statistic SD Unit</unitname>
         <unitinstructions>Statistics Memory Experiment
 

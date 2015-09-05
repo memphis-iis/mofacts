@@ -33,8 +33,9 @@ function matchBranching(answer, userAnswer) {
         var flds = branches[i].split('~');
         if (flds.length != 2)
             continue;
-
-        if ( (new RegExp(flds[0])).test(userAnswer) ) {
+        flds[0] = flds[0].toLowerCase();
+        
+                if ( (new RegExp(flds[0])).test(userAnswer) ) {
             matchText = Helpers.trim(flds[1]);
             isCorrect = (i === 0);
             break;

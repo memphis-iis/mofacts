@@ -2,7 +2,7 @@
     <setspec>
         <name>Music Interval Testing</name>
         <lessonname>MusicIntTesting</lessonname>
-          <userselect>false</userselect>
+        <userselect>false</userselect>
         <experimentTarget>musictest</experimentTarget>
         <stimulusfile>Music2stim.xml</stimulusfile>
         <clustermodel></clustermodel>

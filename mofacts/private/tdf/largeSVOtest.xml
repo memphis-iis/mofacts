@@ -7,7 +7,7 @@
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
-   <lfparameter>.85</lfparameter>
+        <lfparameter>.85</lfparameter>
     </setspec>
     <unit>
         <unitname>Statistics Practice</unitname>
@@ -18,25 +18,26 @@
             Hit ENTER after typing to submit your response.  ]]></unitinstructions>
         <deliveryparams>
             <fontsize>3</fontsize>
-           <purestudy>12000</purestudy>
+            <purestudy>12000</purestudy>
             <readyprompt>0</readyprompt>
             <reviewstudy>24000</reviewstudy>
             <correctprompt>1500</correctprompt>
             <drill>12000</drill>
         </deliveryparams>
         <assessmentsession> 
-<conditiontemplatesbygroup>
+            <conditiontemplatesbygroup>
                 <groupnames>A</groupnames> 
                 <clustersrepeated>2</clustersrepeated> 
                 <templatesrepeated>1</templatesrepeated>
- <group> 0,f,s,0 3,f,d,1</group> 
-</conditiontemplatesbygroup>
-<initialpositions>A_1 A_1</initialpositions> 
-      <randomizegroups>false</randomizegroups> 
-      <clusterlist>0-0</clusterlist> 
-      <permutefinalresult> 0-1</permutefinalresult>
-<assignrandomclusters>false</assignrandomclusters>
-            <randomchoices>4</randomchoices> </assessmentsession>
+                <group> 0,f,s,0 3,f,d,1</group> 
+            </conditiontemplatesbygroup>
+            <initialpositions>A_1 A_1</initialpositions> 
+            <randomizegroups>false</randomizegroups> 
+            <clusterlist>0-0</clusterlist> 
+            <permutefinalresult> 0-1</permutefinalresult>
+            <assignrandomclusters>false</assignrandomclusters>
+            <randomchoices>4</randomchoices> 
+        </assessmentsession>
     </unit>
 
 

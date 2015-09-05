@@ -397,13 +397,7 @@
 			<display>When a study involves human subjects, the sample is the group of people who __________ in the study. </display>
 			<response>participated~Correct.;sample~Sample is incorrect. The correct response is participated. Using the word sample to describe a sample doesn't add much explanation. Therefore, we want to say generally what the sample did, which is to say that they participated.;.*~Incorrect. The correct fill-in is ' participated '.</response>
 		</cluster>
-                <cluster>
-            <display>Gender?</display>
-            <response>Male</response>
-            <falseResponse>Female</falseResponse>
-            <falseResponse>Other</falseResponse>
-            <falseResponse>Prefer not to answer</falseResponse>
-        </cluster> <cluster>
+               <cluster>
             <display>Age?</display>
             <response>18-25</response>
             <falseResponse>26-34</falseResponse>
@@ -411,6 +405,13 @@
             <falseResponse>55-64</falseResponse>
             <falseResponse>65 and over</falseResponse>
         </cluster>
+         <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster> 
          <cluster>
             <display>Which is the highest level of education you have completed?</display>
             <response>Less than High School</response>
