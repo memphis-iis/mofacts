@@ -348,14 +348,29 @@ function newQuestionHandler() {
 
             //are we using specified choice order for buttons?
             //Or do we get them from the cluster?
-            var buttonOrder = getCurrentTdfButtonOrder();
+            var buttonOrder = [];
+            try {
+                if (file && file.tdfs.tutor.unit[unitNumber].buttonorder) {
+                    var btnOrderTxt = file.tdfs.tutor.unit[unitNumber].buttonorder;
+                    buttonOrder = (btnOrderTxt + '').split(",");
+                    if (!buttonOrder || !buttonOrder.length) {
+                        buttonOrder = []; //Just use empty array
+                    }
+                }
+            }
+            catch (e) {
+                console.log("Error find button order (will use []): " + e);
+            }
+          
             var choicesArray = [];
 
-            if (buttonOrder.length > 0) {
+            if (buttonOrder.length > 1) {
                 //Top-level specification for buttons
                 choicesArray = buttonOrder;
             }
-            else {
+            else {                
+                console.log(choicesArray);
+                console.log(buttonOrder[0]);
                 //Specified in the scheduled stim cluster
                 var currentSchedQuest = currentScheduledQInfo();
                 if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
@@ -373,15 +388,21 @@ function newQuestionHandler() {
                 //Currently we only show 5 option button trials - so we only
                 //use 4 false responses
                 if (choicesArray.length > 3) {
-                    Helpers.shuffle(choicesArray);
+                    if(buttonOrder[0]==="random"){
+                    Helpers.shuffle(choicesArray);}
                     choicesArray = choicesArray.splice(0, 5);
                 }
 
+                console.log(choicesArray);
+                console.log(buttonOrder[0]);
                 //Need to make sure they also have a correct option :)
                 var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
                 if (!!correctAnswer)
-                    choicesArray.push(correctAnswer);
-                Helpers.shuffle(choicesArray);
+               choicesArray.unshift(correctAnswer);
+                 if(buttonOrder[0]==="random"){
+                    Helpers.shuffle(choicesArray);}
+                console.log(choicesArray);
+                console.log(buttonOrder[0]);
             }
 
             clearButtonList();

@@ -283,25 +283,3 @@ getCurrentDeliveryParams = function (currUnit) {
 
     return deliveryParams;
 };
-
-//Return the current button order as an array
-getCurrentTdfButtonOrder = function () {
-    //Our default value
-    var btnOrder = [];
-
-    try {
-        var file = getCurrentTdfFile();
-        if (file && file.tdfs.tutor.setspec[0].buttonorder) {
-            var btnOrderTxt = file.tdfs.tutor.setspec[0].buttonorder;
-            btnOrder = (btnOrderTxt + '').split(",");
-            if (!btnOrder || !btnOrder.length) {
-                btnOrder = []; //Just use empty array
-            }
-        }
-    }
-    catch(e) {
-        console.log("Error find button order (will use []): " + e);
-    }
-
-    return btnOrder;
-};
