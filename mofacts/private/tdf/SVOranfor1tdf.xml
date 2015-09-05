@@ -72,7 +72,7 @@
     <unit> 
         <turkpay>2.00</turkpay> 
         <turkemail>text</turkemail> 
-        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now. If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions> 
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment. If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now. If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions> 
         <unitname>Lockout unit</unitname> 
         <deliveryparams> 
             <lockoutminutes>2</lockoutminutes> 
@@ -112,6 +112,6 @@
     <unit> 
         <turkbonus>3.00</turkbonus> 
         <unitname>last</unitname> 
-        <unitinstructions>You have now completed the posttest. We will check your completion within a few days and confirm the $3 bonus.</unitinstructions> 
+        <unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions> 
     </unit> 
 </tutor> 
