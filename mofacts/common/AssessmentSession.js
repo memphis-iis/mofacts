@@ -141,7 +141,17 @@ AssessmentSession = {
                     //if (type === "T") {
                     //    type = "D";
                     //}
-
+                    
+                    if (type === "Z") {
+                        var stud = Math.floor(Math.random() * 10)
+                        if (stud === 0) {
+                            type = "S";
+                        } else
+                        {
+                            type = "D";
+                        }
+                    }
+                    
                     var showHint = false;
                     if (parts[2].length > 1) {
                         showHint = (parts[2].toUpperCase()[1] === "H");

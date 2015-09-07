@@ -52,14 +52,14 @@
                 <groupnames>A B C D E F G H</groupnames> 
                 <clustersrepeated>8 4 2 8 4 2 4 2</clustersrepeated> 
                 <templatesrepeated>2 2 2 2 2 2 2 2</templatesrepeated> 
-                <group> 0,f,d,0 0,f,d,1 0,f,d,6 0,f,d,7 0,f,d,15 0,f,d,16 0,f,d,26 0,f,d,27 r,f,d,0 r,f,d,1 r,f,d,8 r,f,d,9 r,f,d,18 r,f,d,19 r,f,d,27 r,f,d,28 </group> 
-                <group> 0,f,d,0 0,f,d,1 0,f,d,11 0,f,d,12 r,f,d,0 r,f,d,1 r,f,d,9 r,f,d,10 </group> 
-                <group> 0,f,d,0 0,f,d,1 r,f,d,0 r,f,d,1 </group> 
-                <group> 0,f,d,0 0,f,d,8 0,f,d,18 0,f,d,27 0,f,d,34 0,f,d,40 0,f,d,49 0,f,d,60 r,f,d,0 r,f,d,8 r,f,d,18 r,f,d,27 r,f,d,34 r,f,d,40 r,f,d,49 r,f,d,60 </group> 
-                <group> 0,f,d,0 0,f,d,6 0,f,d,15 0,f,d,26 r,f,d,0 r,f,d,8 r,f,d,18 r,f,d,27 </group> 
-                <group> 0,f,d,0 0,f,d,11 r,f,d,0 r,f,d,10 </group> 
-                <group> 0,f,d,0 0,f,d,18 0,f,d,31 0,f,d,52 r,f,d,0 r,f,d,19 r,f,d,34 r,f,d,50 </group> 
-                <group> 0,f,d,0 0,f,d,21 r,f,d,0 r,f,d,18 </group> 
+                <group> 0,f,z,0 0,f,z,1 0,f,z,6 0,f,z,7 0,f,z,15 0,f,z,16 0,f,z,26 0,f,z,27 r,f,z,0 r,f,z,1 r,f,z,8 r,f,z,9 r,f,z,18 r,f,z,19 r,f,z,27 r,f,z,28 </group> 
+                <group> 0,f,z,0 0,f,z,1 0,f,z,11 0,f,z,12 r,f,z,0 r,f,z,1 r,f,z,9 r,f,z,10 </group> 
+                <group> 0,f,z,0 0,f,z,1 r,f,z,0 r,f,z,1 </group> 
+                <group> 0,f,z,0 0,f,z,8 0,f,z,18 0,f,z,27 0,f,z,34 0,f,z,40 0,f,z,49 0,f,z,60 r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 r,f,z,34 r,f,z,40 r,f,z,49 r,f,z,60 </group> 
+                <group> 0,f,z,0 0,f,z,6 0,f,z,15 0,f,z,26 r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 </group> 
+                <group> 0,f,z,0 0,f,z,11 r,f,z,0 r,f,z,10 </group> 
+                <group> 0,f,z,0 0,f,z,18 0,f,z,31 0,f,z,52 r,f,z,0 r,f,z,19 r,f,z,34 r,f,z,50 </group> 
+                <group> 0,f,z,0 0,f,z,21 r,f,z,0 r,f,z,18 </group> 
             </conditiontemplatesbygroup> 
             <initialpositions>A_2 A_2 D_2 D_1 E_2 G_2 C_2 C_2 A_2 A_2 D_2 D_1 E_2 F_2 G_1 H_2 B_2 B_2 A_2 A_2 D_2 D_1 E_2 F_2 G_2 B_2 B_2 A_2 A_2 D_2 D_1 E_2 G_1 H_2 A_1 A_1 D_2 D_1 E_1 G_2 A_1 A_1 D_2 D_1 E_1 G_1 H_1 B_1 B_1 A_1 A_1 D_2 D_1 E_1 F_1 G_2 C_1 C_1 B_1 B_1 A_1 A_1 D_2 D_1 E_1 F_1 G_1 H_1 </initialpositions> 
             <randomizegroups>false</randomizegroups> 
@@ -99,7 +99,7 @@
                 <groupnames>A</groupnames> 
                 <clustersrepeated>3</clustersrepeated> 
                 <templatesrepeated>18</templatesrepeated> 
-                <group> r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 </group> 
+                <group> r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 </group> 
             </conditiontemplatesbygroup> 
             <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 </initialpositions> 
             <randomizegroups>false</randomizegroups> 

@@ -56,7 +56,8 @@ function branchingCorrectText(answer) {
             result = flds[0];
         }
     }
-
+    
+    result = result.split('|');
     return result;
 }
 
