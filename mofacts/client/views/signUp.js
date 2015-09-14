@@ -10,9 +10,9 @@ Template.signUp.events({
     'click #signUpButton' : function (event) {
         event.preventDefault();
 
-        var formUsername = signUpUsername.value;
-        var formPassword1 = password1.value;
-        var formPassword2 = password2.value;
+        var formUsername = Helpers.trim(signUpUsername.value);
+        var formPassword1 = Helpers.trim(password1.value);
+        var formPassword2 = Helpers.trim(password2.value);
 
         //Hide previous errors
         $(".errcheck").hide();
