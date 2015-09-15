@@ -58,7 +58,7 @@ function branchingCorrectText(answer) {
     }
     
     result = result.split('|');
-    return result;
+    return result[0];
 }
 
 Answers = {

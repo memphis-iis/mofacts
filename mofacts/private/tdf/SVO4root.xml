@@ -2,7 +2,7 @@
     <setspec> 
         <lessonname>SVO4</lessonname> 
         <stimulusfile>SVO4stims.xml</stimulusfile> 
-        <userselect>false</userselect> 
+        <userselect>true</userselect> 
         <condition>SVOnumbak0tdf.xml</condition> 
         <condition>SVOnumbak1tdf.xml</condition> 
         <condition>SVOnumbak2tdf.xml</condition> 
