@@ -10,7 +10,7 @@ Template.inputF.rendered = function()
 
 
 Template.inputF.helpers({
-   
+
     fontsmall: function() {
         return getCurrentDeliveryParams().fontsize===1;
     },
@@ -20,5 +20,5 @@ Template.inputF.helpers({
      fontlarge: function() {
         return getCurrentDeliveryParams().fontsize===3;
     }
-  
+
 });
