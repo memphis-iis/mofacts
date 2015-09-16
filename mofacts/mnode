@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+
+LOCAL_METEOR=$(readlink -vef $HOME/.meteor/meteor)
+if [ '$LOCAL_METEOR' = '$HOME/.meteor/meteor' ]; then
+    echo "Could not find Local Meteor link at $HOME/.meteor/meteor"
+    exit 1
+fi
+
+TOOL_DIR=$(dirname "$LOCAL_METEOR")
+NODE_BIN="$TOOL_DIR/dev_bundle/bin/node"
+
+if [ ! -f "$NODE_BIN" ]; then
+    echo "The local node.js binary for meteor could not be found"
+fi
+
+"$NODE_BIN" $*
