@@ -6,6 +6,15 @@
  * a better list of Session variables we currently use.
  * */
 
+//Return the current fontsize from the TDF
+getCurrentFontSize = function () {
+    var fontsize = Helpers.intVal(getCurrentDeliveryParams().fontsize);
+    if (fontsize < 1 || fontsize > 5) {
+        fontsize = 3; // Default for both missing AND invalid values
+    }
+    return fontsize;
+};
+
 //Return the current cluster index into the stimulus file. Note that this
 //returns the "raw" or "unmapped" cluster index. If you want the properly
 //mapped index that includes initial shuffles and swaps from setspec, then

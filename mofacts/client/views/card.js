@@ -267,15 +267,11 @@ Template.card.helpers({
         return type === "d" || type === "t";
     },
 
-    fontsmall: function() {
-        return getCurrentDeliveryParams().fontsize===1;
+    fontSizeClass: function() {
+        // Take advantage of Bootstrap h1-h5 classes
+        return 'h' + getCurrentFontSize().toString();
     },
- fontmedium: function() {
-        return getCurrentDeliveryParams().fontsize===2;
-    },
-     fontlarge: function() {
-        return getCurrentDeliveryParams().fontsize===3;
-    },
+
     skipstudy: function() {
         return getCurrentDeliveryParams().skipstudy;
     },
