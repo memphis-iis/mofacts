@@ -9,3 +9,4 @@ mofacts/build
 .vagrant
 /nbproject/private/
 /nbproject/
+.meteor
