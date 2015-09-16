@@ -13,9 +13,11 @@
  * The first branch is assumed to be the "correct answer" match, while the
  * rest are matches for potential incorrect answers.
  * */
+
 function capFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 //Return true if the answer is a "branched answer"
 function answerIsBranched(answer) {
     return Helpers.trim(answer).indexOf(';') >= 0;
@@ -33,9 +35,9 @@ function matchBranching(answer, userAnswer) {
         var flds = branches[i].split('~');
         if (flds.length != 2)
             continue;
+
         flds[0] = flds[0].toLowerCase();
-        
-                if ( (new RegExp(flds[0])).test(userAnswer) ) {
+        if ( (new RegExp(flds[0])).test(userAnswer) ) {
             matchText = Helpers.trim(flds[1]);
             isCorrect = (i === 0);
             break;
@@ -56,7 +58,7 @@ function branchingCorrectText(answer) {
             result = flds[0];
         }
     }
-    
+
     result = result.split('|');
     return result[0];
 }
@@ -79,10 +81,9 @@ Answers = {
             //Branched = use first entry's text
             answer = branchingCorrectText(answer);
         }
-      
-          //Fill in the blank
-            result = question.replace(/___+/g, answer);
-        
+
+        //Fill in the blank
+        result = question.replace(/___+/g, answer);
         return result;
     },
 
@@ -130,8 +131,7 @@ Answers = {
                 if (userInput === "") {
                     matchText = "The correct answer is " + answer + ".";
                 }
-                else
-                {
+                else {
                     matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
                 }
             }
