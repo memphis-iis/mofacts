@@ -1,6 +1,3 @@
-//TODO: Support a unit directive for displaying stats/scores for current
-//      learning and/or assessment sessions
-
 //TODO: We currently don't support the timeout property "readyprompt" (in
 //      /tutor/unit/deliveryparams). It is the time between two trials (where
 //      we say "ready")
