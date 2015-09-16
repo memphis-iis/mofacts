@@ -20,7 +20,7 @@ deploying a new version of the MoFaCT system:
  * Copy it to /var/www/mofacts/mofacts.tar.gz on optimallearning.org
  * Log in to optimallearning.org, navigate to /var/www/mofacts, and
    run ./deploy.sh
-   
+
 You'll note that these three steps are spelled out in detail in the
 deployment secction below.
 
@@ -41,7 +41,7 @@ owned by the Apache user
 
     cd /var/www
     sudo mkdir mofacts
-    chown -R www-data:www-data 
+    chown -R www-data:www-data
 
 (Note: you could create your own and deploy to a completely different
 location if necessary.  There is nothing magical about these choices.)
@@ -144,11 +144,11 @@ It is assumed that all the following steps are performed on the server
 in the "home" directory for mofacts:
 
     $ cd /var/www/mofacts
-    
+
 One note - remember that for security everything in this directory will
 owned by the www-data user.  As a result, many of the commands will be
 executed using `sudo`
-    
+
 First the bundle needs to be extracted.  Many meteor tutorials will then
 delete the bundle file.  The deploy.sh script changes the name of the
 file instead.  As a result, the deployment step only occurs when necessary
@@ -161,14 +161,14 @@ the previous bundle.
     $ sudo -E rm -f mofacts.tar.gz.deployed
     $ sudo -E -u www-data tar -zxf mofacts.tar.gz
     $ sudo mv mofacts.tar.gz mofacts.tar.gz.deployed
-    
+
 Now that the bundle has been extracted, any node.js packages requiring
 native OS support need to be rebuilt.  MoFaCT doesn't use of packages
 like that directly, but meteor uses the `fibers` package:
 
     $ sudo rm -fr bundle/programs/server/node_modules/fibers
     $ sudo npm install fibers@1.0.1
-    
+
 As a final step, the ownership of all involved files should be changed.
 
     $ sudo chown -R www-data:www-data *
@@ -182,7 +182,7 @@ restart functionality currently supported.  As a result, any previous
 instance of the process should be killed before starting a new one:
 
     $ sudo killall nodejs
-    
+
 Note that this assumes that no other node.js processes are running
 on your server.
 
@@ -201,7 +201,7 @@ deploy.sh description
 ---------------------------
 
 The major functionality of the `deploy.sh` script is described above.
-If the script needs to be customized, all configuration is handled at 
+If the script needs to be customized, all configuration is handled at
 the beginning of the script using environment variables.
 
 The script kills previous processes, deploys mofacts.tar.gz, and then
