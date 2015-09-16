@@ -22,6 +22,8 @@
             <reviewstudy>16000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
+            <correctscore>0</correctscore> <!--No points for demographics-->
+            <incorrectscore>0</incorrectscore>
         </deliveryparams>
         <buttontrial>false</buttontrial>
         <assessmentsession>
@@ -48,6 +50,8 @@
             <reviewstudy>16000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
         </deliveryparams>
         <assessmentsession>
             <conditiontemplatesbygroup>
@@ -96,6 +100,8 @@
             <reviewstudy>16000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
         </deliveryparams>
         <assessmentsession>
             <conditiontemplatesbygroup>

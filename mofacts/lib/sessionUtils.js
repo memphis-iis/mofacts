@@ -10,6 +10,7 @@
  * currentQuestion
  * currentRootTdfName
  * currentTdfName
+ * currentScore
  * currentStimName
  * currentUnitNumber
  * debugging                 - Generic debugging flag
@@ -42,6 +43,7 @@ sessionCleanUp = function() {
     Session.set("currentAnswer", undefined);
     Session.set("currentQuestion", undefined);
     Session.set("currentUnitNumber", 0);
+    Session.set("currentScore", 0);
     Session.set("isScheduledTest", undefined);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);

@@ -258,10 +258,12 @@ Template.card.helpers({
     drill: function() {
         return getTestType() === "d";
     },
+
     trial: function() {
         var type = getTestType();
         return type === "d" || type === "s" || type === "t";
     },
+
     testordrill: function() {
         var type = getTestType();
         return type === "d" || type === "t";
@@ -282,7 +284,11 @@ Template.card.helpers({
 
     buttonList: function() {
         return buttonList.find({}, {sort: {idx: 1}});
-    }
+    },
+
+    currentScore: function() {
+        return Session.get("currentScore");
+    },
 });
 
 
@@ -886,6 +892,14 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
         userAnswer: userAnswer,
         isCorrect: isCorrect,
     });
+
+    // Note that we track the score in the user progress object, but we
+    // copy it to the Session object for template updates
+    scoring = getCurrentScoreValues();  // in format [correct, incorrect]
+    var oldScore = Helpers.intVal(prog.currentScore);
+    var newScore = oldScore + (isCorrect ? scoring[0] : -scoring[1]);
+    prog.currentScore = newScore;
+    Session.set("currentScore", prog.currentScore);
 }
 
 //Return the schedule for the current unit of the current lesson -

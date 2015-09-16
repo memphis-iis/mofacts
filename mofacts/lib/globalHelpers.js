@@ -46,6 +46,7 @@ if (Meteor.isClient) {
     initUserProgress = function(overrideData) {
         var initVals = {
             currentTestMode: "NONE",
+            currentScore: 0,
             progressDataArray: []
         };
 
