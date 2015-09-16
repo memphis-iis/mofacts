@@ -23,10 +23,66 @@ function answerIsBranched(answer) {
     return Helpers.trim(answer).indexOf(';') >= 0;
 }
 
+// Perform string comparison - possibly with edit distance considered.
+// We return a "truthy" value if there is a match and 0 other wise. If the
+// match was exact, we return 1. If we matched on edit distance, we return 2
+function stringMatch(s1, s2, lfparameter) {
+    s1 = Helpers.trim(s1).toLowerCase();
+    s2 = Helpers.trim(s2).toLowerCase();
+
+    if (s1.localeCompare(s2) === 0) {
+        //Exact match!
+        return 1;
+    }
+    else {
+        //See if they were close enough
+        if (!!lfparameter) {
+            var editDistScore = 1.0 - (
+                getEditDistance(s1, s2) /
+                Math.max(s1.length, s2.length)
+            );
+            if (editDistScore >= lfparameter) {
+                return 2;
+            }
+            else {
+                return 0;
+            }
+        }
+    }
+}
+
+// We perform regex matching, which is special in Mofacts. If the regex is
+// "complicated", then we just match. However, if the regex is nothing but
+// pipe-delimited (disjunction) strings that contain only letters, numbers,
+// or underscores, then we manually match the pipe-delimited strings using
+// the current levenshtein distance.
+// ALSO notice that we use the same return values as stringMatch: 0 for no
+// match, 1 for exact match, 2 for edit distance match
+function regExMatch(regExStr, userAnswer, lfparameter) {
+    if (lfparameter && /^[\|A-Za-z0-9]+$/i.test(regExStr)) {
+        // They have an edit distance parameter and the regex matching our
+        // special condition - check it manually
+        var checks = Helpers.trim(regExStr).split('|');
+        for(var i = 0; i < checks.length; ++i) {
+            if (checks[i].length < 1)
+                continue;  //No blank checks
+            var matched = stringMatch(userAnswer, checks[i], lfparameter);
+            if (matched !== 0) {
+                return matched; //Match!
+            }
+        }
+        return 0; //Nothing found
+    }
+    else {
+        // Just use the regex as given
+        return (new RegExp(regExStr)).test(userAnswer) ? 1 : 0;
+    }
+}
+
 //Return [isCorrect, matchText] where isCorrect is true if the user-supplied
 //answer matches the first branch and matchText is the text response from a
 //matching branch
-function matchBranching(answer, userAnswer) {
+function matchBranching(answer, userAnswer, lfparameter) {
     var isCorrect = false;
     var matchText = "";
 
@@ -37,8 +93,12 @@ function matchBranching(answer, userAnswer) {
             continue;
 
         flds[0] = flds[0].toLowerCase();
-        if ( (new RegExp(flds[0])).test(userAnswer) ) {
+        var matched = regExMatch(flds[0], userAnswer, lfparameter);
+        if (matched !== 0) {
             matchText = Helpers.trim(flds[1]);
+            if (matched === 2) {
+                matchText = matchText + " (you were close enough)";
+            }
             isCorrect = (i === 0);
             break;
         }
@@ -90,41 +150,33 @@ Answers = {
     //Return [isCorrect, matchText] if userInput correctly matches answer -
     //taking into account both branching answers and edit distance
     answerIsCorrect: function(userInput, answer, setspec) {
+        var lfparameter = null;
+        if (setspec && setspec.lfparameter && setspec.lfparameter.length)
+            lfparameter = parseFloat(setspec.lfparameter[0]);
+
         if (answerIsBranched(answer)) {
-            return matchBranching(answer, userInput);
+            return matchBranching(answer, userInput, lfparameter);
         }
         else {
-            answer = Helpers.trim(answer).toLowerCase();
-            userInput = Helpers.trim(userInput).toLowerCase();
+            var isCorrect, matchText;
+            var match = stringMatch(userInput, answer);
 
-            var isCorrect = false;
-            var matchText = "";
-
-            if (userInput.localeCompare(answer) === 0) {
-                //Exact match!
+            if (match === 0) {
+                isCorrect = false;
+                matchText = "";
+            }
+            else if (match === 1) {
                 isCorrect = true;
                 matchText = "Correct.";
             }
+            else if (match === 2) {
+                isCorrect = true;
+                matchText = "Close enough to the correct answer '"+ answer + "'.";
+            }
             else {
-                //See if they were close enough
-                var lfparameter = null;
-                if (setspec && setspec.lfparameter && setspec.lfparameter.length)
-                    lfparameter = parseFloat(setspec.lfparameter[0]);
-
-                if (!!lfparameter) {
-                    var editDistScore = 1.0 - (
-                        getEditDistance(userInput, answer) /
-                        Math.max(userInput.length, answer.length)
-                    );
-                    if (Session.get("debugging")) {
-                        console.log("Edit Dist Score", editDistScore, "lfparameter", lfparameter);
-                    }
-
-                    if (editDistScore >= lfparameter) {
-                        isCorrect = true;
-                        matchText = "Close enough to the correct answer '"+ answer + "'.";
-                    }
-                }
+                console.log("MATCH ERROR: something fails in our comparison");
+                isCorrect = false;
+                matchText = "";
             }
 
             if (!matchText) {
