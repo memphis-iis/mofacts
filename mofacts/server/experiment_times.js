@@ -91,7 +91,7 @@
         "Anon Student Id", //username
         "Session ID", //not sure yet
         "Condition Namea", //new field? always == 'tdf file'************
-        "Condition Typea", //selectedTdf 
+        "Condition Typea", //selectedTdf
         "Condition Nameb", //new field? always == 'xcondition'************
         "Condition Typeb", //xcondition
         "Condition Namec", //new field? always == 'schedule condition" ***********
@@ -99,7 +99,7 @@
         "Condition Named", //new field? always == 'how answered'*******
         "Condition Typed", //howAnswered
         "Condition Namee", //new field? always == 'button trial'***********
-        "Condition Typee", //wasButtonTrial      
+        "Condition Typee", //wasButtonTrial
         "Level (Unit)", //unit
         "Level (Unitname)", //unitname
         "Problem Name", //questionValue
@@ -304,7 +304,7 @@
                 temp2 = "HINT_REQUEST";
             }
 
-            var temp3 = "RESULT"
+            var temp3 = "RESULT";
             if (lasta.ttype === "s") {
                 temp3 = "HINT_MSG";
             }
@@ -357,18 +357,13 @@
 
 //Helper to transform our output record into a delimited record
     function delimitedRecord(rec, format) {
-        if (format === 'basic') {
-            vals = new Array(FIELDS.length);
-            for (var i = 0; i < FIELDS.length; ++i) {
-                vals[i] = disp(rec[FIELDS[i]]);
-            }
+        var field_src = format === 'basic' ? FIELDS : FIELDSDS;
+
+        var vals = new Array(field_src.length);
+        for (var i = 0; i < field_src.length; ++i) {
+            vals[i] = disp(rec[field_src[i]]);
         }
-        else {
-            vals = new Array(FIELDSDS.length);
-            for (var i = 0; i < FIELDSDS.length; ++i) {
-                vals[i] = disp(rec[FIELDSDS[i]]);
-            }
-        }
+
         return vals.join('\t');
     }
 
@@ -457,20 +452,23 @@
                     header[f] = f;
                 });
             }
-            else
-            {
+            else {
                 FIELDSDS.forEach(function (f) {
-                    var t = f;
-                    if (f.substr(0, 14) === 'Condition Name') {
+                    var prefix = f.substr(0, 14);
+
+                    var t;
+                    if (prefix === 'Condition Name') {
                         t = 'Condition Name';
                     }
-                    ;
-                    if (f.substr(0, 14) === 'Condition Type') {
+                    else if (prefix === 'Condition Type') {
                         t = 'Condition Type';
                     }
-                    ;
+                    else {
+                        t = f;
+                    }
+
                     header[f] = t;
-                })
+                });
             }
 
             var results = [delimitedRecord(header, format)];
@@ -503,17 +501,12 @@
             }
 
             var header = {};
-            if (format === "basic") {
-                FIELDS.forEach(function (f) {
-                    header[f] = f;
-                });
-            }
-            else
-            {
-                FIELDSDS.forEach(function (f) {
-                    header[f] = f;
-                });
-            }
+            var format = "datashop"; // Hardcode for mongo console for now
+
+            var field_src = (format === "basic") ? FIELDS : FIELDSDS;
+            field_src.forEach(function (f) {
+                header[f] = f;
+            });
 
             print(delimitedRecord(header, format));
 
