@@ -4,3 +4,4 @@
 Stimuli = new Meteor.Collection("stimuli");
 Tdfs = new Meteor.Collection("tdfs");
 UserTimesLog = new Meteor.Collection("userTimesLog");
+UserProfileData = new Mongo.Collection("userProfileData");

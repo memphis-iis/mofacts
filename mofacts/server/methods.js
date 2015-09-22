@@ -46,6 +46,16 @@ function getRoles(fileName) {
     return future.wait();
 }
 
+function defaultUserProfile() {
+    return {
+        have_aws_id: false,
+        have_aws_secret: false,
+        aws_id: '',
+        aws_secret_key: '',
+        use_sandbox: true
+    };
+}
+
 
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
@@ -58,7 +68,12 @@ Meteor.publish(null, function () {
         Stimuli.find({}),
         Tdfs.find({}),
         UserTimesLog.find({_id: userId}),
-        Meteor.users.find({_id: userId})
+        Meteor.users.find({_id: userId}),
+        UserProfileData.find({_id: userId}, {fields: {
+            have_aws_id: 1,
+            have_aws_secret: 1,
+            use_sandbox: 1
+        }})
     ];
 
     return defaultData;
@@ -140,14 +155,26 @@ Meteor.startup(function () {
             //Note that on the server we just get back the ID and have nothing
             //to do right now
             var createdId = Accounts.createUser({username: newUserName, password: newUserPassword});
-
-            //Remeber we return a LIST of errors
             if (!createdId) {
                 return ["Unknown failure creating user account"];
             }
-            else {
-                return null;
-            }
+
+            //Now we need to create a default user profile record
+            UserProfileData.upsert({_id: createdId}, defaultUserProfile());
+
+            //Remeber we return a LIST of errors, so this is success
+            return null;
+        },
+
+        //We provide a separate server method for user profile info - this is
+        //mainly since we don't want some of this data just flowing around
+        //between client and server
+        saveUserProfileData: function(profileData) {
+            //TODO: encrypt aws id and secret
+            var data = _.extend(defaultUserProfile(), profileData);
+            data.have_aws_id = data.aws_id.length > 0;
+            data.have_aws_secret = data.aws_secret_key.length > 0;
+            return UserProfileData.upsert({_id: Meteor.userId()}, data);
         },
 
         //New functionality for logging to the DB
@@ -184,9 +211,9 @@ Meteor.startup(function () {
             action["$push"][experiment_key] = allVals;
 
             UserTimesLog.update(
-                    {_id: Meteor.userId()},
-            action,
-                    {upsert: true}
+                {_id: Meteor.userId()},
+                action,
+                {upsert: true}
             );
         },
 

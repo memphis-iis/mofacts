@@ -37,7 +37,32 @@ Template.profile.events({
             target.data("tdffilename"),
             "User button click"
         );
-    }
+    },
+
+    'click #saveProfile': function(event) {
+        event.preventDefault();
+        console.log(event);
+
+        var data = {
+            aws_id: $("#profileAWSID").val(),
+            aws_secret_key: $("#profileAWSSecret").val(),
+            use_sandbox: $("#profileUseSandbox").prop("checked")
+        };
+
+        //TODO: validate data
+
+        Meteor.call("saveUserProfileData", data, function(error, result) {
+            if (!!error) {
+                console.log("Error saving user profile", error);
+                alert("Your changes were not saved! " + error);
+            }
+            else {
+                console.log("Profile saved:", result);
+                //Clear any controls that shouldn't be kept around
+                $(".clearOnSave").val("");
+            }
+        });
+    },
 });
 
 
@@ -87,6 +112,13 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers
 
+function getProfileField(field) {
+    var prof =  UserProfileData.findOne({_id:Meteor.userId()});
+    if (!prof || typeof prof[field] === undefined)
+        return null;
+    return prof[field];
+}
+
 Template.profile.helpers({
     username: function () {
         if (!haveMeteorUser()) {
@@ -96,6 +128,16 @@ Template.profile.helpers({
             return Meteor.user().username;
         }
     },
+
+    use_sandbox: function() {
+        return getProfileField('use_sandbox') ? "checked" : false;
+    },
+    have_aws_id: function() {
+        return getProfileField('have_aws_id');
+    },
+    have_aws_secret: function() {
+        return getProfileField('have_aws_secret');
+    }
 });
 
 Template.profile.rendered = function () {
