@@ -69,6 +69,10 @@ function UserPasswordCheck() {
 
     if (experiment) {
         //Experiment mode - we create a user if one isn't already there. We
+
+        //Experimental ID's are assumed to be upper case
+        newUsername = newUsername.toUpperCase();
+
         //Call sign up - specifying that a duplicate user is OK
         Meteor.call("signUpUser", newUsername, newPassword, true, function(error, result) {
             var errorMsgs = [];
