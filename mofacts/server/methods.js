@@ -73,23 +73,23 @@ Meteor.startup(function () {
     };
 
     _.each(
-            _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
-            function (ele, idx, lst) {
-                console.log("Updating Stim in DB from ", ele);
-                var json = getStimJSON('stims/' + ele);
-                Stimuli.remove({fileName: ele});
-                Stimuli.insert({fileName: ele, stimuli: json});
-            }
+        _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
+        function (ele, idx, lst) {
+            console.log("Updating Stim in DB from ", ele);
+            var json = getStimJSON('stims/' + ele);
+            Stimuli.remove({fileName: ele});
+            Stimuli.insert({fileName: ele, stimuli: json});
+        }
     );
 
     _.each(
-            _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-            function (ele, idx, lst) {
-                console.log("Updating TDF in DB from ", ele);
-                var json = getStimJSON('tdf/' + ele);
-                Tdfs.remove({fileName: ele});
-                Tdfs.insert({fileName: ele, tdfs: json});
-            }
+        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
+        function (ele, idx, lst) {
+            console.log("Updating TDF in DB from ", ele);
+            var json = getStimJSON('tdf/' + ele);
+            Tdfs.remove({fileName: ele});
+            Tdfs.insert({fileName: ele, tdfs: json});
+        }
     );
 
     var admins = getRoles("roles/admins.json");
@@ -149,11 +149,7 @@ Meteor.startup(function () {
                 return null;
             }
         },
-        //Handle experimental users - we create the user if missing (otherwise
-        //everything is fine). We return null on success or an array of error
-        //messages if there was a problem
-        experimentalUser: function (newUserName, newUserPassword) {
-        },
+
         //New functionality for logging to the DB
         userTime: function (experiment, objectsToLog) {
             var objType = typeof objectsToLog;
@@ -193,6 +189,7 @@ Meteor.startup(function () {
                     {upsert: true}
             );
         },
+
         //Let client code send console output up to server
         debugLog: function (logtxt) {
             var usr = Meteor.user();
@@ -212,8 +209,6 @@ Meteor.startup(function () {
 //We use a special server-side route for our experimental data download
 Router.route("experiment-data", {
     where: "server",
-//how does this line function to create a link target
-//where is params read from
     path: "/experiment-data/:expKey/:format",
     action: function () {
         var exp = this.params.expKey;
@@ -224,7 +219,7 @@ Router.route("experiment-data", {
             this.response.end("No experiment specified");
             return;
         }
-        
+
         var suffix = '';
         if (fmt === 'basic') {
             suffix = 'tsv';
@@ -240,6 +235,5 @@ Router.route("experiment-data", {
         });
 
         this.response.end(createExperimentExport(exp, fmt).join('\r\n'));
-
     }
 });
