@@ -8,7 +8,7 @@ On startup, our server-side code will read the files admins.json and
 teachers.json from this directory.  Any usernames in the array in one of those
 files will be added to the corresponding roles.
 
-NOTE that currently no one will be removed from a role via this logic.
+_Note_ that currently no one will be removed from a role via this logic.
 
 Roles Overview
 ----------------------

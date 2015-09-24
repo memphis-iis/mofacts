@@ -426,7 +426,7 @@ function newQuestionHandler() {
     }
 
     //If this is a study-trial and we are displaying a cloze, then we should
-    //construct the question to display the actual information. NOTE that we
+    //construct the question to display the actual information. Note that we
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
     if (getTestType() === "s" && getQuestionType() === "cloze") {
@@ -1403,7 +1403,7 @@ function resumeFromUserTimesLog() {
     var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
 
     //Find previous cluster mapping (or create if it's missing)
-    //NOTE that we need to wait until the exp condition is selected above so
+    //Note that we need to wait until the exp condition is selected above so
     //that we go to the correct TDF
     var clusterMapping = _.find(userTimesLog, function(entry) {
         return entry && entry.action && entry.action === "cluster-mapping";

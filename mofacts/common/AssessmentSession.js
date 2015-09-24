@@ -14,7 +14,7 @@ AssessmentSession = {
      *
      * RETURNS: a schedule object
      *
-     * NOTE: this is the "public" version, which is just a try-catch
+     * Note: this is the "public" version, which is just a try-catch
      *       wrapper around createScheduleImpl
     */
     createSchedule: function(setspec, unitNumber, unit) {
@@ -105,7 +105,7 @@ AssessmentSession = {
                 var firstPos;
                 for(firstPos = 0; firstPos < settings.initialPositions.length; ++firstPos) {
                     var entry = settings.initialPositions[firstPos];
-                    //NOTE the 1-based assumption for initial position values
+                    //Note the 1-based assumption for initial position values
                     if (groupName === entry[0] && Helpers.intVal(entry.substring(2)) == index + 1) {
                         break; //FOUND
                     }
@@ -141,7 +141,7 @@ AssessmentSession = {
                     //if (type === "T") {
                     //    type = "D";
                     //}
-                    
+
                     if (type === "Z") {
                         var stud = Math.floor(Math.random() * 10)
                         if (stud === 0) {
@@ -151,7 +151,7 @@ AssessmentSession = {
                             type = "D";
                         }
                     }
-                    
+
                     var showHint = false;
                     if (parts[2].length > 1) {
                         showHint = (parts[2].toUpperCase()[1] === "H");
@@ -314,7 +314,7 @@ AssessmentSession = {
         });
 
         //Condition by group, but remove the default single-val arrays
-        //NOTE: since there could be 0-N group entries, we leave that as an array
+        //Note: since there could be 0-N group entries, we leave that as an array
         var by_group = {};
         _.each(assess.conditiontemplatesbygroup, function(val, name) {
             by_group[name] = name === "group" ? val : Helpers.firstElement(val);

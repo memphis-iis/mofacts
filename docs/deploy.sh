@@ -58,7 +58,7 @@ function deploy() {
 #FUNCTION: Execution functionality
 function execute() {
     #Run as www-data
-    echo "NOTE: will execute as user " $EXEC_USER
+    echo "IMPORTANT: will execute as user " $EXEC_USER
 
     #We run as the EXEC_USER but maintain the current environment,
     #So we also need to reset anything needed by that user

@@ -205,7 +205,7 @@ getUnitsRemaining = function() {
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
 //
-//NOTE that the default mode is to use the current unit (thus the name), but we
+//Note that the default mode is to use the current unit (thus the name), but we
 //allow callers to override the unit assumed to be current
 //
 //IMPORTANT: we also support selecting one of multiple delivery params via
