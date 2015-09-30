@@ -19,6 +19,8 @@
  * http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ApproveAssignmentOperation.html
  * */
 
+// Note that this is correct and crypto should *not* be listed in our deps.
+// See https://github.com/meteor/meteor/issues/2050 for details
 var crypto = Npm.require('crypto');
 
 function validateField(fld, err) {
