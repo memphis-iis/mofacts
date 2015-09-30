@@ -1,7 +1,8 @@
 <tutor> 
     <setspec> 
         <lessonname>SVO4</lessonname> 
-        <stimulusfile>SVO4stims.xml</stimulusfile> 
+        <stimulusfile>SVO4stims.xml</stimulusfile>         
+        <experimentTarget>svo</experimentTarget>
         <userselect>true</userselect> 
         <condition>SVOnumbak0tdf.xml</condition> 
         <condition>SVOnumbak1tdf.xml</condition> 
