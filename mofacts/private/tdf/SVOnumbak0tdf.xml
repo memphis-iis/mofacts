@@ -2,7 +2,7 @@
     <setspec>
         <name>Statistics Practice</name> 
         <lessonname>SVOnumbak0tdf.xml</lessonname>
-        <userselect>true</userselect> 
+        <userselect>false</userselect> 
         <stimulusfile>SVO4stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
@@ -44,7 +44,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
     <unit>
         <unitname>Statistics Practice</unitname>
         <unitinstructions><![CDATA[Memory for Statistics Experiment<br><br>
-             Task: You will see a sequence of sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). You must press ENTER to submit your answer. Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 16 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.
+             Task: You will see a sequence of 68 sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). You must press ENTER to submit your answer. Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 16 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.
             Hit ENTER after typing to submit your response.  ]]></unitinstructions>
         <deliveryparams>
             <drill>12000</drill>            
@@ -134,12 +134,12 @@ Please answer the following 5 quick demographic questions, which may be useful f
                 <clustersrepeated>3</clustersrepeated>
                 <templatesrepeated>18</templatesrepeated>
                 <group>
-                    r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36
-                    r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36
-                    r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36 r,f,z,0 r,f,z,18 r,f,z,36
-                    0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36
-                    0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36
-                    0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36 0,f,z,0 0,f,z,18 0,f,z,36
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
                 </group>
             </conditiontemplatesbygroup>
             <initialpositions>
