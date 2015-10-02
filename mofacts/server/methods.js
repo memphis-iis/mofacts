@@ -170,10 +170,13 @@ Meteor.startup(function () {
         //mainly since we don't want some of this data just flowing around
         //between client and server
         saveUserProfileData: function(profileData) {
-            //TODO: encrypt aws id and secret
             var data = _.extend(defaultUserProfile(), profileData);
             data.have_aws_id = data.aws_id.length > 0;
             data.have_aws_secret = data.aws_secret_key.length > 0;
+
+            data.aws_id = encryptUserData(data.aws_id);
+            data.aws_secret_key = encryptUserData(data.aws_secret_key);
+
             return UserProfileData.upsert({_id: Meteor.userId()}, data);
         },
 

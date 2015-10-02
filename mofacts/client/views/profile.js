@@ -49,8 +49,6 @@ Template.profile.events({
             use_sandbox: $("#profileUseSandbox").prop("checked")
         };
 
-        //TODO: validate data
-
         Meteor.call("saveUserProfileData", data, function(error, result) {
             if (!!error) {
                 console.log("Error saving user profile", error);

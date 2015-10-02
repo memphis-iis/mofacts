@@ -19,10 +19,6 @@
  * http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ApproveAssignmentOperation.html
  * */
 
-// Note that this is correct and crypto should *not* be listed in our deps.
-// See https://github.com/meteor/meteor/issues/2050 for details
-var crypto = Npm.require('crypto');
-
 function validateField(fld, err) {
     if (!fld) {
         throw err;
@@ -46,28 +42,22 @@ function createTurkRequest(userProfile, requestParams) {
     // TODO: We're missing fields
     var defaultRequest = {
         'url': url,
-        'AWSAccessKeyId': userProfile.aws_id,
+        'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
         'Service': '',
         'Operation': '',
         'Timestamp': Date.now(),
         'Signature': '',
     };
-    var requestData = _.extend(defaultRequest, requestParams);
+    var req = _.extend(defaultRequest, requestParams);
 
     // Add HMAC signature for request from the fields as defined by AWS
-    var signatureSource = [
-        requestData.Service,
-        requestData.Operation,
-        requestData.Timestamp
-    ].join('');
-
-    requestData.Signature = crypto
-        .createHmac('md5', userProfile.aws_secret_key)
-        .update(signatureSource)
-        .digest('base64');
+    requestData.Signature = createAwsHmac(
+        decryptUserData(userProfile.aws_secret_key),
+        [req.Service, req.Operation, req.Timestamp].join('')
+    );
 
     // All done
-    return requestData;
+    return req;
 }
 
 // TODO: find HIT/assignment for Turk user
