@@ -19,48 +19,68 @@
  * http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ApproveAssignmentOperation.html
  * */
 
-function validateField(fld, err) {
-    if (!fld) {
-        throw err;
+(function() {
+    var TURK_URL = "http://mechanicalturk.amazonaws.com";
+    var SANDBOX_URL = "http://mechanicalturk.sandbox.amazonaws.com";
+
+    function validateField(fld, err) {
+        if (!fld) {
+            throw err;
+        }
     }
-}
 
-function createTurkRequest(userProfile, requestParams) {
-    // Validate userProfile
-    validateField(userProfile.have_aws_id, "AWS request user has no ID");
-    validateField(userProfile.aws_id, "AWS request user ID is invalid");
-    validateField(userProfile.have_aws_secret, "AWS request user has secret key");
-    validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+    function createTurkRequest(userProfile, requestParams) {
+        // Validate userProfile
+        validateField(userProfile.have_aws_id, "AWS request user has no ID");
+        validateField(userProfile.aws_id, "AWS request user ID is invalid");
+        validateField(userProfile.have_aws_secret, "AWS request user has secret key");
+        validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
 
-    // Base url from userProfile use_sandbox
-    var url;
-    if (userProfile.use_sandbox) url = "http://mechanicalturk.sandbox.amazonaws.com";
-    else                         url = "http://mechanicalturk.amazonaws.com";
+        // Base url from userProfile use_sandbox
+        var url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
 
-    // Actual request data from default + requestParams
-    // TODO: Timestamp should be UTC and match the format of the XML Schema dateTime data type
-    // TODO: We're missing fields
-    var defaultRequest = {
-        'url': url,
-        'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
-        'Service': '',
-        'Operation': '',
-        'Timestamp': Date.now(),
-        'Signature': '',
+        // Actual request data from default + requestParams
+        // TODO: Timestamp should be UTC and match the format of the XML Schema dateTime data type
+        var defaultRequest = {
+            'url': url,
+            'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
+            'Service': '',
+            'Operation': '',
+            'Timestamp': Date.now(),
+            'Signature': '',
+        };
+        var req = _.extend(defaultRequest, requestParams);
+
+        // Add HMAC signature for request from the fields as defined by AWS
+        req.Signature = createAwsHmac(
+            decryptUserData(userProfile.aws_secret_key),
+            [req.Service, req.Operation, req.Timestamp].join('')
+        );
+
+        // TODO: remove this
+        console.log("About to send AWS MechTurk request:", req);
+
+        // All done
+        return req;
+    }
+
+    turk = {
+        getReviewableHITs: function(userProfile, requestParams) {
+            var baseParams = {
+                'Operation': 'GetReviewableHITs'
+            };
+
+            var parms = _.extend(baseParams, requestParams);
+            var request = createTurkRequest(userProfile, requestParams);
+
+            var url = request.url;
+
+            //TODO: var response = Meteor.http.post()
+        }
     };
-    var req = _.extend(defaultRequest, requestParams);
 
-    // Add HMAC signature for request from the fields as defined by AWS
-    requestData.Signature = createAwsHmac(
-        decryptUserData(userProfile.aws_secret_key),
-        [req.Service, req.Operation, req.Timestamp].join('')
-    );
-
-    // All done
-    return req;
-}
-
-// TODO: find HIT/assignment for Turk user
-// TODO: confirm assignment for Turk user
-// TODO: send message to Turk user
-// TODO: pay bonus for assignment to Turk user
+    // TODO: find HIT/assignment for Turk user
+    // TODO: confirm assignment for Turk user
+    // TODO: send message to Turk user
+    // TODO: pay bonus for assignment to Turk user
+})();
