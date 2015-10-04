@@ -69,6 +69,7 @@
         "answerGivenTime",
         "startLatency",
         "endLatency",
+        "reviewLatency",
         "howAnswered",
         "answerCorrect",
         "trialType",
@@ -122,10 +123,11 @@
         "CF (Response Time)", //answerGivenTime
         "CF (Start Latency)", //startLatency check first trial discrepancy********
         "CF (End Latency)", //endLatency
+        "CF (Review Latency)", //reviewLatency
         "CF (Button Order)", //CF buttonOrder
         "CF (Note)", //CF note
         "KC()",
-                "KC Category()"
+        "KC Category()"
     ];
 
 //We don't rely on any other files in we're run as a script, so we have some
@@ -174,7 +176,7 @@
     }
 
 //Create our output record
-    function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta, format) {
+    function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
         //Return the default value if the given value isn't "truthy" BUT numeric
         //zero (0) is considered "truthy".
         var d = function (val, defval) {
@@ -231,6 +233,33 @@
             endLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
         }
 
+        var reviewLatency = lasta.inferredReviewLatency || 0;
+
+        // We change the latency numbers based on the ttype
+        var ttype = lasta.ttype;
+        if (ttype === "t") {
+            //Test - no review latency
+            reviewLatency = -1;
+        }
+        else if (ttype === "d") {
+            //Dril - everything is fine, but what if inferredReviewLatency missing?
+            if (!lasta.isCorrect && !reviewLatency) {
+                // need to infer review latency
+                if (nextq && nextq.clientSideTimeStamp) {
+                    reviewLatency = nextq.clientSideTimeStamp - lasta.clientSideTimeStamp;
+                }
+                else {
+                    reviewLatency = 1; //Nothing we can do about this one
+                }
+            }
+        }
+        else if (ttype === "s") {
+            // Study - we ONLY have review latency, but it is in endLatency
+            reviewLatency = endLatency;
+            endLatency = -1;
+            startLatency = -1;
+        }
+
         //Figure out schedule item condition
         //See note above about indexes and 0 vs 1 based
         var schedCondition;
@@ -278,6 +307,7 @@
                 answerGivenTime: d(lasta.clientSideTimeStamp, 0),
                 startLatency: d(startLatency, 0),
                 endLatency: d(endLatency, 0),
+                reviewLatency: d(reviewLatency, 0),
                 howAnswered: d(lasta.guiSource, ''),
                 answerCorrect: d(lasta.isCorrect, null),
                 trialType: d(lasta.ttype, ''),
@@ -346,6 +376,7 @@
                 "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
                 "CF (Start Latency)": d(startLatency, 0),
                 "CF (End Latency)": d(endLatency, 0),
+                "CF (Review Latency)": d(reviewLatency, 0),
                 "CF (Button Order)": d(lasta.buttonOrder, ''),
                 "CF (Note)": d(note, ''),
                 "KC()": d(lastq.selectedQuestion, ''),
@@ -420,9 +451,19 @@
                 lastq = rec;
             }
             else if (act === "answer" || act === "[timeout]") {
+                //They might need the following question for inference
+                var nextq = null;
+                for (var j = i + 1; j < recs.length; ++j) {
+                    if (('' + recs[j].action).trim().toLowerCase() === "question") {
+                        nextq = recs[j];
+                        break;
+                    }
+                }
+
+                //FINALLY have enough to populate the record
                 var populated = null;
                 try {
-                    populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec, format);
+                    populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
                 }
                 catch (e) {
                     console.log("There was an error populating the record - it will be skipped", e);

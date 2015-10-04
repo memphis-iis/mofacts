@@ -551,7 +551,7 @@ function handleUserInput(e , source) {
     //our responsbility to decide when to hide it and move on
     var isCorrect = userAnswerFeedback(userAnswer, isTimeout);
 
-    //Note that actually provide the client-side timestamp since we need it
+    //Note that we must provide the client-side timestamp since we need it...
     //Pretty much everywhere else relies on recordUserTime to provide it.
     //We also get the timestamp of the first keypress for the current trial.
     //Of course for things like a button trial, we won't have it
@@ -584,6 +584,13 @@ function handleUserInput(e , source) {
     //getStimCluster so that we honor cluster mapping
     var currCluster = getStimCluster(getCurrentClusterIndex());
 
+    //Figure out the review latency we should log
+    var reviewLatency = 0;
+    if (getTestType() === "d" && !isCorrect) {
+        reviewLatency = Helpers.intVal(getCurrentDeliveryParams().reviewstudy);
+    }
+
+    //Now actually log the answer they gave (or the timeout)
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
         questionIndex: Session.get("questionIndex"),
         index: currCluster.clusterIndex,
@@ -599,7 +606,8 @@ function handleUserInput(e , source) {
         startLatency: startLatency,
         endLatency: endLatency,
         wasButtonTrial: wasButtonTrial,
-        buttonOrder: buttonEntries
+        buttonOrder: buttonEntries,
+        inferredReviewLatency: reviewLatency
     });
 
     //record progress in userProgress variable storage (note that this is
@@ -611,7 +619,7 @@ function handleUserInput(e , source) {
     //the correctness of his/her answer
     $("#UserInteraction").show();
 
-    //Figure out timeout
+    //Figure out timeout and reviewLatency
     var deliveryParams = getCurrentDeliveryParams();
     var timeout = 0;
     var file = getCurrentTdfFile();
