@@ -88,11 +88,11 @@ function matchBranching(answer, userAnswer, lfparameter) {
 
     var branches = Helpers.trim(answer).split(';');
     for(var i = 0; i < branches.length; ++i) {
-        var flds = branches[i].split('~');
+        var flds = Helpers.trim(branches[i]).split('~');
         if (flds.length != 2)
             continue;
 
-        flds[0] = flds[0].toLowerCase();
+        flds[0] = Helpers.trim(flds[0]).toLowerCase();
         var matched = regExMatch(flds[0], userAnswer, lfparameter);
         if (matched !== 0) {
             matchText = Helpers.trim(flds[1]);
