@@ -1410,6 +1410,37 @@ function resumeFromUserTimesLog() {
     //since we might add other records below
     var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
 
+    //In addition to experimental condition, we allow a root TDF to specify a
+    //that the xcond parameter used for selecting from multiple deliveryParms's
+    //is to be system assigned (as opposed to URL-specified)
+    if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
+        console.log("xcond for delivery params is sys assigned: searching");
+        var prevXCond = _.find(userTimesLog, function(entry) {
+            return entry && entry.action && entry.action === "xcondassign";
+        });
+
+        var xcondAction, xcondValue;
+
+        if (prevXCond) {
+            //Found it!
+            console.log("Found previous xcond for delivery");
+            xcondAction = "xcondnotify";
+            xcondValue = prevXCond.xcond;
+        }
+        else {
+            //Not present - we need to select one
+            console.log("NO previous xcond for delivery - selecting one");
+            xcondAction = "xcondassign";
+            var xcondCount = Helpers.intVal(Helpers.firstElement(setspec.randomizedDelivery));
+            xcondValue = Math.floor(Math.random() * xcondCount);
+        }
+
+        console.log("Setting XCond from sys-selection", xcondValue);
+        Session.set("experimentXCond", xcondValue);
+
+        serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
+    }
+
     //Find previous cluster mapping (or create if it's missing)
     //Note that we need to wait until the exp condition is selected above so
     //that we go to the correct TDF

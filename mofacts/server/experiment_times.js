@@ -176,7 +176,7 @@
     }
 
 //Create our output record
-    function populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
+    function populateRecord(username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
         //Return the default value if the given value isn't "truthy" BUT numeric
         //zero (0) is considered "truthy".
         var d = function (val, defval) {
@@ -188,6 +188,10 @@
 
         //Get the "actual" schedule object out of the last sched entry
         var sched = !!lastschedule ? lastschedule.schedule : null;
+
+        //Either there was a system assigned xcond, a URL assigned xcond
+        //(recorded in lastinstruct), or none at all
+        var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcond;
 
         //We might append a warning message
         var note = "";
@@ -293,7 +297,7 @@
                 username: d(username, ''),
                 selectedTdf: d(lastexpcond.selectedTdf, ''),
                 unitname: d(lastschedule.unitname, ''),
-                xcondition: d(lastinstruct.xcondition, ''),
+                xcondition: d(xcond, ''),
                 questionIndex: d(lastq.questionIndex, -1),
                 clusterIndex: d(lastq.clusterIndex, -1),
                 shufIndex: d(lastq.shufIndex, d(lastq.clusterIndex, -1)),
@@ -347,7 +351,7 @@
                 "Condition Namea": 'tdf file',
                 "Condition Typea": d(lastexpcond.selectedTdf, ''),
                 "Condition Nameb": 'xcondition',
-                "Condition Typeb": d(lastinstruct.xcondition, ''),
+                "Condition Typeb": d(xcond, ''),
                 "Condition Namec": 'schedule condition',
                 "Condition Typec": d(schedCondition, ''),
                 "Condition Named": 'how answered',
@@ -422,6 +426,7 @@
         var lastexpcond = {selectedTdf: expName};
         var lastinstruct = {};
         var lastq = {};
+        var lastxcond = null;
 
         for (var i = 0; i < recs.length; ++i) {
             var rec = recs[i];
@@ -439,6 +444,9 @@
 
             if (act === "expcondition" || act === "condition-notify") {
                 lastexpcond = rec;
+            }
+            else if (act === "xcondassign" || act === "xcondnotify") {
+                lastxcond = rec.xcond;
             }
             else if (act === "schedule") {
                 lastschedule = rec;
@@ -463,7 +471,7 @@
                 //FINALLY have enough to populate the record
                 var populated = null;
                 try {
-                    populated = populateRecord(username, lastexpcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
+                    populated = populateRecord(username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
                 }
                 catch (e) {
                     console.log("There was an error populating the record - it will be skipped", e);
