@@ -43,6 +43,18 @@
                 <div class="body">
                     {{{instructions}}}
                 </div>
+
+                {{#if turkActive}}
+                <br>
+                <div class="turk-notice">
+                    Please click here after you've enter the code above at the
+                    Mechanical Turk Website.
+                    <button type="button" id="turkButton" class="btn ">
+                        Ready for Approval
+                    </button>
+                </div>
+                {{/if}}
+
                 <br>
                 <div class="form-group">
                     {{#if islockout}}

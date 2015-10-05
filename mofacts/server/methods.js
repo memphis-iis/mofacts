@@ -8,6 +8,10 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
 
+// On startup, this will be set to the first user in private/roles/admins.json
+// AFTER the list is sorted.
+var adminUserId = null;
+
 //Helper functions
 
 function parseXML(xml) {
@@ -29,7 +33,7 @@ function getStimJSON(fileName) {
     return future.wait();
 }
 
-function getRoles(fileName) {
+function getPresetUsersInRole(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err)
@@ -54,6 +58,96 @@ function defaultUserProfile() {
         aws_secret_key: '',
         use_sandbox: true
     };
+}
+
+function writeUserLogEntries(experiment, objectsToLog) {
+    var objType = typeof objectsToLog;
+    var valsToPush = [];
+
+    if (typeof objectsToLog === "undefined") {
+        //Nothing passed to us: use an empty object, which will
+        //contain only the current time
+        valsToPush.push({});
+    }
+    else if (typeof objectsToLog.length === "undefined") {
+        //Not an array - they passed a single object
+        valsToPush.push(objectsToLog);
+    }
+    else {
+        //Grab the entire array
+        for (i = 0; i < objectsToLog.length; i++) {
+            valsToPush.push(objectsToLog[i]);
+        }
+    }
+
+    //Every object we log gets a server side time stamp
+    for (i = 0; i < valsToPush.length; i++) {
+        valsToPush[i]["serverSideTimeStamp"] = Date.now();
+    }
+
+    //Create action object: should look like:
+    // { $push: { <experiment_key>: { $each: <objectsToLog in array> } } }
+    var action = {$push: {}};
+    var experiment_key = (experiment + "").replace(/\./g, "_");
+    var allVals = {$each: valsToPush};
+    action["$push"][experiment_key] = allVals;
+
+    UserTimesLog.update(
+        {_id: Meteor.userId()},
+        action,
+        {upsert: true}
+    );
+}
+
+// Return the _id of the user record for the "owner" (or teacher) of the given
+// experiment name (TDF). This is mainly for knowing how to handle MTurk calls
+function getTdfOwner(experiment) {
+    var usr = Meteor.user();
+    var userId = !!usr ? usr._id : null;
+    if (!userId) {
+        //No user currently logged in, so we can't figure out the current TDF
+        console.log("getTdfOwner for ", experiment, "failed - no current user found");
+        return null;
+    }
+
+    var userLog = UserTimesLog.findOne({ _id: userId });
+    var entries = [];
+    if (userLog && userLog[experiment] && userLog[experiment].length) {
+        entries = userLog[experiment];
+    }
+    else {
+        console.log("getTdfOwner for ", experiment, "failed - no user log entries found");
+        return null;
+    }
+
+    //Find last profile TDF selection
+    var tdfId = null;
+    for (var i = entries.length - 1; i >= 0; --i) {
+        var rec = entries[i];
+        var action = Helpers.trim(rec.action).toLowerCase();
+        if (action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
+            tdfId = rec.tdfkey;
+            break;
+        }
+    }
+
+    //If no TDF ID then we can't continue
+    if (!tdfId) {
+        console.log("getTdfOwner for ", experiment, "failed - no tdfId found");
+        return null;
+    }
+
+    //Now we can get the owner (either set on upload of TDF *OR* set on server
+    //startup for TDF's that live in git)
+    var tdf = Tdfs.findOne({_id: tdfId});
+    if (!!tdf && typeof tdf.owner !== "undefined") {
+        return tdf.owner;
+    }
+    else {
+        console.log("getTdfOwner for ", experiment, "failed - TDF doesn't contain owner");
+        console.log(tdfId, tdf); //TODO: remove
+        return null;
+    }
 }
 
 
@@ -82,37 +176,21 @@ Meteor.publish(null, function () {
 //Server-side startup logic
 
 Meteor.startup(function () {
-    //Rewrite TDF and Stimuli documents if we have a file
-    var isXML = function (fn) {
-        return fn.indexOf('.xml') >= 0;
-    };
+    // Get user in roles
+    var admins = getPresetUsersInRole("roles/admins.json");
+    var teachers = getPresetUsersInRole("roles/teachers.json");
 
-    _.each(
-        _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
-        function (ele, idx, lst) {
-            console.log("Updating Stim in DB from ", ele);
-            var json = getStimJSON('stims/' + ele);
-            Stimuli.remove({fileName: ele});
-            Stimuli.insert({fileName: ele, stimuli: json});
-        }
-    );
-
-    _.each(
-        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-        function (ele, idx, lst) {
-            console.log("Updating TDF in DB from ", ele);
-            var json = getStimJSON('tdf/' + ele);
-            Tdfs.remove({fileName: ele});
-            Tdfs.insert({fileName: ele, tdfs: json});
-        }
-    );
-
-    var admins = getRoles("roles/admins.json");
-    var teachers = getRoles("roles/teachers.json");
+    var adminUserName = "";
+    if (admins && admins.length) {
+        adminUserName = admins[0];
+    }
 
     _.each(Meteor.users.find().fetch(), function (ele) {
         var uname = "" + ele["username"];
         if (!!uname) {
+            if (uname == adminUserName) {
+                adminUserId = ele._id;
+            }
             if (_.indexOf(admins, uname, true) >= 0) {
                 Roles.addUsersToRoles(ele._id, "admin");
                 console.log(uname + " is in admin role");
@@ -123,6 +201,42 @@ Meteor.startup(function () {
             }
         }
     });
+
+    //Rewrite TDF and Stimuli documents if we have a file
+    //IMPORTANT: this will change the records' _id fields!!
+    var isXML = function (fn) {
+        return fn.indexOf('.xml') >= 0;
+    };
+
+    _.each(
+        _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
+        function (ele, idx, lst) {
+            console.log("Updating Stim in DB from ", ele);
+            var json = getStimJSON('stims/' + ele);
+            Stimuli.remove({fileName: ele});
+            Stimuli.insert({fileName: ele, stimuli: json, owner: adminUserId});
+        }
+    );
+
+    _.each(
+        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
+        function (ele, idx, lst) {
+            console.log("Updating TDF in DB from ", ele);
+            var json = getStimJSON('tdf/' + ele);
+            Tdfs.remove({fileName: ele});
+            Tdfs.insert({fileName: ele, tdfs: json, owner: adminUserId});
+        }
+    );
+
+    //Log this late so they're more prone to see it
+    if (adminUserId) {
+        console.log("Admin user is", adminUserName, adminUserId);
+    }
+    else {
+        console.log("ADMIN USER is MISSING: a restart might be required");
+        console.log("(Was looking for admin user " + adminUserName + ")");
+        console.log("***IMPORTANT*** There will be no owner for system TDF's");
+    }
 
     //Set up our server-side methods
     Meteor.methods({
@@ -180,44 +294,109 @@ Meteor.startup(function () {
             return UserProfileData.upsert({_id: Meteor.userId()}, data);
         },
 
-        //New functionality for logging to the DB
+        //Log one or more user records for the currently running experiment
         userTime: function (experiment, objectsToLog) {
-            var objType = typeof objectsToLog;
-            var valsToPush = [];
+            writeUserLogEntries(experiment, objectsToLog);
+        },
 
-            if (typeof objectsToLog === "undefined") {
-                //Nothing passed to us: use an empty object, which will
-                //contain only the current time
-                valsToPush.push({});
+        //Given a currently logged in user, an experiment, and a msg - we
+        //attempt to pay the user for the current MTurk HIT/assignment.
+        //RETURNS: null on success or an error message on failure. Any results
+        //are logged to the user times log
+        turkPay: function(experiment, msg) {
+            var usr = Meteor.user();
+            var turkid = !!usr ? usr.username : null;
+            if (!turkid) {
+                return "No valid username found";
             }
-            else if (typeof objectsToLog.length === "undefined") {
-                //Not an array - they passed a single object
-                valsToPush.push(objectsToLog);
+            turkid = Helpers.trim(turkid).toUpperCase();
+
+            var ownerId = getTdfOwner(experiment);
+            if (!ownerId) {
+                return "Could not find TDF owner for current user";
             }
-            else {
-                //Grab the entire array
-                for (i = 0; i < objectsToLog.length; i++) {
-                    valsToPush.push(objectsToLog[i]);
+            var ownerProfile = UserProfileData.findOne({_id: ownerId});
+            if (!ownerProfile) {
+                return "Could not find TDF owner profile";
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                return "Current TDF owner not set up for AWS/MTurk";
+            }
+
+            var errmsg = null; // Return null on success
+
+            //Data we log
+            var workPerformed = {
+                findHITs: 'not performed',
+                findAssignment: 'not performed',
+                approveAssignment: 'not performed'
+            };
+
+            try {
+                // Get available HITs
+                hitlist = turk.getReviewableHITs(ownerProfile, {});
+                if (hitlist && hitlist.length) {
+                    workPerformed.findHITs = "HITs found: " + hitlist.length;
+                }
+                else {
+                    workPerformed.findHITs = "No HITs found";
+                    hitlist = [];
+                }
+
+                //Look for assignments for HITs that can be reviewed
+                var assignment = null;
+                for(var i = 0; i < hitlist.length; ++i) {
+                    hit = hitlist[i];
+                    var assignList = turk.getAssignmentsForHIT(ownerProfile, {
+                        'HITId': hit
+                    });
+                    if (!assignList)
+                        assignList = [];
+
+                    for (var j = 0; j < assignList.length; ++j) {
+                        var currAssign = assignList[j];
+                        if (currAssign && currAssign.WorkerId) {
+                            var assignWorker = Helpers.trim(currAssign.WorkerId).toUpperCase();
+                            if (turkid === assignWorker) {
+                                assignment = currAssign;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!!assignment)
+                        break;
+                }
+
+                if (!!assignment) {
+                    workPerformed.findAssignment = "Found assignment";
+                    workPerformed.assignmentDetails = assignment;
+                }
+                else {
+                    workPerform.findAssignment = "No assignment found";
+                }
+
+                if (!!assignment) {
+                    turk.approveAssignment(ownerProfile, {
+                        'AssignmentId': assignment.AssignmentId,
+                        'RequesterFeedback': msg || "Thanks for your participation"
+                    });
+                    workPerformed.approveAssignment = "Assignment was approved!";
                 }
             }
-
-            //Every object we log gets a server side time stamp
-            for (i = 0; i < valsToPush.length; i++) {
-                valsToPush[i]["serverSideTimeStamp"] = Date.now();
+            catch(e) {
+                errmsg = "Exception caught while processing Turk: " + e;
+            }
+            finally {
+                writeUserLogEntries(experiment, _.extend(workPerformed, {
+                    'success': errmsg === null,
+                    'errmsg': errmsg,
+                    'turkId': turkid,
+                    'tdfOwnerId': ownerId
+                }));
             }
 
-            //Create action object: should look like:
-            // { $push: { <experiment_key>: { $each: <objectsToLog in array> } } }
-            var action = {$push: {}};
-            var experiment_key = (experiment + "").replace(/\./g, "_");
-            var allVals = {$each: valsToPush};
-            action["$push"][experiment_key] = allVals;
-
-            UserTimesLog.update(
-                {_id: Meteor.userId()},
-                action,
-                {upsert: true}
-            );
+            return errmsg;
         },
 
         //Let client code send console output up to server

@@ -102,43 +102,6 @@ function lockoutPeriodicCheck() {
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// Template Events
-
-Template.instructions.events({
-    'click #continueButton' : function (event) {
-        event.preventDefault();
-
-        //Record the fact that we just showed instruction. Also - we use a
-        //call back to redirect to the card display screen to make sure that
-        //everything has been properly logged on the server
-        recordUserTime("instructions", {
-            currentUnit: Session.get("currentUnitNumber"),
-            xcondition: Session.get("experimentXCond")
-        }, function(error, result) {
-            //We know they'll need to resume now
-            Session.set("needResume", true);
-            leavePage("/card");
-        });
-    },
-
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
-            }
-            leavePage(routeToSignin); //Not much else to do now
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        leavePage("/profile");
-    }
-});
-
-////////////////////////////////////////////////////////////////////////////
 // Template helpers
 
 Template.instructions.helpers({
@@ -191,6 +154,14 @@ Template.instructions.helpers({
             return true;
         }
     },
+
+    turkActive: function() {
+        //TODO: first check that current unit has turk stuff at all *AND* that
+        //      we are in experiment mode (so we know the Turk ID)
+        //TODO: return correct value and make sure it's reactive so that we
+        //      don't have to try and pay them twice
+        return true;
+    }
 });
 
 Template.instructions.rendered = function() {
@@ -198,3 +169,61 @@ Template.instructions.rendered = function() {
         startLockoutInterval();
     }
 };
+
+////////////////////////////////////////////////////////////////////////////
+// Template Events
+
+Template.instructions.events({
+    'click #continueButton' : function (event) {
+        event.preventDefault();
+
+        //Record the fact that we just showed instruction. Also - we use a
+        //call back to redirect to the card display screen to make sure that
+        //everything has been properly logged on the server
+        recordUserTime("instructions", {
+            currentUnit: Session.get("currentUnitNumber"),
+            xcondition: Session.get("experimentXCond")
+        }, function(error, result) {
+            //We know they'll need to resume now
+            Session.set("needResume", true);
+            leavePage("/card");
+        });
+    },
+
+    'click #turkButton': function(event) {
+        event.preventDefault();
+        var turkMsg = "Testing for now"; //TODO: need a good message
+        var result = Meteor.call("turkPay", userTimesExpKey(true), turkMsg, function(error, result){
+            if (typeof error !== "undefined") {
+                //something happened - hopefully things will be updated reactively
+                console.log("Failed to handle turk approval. Error:", error);
+            }
+            else if (result !== null) {
+                //Server returned an error
+                console.log("Server error on turk approval. Msg:", result);
+            }
+            else {
+                console.log("Server turk approval appeared to work");
+            }
+
+            //No matter what, we should now be Turk approved
+            //TODO: update the correct Session variable
+        });
+    },
+
+    'click .logoutLink' : function (event) {
+        event.preventDefault();
+        Meteor.logout( function (error) {
+            if (typeof error !== "undefined") {
+                //something happened during logout
+                console.log("User:", Meteor.user(), "Error:", error);
+            }
+            leavePage(routeToSignin); //Not much else to do now
+        });
+    },
+
+    'click .homeLink' : function (event) {
+        event.preventDefault();
+        leavePage("/profile");
+    }
+});

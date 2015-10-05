@@ -20,8 +20,8 @@
  * */
 
 (function() {
-    var TURK_URL = "http://mechanicalturk.amazonaws.com";
-    var SANDBOX_URL = "http://mechanicalturk.sandbox.amazonaws.com";
+    var TURK_URL = "https://mechanicalturk.amazonaws.com";
+    var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
 
     function validateField(fld, err) {
         if (!fld) {
@@ -50,16 +50,14 @@
         }, requestParams);
 
         // Add HMAC signature for request from the fields as defined by AWS
-        req.Signature = createAwsHmac(
-            decryptUserData(userProfile.aws_secret_key),
-            [req.Service, req.Operation, req.Timestamp].join('')
-        );
+        var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
+        req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
 
         // TODO: remove this
-        console.log("About to send AWS MechTurk request", url, req);
+        console.log("About to send AWS MechTurk request", url, req, "Signature based on", sigSrc);
 
         // All done
-        var response = Meteor.http.post(url, {
+        var response = HTTP.post(url, {
             'params': req
         });
 
@@ -80,11 +78,13 @@
             console.log("JSON parse on returned contents failed", e);
         }
         response.json = json;
+        console.log("TURK Response:", json);  //TODO: remove
 
         return response;
     }
 
     turk = {
+        //TODO: seems this won't work - will need SearchHITs
         //Required parameters: none
         getReviewableHITs: function(userProfile, requestParams) {
             var req = _.extend({
@@ -92,6 +92,8 @@
             }, requestParams);
 
             var respose = createTurkRequest(userProfile, req);
+
+            console.log(response.json); //TODO: remove this
 
             var result = Helpers.firstElement(response.json.GetReviewableHITsResult);
             var hitlist = [];
@@ -103,10 +105,12 @@
         },
 
         //Required parameters: HITId
+        //Optional parameters: AssignmentStatus
         getAssignmentsForHIT: function(userProfile, requestParams) {
             var req = _.extend({
                 'Operation': 'GetAssignmentsForHIT',
-                'HITId': ''
+                'HITId': '',
+                'AssignmentStatus': 'Submitted'
             }, requestParams);
 
             var respose = createTurkRequest(userProfile, req);

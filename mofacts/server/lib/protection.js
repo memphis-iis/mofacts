@@ -33,7 +33,7 @@ var crypto = Npm.require('crypto');
 
     createAwsHmac = function(secretKey, dataString) {
         return crypto
-            .createHmac('md5', secretKey)
+            .createHmac('sha1', secretKey)
             .update(dataString)
             .digest('base64');
     };
