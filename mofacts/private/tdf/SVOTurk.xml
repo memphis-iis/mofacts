@@ -1,0 +1,109 @@
+<tutor>
+    <setspec>
+        <name>Statistics Practice</name>
+        <lessonname>SVO TURK</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <isModeled>false</isModeled>
+        <lfparameter>.85</lfparameter>
+        <shuffleclusters>0-17 18-35</shuffleclusters>
+        <swapclusters>0-17 18-35</swapclusters>
+    </setspec>
+    <unit>
+        <unitname>Show the questions</unitname>
+        <unitinstructions><![CDATA[Demographic Survey<br><br>
+Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
+        <buttonorder>fixed</buttonorder>
+        <deliveryparams>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>0</correctscore> <!--No points for demographics-->
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+        <buttontrial>false</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>5</templatesrepeated>
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>36-40</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+    </unit>
+    <unit>
+        <turkpay>2.00</turkpay>
+        <turkemail>text</turkemail>
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
+
+            If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
+
+            If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions>
+        <unitname>Lockout unit</unitname>
+        <deliveryparams>
+            <lockoutminutes>2</lockoutminutes>
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>1440</lockoutminutes>
+        </deliveryparams>
+        <deliveryparams>
+            <lockoutminutes>4320</lockoutminutes>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>Posttest</unitname>
+        <unitinstructions>Memory for Statistics Experiment
+
+            Thanks for continuing. You have 54 sentences remaining. </unitinstructions>
+        <deliveryparams>
+            <drill>12000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>3</clustersrepeated>
+                <templatesrepeated>18</templatesrepeated>
+                <group>
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18
+                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-17</clusterlist>
+            <permutefinalresult>0-17 18-35 36-53</permutefinalresult>
+            <assignrandomclusters>true</assignrandomclusters>
+            <randomchoices> 0 1 2 </randomchoices>
+        </assessmentsession>
+    </unit>
+    <unit>
+        <turkbonus>3.00</turkbonus>
+        <unitname>last</unitname>
+        <unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions>
+    </unit>
+</tutor>
