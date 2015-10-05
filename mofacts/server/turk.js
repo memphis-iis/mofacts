@@ -84,20 +84,23 @@
     }
 
     turk = {
-        //TODO: seems this won't work - will need SearchHITs
         //Required parameters: none
-        getReviewableHITs: function(userProfile, requestParams) {
+        getAvailableHITs: function(userProfile, requestParams) {
             var req = _.extend({
-                'Operation': 'GetReviewableHITs'
+                'Operation': 'SearchHITs'
             }, requestParams);
 
             var respose = createTurkRequest(userProfile, req);
 
             console.log(response.json); //TODO: remove this
 
-            var result = Helpers.firstElement(response.json.GetReviewableHITsResult);
+            var result = Helpers.firstElement(response.json.SearchHITsResult);
+
+            //TODO: check request/isvalid as below
+
             var hitlist = [];
             result.HIT.forEach(function(val) {
+                //TODO: only grab if NumberOfAssignmentsPending or NumberOfAssignmentsAvailable > 1
                 hitlist.push(Helpers.firstElement.HITId);
             });
 
