@@ -1,24 +1,25 @@
-<tutor> 
-    <setspec> 
-        <lessonname>SVO4</lessonname> 
-        <stimulusfile>SVO4stims.xml</stimulusfile>         
+<tutor>
+    <setspec>
+        <lessonname>SVO4</lessonname>
+        <stimulusfile>SVO4stims.xml</stimulusfile>
         <experimentTarget>svo</experimentTarget>
-        <userselect>true</userselect> 
-        <condition>SVOnumbak0tdf.xml</condition> 
-        <condition>SVOnumbak1tdf.xml</condition> 
-        <condition>SVOnumbak2tdf.xml</condition> 
-        <condition>SVOnumbak3tdf.xml</condition> 
-        <condition>SVOnumfor0tdf.xml</condition> 
-        <condition>SVOnumfor1tdf.xml</condition> 
-        <condition>SVOnumfor2tdf.xml</condition> 
-        <condition>SVOnumfor3tdf.xml</condition> 
-        <condition>SVOranbak0tdf.xml</condition> 
-        <condition>SVOranbak1tdf.xml</condition> 
-        <condition>SVOranbak2tdf.xml</condition> 
-        <condition>SVOranbak3tdf.xml</condition> 
-        <condition>SVOranfor0tdf.xml</condition> 
-        <condition>SVOranfor1tdf.xml</condition> 
-        <condition>SVOranfor2tdf.xml</condition> 
-        <condition>SVOranfor3tdf.xml</condition> 
-    </setspec> 
-</tutor> 
+        <randomizedDelivery>3</randomizedDelivery>
+        <userselect>true</userselect>
+        <condition>SVOnumbak0tdf.xml</condition>
+        <condition>SVOnumbak1tdf.xml</condition>
+        <condition>SVOnumbak2tdf.xml</condition>
+        <condition>SVOnumbak3tdf.xml</condition>
+        <condition>SVOnumfor0tdf.xml</condition>
+        <condition>SVOnumfor1tdf.xml</condition>
+        <condition>SVOnumfor2tdf.xml</condition>
+        <condition>SVOnumfor3tdf.xml</condition>
+        <condition>SVOranbak0tdf.xml</condition>
+        <condition>SVOranbak1tdf.xml</condition>
+        <condition>SVOranbak2tdf.xml</condition>
+        <condition>SVOranbak3tdf.xml</condition>
+        <condition>SVOranfor0tdf.xml</condition>
+        <condition>SVOranfor1tdf.xml</condition>
+        <condition>SVOranfor2tdf.xml</condition>
+        <condition>SVOranfor3tdf.xml</condition>
+    </setspec>
+</tutor>
