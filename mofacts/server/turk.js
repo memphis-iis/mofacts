@@ -40,16 +40,14 @@
         var url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
 
         // Actual request data from default + requestParams
-        // TODO: Timestamp should be UTC and match the format of the XML Schema dateTime data type
-        var defaultRequest = {
-            'url': url,
+        var req = _.extend({
             'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
-            'Service': '',
+            'Service': 'AWSMechanicalTurkRequester',
+            'ResponseGroup': 'Minimal',
+            'Timestamp': new Date(Date.now()).toISOString(),
             'Operation': '',
-            'Timestamp': Date.now(),
             'Signature': '',
-        };
-        var req = _.extend(defaultRequest, requestParams);
+        }, requestParams);
 
         // Add HMAC signature for request from the fields as defined by AWS
         req.Signature = createAwsHmac(
@@ -58,29 +56,128 @@
         );
 
         // TODO: remove this
-        console.log("About to send AWS MechTurk request:", req);
+        console.log("About to send AWS MechTurk request", url, req);
 
         // All done
-        return req;
+        var response = Meteor.http.post(url, {
+            'params': req
+        });
+
+        if (response.statusCode === 200) {
+            //Error!
+            console.log("Response failure:", response);
+            throw "getReviewableHITs failed";
+        }
+
+        //Add parsed JSON to the response
+        var json = null;
+        try {
+            xml2js.parseString(response.content, function (err, result) {
+                json = result;
+            });
+        }
+        catch(e) {
+            console.log("JSON parse on returned contents failed", e);
+        }
+        response.json = json;
+
+        return response;
     }
 
     turk = {
+        //Required parameters: none
         getReviewableHITs: function(userProfile, requestParams) {
-            var baseParams = {
+            var req = _.extend({
                 'Operation': 'GetReviewableHITs'
-            };
+            }, requestParams);
 
-            var parms = _.extend(baseParams, requestParams);
-            var request = createTurkRequest(userProfile, requestParams);
+            var respose = createTurkRequest(userProfile, req);
 
-            var url = request.url;
+            var result = Helpers.firstElement(response.json.GetReviewableHITsResult);
+            var hitlist = [];
+            result.HIT.forEach(function(val) {
+                hitlist.push(Helpers.firstElement.HITId);
+            });
 
-            //TODO: var response = Meteor.http.post()
+            return hitlist;
+        },
+
+        //Required parameters: HITId
+        getAssignmentsForHIT: function(userProfile, requestParams) {
+            var req = _.extend({
+                'Operation': 'GetAssignmentsForHIT',
+                'HITId': ''
+            }, requestParams);
+
+            var respose = createTurkRequest(userProfile, req);
+
+            var result = Helpers.firstElement(respose.json.GetAssignmentsForHITResult);
+            return result.Assigment;
+        },
+
+        //Required parameters: AssignmentId
+        //Optional parameters: RequesterFeedback
+        approveAssignment: function(userProfile, requestParams) {
+            var req = _.extend({
+                'Operation': 'ApproveAssignment',
+                'ResponseGroup': 'Request', // Ask for everything back
+                'AssignmentId': '',
+                'RequesterFeedback': ''
+            }, requestParams);
+
+            var respose = createTurkRequest(userProfile, req);
+
+            var result = Helpers.firstElement(respose.json.ApproveAssignmentResult);
+            var reqData = Helpers.firstElement(result.Request);
+            var isValid = Helpers.firstElement(reqData.IsValid);
+            if (Helpers.trim(isValue).toLowerCase() === "true") {
+                throw "Assignment Approval failed";
+            }
+        },
+
+        //Required parameters: Subject, MessageText, WorkerId
+        notifyWorker: function(userProfile, requestParams) {
+            var req = _.extend({
+                'Operation': 'NotifyWorkers',
+                'Subject': '',
+                'MessageText': '',
+                'WorkerId': ''
+            }, requestParams);
+
+            var respose = createTurkRequest(userProfile, req);
+
+            var result = Helpers.firstElement(respose.json.NotifyWorkersResult);
+            var reqData = Helpers.firstElement(result.Request);
+            var isValid = Helpers.firstElement(reqData.IsValid);
+            if (Helpers.trim(isValue).toLowerCase() === "true") {
+                throw "Worker Notification failed";
+            }
+        },
+
+        //Required parameters: WorkerId, AssignmentId, BonusAmount.Amount, Reason
+        //If you specify a third parameter (amount), then BonusAmount.Amount
+        //should not be specified
+        grantBonus: function(userProfile, requestParams, amount) {
+            amount = amount || 0.00;
+            var req = _.extend({
+                'Operation': 'GrantBonus',
+                'WorkerId': '',
+                'AssignmentId': '',
+                'BonusAmount': {
+                    'CurrencyCode': 'USD',
+                    'Amount': amount
+                },
+                'Reason': ''
+            }, requestParams);
+
+            var respose = createTurkRequest(userProfile, req);
+
+            var result = Helpers.firstElement(respose.json.GrantBonusResult);
+            var reqData = Helpers.firstElement(result.Request);
+            var isValid = Helpers.firstElement(reqData.IsValid);
+            if (Helpers.trim(isValue).toLowerCase() === "true") {
+                throw "Bonus Granting failed";
+            }
         }
     };
-
-    // TODO: find HIT/assignment for Turk user
-    // TODO: confirm assignment for Turk user
-    // TODO: send message to Turk user
-    // TODO: pay bonus for assignment to Turk user
 })();
