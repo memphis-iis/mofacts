@@ -42,7 +42,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
         </assessmentsession>
     </unit>
     <unit>
-        <turkpay>2.00</turkpay>
+        <turkpay>true</turkpay>
         <turkemail>text</turkemail>
         <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
 
