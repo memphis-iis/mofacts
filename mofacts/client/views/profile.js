@@ -61,6 +61,24 @@ Template.profile.events({
             }
         });
     },
+
+    'click #turk-show-assign': function(event) {
+        event.preventDefault();
+        var assignid = $("#turk-assignid").val();
+        $("#turk-assign-results").text("Working on " + assignid);
+        $('#turkModal').modal('show');
+        Meteor.call("turkGetAssignment", userTimesExpKey(true), assignid, function(error, result){
+            $('#turkModal').modal('hide');
+            var disp;
+            if (typeof error !== "undefined") {
+                disp = "Failed to handle turk approval. Error:" + error;
+            }
+            else {
+                disp = "Server returned:" + JSON.stringify(result, null, 2);
+            }
+            $("#turk-assign-results").text(disp);
+        });
+    },
 });
 
 

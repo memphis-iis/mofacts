@@ -45,7 +45,7 @@
         <div class="row">
             <div class="col-md-5" id="profileContainer">
                 <legend class="text-center">Profile Data</legend>
-                <!-- TODO: Format this input form in a more bootstrappy way -->
+                <!-- TODO: Format this input form with a bootstrappy form -->
                 <table class="table">
                     <tr>
                         <th>New AWS ID</th>
@@ -92,5 +92,37 @@
             </div>
         </div>
         {{/if}}
+
+        {{#if isInRole 'admin'}}
+            <br><br>
+            <div class="row">
+                <div class="col-md-8" id="turk testing">
+                    <div id="name">
+                        <legend class="text-center">Turk Assignment Debugging</legend>
+                        Assignment ID:
+                        <input type="text" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID" style="width:40%">
+                        <button id="turk-show-assign" class="btn" style="width:40%">Get Assignment!</button>
+                        <pre id="turk-assign-results" style="width:100%">
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        {{/if}}
+    </div>
+
+    <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="turkModalLabel">Please Wait</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="clearfix">
+                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
+                        <p class="pull-right">Please wait while we contact Mechanical Turk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>

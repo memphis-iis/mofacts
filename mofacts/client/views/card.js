@@ -1,4 +1,4 @@
-//TODO: We currently don't support the timeout property "readyprompt" (in
+//NOTE: We currently don't support the timeout property "readyprompt" (in
 //      /tutor/unit/deliveryparams). It is the time between two trials (where
 //      we say "ready")
 
@@ -338,10 +338,6 @@ function newQuestionHandler() {
         if (getButtonTrial()) {
             Session.set("buttonTrial", true);
             $("#textEntryRow").hide();
-
-            //TODO: we should be setting whether or not it's a button trial *AND*
-            //      the choices array when we log the question info (i.e. in
-            //      scheduledCard - and one day in the model card setup)
 
             var cluster = getStimCluster(getCurrentClusterIndex());
 
@@ -1322,6 +1318,7 @@ function resumeFromUserTimesLog() {
     unitStartTimestamp = Date.now();
 
     //Clear any previous session data about unit/question/answer
+    Session.set("turkApprovalSent", undefined);
     Session.set("clusterMapping", undefined);
     Session.set("currentUnitNumber", undefined);
     Session.set("questionIndex", undefined);
@@ -1542,6 +1539,8 @@ function processUserTimesLog() {
         //Generally we use the last timestamp for our major actions. This will
         //currently only be set to false in the default/fall-thru else block
         var recordTimestamp = true;
+
+        //TODO: need to look for turk action turk-approval and update session turkApprovalSent
 
         if (action === "instructions") {
             //They've been shown instructions for this unit

@@ -145,7 +145,7 @@ function getTdfOwner(experiment) {
     }
     else {
         console.log("getTdfOwner for ", experiment, "failed - TDF doesn't contain owner");
-        console.log(tdfId, tdf); //TODO: remove
+        console.log(tdfId, tdf);
         return null;
     }
 }
@@ -299,6 +299,25 @@ Meteor.startup(function () {
             writeUserLogEntries(experiment, objectsToLog);
         },
 
+        //Simple assignment debugging for turk
+        turkGetAssignment: function(experiment, assignid) {
+            try {
+                var usr = Meteor.user();
+                var profile = UserProfileData.findOne({_id: usr._id});
+                if (!profile) {
+                    return "Could not find current user profile";
+                }
+                if (!profile.have_aws_id || !profile.have_aws_secret) {
+                    return "Current user not set up for AWS/MTurk";
+                }
+
+                return turk.getAssignment(profile, {'AssignmentId': assignid});
+            }
+            catch(e) {
+                return e;
+            }
+        },
+
         //Given a currently logged in user, an experiment, and a msg - we
         //attempt to pay the user for the current MTurk HIT/assignment.
         //RETURNS: null on success or an error message on failure. Any results
@@ -312,12 +331,9 @@ Meteor.startup(function () {
             turkid = Helpers.trim(turkid).toUpperCase();
 
             var ownerId = getTdfOwner(experiment);
-            if (!ownerId) {
-                return "Could not find TDF owner for current user";
-            }
             var ownerProfile = UserProfileData.findOne({_id: ownerId});
             if (!ownerProfile) {
-                return "Could not find TDF owner profile";
+                return "Could not find TDF owner profile for id ''" + ownerId + "'";
             }
             if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
                 return "Current TDF owner not set up for AWS/MTurk";
@@ -334,9 +350,10 @@ Meteor.startup(function () {
 
             try {
                 // Get available HITs
-                hitlist = turk.getReviewableHITs(ownerProfile, {});
+                hitlist = turk.getAvailableHITs(ownerProfile, {});
                 if (hitlist && hitlist.length) {
                     workPerformed.findHITs = "HITs found: " + hitlist.length;
+                    workPerformed.hitdetails = hitlist;
                 }
                 else {
                     workPerformed.findHITs = "No HITs found";
@@ -369,31 +386,36 @@ Meteor.startup(function () {
                 }
 
                 if (!!assignment) {
-                    workPerformed.findAssignment = "Found assignment";
+                    workPerformed.findAssignment = "Found assignment " + assignment.AssignmentId;
                     workPerformed.assignmentDetails = assignment;
                 }
                 else {
-                    workPerform.findAssignment = "No assignment found";
+                    workPerformed.findAssignment = "No assignment found";
                 }
 
                 if (!!assignment) {
-                    turk.approveAssignment(ownerProfile, {
+                    var approveResponse = turk.approveAssignment(ownerProfile, {
                         'AssignmentId': assignment.AssignmentId,
                         'RequesterFeedback': msg || "Thanks for your participation"
                     });
                     workPerformed.approveAssignment = "Assignment was approved!";
+                    workPerformed.approvalDetails = approveResponse;
                 }
             }
             catch(e) {
                 errmsg = "Exception caught while processing Turk: " + e;
             }
             finally {
-                writeUserLogEntries(experiment, _.extend(workPerformed, {
+                var userLogEntry = _.extend({
+                    'action': 'turk-approval',
                     'success': errmsg === null,
                     'errmsg': errmsg,
                     'turkId': turkid,
                     'tdfOwnerId': ownerId
-                }));
+                }, workPerformed);
+
+                console.log("About to log entry for Turk", JSON.stringify(userLogEntry, null, 2));
+                writeUserLogEntries(experiment, userLogEntry);
             }
 
             return errmsg;

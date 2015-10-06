@@ -156,18 +156,36 @@ Template.instructions.helpers({
     },
 
     turkActive: function() {
-        //TODO: first check that current unit has turk stuff at all *AND* that
-        //      we are in experiment mode (so we know the Turk ID)
-        //TODO: return correct value and make sure it's reactive so that we
-        //      don't have to try and pay them twice
-        return true;
+        //Turk display can only be active if we're in experiment mode and we
+        //haven't sent an approval
+        if (Session.get("loginMode") !== "experiment") {
+            return false; //Must be an experiment
+        }
+
+        var approvalSent = !!Session.get("turkApprovalSent");
+        if (approvalSent) {
+            return false; //Already done
+        }
+
+        //At this point, we should display turk stuff if it's in the TDF
+        var currUnit = getCurrentTdfUnit();
+        var turkpay = Helpers.trim(Helpers.firstElement(currUnit.turkpay)).toLowerCase();
+        return (turkpay === "true");
     }
 });
 
 Template.instructions.rendered = function() {
+    //Make sure lockout interval timer is running
     if (currLockOutMinutes() > 0) {
         startLockoutInterval();
     }
+
+    //Init the modal dialog
+    $('#turkModal').modal({
+        'backdrop': 'static',
+        'keyboard': false,
+        'show': false
+    });
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -192,8 +210,14 @@ Template.instructions.events({
 
     'click #turkButton': function(event) {
         event.preventDefault();
-        var turkMsg = "Testing for now"; //TODO: need a good message
-        var result = Meteor.call("turkPay", userTimesExpKey(true), turkMsg, function(error, result){
+
+        var currUnit = getCurrentTdfUnit();
+        var turkMsg = Helpers.firstElement(currUnit.turkemail);
+
+        $('#turkModal').modal('show');
+        Meteor.call("turkPay", userTimesExpKey(true), turkMsg, function(error, result){
+            $('#turkModal').modal('hide');
+
             if (typeof error !== "undefined") {
                 //something happened - hopefully things will be updated reactively
                 console.log("Failed to handle turk approval. Error:", error);
@@ -207,7 +231,9 @@ Template.instructions.events({
             }
 
             //No matter what, we should now be Turk approved
-            //TODO: update the correct Session variable
+            //(If there was an error, it will need to be examined in the log
+            //and manually handled)
+            Session.set("turkApprovalSent", true);
         });
     },
 

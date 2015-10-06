@@ -1,9 +1,13 @@
-/** Example button override **/
 body {
     background-color: #C1E1A6;
     font-family: 'Lato', sans-serif;
     color: #585858;
     font-size: 18px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #C1E1A6;
+    font-family: 'Lato', sans-serif;
 }
 
 .visible-text,
@@ -21,34 +25,12 @@ body {
     color: #000;
 }
 
-h1 {	color: #C1E1A6;
-     font-family: 'Lato', sans-serif;
-}
-
-h2 {color: #C1E1A6;
-    font-family: 'Lato', sans-serif;
-}
-h3 {	color: #C1E1A6;
-     font-family: 'Lato', sans-serif;
-}
-
-h4 {color: #C1E1A6;
-    font-family: 'Lato', sans-serif;
-}
-h5 {	color: #C1E1A6;
-     font-family: 'Lato', sans-serif;
-}
-
-h6 {color: #C1E1A6;
-    font-family: 'Lato', sans-serif;
-}
-
 .navbar-inverse {
     background-color: #585858;
 }
 
 .btn { color:white;
-    border-radius: 0px;
+    border-radius: 0;
     background-color: #118C4E;
     border-color: #118C4E;
     font-family: 'Lato', sans-serif;
@@ -94,27 +76,27 @@ legend {
 }
 
 .navbar {
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .navbar-inverse .navbar-brand {
-	color: white;
+    color: white;
     font-family: 'Lato', sans-serif;
     font-size: 28px;
 }
 
 .dropdown-menu {
     background-color: #585858;
-	color: white;
+    color: white;
 }
 
 .dropdown-menu > li > a:focus {
     background-color: #585858;
-	color: white;
+    color: white;
 }
 
 .form-control {
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .btn {
@@ -135,26 +117,26 @@ legend {
 }
 
 .dropdown-menu > li > a {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
     border-color: black;
 }
 
 .dropdown-menu body {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
 }
 
 .panel, .panel-heading, .panel-body {
-    border-radius: 0px;
+    border-radius: 0;
 }
 
 .center-fill-parent {
@@ -163,19 +145,19 @@ legend {
 }
 
 .navbar-inverse .navbar-nav > li > a {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
 }
 
 .navbar-inverse .navbar-nav > li > a:focus {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
-	color: white;
+    color: white;
     background-color: #585858;
     font-family: 'Lato', sans-serif;
 }
@@ -193,4 +175,10 @@ input:focus {
 
 .text-center * {
     text-align: center;
+}
+
+.modal {
+    background-color: #C1E1A6;
+    font-family: "Lato",sans-serif;
+    color: #585858;
 }
