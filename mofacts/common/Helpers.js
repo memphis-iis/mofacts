@@ -79,6 +79,14 @@ Helpers = {
         return val;
     },
 
+    floatVal: function(src) {
+        var val = parseFloat(Helpers.display(src));
+        if (!isFinite(val)) {
+            val = 0.0;
+        }
+        return val;
+    },
+
     //Extract space-delimited fields from src and push them to dest. Note that
     //dest is changed, but is NOT cleared before commencing. Also note that
     //false-ish values and whitespace-only strings are silently discarded

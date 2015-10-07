@@ -300,7 +300,7 @@ Meteor.startup(function () {
         },
 
         //Simple assignment debugging for turk
-        turkGetAssignment: function(experiment, assignid) {
+        turkGetAssignment: function(assignid) {
             try {
                 var usr = Meteor.user();
                 var profile = UserProfileData.findOne({_id: usr._id});
@@ -312,6 +312,29 @@ Meteor.startup(function () {
                 }
 
                 return turk.getAssignment(profile, {'AssignmentId': assignid});
+            }
+            catch(e) {
+                return e;
+            }
+        },
+
+        //Simple message sending
+        turkSendMessage: function(workerid, msgtext) {
+            try {
+                var usr = Meteor.user();
+                var profile = UserProfileData.findOne({_id: usr._id});
+                if (!profile) {
+                    return "Could not find current user profile";
+                }
+                if (!profile.have_aws_id || !profile.have_aws_secret) {
+                    return "Current user not set up for AWS/MTurk";
+                }
+
+                return turk.notifyWorker(profile, {
+                    'Subject': "Message from " + usr.username + " Profile Page",
+                    'MessageText': msgtext,
+                    'WorkerId': workerid
+                });
             }
             catch(e) {
                 return e;
@@ -403,7 +426,7 @@ Meteor.startup(function () {
                 }
             }
             catch(e) {
-                errmsg = "Exception caught while processing Turk: " + e;
+                errmsg = "Exception caught while processing Turk: " + JSON.stringify(e, null, 2);
             }
             finally {
                 var userLogEntry = _.extend({
@@ -420,6 +443,10 @@ Meteor.startup(function () {
 
             return errmsg;
         },
+
+        //TODO: Turk bonus - note that it will need to get the amount from the
+        //      TDF (can't be passed) *and* it will need an assignment ID, which
+        //      we must get from the user times log.
 
         //Let client code send console output up to server
         debugLog: function (logtxt) {

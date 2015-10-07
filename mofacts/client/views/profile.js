@@ -67,7 +67,7 @@ Template.profile.events({
         var assignid = $("#turk-assignid").val();
         $("#turk-assign-results").text("Working on " + assignid);
         $('#turkModal').modal('show');
-        Meteor.call("turkGetAssignment", userTimesExpKey(true), assignid, function(error, result){
+        Meteor.call("turkGetAssignment", assignid, function(error, result){
             $('#turkModal').modal('hide');
             var disp;
             if (typeof error !== "undefined") {
@@ -79,6 +79,26 @@ Template.profile.events({
             $("#turk-assign-results").text(disp);
         });
     },
+
+    'click #turk-send-msg': function(event) {
+        event.preventDefault();
+        var workerid = $("#turk-workerid").val();
+        var msgtext = $("#turk-msg").val();
+        console.log("Sending to", workerid, "Msg:", msgtext);
+        $('#turkModal').modal('show');
+        Meteor.call("turkSendMessage", workerid, msgtext, function(error, result){
+            $('#turkModal').modal('hide');
+            var disp;
+            if (typeof error !== "undefined") {
+                disp = "Failed to handle turk approval. Error:" + error;
+            }
+            else {
+                disp = "Server returned:" + JSON.stringify(result, null, 2);
+            }
+            console.log(disp);
+            alert(disp);
+        });
+    }
 });
 
 

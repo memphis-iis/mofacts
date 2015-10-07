@@ -96,14 +96,28 @@
         {{#if isInRole 'admin'}}
             <br><br>
             <div class="row">
-                <div class="col-md-8" id="turk testing">
+                <div class="col-md-6" id="turk-assignment-details">
                     <div id="name">
-                        <legend class="text-center">Turk Assignment Debugging</legend>
-                        Assignment ID:
-                        <input type="text" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID" style="width:40%">
-                        <button id="turk-show-assign" class="btn" style="width:40%">Get Assignment!</button>
+                        <legend class="text-center">View Turk Assignment Details</legend>
+                        <div class="form-group">
+                            <label for="turk-assignid">Assignment ID</label>
+                            <input type="text" class="form-control" cname="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
+                        </div>
+                        <button id="turk-show-assign" class="btn">Get Assignment!</button>
                         <pre id="turk-assign-results" style="width:100%">
                         </pre>
+                    </div>
+                </div>
+
+                <div class="col-md-6" id="turk-send-message">
+                    <div id="name">
+                        <legend class="text-center">Send Turk Message</legend>
+                        <div class="form-group">
+                            <label for="turk-workerid">Worker ID</label>
+                            <input type="text" class="form-control" name="turk-workerid" id="turk-workerid" value="" placeholder="Mechanical Turk WorkerID">
+                        </div>
+                        <button id="turk-send-msg" class="btn">Send Message!</button>
+                        <textarea name="turk-msg" id="turk-msg" rows="8" cols="40" placeholder="Message text goes here"></textarea>
                     </div>
                 </div>
             </div>

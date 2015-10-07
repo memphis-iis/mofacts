@@ -178,13 +178,18 @@ there are assignments that need to be approved.
             var reqData = fe(result.Request);
             var isValid = fe(reqData.IsValid);
             if (Helpers.trim(isValid).toLowerCase() !== "true") {
-                throw "Assignment Approval failed";
+                throw {
+                    'errmsg': 'Assignment Approval failed',
+                    'response': response
+                };
             }
 
             return response.json;
         },
 
         //Required parameters: AssignmentId
+        //Pretty raw - currently only used for tracking/debugging on profile
+        //page of our admins.
         getAssignment: function(userProfile, requestParams) {
             var req = _.extend({
                 'Operation': 'GetAssignment',
@@ -206,37 +211,46 @@ there are assignments that need to be approved.
 
             var response = createTurkRequest(userProfile, req);
 
-            var result = fe(response.json.NotifyWorkersResult);
+            var jsonResponse = response.json.NotifyWorkersResponse;
+            var result = fe(jsonResponse.NotifyWorkersResult);
             var reqData = fe(result.Request);
             var isValid = fe(reqData.IsValid);
             if (Helpers.trim(isValid).toLowerCase() !== "true") {
-                throw "Worker Notification failed";
+                console.log("isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
+                throw {
+                    'errmsg': 'Worker Notification failed',
+                    'response': response
+                };
             }
+            return jsonResponse;
         },
 
         //Required parameters: WorkerId, AssignmentId, BonusAmount.Amount, Reason
         //If you specify a third parameter (amount), then BonusAmount.Amount
         //should not be specified
         grantBonus: function(userProfile, requestParams, amount) {
-            amount = amount || 0.00;
             var req = _.extend({
                 'Operation': 'GrantBonus',
                 'WorkerId': '',
                 'AssignmentId': '',
                 'BonusAmount': {
                     'CurrencyCode': 'USD',
-                    'Amount': amount
+                    'Amount': Helpers.floatVal(amount)
                 },
                 'Reason': ''
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
 
-            var result = fe(response.json.GrantBonusResult);
+            var jsonResponse = response.json.GrantBonusResponse;
+            var result = fe(jsonResponse.GrantBonusResult);
             var reqData = fe(result.Request);
             var isValid = fe(reqData.IsValid);
             if (Helpers.trim(IsValid).toLowerCase() !== "true") {
-                throw "Bonus Granting failed";
+                throw {
+                    'errmsg': 'Bonus Granting failed',
+                    'response': response
+                };
             }
         }
     };
