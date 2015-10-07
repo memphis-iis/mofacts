@@ -1328,6 +1328,11 @@ function resumeFromUserTimesLog() {
     Session.set("testType", undefined);
     Session.set("lastTimestamp", 0);
 
+    //We default turkApprovalSent to false iff they are in experiment mode
+    if (Session.get("loginMode") === "experiment") {
+        Session.set("turkApprovalSent", false);
+    }
+
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
     //condition selection. It will be our responsibility to update
@@ -1540,8 +1545,6 @@ function processUserTimesLog() {
         //currently only be set to false in the default/fall-thru else block
         var recordTimestamp = true;
 
-        //TODO: need to look for turk action turk-approval and update session turkApprovalSent
-
         if (action === "instructions") {
             //They've been shown instructions for this unit
             needFirstUnitInstructions = false;
@@ -1554,6 +1557,12 @@ function processUserTimesLog() {
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
             }
+        }
+
+        else if (action === "turk-approval") {
+            //We've attemted an approval. At this point, we don't care if it
+            //succeeded since approval is now a matter of manual intervention
+            Session.set("turkApprovalSent", true);
         }
 
         else if (action === "schedule") {
