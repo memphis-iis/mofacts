@@ -444,9 +444,12 @@ Meteor.startup(function () {
             return errmsg;
         },
 
-        //TODO: Turk bonus - note that it will need to get the amount from the
-        //      TDF (can't be passed) *and* it will need an assignment ID, which
-        //      we must get from the user times log.
+        turkBonus: function(experiment, tdfid, unitnum) {
+            //TODO: read tdfid to find turkbonus in unitnum
+            //TODO: read user log for experiment to find assignment ID
+            //TODO: when reading log, check for previous bonus payment
+            //TODO: submit bonus for assignment
+        },
 
         //Let client code send console output up to server
         debugLog: function (logtxt) {

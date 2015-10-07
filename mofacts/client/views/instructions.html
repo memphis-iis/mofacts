@@ -44,35 +44,34 @@
                     {{{instructions}}}
                 </div>
 
+                <br>
                 {{#if turkActive}}
-                <br>
-                <div class="turk-notice">
-                    Please click here after you've enter the code above at the
-                    Mechanical Turk Website.
-                    <button type="button" id="turkButton" class="btn ">
-                        Ready for Approval
-                    </button>
-                </div>
+                    <div class="turk-notice">
+                        Please click here after you've enter the code above at the
+                        Mechanical Turk Website.
+                        <button type="button" id="turkButton" class="btn ">
+                            Ready for Approval
+                        </button>
+                    </div>
+                {{else}}
+                    <div class="form-group">
+                        {{#if islockout}}
+                            <div id="lockoutDisplay">
+                                <h3 id="lockoutMessage">
+                                    The rest of the content has been locked until a
+                                    certain amount of time has elapsed.
+                                </h3>
+                                <h2 id="lockoutTimeRemaining">&nbsp;</h2>
+                            </div>
+                        {{/if}}
+
+                        {{#if allowcontinue}}
+                        <button type="button" id="continueButton" class="btn ">
+                            Continue
+                        </button>
+                        {{/if}}
+                    </div>
                 {{/if}}
-
-                <br>
-                <div class="form-group">
-                    {{#if islockout}}
-                        <div id="lockoutDisplay">
-                            <h3 id="lockoutMessage">
-                                The rest of the content has been locked until a
-                                certain amount of time has elapsed.
-                            </h3>
-                            <h2 id="lockoutTimeRemaining">&nbsp;</h2>
-                        </div>
-                    {{/if}}
-
-                    {{#if allowcontinue}}
-                    <button type="button" id="continueButton" class="btn ">
-                        Continue
-                    </button>
-                    {{/if}}
-                </div>
             </div>
         </div>
     </div>

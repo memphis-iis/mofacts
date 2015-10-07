@@ -146,7 +146,8 @@ Template.instructions.helpers({
 
     allowcontinue: function() {
         //If we're in experiment mode, they can only continue if there are
-        //units left. Otherwise they can always go
+        //units left. Otherwise they can always go UNLESS we are displaying
+        //a Turk screen
         if (Session.get("loginMode") === "experiment") {
             return getUnitsRemaining() > 0;
         }
@@ -155,6 +156,8 @@ Template.instructions.helpers({
         }
     },
 
+    //Note that the current template won't display continue or lockout stuff
+    //if turkActive returns true
     turkActive: function() {
         //Turk display can only be active if we're in experiment mode and we
         //haven't sent an approval
@@ -162,8 +165,7 @@ Template.instructions.helpers({
             return false; //Must be an experiment
         }
 
-        var approvalSent = !!Session.get("turkApprovalSent");
-        if (approvalSent) {
+        if (!!Session.get("turkApprovalSent")) {
             return false; //Already done
         }
 
