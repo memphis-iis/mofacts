@@ -225,10 +225,8 @@ there are assignments that need to be approved.
             return jsonResponse;
         },
 
-        //Required parameters: WorkerId, AssignmentId, BonusAmount.Amount, Reason
-        //If you specify a third parameter (amount), then BonusAmount.Amount
-        //should not be specified
-        grantBonus: function(userProfile, requestParams, amount) {
+        //Required parameters: WorkerId, AssignmentId, Reason
+        grantBonus: function(userProfile, amount, requestParams) {
             var req = _.extend({
                 'Operation': 'GrantBonus',
                 'WorkerId': '',
@@ -252,6 +250,8 @@ there are assignments that need to be approved.
                     'response': response
                 };
             }
+
+            return response.json;
         }
     };
 })();

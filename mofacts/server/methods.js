@@ -445,10 +445,84 @@ Meteor.startup(function () {
         },
 
         turkBonus: function(experiment, tdfid, unitnum) {
-            //TODO: read tdfid to find turkbonus in unitnum
-            //TODO: read user log for experiment to find assignment ID
-            //TODO: when reading log, check for previous bonus payment
-            //TODO: submit bonus for assignment
+            var usr = Meteor.user();
+            var turkid = !!usr ? usr.username : null;
+            if (!turkid) {
+                return "No valid username found";
+            }
+            turkid = Helpers.trim(turkid).toUpperCase();
+
+            var ownerId = getTdfOwner(experiment);
+            var ownerProfile = UserProfileData.findOne({_id: ownerId});
+            if (!ownerProfile) {
+                return "Could not find TDF owner profile for id ''" + ownerId + "'";
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                return "Current TDF owner not set up for AWS/MTurk";
+            }
+
+            var errmsg = null; // Return null on success
+
+            //Data we log
+            var workPerformed = {
+                locatePreviousAssignment: 'not performed',
+                locateBonusAmount: 'not performed',
+                sendBonusRequest: 'not performed'
+            };
+
+            try {
+                //TODO: read user log for experiment to find assignment ID
+                var assignmentId = null;
+
+                if (assignmentId) {
+                    workPerformed.locatePreviousAssignment = "Found assignment " + assignmentId;
+                    workPerformed.assignmentId = assignmentId;
+                }
+                else {
+                    workPerformed.locatePreviousAssignment = "No assignment found";
+                    throw "Previous assignment required";
+                }
+
+                //TODO: read tdfid to find turkbonus in unitnum
+                //TODO: when reading log, check for previous bonus payment
+                var bonusAmt = null;
+
+                if (bonusAmt) {
+                    workPerformed.locateBonusAmount = "";
+                    workPerformed.bonusAmt = bonusAmt;
+                }
+                else {
+                    workPerformed.locateBonusAmount = "No bonus amount found";
+                    throw "Bonus amount required";
+                }
+
+                var bonusResponse = turk.grantBonus(ownerProfile, bonusAmt, {
+                    'WorkerId': turkid,
+                    'AssignmentId': assignmentId,
+                    'Reason': 'Additional unit completion. Thank you!'
+                });
+                workPerformed.sendBonusRequest = "Bonus request sent";
+                workPerformed.bonusResponse = bonusResponse;
+            }
+            catch(e) {
+                errmsg = "Exception caught while processing Turk: " + JSON.stringify(e, null, 2);
+            }
+            finally {
+                var userLogEntry = _.extend({
+                    'action': 'turk-bonus',
+                    'success': errmsg === null,
+                    'errmsg': errmsg,
+                    'turkId': turkid,
+                    'tdfOwnerId': ownerId,
+                    'selectedTdfId': tdfid,
+                    'selectedTdfUnitNum': unitnum
+                }, workPerformed);
+
+                console.log("About to log entry for Turk", JSON.stringify(userLogEntry, null, 2));
+                writeUserLogEntries(experiment, userLogEntry);
+            }
+
+            return errmsg;
         },
 
         //Let client code send console output up to server
