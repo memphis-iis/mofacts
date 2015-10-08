@@ -471,8 +471,28 @@ Meteor.startup(function () {
             };
 
             try {
-                //TODO: read user log for experiment to find assignment ID
+                //Read user log for experiment to find assignment ID
                 var assignmentId = null;
+                var previousBonus = false;
+
+                var userLog = UserTimesLog.findOne({ _id: turkid });
+                var userLogEntries = [];
+                if (userLog && userLog[experiment] && userLog[experiment].length) {
+                    userLogEntries = userLog[experiment];
+                }
+
+                for (var i = userLogEntries.length - 1; i >= 0; --i) {
+                    var rec = userLogEntries[i];
+                    var action = Helpers.trim(rec.action).toLowerCase();
+                    if (action === "turk-approval" && !assignmentId) {
+                        if (typeof action.assignmentId !== "undefined") {
+                            assignmentId = Helpers.trim(action.assignmentId);
+                        }
+                    }
+                    else if (action === "turk-bonus") {
+                        previousBonus = true;
+                    }
+                }
 
                 if (assignmentId) {
                     workPerformed.locatePreviousAssignment = "Found assignment " + assignmentId;
@@ -483,12 +503,27 @@ Meteor.startup(function () {
                     throw "Previous assignment required";
                 }
 
-                //TODO: read tdfid to find turkbonus in unitnum
-                //TODO: when reading log, check for previous bonus payment
+                if (previousBonus) {
+                    throw "There was already a bonus paid for this user/TDF combination";
+                }
+
+                //We read the TDF to get the bonus amount
+                var tdfFile = Tdfs.findOne({_id: tdfid});
+                var tdfUnit = null;
+                if (typeof tdfFile.tdfs.tutor.unit !== "undefined") {
+                    if (!!unitIdx || unitIdx === 0) {
+                        tdfUnit = thisTdf.tdfs.tutor.unit[unitnum];
+                    }
+                }
+
                 var bonusAmt = null;
+                if (tdfUnit) {
+                    bonusAmt = Helpers.floatVal(Helpers.firstElement(tdfUnit.turkbonus));
+                }
 
                 if (bonusAmt) {
-                    workPerformed.locateBonusAmount = "";
+                    workPerformed.locateBonusAmount = "Found bonus " + bonusAmt +
+                        " in tdf[unit]=" + tdfid + "[" + unitnum + "]";
                     workPerformed.bonusAmt = bonusAmt;
                 }
                 else {
@@ -496,6 +531,7 @@ Meteor.startup(function () {
                     throw "Bonus amount required";
                 }
 
+                //Actually send request - note that we always force USD currently
                 var bonusResponse = turk.grantBonus(ownerProfile, bonusAmt, {
                     'WorkerId': turkid,
                     'AssignmentId': assignmentId,
