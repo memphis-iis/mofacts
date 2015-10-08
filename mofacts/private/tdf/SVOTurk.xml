@@ -99,7 +99,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
             <clusterlist>0-17</clusterlist>
             <permutefinalresult>0-17 18-35 36-53</permutefinalresult>
             <assignrandomclusters>true</assignrandomclusters>
-            <randomchoices> 0 1 2 </randomchoices>
+            <randomchoices>0-2</randomchoices>
         </assessmentsession>
     </unit>
     <unit>
