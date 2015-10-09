@@ -7,11 +7,17 @@
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter> 
+   <lfparameter>.85</lfparameter> 
         <shuffleclusters>0-17 18-35</shuffleclusters>
         <swapclusters>0-17 18-35</swapclusters>
-    </setspec>
-    <unit>        
+    </setspec><unit> <unitname>Show the questions</unitname>        
+        <unitinstructions><![CDATA[<font size="2">Consent to Use Data<br><br>The Mechanical Turk task you have selected is part of a research project that is described below.  You will use you computer for this experiment, first to load the program, then to practice for 68 sentences, then you will either complete the posttest after a 2 minute wait, or be chosen for 1 day or 3 day later posttest completion, at which time you will see 54 concluding sentence presentations. This study should take no longer than 60 minutes total to complete. <br><br>
+If you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjects’ rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>
+All efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by Unviersity of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.<br><br>
+By clicking this button, I consent to the above terms. 
+]]></unitinstructions>     
+</unit>
+ <unit>        
         <unitname>Show the questions</unitname>        
         <unitinstructions><![CDATA[Demographic Survey<br><br>
 Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>        
@@ -24,7 +30,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
             <correctprompt>500</correctprompt>        
             <fontsize>3</fontsize>
             <correctscore>0</correctscore> <!--No points for demographics-->
-            <incorrectscore>0</incorrectscore>
+<incorrectscore>0</incorrectscore>
         </deliveryparams>        
         <buttontrial>false</buttontrial>        
         <assessmentsession>            
@@ -47,116 +53,113 @@ Please answer the following 5 quick demographic questions, which may be useful f
              Task: You will see a sequence of 68 sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). You must press ENTER to submit your answer. Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 16 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.
             Hit ENTER after typing to submit your response.  ]]></unitinstructions>
         <deliveryparams>
-            <drill>12000</drill>            
+      <drill>12000</drill>            
             <purestudy>16000</purestudy>            
             <skipstudy>false</skipstudy>            
             <reviewstudy>16000</reviewstudy>            
-            <correctprompt>1000</correctprompt>         
-            <fontsize>3</fontsize>
+            <correctprompt>1000</correctprompt>         <fontsize>3</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
         <assessmentsession>
-            <conditiontemplatesbygroup>
+<conditiontemplatesbygroup>
                 <groupnames>A B C D E F G H</groupnames> 
                 <clustersrepeated>8 4 2 8 4 2 4 2</clustersrepeated> 
                 <templatesrepeated>2 2 2 2 2 2 2 2</templatesrepeated>
-                <group> 3,f,z,0 3,f,z,1 3,f,z,6 3,f,z,7 3,f,z,15 3,f,z,16 3,f,z,26 3,f,z,27  
-                    r,f,z,0 r,f,z,1 r,f,z,8 r,f,z,9 r,f,z,18 r,f,z,19 r,f,z,27 r,f,z,28 </group> 
-                <group> 3,f,z,0 3,f,z,1 3,f,z,11 3,f,z,12  
-                    r,f,z,0 r,f,z,1 r,f,z,9 r,f,z,10 </group> 
-                <group> 3,f,z,0 3,f,z,1  
-                    r,f,z,0 r,f,z,1 </group> 
-                <group> 3,f,z,0 3,f,z,8 3,f,z,18 3,f,z,27 3,f,z,34 3,f,z,40 3,f,z,49 3,f,z,60  
-                    r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 r,f,z,34 r,f,z,40 r,f,z,49 r,f,z,60 </group> 
-                <group> 3,f,z,0 3,f,z,6 3,f,z,15 3,f,z,26  
-                    r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 </group> 
-                <group> 3,f,z,0 3,f,z,11  
-                    r,f,z,0 r,f,z,10 </group> 
-                <group> 3,f,z,0 3,f,z,18 3,f,z,31 3,f,z,52  
-                    r,f,z,0 r,f,z,19 r,f,z,34 r,f,z,50 </group> 
-                <group> 3,f,z,0 3,f,z,21  
-                    r,f,z,0 r,f,z,18 </group> 
-            </conditiontemplatesbygroup>
-            <initialpositions>A_2  A_2	D_2	D_1	E_2	G_2						
-                C_2	C_2	A_2	A_2	D_2	D_1	E_2	F_2	G_1	H_2		
-                B_2	B_2	A_2	A_2	D_2	D_1	E_2	F_2	G_2			
-                B_2	B_2	A_2	A_2	D_2	D_1	E_2	G_1	H_2			
-                A_1	A_1	D_2	D_1	E_1	G_2						
-                A_1	A_1	D_2	D_1	E_1	G_1	H_1					
-                B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_2			
-                C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
-            </initialpositions> 
-            <randomizegroups>false</randomizegroups> 
-            <clusterlist>0-15</clusterlist> 
-            <permutefinalresult> 0-5 6-15 16-24 25-33 34-39 40-46 47-55 56-67</permutefinalresult>
-            <assignrandomclusters>false</assignrandomclusters>
-            <randomchoices>4</randomchoices> 
-        </assessmentsession>
+ <group> 3,f,z,0 3,f,z,1 3,f,z,6 3,f,z,7 3,f,z,15 3,f,z,16 3,f,z,26 3,f,z,27  
+ r,f,z,0 r,f,z,1 r,f,z,8 r,f,z,9 r,f,z,18 r,f,z,19 r,f,z,27 r,f,z,28 </group> 
+<group> 3,f,z,0 3,f,z,1 3,f,z,11 3,f,z,12  
+ r,f,z,0 r,f,z,1 r,f,z,9 r,f,z,10 </group> 
+<group> 3,f,z,0 3,f,z,1  
+ r,f,z,0 r,f,z,1 </group> 
+<group> 3,f,z,0 3,f,z,8 3,f,z,18 3,f,z,27 3,f,z,34 3,f,z,40 3,f,z,49 3,f,z,60  
+ r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 r,f,z,34 r,f,z,40 r,f,z,49 r,f,z,60 </group> 
+<group> 3,f,z,0 3,f,z,6 3,f,z,15 3,f,z,26  
+ r,f,z,0 r,f,z,8 r,f,z,18 r,f,z,27 </group> 
+<group> 3,f,z,0 3,f,z,11  
+ r,f,z,0 r,f,z,10 </group> 
+<group> 3,f,z,0 3,f,z,18 3,f,z,31 3,f,z,52  
+ r,f,z,0 r,f,z,19 r,f,z,34 r,f,z,50 </group> 
+<group> 3,f,z,0 3,f,z,21  
+ r,f,z,0 r,f,z,18 </group> 
+</conditiontemplatesbygroup>
+<initialpositions>A_2  A_2	D_2	D_1	E_2	G_2						
+C_2	C_2	A_2	A_2	D_2	D_1	E_2	F_2	G_1	H_2		
+B_2	B_2	A_2	A_2	D_2	D_1	E_2	F_2	G_2			
+B_2	B_2	A_2	A_2	D_2	D_1	E_2	G_1	H_2			
+A_1	A_1	D_2	D_1	E_1	G_2						
+A_1	A_1	D_2	D_1	E_1	G_1	H_1					
+B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_2			
+C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
+</initialpositions> 
+      <randomizegroups>false</randomizegroups> 
+      <clusterlist>0-15</clusterlist> 
+      <permutefinalresult>0-5 6-15 16-24 25-33 34-39 40-46 47-55 56-67</permutefinalresult>
+<assignrandomclusters>false</assignrandomclusters>
+            <randomchoices>4</randomchoices></assessmentsession>
     </unit>
-    <unit>
-        <turkpay>2.00</turkpay>
-        <turkemail>text</turkemail>
-        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
+<unit>
+<turkpay>2.00</turkpay>
+<turkemail>text</turkemail>
+<unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
 
-            If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
+If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
 
-            If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions>
-        <unitname>Lockout unit</unitname>
-        <deliveryparams>
-            <lockoutminutes>2</lockoutminutes> 
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>1440</lockoutminutes> 
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>4320</lockoutminutes>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>Posttest</unitname>
-        <unitinstructions>Memory for Statistics Experiment
+If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions>
+<unitname>Lockout unit</unitname>
+<deliveryparams>
+<lockoutminutes>2</lockoutminutes> 
+</deliveryparams>
+<deliveryparams>
+<lockoutminutes>1440</lockoutminutes> 
+</deliveryparams>
+<deliveryparams>
+<lockoutminutes>4320</lockoutminutes>
+</deliveryparams>
+</unit>
+<unit>
+<unitname>Posttest</unitname>
+<unitinstructions>Memory for Statistics Experiment
 
-            Thanks for continuing. You have 54 sentences remaining. </unitinstructions>
-        <deliveryparams>
-            <drill>12000</drill>            
+Thanks for continuing. You have 54 sentences remaining. </unitinstructions>
+<deliveryparams>
+  <drill>12000</drill>            
             <purestudy>16000</purestudy>            
             <skipstudy>false</skipstudy>            
             <reviewstudy>16000</reviewstudy>            
-            <correctprompt>1000</correctprompt>         
-            <fontsize>3</fontsize>
+            <correctprompt>1000</correctprompt>         <fontsize>3</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames> 
-                <clustersrepeated>3</clustersrepeated>
-                <templatesrepeated>18</templatesrepeated>
-                <group>
-                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
-                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
-                    r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
-                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
-                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
-                    0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
-                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>
-                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
-                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
-                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>0-17</clusterlist>
-            <permutefinalresult>0-17 18-35 36-53</permutefinalresult>
-            <assignrandomclusters>true</assignrandomclusters>
-            <randomchoices> 0 1 2 </randomchoices>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <turkbonus>3.00</turkbonus>
-        <unitname>last</unitname>
-        <unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions>
-    </unit>
+</deliveryparams>
+<assessmentsession>
+<conditiontemplatesbygroup>
+<groupnames>A</groupnames> 
+<clustersrepeated>3</clustersrepeated>
+<templatesrepeated>18</templatesrepeated>
+<group>
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36
+</group>
+</conditiontemplatesbygroup>
+<initialpositions>
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 
+</initialpositions>
+<randomizegroups>false</randomizegroups>
+<clusterlist>0-17</clusterlist>
+<permutefinalresult>0-17 18-35 36-53</permutefinalresult>
+<assignrandomclusters>true</assignrandomclusters>
+<randomchoices>0-0 1-1 2-2</randomchoices>
+</assessmentsession>
+</unit>
+<unit>
+<turkbonus>3.00</turkbonus>
+<unitname>last</unitname>
+<unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions>
+</unit>
 </tutor>
