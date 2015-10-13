@@ -1319,6 +1319,7 @@ function resumeFromUserTimesLog() {
 
     //Clear any previous session data about unit/question/answer
     Session.set("turkApprovalSent", undefined);
+    Session.set("turkBonusSent", undefined);
     Session.set("clusterMapping", undefined);
     Session.set("currentUnitNumber", undefined);
     Session.set("questionIndex", undefined);
@@ -1331,6 +1332,7 @@ function resumeFromUserTimesLog() {
     //We default turkApprovalSent to false iff they are in experiment mode
     if (Session.get("loginMode") === "experiment") {
         Session.set("turkApprovalSent", false);
+        Session.set("turkBonusSent", false);
     }
 
     //So here's the place where we'll use the ROOT tdf instead of just the
@@ -1563,6 +1565,11 @@ function processUserTimesLog() {
             //We've attemted an approval. At this point, we don't care if it
             //succeeded since approval is now a matter of manual intervention
             Session.set("turkApprovalSent", true);
+        }
+
+        else if (action === "turk-bonus") {
+            //We've attemted a bonus - this is extremely similar to approval above
+            Session.set("turkBonusSent", true);
         }
 
         else if (action === "schedule") {

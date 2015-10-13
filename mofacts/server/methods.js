@@ -451,6 +451,7 @@ Meteor.startup(function () {
                 return "No valid username found";
             }
             turkid = Helpers.trim(turkid).toUpperCase();
+            var workerDbKey = usr._id;
 
             var ownerId = getTdfOwner(experiment);
             var ownerProfile = UserProfileData.findOne({_id: ownerId});
@@ -475,7 +476,7 @@ Meteor.startup(function () {
                 var assignmentId = null;
                 var previousBonus = false;
 
-                var userLog = UserTimesLog.findOne({ _id: turkid });
+                var userLog = UserTimesLog.findOne({ _id: workerDbKey });
                 var userLogEntries = [];
                 if (userLog && userLog[experiment] && userLog[experiment].length) {
                     userLogEntries = userLog[experiment];
@@ -485,8 +486,15 @@ Meteor.startup(function () {
                     var rec = userLogEntries[i];
                     var action = Helpers.trim(rec.action).toLowerCase();
                     if (action === "turk-approval" && !assignmentId) {
-                        if (typeof action.assignmentId !== "undefined") {
-                            assignmentId = Helpers.trim(action.assignmentId);
+                        if (typeof rec.assignmentDetails !== "undefined" &&
+                            typeof rec.assignmentDetails.AssignmentId !== "undefined" &&
+                            rec.assignmentDetails.AssignmentId.length)
+                        {
+                            assignmentId = Helpers.trim(Helpers.firstElement(rec.assignmentDetails.AssignmentId));
+                        }
+                        else {
+                            console.log("Bad Assignment found for bonus", rec);
+                            throw "Invalid assignment structure found for approval";
                         }
                     }
                     else if (action === "turk-bonus") {
@@ -511,8 +519,8 @@ Meteor.startup(function () {
                 var tdfFile = Tdfs.findOne({_id: tdfid});
                 var tdfUnit = null;
                 if (typeof tdfFile.tdfs.tutor.unit !== "undefined") {
-                    if (!!unitIdx || unitIdx === 0) {
-                        tdfUnit = thisTdf.tdfs.tutor.unit[unitnum];
+                    if (!!unitnum || unitnum === 0) {
+                        tdfUnit = tdfFile.tdfs.tutor.unit[unitnum];
                     }
                 }
 
@@ -541,7 +549,8 @@ Meteor.startup(function () {
                 workPerformed.bonusResponse = bonusResponse;
             }
             catch(e) {
-                errmsg = "Exception caught while processing Turk: " + JSON.stringify(e, null, 2);
+                console.log("Error processing Turk bonus", e);
+                errmsg = "Exception caught while processing Turk: " + Helpers.display(e);
             }
             finally {
                 var userLogEntry = _.extend({
@@ -554,7 +563,7 @@ Meteor.startup(function () {
                     'selectedTdfUnitNum': unitnum
                 }, workPerformed);
 
-                console.log("About to log entry for Turk", JSON.stringify(userLogEntry, null, 2));
+                console.log("About to log entry for Turk ", experiment, JSON.stringify(userLogEntry, null, 2));
                 writeUserLogEntries(experiment, userLogEntry);
             }
 

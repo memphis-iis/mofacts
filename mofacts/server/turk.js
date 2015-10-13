@@ -68,7 +68,7 @@ there are assignments that need to be approved.
         var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
         req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
 
-        console.log("About to send AWS MechTurk request", url, req);
+        console.log("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
 
         // All done
         var response = HTTP.post(url, {
@@ -231,20 +231,18 @@ there are assignments that need to be approved.
                 'Operation': 'GrantBonus',
                 'WorkerId': '',
                 'AssignmentId': '',
-                'BonusAmount': {
-                    'CurrencyCode': 'USD',
-                    'Amount': Helpers.floatVal(amount)
-                },
+                'BonusAmount.1.Amount': amount,
+                'BonusAmount.1.CurrencyCode': 'USD',
                 'Reason': ''
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
-
             var jsonResponse = response.json.GrantBonusResponse;
             var result = fe(jsonResponse.GrantBonusResult);
             var reqData = fe(result.Request);
             var isValid = fe(reqData.IsValid);
-            if (Helpers.trim(IsValid).toLowerCase() !== "true") {
+
+            if (Helpers.trim(isValid).toLowerCase() !== "true") {
                 throw {
                     'errmsg': 'Bonus Granting failed',
                     'response': response

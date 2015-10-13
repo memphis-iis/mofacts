@@ -173,6 +173,23 @@ Template.instructions.helpers({
         var currUnit = getCurrentTdfUnit();
         var turkpay = Helpers.trim(Helpers.firstElement(currUnit.turkpay)).toLowerCase();
         return (turkpay === "true");
+    },
+
+    turkBonus: function() {
+        //Turk display can only be active if we're in experiment mode and we
+        //haven't sent an approval
+        if (Session.get("loginMode") !== "experiment") {
+            return false; //Must be an experiment
+        }
+
+        if (!!Session.get("turkBonusSent")) {
+            return false; //Already done
+        }
+
+        //At this point, we should display turk stuff if it's in the TDF
+        var currUnit = getCurrentTdfUnit();
+        var turkbonus = Helpers.floatVal(Helpers.firstElement(currUnit.turkbonus));
+        return (turkbonus > 0.000001);
     }
 });
 
@@ -236,6 +253,44 @@ Template.instructions.events({
             //(If there was an error, it will need to be examined in the log
             //and manually handled)
             Session.set("turkApprovalSent", true);
+        });
+    },
+
+    'click #turkBonusButton': function(event) {
+        event.preventDefault();
+
+        var experiment = userTimesExpKey(true);
+
+        var tdfid = null;
+        var unitidx = null;
+        var currUnit = getCurrentTdfUnit();
+        if (!!currUnit) {
+            tdfid = getCurrentTdfFile()._id;
+            unitidx = getCurrentUnitNumber();
+        }
+
+        console.log("About to request bonus for ", experiment, tdfid, unitidx);
+
+        $('#turkModal').modal('show');
+        Meteor.call("turkBonus", experiment, tdfid, unitidx, function(error, result){
+            $('#turkModal').modal('hide');
+
+            if (typeof error !== "undefined") {
+                //something happened - hopefully things will be updated reactively
+                console.log("Failed to handle turk bonus. Error:", error);
+            }
+            else if (result !== null) {
+                //Server returned an error
+                console.log("Server error on turk bous. Msg:", result);
+            }
+            else {
+                console.log("Server turk bonus appeared to work");
+            }
+
+            //No matter what, we should now be Turk approved
+            //(If there was an error, it will need to be examined in the log
+            //and manually handled)
+            Session.set("turkBonusSent", true);
         });
     },
 

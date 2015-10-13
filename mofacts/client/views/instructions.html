@@ -49,11 +49,20 @@
                     <div class="turk-notice">
                         Please click here after you've enter the code above at the
                         Mechanical Turk Website.
-                        <button type="button" id="turkButton" class="btn ">
-                            Ready for Approval
+                        <button type="button" id="turkButton" class="btn">
+                            Approve My Work!
                         </button>
                     </div>
                 {{else}}
+                    {{#if turkBonus}}
+                        <div class="turk-notice">
+                            Thank you! Please claim your bonus by clicking the button
+                            <button type="button" id="turkBonusButton" class="btn">
+                                Claim My Bonus!
+                            </button>
+                        </div>
+                    {{/if}}
+
                     <div class="form-group">
                         {{#if islockout}}
                             <div id="lockoutDisplay" class="visible-text">
