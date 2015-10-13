@@ -1,7 +1,8 @@
-/* turk.js
+/* turk.js - Provide access to AWS Mechanical Turk services using AWS data that
+we track per user. See turk_methods.js for the implementation of the server
+methods called by the client-side code
 ******************************************************************************
-Provide access to AWS Mechanical Turk services using AWS data that we track
-per user. Some helpful documentation:
+Some helpful documentation:
 
 Accessing the sandbox (vs prod)
 https://workersandbox.mturk.com/?sandboxinfo=true
