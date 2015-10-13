@@ -25,19 +25,6 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
 }
 
-.navbar-inverse {
-    background-color: #585858;
-}
-
-.btn { color:white;
-    border-radius: 0;
-    background-color: #118C4E;
-    border-color: #118C4E;
-    font-family: 'Lato', sans-serif;
-    font-size: 16px;
-    white-space:normal;
-}
-
 #cardQuestionImg {
     width:auto;
     height:340px; /* Height is expected to be changed: see index.js */
@@ -79,10 +66,55 @@ legend {
     border-radius: 0;
 }
 
+.navbar-inverse {
+    background-color: #585858;
+}
+
 .navbar-inverse .navbar-brand {
     color: white;
     font-family: 'Lato', sans-serif;
     font-size: 28px;
+}
+
+.navbar-inverse .navbar-nav > li > a {
+    color: white;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
+}
+
+.navbar-inverse .navbar-nav > li > a:focus {
+    color: white;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
+}
+
+.form-control {
+    border-radius: 0;
+}
+
+.btn {
+    color: white;
+    border-radius: 0;
+    border: none;
+    background: #118C4E;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    white-space:normal;
+    width: 100%;
+}
+
+.btn:hover {
+    background-color: #585858;
+    color:white;
+}
+
+.btn-fix {
+    width: auto;
+}
+
+.form-control:focus {
+    box-shadow: 1px 1px 1px 1px #118C4E;
+    border: black;
 }
 
 .dropdown-menu {
@@ -93,27 +125,6 @@ legend {
 .dropdown-menu > li > a:focus {
     background-color: #585858;
     color: white;
-}
-
-.form-control {
-    border-radius: 0;
-}
-
-.btn {
-    border: none;
-    background: #118C4E;
-    font-family: 'Lato', sans-serif;
-    width: 100%;
-}
-
-.btn:hover {
-    background-color: #585858;
-    color:white;
-}
-
-.form-control:focus {
-    box-shadow: 1px 1px 1px 1px #118C4E;
-    border: black;
 }
 
 .dropdown-menu > li > a {
@@ -135,6 +146,12 @@ legend {
     font-family: 'Lato', sans-serif;
 }
 
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+    color: white;
+    background-color: #585858;
+    font-family: 'Lato', sans-serif;
+}
+
 .panel, .panel-heading, .panel-body {
     border-radius: 0;
 }
@@ -142,24 +159,6 @@ legend {
 .center-fill-parent {
     width: 100%;
     margin: auto;
-}
-
-.navbar-inverse .navbar-nav > li > a {
-    color: white;
-    background-color: #585858;
-    font-family: 'Lato', sans-serif;
-}
-
-.navbar-inverse .navbar-nav > li > a:focus {
-    color: white;
-    background-color: #585858;
-    font-family: 'Lato', sans-serif;
-}
-
-.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
-    color: white;
-    background-color: #585858;
-    font-family: 'Lato', sans-serif;
 }
 
 input:focus {

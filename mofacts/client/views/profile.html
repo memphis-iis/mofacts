@@ -76,7 +76,7 @@
                     <tr>
                         <th>&nbsp;</th>
                         <td>
-                            <button type='button' id='saveProfile' class='btn'>
+                            <button type='button' id='saveProfile' class='btn btn-fix'>
                                 Save Profile Data
                             </button>
                             <br>
@@ -103,7 +103,7 @@
                             <label for="turk-assignid">Assignment ID</label>
                             <input type="text" class="form-control" cname="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
                         </div>
-                        <button id="turk-show-assign" class="btn">Get Assignment!</button>
+                        <button id="turk-show-assign" class="btn btn-fix">Get Assignment!</button>
                         <pre id="turk-assign-results" style="width:100%">
                         </pre>
                     </div>
@@ -116,9 +116,61 @@
                             <label for="turk-workerid">Worker ID</label>
                             <input type="text" class="form-control" name="turk-workerid" id="turk-workerid" value="" placeholder="Mechanical Turk WorkerID">
                         </div>
-                        <button id="turk-send-msg" class="btn">Send Message!</button>
+                        <button id="turk-send-msg" class="btn btn-fix">Send Message!</button>
                         <textarea name="turk-msg" id="turk-msg" rows="8" cols="40" placeholder="Message text goes here"></textarea>
                     </div>
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if isInRole 'admin,teacher'}}
+            <br><br>
+
+            <div class="row">
+                <div class="col-md-12" id="turkLogSelectContainer">
+                    <legend class="text-center">Select a TDF to see the Turk Log</legend>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <legend class="text-center">
+                        Turk Experiment Log <span id="turkExpTitle"></span>
+                    </legend>
+
+                    <table class="table table-striped table-bordered">
+                        <thead><tr>
+                            <th>Usr ID</th>
+                            <th>Usr Name</th>
+                            <th>Approval</th>
+                            <th>Bonus</th>
+                        </tr></thead>
+
+                        <tbody>
+                        {{#each turkExperimentLog}}
+                            <tr>
+                                <td>{{userid}}</td>
+                                <td>{{username}}</td>
+                                <td>
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-pay-detail"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-zoom-in"></span>
+                                    </button>
+                                    {{turkpay}}
+                                </td>
+                                <td>
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-bonus-detail"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-zoom-in"></span>
+                                    </button>
+                                    {{turkbonus}}
+                                </td>
+                            </tr>
+                        {{/each}}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         {{/if}}
@@ -135,6 +187,19 @@
                         <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
                         <p class="pull-right">Please wait while we contact Mechanical Turk</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+        <div class="modal-dialog" role="document" style="width:98%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailsModalLabel">Turk Experiment Log Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="detailsModalListing" style="white-space:pre;"></div>
                 </div>
             </div>
         </div>

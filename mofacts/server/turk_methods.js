@@ -324,5 +324,57 @@ Meteor.methods({
         }
 
         return errmsg;
+    },
+
+    //Given an experiment name, return the current status of any turk activities
+    turkUserLogStatus: function(experiment) {
+        var expKey = ('' + experiment).replace(/\./g, "_");
+        var records = [];
+
+        UserTimesLog.find({}).forEach(function (entry) {
+            if (!(expKey in entry)) {
+                return;
+            }
+
+            var recs = entry[expKey];
+            if (!recs || !recs.length) {
+                return;
+            }
+
+            var userRec = Meteor.users.findOne({_id: entry._id});
+            if (!userRec || !userRec.username) {
+                return;
+            }
+
+            var data = {
+                userid: entry._id,
+                username: userRec.username,
+                turkpay: '?',
+                turkpayDetails: 'No Details Found',
+                turkbonus: '?',
+                turkbonusDetails: 'No Details Found'
+            };
+
+            for (var i = 0; i < recs.length; ++i) {
+                var rec = recs[i];
+                if (!rec || !rec.action) {
+                    continue;
+                }
+
+                var act = Helpers.trim(rec.action).toLowerCase();
+                if (act === "turk-approval") {
+                    data.turkpay = rec.success ? 'Complete' : 'FAIL';
+                    data.turkpayDetails = rec;
+                }
+                else if (act === "turk-bonus") {
+                    data.turkbonus = rec.success ? 'Complete' : 'FAIL';
+                    data.turkbonusDetails = rec;
+                }
+            }
+
+            records.push(data);
+        });
+
+        return records;
     }
 });

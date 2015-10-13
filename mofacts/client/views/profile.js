@@ -1,4 +1,30 @@
 ////////////////////////////////////////////////////////////////////////////
+// Template storage
+
+var turkExperimentLog = new Mongo.Collection(null); //local-only - no database;
+
+function clearTurkExpLog() {
+    turkExperimentLog.remove({'temp': 1});
+}
+
+// We are expecting the format supplied by the server method turkUserLogStatus
+function populateTurkExpLog(serverData) {
+    _.each(serverData, function(val, idx) {
+        console.log(val);
+        turkExperimentLog.insert({
+            temp: 1,
+            idx: idx,
+            userid: val.userid,
+            username: val.username,
+            turkpay: val.turkpay,
+            turkpayDetails: val.turkpayDetails,
+            turkbonus: val.turkbonus,
+            turkbonusDetails: val.turkbonusDetails
+        });
+    });
+}
+
+////////////////////////////////////////////////////////////////////////////
 // Template Events
 
 Template.profile.events({
@@ -98,6 +124,74 @@ Template.profile.events({
             console.log(disp);
             alert(disp);
         });
+    },
+
+    'click .btn-log-select': function(event) {
+        event.preventDefault();
+
+        var target = $(event.target);
+        var exp = target.data("tdffilename");
+
+        $("#turkExpTitle").text("Viewing data for " + exp);
+        clearTurkExpLog();
+
+        $('#turkModal').modal('show');
+        Meteor.call("turkUserLogStatus", exp, function(error, result){
+            $('#turkModal').modal('hide');
+
+            if (typeof error !== "undefined") {
+                var disp = "Failed to retrieve log entries. Error:" + error;
+                console.log(disp);
+                alert(disp);
+                return;
+            }
+
+            populateTurkExpLog(result);
+        });
+    },
+
+    'click .btn-pay-detail': function(event) {
+        event.preventDefault();
+
+        $("#detailsModal").modal('hide');
+
+        var target = $(event.target);
+        var idx = Helpers.intVal(target.data("idx"));
+
+        var disp;
+        try {
+            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
+            console.log(data);
+            disp = JSON.stringify(data.turkpayDetails, null, 2);
+        }
+        catch(e) {
+            disp = "Error finding details to display: " + e;
+        }
+
+        $("#detailsModalListing").text(disp);
+        $("#detailsModal").modal('show');
+    },
+
+    'click .btn-bonus-detail': function(event) {
+        event.preventDefault();
+
+        $("#detailsModal").modal('hide');
+
+        var target = $(event.target);
+        var idx = Helpers.intVal(target.data("idx"));
+
+        var disp;
+        try {
+            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
+            console.log(data);
+            disp = JSON.stringify(data.turkbonusDetails, null, 2);
+        }
+        catch(e) {
+            disp = "Error finding details to display: " + e;
+        }
+
+        $("#detailsModalListing").text(disp);
+        $("#detailsModal").modal('show');
     }
 });
 
@@ -173,10 +267,25 @@ Template.profile.helpers({
     },
     have_aws_secret: function() {
         return getProfileField('have_aws_secret');
-    }
+    },
+
+    turkExperimentLog: function() {
+        return turkExperimentLog.find({}, {sort: {idx: 1}});
+    },
 });
 
 Template.profile.rendered = function () {
+    //Init the modal dialogs
+    $('#turkModal').modal({
+        'backdrop': 'static',
+        'keyboard': false,
+        'show': false
+    });
+
+    $('#detailsModal').modal({
+        'show': false
+    });
+
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 
@@ -259,7 +368,7 @@ Template.profile.rendered = function () {
 
         addButton(
             $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
-                .addClass("btn  btn-block stimButton")
+                .addClass("btn btn-block stimButton")
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
                 .data("tdfkey", tdfObject._id)
@@ -274,13 +383,14 @@ Template.profile.rendered = function () {
                     .text("Download: " + name + " (DataShop format)")
             )
         );
-//  $("#expDataDownloadContainer").append(
-//            $("<div></div>").append(
-//                $("<a class='exp-data-link' target='_blank'></a>")
-//                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/basic")
-//                    .text("Download data for " + name + " basic.")
-//            )
-//        );
+
+        $("#turkLogSelectContainer").append(
+            $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
+                .addClass("btn btn-fix btn-sm btn-success btn-log-select")
+                .css('margin', '3px')
+                .data("tdffilename", tdfObject.fileName)
+                .html(name)
+        );
     });
 
     //Did we find something to auto-jump to?
