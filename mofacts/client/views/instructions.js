@@ -4,6 +4,7 @@
 
 var lockoutInterval = null;
 var lockoutFreeTime = null;
+var serverNotify = null;
 
 function startLockoutInterval() {
     clearLockoutInterval();
@@ -19,6 +20,7 @@ function clearLockoutInterval() {
     }
     lockoutInterval = null;
     lockoutFreeTime = null;
+    serverNotify = null;
 }
 
 function leavePage(dest) {
@@ -98,6 +100,24 @@ function lockoutPeriodicCheck() {
         $("#lockoutDisplay").show();
         $("#lockoutTimeRemaining").text(timeLeftDisplay);
         $("#continueButton").prop("disabled", true);
+
+        //Make sure that the server knows a lockout has been detected - but
+        //we only need to call it once
+        if (serverNotify === null) {
+            serverNotify = _.once(function() {
+                var lockoutmsg = ""; //TODO: msg (with current URL)
+
+                Meteor.call("turkScheduleLockoutMessage", lockoutFreeTime + 1, lockoutmsg, function(error, result) {
+                    if (typeof error !== "undefined") {
+                        console.log("Server schedule failed. Error:", error);
+                    }
+                    else {
+                        console.log("Server accepted lockout msg schedule");
+                    }
+                });
+            });
+        }
+        serverNotify();
     }
 }
 

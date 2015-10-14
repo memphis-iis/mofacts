@@ -97,6 +97,11 @@ Meteor.methods({
         }
     },
 
+    //Message sending for the end of a lockout
+    turkScheduleLockoutMessage: function(lockoutend, lockoutmsg) {
+        //TODO: schedule
+    },
+
     //Given a currently logged in user, an experiment, and a msg - we
     //attempt to pay the user for the current MTurk HIT/assignment.
     //RETURNS: null on success or an error message on failure. Any results
