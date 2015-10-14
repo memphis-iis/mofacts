@@ -15,7 +15,7 @@ function populateTurkExpLog(serverData) {
             temp: 1,
             idx: idx,
             userid: val.userid,
-            username: val.username,
+            turk_username: val.username,
             turkpay: val.turkpay,
             turkpayDetails: val.turkpayDetails,
             turkbonus: val.turkbonus,
@@ -84,6 +84,7 @@ Template.profile.events({
                 console.log("Profile saved:", result);
                 //Clear any controls that shouldn't be kept around
                 $(".clearOnSave").val("");
+                alert("Your profile changes have been saved");
             }
         });
     },
