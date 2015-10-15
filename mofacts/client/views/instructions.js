@@ -105,9 +105,19 @@ function lockoutPeriodicCheck() {
         //we only need to call it once
         if (serverNotify === null) {
             serverNotify = _.once(function() {
-                var lockoutmsg = ""; //TODO: msg (with current URL)
+                if (Session.get("loginMode") !== "experiment") {
+                    return; //Nothing to do
+                }
 
-                Meteor.call("turkScheduleLockoutMessage", lockoutFreeTime + 1, lockoutmsg, function(error, result) {
+                //At this point, we should display turk stuff if it's in the TDF
+                var currUnit = getCurrentTdfUnit();
+                var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkpay));
+
+                if (!turkemail) {
+                    return; //No message
+                }
+
+                Meteor.call("turkScheduleLockoutMessage", lockoutFreeTime + 1, turkemail, function(error, result) {
                     if (typeof error !== "undefined") {
                         console.log("Server schedule failed. Error:", error);
                     }
@@ -251,10 +261,11 @@ Template.instructions.events({
         event.preventDefault();
 
         var currUnit = getCurrentTdfUnit();
-        var turkMsg = Helpers.firstElement(currUnit.turkemail);
 
+        //Actually approve - note that we currently just use the default
+        //message the server offers
         $('#turkModal').modal('show');
-        Meteor.call("turkPay", userTimesExpKey(true), turkMsg, function(error, result){
+        Meteor.call("turkPay", userTimesExpKey(true), null, function(error, result){
             $('#turkModal').modal('hide');
 
             if (typeof error !== "undefined") {
