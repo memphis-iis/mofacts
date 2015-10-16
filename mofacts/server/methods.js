@@ -83,6 +83,16 @@ Meteor.publish(null, function () {
     return defaultData;
 });
 
+//Config for scheduled jobs - the start command is at the end of
+//Meteor.startup below
+SyncedCron.config({
+    log: true,
+    logger: null,
+    collectionName: 'cronHistory',
+    utc: false,
+    collectionTTL: undefined
+});
+
 //Server-side startup logic
 
 Meteor.startup(function () {
@@ -223,6 +233,9 @@ Meteor.startup(function () {
             console.log(usr + " " + logtxt);
         },
     });
+
+    //Start up synched cron background jobs
+    SyncedCron.start();
 });
 
 //We use a special server-side route for our experimental data download

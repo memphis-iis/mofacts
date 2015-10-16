@@ -98,8 +98,69 @@ Meteor.methods({
     },
 
     //Message sending for the end of a lockout
-    turkScheduleLockoutMessage: function(lockoutend, lockoutmsg) {
-        //TODO: schedule
+    turkScheduleLockoutMessage: function(experiment, lockoutend, lockoutmsg) {
+        try {
+            var usr, turkid, ownerId;
+
+            usr = Meteor.user();
+            if (!usr || !usr._id) {
+                throw Meteor.Error("No current user");
+            }
+
+            turkid = !!usr ? usr.username : null;
+            if (!turkid) {
+                throw Meteor.Error("No valid username found");
+            }
+            turkid = Helpers.trim(turkid).toUpperCase();
+
+            ownerId = getTdfOwner(experiment);
+
+            var ownerProfile = UserProfileData.findOne({_id: ownerId});
+            if (!ownerProfile) {
+                throw Meteor.Error("Could not find TDF owner profile for id '" + ownerId + "'");
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                throw Meteor.Error("Current TDF owner not set up for AWS/MTurk");
+            }
+
+            var msgtext = "The lock out period has ended - you may continue.\n\n" + lockoutmsg;
+            var jobName = 'Message for ' + experiment + ' to ' + turkid;
+            var schedDate = new Date(lockoutend);
+
+            console.log("Scheduling:", jobName, "at", schedDate);
+            SyncedCron.add({
+                name: jobName,
+
+                schedule: function(parser) {
+                    return parser.recur().on(schedDate).fullDate();
+                },
+
+                job: function() {
+                    console.log("Running scheduled job", jobName);
+                    try {
+                        var requestParams = {
+                            'Subject': "Message from " + turkid + " Profile Page",
+                            'MessageText': msgtext,
+                            'WorkerId': turkid
+                        };
+                        var ret = turk.notifyWorker(ownerProfile, requestParams);
+                        console.log("Completed scheduled job", jobName);
+                        return _.extend({'passedParams': requestParams}, ret);
+                    }
+                    catch(e) {
+                        console.log("Error finishing", jobname, e);
+                        return e;
+                    }
+                }
+            });
+
+            console.log("Scheduled Message scheduled for:", SyncedCron.nextScheduledAtDate(jobName));
+            return "Message scheduled";
+        }
+        catch(e) {
+            console.log("Failure scheduling turk message at later date:", e);
+            throw Meteor.Error("Message-Failure", e.error, e);
+        }
     },
 
     //Given a currently logged in user, an experiment, and a msg - we
@@ -117,7 +178,7 @@ Meteor.methods({
         var ownerId = getTdfOwner(experiment);
         var ownerProfile = UserProfileData.findOne({_id: ownerId});
         if (!ownerProfile) {
-            return "Could not find TDF owner profile for id ''" + ownerId + "'";
+            return "Could not find TDF owner profile for id '" + ownerId + "'";
         }
         if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
             return "Current TDF owner not set up for AWS/MTurk";
@@ -217,7 +278,7 @@ Meteor.methods({
         var ownerId = getTdfOwner(experiment);
         var ownerProfile = UserProfileData.findOne({_id: ownerId});
         if (!ownerProfile) {
-            return "Could not find TDF owner profile for id ''" + ownerId + "'";
+            return "Could not find TDF owner profile for id '" + ownerId + "'";
         }
         if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
             return "Current TDF owner not set up for AWS/MTurk";

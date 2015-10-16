@@ -104,30 +104,32 @@ function lockoutPeriodicCheck() {
         //Make sure that the server knows a lockout has been detected - but
         //we only need to call it once
         if (serverNotify === null) {
-            serverNotify = _.once(function() {
+            serverNotify = function() {
                 if (Session.get("loginMode") !== "experiment") {
                     return; //Nothing to do
                 }
 
                 //At this point, we should display turk stuff if it's in the TDF
                 var currUnit = getCurrentTdfUnit();
-                var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkpay));
+                var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkemail));
 
                 if (!turkemail) {
                     return; //No message
                 }
 
-                Meteor.call("turkScheduleLockoutMessage", lockoutFreeTime + 1, turkemail, function(error, result) {
+                var experiment = userTimesExpKey(true);
+
+                Meteor.call("turkScheduleLockoutMessage", experiment, lockoutFreeTime + 1, turkemail, function(error, result) {
                     if (typeof error !== "undefined") {
                         console.log("Server schedule failed. Error:", error);
                     }
                     else {
-                        console.log("Server accepted lockout msg schedule");
+                        console.log("Server accepted lockout msg schedule", lockoutFreeTime + 1, turkemail);
                     }
                 });
-            });
+            };
+            serverNotify();
         }
-        serverNotify();
     }
 }
 
