@@ -12,7 +12,7 @@
         <swapclusters>0-17 18-35</swapclusters>
     </setspec><unit> <unitname>Show the questions</unitname>        
         <unitinstructions><![CDATA[<font size="2">Consent to Use Data<br><br>The Mechanical Turk task you have selected is part of a research project that is described below.  You will use you computer for this experiment, first to load the program, then to practice for 68 sentences, then you will either complete the posttest after a 2 minute wait, or be chosen for 1 day or 3 day later posttest completion, at which time you will see 54 concluding sentence presentations. This study should take no longer than 60 minutes total to complete. <br><br>
-If you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjects’ rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>
+If you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>
 All efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by Unviersity of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.<br><br>
 By clicking this button, I consent to the above terms. 
 ]]></unitinstructions>     
@@ -100,7 +100,7 @@ C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
             <randomchoices>4</randomchoices></assessmentsession>
     </unit>
 <unit>
-<turkpay>2.00</turkpay>
+<turkpay>true</turkpay>
 <turkemail><![CDATA[
 Dear Amazon Turk Worker,
 
