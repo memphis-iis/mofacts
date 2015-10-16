@@ -2,7 +2,7 @@
     <setspec>
         <name>Statistics Practice</name> 
         <lessonname>SVOnumbak0tdf.xml</lessonname>
-        <userselect>true</userselect> 
+        <userselect>false</userselect> 
         <stimulusfile>SVO4stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
@@ -12,7 +12,7 @@
         <swapclusters>0-17 18-35</swapclusters>
     </setspec><unit> <unitname>Show the questions</unitname>        
         <unitinstructions><![CDATA[<font size="2">Consent to Use Data<br><br>The Mechanical Turk task you have selected is part of a research project that is described below.  You will use you computer for this experiment, first to load the program, then to practice for 68 sentences, then you will either complete the posttest after a 2 minute wait, or be chosen for 1 day or 3 day later posttest completion, at which time you will see 54 concluding sentence presentations. This study should take no longer than 60 minutes total to complete. <br><br>
-If you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjectsï¿½ rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>
+If you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjects’ rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>
 All efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by Unviersity of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.<br><br>
 By clicking this button, I consent to the above terms. 
 ]]></unitinstructions>     
@@ -100,7 +100,18 @@ C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
     </unit>
 <unit>
 <turkpay>2.00</turkpay>
-<turkemail>text</turkemail>
+<turkemail><![CDATA[
+Dear Amazon Turk Worker,
+
+Recently you completed part 1 of a 2 part experiment called 'Memory for Statistics Experiment 3', which paid $2.00. Now we would appreciate it if you would please return do part 2. It is a bit less work than part 1, but we pay a $3.00 bonus for completion, since it is so important for us to get the part 2 data.
+
+Please avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. You have 54 sentences remaining.'
+
+Here is the link to finish: http://mofacts.optimallearning.org/experiment/svo
+
+Thanks for your help,
+Phil
+        ]]></turkemail>
 <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
 
 If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.

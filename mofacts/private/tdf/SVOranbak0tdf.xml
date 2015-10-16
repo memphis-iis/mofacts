@@ -101,7 +101,18 @@ C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
     </unit>
 <unit>
 <turkpay>2.00</turkpay>
-<turkemail>text</turkemail>
+<turkemail><![CDATA[
+Dear Amazon Turk Worker,
+
+Recently you completed part 1 of a 2 part experiment called 'Memory for Statistics Experiment 3', which paid $2.00. Now we would appreciate it if you would please return do part 2. It is a bit less work than part 1, but we pay a $3.00 bonus for completion, since it is so important for us to get the part 2 data.
+
+Please avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. You have 54 sentences remaining.'
+
+Here is the link to finish: http://mofacts.optimallearning.org/experiment/svo
+
+Thanks for your help,
+Phil
+        ]]></turkemail>
 <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
 
 If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
