@@ -2,9 +2,9 @@
     <setspec>
         <name>Statistics Practice</name>
         <lessonname>SVO TURK</lessonname>
-        <userselect>true</userselect>
+        <userselect>false</userselect>
         <randomizedDelivery>3</randomizedDelivery>
-        <experimentTarget>svoturk</experimentTarget>
+        <experimentTarget>svoturktesting</experimentTarget>
         <stimulusfile>SVO4stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
