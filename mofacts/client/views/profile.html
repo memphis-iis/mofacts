@@ -41,6 +41,21 @@
         </div>
 
         {{#if isInRole 'admin,teacher'}}
+            <br><br>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="upload-tdf">TDF File</label>
+                        <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
+                    </div>
+                    <button type='button' id='doUploadTDF' class='btn btn-fix'>
+                        Upload TDF File
+                    </button>
+                </div>
+            </div>
+        {{/if}}
+
+        {{#if isInRole 'admin,teacher'}}
         <br><br>
         <div class="row">
             <div class="col-md-5" id="profileContainer">
@@ -101,7 +116,7 @@
                         <legend class="text-center">View Turk Assignment Details</legend>
                         <div class="form-group">
                             <label for="turk-assignid">Assignment ID</label>
-                            <input type="text" class="form-control" cname="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
+                            <input type="text" class="form-control" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
                         </div>
                         <button id="turk-show-assign" class="btn btn-fix">Get Assignment!</button>
                         <pre id="turk-assign-results" style="width:100%">

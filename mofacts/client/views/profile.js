@@ -65,9 +65,23 @@ Template.profile.events({
         );
     },
 
+    'click #doUploadTDF': function(event) {
+        event.preventDefault();
+        _.each($("#upload-tdf").prop("files"), function(file) {
+            var name = file.name;
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
+                // Meteor.call('saveTDFFile', name, file.srcElement.result, function(error, result) {
+                //     //TODO: need this call implemented and tell the user what the result was
+                // });
+            };
+            fileReader.readAsBinaryString(file);
+        });
+    },
+
     'click #saveProfile': function(event) {
         event.preventDefault();
-        console.log(event);
 
         var data = {
             aws_id: $("#profileAWSID").val(),
