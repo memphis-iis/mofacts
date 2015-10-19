@@ -98,7 +98,7 @@ Meteor.methods({
     },
 
     //Message sending for the end of a lockout
-    turkScheduleLockoutMessage: function(experiment, lockoutend, lockoutmsg) {
+    turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
         try {
             var usr, turkid, ownerId;
 
@@ -123,7 +123,8 @@ Meteor.methods({
                 throw Meteor.Error("Current TDF owner not set up for AWS/MTurk");
             }
 
-            var msgtext = "The lock out period has ended - you may continue.\n\n" + lockoutmsg;
+            subject = subject || Helpers.trim("Message from " + turkid + " Profile Page");
+            var msgtext = "The lock out period has ended - you may continue.\n\n" + msgbody;
             var jobName = 'Message for ' + experiment + ' to ' + turkid;
             var schedDate = new Date(lockoutend);
 
@@ -139,7 +140,7 @@ Meteor.methods({
                     console.log("Running scheduled job", jobName);
                     try {
                         var requestParams = {
-                            'Subject': "Message from " + turkid + " Profile Page",
+                            'Subject': subject,
                             'MessageText': msgtext,
                             'WorkerId': turkid
                         };
@@ -195,6 +196,8 @@ Meteor.methods({
             if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
                 throw "Current TDF owner not set up for AWS/MTurk";
             }
+
+            //TODO: look for turkminscore and check vs their current score (which we'll need to calculate)
 
             // Get available HITs
             hitlist = turk.getAvailableHITs(ownerProfile, {});

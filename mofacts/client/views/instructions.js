@@ -151,6 +151,7 @@ function lockoutPeriodicCheck() {
                 //At this point, we should display turk stuff if it's in the TDF
                 var currUnit = getCurrentTdfUnit();
                 var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkemail));
+                var subject = Helpers.trim(Helpers.firstElement(currUnit.turkemailsubject));
 
                 if (!turkemail) {
                     return; //No message
@@ -158,7 +159,7 @@ function lockoutPeriodicCheck() {
 
                 var experiment = userTimesExpKey(true);
 
-                Meteor.call("turkScheduleLockoutMessage", experiment, lockoutFreeTime + 1, turkemail, function(error, result) {
+                Meteor.call("turkScheduleLockoutMessage", experiment, lockoutFreeTime + 1, subject, turkemail, function(error, result) {
                     if (typeof error !== "undefined") {
                         console.log("Server schedule failed. Error:", error);
                     }
