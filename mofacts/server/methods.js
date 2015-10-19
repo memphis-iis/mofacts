@@ -226,14 +226,42 @@ Meteor.startup(function () {
         //mainly since we don't want some of this data just flowing around
         //between client and server
         saveUserProfileData: function(profileData) {
-            var data = _.extend(defaultUserProfile(), profileData);
-            data.have_aws_id = data.aws_id.length > 0;
-            data.have_aws_secret = data.aws_secret_key.length > 0;
+            var saveResult, acctBal, result, errmsg;
+            try {
+                data = _.extend(defaultUserProfile(), profileData);
 
-            data.aws_id = encryptUserData(data.aws_id);
-            data.aws_secret_key = encryptUserData(data.aws_secret_key);
+                //Check length BEFORE any kind of encryption
+                data.have_aws_id = data.aws_id.length > 0;
+                data.have_aws_secret = data.aws_secret_key.length > 0;
 
-            return userProfileSave(Meteor.userId(), data);
+                data.aws_id = encryptUserData(data.aws_id);
+                data.aws_secret_key = encryptUserData(data.aws_secret_key);
+
+                saveResult = userProfileSave(Meteor.userId(), data);
+
+                //We test by reading the profile back and checking their
+                //account balance
+                acctBal = turk.getAccountBalance(
+                    UserProfileData.findOne({_id: Meteor.user()._id})
+                );
+                if (!acctBal) {
+                    throw "There was an error reading your account balance";
+                }
+
+                result = true;
+                errmsg = "";
+            }
+            catch(e) {
+                result = false;
+                errmsg = e;
+            }
+
+            return {
+                'result': result,
+                'saveResult': saveResult,
+                'acctBal': acctBal,
+                'error': errmsg
+            };
         },
 
         //Log one or more user records for the currently running experiment
