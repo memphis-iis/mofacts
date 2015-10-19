@@ -98,7 +98,7 @@ Template.profile.events({
                 console.log("Profile saved:", result);
                 //Clear any controls that shouldn't be kept around
                 $(".clearOnSave").val("");
-                alert("Your profile changes have been saved");
+                alert("Your profile changes have been saved: " + JSON.stringify(result, null, 2));
             }
         });
     },

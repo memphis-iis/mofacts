@@ -7,23 +7,26 @@ ln -s /vagrant $HOME/mofacts
 
 # Install MongoDB
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+#echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
 sudo apt-get update
-sudo apt-get install -y mongodb-org
+# The current version of Mongo on optimallearning.org is 2.4.10, so we stick with that
+sudo apt-get install -y mongodb-10gen=2.4.10
+echo "mongodb-10gen hold" | sudo dpkg --set-selections
 
 # Change mongo to listen on all addresses (which is fine since we're walled off)
 PDIR="$HOME/.provision"
 mkdir -p $PDIR
 
-CFGSRC="/etc/mongod.conf"
-CFGBASE="$PDIR/mongod.conf"
+CFGSRC="/etc/mongodb.conf"
+CFGBASE="$PDIR/mongodb.conf"
 
 cp $CFGSRC $CFGBASE.old
 sed "s/bind_ip/#bind_ip/" < $CFGBASE.old > $CFGBASE.new
 sudo cp $CFGBASE.new $CFGSRC
 
 # Now restart the service since we've changed the config
-sudo service mongod restart
+sudo service mongodb restart
 
 
 # Install meteor
