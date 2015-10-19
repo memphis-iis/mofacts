@@ -33,6 +33,38 @@ function leavePage(dest) {
     }
 }
 
+function checkTurkActive() {
+    //Turk display can only be active if we're in experiment mode
+    if (Session.get("loginMode") !== "experiment") {
+        return true; //Must be an experiment
+    }
+
+    if (!!Session.get("turkApprovalSent")) {
+        return false; //Already done
+    }
+
+    //At this point, we should display turk stuff if it's in the TDF
+    var currUnit = getCurrentTdfUnit();
+    var turkpay = Helpers.trim(Helpers.firstElement(currUnit.turkpay)).toLowerCase();
+    return (turkpay === "true");
+}
+
+function checkTurkBonus() {
+    //Turk display can only be active if we're in experiment mode
+    if (Session.get("loginMode") !== "experiment") {
+        return false; //Must be an experiment
+    }
+
+    if (!!Session.get("turkBonusSent")) {
+        return false; //Already done
+    }
+
+    //At this point, we should display turk stuff if it's in the TDF
+    var currUnit = getCurrentTdfUnit();
+    var turkbonus = Helpers.floatVal(Helpers.firstElement(currUnit.turkbonus));
+    return (turkbonus > 0.000001);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
@@ -71,6 +103,13 @@ function lockoutPeriodicCheck() {
         $("#lockoutDisplay").hide();
         $("#continueButton").prop("disabled", false);
         clearLockoutInterval();
+
+        //If there isn't anything pending for mechanical turk, we will continue
+        //as if they clicked on the button. Note that this auto-continue ONLY
+        //happens for units with a lockout time
+        if (!checkTurkActive() && !checkTurkBonus()) {
+            $("#continueButton").click();
+        }
     }
     else {
         //Still locked
@@ -189,41 +228,17 @@ Template.instructions.helpers({
     },
 
     //Note that the current template won't display continue or lockout stuff
-    //if turkActive returns true
+    //if turkActive or turkBonus returns true
+
     turkActive: function() {
-        //Turk display can only be active if we're in experiment mode and we
-        //haven't sent an approval
-        if (Session.get("loginMode") !== "experiment") {
-            return false; //Must be an experiment
-        }
-
-        if (!!Session.get("turkApprovalSent")) {
-            return false; //Already done
-        }
-
-        //At this point, we should display turk stuff if it's in the TDF
-        var currUnit = getCurrentTdfUnit();
-        var turkpay = Helpers.trim(Helpers.firstElement(currUnit.turkpay)).toLowerCase();
-        return (turkpay === "true");
+        return checkTurkActive();
     },
 
     turkBonus: function() {
-        //Turk display can only be active if we're in experiment mode and we
-        //haven't sent an approval
-        if (Session.get("loginMode") !== "experiment") {
-            return false; //Must be an experiment
-        }
-
-        if (!!Session.get("turkBonusSent")) {
-            return false; //Already done
-        }
-
-        //At this point, we should display turk stuff if it's in the TDF
-        var currUnit = getCurrentTdfUnit();
-        var turkbonus = Helpers.floatVal(Helpers.firstElement(currUnit.turkbonus));
-        return (turkbonus > 0.000001);
+        return checkTurkBonus();
     }
 });
+
 
 Template.instructions.rendered = function() {
     //Make sure lockout interval timer is running
