@@ -60,6 +60,28 @@ function defaultUserProfile() {
     };
 }
 
+function userProfileSave(id, profile) {
+    try {
+        //Insure record matching ID is present while working around MongoDB 2.4 bug
+        UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
+    }
+    catch(e) {
+        console.log("Ignoring user profile upsert ", e);
+    }
+    var numUpdated = UserProfileData.update({_id: id}, profile);
+    if (numUpdated == 1) {
+        return "Save succeeed";
+    }
+
+    // WHOOOPS! If we're still here something has gone horribly wrong
+    if (numUpdate < 1) {
+        throw new Meteor.Error("user-profile-save", "No records updated by save");
+    }
+    else {
+        throw new Meteor.Error("user-profile-save", "More than one record updated?! " + Helpers.display(numUpdate));
+    }
+}
+
 
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
@@ -194,7 +216,7 @@ Meteor.startup(function () {
             }
 
             //Now we need to create a default user profile record
-            UserProfileData.upsert({_id: createdId}, defaultUserProfile());
+            userProfileSave(createdId, defaultUserProfile());
 
             //Remeber we return a LIST of errors, so this is success
             return null;
@@ -211,7 +233,7 @@ Meteor.startup(function () {
             data.aws_id = encryptUserData(data.aws_id);
             data.aws_secret_key = encryptUserData(data.aws_secret_key);
 
-            return UserProfileData.upsert({_id: Meteor.userId()}, data);
+            return userProfileSave(Meteor.userId(), data);
         },
 
         //Log one or more user records for the currently running experiment
