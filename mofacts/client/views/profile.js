@@ -89,16 +89,24 @@ Template.profile.events({
             use_sandbox: $("#profileUseSandbox").prop("checked")
         };
 
-        Meteor.call("saveUserProfileData", data, function(error, result) {
+        $('#turkModal').modal('show');
+
+        Meteor.call("saveUserProfileData", data, function(error, serverReturn) {
+            $('#turkModal').modal('hide');
+
             if (!!error) {
                 console.log("Error saving user profile", error);
                 alert("Your changes were not saved! " + error);
             }
+            else if (!serverReturn || !serverReturn.result) {
+                console.log("Server failure while saving profile", serverReturn);
+                alert("Your changes were not saved! The server said: " + JSON.stringify(serverReturn, null, 2));
+            }
             else {
-                console.log("Profile saved:", result);
+                console.log("Profile saved:", serverReturn);
                 //Clear any controls that shouldn't be kept around
                 $(".clearOnSave").val("");
-                alert("Your profile changes have been saved: " + JSON.stringify(result, null, 2));
+                alert("Your profile changes have been saved: save details follow\n\n" + JSON.stringify(serverReturn, null, 2));
             }
         });
     },

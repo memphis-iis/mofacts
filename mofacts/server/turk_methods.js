@@ -98,7 +98,7 @@ Meteor.methods({
     },
 
     //Message sending for the end of a lockout
-    turkScheduleLockoutMessage: function(experiment, lockoutend, lockoutmsg) {
+    turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
         try {
             var usr, turkid, ownerId;
 
@@ -123,7 +123,8 @@ Meteor.methods({
                 throw Meteor.Error("Current TDF owner not set up for AWS/MTurk");
             }
 
-            var msgtext = "The lock out period has ended - you may continue.\n\n" + lockoutmsg;
+            subject = subject || Helpers.trim("Message from " + turkid + " Profile Page");
+            var msgtext = "The lock out period has ended - you may continue.\n\n" + msgbody;
             var jobName = 'Message for ' + experiment + ' to ' + turkid;
             var schedDate = new Date(lockoutend);
 
@@ -139,7 +140,7 @@ Meteor.methods({
                     console.log("Running scheduled job", jobName);
                     try {
                         var requestParams = {
-                            'Subject': "Message from " + turkid + " Profile Page",
+                            'Subject': subject,
                             'MessageText': msgtext,
                             'WorkerId': turkid
                         };
@@ -168,23 +169,7 @@ Meteor.methods({
     //RETURNS: null on success or an error message on failure. Any results
     //are logged to the user times log
     turkPay: function(experiment, msg) {
-        var usr = Meteor.user();
-        var turkid = !!usr ? usr.username : null;
-        if (!turkid) {
-            return "No valid username found";
-        }
-        turkid = Helpers.trim(turkid).toUpperCase();
-
-        var ownerId = getTdfOwner(experiment);
-        var ownerProfile = UserProfileData.findOne({_id: ownerId});
-        if (!ownerProfile) {
-            return "Could not find TDF owner profile for id '" + ownerId + "'";
-        }
-        if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
-            return "Current TDF owner not set up for AWS/MTurk";
-        }
-
-        var errmsg = null; // Return null on success
+        var errmsg = null; //Return null on success
 
         //Data we log
         var workPerformed = {
@@ -192,6 +177,8 @@ Meteor.methods({
             findAssignment: 'not performed',
             approveAssignment: 'not performed'
         };
+
+        var ownerId, turkid; // Needed for final work
 
         try {
             var usr = Meteor.user();
@@ -223,6 +210,7 @@ Meteor.methods({
             else {
                 workPerformed.findHITs = "No HITs found";
                 hitlist = [];
+                throw "No HITs - can not continue";
             }
 
             //Look for assignments for HITs that can be reviewed
@@ -256,21 +244,21 @@ Meteor.methods({
             }
             else {
                 workPerformed.findAssignment = "No assignment found";
+                throw "Can not continue - no assignment";
             }
 
-            if (!!assignment) {
-                var approveResponse = turk.approveAssignment(ownerProfile, {
-                    'AssignmentId': assignment.AssignmentId,
-                    'RequesterFeedback': msg || "Thanks for your participation"
-                });
-                workPerformed.approveAssignment = "Assignment was approved!";
-                workPerformed.approvalDetails = approveResponse;
-            }
+            var approveResponse = turk.approveAssignment(ownerProfile, {
+                'AssignmentId': assignment.AssignmentId,
+                'RequesterFeedback': msg || "Thanks for your participation"
+            });
+            workPerformed.approveAssignment = "Assignment was approved!";
+            workPerformed.approvalDetails = approveResponse;
         }
         catch(e) {
             errmsg = "Exception caught while processing Turk: " + JSON.stringify(e, null, 2);
         }
         finally {
+            //Always write an entry
             var userLogEntry = _.extend({
                 'action': 'turk-approval',
                 'success': errmsg === null,
@@ -287,23 +275,6 @@ Meteor.methods({
     },
 
     turkBonus: function(experiment, tdfid, unitnum) {
-        var usr = Meteor.user();
-        var turkid = !!usr ? usr.username : null;
-        if (!turkid) {
-            return "No valid username found";
-        }
-        turkid = Helpers.trim(turkid).toUpperCase();
-        var workerDbKey = usr._id;
-
-        var ownerId = getTdfOwner(experiment);
-        var ownerProfile = UserProfileData.findOne({_id: ownerId});
-        if (!ownerProfile) {
-            return "Could not find TDF owner profile for id '" + ownerId + "'";
-        }
-        if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
-            return "Current TDF owner not set up for AWS/MTurk";
-        }
-
         var errmsg = null; // Return null on success
 
         //Data we log
@@ -313,7 +284,26 @@ Meteor.methods({
             sendBonusRequest: 'not performed'
         };
 
+        var turkid, ownerId; // Needed for final work
+
         try {
+            var usr = Meteor.user();
+            turkid = !!usr ? usr.username : null;
+            if (!turkid) {
+                throw "No valid username found";
+            }
+            turkid = Helpers.trim(turkid).toUpperCase();
+            var workerDbKey = usr._id;
+
+            ownerId = getTdfOwner(experiment);
+            var ownerProfile = UserProfileData.findOne({_id: ownerId});
+            if (!ownerProfile) {
+                throw "Could not find TDF owner profile for id '" + ownerId + "'";
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                throw "Current TDF owner not set up for AWS/MTurk";
+            }
+
             //Read user log for experiment to find assignment ID
             var assignmentId = null;
             var previousBonus = false;

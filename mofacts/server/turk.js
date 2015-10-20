@@ -105,6 +105,29 @@ there are assignments that need to be approved.
     }
 
     turk = {
+        getAccountBalance: function(userProfile) {
+            var req = {
+                'Operation': 'GetAccountBalance'
+            };
+
+            var response = createTurkRequest(userProfile, req);
+            var jsonResponse = response.json.GetAccountBalanceResponse;
+            var result = fe(jsonResponse.GetAccountBalanceResult);
+
+            var reqData = fe(result.Request);
+            var isValid = fe(reqData.IsValid);
+            if (Helpers.trim(isValid).toLowerCase() !== "true") {
+                throw {
+                    'errmsg': 'Could not get Account Balance',
+                    'response': response
+                };
+            }
+
+            var balData = fe(result.AvailableBalance);
+            var fmtPrice = fe(balData.FormattedPrice);
+            return fmtPrice;
+        },
+
         //Required parameters: none
         getAvailableHITs: function(userProfile, requestParams) {
             var req = _.extend({

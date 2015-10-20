@@ -3,6 +3,7 @@
 /* userlog.js - Server-side utilities for working with the user times log
 **/
 
+//Write user log entries for the current user
 writeUserLogEntries = function(experiment, objectsToLog) {
     var objType = typeof objectsToLog;
     var valsToPush = [];
