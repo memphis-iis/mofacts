@@ -194,6 +194,26 @@ Meteor.methods({
         };
 
         try {
+            var usr = Meteor.user();
+            turkid = !!usr ? usr.username : null;
+            if (!turkid) {
+                throw "No valid username found";
+            }
+            turkid = Helpers.trim(turkid).toUpperCase();
+
+            ownerId = getTdfOwner(experiment);
+            var ownerProfile = UserProfileData.findOne({_id: ownerId});
+            if (!ownerProfile) {
+                throw "Could not find TDF owner profile for id '" + ownerId + "'";
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                throw "Current TDF owner not set up for AWS/MTurk";
+            }
+
+            //TODO: look for turkminscore and check vs their current score
+            //      (which we'll get from userLogCurrentScore). Note that we'll
+            //      need a unit number from the client side
+
             // Get available HITs
             hitlist = turk.getAvailableHITs(ownerProfile, {});
             if (hitlist && hitlist.length) {
