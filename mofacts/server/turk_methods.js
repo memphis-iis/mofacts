@@ -197,7 +197,9 @@ Meteor.methods({
                 throw "Current TDF owner not set up for AWS/MTurk";
             }
 
-            //TODO: look for turkminscore and check vs their current score (which we'll need to calculate)
+            //TODO: look for turkminscore and check vs their current score
+            //      (which we'll get from userLogCurrentScore). Note that we'll
+            //      need a unit number from the client side
 
             // Get available HITs
             hitlist = turk.getAvailableHITs(ownerProfile, {});

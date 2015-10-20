@@ -67,7 +67,6 @@ Template.profile.events({
 
     'click #saveProfile': function(event) {
         event.preventDefault();
-        console.log(event);
 
         var data = {
             aws_id: $("#profileAWSID").val(),

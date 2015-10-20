@@ -44,7 +44,7 @@ writeUserLogEntries = function(experiment, objectsToLog) {
 };
 
 //Return the current score for the current user on the specified experiment
-currentScore = function(experiment) {
+userLogCurrentScore = function(experiment) {
     var score = 0;
     var correct = 0;
     var incorrect = 0;
