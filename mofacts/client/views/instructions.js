@@ -36,7 +36,7 @@ function leavePage(dest) {
 function checkTurkActive() {
     //Turk display can only be active if we're in experiment mode
     if (Session.get("loginMode") !== "experiment") {
-        return true; //Must be an experiment
+        return false; //Must be an experiment
     }
 
     if (!!Session.get("turkApprovalSent")) {
