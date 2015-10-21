@@ -406,6 +406,7 @@ Meteor.methods({
     turkUserLogStatus: function(experiment) {
         var expKey = ('' + experiment).replace(/\./g, "_");
         var records = [];
+        var tdfId = null;
 
         UserTimesLog.find({}).forEach(function (entry) {
             if (!(expKey in entry)) {
@@ -445,6 +446,24 @@ Meteor.methods({
                 else if (act === "turk-bonus") {
                     data.turkbonus = rec.success ? 'Complete' : 'FAIL';
                     data.turkbonusDetails = rec;
+                }
+                else if (tdfId !== null && act === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
+                    //Two things to keep in mind here - this is a one time check,
+                    //and we'll immediately fail if there is a problem
+                    tdfId = rec.tdfkey;
+                    var ownerOK = false;
+                    if (!!tdfId) {
+                        //They must be the owner of the TDF
+                        var tdf = Tdfs.findOne({_id: tdfId});
+                        if (!!tdf && typeof tdf.owner !== "undefined") {
+                            ownerOK = (Meteor.user()._id === tdf.owner);
+                        }
+                    }
+
+                    if (!ownerOK) {
+                        console.log("Could not verify owner for", experiment);
+                        return [];
+                    }
                 }
             }
 
