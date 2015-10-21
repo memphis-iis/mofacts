@@ -286,12 +286,10 @@ Template.instructions.events({
     'click #turkButton': function(event) {
         event.preventDefault();
 
-        var currUnit = getCurrentTdfUnit();
-
         //Actually approve - note that we currently just use the default
         //message the server offers
         $('#turkModal').modal('show');
-        Meteor.call("turkPay", userTimesExpKey(true), null, function(error, result){
+        Meteor.call("turkPay", userTimesExpKey(true), null, getCurrentUnitNumber(), function(error, result){
             $('#turkModal').modal('hide');
 
             if (typeof error !== "undefined") {

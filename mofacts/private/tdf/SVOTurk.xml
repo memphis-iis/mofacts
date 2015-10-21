@@ -45,7 +45,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
     </unit>
     <unit>
         <turkpay>true</turkpay>
-        <turkminscore>2</turkminscore>
+        <turkminscore>4</turkminscore>
         <turkemailsubject>MOFACTS: Lockout End for TEST</turkemailsubject>
         <turkemail><![CDATA[
 
