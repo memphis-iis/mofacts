@@ -43,11 +43,29 @@ writeUserLogEntries = function(experiment, objectsToLog) {
     );
 };
 
+//Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
+userLogGetTdfId = function(userid, experiment) {
+    var userLog = UserTimesLog.findOne({ _id: userid });
+    var entries = [];
+    if (userLog && userLog[experiment] && userLog[experiment].length) {
+        entries = userLog[experiment];
+    }
+
+    for(i = 0; i < entries.length; ++i) {
+        rec = entries[i];
+        action = Helpers.trim(rec.action).toLowerCase();
+
+        //Only need to see the tdf select event once to get the key
+        if (action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
+            return rec.tdfkey;
+        }
+    }
+
+    return null; //Whoops
+};
+
 //Return the current score for the current user on the specified experiment
 userLogCurrentScore = function(experiment) {
-    var score = 0;
-    var correct = 0;
-    var incorrect = 0;
     var i, rec, action;
 
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
@@ -64,7 +82,7 @@ userLogCurrentScore = function(experiment) {
         rec = entries[i];
         action = Helpers.trim(rec.action).toLowerCase();
 
-        //Only need to keep this once - won't event
+        //Only need to see the tdf select event once to get the key
         if (!tdfId && action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
             tdfId = rec.tdfkey;
             continue;
@@ -80,38 +98,63 @@ userLogCurrentScore = function(experiment) {
         if (uniqifier in previousRecords) {
             continue; //dup detected
         }
-        previousRecords[uniqifier] = true;
 
         //We don't do much other than save the record
+        previousRecords[uniqifier] = true;
         records.push(rec);
     }
 
-    //Nothing to without a tdfId
-    if (!tdfId) {
-        return null;
-    }
-
+    //Nothing to do without a tdf
     var tdf = Tdfs.findOne({_id: tdfId});
     if (typeof tdf.tdfs.tutor.unit === "undefined") {
         return null; //No units available
     }
 
+    //Helper for our param extraction below: we expect val to a single valued
+    //array with a numeric parameter. If not we return def
+    function getNumVal(val, def) {
+        val = Helpers.firstElement(val);
+        if (!!val || val === 0 || val === "0") return Helpers.intVal(val);
+        else                                   return def;
+    }
+
+    //A tiny stripped down version of the logic for delivery params - we just
+    //need to get scoring. See the full details in the function
+    //getCurrentDeliveryParams in client/lib/currentTestingHelpers.js
+    var correct = 0;
+    var incorrect = 0;
+    var setScoring = function(unitIdx) {
+        correct = 1; incorrect = 0; // Set system default values
+
+        var unit = null;
+        if (!!unitIdx || unitIdx === 0) {
+            unit = tdf.tdfs.tutor.unit[Helpers.intVal(unitIdx)] || null;
+        }
+        var deliveryparams = !!unit ? unit.deliveryparams : null;
+        if (!deliveryparams && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
+            deliveryparams = tdf.tdfs.tutor.deliveryparams;
+        }
+        if (!deliveryparams) {
+            return; //Could not get params - leave and use default values
+        }
+
+        correct = getNumVal(deliveryparams.correctprompt, 1);
+        incorrect = getNumVal(deliveryparams.incorrectprompt, 0);
+    };
+
+    var score = 0;
     for (i = 0; i < records.length; ++i) {
         rec = records[i];
         action = Helpers.trim(rec.action).toLowerCase();
         if (action === "question") {
             if (!!rec.selType) {
-                var currUnit = tdf.tdfs.tutor.unit[rec.currentUnit];
-                if (currUnit) {
-                    correct = Helpers.intVal(parms.correctscore);
-                    incorrect = Helpers.intVal(parms.incorrectscore);
-                }
+                setScoring(rec.currentUnit);
             }
         }
         else if (action === "answer" || action === "[timeout]") {
             var wasCorrect = false;
             if (action === "answer") {
-                wasCorrect = typeof entry.isCorrect !== "undefined" ? entry.isCorrect : false;
+                wasCorrect = typeof rec.isCorrect !== "undefined" ? rec.isCorrect : false;
             }
             score += (wasCorrect ? correct : -incorrect);
         }

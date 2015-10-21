@@ -12,26 +12,8 @@ function getTdfOwner(experiment) {
         return null;
     }
 
-    var userLog = UserTimesLog.findOne({ _id: userId });
-    var entries = [];
-    if (userLog && userLog[experiment] && userLog[experiment].length) {
-        entries = userLog[experiment];
-    }
-    else {
-        console.log("getTdfOwner for ", experiment, "failed - no user log entries found");
-        return null;
-    }
-
-    //Find last profile TDF selection
-    var tdfId = null;
-    for (var i = entries.length - 1; i >= 0; --i) {
-        var rec = entries[i];
-        var action = Helpers.trim(rec.action).toLowerCase();
-        if (action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
-            tdfId = rec.tdfkey;
-            break;
-        }
-    }
+    //Find the TDF _id from the user log
+    var tdfId = userLogGetTdfId(userId, experiment);
 
     //If no TDF ID then we can't continue
     if (!tdfId) {
@@ -168,7 +150,7 @@ Meteor.methods({
     //attempt to pay the user for the current MTurk HIT/assignment.
     //RETURNS: null on success or an error message on failure. Any results
     //are logged to the user times log
-    turkPay: function(experiment, msg) {
+    turkPay: function(experiment, msg, unitidx) {
         var errmsg = null; //Return null on success
 
         //Data we log
@@ -197,9 +179,21 @@ Meteor.methods({
                 throw "Current TDF owner not set up for AWS/MTurk";
             }
 
-            //TODO: look for turkminscore and check vs their current score
-            //      (which we'll get from userLogCurrentScore). Note that we'll
-            //      need a unit number from the client side
+            //If we have a minimum score, check vs their current score
+            var tdfId = userLogGetTdfId(usr._id, experiment);
+            var tdf = Tdfs.findOne({_id: tdfId});
+            var unit = tdf.tdfs.tutor.unit[unitidx] || null;
+            if (unit && unit.turkminscore && unit.turkminscore.length) {
+                var minscore = Helpers.intVal(Helpers.firstElement(unit.turkminscore));
+                var currscore = userLogCurrentScore(experiment);
+                if (currscore < minscore) {
+                    console.log(
+                        "Rejecting turk pay for", turkid, "tdf", experiment,
+                        ":: score was ", currscore, "<", minscore
+                    );
+                    throw "Rejected payment - score of " + currscore + " was below " + minscore;
+                }
+            }
 
             // Get available HITs
             hitlist = turk.getAvailableHITs(ownerProfile, {});
@@ -255,7 +249,8 @@ Meteor.methods({
             workPerformed.approvalDetails = approveResponse;
         }
         catch(e) {
-            errmsg = "Exception caught while processing Turk: " + JSON.stringify(e, null, 2);
+            console.log("Error processing Turk approval", e);
+            errmsg = "Exception caught while processing Turk approval: " + JSON.stringify(e, null, 2);
         }
         finally {
             //Always write an entry
@@ -382,7 +377,7 @@ Meteor.methods({
         }
         catch(e) {
             console.log("Error processing Turk bonus", e);
-            errmsg = "Exception caught while processing Turk: " + Helpers.display(e);
+            errmsg = "Exception caught while processing Turk bonus: " + JSON.stringify(e, null, 2);
         }
         finally {
             var userLogEntry = _.extend({
@@ -406,6 +401,7 @@ Meteor.methods({
     turkUserLogStatus: function(experiment) {
         var expKey = ('' + experiment).replace(/\./g, "_");
         var records = [];
+        var tdfId = null;
 
         UserTimesLog.find({}).forEach(function (entry) {
             if (!(expKey in entry)) {
@@ -445,6 +441,24 @@ Meteor.methods({
                 else if (act === "turk-bonus") {
                     data.turkbonus = rec.success ? 'Complete' : 'FAIL';
                     data.turkbonusDetails = rec;
+                }
+                else if (tdfId !== null && act === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
+                    //Two things to keep in mind here - this is a one time check,
+                    //and we'll immediately fail if there is a problem
+                    tdfId = rec.tdfkey;
+                    var ownerOK = false;
+                    if (!!tdfId) {
+                        //They must be the owner of the TDF
+                        var tdf = Tdfs.findOne({_id: tdfId});
+                        if (!!tdf && typeof tdf.owner !== "undefined") {
+                            ownerOK = (Meteor.user()._id === tdf.owner);
+                        }
+                    }
+
+                    if (!ownerOK) {
+                        console.log("Could not verify owner for", experiment);
+                        return [];
+                    }
                 }
             }
 

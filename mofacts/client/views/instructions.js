@@ -81,6 +81,13 @@ function currLockOutMinutes() {
     return lockoutminutes;
 }
 
+function lockoutKick() {
+    if (!lockoutInterval && currLockOutMinutes() > 0) {
+        console.log("interval kicked");
+        startLockoutInterval();
+    }
+}
+
 //Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
@@ -108,7 +115,10 @@ function lockoutPeriodicCheck() {
         //as if they clicked on the button. Note that this auto-continue ONLY
         //happens for units with a lockout time
         if (!checkTurkActive() && !checkTurkBonus()) {
-            $("#continueButton").click();
+            Meteor.setInterval(
+                function(){ $("#continueButton").click(); },
+                1
+            );
         }
     }
     else {
@@ -243,9 +253,7 @@ Template.instructions.helpers({
 
 Template.instructions.rendered = function() {
     //Make sure lockout interval timer is running
-    if (currLockOutMinutes() > 0) {
-        startLockoutInterval();
-    }
+    lockoutKick();
 
     //Init the modal dialog
     $('#turkModal').modal({
@@ -278,12 +286,10 @@ Template.instructions.events({
     'click #turkButton': function(event) {
         event.preventDefault();
 
-        var currUnit = getCurrentTdfUnit();
-
         //Actually approve - note that we currently just use the default
         //message the server offers
         $('#turkModal').modal('show');
-        Meteor.call("turkPay", userTimesExpKey(true), null, function(error, result){
+        Meteor.call("turkPay", userTimesExpKey(true), null, getCurrentUnitNumber(), function(error, result){
             $('#turkModal').modal('hide');
 
             if (typeof error !== "undefined") {
@@ -302,6 +308,7 @@ Template.instructions.events({
             //(If there was an error, it will need to be examined in the log
             //and manually handled)
             Session.set("turkApprovalSent", true);
+            lockoutKick();
         });
     },
 
@@ -340,6 +347,7 @@ Template.instructions.events({
             //(If there was an error, it will need to be examined in the log
             //and manually handled)
             Session.set("turkBonusSent", true);
+            lockoutKick();
         });
     },
 

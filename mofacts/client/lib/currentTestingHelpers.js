@@ -209,7 +209,7 @@ getUnitsRemaining = function() {
 //allow callers to override the unit assumed to be current
 //
 //IMPORTANT: we also support selecting one of multiple delivery params via
-//experimentXCond (which is specified in the URL)
+//experimentXCond (which can be specified in the URL or system-assigned)
 getCurrentDeliveryParams = function (currUnit) {
     //If they didn't specify the unit, assume that current unit
     if (!currUnit) {

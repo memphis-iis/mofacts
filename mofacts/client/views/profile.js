@@ -7,22 +7,7 @@ function clearTurkExpLog() {
     turkExperimentLog.remove({'temp': 1});
 }
 
-// We are expecting the format supplied by the server method turkUserLogStatus
-function populateTurkExpLog(serverData) {
-    _.each(serverData, function(val, idx) {
-        console.log(val);
-        turkExperimentLog.insert({
-            temp: 1,
-            idx: idx,
-            userid: val.userid,
-            turk_username: val.username,
-            turkpay: val.turkpay,
-            turkpayDetails: val.turkpayDetails,
-            turkbonus: val.turkbonus,
-            turkbonusDetails: val.turkbonusDetails
-        });
-    });
-}
+//See the button event below to see how turkExperimentLog is populated
 
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
@@ -169,7 +154,19 @@ Template.profile.events({
                 return;
             }
 
-            populateTurkExpLog(result);
+            _.each(result, function(val, idx) {
+                console.log(val);
+                turkExperimentLog.insert({
+                    temp: 1,
+                    idx: idx,
+                    userid: val.userid,
+                    turk_username: val.username,
+                    turkpay: val.turkpay,
+                    turkpayDetails: val.turkpayDetails,
+                    turkbonus: val.turkbonus,
+                    turkbonusDetails: val.turkbonusDetails
+                });
+            });
         });
     },
 
@@ -334,6 +331,8 @@ Template.profile.rendered = function () {
     var foundExpTarget = null;
 
     //Check all the valid TDF's
+    var turkLogCount = 0;
+
     allTdfs.forEach( function (tdfObject) {
         var setspec = tdfObject.tdfs.tutor.setspec[0];
         if (!setspec) {
@@ -407,14 +406,21 @@ Template.profile.rendered = function () {
             )
         );
 
-        $("#turkLogSelectContainer").append(
-            $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
-                .addClass("btn btn-fix btn-sm btn-success btn-log-select")
-                .css('margin', '3px')
-                .data("tdffilename", tdfObject.fileName)
-                .html(name)
-        );
+        if (Meteor.userId() === tdfObject.owner) {
+            $("#turkLogSelectContainer").append(
+                $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
+                    .addClass("btn btn-fix btn-sm btn-success btn-log-select")
+                    .css('margin', '3px')
+                    .data("tdffilename", tdfObject.fileName)
+                    .html(name)
+            );
+
+            turkLogCount += 1;
+        }
     });
+
+    //Only show turk log stuff if there is anything to show
+    $("#turkLogAll").toggle(turkLogCount > 0);
 
     //Did we find something to auto-jump to?
     if (foundExpTarget) {
