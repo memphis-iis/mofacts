@@ -114,8 +114,8 @@ function lockoutPeriodicCheck() {
         //If there isn't anything pending for mechanical turk, we will continue
         //as if they clicked on the button. Note that this auto-continue ONLY
         //happens for units with a lockout time
-        if (!checkTurkActive() && !checkTurkBonus()) {
-            Meteor.setInterval(
+        if (!checkTurkActive() && !checkTurkBonus() && currLockOutMinutes() > 0) {
+            Meteor.setTimeout(
                 function(){ $("#continueButton").click(); },
                 1
             );

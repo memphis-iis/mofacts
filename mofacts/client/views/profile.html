@@ -41,21 +41,6 @@
         </div>
 
         {{#if isInRole 'admin,teacher'}}
-            <br><br>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="upload-tdf">TDF File</label>
-                        <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
-                    </div>
-                    <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                        Upload TDF File
-                    </button>
-                </div>
-            </div>
-        {{/if}}
-
-        {{#if isInRole 'admin,teacher'}}
         <br><br>
         <div class="row">
             <div class="col-md-5" id="profileContainer">
