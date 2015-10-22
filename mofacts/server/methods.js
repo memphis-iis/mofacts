@@ -150,13 +150,23 @@ Meteor.startup(function () {
         return fn.indexOf('.xml') >= 0;
     };
 
+    //You'll note our lack of upsert in the loops below - we don't want _id to
+    //change under MongoDB 2.4 (later versions of Mongo don't have the bug)
+
     _.each(
         _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
         function (ele, idx, lst) {
             console.log("Updating Stim in DB from ", ele);
             var json = getStimJSON('stims/' + ele);
-            Stimuli.remove({fileName: ele});
-            Stimuli.insert({fileName: ele, stimuli: json, owner: adminUserId});
+            var rec = {fileName: ele, stimuli: json, owner: adminUserId};
+            var prev = Stimuli.findOne({fileName: ele});
+
+            if (prev) {
+                Stimuli.update({ _id: prev._id }, rec);
+            }
+            else {
+                Stimuli.insert(rec);
+            }
         }
     );
 
@@ -165,8 +175,16 @@ Meteor.startup(function () {
         function (ele, idx, lst) {
             console.log("Updating TDF in DB from ", ele);
             var json = getStimJSON('tdf/' + ele);
-            Tdfs.remove({fileName: ele});
-            Tdfs.insert({fileName: ele, tdfs: json, owner: adminUserId});
+
+            var rec = {fileName: ele, tdfs: json, owner: adminUserId};
+            var prev = Tdfs.findOne({fileName: ele});
+
+            if (prev) {
+                Tdfs.update({ _id: prev._id }, rec);
+            }
+            else {
+                Tdfs.insert(rec);
+            }
         }
     );
 
