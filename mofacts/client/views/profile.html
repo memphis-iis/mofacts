@@ -43,6 +43,29 @@
         {{#if isInRole 'admin,teacher'}}
         <br><br>
         <div class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="upload-tdf">TDF File</label>
+                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
+                </div>
+                <button type='button' id='doUploadTDF' class='btn btn-fix'>
+                    Upload TDF File
+                </button>
+            </div>
+
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="upload-stim">TDF File</label>
+                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File">
+                </div>
+                <button type='button' id='doUploadStim' class='btn btn-fix'>
+                    Upload Stimulus File
+                </button>
+            </div>
+        </div>
+
+        <br><br>
+        <div class="row">
             <div class="col-md-5" id="profileContainer">
                 <legend class="text-center">Profile Data</legend>
                 <!-- TODO: Format this input form with a bootstrappy form -->

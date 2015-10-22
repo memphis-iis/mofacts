@@ -1,3 +1,5 @@
+//TODO: Need a list of TDF and simulus files owned by the user
+
 ////////////////////////////////////////////////////////////////////////////
 // Template storage
 
@@ -57,9 +59,46 @@ Template.profile.events({
             var fileReader = new FileReader();
             fileReader.onload = function() {
                 console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                // Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
-                //     //TODO: need this call implemented and tell the user what the result was
-                // });
+                Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
+                    if (!!error) {
+                        console.log("Critical failure saving TDF", error);
+                        alert("There was a critical failure saving your TDF:" + error);
+                    }
+                    else if (!result.result) {
+                        console.log("TDF saved failed", result);
+                        alert("The TDF was not saved: " + errmsg);
+                    }
+                    else {
+                        console.log("TDF Saved:", result);
+                        alert("You TDF was saved");
+                    }
+                });
+            };
+            fileReader.readAsBinaryString(file);
+        });
+    },
+
+    'click #doUploadStim': function(event) {
+        event.preventDefault();
+        _.each($("#upload-stim").prop("files"), function(file) {
+            var name = file.name;
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
+                Meteor.call('saveContentFile', 'stim', name, file.srcElement.result, function(error, result) {
+                    if (!!error) {
+                        console.log("Critical failure saving stim", error);
+                        alert("There was a critical failure saving your Stimulus file:" + error);
+                    }
+                    else if (!result.result) {
+                        console.log("Stim saved failed", result);
+                        alert("The Stimulus file was not saved: " + errmsg);
+                    }
+                    else {
+                        console.log("Stim Saved:", result);
+                        alert("You Stimulus file was saved");
+                    }
+                });
             };
             fileReader.readAsBinaryString(file);
         });

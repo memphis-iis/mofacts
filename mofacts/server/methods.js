@@ -276,10 +276,50 @@ Meteor.startup(function () {
         //Allow file uploaded with name and contents. The type of file must be
         //specified - current allowed types are: 'stimuli', 'tdf'
         saveContentFile: function(type, filename, filecontents) {
-            //TODO: save the TDF file - and be sure to set the owner from
-            //      the current user. Also to check role is admin or teacher.
-            //      Also need to overwrite by filename IFF owner matches (and
-            //      we should add a special prefix signifying upload)
+            var result = null;
+            var errmsg = "No action taken?";
+
+            //TODO: filename gets special prefix denoting file upload
+            //TODO: Should overwrite IFF owner matches
+
+            try {
+                //We need a valid use that is either admin or teacher
+                var ownerId = Meteor.user()._id;
+                if (!ownerId) {
+                    throw "No user logged in - no file upload allowed";
+                }
+
+                if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+                    throw "You are not authorized to upload files";
+                }
+
+                //We prefix upload files with upload and the user _id so that
+                //they are separate from the preload files in git and other
+                //users' files
+                filename = "upload:" + ownerId + ":" + filename;
+
+                if (type == "tdf") {
+                    //TODO: save the TDF file
+                }
+                else if (type === "stim") {
+                    //TODO: save the stimulus file
+                }
+                else {
+                    throw "Unknown file type not allowed: " + type;
+                }
+
+                result = true;
+                errmsg = "";
+            }
+            catch(e) {
+                result = false;
+                errmsg = e;
+            }
+
+            return {
+                'result': result,
+                'error': errmsg
+            };
         },
 
         //Log one or more user records for the currently running experiment
