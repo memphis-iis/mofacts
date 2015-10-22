@@ -40,9 +40,9 @@ One-Time Setup for Vagrant
 -------------------------------
 
  * Install git if you haven't already
- * Install VirtualBox if you haven't already: 
+ * Install VirtualBox if you haven't already:
    [https://www.virtualbox.org/wiki/Downloads](https://www.virtualbox.org/wiki/Downloads)
- * Install vagrant if you havent' already: 
+ * Install vagrant if you havent' already:
    [https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
 
 
@@ -58,7 +58,7 @@ From your command prompt, clone the repository and then enter the new directory:
 
 Now you're ready to use vagrant to set up your development environment. First,
 we'll ask vagrant to download a "box"; this is a "base" image that we use as a
-starting point. Assuming that you're in the mofacts directory that we cloned 
+starting point. Assuming that you're in the mofacts directory that we cloned
 above:
 
     $ vagrant box add ubuntu/trusty64
@@ -116,10 +116,10 @@ the application to use the "real" MongoDB server that was installed for you:
 
     $ cd mofacts/mofacts
     $ ./run_meteor
-    
+
 Ports for the application and MongoDB are already shared. Once meteor reports
 that your application is running (after you've run `./run_meteor` as above), you
-can connect from your host operating system at 
+can connect from your host operating system at
 [http://localhost:3000/](http://localhost:3000/)
 
 You can also connect to the MongoDB instance with your tool of choice (for instance,
@@ -146,6 +146,6 @@ This is fine for the end of a development session, but if you want to completely
 remove the virtual machine from your computer you can destroy it:
 
     $ vagrant destroy
-    
+
 This is a fairly low risk activity, since you can always run `vagrant up` to
 recreate the virtual machine for you.
