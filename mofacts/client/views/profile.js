@@ -57,7 +57,7 @@ Template.profile.events({
             var fileReader = new FileReader();
             fileReader.onload = function() {
                 console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                // Meteor.call('saveTDFFile', name, file.srcElement.result, function(error, result) {
+                // Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
                 //     //TODO: need this call implemented and tell the user what the result was
                 // });
             };

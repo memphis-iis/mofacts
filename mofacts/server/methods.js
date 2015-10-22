@@ -273,6 +273,15 @@ Meteor.startup(function () {
             };
         },
 
+        //Allow file uploaded with name and contents. The type of file must be
+        //specified - current allowed types are: 'stimuli', 'tdf'
+        saveContentFile: function(type, filename, filecontents) {
+            //TODO: save the TDF file - and be sure to set the owner from
+            //      the current user. Also to check role is admin or teacher.
+            //      Also need to overwrite by filename IFF owner matches (and
+            //      we should add a special prefix signifying upload)
+        },
+
         //Log one or more user records for the currently running experiment
         userTime: function (experiment, objectsToLog) {
             writeUserLogEntries(experiment, objectsToLog);
