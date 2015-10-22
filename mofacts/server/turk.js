@@ -83,17 +83,13 @@ there are assignments that need to be approved.
         }
 
         //Add parsed JSON to the response
-        var json = null;
         try {
-            xml2js.parseString(response.content, function (err, result) {
-                json = result;
-            });
+            response.json = xml2js.parseStringSync(response.content);
         }
         catch(e) {
             console.log("JSON parse on returned contents failed", e);
         }
 
-        response.json = json;
         //console.log("TURK response:", JSON.stringify(response.json, null, 2));
         return response;
     }

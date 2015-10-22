@@ -14,21 +14,12 @@ var adminUserId = null;
 
 //Helper functions
 
-function parseXML(xml) {
-    var json = {};
-    xml2js.parseString(xml, function (err, result) {
-        json = result;
-    });
-    return json;
-}
-
 function getStimJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err)
             throw err;
-        var json = parseXML(data);
-        future.return(json);
+        future.return(xml2js.parseStringSync(data));
     });
     return future.wait();
 }
