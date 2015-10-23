@@ -401,7 +401,7 @@ Meteor.methods({
     turkUserLogStatus: function(experiment) {
         var expKey = ('' + experiment).replace(/\./g, "_");
         var records = [];
-        var tdfId = null;
+        var tdf = null;
 
         UserTimesLog.find({}).forEach(function (entry) {
             if (!(expKey in entry)) {
@@ -442,17 +442,14 @@ Meteor.methods({
                     data.turkbonus = rec.success ? 'Complete' : 'FAIL';
                     data.turkbonusDetails = rec;
                 }
-                else if (tdfId !== null && act === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
+                else if (tdf !== null && (act === "expcondition" || act === "condition-notify")) {
                     //Two things to keep in mind here - this is a one time check,
                     //and we'll immediately fail if there is a problem
-                    tdfId = rec.tdfkey;
+                    tdf = Tdfs.findOne({'fileName': rec.currentTdfName});
                     var ownerOK = false;
-                    if (!!tdfId) {
+                    if (!!tdf && typeof tdf.owner !== "undefined") {
                         //They must be the owner of the TDF
-                        var tdf = Tdfs.findOne({_id: tdfId});
-                        if (!!tdf && typeof tdf.owner !== "undefined") {
-                            ownerOK = (Meteor.user()._id === tdf.owner);
-                        }
+                        ownerOK = (Meteor.user()._id === tdf.owner);
                     }
 
                     if (!ownerOK) {

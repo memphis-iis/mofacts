@@ -51,13 +51,24 @@ userLogGetTdfId = function(userid, experiment) {
         entries = userLog[experiment];
     }
 
+    var filename = null;
     for(i = 0; i < entries.length; ++i) {
         rec = entries[i];
         action = Helpers.trim(rec.action).toLowerCase();
 
         //Only need to see the tdf select event once to get the key
-        if (action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
-            return rec.tdfkey;
+        if (action === "expcondition" || action === "condition-notify") {
+            filename = Helpers.display(rec.currentTdfName);
+            if (!!filename) {
+                break;
+            }
+        }
+    }
+
+    if (!!filename) {
+        var tdf = Tdfs.findOne({'fileName': filename});
+        if (tdf) {
+            return tdf._id;
         }
     }
 
@@ -76,15 +87,15 @@ userLogCurrentScore = function(experiment) {
 
     var previousRecords = {};
     var records = [];
-    var tdfId = null;
+    var tdf = null;
 
     for(i = 0; i < entries.length; ++i) {
         rec = entries[i];
         action = Helpers.trim(rec.action).toLowerCase();
 
-        //Only need to see the tdf select event once to get the key
-        if (!tdfId && action === "profile tdf selection" && typeof rec.tdfkey !== "undefined") {
-            tdfId = rec.tdfkey;
+        //We will need the tdf
+        if (!tdf && (action === "expcondition" || action === "condition-notify")) {
+            tdf = Tdfs.findOne({'fileName': rec.currentTdfName});
             continue;
         }
 
@@ -105,8 +116,7 @@ userLogCurrentScore = function(experiment) {
     }
 
     //Nothing to do without a tdf
-    var tdf = Tdfs.findOne({_id: tdfId});
-    if (typeof tdf.tdfs.tutor.unit === "undefined") {
+    if (!tdf || typeof tdf.tdfs.tutor.unit === "undefined") {
         return null; //No units available
     }
 
