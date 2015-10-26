@@ -1,3 +1,5 @@
+//TODO: Need a list of TDF and simulus files owned by the user
+
 ////////////////////////////////////////////////////////////////////////////
 // Template storage
 
@@ -48,6 +50,58 @@ Template.profile.events({
             target.data("tdffilename"),
             "User button click"
         );
+    },
+
+    'click #doUploadTDF': function(event) {
+        event.preventDefault();
+        _.each($("#upload-tdf").prop("files"), function(file) {
+            var name = file.name;
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
+                Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
+                    if (!!error) {
+                        console.log("Critical failure saving TDF", error);
+                        alert("There was a critical failure saving your TDF:" + error);
+                    }
+                    else if (!result.result) {
+                        console.log("TDF saved failed", result);
+                        alert("The TDF was not saved: " + errmsg);
+                    }
+                    else {
+                        console.log("TDF Saved:", result);
+                        alert("You TDF was saved");
+                    }
+                });
+            };
+            fileReader.readAsBinaryString(file);
+        });
+    },
+
+    'click #doUploadStim': function(event) {
+        event.preventDefault();
+        _.each($("#upload-stim").prop("files"), function(file) {
+            var name = file.name;
+            var fileReader = new FileReader();
+            fileReader.onload = function() {
+                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
+                Meteor.call('saveContentFile', 'stim', name, file.srcElement.result, function(error, result) {
+                    if (!!error) {
+                        console.log("Critical failure saving stim", error);
+                        alert("There was a critical failure saving your Stimulus file:" + error);
+                    }
+                    else if (!result.result) {
+                        console.log("Stim saved failed", result);
+                        alert("The Stimulus file was not saved: " + errmsg);
+                    }
+                    else {
+                        console.log("Stim Saved:", result);
+                        alert("You Stimulus file was saved");
+                    }
+                });
+            };
+            fileReader.readAsBinaryString(file);
+        });
     },
 
     'click #saveProfile': function(event) {
@@ -141,16 +195,9 @@ Template.profile.events({
 
             _.each(result, function(val, idx) {
                 console.log(val);
-                turkExperimentLog.insert({
-                    temp: 1,
-                    idx: idx,
-                    userid: val.userid,
-                    turk_username: val.username,
-                    turkpay: val.turkpay,
-                    turkpayDetails: val.turkpayDetails,
-                    turkbonus: val.turkbonus,
-                    turkbonusDetails: val.turkbonusDetails
-                });
+                var newRec = _.extend({ temp: 1, idx: idx }, val);
+                newRec.turk_username = newRec.username;
+                turkExperimentLog.insert(newRec);
             });
         });
     },

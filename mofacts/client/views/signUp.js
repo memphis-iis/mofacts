@@ -10,9 +10,10 @@ Template.signUp.events({
     'click #signUpButton' : function (event) {
         event.preventDefault();
 
-        var formUsername = Helpers.trim(signUpUsername.value);
-        var formPassword1 = Helpers.trim(password1.value);
-        var formPassword2 = Helpers.trim(password2.value);
+        var formUsername = Helpers.trim($("#signUpUsername").val());
+        var formPassword1 = Helpers.trim($("#password1").val());
+        var formPassword2 = Helpers.trim($("#password2").val());
+        console.log(formUsername, formPassword1, formPassword2);
 
         //Hide previous errors
         $(".errcheck").hide();
@@ -88,7 +89,7 @@ Template.signUp.events({
     },
 
     'blur #signUpUsername' : function (event) {
-        if(signUpUsername.value.length < 6) {
+        if($("#signUpUsername").val().length < 6) {
             $("#usernameTooShort").show();
         }
         else {
@@ -97,7 +98,7 @@ Template.signUp.events({
     },
 
     'blur #password1' : function () {
-        var len = password1.value.length;
+        var len = $("#password1").val().length;
         if(len < 6) {
             $("#passwordTooShort").show();
         }
@@ -107,7 +108,7 @@ Template.signUp.events({
     },
 
     'blur #password2' : function () {
-        if(password1.value !== password2.value) {
+        if($("#password1").val() !== $("#password2").val()) {
             $("#passwordMustMatch").show();
         }
         else {

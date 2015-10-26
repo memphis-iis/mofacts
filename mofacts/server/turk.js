@@ -27,7 +27,13 @@ assignment, Available is decremented and Pending is incremented. When the
 worker submits their code (for a survey link, say), Pending is decremented.
 Then that assignment is approved or rejected, which increments Completed.
 SO... When Available + Pending + Completed != Max Assignments we know that
-there are assignments that need to be approved.
+there are assignments that need to be approved. HOWEVER!!! It appears that
+this is not always reliable. We have instead adopted the far more conservative
+criteria where we assume a HIT might have approvable assignments if ONE of the
+following is true:
+    - Available > 0
+    - Pending > 0
+    - Completed < Max
 ******************************************************************************
 **/
 
@@ -125,9 +131,12 @@ there are assignments that need to be approved.
         },
 
         //Required parameters: none
+        //Optional parameters: SortProperty, SortDirection
         getAvailableHITs: function(userProfile, requestParams) {
             var req = _.extend({
-                'Operation': 'SearchHITs'
+                'Operation': 'SearchHITs',
+                'SortProperty': 'CreationTime',
+                'SortDirection': 'Descending'
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
@@ -136,6 +145,7 @@ there are assignments that need to be approved.
             var hitCursor = result.HIT || [];
 
             var hitlist = [];
+            var rejected = 0;
             hitCursor.forEach(function(val) {
                 //Only report HITs with something that we can approve
                 //See top of this module for the details
@@ -143,10 +153,16 @@ there are assignments that need to be approved.
                 var pend = fenum(val.NumberOfAssignmentsPending);
                 var avail = fenum(val.NumberOfAssignmentsAvailable);
                 var complete = fenum(val.NumberOfAssignmentsCompleted);
-                if (pend + avail + complete < max) {
+
+                if (pend > 0 || avail > 0 || complete < max) {
                     hitlist.push(fe(val.HITId));
                 }
+                else {
+                    rejected += 1;
+                }
             });
+
+            console.log("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
 
             return hitlist;
         },
