@@ -195,16 +195,9 @@ Template.profile.events({
 
             _.each(result, function(val, idx) {
                 console.log(val);
-                turkExperimentLog.insert({
-                    temp: 1,
-                    idx: idx,
-                    userid: val.userid,
-                    turk_username: val.username,
-                    turkpay: val.turkpay,
-                    turkpayDetails: val.turkpayDetails,
-                    turkbonus: val.turkbonus,
-                    turkbonusDetails: val.turkbonusDetails
-                });
+                var newRec = _.extend({ temp: 1, idx: idx }, val);
+                newRec.turk_username = newRec.username;
+                turkExperimentLog.insert(newRec);
             });
         });
     },

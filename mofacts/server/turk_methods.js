@@ -321,7 +321,7 @@ Meteor.methods({
                     }
                     else {
                         console.log("Bad Assignment found for bonus", rec);
-                        throw "Invalid assignment structure found for approval";
+                        throw "No previous assignment ID was found for approval, so no bonus can be paid. Examine approval/pay details for more information";
                     }
                 }
                 else if (action === "turk-bonus") {
@@ -424,7 +424,11 @@ Meteor.methods({
                 turkpay: '?',
                 turkpayDetails: 'No Details Found',
                 turkbonus: '?',
-                turkbonusDetails: 'No Details Found'
+                turkbonusDetails: 'No Details Found',
+                questionsSeen: 0,
+                answersSeen: 0,
+                answersCorrect: 0,
+                lastUnitSeen: -1
             };
 
             for (var i = 0; i < recs.length; ++i) {
@@ -455,6 +459,23 @@ Meteor.methods({
                     if (!ownerOK) {
                         console.log("Could not verify owner for", experiment);
                         return [];
+                    }
+                }
+                else if (act === "question") {
+                    if (!!rec.selType) {
+                        data.questionsSeen += 1;
+                        data.lastUnitSeen = Math.max(data.lastUnitSeen, Helpers.intVal(rec.currentUnit));
+                    }
+                }
+                else if (act === "answer" || act === "[timeout]") {
+                    data.answersSeen += 1;
+
+                    var wasCorrect = false;
+                    if (act === "answer") {
+                        wasCorrect = typeof rec.isCorrect !== "undefined" ? rec.isCorrect : false;
+                    }
+                    if (wasCorrect) {
+                        data.answersCorrect += 1;
                     }
                 }
             }
