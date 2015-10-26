@@ -1,7 +1,7 @@
 //TODO: Need a list of TDF and simulus files owned by the user
 
 ////////////////////////////////////////////////////////////////////////////
-// Template storage
+// Template storage and helpers
 
 var turkExperimentLog = new Mongo.Collection(null); //local-only - no database;
 
@@ -10,6 +10,28 @@ function clearTurkExpLog() {
 }
 
 //See the button event below to see how turkExperimentLog is populated
+
+//Helpful wrapper around JSON.stringify, including timestamp field expansion
+function displayify(obj) {
+    var dispObj = _.extend({}, obj);
+
+    try {
+        for (var prop in dispObj) {
+            if (prop.toLowerCase().endsWith('timestamp')) {
+                var ts = _.intval(_.prop(obj, prop));
+                if (ts > 0) {
+                    dispObj[prop] = " " + new Date(ts) + " (converted from " + ts + ")";
+                }
+            }
+        }
+    }
+    catch(e) {
+        console.log("Object displayify error", e);
+
+    }
+
+    return JSON.stringify(dispObj, null, 2);
+}
 
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
@@ -220,7 +242,7 @@ Template.profile.events({
         try {
             var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
             console.log(data);
-            disp = JSON.stringify(data.turkpayDetails, null, 2);
+            disp = displayify(data.turkpayDetails);
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
@@ -242,7 +264,7 @@ Template.profile.events({
         try {
             var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
             console.log(data);
-            disp = JSON.stringify(data.turkbonusDetails, null, 2);
+            disp = displayify(data.turkbonusDetails);
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
