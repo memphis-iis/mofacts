@@ -161,12 +161,12 @@ Template.card.events({
 
     'click .multipleChoiceButton' : function (event) {
         event.preventDefault();
-        handleUserInput( event , "buttonClick");
+        handleUserInput(event, "buttonClick");
     },
 
     'click #continueStudy': function(event) {
         event.preventDefault();
-        handleUserInput( event , "buttonClick");
+        handleUserInput(event, "buttonClick");
     },
 
     'click .instructModalDismiss': function(event) {
@@ -364,8 +364,6 @@ function newQuestionHandler() {
                 choicesArray = buttonOrder;
             }
             else {
-                console.log(choicesArray);
-                console.log(buttonOrder[0]);
                 //Specified in the scheduled stim cluster
                 var currentSchedQuest = currentScheduledQInfo();
                 if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
@@ -383,21 +381,20 @@ function newQuestionHandler() {
                 //Currently we only show 5 option button trials - so we only
                 //use 4 false responses
                 if (choicesArray.length > 3) {
-                    if(buttonOrder[0]==="random"){
-                    Helpers.shuffle(choicesArray);}
+                    if (buttonOrder[0] === "random") {
+                        Helpers.shuffle(choicesArray);
+                    }
                     choicesArray = choicesArray.splice(0, 5);
                 }
 
-                console.log(choicesArray);
-                console.log(buttonOrder[0]);
                 //Need to make sure they also have a correct option :)
                 var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
-                if (!!correctAnswer)
-               choicesArray.unshift(correctAnswer);
-                 if(buttonOrder[0]==="random"){
-                    Helpers.shuffle(choicesArray);}
-                console.log(choicesArray);
-                console.log(buttonOrder[0]);
+                if (!!correctAnswer) {
+                    choicesArray.unshift(correctAnswer);
+                }
+                if (buttonOrder[0] === "random") {
+                    Helpers.shuffle(choicesArray);
+                }
             }
 
             clearButtonList();
@@ -539,7 +536,7 @@ function handleUserInput(e , source) {
         userAnswer = Helpers.trim($('#userAnswer').val()).toLowerCase();
     }
     else if (source === "buttonClick") {
-        userAnswer = e.target.name;
+        userAnswer = e.currentTarget.name;
     }
 
     //Show user feedback and find out if they answered correctly

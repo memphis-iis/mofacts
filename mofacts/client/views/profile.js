@@ -42,7 +42,7 @@ Template.profile.events({
         event.preventDefault();
         console.log(event);
 
-        var target = $(event.target);
+        var target = $(event.currentTarget);
         selectTdf(
             target.data("tdfkey"),
             target.data("lessonname"),
@@ -176,7 +176,7 @@ Template.profile.events({
     'click .btn-log-select': function(event) {
         event.preventDefault();
 
-        var target = $(event.target);
+        var target = $(event.currentTarget);
         var exp = target.data("tdffilename");
 
         $("#turkExpTitle").text("Viewing data for " + exp);
@@ -207,8 +207,9 @@ Template.profile.events({
 
         $("#detailsModal").modal('hide');
 
-        var target = $(event.target);
+        var target = $(event.currentTarget);
         var idx = Helpers.intVal(target.data("idx"));
+        console.log("Pay event for", target, "Found index", idx);
 
         var disp;
         try {
@@ -229,7 +230,7 @@ Template.profile.events({
 
         $("#detailsModal").modal('hide');
 
-        var target = $(event.target);
+        var target = $(event.currentTarget);
         var idx = Helpers.intVal(target.data("idx"));
 
         var disp;
