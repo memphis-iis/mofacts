@@ -195,11 +195,16 @@ Template.profile.events({
 
             _.each(result, function(val, idx) {
                 console.log(val);
-                var newRec = _.extend({ temp: 1, idx: idx }, val);
+                var newRec = _.extend({ temp: 1, idx: idx, questionsSeen: 0 }, val);
                 newRec.turk_username = newRec.username;
                 turkExperimentLog.insert(newRec);
             });
         });
+    },
+
+    'keyup #turklog-filt': function(event) {
+        Session.set("turkLogFilterTrials", _.intval($("#turklog-filt").val()));
+        console.log("Filtering for", Session.get("turkLogFilterTrials"), "trials");
     },
 
     'click .btn-pay-detail': function(event) {
@@ -323,7 +328,8 @@ Template.profile.helpers({
     },
 
     turkExperimentLog: function() {
-        return turkExperimentLog.find({}, {sort: {idx: 1}});
+        var minTrials = _.intval(Session.get("turkLogFilterTrials") || -1);
+        return turkExperimentLog.find({'questionsSeen': {'$gte': _.intval(minTrials)}}, {sort: {idx: 1}});
     },
 });
 
