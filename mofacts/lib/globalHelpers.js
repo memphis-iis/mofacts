@@ -12,6 +12,51 @@ if (!Date.now) {
     };
 }
 
+//Helper function for underscore that accesses a property by name but
+//returns null either the object is "falsey" or the property is missing
+// Given o = {a: {z: [1,2,3]}} then
+// _.chain(o).prop('a').prop('z').value == [1,2,3]
+// _.chain(o).prop('a').prop('z').first().intval().value == 1
+// _.chain(o).prop('a').prop('z').first().floatval().value == 1.0
+// _.chain(o).prop('a').prop('z').first().prop('nope') == null
+// _.chain(o).prop('bad start').prop('z') == null
+if (_ && _.mixin) {
+    _.mixin({
+        prop: function(obj, propname) {
+            if ((!obj && obj !== "") || !propname || !_.has(obj, propname)) {
+                return null;
+            }
+            else {
+                return obj[propname];
+            }
+        },
+
+        intval: function(src) {
+            if (!src && src !== false) {
+                src = "";
+            }
+            else {
+                src = ("" + src).replace(/^\s+|\s+$/gm, '');
+            }
+
+            var val = parseInt(src);
+            return isNaN(val) ? 0 : val;
+        },
+
+        floatval: function(src) {
+            if (!src && src !== false) {
+                src = "";
+            }
+            else {
+                src = ("" + src).replace(/^\s+|\s+$/gm, '');
+            }
+
+            var val = parseFloat(src);
+            return isFinite(val) ? val : 0.0;
+        }
+    });
+}
+
 //Card probabilities setup and retrieval - used by ACT-R model
 //Note that this is only used on the client, but we want to make sure that
 //setting the cardProbabilities data structure is always available (and

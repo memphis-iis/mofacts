@@ -276,13 +276,17 @@ Meteor.startup(function () {
         //Allow file uploaded with name and contents. The type of file must be
         //specified - current allowed types are: 'stimuli', 'tdf'
         saveContentFile: function(type, filename, filecontents) {
-            var result = null;
-            var errmsg = "No action taken?";
-
-            //TODO: filename gets special prefix denoting file upload
-            //TODO: Should overwrite IFF owner matches
+            var results = {
+                'result': null,
+                'errmsg': 'No action taken?',
+                'action': 'None'
+            };
 
             try {
+                if (!!type)         throw "Type required for File Save";
+                if (!!filename)     throw "Filename required for File Save";
+                if (!!filecontents) throw "File Contents required for File Save";
+
                 //We need a valid use that is either admin or teacher
                 var ownerId = Meteor.user()._id;
                 if (!ownerId) {
@@ -298,28 +302,40 @@ Meteor.startup(function () {
                 //users' files
                 filename = "upload:" + ownerId + ":" + filename;
 
+                //Parse the XML contents to make sure we can acutally handle the file
+                var jsonContents = xml2js.parseStringSync(filecontents);
+
                 if (type == "tdf") {
+                    //TODO: //Make sure the TDF looks valid-ish
+                    if (typeof jsonContents.tdfs.tutor.setspec != "undefined") {
+                    }
+
+                    var prev = Tdfs.findOne({'filename': filename});
+                    if (prev) {
+                        //TODO: Should overwrite IFF owner matches
+                        results.action = "overwrite previous file";
+                    }
+                    else {
+                        results.action = "save new file";
+                    }
                     //TODO: save the TDF file
                 }
                 else if (type === "stim") {
-                    //TODO: save the stimulus file
+                    //TODO: save the stimulus file as TDF above
                 }
                 else {
                     throw "Unknown file type not allowed: " + type;
                 }
 
-                result = true;
-                errmsg = "";
+                results.result = true;
+                results.errmsg = "";
             }
             catch(e) {
-                result = false;
-                errmsg = e;
+                results.result = false;
+                results.errmsg = e;
             }
 
-            return {
-                'result': result,
-                'error': errmsg
-            };
+            return results;
         },
 
         //Log one or more user records for the currently running experiment
