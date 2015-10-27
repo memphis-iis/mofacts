@@ -21,6 +21,7 @@ test_suite("underscore mixins", function() {
         assert.deepEqual(0, _.intval());
         assert.deepEqual(0, _.intval(false));
         assert.deepEqual(0, _.intval('Nothing to see here'));
+        assert.deepEqual(42, _.intval(null, 42));
 
         assert.deepEqual(42, _.intval('42'));
         assert.deepEqual(42, _.intval(42));
@@ -36,6 +37,7 @@ test_suite("underscore mixins", function() {
         assert.deepEqual(0.0, _.floatval());
         assert.deepEqual(0.0, _.floatval(false));
         assert.deepEqual(0.0, _.floatval('Nothing to see here'));
+        assert.deepEqual(0.42, _.floatval(null, 0.42));
 
         assert.deepEqual(1.1, _.floatval("1.1"));
         assert.deepEqual(1.1, _.floatval(1.1));
@@ -71,8 +73,12 @@ test_suite("underscore mixins", function() {
         assert.deepEqual('Another String', _.chain(obj).prop('nested').first().prop('sub').prop('s').value());
         assert.deepEqual(42, _.chain(obj).prop('nested').first().prop('sub').prop('ii').intval().value());
         assert.deepEqual('Bad String', _.chain(obj).prop('nested').last().prop('sub').prop('s').value());
+
         assert.deepEqual(null, _.chain(obj).prop('nestedmiss').first().prop('sub').prop('s').value());
         assert.deepEqual(null, _.chain(obj).prop('nested').first().prop('sub').prop('miss').value());
+
+        assert.deepEqual(42, _.chain(obj).prop('nestedmiss').first().prop('sub').prop('s').intval(42).value());
+        assert.deepEqual(0.42, _.chain(obj).prop('nested').first().prop('sub').prop('miss').floatval(0.42).value());
     });
 });
 

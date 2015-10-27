@@ -31,7 +31,7 @@ if (_ && _.mixin) {
             }
         },
 
-        intval: function(src) {
+        intval: function(src, defaultVal) {
             if (!src && src !== false) {
                 src = "";
             }
@@ -40,10 +40,11 @@ if (_ && _.mixin) {
             }
 
             var val = parseInt(src);
-            return isNaN(val) ? 0 : val;
+            defaultVal = defaultVal || 0;
+            return isNaN(val) ? defaultVal : val;
         },
 
-        floatval: function(src) {
+        floatval: function(src, defaultVal) {
             if (!src && src !== false) {
                 src = "";
             }
@@ -52,7 +53,8 @@ if (_ && _.mixin) {
             }
 
             var val = parseFloat(src);
-            return isFinite(val) ? val : 0.0;
+            defaultVal = defaultVal || 0.0;
+            return isFinite(val) ? val : defaultVal;
         }
     });
 }
