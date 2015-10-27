@@ -55,6 +55,23 @@ if (_ && _.mixin) {
             var val = parseFloat(src);
             defaultVal = defaultVal || 0.0;
             return isFinite(val) ? val : defaultVal;
+        },
+
+        trim: function(s) {
+            if (!s)
+                return "";
+
+            var ss = "" + s;
+            if (!ss || !ss.length || ss.length < 1) {
+                return "";
+            }
+
+            if (ss.trim) {
+                return ss.trim();
+            }
+            else {
+                return ss.replace(/^\s+|\s+$/gm, '');
+            }
         }
     });
 }
