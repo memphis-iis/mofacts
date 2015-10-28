@@ -1,40 +1,16 @@
-//TODO: Need a list of TDF and simulus files owned by the user
-
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
-var turkExperimentLog = new Mongo.Collection(null); //local-only - no database;
-
-function clearTurkExpLog() {
-    turkExperimentLog.remove({'temp': 1});
-}
-
-//See the button event below to see how turkExperimentLog is populated
-
-//Helpful wrapper around JSON.stringify, including timestamp field expansion
-function displayify(obj) {
-    if (typeof obj === "string" || typeof obj === "number") {
-        return obj;
-    }
-    var dispObj = _.extend({}, obj);
-
-    try {
-        for (var prop in dispObj) {
-            if (prop.toLowerCase().endsWith('timestamp')) {
-                var ts = _.intval(_.prop(obj, prop));
-                if (ts > 0) {
-                    dispObj[prop] = " " + new Date(ts) + " (converted from " + ts + ")";
-                }
-            }
+Template.profile.helpers({
+    username: function () {
+        if (!haveMeteorUser()) {
+            routeToSignin();
+        }
+        else {
+            return Meteor.user().username;
         }
     }
-    catch(e) {
-        console.log("Object displayify error", e);
-
-    }
-
-    return JSON.stringify(dispObj, null, 2);
-}
+});
 
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
@@ -63,6 +39,7 @@ Template.profile.events({
         Router.go("/admin");
     },
 
+    // Start a TDF
     'click .stimButton' : function (event) {
         event.preventDefault();
         console.log(event);
@@ -75,208 +52,130 @@ Template.profile.events({
             target.data("tdffilename"),
             "User button click"
         );
-    },
-
-    'click #doUploadTDF': function(event) {
-        event.preventDefault();
-        _.each($("#upload-tdf").prop("files"), function(file) {
-            var name = file.name;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
-                    if (!!error) {
-                        console.log("Critical failure saving TDF", error);
-                        alert("There was a critical failure saving your TDF:" + error);
-                    }
-                    else if (!result.result) {
-                        console.log("TDF saved failed", result);
-                        alert("The TDF was not saved: " + errmsg);
-                    }
-                    else {
-                        console.log("TDF Saved:", result);
-                        alert("You TDF was saved");
-                    }
-                });
-            };
-            fileReader.readAsBinaryString(file);
-        });
-    },
-
-    'click #doUploadStim': function(event) {
-        event.preventDefault();
-        _.each($("#upload-stim").prop("files"), function(file) {
-            var name = file.name;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                Meteor.call('saveContentFile', 'stim', name, file.srcElement.result, function(error, result) {
-                    if (!!error) {
-                        console.log("Critical failure saving stim", error);
-                        alert("There was a critical failure saving your Stimulus file:" + error);
-                    }
-                    else if (!result.result) {
-                        console.log("Stim saved failed", result);
-                        alert("The Stimulus file was not saved: " + errmsg);
-                    }
-                    else {
-                        console.log("Stim Saved:", result);
-                        alert("You Stimulus file was saved");
-                    }
-                });
-            };
-            fileReader.readAsBinaryString(file);
-        });
-    },
-
-    'click #saveProfile': function(event) {
-        event.preventDefault();
-
-        var data = {
-            aws_id: $("#profileAWSID").val(),
-            aws_secret_key: $("#profileAWSSecret").val(),
-            use_sandbox: $("#profileUseSandbox").prop("checked")
-        };
-
-        $('#turkModal').modal('show');
-
-        Meteor.call("saveUserProfileData", data, function(error, serverReturn) {
-            $('#turkModal').modal('hide');
-
-            if (!!error) {
-                console.log("Error saving user profile", error);
-                alert("Your changes were not saved! " + error);
-            }
-            else if (!serverReturn || !serverReturn.result) {
-                console.log("Server failure while saving profile", serverReturn);
-                alert("Your changes were not saved! The server said: " + JSON.stringify(serverReturn, null, 2));
-            }
-            else {
-                console.log("Profile saved:", serverReturn);
-                //Clear any controls that shouldn't be kept around
-                $(".clearOnSave").val("");
-                alert("Your profile changes have been saved: save details follow\n\n" + JSON.stringify(serverReturn, null, 2));
-            }
-        });
-    },
-
-    'click #turk-show-assign': function(event) {
-        event.preventDefault();
-        var assignid = $("#turk-assignid").val();
-        $("#turk-assign-results").text("Working on " + assignid);
-        $('#turkModal').modal('show');
-        Meteor.call("turkGetAssignment", assignid, function(error, result){
-            $('#turkModal').modal('hide');
-            var disp;
-            if (typeof error !== "undefined") {
-                disp = "Failed to handle turk approval. Error:" + error;
-            }
-            else {
-                disp = "Server returned:" + JSON.stringify(result, null, 2);
-            }
-            $("#turk-assign-results").text(disp);
-        });
-    },
-
-    'click #turk-send-msg': function(event) {
-        event.preventDefault();
-        var workerid = $("#turk-workerid").val();
-        var msgtext = $("#turk-msg").val();
-        console.log("Sending to", workerid, "Msg:", msgtext);
-        $('#turkModal').modal('show');
-        Meteor.call("turkSendMessage", workerid, msgtext, function(error, result){
-            $('#turkModal').modal('hide');
-            var disp;
-            if (typeof error !== "undefined") {
-                disp = "Failed to handle turk approval. Error:" + error;
-            }
-            else {
-                disp = "Server returned:" + JSON.stringify(result, null, 2);
-            }
-            console.log(disp);
-            alert(disp);
-        });
-    },
-
-    'click .btn-log-select': function(event) {
-        event.preventDefault();
-
-        var target = $(event.currentTarget);
-        var exp = target.data("tdffilename");
-
-        $("#turkExpTitle").text("Viewing data for " + exp);
-        clearTurkExpLog();
-
-        $('#turkModal').modal('show');
-        Meteor.call("turkUserLogStatus", exp, function(error, result){
-            $('#turkModal').modal('hide');
-
-            if (typeof error !== "undefined") {
-                var disp = "Failed to retrieve log entries. Error:" + error;
-                console.log(disp);
-                alert(disp);
-                return;
-            }
-
-            _.each(result, function(val, idx) {
-                console.log(val);
-                var newRec = _.extend({ temp: 1, idx: idx, questionsSeen: 0 }, val);
-                newRec.turk_username = newRec.username;
-                turkExperimentLog.insert(newRec);
-            });
-        });
-    },
-
-    'keyup #turklog-filt': function(event) {
-        Session.set("turkLogFilterTrials", _.intval($("#turklog-filt").val()));
-        console.log("Filtering for", Session.get("turkLogFilterTrials"), "trials");
-    },
-
-    'click .btn-pay-detail': function(event) {
-        event.preventDefault();
-
-        $("#detailsModal").modal('hide');
-
-        var target = $(event.currentTarget);
-        var idx = Helpers.intVal(target.data("idx"));
-        console.log("Pay event for", target, "Found index", idx);
-
-        var disp;
-        try {
-            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
-            console.log(data);
-            disp = displayify(data.turkpayDetails);
-        }
-        catch(e) {
-            disp = "Error finding details to display: " + e;
-        }
-
-        $("#detailsModalListing").text(disp);
-        $("#detailsModal").modal('show');
-    },
-
-    'click .btn-bonus-detail': function(event) {
-        event.preventDefault();
-
-        $("#detailsModal").modal('hide');
-
-        var target = $(event.currentTarget);
-        var idx = Helpers.intVal(target.data("idx"));
-
-        var disp;
-        try {
-            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
-            console.log(data);
-            disp = displayify(data.turkbonusDetails);
-        }
-        catch(e) {
-            disp = "Error finding details to display: " + e;
-        }
-
-        $("#detailsModalListing").text(disp);
-        $("#detailsModal").modal('show');
     }
 });
+
+Template.profile.rendered = function () {
+    //Init the modal dialogs
+    $('#turkModal').modal({
+        'backdrop': 'static',
+        'keyboard': false,
+        'show': false
+    });
+
+    $('#detailsModal').modal({
+        'show': false
+    });
+
+    //this is called whenever the template is rendered.
+    var allTdfs = Tdfs.find({});
+
+    $("#expDataDownloadContainer").html("");
+
+    var addButton = function(btnObj) {
+        $("#testButtonContainer").append(
+            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
+                btnObj
+            )
+        );
+    };
+
+    //In experiment mode, they may be forced to a single tdf
+    var experimentTarget = null;
+    if (Session.get("loginMode") === "experiment") {
+        experimentTarget = Session.get("experimentTarget");
+        if (experimentTarget)
+            experimentTarget = experimentTarget.toLowerCase();
+    }
+
+    //Will be populated if we find an experimental target to jump to
+    var foundExpTarget = null;
+
+    //Check all the valid TDF's
+    allTdfs.forEach( function (tdfObject) {
+        //Make sure we have a valid TDF (with a setspec)
+        var setspec = _.chain(tdfObject)
+            .prop("tdfs")
+            .prop("tutor")
+            .prop("setspec").first()
+            .value();
+
+        if (!setspec) {
+            console.log("Invalid TDF - it will never work", tdfObject);
+            return;
+        }
+
+        var name = _.chain(setspec).prop("lessonname").first().value();
+        if (!name) {
+            console.log("Skipping TDF with no name", setspec);
+            return;
+        }
+
+        var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
+
+        //Check to see if we have found a selected experiment target
+        if (experimentTarget && !foundExpTarget) {
+            var tdfExperimentTarget = _.chain(setspec)
+                .prop("experimentTarget").first().trim()
+                .value().toLowerCase();
+
+            if (tdfExperimentTarget && experimentTarget == tdfExperimentTarget) {
+                foundExpTarget = {
+                    tdfkey: tdfObject._id,
+                    lessonName: name,
+                    stimulusfile: stimulusFile,
+                    tdffilename: tdfObject.fileName,
+                    how: "Auto-selected by experiment target " + experimentTarget
+                };
+            }
+        }
+
+        //Note that we defer checking for userselect in case something above
+        //(e.g. experimentTarget) auto-selects the TDF
+        var userselectText = _.chain(setspec)
+            .prop("userselect").first().trim()
+            .value().toLowerCase();
+
+        var userselect = true;
+        if (userselectText === "false")
+            userselect = false;
+
+        if (!userselect) {
+            console.log("Skipping due to userselect=false for ", name);
+            return;
+        }
+
+        addButton(
+            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
+                .addClass("btn btn-block stimButton")
+                .data("lessonname", name)
+                .data("stimulusfile", stimulusFile)
+                .data("tdfkey", tdfObject._id)
+                .data("tdffilename", tdfObject.fileName)
+                .html(name)
+        );
+
+        $("#expDataDownloadContainer").append(
+            $("<div></div>").append(
+                $("<a class='exp-data-link' target='_blank'></a>")
+                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
+                    .text("Download: " + name + " (DataShop format)")
+            )
+        );
+    });
+
+    //Did we find something to auto-jump to?
+    if (foundExpTarget) {
+        selectTdf(
+            foundExpTarget.tdfkey,
+            foundExpTarget.lessonName,
+            foundExpTarget.stimulusfile,
+            foundExpTarget.tdffilename,
+            foundExpTarget.how
+        );
+    }
+};
+
 
 
 //Actual logic for selecting and starting a TDF
@@ -321,179 +220,3 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     Session.set("needResume", true);
     Router.go("/card");
 }
-
-////////////////////////////////////////////////////////////////////////////
-// Template helpers
-
-function getProfileField(field) {
-    var prof =  UserProfileData.findOne({_id:Meteor.userId()});
-    if (!prof || typeof prof[field] === undefined)
-        return null;
-    return prof[field];
-}
-
-Template.profile.helpers({
-    username: function () {
-        if (!haveMeteorUser()) {
-            routeToSignin();
-        }
-        else {
-            return Meteor.user().username;
-        }
-    },
-
-    use_sandbox: function() {
-        return getProfileField('use_sandbox') ? "checked" : false;
-    },
-    have_aws_id: function() {
-        return getProfileField('have_aws_id');
-    },
-    have_aws_secret: function() {
-        return getProfileField('have_aws_secret');
-    },
-
-    turkExperimentLog: function() {
-        var minTrials = _.intval(Session.get("turkLogFilterTrials") || -1);
-        return turkExperimentLog.find({'questionsSeen': {'$gte': _.intval(minTrials)}}, {sort: {idx: 1}});
-    },
-});
-
-Template.profile.rendered = function () {
-    //Init the modal dialogs
-    $('#turkModal').modal({
-        'backdrop': 'static',
-        'keyboard': false,
-        'show': false
-    });
-
-    $('#detailsModal').modal({
-        'show': false
-    });
-
-    //this is called whenever the template is rendered.
-    var allTdfs = Tdfs.find({});
-
-    $("#expDataDownloadContainer").html("");
-
-    var addButton = function(btnObj) {
-        $("#testButtonContainer").append(
-            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
-                btnObj
-            )
-        );
-    };
-
-    //In experiment mode, they may be forced to a single tdf
-    var experimentTarget = null;
-    if (Session.get("loginMode") === "experiment") {
-        experimentTarget = Session.get("experimentTarget");
-        if (experimentTarget)
-            experimentTarget = experimentTarget.toLowerCase();
-    }
-
-    //Will be populated if we find an experimental target to jump to
-    var foundExpTarget = null;
-
-    //Check all the valid TDF's
-    var turkLogCount = 0;
-
-    allTdfs.forEach( function (tdfObject) {
-        var setspec = tdfObject.tdfs.tutor.setspec[0];
-        if (!setspec) {
-            console.log("Invalid TDF - it will never work", tdfObject);
-            return;
-        }
-
-        var name = null;
-        if (setspec.lessonname && setspec.lessonname.length) {
-            name = setspec.lessonname[0];
-        }
-        if (!name) {
-            console.log("Skipping TDF with no name", setspec);
-            return;
-        }
-
-        var stimulusFile = "";
-        if (setspec.stimulusfile && setspec.stimulusfile.length) {
-            stimulusFile = setspec.stimulusfile[0];
-        }
-
-        //Check to see if we have found a selected experiment target
-        if (experimentTarget && !foundExpTarget) {
-            var tdfExperimentTarget = "";
-            if (setspec.experimentTarget && setspec.experimentTarget.length) {
-                tdfExperimentTarget = setspec.experimentTarget[0];
-            }
-
-            if (tdfExperimentTarget && experimentTarget == tdfExperimentTarget.toLowerCase()) {
-                foundExpTarget = {
-                    tdfkey: tdfObject._id,
-                    lessonName: name,
-                    stimulusfile: stimulusFile,
-                    tdffilename: tdfObject.fileName,
-                    how: "Auto-selected by experiment target " + experimentTarget
-                };
-            }
-        }
-
-        //Note that we defer checking for userselect in case something above
-        //(e.g. experimentTarget) auto-selects the TDF
-        var userselect = true;
-        if (setspec.userselect && setspec.userselect.length) {
-            userselect = setspec.userselect[0];
-            if (userselect && userselect.toLowerCase() === "false") {
-                //We require that they explicitly have the string "false"
-                //to disable display
-                userselect = false;
-            }
-        }
-        if (!userselect) {
-            console.log("Skipping due to userselect=false for ", name);
-            return;
-        }
-
-        addButton(
-            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
-                .addClass("btn btn-block stimButton")
-                .data("lessonname", name)
-                .data("stimulusfile", stimulusFile)
-                .data("tdfkey", tdfObject._id)
-                .data("tdffilename", tdfObject.fileName)
-                .html(name)
-        );
-
-        $("#expDataDownloadContainer").append(
-            $("<div></div>").append(
-                $("<a class='exp-data-link' target='_blank'></a>")
-                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                    .text("Download: " + name + " (DataShop format)")
-            )
-        );
-
-        if (Meteor.userId() === tdfObject.owner) {
-            $("#turkLogSelectContainer").append(
-                $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
-                    .addClass("btn btn-fix btn-sm btn-success btn-log-select")
-                    .css('margin', '3px')
-                    .data("tdffilename", tdfObject.fileName)
-                    .html(name)
-            );
-
-            turkLogCount += 1;
-        }
-    });
-
-    //Only show turk log stuff if there is anything to show
-    $("#turkLogAll").toggle(turkLogCount > 0);
-
-    //Did we find something to auto-jump to?
-    if (foundExpTarget) {
-        selectTdf(
-            foundExpTarget.tdfkey,
-            foundExpTarget.lessonName,
-            foundExpTarget.stimulusfile,
-            foundExpTarget.tdffilename,
-            foundExpTarget.how
-        );
-    }
-};

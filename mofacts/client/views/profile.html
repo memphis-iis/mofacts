@@ -1,5 +1,5 @@
+<!-- MAIN profile template -->
 <template name="profile">
-
     <nav class="navbar navbar-inverse" role="navigation">
         <div class="container">
             <div class="navbar-header">
@@ -11,8 +11,8 @@
                 </button>
                 <a class="navbar-brand" href="#">MoFaCTS
                     {{#if isInRole 'admin,teacher'}}
-                        {{#if isInRole 'admin'}}Administrator{{/if}}
-                        {{#if isInRole 'teacher'}}Teacher {{/if}}
+                        {{#if isInRole 'admin'}} Administrator {{/if}}
+                        {{#if isInRole 'teacher'}} Teacher {{/if}}
                     {{else}}
                         Student
                     {{/if}}
@@ -35,224 +35,43 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
-
         <div class="row" id="testButtonContainer">
             <legend class="text-center">Your Practice Modules</legend>
         </div>
 
         {{#if isInRole 'admin,teacher'}}
-        <br><br>
-        <div class="row">
-            <div class="col-md-3">
-                <legend class="text-center">Upload TDF File</legend>
-                <div class="form-group">
-                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
-                </div>
-                <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                    Upload TDF File
-                </button>
-            </div>
+            {{> contentUpload}}
+            {{> userProfileEdit}}
+            {{> turkWorkflow}}
 
-            <div class="col-md-3">
-                <legend class="text-center">Upload Stimulus File</legend>
-                <div class="form-group">
-                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File">
-                </div>
-                <button type='button' id='doUploadStim' class='btn btn-fix'>
-                    Upload Stimulus File
-                </button>
-            </div>
-
-            <div class="col-md-6">
-                <legend class="text-center">Uploaded Files</legend>
-                <table class="table table-striped table-bordered table-condensed">
-                    <thead>
-                        <tr>
-                            <th>Date Created</th>
-                            <th>Name</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
-
-        <br><br>
-        <div class="row">
-            <div class="col-md-5" id="profileContainer">
-                <legend class="text-center">Profile Data</legend>
-                <!-- TODO: Format this input form with a bootstrappy form -->
-                <table class="table">
-                    <tr>
-                        <th>New AWS ID</th>
-                        <td>
-                            <input type="text"
-                                id="profileAWSID"
-                                class="clearOnSave"
-                                maxlength="40"
-                                placeholder="{{#if have_aws_id}}Overwrite{{else}}Enter{{/if}} your AWS ID"
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>New AWS Secret Key</th>
-                        <td>
-                            <input type="password"
-                                id="profileAWSSecret"
-                                class="clearOnSave"
-                                maxlength="60"
-                                placeholder="{{#if have_aws_secret}}Overwrite{{else}}Enter{{/if}} your AWS Secret Key"
-                            >
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Use Sandbox</th>
-                        <td><input type="checkbox" id="profileUseSandbox" checked={{use_sandbox}}></td>
-                    </tr>
-                    <tr>
-                        <th>&nbsp;</th>
-                        <td>
-                            <button type='button' id='saveProfile' class='btn btn-fix'>
-                                Save Profile Data
-                            </button>
-                            <br>
-                            <small>(Your AWS credentials are never shown)</small>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="col-md-offset-1 col-md-6" id="downloadContainer">
-                <legend class="text-center">Data Downloads</legend>
-                <div id="expDataDownloadContainer" class="col-lg-12"></div>
-            </div>
-        </div>
-        {{/if}}
-
-        {{#if isInRole 'admin'}}
-            <br><br>
-            <div class="row form-inline">
-                <div class="col-md-6" id="turk-assignment-details">
-                    <div id="name">
-                        <legend class="text-center">View Turk Assignment Details</legend>
-                        <div class="form-group">
-                            <label for="turk-assignid">Assignment ID</label>
-                            <input type="text" class="form-control" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
+            <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="turkModalLabel">Please Wait</h4>
                         </div>
-                        <button id="turk-show-assign" class="btn btn-fix">Get Assignment!</button>
-                        <pre id="turk-assign-results" style="width:100%">
-                        </pre>
-                    </div>
-                </div>
-
-                <div class="col-md-6" id="turk-send-message">
-                    <div id="name">
-                        <legend class="text-center">Send Turk Message</legend>
-                        <div class="form-group">
-                            <label for="turk-workerid">Worker ID</label>
-                            <input type="text" class="form-control" name="turk-workerid" id="turk-workerid" value="" placeholder="Mechanical Turk WorkerID">
+                        <div class="modal-body">
+                            <div class="clearfix">
+                                <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
+                                <p class="pull-right">Please wait while we contact Mechanical Turk</p>
+                            </div>
                         </div>
-                        <button id="turk-send-msg" class="btn btn-fix">Send Message!</button>
-                        <textarea name="turk-msg" id="turk-msg" style="width:100%" rows="12" placeholder="Message text goes here"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+                <div class="modal-dialog" role="document" style="width:98%;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="detailsModalLabel">Turk Experiment Log Details</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div id="detailsModalListing" style="white-space:pre;"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         {{/if}}
-
-        {{#if isInRole 'admin,teacher'}}
-            <br><br>
-
-            <div id="turkLogAll">
-            <div class="row">
-                <div class="col-md-12" id="turkLogSelectContainer">
-                    <legend class="text-center">Select a TDF to see the Turk Log</legend>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 form-inline">
-                    <legend class="text-center">
-                        Turk Experiment Log <span id="turkExpTitle"></span>
-                    </legend>
-
-                    <div class="form-group">
-                        <label for="turklog-filt">Minimum Trials</label>
-                        <input type="text" class="form-control" name="turklog-filt" id="turklog-filt" value="" placeholder="Only show users with this many trials">
-                    </div>
-
-                    <table class="table table-striped table-bordered table-condensed" style="font-size:85%;">
-                        <thead><tr>
-                            <th>User MongoDB ID</th>
-                            <th>User Name (Turk)</th>
-                            <th>Last Unit</th>
-                            <th>Q Seen</th>
-                            <th>A Given</th>
-                            <th>Correct</th>
-                            <th>Approval</th>
-                            <th>Bonus</th>
-                        </tr></thead>
-
-                        <tbody>
-                        {{#each turkExperimentLog}}
-                            <tr>
-                                <td>{{userid}}</td>
-                                <td>{{turk_username}}</td>
-                                <td>{{lastUnitSeen}}</td>
-                                <td>{{questionsSeen}}</td>
-                                <td>{{answersSeen}}</td>
-                                <td>{{answersCorrect}}</td>
-                                <td>
-                                    <button type="button"
-                                        class="btn btn-fix btn-primary btn-xs btn-pay-detail"
-                                        data-idx="{{idx}}"
-                                    ><span class="glyphicon glyphicon-zoom-in"></span>
-                                    </button>
-                                    {{turkpay}}
-                                </td>
-                                <td>
-                                    <button type="button"
-                                        class="btn btn-fix btn-primary btn-xs btn-bonus-detail"
-                                        data-idx="{{idx}}"
-                                    ><span class="glyphicon glyphicon-zoom-in"></span>
-                                    </button>
-                                    {{turkbonus}}
-                                </td>
-                            </tr>
-                        {{/each}}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            </div> <!-- /turkLogAll -->
-        {{/if}}
-    </div>
-
-    <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="turkModalLabel">Please Wait</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="clearfix">
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
-                        <p class="pull-right">Please wait while we contact Mechanical Turk</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
-        <div class="modal-dialog" role="document" style="width:98%;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="detailsModalLabel">Turk Experiment Log Details</h4>
-                </div>
-                <div class="modal-body">
-                    <div id="detailsModalListing" style="white-space:pre;"></div>
-                </div>
-            </div>
-        </div>
     </div>
 </template>

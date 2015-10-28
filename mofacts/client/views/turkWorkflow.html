@@ -1,0 +1,115 @@
+<!----------------------------------------------------------------------------
+Turk Workflow Template
+----------------------------------------------------------------------------->
+<template name="turkWorkflow">
+    <br><br>
+    <div class="row form-inline">
+        <div class="col-md-6" id="turk-assignment-details">
+            <div id="name">
+                <legend class="text-center">View Turk Assignment Details</legend>
+                <div class="form-group">
+                    <label for="turk-assignid">Assignment ID</label>
+                    <input type="text" class="form-control" name="turk-assignid" id="turk-assignid" value="" placeholder="Mechanical Turk AssignmentID">
+                </div>
+                <button id="turk-show-assign" class="btn btn-fix">Get Assignment!</button>
+                <pre id="turk-assign-results" style="width:100%">
+                </pre>
+            </div>
+        </div>
+
+        <div class="col-md-6" id="turk-send-message">
+            <div id="name">
+                <legend class="text-center">Send Turk Message</legend>
+                <div class="form-group">
+                    <label for="turk-workerid">Worker ID</label>
+                    <input type="text" class="form-control" name="turk-workerid" id="turk-workerid" value="" placeholder="Mechanical Turk WorkerID">
+                </div>
+                <button id="turk-send-msg" class="btn btn-fix">Send Message!</button>
+                <textarea name="turk-msg" id="turk-msg" style="width:100%" rows="12" placeholder="Message text goes here"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <br><br>
+
+    <div id="turkLogAll">
+        <div class="row">
+            <div class="col-md-12" id="turkLogSelectContainer">
+                <legend class="text-center">Select a TDF to see the Turk Log</legend>
+            </div>
+        </div>
+
+        {{#if turkExperimentLogToShow}}
+        <div class="row">
+            <div class="col-md-12 form-inline">
+                <legend class="text-center">
+                    Turk Experiment Log <span id="turkExpTitle"></span>
+                </legend>
+
+                <div class="form-group">
+                    <label for="turklog-filt">Minimum Trials</label>
+                    <input type="text" class="form-control" name="turklog-filt" id="turklog-filt" value="" placeholder="Only show users with this many trials">
+                </div>
+
+                <table class="table table-striped table-bordered table-condensed" style="font-size:85%;">
+                    <thead><tr>
+                        <th>User MongoDB ID</th>
+                        <th>User Name (Turk)</th>
+                        <th>Last Unit</th>
+                        <th>Q Seen</th>
+                        <th>A Given</th>
+                        <th>Correct</th>
+                        <th>Approval</th>
+                        <th>Bonus</th>
+                    </tr></thead>
+
+                    <tbody>
+                    {{#each turkExperimentLog}}
+                        <tr>
+                            <td>{{userid}}</td>
+                            <td>{{turk_username}}</td>
+                            <td>{{lastUnitSeen}}</td>
+                            <td>{{questionsSeen}}</td>
+                            <td>{{answersSeen}}</td>
+                            <td>{{answersCorrect}}</td>
+                            <td>
+                                {{#if needPay}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-pay-action"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-usd"></span> Approve/Pay
+                                    </button>
+                                {{else}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-pay-detail"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-zoom-in"></span>
+                                    </button>
+                                    {{turkpay}}
+                                {{/if}}
+                            </td>
+                            <td>
+                                {{#if needBonus}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-bonus-action"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-usd"></span> Send Bonus
+                                    </button>
+                                {{else}}
+                                    <button type="button"
+                                        class="btn btn-fix btn-primary btn-xs btn-bonus-detail"
+                                        data-idx="{{idx}}"
+                                    ><span class="glyphicon glyphicon-zoom-in"></span>
+                                    </button>
+                                    {{turkbonus}}
+                                {{/if}}
+                            </td>
+                        </tr>
+                    {{/each}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{/if}} <!-- /turkExperimentLogToShow -->
+    </div> <!-- /turkLogAll -->
+</template>
