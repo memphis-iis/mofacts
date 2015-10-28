@@ -190,7 +190,7 @@ Meteor.methods({
             }
 
             turkid =  _.chain(Meteor.users.findOne({'_id': workerUserId}))
-                .prop('_id').trim()
+                .prop('username').trim()
                 .value().toUpperCase();
             if (!turkid) {
                 throw "No valid username found";
@@ -288,7 +288,7 @@ Meteor.methods({
             sendBonusRequest: 'not performed'
         };
 
-        var turkid, ownerId, tdfid; // Needed for final work
+        var turkid, ownerId, tdfid, unitnum; // Needed for final work
 
         try {
             var usr = Meteor.user();
@@ -306,7 +306,7 @@ Meteor.methods({
             }
 
             turkid =  _.chain(Meteor.users.findOne({'_id': workerUserId}))
-                .prop('_id').trim()
+                .prop('username').trim()
                 .value().toUpperCase();
             if (!turkid) {
                 throw "No valid username found";
@@ -372,13 +372,14 @@ Meteor.methods({
                 bonusAmt = _.chain(unitList[i])
                     .prop("turkbonus").first().floatval().value();
                 if (bonusAmt) {
+                    unitnum = i;
                     break;
                 }
             }
 
             if (bonusAmt) {
                 workPerformed.locateBonusAmount = "Found bonus " + bonusAmt +
-                    " in tdf[unit]=" + tdfid + "[" + i + "]";
+                    " in tdf[unit]=" + tdfid + "[" + unitnum + "]";
                 workPerformed.bonusAmt = bonusAmt;
             }
             else {

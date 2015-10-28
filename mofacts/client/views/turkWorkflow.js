@@ -7,7 +7,50 @@ function clearTurkExpLog() {
     turkExperimentLog.remove({'temp': 1});
 }
 
-//See the button event below to see how turkExperimentLog is populated
+function turkLogRefresh(exp) {
+    $("#turkExpTitle").text("Viewing data for " + exp);
+    clearTurkExpLog();
+
+    $('#turkModal').modal('show');
+
+    Meteor.call("turkUserLogStatus", exp, function(error, result){
+        $('#turkModal').modal('hide');
+
+        if (typeof error !== "undefined") {
+            var disp = "Failed to retrieve log entries. Error:" + error;
+            console.log(disp);
+            alert(disp);
+            return;
+        }
+
+        _.each(result, function(val, idx) {
+            var newRec = _.extend({
+                temp: 1,
+                idx: idx,
+                questionsSeen: 0,
+                experiment: exp
+            }, val);
+
+            newRec.needPay = (newRec.turkpay === '?');
+            newRec.needBonus = (newRec.turkbonus === '?');
+            newRec.turk_username = newRec.username;
+
+            turkExperimentLog.insert(newRec);
+        });
+    });
+}
+
+function turkLogButtonToRec(element) {
+    var target = $(element);
+    var idx = _.intval(target.data("idx"), -1);
+    console.log("Pay event for", target, "Found index", idx);
+
+    if (idx < 0) {
+        return null;
+    }
+
+    return turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
+}
 
 Template.turkWorkflow.helpers({
     turkExperimentLogToShow: function() {
@@ -157,29 +200,7 @@ Template.turkWorkflow.events({
         var target = $(event.currentTarget);
         var exp = target.data("tdffilename");
 
-        $("#turkExpTitle").text("Viewing data for " + exp);
-        clearTurkExpLog();
-
-        $('#turkModal').modal('show');
-        Meteor.call("turkUserLogStatus", exp, function(error, result){
-            $('#turkModal').modal('hide');
-
-            if (typeof error !== "undefined") {
-                var disp = "Failed to retrieve log entries. Error:" + error;
-                console.log(disp);
-                alert(disp);
-                return;
-            }
-
-            _.each(result, function(val, idx) {
-                console.log(val);
-                var newRec = _.extend({ temp: 1, idx: idx, questionsSeen: 0 }, val);
-                newRec.needPay = (newRec.turkpay === '?');
-                newRec.needBonus = (newRec.turkbonus === '?');
-                newRec.turk_username = newRec.username;
-                turkExperimentLog.insert(newRec);
-            });
-        });
+        turkLogRefresh(exp);
     },
 
     // Admin/Teachers - filter Turk log results by trials seen
@@ -191,13 +212,77 @@ Template.turkWorkflow.events({
     // Admin/Teachers - approve/pay a user in the Turk log view
     'click .btn-pay-action': function(event) {
         event.preventDefault();
-        //TODO: actually send approval
+
+        var rec = turkLogButtonToRec(event.currentTarget);
+        if (!rec) {
+            alert("Cannot find record for that table entry?!");
+            return;
+        }
+
+        var exp = _.trim(rec.experiment).replace(/\./g, "_");
+        if (!exp) {
+            alert("Could not determine the experiment name for this entry?!");
+            return;
+        }
+
+        var msg = "Thank you for participating";
+
+        $("#turkModal").modal('show');
+
+        Meteor.call("turkPay", rec.userid, exp, msg, function(error, result) {
+            $("#turkModal").modal('hide');
+
+            if (!!error) {
+                console.log("turkPay failure:", error);
+                alert("There was a server failure of some kind: " + error);
+            }
+            else if (!!result) {
+                console.log("turkPay error:", result);
+                alert("There was a problem with the approval/payment: " + result);
+            }
+            else {
+                alert("Your approval succeeded");
+            }
+
+            turkLogRefresh(exp);
+        });
     },
 
     // Admin/Teachers - pay bonus to a user in the Turk log view
     'click .btn-bonus-action': function(event) {
         event.preventDefault();
-        //TODO: actually pay bonus
+
+        var rec = turkLogButtonToRec(event.currentTarget);
+        if (!rec) {
+            alert("Cannot find record for that table entry?!");
+            return;
+        }
+
+        var exp = _.trim(rec.experiment).replace(/\./g, "_");
+        if (!exp) {
+            alert("Could not determine the experiment name for this entry?!");
+            return;
+        }
+
+        $("#turkModal").modal('show');
+
+        Meteor.call("turkBonus", rec.userid, exp, function(error, result) {
+            $("#turkModal").modal('hide');
+
+            if (!!error) {
+                console.log("turkBonus failure:", error);
+                alert("There was a server failure of some kind: " + error);
+            }
+            else if (!!result) {
+                console.log("turkBonus error:", result);
+                alert("There was a problem with the bonus: " + result);
+            }
+            else {
+                alert("Your bonus payment succeeded");
+            }
+
+            turkLogRefresh(exp);
+        });
     },
 
     // Admin/Teachers - show previous approve/pay for a user in the Turk log view
@@ -206,15 +291,9 @@ Template.turkWorkflow.events({
 
         $("#detailsModal").modal('hide');
 
-        var target = $(event.currentTarget);
-        var idx = Helpers.intVal(target.data("idx"));
-        console.log("Pay event for", target, "Found index", idx);
-
         var disp;
         try {
-            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
-            console.log(data);
-            disp = displayify(data.turkpayDetails);
+            disp = displayify(turkLogButtonToRec(event.currentTarget));
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
@@ -230,14 +309,9 @@ Template.turkWorkflow.events({
 
         $("#detailsModal").modal('hide');
 
-        var target = $(event.currentTarget);
-        var idx = Helpers.intVal(target.data("idx"));
-
         var disp;
         try {
-            var data = turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
-            console.log(data);
-            disp = displayify(data.turkbonusDetails);
+            disp = displayify(turkLogButtonToRec(event.currentTarget));
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
