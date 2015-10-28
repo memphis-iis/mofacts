@@ -45,57 +45,22 @@
                 </div>
 
                 <br>
-                {{#if turkActive}}
-                    <div class="turk-notice">
-                        Please click here after you've enter the code above at the
-                        Mechanical Turk Website.
-                        <button type="button" id="turkButton" class="btn">
-                            Approve My Work!
-                        </button>
-                    </div>
-                {{else}}
-                    {{#if turkBonus}}
-                        <div class="turk-notice">
-                            Thank you! Please claim your bonus by clicking the button
-                            <button type="button" id="turkBonusButton" class="btn">
-                                Claim My Bonus!
-                            </button>
+                <div class="form-group">
+                    {{#if islockout}}
+                        <div id="lockoutDisplay" class="visible-text">
+                            <h3 id="lockoutMessage">
+                                The rest of the content has been locked until a
+                                certain amount of time has elapsed.
+                            </h3>
+                            <h2 id="lockoutTimeRemaining">&nbsp;</h2>
                         </div>
                     {{/if}}
 
-                    <div class="form-group">
-                        {{#if islockout}}
-                            <div id="lockoutDisplay" class="visible-text">
-                                <h3 id="lockoutMessage">
-                                    The rest of the content has been locked until a
-                                    certain amount of time has elapsed.
-                                </h3>
-                                <h2 id="lockoutTimeRemaining">&nbsp;</h2>
-                            </div>
-                        {{/if}}
-
-                        {{#if allowcontinue}}
-                        <button type="button" id="continueButton" class="btn ">
-                            Continue
-                        </button>
-                        {{/if}}
-                    </div>
-                {{/if}}
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="turkModalLabel">Please Wait</h4>
-                </div>
-                <div class="modal-body">
-                    <div class="clearfix">
-                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
-                        <p class="pull-right">Please wait while we contact Mechanical Turk</p>
-                    </div>
+                    {{#if allowcontinue}}
+                    <button type="button" id="continueButton" class="btn ">
+                        Continue
+                    </button>
+                    {{/if}}
                 </div>
             </div>
         </div>

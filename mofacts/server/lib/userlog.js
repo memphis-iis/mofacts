@@ -3,8 +3,15 @@
 /* userlog.js - Server-side utilities for working with the user times log
 **/
 
-//Write user log entries for the current user
-writeUserLogEntries = function(experiment, objectsToLog) {
+//Write user log entries - if userId is not specified we use the current user
+writeUserLogEntries = function(experiment, objectsToLog, userId) {
+    if (!userId) {
+        userId = Meteor.userId();
+    }
+    if (!userId) {
+        throw new Meteor.Error("No valid user ID found for User Log Entry");
+    }
+
     var objType = typeof objectsToLog;
     var valsToPush = [];
 
@@ -36,11 +43,7 @@ writeUserLogEntries = function(experiment, objectsToLog) {
     var allVals = {$each: valsToPush};
     action["$push"][experiment_key] = allVals;
 
-    UserTimesLog.update(
-        {_id: Meteor.userId()},
-        action,
-        {upsert: true}
-    );
+    UserTimesLog.update( {_id: userId}, action, {upsert: true} );
 };
 
 //Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)

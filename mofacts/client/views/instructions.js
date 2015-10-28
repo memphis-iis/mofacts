@@ -33,38 +33,6 @@ function leavePage(dest) {
     }
 }
 
-function checkTurkActive() {
-    //Turk display can only be active if we're in experiment mode
-    if (Session.get("loginMode") !== "experiment") {
-        return false; //Must be an experiment
-    }
-
-    if (!!Session.get("turkApprovalSent")) {
-        return false; //Already done
-    }
-
-    //At this point, we should display turk stuff if it's in the TDF
-    var currUnit = getCurrentTdfUnit();
-    var turkpay = Helpers.trim(Helpers.firstElement(currUnit.turkpay)).toLowerCase();
-    return (turkpay === "true");
-}
-
-function checkTurkBonus() {
-    //Turk display can only be active if we're in experiment mode
-    if (Session.get("loginMode") !== "experiment") {
-        return false; //Must be an experiment
-    }
-
-    if (!!Session.get("turkBonusSent")) {
-        return false; //Already done
-    }
-
-    //At this point, we should display turk stuff if it's in the TDF
-    var currUnit = getCurrentTdfUnit();
-    var turkbonus = Helpers.floatVal(Helpers.firstElement(currUnit.turkbonus));
-    return (turkbonus > 0.000001);
-}
-
 ////////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
@@ -110,16 +78,6 @@ function lockoutPeriodicCheck() {
         $("#lockoutDisplay").hide();
         $("#continueButton").prop("disabled", false);
         clearLockoutInterval();
-
-        //If there isn't anything pending for mechanical turk, we will continue
-        //as if they clicked on the button. Note that this auto-continue ONLY
-        //happens for units with a lockout time
-        if (!checkTurkActive() && !checkTurkBonus() && currLockOutMinutes() > 0) {
-            Meteor.setTimeout(
-                function(){ $("#continueButton").click(); },
-                1
-            );
-        }
     }
     else {
         //Still locked
@@ -158,13 +116,14 @@ function lockoutPeriodicCheck() {
                     return; //Nothing to do
                 }
 
-                //At this point, we should display turk stuff if it's in the TDF
+                //We're in experiment mode and locked out - if they should get a Turk email,
+                //now is the time to let the server know we've shown a lockout msg
                 var currUnit = getCurrentTdfUnit();
                 var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkemail));
                 var subject = Helpers.trim(Helpers.firstElement(currUnit.turkemailsubject));
 
                 if (!turkemail) {
-                    return; //No message
+                    return; //No message to show
                 }
 
                 var experiment = userTimesExpKey(true);
@@ -228,25 +187,13 @@ Template.instructions.helpers({
 
     allowcontinue: function() {
         //If we're in experiment mode, they can only continue if there are
-        //units left. Otherwise they can always go UNLESS we are displaying
-        //a Turk screen
+        //units left.
         if (Session.get("loginMode") === "experiment") {
             return getUnitsRemaining() > 0;
         }
         else {
             return true;
         }
-    },
-
-    //Note that the current template won't display continue or lockout stuff
-    //if turkActive or turkBonus returns true
-
-    turkActive: function() {
-        return checkTurkActive();
-    },
-
-    turkBonus: function() {
-        return checkTurkBonus();
     }
 });
 
@@ -254,13 +201,6 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
     //Make sure lockout interval timer is running
     lockoutKick();
-
-    //Init the modal dialog
-    $('#turkModal').modal({
-        'backdrop': 'static',
-        'keyboard': false,
-        'show': false
-    });
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -280,74 +220,6 @@ Template.instructions.events({
             //We know they'll need to resume now
             Session.set("needResume", true);
             leavePage("/card");
-        });
-    },
-
-    'click #turkButton': function(event) {
-        event.preventDefault();
-
-        //Actually approve - note that we currently just use the default
-        //message the server offers
-        $('#turkModal').modal('show');
-        Meteor.call("turkPay", userTimesExpKey(true), null, getCurrentUnitNumber(), function(error, result){
-            $('#turkModal').modal('hide');
-
-            if (typeof error !== "undefined") {
-                //something happened - hopefully things will be updated reactively
-                console.log("Failed to handle turk approval. Error:", error);
-            }
-            else if (result !== null) {
-                //Server returned an error
-                console.log("Server error on turk approval. Msg:", result);
-            }
-            else {
-                console.log("Server turk approval appeared to work");
-            }
-
-            //No matter what, we should now be Turk approved
-            //(If there was an error, it will need to be examined in the log
-            //and manually handled)
-            Session.set("turkApprovalSent", true);
-            lockoutKick();
-        });
-    },
-
-    'click #turkBonusButton': function(event) {
-        event.preventDefault();
-
-        var experiment = userTimesExpKey(true);
-
-        var tdfid = null;
-        var unitidx = null;
-        var currUnit = getCurrentTdfUnit();
-        if (!!currUnit) {
-            tdfid = getCurrentTdfFile()._id;
-            unitidx = getCurrentUnitNumber();
-        }
-
-        console.log("About to request bonus for ", experiment, tdfid, unitidx);
-
-        $('#turkModal').modal('show');
-        Meteor.call("turkBonus", experiment, tdfid, unitidx, function(error, result){
-            $('#turkModal').modal('hide');
-
-            if (typeof error !== "undefined") {
-                //something happened - hopefully things will be updated reactively
-                console.log("Failed to handle turk bonus. Error:", error);
-            }
-            else if (result !== null) {
-                //Server returned an error
-                console.log("Server error on turk bous. Msg:", result);
-            }
-            else {
-                console.log("Server turk bonus appeared to work");
-            }
-
-            //No matter what, we should now be Turk approved
-            //(If there was an error, it will need to be examined in the log
-            //and manually handled)
-            Session.set("turkBonusSent", true);
-            lockoutKick();
         });
     },
 

@@ -13,6 +13,9 @@ function clearTurkExpLog() {
 
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
 function displayify(obj) {
+    if (typeof obj === "string" || typeof obj === "number") {
+        return obj;
+    }
     var dispObj = _.extend({}, obj);
 
     try {
