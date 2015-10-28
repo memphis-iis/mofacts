@@ -100,12 +100,6 @@ following is true:
         return response;
     }
 
-    //Make some of our code below much less verbose
-    var fe = Helpers.firstElement;
-    function fenum (src) {
-        return Helpers.intVal(fe(src));
-    }
-
     turk = {
         getAccountBalance: function(userProfile) {
             var req = {
@@ -113,21 +107,28 @@ following is true:
             };
 
             var response = createTurkRequest(userProfile, req);
-            var jsonResponse = response.json.GetAccountBalanceResponse;
-            var result = fe(jsonResponse.GetAccountBalanceResult);
 
-            var reqData = fe(result.Request);
-            var isValid = fe(reqData.IsValid);
-            if (Helpers.trim(isValid).toLowerCase() !== "true") {
+            var result = _.chain(response.json)
+                .prop("GetAccountBalanceResponse")
+                .prop("GetAccountBalanceResult").first()
+                .value();
+
+            var isValid = _.chain(result)
+                .prop("Request").first()
+                .prop("IsValid").first().trim()
+                .value().toLowerCase();
+
+            if (isValid !== "true") {
                 throw {
                     'errmsg': 'Could not get Account Balance',
                     'response': response
                 };
             }
 
-            var balData = fe(result.AvailableBalance);
-            var fmtPrice = fe(balData.FormattedPrice);
-            return fmtPrice;
+            return _.chain(result)
+                .prop("AvailableBalance").first()
+                .prop("FormattedPrice").first()
+                .value();
         },
 
         //Required parameters: none
@@ -136,13 +137,22 @@ following is true:
             var req = _.extend({
                 'Operation': 'SearchHITs',
                 'SortProperty': 'CreationTime',
-                'SortDirection': 'Descending'
+                'SortDirection': 'Descending',
+                'PageSize': 99
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
-            var jsonResponse = response.json.SearchHITsResponse;
-            var result = fe(jsonResponse.SearchHITsResult);
-            var hitCursor = result.HIT || [];
+
+            var hitCursor = _.chain(response.json)
+                .prop("SearchHITsResponse")
+                .prop("SearchHITsResult").first()
+                .prop("HIT")
+                .value() || [];
+
+            //Little helper for our loop - note default of -1 instead of 0
+            var fenum = function(n) {
+                return _.chain(n).first().floatval(-1).value();
+            };
 
             var hitlist = [];
             var rejected = 0;
@@ -154,8 +164,12 @@ following is true:
                 var avail = fenum(val.NumberOfAssignmentsAvailable);
                 var complete = fenum(val.NumberOfAssignmentsCompleted);
 
-                if (pend > 0 || avail > 0 || complete < max) {
-                    hitlist.push(fe(val.HITId));
+                if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
+                    console.log("Something wrong with this HIT's stats - including for safety. val was", val);
+                    hitlist.push(_.first(val.HITId));
+                }
+                else if (pend > 0 || avail > 0 || complete < max) {
+                    hitlist.push(_.first(val.HITId));
                 }
                 else {
                     rejected += 1;
@@ -173,29 +187,33 @@ following is true:
             var req = _.extend({
                 'Operation': 'GetAssignmentsForHIT',
                 'HITId': '',
-                'AssignmentStatus': 'Submitted'
+                'AssignmentStatus': 'Submitted',
+                'PageSize': 99
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
-            var jsonResp = response.json.GetAssignmentsForHITResponse;
-            var result = fe(jsonResp.GetAssignmentsForHITResult);
-            var assignCursor = result.Assignment || [];
+
+            var assignCursor = _.chain(response.json)
+                .prop("GetAssignmentsForHITResponse")
+                .prop("GetAssignmentsForHITResult").first()
+                .prop("Assignment")
+                .value() || [];
 
             var assignlist = [];
             assignCursor.forEach(function(val) {
                 assignlist.push({
-                    "AssignmentId": fe(val.AssignmentId),
-                    "WorkerId": fe(val.WorkerId),
-                    "HITId": fe(val.HITId),
-                    "AssignmentStatus": fe(val.AssignmentStatus),
-                    "AutoApprovalTime": fe(val.AutoApprovalTime),
-                    "AcceptTime": fe(val.AcceptTime),
-                    "SubmitTime": fe(val.SubmitTime),
-                    "Answer": fe(val.Answer),
+                    "AssignmentId": _.first(val.AssignmentId),
+                    "WorkerId": _.first(val.WorkerId),
+                    "HITId": _.first(val.HITId),
+                    "AssignmentStatus": _.first(val.AssignmentStatus),
+                    "AutoApprovalTime": _.first(val.AutoApprovalTime),
+                    "AcceptTime": _.first(val.AcceptTime),
+                    "SubmitTime": _.first(val.SubmitTime),
+                    "Answer": _.first(val.Answer),
                 });
             });
 
-            return result.Assignment;
+            return assignlist;
         },
 
         //Required parameters: AssignmentId
@@ -209,11 +227,16 @@ following is true:
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
-            var jsonResponse = response.json.ApproveAssignmentResponse;
-            var result = fe(jsonResponse.ApproveAssignmentResult);
-            var reqData = fe(result.Request);
-            var isValid = fe(reqData.IsValid);
-            if (Helpers.trim(isValid).toLowerCase() !== "true") {
+
+            var isValid = _.chain(response.json)
+                .prop("ApproveAssignmentResponse")
+                .prop("ApproveAssignmentResult").first()
+                .prop("Request").first()
+                .prop("IsValid").first().trim()
+                .value().toLowerCase();
+
+            if (isValid !== "true") {
+                console.log("Failed to approve assignment", response.json);
                 throw {
                     'errmsg': 'Assignment Approval failed',
                     'response': response
@@ -247,18 +270,22 @@ following is true:
 
             var response = createTurkRequest(userProfile, req);
 
-            var jsonResponse = response.json.NotifyWorkersResponse;
-            var result = fe(jsonResponse.NotifyWorkersResult);
-            var reqData = fe(result.Request);
-            var isValid = fe(reqData.IsValid);
-            if (Helpers.trim(isValid).toLowerCase() !== "true") {
-                console.log("isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
+            var isValid = _.chain(response.json)
+                .prop("NotifyWorkersResponse")
+                .prop("NotifyWorkersResult").first()
+                .prop("Request").first()
+                .prop("IsValid").first().trim()
+                .value().toLowerCase();
+
+            if (isValid !== "true") {
+                console.log("notifyWorker isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
                 throw {
                     'errmsg': 'Worker Notification failed',
                     'response': response
                 };
             }
-            return jsonResponse;
+
+            return response.json;
         },
 
         //Required parameters: WorkerId, AssignmentId, Reason
@@ -273,12 +300,15 @@ following is true:
             }, requestParams);
 
             var response = createTurkRequest(userProfile, req);
-            var jsonResponse = response.json.GrantBonusResponse;
-            var result = fe(jsonResponse.GrantBonusResult);
-            var reqData = fe(result.Request);
-            var isValid = fe(reqData.IsValid);
 
-            if (Helpers.trim(isValid).toLowerCase() !== "true") {
+            var isValid = _.chain(response.json)
+                .prop("GrantBonusResponse")
+                .prop("GrantBonusResult").first()
+                .prop("Request").first()
+                .prop("IsValid").first().trim()
+                .value().toLowerCase();
+
+            if (isValid !== "true") {
                 throw {
                     'errmsg': 'Bonus Granting failed',
                     'response': response

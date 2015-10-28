@@ -55,8 +55,6 @@ sessionCleanUp = function() {
     Session.set("statsTotal", undefined);
     Session.set("statsPercentage", undefined);
     Session.set("statsUserTimeLogView", undefined);
-    Session.set("turkApprovalSent", undefined);
-    Session.set("turkBonusSent", undefined);
     Session.set("testType", undefined);
     Session.set("usingACTRModel", undefined);
 
