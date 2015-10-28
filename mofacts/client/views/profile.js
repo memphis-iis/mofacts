@@ -56,17 +56,6 @@ Template.profile.events({
 });
 
 Template.profile.rendered = function () {
-    //Init the modal dialogs
-    $('#turkModal').modal({
-        'backdrop': 'static',
-        'keyboard': false,
-        'show': false
-    });
-
-    $('#detailsModal').modal({
-        'show': false
-    });
-
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 

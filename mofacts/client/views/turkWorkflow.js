@@ -48,6 +48,67 @@ function displayify(obj) {
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
+Template.turkWorkflow.rendered = function () {
+    //Init the modal dialogs
+    $('#turkModal').modal({
+        'backdrop': 'static',
+        'keyboard': false,
+        'show': false
+    });
+
+    $('#detailsModal').modal({
+        'show': false
+    });
+
+    var allTdfs = Tdfs.find({});
+    var turkLogCount = 0; //Check all the valid TDF's
+
+    allTdfs.forEach( function (tdfObject) {
+        //Make sure we have a valid TDF (with a setspec)
+        var setspec = _.chain(tdfObject)
+            .prop("tdfs")
+            .prop("tutor")
+            .prop("setspec").first()
+            .value();
+
+        if (!setspec) {
+            return;
+        }
+
+        // No lesson name? that's wrong
+        var name = _.chain(setspec).prop("lessonname").first().value();
+        if (!name) {
+            return;
+        }
+
+        //Only show for userselect == true (and always assume userselect is
+        //true unless we explcitily find false
+        var userselectText = _.chain(setspec)
+            .prop("userselect").first().trim()
+            .value().toLowerCase();
+
+        var userselect = true;
+        if (userselectText === "false")
+            userselect = false;
+
+        if (userselect && Meteor.userId() === tdfObject.owner) {
+            $("#turkLogSelectContainer").append(
+                $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
+                    .addClass("btn btn-fix btn-sm btn-success btn-log-select")
+                    .css('margin', '3px')
+                    .data("tdffilename", tdfObject.fileName)
+                    .html(name)
+            );
+
+            turkLogCount += 1;
+        }
+    });
+
+    //Only show turk log stuff if there is anything to show
+    $("#turkLogAll").toggle(turkLogCount > 0);
+};
+
+
 Template.turkWorkflow.events({
     // Admin/Teachers - show details from single Turk assignment
     'click #turk-show-assign': function(event) {
@@ -186,53 +247,3 @@ Template.turkWorkflow.events({
         $("#detailsModal").modal('show');
     }
 });
-
-
-Template.turkWorkflow.rendered = function () {
-    var allTdfs = Tdfs.find({});
-    var turkLogCount = 0; //Check all the valid TDF's
-
-    allTdfs.forEach( function (tdfObject) {
-        //Make sure we have a valid TDF (with a setspec)
-        var setspec = _.chain(tdfObject)
-            .prop("tdfs")
-            .prop("tutor")
-            .prop("setspec").first()
-            .value();
-
-        if (!setspec) {
-            return;
-        }
-
-        // No lesson name? that's wrong
-        var name = _.chain(setspec).prop("lessonname").first().value();
-        if (!name) {
-            return;
-        }
-
-        //Only show for userselect == true (and always assume userselect is
-        //true unless we explcitily find false
-        var userselectText = _.chain(setspec)
-            .prop("userselect").first().trim()
-            .value().toLowerCase();
-
-        var userselect = true;
-        if (userselectText === "false")
-            userselect = false;
-
-        if (userselect && Meteor.userId() === tdfObject.owner) {
-            $("#turkLogSelectContainer").append(
-                $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
-                    .addClass("btn btn-fix btn-sm btn-success btn-log-select")
-                    .css('margin', '3px')
-                    .data("tdffilename", tdfObject.fileName)
-                    .html(name)
-            );
-
-            turkLogCount += 1;
-        }
-    });
-
-    //Only show turk log stuff if there is anything to show
-    $("#turkLogAll").toggle(turkLogCount > 0);
-};

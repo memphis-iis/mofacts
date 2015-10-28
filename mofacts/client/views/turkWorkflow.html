@@ -112,4 +112,36 @@ Turk Workflow Template
         </div>
         {{/if}} <!-- /turkExperimentLogToShow -->
     </div> <!-- /turkLogAll -->
+
+
+
+    <div class="modal fade" id="turkModal" tabindex="-1" role="dialog" aria-labelledby="turkModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="turkModalLabel">Please Wait</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="clearfix">
+                        <img src="/styles/mofacts_waiting.gif" class="img-responsive pull-left"/>
+                        <p class="pull-right">Please wait while we contact Mechanical Turk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel">
+        <div class="modal-dialog" role="document" style="width:98%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="detailsModalLabel">Turk Experiment Log Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="detailsModalListing" style="white-space:pre;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </template>

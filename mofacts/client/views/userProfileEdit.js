@@ -25,6 +25,15 @@ Template.userProfileEdit.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Template events
 
+Template.userProfileEdit.rendered = function () {
+    //Init the modal dialog
+    $('#profileWorkModal').modal({
+        'backdrop': 'static',
+        'keyboard': false,
+        'show': false
+    });
+};
+
 Template.userProfileEdit.events({
     // Admin/Teachers - save AWS profile data
     'click #saveProfile': function(event) {
@@ -36,10 +45,10 @@ Template.userProfileEdit.events({
             use_sandbox: $("#profileUseSandbox").prop("checked")
         };
 
-        $('#turkModal').modal('show');
+        $('#profileWorkModal').modal('show');
 
         Meteor.call("saveUserProfileData", data, function(error, serverReturn) {
-            $('#turkModal').modal('hide');
+            $('#profileWorkModal').modal('hide');
 
             if (!!error) {
                 console.log("Error saving user profile", error);
