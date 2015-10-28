@@ -100,8 +100,6 @@ C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
             <randomchoices>4</randomchoices></assessmentsession>
     </unit>
 <unit>
-<turkpay>true</turkpay>
-<turkminscore>3</turkminscore>
         <turkemailsubject>Link for 3$ Bonus for Turk HIT</turkemailsubject>
       <turkemail><![CDATA[
 Dear Amazon Turk Worker,
@@ -117,13 +115,11 @@ Phil
         ]]></turkemail>
 <unitinstructions><![CDATA[You have completed Session 1 of the experiment. 
 <br><br>
-<strong>Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. <br><br>Then press the approve button below.</strong>
+<strong>Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response now. 
 <br><br>
-We will check your completion and approve your assignment for the $2 payment.
-
-If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
-
-If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.]]></unitinstructions>
+We will check your completion and approve your assignment for the $2 payment. If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest for the $3 bonus now.
+<br><br>
+If the countdown below is 1 day or 3 days, you will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.]]></unitinstructions>
 <unitname>Lockout unit</unitname>
 <deliveryparams>
 <lockoutminutes>2</lockoutminutes> 
