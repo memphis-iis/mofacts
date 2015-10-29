@@ -159,7 +159,8 @@ Meteor.methods({
                             'result': retval,
                             'errmsg': senderr,
                             'turkId': turkid,
-                            'tdfOwnerId': ownerId
+                            'tdfOwnerId': ownerId,
+                            'schedDate': schedDate ? schedDate.toString() : "???"
                         };
 
                         console.log("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
@@ -191,7 +192,8 @@ Meteor.methods({
                 'result': resultMsg,
                 'errmsg': errmsg,
                 'turkId': turkid,
-                'tdfOwnerId': ownerId
+                'tdfOwnerId': ownerId,
+                'schedDate': schedDate ? schedDate.toString() : "???"
             };
 
             console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
