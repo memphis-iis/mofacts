@@ -92,15 +92,19 @@ Meteor.methods({
 
     //Message sending for the end of a lockout
     turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
-        try {
-            var usr, turkid, ownerId;
+        var usr, turkid, ownerId, workerUserId;
+        var schedDate;
+        var resultMsg = "";
+        var errmsg = null;
 
+        try {
             usr = Meteor.user();
             if (!usr || !usr._id) {
                 throw Meteor.Error("No current user");
             }
 
-            turkid = !!usr ? usr.username : null;
+            workerUserId = usr._id;
+            turkid = usr.username;
             if (!turkid) {
                 throw Meteor.Error("No valid username found");
             }
@@ -119,7 +123,7 @@ Meteor.methods({
             subject = subject || _.trim("Message from " + turkid + " Profile Page");
             var msgtext = "The lock out period has ended - you may continue.\n\n" + msgbody;
             var jobName = 'Message for ' + experiment + ' to ' + turkid;
-            var schedDate = new Date(lockoutend);
+            schedDate = new Date(lockoutend);
 
             console.log("Scheduling:", jobName, "at", schedDate);
             SyncedCron.add({
@@ -131,6 +135,9 @@ Meteor.methods({
 
                 job: function() {
                     console.log("Running scheduled job", jobName);
+                    var senderr = null;
+                    var retval = null;
+
                     try {
                         var requestParams = {
                             'Subject': subject,
@@ -139,22 +146,63 @@ Meteor.methods({
                         };
                         var ret = turk.notifyWorker(ownerProfile, requestParams);
                         console.log("Completed scheduled job", jobName);
-                        return _.extend({'passedParams': requestParams}, ret);
+                        retval = _.extend({'passedParams': requestParams}, ret);
                     }
                     catch(e) {
                         console.log("Error finishing", jobname, e);
-                        return e;
+                        senderr = e;
                     }
+                    finally {
+                        var sendLogEntry = {
+                            'action': 'turk-email-send',
+                            'success': senderr === null,
+                            'result': retval,
+                            'errmsg': senderr,
+                            'turkId': turkid,
+                            'tdfOwnerId': ownerId
+                        };
+
+                        console.log("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
+                        writeUserLogEntries(experiment, sendLogEntry, workerUserId);
+                    }
+
+                    if (senderr !== null) {
+                        throw senderr;
+                    }
+                    return retval;
                 }
             });
 
             console.log("Scheduled Message scheduled for:", SyncedCron.nextScheduledAtDate(jobName));
-            return "Message scheduled";
+            resultMsg = "Message scheduled";
         }
         catch(e) {
             console.log("Failure scheduling turk message at later date:", e);
-            throw Meteor.Error("Message-Failure", e.error, e);
+            errmsg = {
+                'msg': e.error,
+                'full': e
+            };
         }
+        finally {
+            //Always write an entry
+            var schedLogEntry = {
+                'action': 'turk-email-schedule',
+                'success': errmsg === null,
+                'result': resultMsg,
+                'errmsg': errmsg,
+                'turkId': turkid,
+                'tdfOwnerId': ownerId
+            };
+
+            console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
+            writeUserLogEntries(experiment, schedLogEntry, workerUserId);
+        }
+
+        if (errmsg !== null) {
+            throw Meteor.Error("Message-Failure", errmsg.msg, errmsg.full);
+        }
+
+        return resultMsg;
     },
 
     //Assuming the current user is an admin or teacher, and given a user ID, an
@@ -446,6 +494,10 @@ Meteor.methods({
                 turkpayDetails: 'No Details Found',
                 turkbonus: '?',
                 turkbonusDetails: 'No Details Found',
+                turkEmailSchedule: '?',
+                turkEmailScheduleDetails: 'No Details Found',
+                turkEmailSend: '?',
+                turkEmailSendDetails: 'No Details Found',
                 questionsSeen: 0,
                 answersSeen: 0,
                 answersCorrect: 0,
@@ -466,6 +518,14 @@ Meteor.methods({
                 else if (act === "turk-bonus") {
                     data.turkbonus = rec.success ? 'Complete' : 'FAIL';
                     data.turkbonusDetails = rec;
+                }
+                else if (act === "turk-email-schedule") {
+                    data.turkEmailSchedule = rec.success ? 'Complete': 'FAIL';
+                    data.turkEmailScheduleDetails = rec;
+                }
+                else if (act === "turk-email-send") {
+                    data.turkEmailSend = rec.success ? 'Complete': 'FAIL';
+                    data.turkEmailSendDetails = rec;
                 }
                 else if (tdf !== null && (act === "expcondition" || act === "condition-notify")) {
                     //Two things to keep in mind here - this is a one time check,

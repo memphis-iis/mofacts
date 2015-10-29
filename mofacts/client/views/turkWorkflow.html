@@ -59,6 +59,8 @@ Turk Workflow Template
                         <th>Q Seen</th>
                         <th>A Given</th>
                         <th>Correct</th>
+                        <th>Email Sched</th>
+                        <th>Email Sent</th>
                         <th>Approval</th>
                         <th>Bonus</th>
                     </tr></thead>
@@ -72,6 +74,26 @@ Turk Workflow Template
                             <td>{{questionsSeen}}</td>
                             <td>{{answersSeen}}</td>
                             <td>{{answersCorrect}}</td>
+                            <td>
+                                {{#if haveEmailSched}}
+                                <button type="button"
+                                    class="btn btn-fix btn-primary btn-xs btn-sched-detail"
+                                    data-idx="{{idx}}"
+                                ><span class="glyphicon glyphicon-zoom-in"></span>
+                                </button>
+                                {{/if}}
+                                {{turkEmailSchedule}}
+                            </td>
+                            <td>
+                                {{#if haveEmailSend}}
+                                <button type="button"
+                                    class="btn btn-fix btn-primary btn-xs btn-send-detail"
+                                    data-idx="{{idx}}"
+                                ><span class="glyphicon glyphicon-zoom-in"></span>
+                                </button>
+                                {{/if}}
+                                {{turkEmailSend}}
+                            </td>
                             <td>
                                 {{#if needPay}}
                                     <button type="button"

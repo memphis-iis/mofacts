@@ -33,6 +33,8 @@ function turkLogRefresh(exp) {
 
             newRec.needPay = (newRec.turkpay === '?');
             newRec.needBonus = (newRec.turkbonus === '?');
+            newRec.haveEmailSched = (newRec.turkEmailSchedule !== '?');
+            newRec.haveEmailSend = (newRec.turkEmailSend !== '?');
             newRec.turk_username = newRec.username;
 
             turkExperimentLog.insert(newRec);
@@ -293,7 +295,7 @@ Template.turkWorkflow.events({
 
         var disp;
         try {
-            disp = displayify(turkLogButtonToRec(event.currentTarget));
+            disp = displayify(turkLogButtonToRec(event.currentTarget).turkpayDetails);
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
@@ -311,7 +313,7 @@ Template.turkWorkflow.events({
 
         var disp;
         try {
-            disp = displayify(turkLogButtonToRec(event.currentTarget));
+            disp = displayify(turkLogButtonToRec(event.currentTarget).turkbonusDetails);
         }
         catch(e) {
             disp = "Error finding details to display: " + e;
@@ -319,5 +321,41 @@ Template.turkWorkflow.events({
 
         $("#detailsModalListing").text(disp);
         $("#detailsModal").modal('show');
-    }
+    },
+
+    //Admin/Teachers - show previous email sched detail
+    'click .btn-sched-detail': function(event) {
+        event.preventDefault();
+
+        $("#detailsModal").modal('hide');
+
+        var disp;
+        try {
+            disp = displayify(turkLogButtonToRec(event.currentTarget).turkEmailScheduleDetails);
+        }
+        catch(e) {
+            disp = "Error finding details to display: " + e;
+        }
+
+        $("#detailsModalListing").text(disp);
+        $("#detailsModal").modal('show');
+    },
+
+    //Admin/Teachers - show previous email send detail
+    'click .btn-send-detail': function(event) {
+        event.preventDefault();
+
+        $("#detailsModal").modal('hide');
+
+        var disp;
+        try {
+            disp = displayify(turkLogButtonToRec(event.currentTarget).turkEmailSendDetails);
+        }
+        catch(e) {
+            disp = "Error finding details to display: " + e;
+        }
+
+        $("#detailsModalListing").text(disp);
+        $("#detailsModal").modal('show');
+    },
 });
