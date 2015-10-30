@@ -176,7 +176,7 @@
     }
 
 //Create our output record
-    function populateRecord(username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
+    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
         //Return the default value if the given value isn't "truthy" BUT numeric
         //zero (0) is considered "truthy".
         var d = function (val, defval) {
@@ -293,7 +293,7 @@
                         d(lastq.currentUnit, -1),
                         d(lastschedule.unitindex, -1),
                         d(lastinstruct.currentUnit, -1)
-                        ),
+                    ),
                 username: d(username, ''),
                 selectedTdf: d(lastexpcond.selectedTdf, ''),
                 unitname: d(lastschedule.unitname, ''),
@@ -323,28 +323,24 @@
         }
         else
         {
-            var temp = null;
-            if (lasta.isCorrect) {
-                temp = "CORRECT";
-            }
-            if (!lasta.isCorrect) {
-                temp = "INCORRECT";
-            }
+            var outcome;
             if (lasta.ttype === "s") {
-                temp = "STUDY";
+                outcome = "STUDY";
             }
-            var temp2 = "ATTEMPT";
-            if (lasta.ttype === "s") {
-                temp2 = "HINT_REQUEST";
+            else {
+                outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
             }
 
-            var temp3 = "RESULT";
-            if (lasta.ttype === "s") {
-                temp3 = "HINT_MSG";
+            //Track previous step names in the cross-call state so that we can
+            //uniqify it. We prepend a count
+            if (typeof state.stepNameSeen === "undefined") {
+                state.stepNameSeen = {};
             }
-            if (!lasta.isCorrect && lasta.ttype === "d") {
-                temp3 = "RESULT";
-            }
+            var stepName = _.trim(d(lastq.selectedQuestion, ''));
+            var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
+            state.stepNameSeen[stepName] = stepCount;
+            stepName = "[" + stepCount + "]: " + stepName;
+
             return {
                 "Anon Student Id": d(username, ''),
                 "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + d(lastexpcond.selectedTdf, ''), //hack
@@ -361,15 +357,15 @@
                 "Level (Unit)": Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1)),
                 "Level (Unitname)": d(lastschedule.unitname, ''),
                 "Problem Name": d(lastq.selectedQuestion, ''),
-                "Step Name": d(lastq.selectedQuestion, ''),
+                "Step Name": stepName,
                 "Time": d(lastq.clientSideTimeStamp, 0),
                 "Selection": '',
                 "Action": '',
                 "Input": d(lasta.answer, ''),
-                "Outcome": d(temp, null), //answerCorrect recoded as CORRECT or INCORRECT
-                "Student Response Type": d(temp2, ''), // where is ttype set?
+                "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
+                "Student Response Type": lasta.ttype === "s" ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
                 "Student Response Subtype": d(lasta.qtype, ''),
-                "Tutor Response Type": d(temp3, ''), // where is ttype set?
+                "Tutor Response Type": lasta.ttype === "s" ? "HINT_MSG" : "RESULT", // where is ttype set?
                 "Tutor Response Subtype": '',
                 "CF (Display Order)": d(lastq.questionIndex, -1),
                 "CF (Stim File Index)": d(lastq.clusterIndex, -1),
@@ -428,6 +424,10 @@
         var lastq = {};
         var lastxcond = null;
 
+        //We let populate record maintain any state it needs between calls
+        //You should note that state is PER USER
+        state = {};
+
         for (var i = 0; i < recs.length; ++i) {
             var rec = recs[i];
             if (!rec || !rec.action || !rec.clientSideTimeStamp) {
@@ -471,7 +471,7 @@
                 //FINALLY have enough to populate the record
                 var populated = null;
                 try {
-                    populated = populateRecord(username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
+                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
                 }
                 catch (e) {
                     console.log("There was an error populating the record - it will be skipped", e);
