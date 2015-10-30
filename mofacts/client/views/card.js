@@ -1443,11 +1443,24 @@ function resumeFromUserTimesLog() {
     });
     if (!clusterMapping) {
         //No cluster mapping! Need to create it and store for resume
+        //We process each pair of shuffle/swap together and keep processing
+        //until we have nothing left
         var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-        clusterMapping = createStimClusterMapping(
-            getStimClusterCount(),
-            Helpers.firstElement(setSpec.shuffleclusters) || "",
-            Helpers.firstElement(setSpec.swapclusters) || "");
+
+        //Note our default of a single no-op to insure we at least build a
+        //default cluster mapping
+        var shuffles = setSpec.shuffleclusters || [""];
+        var swaps = setSpec.swapclusters || [""];
+        clusterMapping = [];
+
+        while(shuffles.length > 0 || swaps.length > 0) {
+            clusterMapping = createStimClusterMapping(
+                getStimClusterCount(),
+                shuffles.shift() || "",
+                swaps.shift() || "",
+                clusterMapping
+            );
+        }
 
         serverRecords.push(createUserTimeRecord("cluster-mapping", {
             clusterMapping: clusterMapping
