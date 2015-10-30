@@ -1,18 +1,22 @@
 //Given a cluster count, a shuffleclusters string, and a swapclusters string,
 //create a mapping vector. The idea is that for cluster x, mapping[x] returns
 //a translated index. Note that the default mapping is identity, so that
-//mapping[x] = x
+//mapping[x] = x HOWEVER, the user may submit a different default mapping.
+//This is mainly so that multiple shuffle/swap pairs can be run. ALSO important
+//is the fact that additional elements will be added if
+//mapping.length < clusterCount
 
-createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters) {
+createStimClusterMapping = function(clusterCount, shuffleclusters, swapclusters, startMapping) {
     if (clusterCount < 1)
         return [];
 
     var i;
 
     //Default mapping is identity - mapping[x] == x
-    var mapping = [];
-    for(i = 0; i < clusterCount; ++i) {
-        mapping.push(i);
+    //We also need to make sure we have clusterCount elements
+    var mapping = (startMapping || []).slice(); //they get a copy back
+    while (mapping.length < clusterCount) {
+        mapping.push(mapping.length);
     }
 
     //Shufle the given ranges of cards (like permutefinalresult)

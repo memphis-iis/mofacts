@@ -31,6 +31,13 @@ test_suite("shuffle_swap", function() {
         assert.deepEqual([0,1,2,3], createStimClusterMapping(4, null, null));
     });
 
+    unit_test("Previous Ops", function(logger){
+        assert.deepEqual([7,8,9], createStimClusterMapping(3, "", "", [7,8,9]));
+        assert.deepEqual([5,4,3,2], createStimClusterMapping(4, null, null, [5,4,3,2]));
+        //Test short array
+        assert.deepEqual([7,8,9,3], createStimClusterMapping(4, "", "", [7,8,9]));
+    });
+
     unit_test("Shuffle Only", function(logger) {
         var mapping;
 
@@ -84,6 +91,27 @@ test_suite("shuffle_swap", function() {
 
         assert.equal(true, c < 10, "no shuffling in 10 tries?");
         assert.deepEqual([0,6,7,8,5,1,2,3,4,9], mapping);
+    });
+
+    unit_test("Swap Only - Previous Val", function(logger) {
+        var mapping;
+        var c;
+
+        //Hard swaps - non-contiguous and differently sized
+        logger.log("Hard swaps with previous");
+        c = 0;
+        while (c < 10) {
+            mapping = createStimClusterMapping(10, "", "1-4 6-8", [-42,1,2,3,4,42,6,7,8,84]);
+            //Can't use in order, so use a more manual check
+            if (mapping[1] == 6)
+                break;
+            c++;
+        }
+
+        logger.log("Mapping found is", mapping);
+
+        assert.equal(true, c < 10, "no shuffling in 10 tries?");
+        assert.deepEqual([-42,6,7,8,42,1,2,3,4,84], mapping);
     });
 
     unit_test("Shuffle and Swap", function(logger) {
