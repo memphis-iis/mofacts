@@ -600,7 +600,8 @@ function handleUserInput(e , source) {
         endLatency: endLatency,
         wasButtonTrial: wasButtonTrial,
         buttonOrder: buttonEntries,
-        inferredReviewLatency: reviewLatency
+        inferredReviewLatency: reviewLatency,
+        displayedSystemResponse: $("#UserInteraction").text() || ""
     });
 
     //record progress in userProgress variable storage (note that this is

@@ -76,6 +76,7 @@
         "qtype",
         "wasButtonTrial",
         "buttonOrder",
+        "feedbackText",
         "note",
     ];
 
@@ -127,7 +128,8 @@
         "CF (Button Order)", //CF buttonOrder
         "CF (Note)", //CF note
         "KC()",
-        "KC Category()"
+        "KC Category()",
+        "Feedback Text"
     ];
 
 //We don't rely on any other files in we're run as a script, so we have some
@@ -319,12 +321,15 @@
                 wasButtonTrial: d(lasta.wasButtonTrial, false),
                 buttonOrder: d(lasta.buttonOrder, ''),
                 note: d(note, ''),
+                feedbackText: d(lasta.displayedSystemResponse, ''),
             };
         }
         else
         {
-            var outcome;
-            if (lasta.ttype === "s") {
+            //used a lot below
+            var isStudy = lasta.ttype === "s";
+
+            if (isStudy) {
                 outcome = "STUDY";
             }
             else {
@@ -332,7 +337,7 @@
             }
 
             //Track previous step names in the cross-call state so that we can
-            //uniqify it. We prepend a count
+            //uniqify it (by user) by prepending a count
             if (typeof state.stepNameSeen === "undefined") {
                 state.stepNameSeen = {};
             }
@@ -363,9 +368,9 @@
                 "Action": '',
                 "Input": d(lasta.answer, ''),
                 "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
-                "Student Response Type": lasta.ttype === "s" ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
+                "Student Response Type": isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
                 "Student Response Subtype": d(lasta.qtype, ''),
-                "Tutor Response Type": lasta.ttype === "s" ? "HINT_MSG" : "RESULT", // where is ttype set?
+                "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
                 "Tutor Response Subtype": '',
                 "CF (Display Order)": d(lastq.questionIndex, -1),
                 "CF (Stim File Index)": d(lastq.clusterIndex, -1),
@@ -381,6 +386,7 @@
                 "CF (Note)": d(note, ''),
                 "KC()": d(lastq.selectedQuestion, ''),
                 "KC Category()":'',
+                "Feedback Text": d(lasta.displayedSystemResponse, ''),
             };
         }
 
