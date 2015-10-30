@@ -73,6 +73,24 @@ function userProfileSave(id, profile) {
     }
 }
 
+function createTdfRecord(fileName, tdfJson, ownerId, source) {
+    return {
+        'fileName': fileName,
+        'tdfs': tdfJson,
+        'owner': ownerId,
+        'source': source
+    };
+}
+
+function createStimRecord(fileName, stimJson, ownerId, source) {
+    return {
+        'fileName': fileName,
+        'stimuli': stimJson,
+        'owner': ownerId,
+        'source': source
+    };
+}
+
 
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
@@ -149,9 +167,9 @@ Meteor.startup(function () {
         function (ele, idx, lst) {
             console.log("Updating Stim in DB from ", ele);
             var json = getStimJSON('stims/' + ele);
-            var rec = {fileName: ele, stimuli: json, owner: adminUserId};
-            var prev = Stimuli.findOne({fileName: ele});
+            var rec = createStimRecord(ele, json, adminUserId, 'repo');
 
+            var prev = Stimuli.findOne({'fileName': ele});
             if (prev) {
                 Stimuli.update({ _id: prev._id }, rec);
             }
@@ -167,8 +185,8 @@ Meteor.startup(function () {
             console.log("Updating TDF in DB from ", ele);
             var json = getStimJSON('tdf/' + ele);
 
-            var rec = {fileName: ele, tdfs: json, owner: adminUserId};
-            var prev = Tdfs.findOne({fileName: ele});
+            var rec = createTdfRecord(ele, json, adminUserId, 'repo');
+            var prev = Tdfs.findOne({'fileName': ele});
 
             if (prev) {
                 Tdfs.update({ _id: prev._id }, rec);
@@ -283,9 +301,9 @@ Meteor.startup(function () {
             };
 
             try {
-                if (!!type)         throw "Type required for File Save";
-                if (!!filename)     throw "Filename required for File Save";
-                if (!!filecontents) throw "File Contents required for File Save";
+                if (!type)         throw "Type required for File Save";
+                if (!filename)     throw "Filename required for File Save";
+                if (!filecontents) throw "File Contents required for File Save";
 
                 //We need a valid use that is either admin or teacher
                 var ownerId = Meteor.user()._id;
@@ -297,34 +315,62 @@ Meteor.startup(function () {
                     throw "You are not authorized to upload files";
                 }
 
-                //We prefix upload files with upload and the user _id so that
-                //they are separate from the preload files in git and other
-                //users' files
-                filename = "upload:" + ownerId + ":" + filename;
-
                 //Parse the XML contents to make sure we can acutally handle the file
                 var jsonContents = xml2js.parseStringSync(filecontents);
 
+                var rec, prev, collection;
+
                 if (type == "tdf") {
-                    //TODO: //Make sure the TDF looks valid-ish
-                    if (typeof jsonContents.tdfs.tutor.setspec != "undefined") {
+                    //Make sure the TDF looks valid-ish
+                    var tutor = _.chain(jsonContents).prop("tutor").value();
+
+                    var lessonName = _.chain(tutor)
+                        .prop("setspec").first()
+                        .prop("lessonname").first().trim().value();
+                    if (lessonName.length < 1) {
+                        console.log("Invalid setspec found", jsonContents); //TODO: remove
+                        throw "TDF has no lessonname - it cannot be valid";
                     }
 
-                    var prev = Tdfs.findOne({'filename': filename});
-                    if (prev) {
-                        //TODO: Should overwrite IFF owner matches
-                        results.action = "overwrite previous file";
+                    var unitCount = _.chain(tutor).prop("unit").prop("length").value();
+                    if (unitCount < 1) {
+                        throw "TDF has no units - it cannot be valid";
                     }
-                    else {
-                        results.action = "save new file";
-                    }
-                    //TODO: save the TDF file
+
+                    //Set up for TDF save
+                    rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    collection = Tdfs;
                 }
                 else if (type === "stim") {
-                    //TODO: save the stimulus file as TDF above
+                    //Make sure the stim looks valid-ish
+                    var clusterCount = _.chain(jsonContents)
+                        .prop("setspec")
+                        .prop("clusters").first()
+                        .prop("cluster").prop("length").value();
+                    if (clusterCount < 1) {
+                        throw "Stimulus has no clusters - it cannot be valid";
+                    }
+
+                    //Set up for stim save
+                    rec = createStimRecord(filename, jsonContents, ownerId, 'upload');
+                    collection = Stimuli;
                 }
                 else {
                     throw "Unknown file type not allowed: " + type;
+                }
+
+                //If we're here we should have enough to handle the file
+                prev = collection.findOne({'fileName': filename});
+                if (prev) {
+                    if (prev.owner !== ownerId) {
+                        throw "You may not overwrite a file you don't own";
+                    }
+                    results.action = "overwrite previous file";
+                    collection.update({ _id: prev._id }, rec);
+                }
+                else {
+                    results.action = "save new file";
+                    collection.insert(rec);
                 }
 
                 results.result = true;
