@@ -114,6 +114,10 @@
         "Student Response Subtype", //qtype
         "Tutor Response Type", //trialType
         "Tutor Response Subtype", //qtype
+          "KC(Default)",
+        "KC Category(Default)",
+          "KC(Cluster)",
+        "KC Category(Cluster)",
         "CF (Display Order)", //questionIndex
         "CF (Stim File Index)", //clusterIndex
         "CF (Set Shuffled Index)", //shufIndex
@@ -125,13 +129,27 @@
         "CF (End Latency)", //endLatency
         "CF (Review Latency)", //reviewLatency
         "CF (Button Order)", //CF buttonOrder
-        "CF (Note)", //CF note
-        "KC()",
-        "KC Category()"
+        "CF (Note)" //CF note
+      
     ];
 
 //We don't rely on any other files in we're run as a script, so we have some
 //helpers here
+
+function branchingCorrectText(answer) {
+    var result = "";
+
+    var branches = Helpers.trim(answer).split(';');
+    if (branches.length > 0) {
+        var flds = branches[0].split('~');
+        if (flds.length == 2) {
+            result = flds[0];
+        }
+    }
+
+    result = result.split('|');
+    return result[0];
+}
 
 //Return a displayable string for given value (note we don't do anything fancy)
     function disp(val) {
@@ -326,11 +344,13 @@
             var outcome;
             if (lasta.ttype === "s") {
                 outcome = "STUDY";
-            }
-            else {
+            } else {
                 outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
             }
-
+            
+            var temp = Helpers.trim(d(lastq.selectedAnswer, '')).split('~');
+            var corans = temp[0];
+            
             //Track previous step names in the cross-call state so that we can
             //uniqify it. We prepend a count
             if (typeof state.stepNameSeen === "undefined") {
@@ -339,7 +359,7 @@
             var stepName = _.trim(d(lastq.selectedQuestion, ''));
             var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
             state.stepNameSeen[stepName] = stepCount;
-            stepName = "[" + stepCount + "]: " + stepName;
+            stepName = stepCount + " " + stepName;
 
             return {
                 "Anon Student Id": d(username, ''),
@@ -367,11 +387,15 @@
                 "Student Response Subtype": d(lasta.qtype, ''),
                 "Tutor Response Type": lasta.ttype === "s" ? "HINT_MSG" : "RESULT", // where is ttype set?
                 "Tutor Response Subtype": '',
+                "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
+                "KC Category(Default)": '',
+                "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, branchingCorrectText(lastq.selectedAnswer)), ''),
+                "KC Category(Cluster)": '',
                 "CF (Display Order)": d(lastq.questionIndex, -1),
                 "CF (Stim File Index)": d(lastq.clusterIndex, -1),
                 "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
                 "CF (Stimulus Version)": d(lastq.whichStim, -1),
-                "CF (Correct Answer)": d(lastq.selectedAnswer, ''),
+                "CF (Correct Answer)": corans,
                 "CF (Overlearning)": d(lastq.showOverlearningText, false),
                 "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
                 "CF (Start Latency)": d(startLatency, 0),
@@ -379,8 +403,6 @@
                 "CF (Review Latency)": d(reviewLatency, 0),
                 "CF (Button Order)": d(lasta.buttonOrder, ''),
                 "CF (Note)": d(note, ''),
-                "KC()": d(lastq.selectedQuestion, ''),
-                "KC Category()":'',
             };
         }
 
