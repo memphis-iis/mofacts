@@ -28,7 +28,7 @@
            <display>A __________ describes a characteristic of a sample.</display>
            <response>statistic~Correct.;variable~Variable is incorrect. The correct response is statistic. In the field of statistics, the word statistic has been specifically defined to mean a summary characteristic of a sample. While the observations obtained from a sample are a measurement of some variable or factor, a statistic is what describes features of the whole sample.;.*~Incorrect. The correct fill-in is 'statistic'.</response>
            <display>A statistic __________ a characteristic of a sample.</display>
-           <response>describes|is |represents~Correct.;.*~Incorrect. The correct fill-in is 'describes'.</response>
+           <response>describes|is|represents~Correct.;.*~Incorrect. The correct fill-in is 'describes'.</response>
            <display>A statistic describes a __________ of a sample.</display>
            <response>characteristic~Correct.;observation~Observation is incorrect. The correct response is characteristic. Statistics describe overall characteristics of samples, not single observations. While we do make observations about the sample, in statistical language an observation is a specific value in a sample, whereas the term statistic is a description of the sample as a whole.;.*~Incorrect. The correct fill-in is 'characteristic'.</response>
            <display>A statistic describes a characteristic of a __________.</display>
@@ -41,7 +41,7 @@
            <display>Although multiple samples are __________ they are intended to represent the population from which they come.</display>
            <response>variable|random~Correct.;small~Small is incorrect. The correct response is variable. While samples in most situations are smaller than the population, they still may be very large, restrained by only the size of the population. This sentence refers to how samples, regardless of size, are meant to exemplify the population.;.*~Incorrect. The correct fill-in is 'variable'.</response>
            <display>Although multiple samples are variable they are intended to __________ the population from which they come.</display>
-           <response>represent|describe |sample~Correct.;.*~Incorrect. The correct fill-in is 'represent'.</response>
+           <response>represent|describe|sample~Correct.;.*~Incorrect. The correct fill-in is 'represent'.</response>
            <display>Although multiple samples are variable they are intended to represent the __________ from which they come.</display>
            <response>population~Correct.;sample~Sample is incorrect. The correct response is population. While we could take a sample from a sample, this is not generally done in statistics. Rather, in statistics the sample is taken from the population, and is used to make inferences about that population.;.*~Incorrect. The correct fill-in is 'population'.</response>
        </cluster>
@@ -74,14 +74,14 @@
            <display>The density of a distribution between a __________ of values represents the probability that a new observation will fall within that __________ also.</display>
            <response>range|set~Correct.;sample~Sample is incorrect. The correct response is range. While it makes sense to sample from a distribution, you can't be ‘between’ a sample. Range fits much better in this sentence, because you can be between a range of values, for example, between the range of -3 to 2.;.*~Incorrect. The correct fill-in is 'range'.</response>
            <display>The density of a distribution between a range of values represents the __________ that a new observation will fall within that range also.</display>
-           <response>probability|likelihood |chance~Correct.;range~Range is incorrect. The correct response is probability. A range of values in a distribution describes an area, which is interpreted as a proportion of the total distribution, which is the probability that future observations will fall within that range also. The range is not the probability;the range itself just tells us where to measure the probability of the distribution.;.*~Incorrect. The correct fill-in is 'probability'.</response>
+           <response>probability|likelihood|chance~Correct.;range~Range is incorrect. The correct response is probability. A range of values in a distribution describes an area, which is interpreted as a proportion of the total distribution, which is the probability that future observations will fall within that range also. The range is not the probability;the range itself just tells us where to measure the probability of the distribution.;.*~Incorrect. The correct fill-in is 'probability'.</response>
            <display>The density of a distribution between a range of values represents the probability that a new __________ will fall within that range also.</display>
            <response>observation~Correct.;sample~Sample is incorrect. The correct response is observation. The density of a distribution tells how likely it is that a new observation will fall within the range. The word sample refers to multiple observations, and since we are referring to a distribution we would usually assume the distribution is of observations. If the distribution were a distribution of samples we would call it a sample distribution.;value~Correct.;variable~Variable is incorrect. The correct response is observation. While we observe a variable, those observations are not called variable themselves. Typically, a distribution of scores describes how the observations (observed scores) are dispersed across a range of values for a single variable or factor.;.*~Incorrect. The correct fill-in is 'observation'.</response>
        </cluster>
        <cluster>
            <displayType>Cloze</displayType>
            <display>The __________ is computed by taking the sum of all the numbers in a set, divided by the count of the numbers in the set.</display>
-           <response>mean|sample mean |average~Correct.;standard deviation~Standard deviation is incorrect. The correct response is mean. Mean refers to the average value of a set of numbers, whereas standard deviation refers to how different the numbers in that set are from the mean. The calculation described here is for the mean.;variance~Variance is incorrect. The correct response is mean. Mean refers to the mathematical average value of a set of numbers. The variance is a different statistic that describes how dispersed, or diverse, the numbers in the set are.;.*~Incorrect. The correct fill-in is 'mean'.</response>
+           <response>mean|sample mean|average~Correct.;standard deviation~Standard deviation is incorrect. The correct response is mean. Mean refers to the average value of a set of numbers, whereas standard deviation refers to how different the numbers in that set are from the mean. The calculation described here is for the mean.;variance~Variance is incorrect. The correct response is mean. Mean refers to the mathematical average value of a set of numbers. The variance is a different statistic that describes how dispersed, or diverse, the numbers in the set are.;.*~Incorrect. The correct fill-in is 'mean'.</response>
            <display>The mean is computed by taking the __________ of all the numbers in a set, divided by the count of the numbers in the set.</display>
            <response>sum~Correct.;average~Average is incorrect. The correct response is sum. The average is the same as the mean, which is the value we are calculating here. To get the mean, or average, you would sum the numbers in a set and divide by the number of values in a set.;.*~Incorrect. The correct fill-in is 'sum'.</response>
            <display>The mean is computed by taking the sum of all the numbers in a set, __________ by the count of the numbers in the set.</display>
@@ -129,7 +129,7 @@
            <display>The sample mean, or average, is a __________ that represents what we expect observations in the sample to be centered around.</display>
            <response>statistic~Correct.;number~Number is incorrect. The correct response is statistic. While the mean or average is indeed a numbers, this answer is too vague. The word statistic fits much better since it specifically refers to summary values describing a sample.;range~Range is incorrect. The correct response is statistic. The average or mean cannot be a range of possible values. Rather, the mean is a single exact value, or statistic, we calculate.;sample~Sample is incorrect. The correct response is statistic. The sample is not a mean, rather the mean for the sample (or the sample mean) is a statistic we can calculate to represent the average in that sample.;value~Value is incorrect. The correct response is statistic. While the mean or average is a value, calling the sample mean a value is too vague. The word statistic fits much better since it specifically refers to summary values describing a sample.;variable~Variable is incorrect. The correct response is statistic. The word variable used here is inappropriate, since a variable is what we are observing. In statistics, the word statistic has been specifically defined to mean a summary characteristic of a sample.;.*~Incorrect. The correct fill-in is 'statistic'.</response>
            <display>The sample mean, or average, is a statistic that __________ what we expect observations in the sample to be centered around.</display>
-           <response>represents|describes |shows~Correct.;.*~Incorrect. The correct fill-in is 'represents'.</response>
+           <response>represents|describes|shows~Correct.;.*~Incorrect. The correct fill-in is 'represents'.</response>
            <display>The sample mean, or average, is a statistic that represents what we __________ observations in the sample to be centered around.</display>
            <response>expect~Correct.;measure~Measure is incorrect. The correct response is expect. In fact, what we measure may be very different than what we should expect. If we measure many times we can compute the sample mean, which is what we expect for observations on average.;.*~Incorrect. The correct fill-in is 'expect'.</response>
        </cluster>
@@ -153,7 +153,7 @@
            <display>The units for the standard deviation statistic are the __________ units used to measure the observations.</display>
            <response>same~Correct.;sample~Sample is incorrect. The correct response is same. This fact refers to how the unit of measurement for an observation (e.g. seconds) is the same unit of measurement for the standard deviation. There is no such thing as a sample unit.;standard~Standard is incorrect. The correct response is same. There are no 'standard units' referred to in statistics to measure an observation. Rather, this fact is pointing out that whatever the unit of measurement is for the observations (e.g., inches, IQ, age, etc.) is also the unit of measurement for the standard deviation.;.*~Incorrect. The correct fill-in is 'same'.</response>
            <display>The units for the standard deviation statistic are the same units used to __________ the observations.</display>
-           <response>measure|represent |describe~Correct.;.*~Incorrect. The correct fill-in is 'measure'.</response>
+           <response>measure|represent|describe~Correct.;.*~Incorrect. The correct fill-in is 'measure'.</response>
        </cluster>
        <cluster>
            <displayType>Cloze</displayType>
@@ -182,7 +182,7 @@
            <display>__________ refers to how different the observations are from each other and sometimes from the mean.</display>
            <response>Variability~Correct.;standard deviation~Standard deviation is incorrect. The correct response is variability. While the standard deviation statistic is a measure of variability, it is a very specific measure of variability, not well captured by this definition. Rather, this sentence is describing the general concept of variability.;variance~Variance is incorrect. The correct response is variability. While the variance statistic is a measure of variability, it is a very specific measure of variability, not well captured by this definition. Rather, this sentence is describing the general concept of variability.;.*~Incorrect. The correct fill-in is 'Variability'.</response>
            <display>Variability refers to how __________ the observations are from each other and sometimes from the mean.</display>
-           <response>different|far |variable~Correct.;.*~Incorrect. The correct fill-in is 'different'.</response>
+           <response>different|far|variable~Correct.;.*~Incorrect. The correct fill-in is 'different'.</response>
            <display>Variability refers to how different the __________ are from each other and sometimes from the mean.</display>
            <response>observations~Correct.;sample~Sample is incorrect. The correct response is observations. Variability here refers to differences within a single sample. Although samples are variable, usually when we talk about sample comparisons we talk about making inferences.;samples~Samples is incorrect. The correct response is observations. Variability here refers to differences within a single sample. Although samples are variable, usually when we talk about sample comparisons we talk about making inferences.;.*~Incorrect. The correct fill-in is 'observations'.</response>
            <display>Variability refers to how different the observations are from each other and sometimes from the __________.</display>
@@ -191,9 +191,9 @@
        <cluster>
            <displayType>Cloze</displayType>
            <display>When a study __________ human subjects, the sample is the group of people who participated in the study.</display>
-           <response>involves|uses |includes |observes~Correct.;.*~Incorrect. The correct fill-in is 'involves'.</response>
+           <response>involves|uses|includes|observes~Correct.;.*~Incorrect. The correct fill-in is 'involves'.</response>
            <display>When a study involves human __________s, the sample is the group of people who participated in the study.</display>
-           <response>subject|participant |participants~Correct.;sample~Sample is incorrect. The correct response is subject. Answering ‘sample’ makes the sentence redundant. Answering ‘subject’ allows the sentence to convey that the sample is made up of individual subjects.;samples~Samples is incorrect. The correct response is subject. Answering ‘samples’ makes the sentence redundant. Answering ‘subject’ allows the sentence to convey that the sample is made up of individual subjects.;.*~Incorrect. The correct fill-in is 'subject'.</response>
+           <response>subject|participant|participants~Correct.;sample~Sample is incorrect. The correct response is subject. Answering ‘sample’ makes the sentence redundant. Answering ‘subject’ allows the sentence to convey that the sample is made up of individual subjects.;samples~Samples is incorrect. The correct response is subject. Answering ‘samples’ makes the sentence redundant. Answering ‘subject’ allows the sentence to convey that the sample is made up of individual subjects.;.*~Incorrect. The correct fill-in is 'subject'.</response>
            <display>When a study involves human subjects, the __________ is the group of people who participated in the study.</display>
            <response>sample~Correct.;control~Control is incorrect. The correct response is sample. A control group is included within a sample, but the sample also includes the experimental group(s). Since this fact is referring to everyone who participated in the study, regardless of which group they were in, it's referring to the entire group, i.e. the sample.;subject~Subject is incorrect. The correct response is sample. A subject would refer to a single person that participated. Here, we are referring to the entire group of subjects that participated, i.e. the sample.;.*~Incorrect. The correct fill-in is 'sample'.</response>
            <display>When a study involves human subjects, the sample is the group of people who __________ in the study.</display>
@@ -226,7 +226,7 @@
            <display>A __________ describes a characteristic of a sample.</display>
            <response>statistic~Correct.;.*~Incorrect. The correct fill-in is 'statistic'.</response>
            <display>A statistic __________ a characteristic of a sample.</display>
-           <response>describes|is |represents~Correct.;.*~Incorrect. The correct fill-in is 'describes'.</response>
+           <response>describes|is|represents~Correct.;.*~Incorrect. The correct fill-in is 'describes'.</response>
            <display>A statistic describes a __________ of a sample.</display>
            <response>characteristic~Correct.;.*~Incorrect. The correct fill-in is 'characteristic'.</response>
            <display>A statistic describes a characteristic of a __________.</display>
@@ -239,7 +239,7 @@
            <display>Although multiple samples are __________ they are intended to represent the population from which they come.</display>
            <response>variable|random~Correct.;.*~Incorrect. The correct fill-in is 'variable'.</response>
            <display>Although multiple samples are variable they are intended to __________ the population from which they come.</display>
-           <response>represent|describe |sample~Correct.;.*~Incorrect. The correct fill-in is 'represent'.</response>
+           <response>represent|describe|sample~Correct.;.*~Incorrect. The correct fill-in is 'represent'.</response>
            <display>Although multiple samples are variable they are intended to represent the __________ from which they come.</display>
            <response>population~Correct.;.*~Incorrect. The correct fill-in is 'population'.</response>
        </cluster>
@@ -272,14 +272,14 @@
            <display>The density of a distribution between a __________ of values represents the probability that a new observation will fall within that __________ also.</display>
            <response>range|set~Correct.;.*~Incorrect. The correct fill-in is 'range'.</response>
            <display>The density of a distribution between a range of values represents the __________ that a new observation will fall within that range also.</display>
-           <response>probability|likelihood |chance~Correct.;.*~Incorrect. The correct fill-in is 'probability'.</response>
+           <response>probability|likelihood|chance~Correct.;.*~Incorrect. The correct fill-in is 'probability'.</response>
            <display>The density of a distribution between a range of values represents the probability that a new __________ will fall within that range also.</display>
            <response>observation~Correct.;.*~Incorrect. The correct fill-in is 'observation'.</response>
        </cluster>
        <cluster>
            <displayType>Cloze</displayType>
            <display>The __________ is computed by taking the sum of all the numbers in a set, divided by the count of the numbers in the set.</display>
-           <response>mean|sample mean |average~Correct.;.*~Incorrect. The correct fill-in is 'mean'.</response>
+           <response>mean|sample mean|average~Correct.;.*~Incorrect. The correct fill-in is 'mean'.</response>
            <display>The mean is computed by taking the __________ of all the numbers in a set, divided by the count of the numbers in the set.</display>
            <response>sum~Correct.;.*~Incorrect. The correct fill-in is 'sum'.</response>
            <display>The mean is computed by taking the sum of all the numbers in a set, __________ by the count of the numbers in the set.</display>
@@ -327,7 +327,7 @@
            <display>The sample mean, or average, is a __________ that represents what we expect observations in the sample to be centered around.</display>
            <response>statistic~Correct.;.*~Incorrect. The correct fill-in is 'statistic'.</response>
            <display>The sample mean, or average, is a statistic that __________ what we expect observations in the sample to be centered around.</display>
-           <response>represents|describes |shows~Correct.;.*~Incorrect. The correct fill-in is 'represents'.</response>
+           <response>represents|describes|shows~Correct.;.*~Incorrect. The correct fill-in is 'represents'.</response>
            <display>The sample mean, or average, is a statistic that represents what we __________ observations in the sample to be centered around.</display>
            <response>expect~Correct.;.*~Incorrect. The correct fill-in is 'expect'.</response>
        </cluster>
@@ -351,7 +351,7 @@
            <display>The units for the standard deviation statistic are the __________ units used to measure the observations.</display>
            <response>same~Correct.;.*~Incorrect. The correct fill-in is 'same'.</response>
            <display>The units for the standard deviation statistic are the same units used to __________ the observations.</display>
-           <response>measure|represent |describe~Correct.;.*~Incorrect. The correct fill-in is 'measure'.</response>
+           <response>measure|represent|describe~Correct.;.*~Incorrect. The correct fill-in is 'measure'.</response>
        </cluster>
        <cluster>
            <displayType>Cloze</displayType>
@@ -380,7 +380,7 @@
            <display>__________ refers to how different the observations are from each other and sometimes from the mean.</display>
            <response>Variability~Correct.;.*~Incorrect. The correct fill-in is 'Variability'.</response>
            <display>Variability refers to how __________ the observations are from each other and sometimes from the mean.</display>
-           <response>different|far |variable~Correct.;.*~Incorrect. The correct fill-in is 'different'.</response>
+           <response>different|far|variable~Correct.;.*~Incorrect. The correct fill-in is 'different'.</response>
            <display>Variability refers to how different the __________ are from each other and sometimes from the mean.</display>
            <response>observations~Correct.;.*~Incorrect. The correct fill-in is 'observations'.</response>
            <display>Variability refers to how different the observations are from each other and sometimes from the __________.</display>
@@ -389,9 +389,9 @@
        <cluster>
            <displayType>Cloze</displayType>
            <display>When a study __________ human subjects, the sample is the group of people who participated in the study.</display>
-           <response>involves|uses |includes |observes~Correct.;.*~Incorrect. The correct fill-in is 'involves'.</response>
+           <response>involves|uses|includes|observes~Correct.;.*~Incorrect. The correct fill-in is 'involves'.</response>
            <display>When a study involves human __________s, the sample is the group of people who participated in the study.</display>
-           <response>subject|participant |participants~Correct.;.*~Incorrect. The correct fill-in is 'subject'.</response>
+           <response>subject|participant|participants~Correct.;.*~Incorrect. The correct fill-in is 'subject'.</response>
            <display>When a study involves human subjects, the __________ is the group of people who participated in the study.</display>
            <response>sample~Correct.;.*~Incorrect. The correct fill-in is 'sample'.</response>
            <display>When a study involves human subjects, the sample is the group of people who __________ in the study.</display>
