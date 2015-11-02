@@ -352,10 +352,10 @@ function branchingCorrectText(answer) {
             else {
                 outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
             }
-            
+
             var temp = Helpers.trim(d(lastq.selectedAnswer, '')).split('~');
             var corans = temp[0];
-            
+
             //Track previous step names in the cross-call state so that we can
             //uniqify it (by user) by prepending a count
             if (typeof state.stepNameSeen === "undefined") {
