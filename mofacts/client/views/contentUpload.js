@@ -14,9 +14,7 @@ function userFilesRefresh() {
     var userId = Meteor.user()._id;
 
     Tdfs.find().forEach(function(tdf) {
-        console.log("Found", tdf.fileName); //TODO: remove
         if (userId === tdf.owner) {
-            console.log("Inserting", tdf.fileName); //TODO: remove
             userFiles.insert({
                 'temp': 1,
                 '_id': tdf._id,
@@ -30,9 +28,7 @@ function userFilesRefresh() {
     });
 
     Stimuli.find().forEach(function(stim){
-        console.log("Found", stim.fileName); //TODO: remove
         if (userId === stim.owner) {
-            console.log("Keeping", stim.fileName); //TODO: remove
             userFiles.insert({
                 'temp': 1,
                 '_id': stim._id,

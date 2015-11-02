@@ -328,7 +328,6 @@ Meteor.startup(function () {
                         .prop("setspec").first()
                         .prop("lessonname").first().trim().value();
                     if (lessonName.length < 1) {
-                        console.log("Invalid setspec found", jsonContents); //TODO: remove
                         throw "TDF has no lessonname - it cannot be valid";
                     }
 

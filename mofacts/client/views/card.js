@@ -1,8 +1,3 @@
-//NOTE: We currently don't support the timeout property "readyprompt" (in
-//      /tutor/unit/deliveryparams). It is the time between two trials (where
-//      we say "ready")
-
-//
 //  card.js - the implementation behind card.html (and thus
 //  the main GUI implementation for MoFaCTS).
 //
