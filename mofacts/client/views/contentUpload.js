@@ -65,6 +65,16 @@ Template.contentUpload.events({
         event.preventDefault();
         doFileUpload("#upload-stim", "stim", "Stimlus");
     },
+
+    'change #upload-tdf': function(event) {
+        var input = $(event.currentTarget);
+        $("#tdf-file-info").html(input.val());
+    },
+
+    'change #upload-stim': function(event) {
+        var input = $(event.currentTarget);
+        $("#stim-file-info").html(input.val());
+    }
 });
 
 
@@ -89,12 +99,15 @@ function doFileUpload(fileElementSelector, fileType, fileDescrip) {
                     alert("There was a critical failure saving your " + fileDescrip + " file:" + error);
                 }
                 else if (!result.result) {
-                    console.log(fileDescrip + " saved failed", result);
-                    alert("The " + fileDescrip + " file was not saved: " + errmsg);
+                    console.log(fileDescrip + " save failed", result);
+                    alert("The " + fileDescrip + " file was not saved: " + result.errmsg);
                 }
                 else {
                     console.log(fileDescrip + " Saved:", result);
-                    alert("You " + fileDescrip + " file was saved");
+                    alert("Your " + fileDescrip + " file was saved");
+                    //Now we can clear the selected file
+                    $(fileElementSelector).val('');
+                    $(fileElementSelector).parent().find('.file-info').html('');
                 }
             });
         };
