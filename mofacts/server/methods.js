@@ -266,7 +266,7 @@ Meteor.startup(function () {
 
             try {
                 Accounts.setPassword(userId, newPassword);
-                console.log("Admin user", Meteor.user(), "changed password for user", userName, "mongo _id", userId);
+                console.log("Admin user", _.prop(Meteor.user(), "username"), "changed password for user", userName, "mongo _id", userId);
                 return null; //Succeeded
             }
             catch(e) {

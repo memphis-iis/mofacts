@@ -31,7 +31,7 @@ Template.userAdmin.events({
                 }
                 else if (!!serverReturn) {
                     console.log("Server failure while updating password", serverReturn);
-                    alert("The password was not changes! The server said: " + serverReturn);
+                    alert("The password was not changed! The server said: " + serverReturn);
                 }
                 else {
                     console.log("Password Changed");
