@@ -37,6 +37,7 @@
     <div class="container">
         {{#if isInRole 'admin,teacher'}}
             {{> turkWorkflow}}
+            <br><br>
         {{/if}}
 
         <div class="row" id="testButtonContainer">
@@ -44,8 +45,14 @@
         </div>
 
         {{#if isInRole 'admin,teacher'}}
+            <br><br>
             {{> contentUpload}}
             {{> userProfileEdit}}
+        {{/if}}
+
+        {{#if isInRole 'admin'}}
+            <br><br>
+            {{> userAdmin}}
         {{/if}}
     </div>
 </template>
