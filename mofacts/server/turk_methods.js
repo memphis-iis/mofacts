@@ -515,13 +515,19 @@ Meteor.methods({
                 questionsSeen: 0,
                 answersSeen: 0,
                 answersCorrect: 0,
-                lastUnitSeen: -1
+                lastUnitSeen: -1,
+                maxTimestamp: 0
             };
 
             for (var i = 0; i < recs.length; ++i) {
                 var rec = recs[i];
                 if (!rec || !rec.action) {
                     continue;
+                }
+
+                var lastTs = _.intval(rec.clientSideTimeStamp);
+                if (!!lastTs && lastTs > data.maxTimestamp) {
+                    data.maxTimestamp = lastTs;
                 }
 
                 var act = _.trim(rec.action).toLowerCase();

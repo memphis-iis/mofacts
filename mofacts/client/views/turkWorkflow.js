@@ -37,6 +37,9 @@ function turkLogRefresh(exp) {
             newRec.haveEmailSend = (newRec.turkEmailSend !== '?');
             newRec.turk_username = newRec.username;
 
+            if (!!newRec.maxTimestamp) {
+                newRec.lastAction = new Date(newRec.maxTimestamp);
+            }
             turkExperimentLog.insert(newRec);
         });
     });
@@ -51,7 +54,10 @@ function turkLogButtonToRec(element) {
         return null;
     }
 
-    return turkExperimentLog.findOne({'idx': idx}, {sort: {'idx': 1}});
+    return turkExperimentLog.findOne(
+        { 'idx': idx },
+        { sort: [['maxTimestamp', 'desc'],['idx', 'asc']] }
+    );
 }
 
 Template.turkWorkflow.helpers({
@@ -61,7 +67,10 @@ Template.turkWorkflow.helpers({
 
     turkExperimentLog: function() {
         var minTrials = _.intval(Session.get("turkLogFilterTrials") || -1);
-        return turkExperimentLog.find({'questionsSeen': {'$gte': _.intval(minTrials)}}, {sort: {idx: 1}});
+        return turkExperimentLog.find(
+            { 'questionsSeen': {'$gte': _.intval(minTrials)} },
+            { sort: [['maxTimestamp', 'desc'],['idx', 'asc']] }
+        );
     },
 });
 
