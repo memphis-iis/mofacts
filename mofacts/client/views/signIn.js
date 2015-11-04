@@ -117,8 +117,7 @@ function UserPasswordCheck() {
         return;
     }
 
-    //If we're here, either we're in experimental mode and we know the user
-    //exists **OR** it's a "normal" login
+    //If we're here, we're NOT in experimental mode
     Meteor.loginWithPassword(newUsername, newPassword, function(error) {
         if (typeof error !== 'undefined') {
             console.log("Login error: " + error);
@@ -126,6 +125,16 @@ function UserPasswordCheck() {
             $("#serverErrors").html(error).show();
         }
         else {
+            if (newPassword === Helpers.blankPassword(newUsername)) {
+                //So now we know it's NOT experiment mode and they've logged in
+                //with a blank password. Currently this is someone who's
+                //managed to figure out to use the "normal" login flow. Tell
+                //them the "correct" way to use the system.
+                console.log("Detected non-experimental login for turk ID", newUsername);
+                alert("This login page is not for Mechanical Turk workers. Please use the link provided with your HIT");
+                return;
+            }
+
             signinNotify();
         }
     });

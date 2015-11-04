@@ -210,12 +210,37 @@ Template.instructions.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
 
+        //On resume, seeing an "instructions" log event is seen as a breaking point
+        //in the TDF session (since it's supposed to be the beginning of a new unit).
+        //As a result, we only want to log an instruction record ONCE PER UNIT. In
+        //the unlikely event we've already logged an instruction record for the
+        //current unit, we should log a duplicate instead
+        var logAction = "instructions";
+        var currUnit = Session.get("currentUnitNumber");
+
+        var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+        var expKey = userTimesExpKey(true);
+
+        var entries = _.prop(userLog, expKey) || [];
+
+        var dup = _.find(entries, function(rec){
+            return (
+                _.prop(rec, "action") === "instructions" &&
+                _.prop(rec, "currentUnit") === currUnit
+            );
+        });
+        if (!!dup) {
+            console.log("Found dup instruction", dup);
+            Meteor.call("debugLog", "Found dup instruction. User:", Meteor.userId(), "Entry:", dup);
+            logAction = "instructions-dup";
+        }
+
         //Record the fact that we just showed instruction. Also - we use a
         //call back to redirect to the card display screen to make sure that
         //everything has been properly logged on the server
-        recordUserTime("instructions", {
-            currentUnit: Session.get("currentUnitNumber"),
-            xcondition: Session.get("experimentXCond")
+        recordUserTime(logAction, {
+            'currentUnit': currUnit,
+            'xcondition': Session.get("experimentXCond")
         }, function(error, result) {
             //We know they'll need to resume now
             Session.set("needResume", true);
