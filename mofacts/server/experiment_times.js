@@ -137,20 +137,37 @@
 //We don't rely on any other files in we're run as a script, so we have some
 //helpers here
 
-function branchingCorrectText(answer) {
-    var result = "";
+    function trim(s) {
+        if (!s)
+            return "";
 
-    var branches = Helpers.trim(answer).split(';');
-    if (branches.length > 0) {
-        var flds = branches[0].split('~');
-        if (flds.length == 2) {
-            result = flds[0];
+        var ss = "" + s;
+        if (!ss || !ss.length || ss.length < 1) {
+            return "";
+        }
+
+        if (ss.trim) {
+            return ss.trim();
+        }
+        else {
+            return ss.replace(/^\s+|\s+$/gm, '');
         }
     }
 
-    result = result.split('|');
-    return result[0];
-}
+    function branchingCorrectText(answer) {
+        var result = "";
+
+        var branches = trim(answer).split(';');
+        if (branches.length > 0) {
+            var flds = branches[0].split('~');
+            if (flds.length == 2) {
+                result = flds[0];
+            }
+        }
+
+        result = result.split('|');
+        return result[0];
+    }
 
 //Return a displayable string for given value (note we don't do anything fancy)
     function disp(val) {
@@ -353,7 +370,7 @@ function branchingCorrectText(answer) {
                 outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
             }
 
-            var temp = Helpers.trim(d(lastq.selectedAnswer, '')).split('~');
+            var temp = trim(d(lastq.selectedAnswer, '')).split('~');
             var corans = temp[0];
 
             //Track previous step names in the cross-call state so that we can
@@ -361,7 +378,7 @@ function branchingCorrectText(answer) {
             if (typeof state.stepNameSeen === "undefined") {
                 state.stepNameSeen = {};
             }
-            var stepName = _.trim(d(lastq.selectedQuestion, ''));
+            var stepName = trim(d(lastq.selectedQuestion, ''));
             var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
             state.stepNameSeen[stepName] = stepCount;
             stepName = stepCount + " " + stepName;
