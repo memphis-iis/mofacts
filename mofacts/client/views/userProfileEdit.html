@@ -4,50 +4,47 @@ User Profile (AWS) editing template
 <template name="userProfileEdit">
     <br><br>
     <div class="row">
-        <div class="col-md-5" id="profileContainer">
+        <div class="col-md-6 form-horizontal" id="profileContainer">
             <legend class="text-center">Profile Data</legend>
-            <!-- TODO: Format this input form with a bootstrappy form -->
-            <table class="table">
-                <tr>
-                    <th>New AWS ID</th>
-                    <td>
-                        <input type="text"
-                            id="profileAWSID"
-                            class="clearOnSave"
-                            maxlength="40"
-                            placeholder="{{#if have_aws_id}}Overwrite{{else}}Enter{{/if}} your AWS ID"
-                        >
-                    </td>
-                </tr>
-                <tr>
-                    <th>New AWS Secret Key</th>
-                    <td>
-                        <input type="password"
-                            id="profileAWSSecret"
-                            class="clearOnSave"
-                            maxlength="60"
-                            placeholder="{{#if have_aws_secret}}Overwrite{{else}}Enter{{/if}} your AWS Secret Key"
-                        >
-                    </td>
-                </tr>
-                <tr>
-                    <th>Use Sandbox</th>
-                    <td><input type="checkbox" id="profileUseSandbox" checked={{use_sandbox}}></td>
-                </tr>
-                <tr>
-                    <th>&nbsp;</th>
-                    <td>
-                        <button type='button' id='saveProfile' class='btn btn-fix'>
-                            Save Profile Data
-                        </button>
-                        <br>
-                        <small>(Your AWS credentials are never shown)</small>
-                    </td>
-                </tr>
-            </table>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="profileAWSID">AWS ID</label>
+                <div class="col-md-8">
+                    <input type="text"
+                        id="profileAWSID" name="profileAWSID"
+                        class="form-control clearOnSave"
+                        maxlength="40"
+                        placeholder="{{#if have_aws_id}}Overwrite{{else}}Enter{{/if}} your AWS ID"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="profileAWSSecret">AWS Secret Key</label>
+                <div class="col-md-8">
+                    <input type="password"
+                        id="profileAWSSecret" name="profileAWSSecret"
+                        class="form-control clearOnSave"
+                        maxlength="60"
+                        placeholder="{{#if have_aws_secret}}Overwrite{{else}}Enter{{/if}} your AWS Secret Key"
+                    >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="profileUseSandbox">Use Sandbox</label>
+                <div class="col-md-8">
+                    <input type="checkbox" id="profileUseSandbox" name="profileUseSandbox" checked={{use_sandbox}}>
+                    <button type='button' id='saveProfile' class='btn btn-fix'>
+                        Save Profile Data
+                    </button>
+                    <br>
+                    <small>(Your AWS credentials are never shown)</small>
+                </div>
+            </div>
         </div>
 
-        <div class="col-md-offset-1 col-md-6" id="downloadContainer">
+        <div class="col-md-6" id="downloadContainer">
             <legend class="text-center">Data Downloads</legend>
             <div id="expDataDownloadContainer" class="col-lg-12"></div>
         </div>

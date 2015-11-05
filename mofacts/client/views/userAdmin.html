@@ -1,0 +1,42 @@
+<!----------------------------------------------------------------------------
+User Administration Template
+----------------------------------------------------------------------------->
+<template name="userAdmin">
+{{#if isInRole 'admin,teacher'}}
+
+    <br><br>
+    <div class="row">
+        <div class="col-md-6 form-horizontal">
+            <legend class="text-center">Change User Password</legend>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="passchg-user">User Name</label>
+                <div class="col-md-8">
+                    <input class="form-control clearOnPwd" type="text" name="passchg-user" id="passchg-user" value="" placeholder="User name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="passchg-pwd1">Password</label>
+                <div class="col-md-8">
+                    <input class="form-control clearOnPwd" type="password" name="passchg-pwd1" id="passchg-pwd1" value="" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-md-4 control-label" for="passchg-pwd2">Confirm Password</label>
+                <div class="col-md-8">
+                    <input class="form-control clearOnPwd" type="password" name="passchg-pwd2" id="passchg-pwd2" value="" placeholder="Repeat Password">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type='button' id='passchg' class='btn btn-fix'>
+                    Change Password
+                </button>
+            </div>
+        </div>
+    </div>
+
+{{/if}}
+</template>

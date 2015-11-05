@@ -10,8 +10,9 @@
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
-        <shuffleclusters>0-17 18-35</shuffleclusters>
-        <swapclusters>0-17 18-35</swapclusters>
+        <shuffleclusters>20-35</shuffleclusters>
+        <swapclusters>0-19 20-35</swapclusters>
+        <swapclusters>0-4 5-9 10-14 15-19</swapclusters>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

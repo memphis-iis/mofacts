@@ -35,14 +35,24 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
+        {{#if isInRole 'admin,teacher'}}
+            {{> turkWorkflow}}
+            <br><br>
+        {{/if}}
+
         <div class="row" id="testButtonContainer">
             <legend class="text-center">Your Practice Modules</legend>
         </div>
 
         {{#if isInRole 'admin,teacher'}}
+            <br><br>
             {{> contentUpload}}
             {{> userProfileEdit}}
-            {{> turkWorkflow}}
+        {{/if}}
+
+        {{#if isInRole 'admin'}}
+            <br><br>
+            {{> userAdmin}}
         {{/if}}
     </div>
 </template>

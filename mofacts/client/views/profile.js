@@ -144,13 +144,15 @@ Template.profile.rendered = function () {
                 .html(name)
         );
 
-        $("#expDataDownloadContainer").append(
-            $("<div></div>").append(
-                $("<a class='exp-data-link' target='_blank'></a>")
-                    .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                    .text("Download: " + name + " (DataShop format)")
-            )
-        );
+        if (Meteor.userId() === tdfObject.owner) {
+            $("#expDataDownloadContainer").append(
+                $("<div></div>").append(
+                    $("<a class='exp-data-link' target='_blank'></a>")
+                        .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
+                        .text("Download: " + name + " (DataShop format)")
+                )
+            );
+        }
     });
 
     //Did we find something to auto-jump to?

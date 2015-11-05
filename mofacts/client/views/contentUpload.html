@@ -7,7 +7,11 @@ Content (TDF and Stim) File Uploading Template
         <div class="col-md-3">
             <legend class="text-center">Upload TDF File</legend>
             <div class="form-group">
-                <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
+                <span class="btn btn-default btn-file">
+                    Browse
+                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
+                    <span class='label label-info file-info' id="tdf-file-info"></span>
+                </span>
             </div>
             <button type='button' id='doUploadTDF' class='btn btn-fix'>
                 Upload TDF File
@@ -17,7 +21,11 @@ Content (TDF and Stim) File Uploading Template
         <div class="col-md-3">
             <legend class="text-center">Upload Stimulus File</legend>
             <div class="form-group">
-                <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File">
+                <span class="btn btn-default btn-file">
+                    Browse
+                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File">
+                    <span class='label label-info file-info' id="stim-file-info"></span>
+                </span>
             </div>
             <button type='button' id='doUploadStim' class='btn btn-fix'>
                 Upload Stimulus File
@@ -29,11 +37,20 @@ Content (TDF and Stim) File Uploading Template
             <table class="table table-striped table-bordered table-condensed">
                 <thead>
                     <tr>
-                        <th>Date Created</th>
+                        <th>Type</th>
                         <th>Name</th>
                         <th>Action</th>
                     </tr>
                 </thead>
+                <tbody>
+                    {{#each userFiles}}
+                        <tr>
+                            <td>{{type}}</td>
+                            <td>{{fileName}}</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
             </table>
         </div>
     </div>

@@ -31,9 +31,9 @@ console.log = function() {
             v = JSON.stringify(v);
         }
         console_buffer.push(v);
-	if (i !== arguments.length - 1) {
-		console_buffer.push(' ');
-	}
+    	if (i !== arguments.length - 1) {
+    		console_buffer.push(' ');
+    	}
     }
     console_buffer.push('\n');
 };
@@ -106,8 +106,16 @@ unit_test = function(unit_name, func) {
     logger.print("ok");
 };
 
+//Test groupings might want to suppress reporting until all tests have run
+suspend_reporting = false;
+
 test_report = function() {
+    if (suspend_reporting)
+        return;
+
+    console.real_log("");
     console.real_log("TEST REPORT");
+    console.real_log("Suites Seen:  ", all_suites.join(', '));
     console.real_log("Test Suites:  ", suite_count);
     console.real_log("Unit Tests:   ", test_count);
     console.real_log("Failure Count:", failure_count);
@@ -118,7 +126,7 @@ test_report = function() {
         "FULL TEST OUTPUT on " + (new Date()).toString()  + "\n" +
         "All Suites Seen: " + all_suites.join(',') + '\n'
     );
-    console_buffer.push("\n=================================================\n\n\n")
+    console_buffer.push("\n=================================================\n\n\n");
 
     fs.appendFileSync(".test_results", console_buffer.join(''));
     clear_test_report();

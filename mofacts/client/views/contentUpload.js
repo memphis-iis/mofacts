@@ -1,7 +1,54 @@
 ////////////////////////////////////////////////////////////////////////////
-// Template storage and helpers
+// Template helpers
 
-//None currently
+var userFiles = new Mongo.Collection(null); //local-only - no database;
+
+function clearUserFiles() {
+    userFiles.remove({'temp': 1});
+}
+
+function userFilesRefresh() {
+    clearUserFiles();
+
+    var count = 0;
+    var userId = Meteor.user()._id;
+
+    Tdfs.find().forEach(function(tdf) {
+        if (userId === tdf.owner) {
+            userFiles.insert({
+                'temp': 1,
+                '_id': tdf._id,
+                'idx': count,
+                'type': 'tdf',
+                'fileName': _.chain(tdf).prop('fileName').trim().value()
+            });
+
+            count += 1;
+        }
+    });
+
+    Stimuli.find().forEach(function(stim){
+        if (userId === stim.owner) {
+            userFiles.insert({
+                'temp': 1,
+                '_id': stim._id,
+                'idx': count,
+                'type': 'stim',
+                'fileName': _.chain(stim).prop('fileName').trim().value()
+            });
+
+            count += 1;
+        }
+    });
+}
+
+Template.contentUpload.helpers({
+    userFiles: function() {
+        userFilesRefresh();
+        return userFiles.find();
+    },
+});
+
 
 ////////////////////////////////////////////////////////////////////////////
 // Template events
@@ -10,56 +57,63 @@ Template.contentUpload.events({
     // Admin/Teachers - upload a TDF file
     'click #doUploadTDF': function(event) {
         event.preventDefault();
-
-        _.each($("#upload-tdf").prop("files"), function(file) {
-            var name = file.name;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                Meteor.call('saveContentFile', 'tdf', name, file.srcElement.result, function(error, result) {
-                    if (!!error) {
-                        console.log("Critical failure saving TDF", error);
-                        alert("There was a critical failure saving your TDF:" + error);
-                    }
-                    else if (!result.result) {
-                        console.log("TDF saved failed", result);
-                        alert("The TDF was not saved: " + errmsg);
-                    }
-                    else {
-                        console.log("TDF Saved:", result);
-                        alert("You TDF was saved");
-                    }
-                });
-            };
-            fileReader.readAsBinaryString(file);
-        });
+        doFileUpload("#upload-tdf", "tdf", "TDF");
     },
 
     // Admin/Teachers - upload a Stimulus file
     'click #doUploadStim': function(event) {
         event.preventDefault();
-
-        _.each($("#upload-stim").prop("files"), function(file) {
-            var name = file.name;
-            var fileReader = new FileReader();
-            fileReader.onload = function() {
-                console.log("Upload attempted for", name, "RESULT:", fileReader.result);
-                Meteor.call('saveContentFile', 'stim', name, file.srcElement.result, function(error, result) {
-                    if (!!error) {
-                        console.log("Critical failure saving stim", error);
-                        alert("There was a critical failure saving your Stimulus file:" + error);
-                    }
-                    else if (!result.result) {
-                        console.log("Stim saved failed", result);
-                        alert("The Stimulus file was not saved: " + errmsg);
-                    }
-                    else {
-                        console.log("Stim Saved:", result);
-                        alert("You Stimulus file was saved");
-                    }
-                });
-            };
-            fileReader.readAsBinaryString(file);
-        });
+        doFileUpload("#upload-stim", "stim", "Stimlus");
     },
+
+    'change #upload-tdf': function(event) {
+        var input = $(event.currentTarget);
+        $("#tdf-file-info").html(input.val());
+    },
+
+    'change #upload-stim': function(event) {
+        var input = $(event.currentTarget);
+        $("#stim-file-info").html(input.val());
+    }
 });
+
+
+////////////////////////////////////////////////////////////////////////////
+// Our main logic for uploading files
+
+function doFileUpload(fileElementSelector, fileType, fileDescrip) {
+    var count = 0;
+
+    _.each($(fileElementSelector).prop("files"), function(file) {
+        count += 1;
+
+        var name = file.name;
+        var fileReader = new FileReader();
+
+        fileReader.onload = function() {
+            console.log("Upload attempted for", name);
+
+            Meteor.call('saveContentFile', fileType, name, fileReader.result, function(error, result) {
+                if (!!error) {
+                    console.log("Critical failure saving " + fileDescrip, error);
+                    alert("There was a critical failure saving your " + fileDescrip + " file:" + error);
+                }
+                else if (!result.result) {
+                    console.log(fileDescrip + " save failed", result);
+                    alert("The " + fileDescrip + " file was not saved: " + result.errmsg);
+                }
+                else {
+                    console.log(fileDescrip + " Saved:", result);
+                    alert("Your " + fileDescrip + " file was saved");
+                    //Now we can clear the selected file
+                    $(fileElementSelector).val('');
+                    $(fileElementSelector).parent().find('.file-info').html('');
+                }
+            });
+        };
+
+        fileReader.readAsBinaryString(file);
+    });
+
+    console.log(fileType, ":", fileDescrip, "at ele", fileElementSelector, "scheduled", count, "uploads");
+}

@@ -94,8 +94,10 @@ Meteor.methods({
     turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
         var usr, turkid, ownerId, workerUserId;
         var schedDate;
+        var jobName;
         var resultMsg = "";
         var errmsg = null;
+        var requestParams = null; //Params used to make email send request
 
         try {
             usr = Meteor.user();
@@ -122,8 +124,16 @@ Meteor.methods({
 
             subject = subject || _.trim("Message from " + turkid + " Profile Page");
             var msgtext = "The lock out period has ended - you may continue.\n\n" + msgbody;
-            var jobName = 'Message for ' + experiment + ' to ' + turkid;
+            jobName = 'Message for ' + experiment + ' to ' + turkid;
             schedDate = new Date(lockoutend);
+
+            //Pre-calculate our request parameters for send to that we can
+            //copy them to our schedule log entry
+            requestParams = {
+                'Subject': subject,
+                'MessageText': msgtext,
+                'WorkerId': turkid
+            };
 
             console.log("Scheduling:", jobName, "at", schedDate);
             SyncedCron.add({
@@ -139,11 +149,6 @@ Meteor.methods({
                     var retval = null;
 
                     try {
-                        var requestParams = {
-                            'Subject': subject,
-                            'MessageText': msgtext,
-                            'WorkerId': turkid
-                        };
                         var ret = turk.notifyWorker(ownerProfile, requestParams);
                         console.log("Completed scheduled job", jobName);
                         retval = _.extend({'passedParams': requestParams}, ret);
@@ -193,7 +198,14 @@ Meteor.methods({
                 'errmsg': errmsg,
                 'turkId': turkid,
                 'tdfOwnerId': ownerId,
-                'schedDate': schedDate ? schedDate.toString() : "???"
+                'schedDate': schedDate ? schedDate.toString() : "???",
+
+                //The following three properties are for recreating the sched
+                //call (although you'll need to create a Date from schedDateRaw
+                //and retrieve the owner profile with tdfOwnerId)
+                'schedDateRaw': schedDate ? schedDate.getTime() : 0,
+                'jobname': jobName,
+                'requestParams': requestParams
             };
 
             console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
@@ -503,13 +515,19 @@ Meteor.methods({
                 questionsSeen: 0,
                 answersSeen: 0,
                 answersCorrect: 0,
-                lastUnitSeen: -1
+                lastUnitSeen: -1,
+                maxTimestamp: 0
             };
 
             for (var i = 0; i < recs.length; ++i) {
                 var rec = recs[i];
                 if (!rec || !rec.action) {
                     continue;
+                }
+
+                var lastTs = _.intval(rec.clientSideTimeStamp);
+                if (!!lastTs && lastTs > data.maxTimestamp) {
+                    data.maxTimestamp = lastTs;
                 }
 
                 var act = _.trim(rec.action).toLowerCase();

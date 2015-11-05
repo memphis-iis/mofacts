@@ -65,9 +65,12 @@ test_suite("underscore mixins", function() {
         assert.deepEqual(null, _.prop('', 'cantbeaproperty'));
 
         assert.deepEqual(0, _.prop('', 'length'));
+        assert.deepEqual(0, _.chain(null).prop('s').trim().prop('length').value());
 
         assert.deepEqual('A String', _.prop(obj, 's'));
+        assert.deepEqual(8, _.chain(obj).prop('s').trim().prop('length').value());
         assert.deepEqual(['An', 'Array'], _.prop(obj, 'a'));
+        assert.deepEqual(2, _.chain(obj).prop('a').prop('length').value());
         assert.deepEqual(42, _.prop(obj, 'i'));
 
         assert.deepEqual('Another String', _.chain(obj).prop('nested').first().prop('sub').prop('s').value());
