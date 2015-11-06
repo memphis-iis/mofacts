@@ -184,7 +184,7 @@ Answers = {
                     matchText = "The correct answer is " + answer + ".";
                 }
                 else {
-                    matchText = isCorrect ? "Correct" : capFirst(userInput) + " is incorrect. The correct answer is " + answer + ".";
+                    matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + answer + ".";
                 }
             }
 
