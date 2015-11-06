@@ -356,10 +356,8 @@ Meteor.startup(function () {
                         throw "TDF has no lessonname - it cannot be valid";
                     }
 
-                    var unitCount = _.chain(tutor).prop("unit").prop("length").value();
-                    if (unitCount < 1) {
-                        throw "TDF has no units - it cannot be valid";
-                    }
+                    //Note that we don't check for units since a root TDF may
+                    //not have any units
 
                     //Set up for TDF save
                     rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
