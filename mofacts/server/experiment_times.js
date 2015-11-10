@@ -437,7 +437,8 @@
 
         var vals = new Array(field_src.length);
         for (var i = 0; i < field_src.length; ++i) {
-            vals[i] = disp(rec[field_src[i]]);
+            var val = disp(rec[field_src[i]]).replace(/[\r\n\t]/g, ' ');
+            vals[i] = trim(val);
         }
 
         return vals.join('\t');
