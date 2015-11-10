@@ -17,7 +17,7 @@ Helpers = {
     //Note that we recurse on array entries, so arrays of arrays will
     //be "flattened"
     display: function(to_display) {
-        if (!to_display && to_display !== false) {
+        if (!to_display && to_display !== false && to_display !== 0) {
             return "";
         }
         else if (to_display && to_display.length && to_display.join) {
@@ -37,7 +37,7 @@ Helpers = {
     trim: function(s) {
         //Handle non-strings and empty strings - first check existence,
         //then force conversion to string (and implicit copy).
-        if (!s)
+        if (!s && s !== 0 && s !== false)
             return "";
 
         var ss = "" + s;

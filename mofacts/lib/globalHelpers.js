@@ -58,7 +58,7 @@ if (_ && _.mixin) {
         },
 
         trim: function(s) {
-            if (!s)
+            if (!s && s !== 0 && s !== false)
                 return "";
 
             var ss = "" + s;
