@@ -437,8 +437,10 @@
 
         var vals = new Array(field_src.length);
         for (var i = 0; i < field_src.length; ++i) {
-            var val = disp(rec[field_src[i]]).replace(/[\r\n\t]/g, ' ');
-            vals[i] = trim(val);
+            vals[i] = trim(rec[field_src[i]])
+                .replace(/\s+/gm, ' ')   //Norm ws and remove non-space ws
+                .slice(0, 255)           //Respect len limits for data shop
+                .replace(/\s+$/gm, '');  //Might have revealed embedded space at end
         }
 
         return vals.join('\t');
