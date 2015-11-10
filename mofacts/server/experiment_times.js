@@ -138,7 +138,7 @@
 //helpers here
 
     function trim(s) {
-        if (!s)
+        if (!s && s !== 0)
             return "";
 
         var ss = "" + s;
@@ -227,9 +227,9 @@
 
         //Either there was a system assigned xcond, a URL assigned xcond
         //(recorded in lastinstruct), or none at all
-        var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcond;
+        var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcondition;
         //Empty string becomes 0
-        xcond = d(xcond, '') || 0;
+        xcond = trim(d(xcond, '0')) || '0';
 
         //We might append a warning message
         var note = "";
@@ -335,7 +335,7 @@
                 username: d(username, ''),
                 selectedTdf: d(lastexpcond.selectedTdf, ''),
                 unitname: d(lastschedule.unitname, ''),
-                xcondition: d(xcond, ''),
+                xcondition: xcond,
                 questionIndex: d(lastq.questionIndex, -1),
                 clusterIndex: d(lastq.clusterIndex, -1),
                 shufIndex: d(lastq.shufIndex, d(lastq.clusterIndex, -1)),
@@ -390,7 +390,7 @@
                 "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + d(lastexpcond.selectedTdf, ''), //hack
                 "Condition Namea": d(lastexpcond.selectedTdf, ''),
                 "Condition Typea": 'tdf file',
-                "Condition Nameb": d(xcond, ''),
+                "Condition Nameb": xcond,
                 "Condition Typeb": 'xcondition',
                 "Condition Namec": d(schedCondition, ''),
                 "Condition Typec": 'schedule condition',
