@@ -228,6 +228,8 @@
         //Either there was a system assigned xcond, a URL assigned xcond
         //(recorded in lastinstruct), or none at all
         var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcond;
+        //Empty string becomes 0
+        xcond = d(xcond, '') || 0;
 
         //We might append a warning message
         var note = "";
