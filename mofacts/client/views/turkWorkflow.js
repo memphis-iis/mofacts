@@ -7,6 +7,19 @@ function clearTurkExpLog() {
     turkExperimentLog.remove({'temp': 1});
 }
 
+function turkLogInsert(newRec) {
+    newRec.needPay = (newRec.turkpay === '?');
+    newRec.needBonus = (newRec.turkbonus === '?');
+    newRec.haveEmailSched = (newRec.turkEmailSchedule !== '?');
+    newRec.haveEmailSend = (newRec.turkEmailSend !== '?');
+    newRec.turk_username = newRec.username;
+
+    if (!!newRec.maxTimestamp) {
+        newRec.lastAction = new Date(newRec.maxTimestamp);
+    }
+    turkExperimentLog.insert(newRec);
+}
+
 function turkLogRefresh(exp) {
     $("#turkExpTitle").text("Viewing data for " + exp);
     clearTurkExpLog();
@@ -24,23 +37,12 @@ function turkLogRefresh(exp) {
         }
 
         _.each(result, function(val, idx) {
-            var newRec = _.extend({
+            turkLogInsert(_.extend({
                 temp: 1,
                 idx: idx,
                 questionsSeen: 0,
                 experiment: exp
-            }, val);
-
-            newRec.needPay = (newRec.turkpay === '?');
-            newRec.needBonus = (newRec.turkbonus === '?');
-            newRec.haveEmailSched = (newRec.turkEmailSchedule !== '?');
-            newRec.haveEmailSend = (newRec.turkEmailSend !== '?');
-            newRec.turk_username = newRec.username;
-
-            if (!!newRec.maxTimestamp) {
-                newRec.lastAction = new Date(newRec.maxTimestamp);
-            }
-            turkExperimentLog.insert(newRec);
+            }, val));
         });
     });
 }
@@ -243,19 +245,31 @@ Template.turkWorkflow.events({
         Meteor.call("turkPay", rec.userid, exp, msg, function(error, result) {
             $("#turkModal").modal('hide');
 
+            rec.turkpayDetails = {
+                msg: "Refresh the view to see details on server",
+                details: ""
+            };
+
             if (!!error) {
+                rec.turkpay = "FAIL";
+                rec.turkpayDetails.details = error;
                 console.log("turkPay failure:", error);
                 alert("There was a server failure of some kind: " + error);
             }
             else if (!!result) {
                 console.log("turkPay error:", result);
+                rec.turkpay = "FAIL";
+                rec.turkpayDetails.details = result;
                 alert("There was a problem with the approval/payment: " + result);
             }
             else {
+                rec.turkpay = "Complete";
+                rec.turkpayDetails.details = "None available";
                 alert("Your approval succeeded");
             }
 
-            turkLogRefresh(exp);
+            turkExperimentLog.remove({ 'idx': rec.idx });
+            turkLogInsert(rec);
         });
     },
 
@@ -280,19 +294,31 @@ Template.turkWorkflow.events({
         Meteor.call("turkBonus", rec.userid, exp, function(error, result) {
             $("#turkModal").modal('hide');
 
+            rec.turkbonusDetails = {
+                msg: "Refresh the view to see details on server",
+                details: ""
+            };
+
             if (!!error) {
+                rec.turkbonus = "FAIL";
+                rec.turkbonusDetails.details = error;
                 console.log("turkBonus failure:", error);
                 alert("There was a server failure of some kind: " + error);
             }
             else if (!!result) {
+                rec.turkbonus = "FAIL";
+                rec.turkbonusDetails.details = result;
                 console.log("turkBonus error:", result);
                 alert("There was a problem with the bonus: " + result);
             }
             else {
+                rec.turkbonus = "Complete";
+                rec.turkbonusDetails.details = "None available";
                 alert("Your bonus payment succeeded");
             }
 
-            turkLogRefresh(exp);
+            turkExperimentLog.remove({ 'idx': rec.idx });
+            turkLogInsert(rec);
         });
     },
 
