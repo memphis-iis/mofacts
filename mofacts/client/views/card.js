@@ -774,9 +774,16 @@ function prepareCard() {
             schedule = getSchedule();
         }
 
+        //TODO: if (engine.unitFinished()) {
         if (schedule && questionIndex < schedule.q.length) {
             //Just another card
             scheduledCard();
+
+            //TODO: replace above with...
+            //var selReturn = engine.selectNextCard();
+            //engine.selectedCard(selReturn);
+            //engine.writeQuestionEntry();
+            //newQuestionHandler();
         }
         else {
             //We just finished a unit

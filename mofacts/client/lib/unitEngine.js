@@ -32,7 +32,8 @@ function defaultUnitEngine() {
     return {
         // Things actual engines must supply
         unitType: "DEFAULT",
-        cardSelected: function(cardIndex) { throw "Missing Implementation"; },
+        selectNextCard: function() { throw "Missing Implementation"; },
+        cardSelected: function(selectVal) { throw "Missing Implementation"; },
         createQuestionLogEntry: function() { throw "Missing Implementation"; },
         cardAnswered: function(wasCorrect) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
@@ -120,7 +121,12 @@ function modelUnitEngine() {
             initializeActRModel();
         },
 
-        cardSelected: function(cardIndex) {
+        selectNextCard: function() {
+            //TODO: figure out next card (and don't forget to return cardIndex)
+        },
+
+        cardSelected: function(selectVal) {
+            var indexForNewCard = _.intval(selectVal);  // See selectNextCard
             var cardProbs = getCardProbs();
             cardProbs.numQuestionsIntroduced += 1;
 
@@ -239,7 +245,25 @@ function scheduleUnitEngine() {
     return {
         unitType: "schedule",
 
-        cardSelected: function(cardIndex) {
+        selectNextCard: function() {
+            var unit = getCurrentUnitNumber();
+            var questionIndex = Session.get("questionIndex");
+            var questInfo = getSchedule().q[questionIndex];
+            var whichStim = questInfo.whichStim;
+
+            //Set current Q/A info
+            setCurrentClusterIndex(questInfo.clusterIndex);
+            Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
+            Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
+
+            //Set type of test (drill, test, study)
+            Session.set("testType", questInfo.testType);
+
+            //Note we increment the session's question index number
+            Session.set("questionIndex", questionIndex + 1);
+        },
+
+        cardSelected: function(selectVal) {
             //TODO: update any stats we want to track for schedules on selected question cards
         },
 
