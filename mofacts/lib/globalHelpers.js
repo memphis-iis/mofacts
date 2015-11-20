@@ -23,7 +23,10 @@ if (!Date.now) {
 if (_ && _.mixin) {
     _.mixin({
         prop: function(obj, propname) {
-            if ((!obj && obj !== "") || !propname || !_.has(obj, propname)) {
+            if (_.isArray(obj) && _.isNumber(propname)) {
+                return obj[propname];
+            }
+            else if ((!obj && obj !== "") || !propname || !_.has(obj, propname)) {
                 return null;
             }
             else {
