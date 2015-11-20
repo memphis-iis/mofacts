@@ -122,7 +122,63 @@ function modelUnitEngine() {
         },
 
         selectNextCard: function() {
-            //TODO: figure out next card (and don't forget to return cardIndex)
+            /* TODO: need to copy or implement:
+                getIndexForNewCardToIntroduce
+                selectHighestProbabilityAlreadyIntroducedCardLessThan85
+                selectLowestProbabilityCardIndex
+            */
+
+            var cardProbs = getCardProbs();
+            var numItemsPracticed = cardProbs.numQuestionsAnswered;
+            var cards = cardProbs.cards;
+
+            var indexForNewCard;
+            var showOverlearningText = false;
+
+            if (numItemsPracticed === 0) {
+                //introduce new card.  (#2 in the algorithm)
+                indexForNewCard = getIndexForNewCardToIntroduce(cards);
+                if (indexForNewCard === -1) {
+                    if (Session.get("debugging")) {
+                        console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
+                    }
+                    return -1; //TODO: Need some kind of panic for this situation
+                }
+            }
+            else {
+                indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards);
+                if (indexForNewCard === -1) {
+                    //numbers 4 and 5 in the algorithm.
+                    var numIntroduced = cardProbs.numQuestionsIntroduced;
+                    if (getNumCardsBelow85(cards) === 0 && numIntroduced === cards.length) {
+                        //number 5 in the algorithm.
+                        indexForNewCard = selectLowestProbabilityCardIndex(cards);
+                        showOverlearningText = true;
+                    }
+                    else {
+                        //number 4 in the algorithm.
+                        indexForNewCard = getIndexForNewCardToIntroduce(cards);
+                        if (indexForNewCard === -1) {
+                            //if we have introduced all of the cards.
+                            indexForNewCard = selectLowestProbabilityCardIndex(cards);
+                        }
+                    }
+                }
+            }
+
+            //Found! Update everything and grab a reference to the card
+            modelCardSelected(indexForNewCard);
+            var card = cards[indexForNewCard];
+
+            //Save the card selection
+            setCurrentClusterIndex(indexForNewCard);
+            Session.set("currentQuestion", getStimQuestion(indexForNewCard, 0));
+            Session.set("currentAnswer", getStimAnswer(indexForNewCard, 0));
+            Session.set("testType", "d");
+            Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
+            Session.set("showOverlearningText", showOverlearningText);
+
+            return indexForNewCard; //Must return index for call to cardSelected
         },
 
         cardSelected: function(selectVal) {
@@ -251,16 +307,14 @@ function scheduleUnitEngine() {
             var questInfo = getSchedule().q[questionIndex];
             var whichStim = questInfo.whichStim;
 
-            //Set current Q/A info
+            //Set current Q/A info, type of test (drill, test, study), and then
+            //increment the session's question index number
             setCurrentClusterIndex(questInfo.clusterIndex);
             Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
             Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
-
-            //Set type of test (drill, test, study)
             Session.set("testType", questInfo.testType);
-
-            //Note we increment the session's question index number
             Session.set("questionIndex", questionIndex + 1);
+            Session.set("showOverlearningText", false);  //No overlearning in a schedule
         },
 
         cardSelected: function(selectVal) {
