@@ -47,6 +47,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
+var engine = null; //The unit engine for display (i.e. model or schedule)
 var buttonList = new Mongo.Collection(null); //local-only - no database
 
 function clearButtonList() {
@@ -1536,6 +1537,13 @@ function processUserTimesLog() {
     //to worry about this if we actually have units
     var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
 
+    //Helper to determine if a unit specified by index has the given field
+    var unitHasOption = function(unitIdx, optionName) {
+        return null !== _.chain(file.tdfs.tutor)
+            .prop("unit").prop(unitIdx)
+            .prop(optionName).first().value();
+    };
+
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
@@ -1563,6 +1571,18 @@ function processUserTimesLog() {
                 Session.set("currentQuestion", undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
+
+                //Now we need to select an engine
+                var checkUnit = _.chain(file.tdfs.tutor).prop("unit").prop(instructUnit).value();
+                if (unitHasOption(instructUnit, "assessmentsession")) {
+                    engine = createScheduleUnit();
+                }
+                else if (unitHasOption(instructUnit, "learningsession")) {
+                    engine = createModelUnit();
+                }
+                else {
+                    engine = createEmptyUnit();
+                }
             }
         }
 

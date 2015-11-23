@@ -19,6 +19,10 @@ function create(func) {
     return engine();
 }
 
+createEmptyUnit = function() {
+    return create(emptyUnitEngine);
+};
+
 createModelUnit = function() {
     return create(modelUnitEngine);
 };
@@ -55,6 +59,21 @@ function defaultUnitEngine() {
                 )
             );
         }
+    };
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Return an instance of a unit with NO question/answer's (instruction-only)
+function emptyUnitEngine() {
+    return {
+        unitType: "instruction-only",
+
+        unitFinished: function() { return true; },
+
+        selectNextCard: function() { },
+        cardSelected: function(selectVal) { },
+        createQuestionLogEntry: function() { },
+        cardAnswered: function(wasCorrect) { }
     };
 }
 
@@ -114,6 +133,59 @@ function modelUnitEngine() {
         });
     }
 
+    //Return index of card that hasn't been introduced (or -1 if we can't find
+    //it). Note that we find in reverse order to mimic a bug in the original
+    //code in case it was an intended side-effect
+    function findNewCard(cards) {
+        return _.findLastIndex(cards, function(card){
+            return !card.hasBeenIntroduced;
+        });
+    }
+
+    //Return index of card with minimum probability that was last seen at least
+    //2 trials ago. Default in index 0 in case no cards meet this criterion
+    function findMinProbCard(cards) {
+        var currentMin = 1;
+        var indexToReturn = 0;
+
+        _.each(cards, function(card, index) {
+            if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
+                if (card.probability < currentMin) {
+                    currentMin = card.probability;
+                    indexToReturn = index;
+                }
+            }
+        });
+
+        return indexToReturn;
+    }
+
+    //Return index of card with max probability that is under ceiling. If no
+    //card is found under ceiling then -1 is returned
+    function findMaxProbCard(cards, ceiling) {
+        var currentMax = 0;
+        var indexToReturn = -1;
+
+        _.each(cards, function(card, index) {
+            if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
+                if (card.probability > currentMax && card.probability < ceiling) {
+                    currentMax = card.probability;
+                    indexToReturn = index;
+                }
+            }
+        });
+
+        return indexToReturn;
+    }
+
+    //Return count of cards whose probability under prob
+    function countCardsUnderProb(cards, prob) {
+        return _.filter(cards, function(card) {
+            return card.probability < prob;
+        }).length;
+    }
+
+    //Our actual implementation
     return {
         unitType: "model",
 
@@ -122,12 +194,6 @@ function modelUnitEngine() {
         },
 
         selectNextCard: function() {
-            /* TODO: need to copy or implement:
-                getIndexForNewCardToIntroduce
-                selectHighestProbabilityAlreadyIntroducedCardLessThan85
-                selectLowestProbabilityCardIndex
-            */
-
             var cardProbs = getCardProbs();
             var numItemsPracticed = cardProbs.numQuestionsAnswered;
             var cards = cardProbs.cards;
@@ -136,8 +202,7 @@ function modelUnitEngine() {
             var showOverlearningText = false;
 
             if (numItemsPracticed === 0) {
-                //introduce new card.  (#2 in the algorithm)
-                indexForNewCard = getIndexForNewCardToIntroduce(cards);
+                indexForNewCard = findNewCard(cards);
                 if (indexForNewCard === -1) {
                     if (Session.get("debugging")) {
                         console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
@@ -146,28 +211,24 @@ function modelUnitEngine() {
                 }
             }
             else {
-                indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards);
+                indexForNewCard = findMaxProbCard(cards, 0.85);
                 if (indexForNewCard === -1) {
-                    //numbers 4 and 5 in the algorithm.
                     var numIntroduced = cardProbs.numQuestionsIntroduced;
-                    if (getNumCardsBelow85(cards) === 0 && numIntroduced === cards.length) {
-                        //number 5 in the algorithm.
-                        indexForNewCard = selectLowestProbabilityCardIndex(cards);
+                    if (countCardsUnderProb(cards, 0.85) === 0 && numIntroduced === cards.length) {
+                        indexForNewCard = findMinProbCard(cards);
                         showOverlearningText = true;
                     }
                     else {
-                        //number 4 in the algorithm.
-                        indexForNewCard = getIndexForNewCardToIntroduce(cards);
+                        indexForNewCard = findNewCard(cards);
                         if (indexForNewCard === -1) {
                             //if we have introduced all of the cards.
-                            indexForNewCard = selectLowestProbabilityCardIndex(cards);
+                            indexForNewCard = findMinProbCard(cards);
                         }
                     }
                 }
             }
 
             //Found! Update everything and grab a reference to the card
-            modelCardSelected(indexForNewCard);
             var card = cards[indexForNewCard];
 
             //Save the card selection
