@@ -15,7 +15,14 @@
 
 function create(func) {
     var engine = _.extend(defaultUnitEngine(), func());
+
+    //TODO: purge all use of these variables and then remove this setting
+    //Set the session variables that we used in legacy times to check these things
+    Session.set("isScheduledTest", false);
+    Session.set("usingACTRModel", false);
+
     engine.init();
+
     return engine();
 }
 
@@ -191,6 +198,7 @@ function modelUnitEngine() {
 
         initImpl: function() {
             initializeActRModel();
+            Session.set("usingACTRModel", true);
         },
 
         selectNextCard: function() {
@@ -362,6 +370,10 @@ function scheduleUnitEngine() {
     return {
         unitType: "schedule",
 
+        initImpl: function() {
+            Session.set("isScheduledTest", true);
+        },
+
         selectNextCard: function() {
             var unit = getCurrentUnitNumber();
             var questionIndex = Session.get("questionIndex");
@@ -379,7 +391,7 @@ function scheduleUnitEngine() {
         },
 
         cardSelected: function(selectVal) {
-            //TODO: update any stats we want to track for schedules on selected question cards
+            //Nothing currently
         },
 
         createQuestionLogEntry: function() {

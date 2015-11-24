@@ -292,126 +292,93 @@ Template.card.helpers({
 function newQuestionHandler() {
     console.log("NQ handler", (Date.now() - unitStartTimestamp||1) / 1000.0);
 
-    //If we are using a model, check to see if we've exceeded practice time
-    if (Session.get("usingACTRModel") && unitStartTimestamp > 0) {
-        //Do we have a time limit?
-        var tutor = getCurrentTdfFile().tdfs.tutor;
-        var params = _.first(tutor.deliveryparams);
-
-        var practiceTime = 0;
-        var finalInstruct = "";
-
-        if (params) {
-            practiceTime = _.intval(_.first(params.practiceseconds));
-            finalInstruct = _.trim(_.first(params.finalInstructions));
-        }
-
-        if (practiceTime) {
-            //Note that we need seconds
-            var unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
-            if (unitElapsedTime > practiceTime) {
-                if (!finalInstruct || finalInstruct.length < 1) {
-                    finalInstruct = "You have practiced enough. Thank you for using this tutor.";
-                }
-
-                clearCardTimeout();
-                clearPlayingSound();
-                stopUserInput();
-                $("#finalInstructionsText").text(finalInstruct);
-                $("#finalInstructionsDlg").modal('show');
-                return;
-            }
-        }
-    }
-
     var textFocus = false; //We'll set to true if needed
 
-    if ( Session.get("isScheduledTest") ) {
-        var unitNumber = getCurrentUnitNumber();
-        var file = getCurrentTdfFile();
-        var currUnit = file.tdfs.tutor.unit[unitNumber];
+    var unitNumber = getCurrentUnitNumber();
+    var file = getCurrentTdfFile();
+    var currUnit = file.tdfs.tutor.unit[unitNumber];
 
-        if (getButtonTrial()) {
-            Session.set("buttonTrial", true);
-            $("#textEntryRow").hide();
+    if (getButtonTrial()) {
+        Session.set("buttonTrial", true);
+        $("#textEntryRow").hide();
 
-            var cluster = getStimCluster(getCurrentClusterIndex());
+        var cluster = getStimCluster(getCurrentClusterIndex());
 
-            //are we using specified choice order for buttons?
-            //Or do we get them from the cluster?
-            var buttonOrder = [];
-            try {
-                if (file && file.tdfs.tutor.unit[unitNumber].buttonorder) {
-                    var btnOrderTxt = file.tdfs.tutor.unit[unitNumber].buttonorder;
-                    buttonOrder = (btnOrderTxt + '').split(",");
-                    if (!buttonOrder || !buttonOrder.length) {
-                        buttonOrder = []; //Just use empty array
-                    }
+        //are we using specified choice order for buttons?
+        //Or do we get them from the cluster?
+        var buttonOrder = [];
+        try {
+            if (file && file.tdfs.tutor.unit[unitNumber].buttonorder) {
+                var btnOrderTxt = file.tdfs.tutor.unit[unitNumber].buttonorder;
+                buttonOrder = (btnOrderTxt + '').split(",");
+                if (!buttonOrder || !buttonOrder.length) {
+                    buttonOrder = []; //Just use empty array
                 }
             }
-            catch (e) {
-                console.log("Error find button order (will use []): " + e);
+        }
+        catch (e) {
+            console.log("Error find button order (will use []): " + e);
+        }
+
+        var choicesArray = [];
+
+        if (buttonOrder.length > 1) {
+            //Top-level specification for buttons
+            choicesArray = buttonOrder;
+        }
+        else {
+            //TODO: currentScheduledQInfo won't work with model unit
+            //Specified in the scheduled stim cluster
+            var currentSchedQuest = currentScheduledQInfo();
+            if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
+                _.each(getCurrentFalseResponses(currentSchedQuest.whichStim), function(ele) {
+                    choicesArray.push(ele);
+                });
             }
 
-            var choicesArray = [];
-
-            if (buttonOrder.length > 1) {
-                //Top-level specification for buttons
-                choicesArray = buttonOrder;
+            if (choicesArray.length < 1) {
+                //Whoops - they didn't specify any alternate choices
+                console.log("A button trial requires some false responses");
+                throw new Error("Bad TDF or Stim file");
             }
-            else {
-                //Specified in the scheduled stim cluster
-                var currentSchedQuest = currentScheduledQInfo();
-                if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
-                    _.each(getCurrentFalseResponses(currentSchedQuest.whichStim), function(ele) {
-                        choicesArray.push(ele);
-                    });
-                }
 
-                if (choicesArray.length < 1) {
-                    //Whoops - they didn't specify any alternate choices
-                    console.log("A button trial requires some false responses");
-                    throw new Error("Bad TDF or Stim file");
-                }
-
-                //Currently we only show 5 option button trials - so we only
-                //use 4 false responses
-                if (choicesArray.length > 3) {
-                    if (buttonOrder[0] === "random") {
-                        Helpers.shuffle(choicesArray);
-                    }
-                    choicesArray = choicesArray.splice(0, 5);
-                }
-
-                //Need to make sure they also have a correct option :)
-                var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
-                if (!!correctAnswer) {
-                    choicesArray.unshift(correctAnswer);
-                }
+            //Currently we only show 5 option button trials - so we only
+            //use 4 false responses
+            if (choicesArray.length > 3) {
                 if (buttonOrder[0] === "random") {
                     Helpers.shuffle(choicesArray);
                 }
+                choicesArray = choicesArray.splice(0, 5);
             }
 
-            clearButtonList();
-            Session.set("buttonTrial", true);
+            //Need to make sure they also have a correct option :)
+            var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+            if (!!correctAnswer) {
+                choicesArray.unshift(correctAnswer);
+            }
+            if (buttonOrder[0] === "random") {
+                Helpers.shuffle(choicesArray);
+            }
+        }
 
-            _.each(choicesArray, function(val, idx) {
-                buttonList.insert({
-                    temp: 1,         //Deleted when clearing
-                    idx: idx,        //Will be ordered by array index
-                    buttonName: val, //Currently, name and value are the same
-                    buttonValue: val
-                });
+        clearButtonList();
+        Session.set("buttonTrial", true);
+
+        _.each(choicesArray, function(val, idx) {
+            buttonList.insert({
+                temp: 1,         //Deleted when clearing
+                idx: idx,        //Will be ordered by array index
+                buttonName: val, //Currently, name and value are the same
+                buttonValue: val
             });
-        }
-        else {
-            //Not a button trial
-            clearButtonList();
-            Session.set("buttonTrial", false);
-            textFocus = true; //Need the text box focused
-            $("#textEntryRow").show();
-        }
+        });
+    }
+    else {
+        //Not a button trial
+        clearButtonList();
+        Session.set("buttonTrial", false);
+        textFocus = true; //Need the text box focused
+        $("#textEntryRow").show();
     }
 
     //If this is a study-trial and we are displaying a cloze, then we should
@@ -672,6 +639,8 @@ function getButtonTrial() {
     //Default to false
     var isButtonTrial = false;
 
+    //TODO: this won't work for model units
+
     var progress = getUserProgress();
     if (progress && progress.currentSchedule) {
         //We are scheduled that means the schedule knows if we are a button trial
@@ -731,10 +700,8 @@ function userAnswerFeedback(userAnswer, isTimeout) {
         handleAnswerState(correctAndText[0], correctAndText[1]);
     }
 
-    //Update any model parameters based on their answer's correctness
-    if (Session.get("usingACTRModel")) {
-        modelCardAnswered(isCorrect);
-    }
+    //Give unit engine a chance to update any necessary stats
+    engine.cardAnswered(isCorrect);
 
     //If they are incorrect on a drill, we might need to do extra work for
     //their review period
@@ -751,127 +718,54 @@ function userAnswerFeedback(userAnswer, isTimeout) {
 function prepareCard() {
     var file = getCurrentTdfFile();
 
-    if (Session.get("usingACTRModel")) {
-        //ACT-R model
-        getNextCardActRModel();
+    if (Session.get("questionIndex") === undefined) {
+        //At this point, a missing question index is assumed to mean "start
+        //with the first question"
+        Session.set("questionIndex", 0);
     }
-    else if (file.tdfs.tutor.unit && file.tdfs.tutor.unit.length) {
-        //Scheduled (see assessment session)
-        Session.set("isScheduledTest", true);
 
-        if (Session.get("questionIndex") === undefined) {
-            //At this point, a missing question index is assumed to mean "start
-            //with the first question"
-            Session.set("questionIndex", 0);
-        }
+    var questionIndex = Session.get("questionIndex");
+    var unit = getCurrentUnitNumber();
+    console.log("prepareCard for Schedule (Unit,QIdx)=", unit, questionIndex);
 
-        var questionIndex = Session.get("questionIndex");
-        var unit = getCurrentUnitNumber();
-        console.log("prepareCard for Schedule (Unit,QIdx)=", unit, questionIndex);
-
-        //Grab the schedule - but only if we need it
-        var schedule = null;
-        if (unit < file.tdfs.tutor.unit.length) {
-            schedule = getSchedule();
-        }
-
-        //TODO: if (engine.unitFinished()) {
-        if (schedule && questionIndex < schedule.q.length) {
-            //Just another card
-            scheduledCard();
-
-            //TODO: replace above with...
-            //var selReturn = engine.selectNextCard();
-            //engine.selectedCard(selReturn);
-            //engine.writeQuestionEntry();
-            //newQuestionHandler();
-        }
-        else {
-            //We just finished a unit
-            clearCardTimeout();
-
-            Session.set("questionIndex", 0);
-            Session.set("clusterIndex", undefined);
-            var newUnit = unit + 1;
-            Session.set("currentUnitNumber", newUnit);
-
-            if (newUnit < file.tdfs.tutor.unit.length) {
-                //Just hit a new unit - we need to restart with instructions
-                console.log("UNIT FINISHED: show instructions for next unit", newUnit);
-                leavePage("/instructions");
-            }
-            else {
-                //We have run out of units - return home for now
-                console.log("UNIT FINISHED: No More Units");
-                leavePage("/profile");
-            }
-
-            return;
-        }
+    if (!engine.unitFinished()) {
+        //We have another card to show...
+        var selReturn = engine.selectNextCard();
+        engine.selectedCard(selReturn);
+        engine.writeQuestionEntry();
+        newQuestionHandler();
     }
     else {
-        //Shrug - must just be random selection
-        Session.set("isScheduledTest", false);
-        randomCard();
+        //We just finished a unit
+        clearCardTimeout();
+
+        Session.set("questionIndex", 0);
+        Session.set("clusterIndex", undefined);
+        var newUnit = unit + 1;
+        Session.set("currentUnitNumber", newUnit);
+
+        if (newUnit < file.tdfs.tutor.unit.length) {
+            //Just hit a new unit - we need to restart with instructions
+            console.log("UNIT FINISHED: show instructions for next unit", newUnit);
+            leavePage("/instructions");
+        }
+        else {
+            //We have run out of units - return home for now
+            console.log("UNIT FINISHED: No More Units");
+            leavePage("/profile");
+        }
+
+        return;
     }
 }
 
-function randomCard() {
-    //get a valid index
-    var nextCardIndex = Math.floor((Math.random() * getStimClusterCount()));
-
-    //set the question and answer (and note that the we just assume whichStim=0)
-    setCurrentClusterIndex(nextCardIndex);
-    Session.set("currentQuestion", getCurrentStimQuestion(0));
-    Session.set("currentAnswer", getCurrentStimAnswer(0));
-
-    Session.set("testType", "d"); //No test type given
-
-    recordUserTimeQuestion({
-        selType: "random"
-    });
-
-    newQuestionHandler();
-}
-
+//TODO: this only works for schedules
 //Return the current q info in the schedule - note that we don't check to make
 //sure that the caller SHOULD be calling us
 function currentScheduledQInfo() {
     //Note that scheduledCard increments questionIndex - so we subtract
     //one. Also note that this is whay scheduledCard doesn't call us
     return getSchedule().q[Session.get("questionIndex") - 1];
-}
-
-function scheduledCard() {
-    var unit = getCurrentUnitNumber();
-    var questionIndex = Session.get("questionIndex");
-    var questInfo = getSchedule().q[questionIndex];
-    var clusterIndex = questInfo.clusterIndex;
-    var whichStim = questInfo.whichStim;
-
-    console.log("scheduledCard => ",
-        "unit:", unit,
-        "questionIndex:", questionIndex,
-        "clusterIndex:", clusterIndex,
-        "whichStim:", whichStim);
-
-    //Set current Q/A info
-    setCurrentClusterIndex(clusterIndex);
-    Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
-    Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
-
-    //Set type of test (drill, test, study)
-    Session.set("testType", questInfo.testType);
-
-    //Note we increment the session's question index number
-    Session.set("questionIndex", questionIndex + 1);
-
-    recordUserTimeQuestion({
-        selType: "schedule",
-        whichStim: whichStim
-    });
-
-    newQuestionHandler();
 }
 
 function recordProgress(question, answer, userAnswer, isCorrect) {
@@ -904,262 +798,6 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
     Session.set("currentScore", prog.currentScore);
 }
 
-//Return the schedule for the current unit of the current lesson -
-//If it doesn't exist, then create and store it in User Progress
-function getSchedule() {
-    //Retrieve current schedule
-    var progress = getUserProgress();
-
-    var unit = getCurrentUnitNumber();
-    var schedule = null;
-    if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
-        schedule = progress.currentSchedule;
-    }
-
-    //Lazy create save if we don't have a correct schedule
-    if (schedule === null) {
-        console.log("CREATING SCHEDULE, showing progress");
-        console.log(progress);
-
-        var file = getCurrentTdfFile();
-        var setSpec = file.tdfs.tutor.setspec[0];
-        var currUnit = file.tdfs.tutor.unit[unit];
-
-        schedule = AssessmentSession.createSchedule(setSpec, unit, currUnit);
-        if (!schedule) {
-            //There was an error creating the schedule - there's really nothing
-            //left to do since the experiment is broken
-            recordUserTime("FAILURE to create schedule", {
-                unitname: Helpers.display(currUnit.unitname),
-                unitindex: unit
-            });
-            alert("There is an issue with the TDF - experiment cannot continue");
-            clearCardTimeout();
-            leavePage("/profile");
-            return;
-        }
-
-        //We save the current schedule and also log it to the UserTime collection
-        progress.currentSchedule = schedule;
-
-        recordUserTime("schedule", {
-            unitname: Helpers.display(currUnit.unitname),
-            unitindex: unit,
-            schedule: schedule
-        });
-    }
-
-    //Now they can have the schedule
-    return schedule;
-}
-
-//Note that when we initialize the mode, we are defaulting to only using
-//the first (index 0) stimulus/response
-function initializeActRModel() {
-    var numQuestions = getStimClusterCount();
-
-    var initCards = [];
-    for (var i = 0; i < numQuestions; ++i) {
-        initCards.push({
-            questionSuccessCount: 0,
-            questionFailureCount: 0,
-            trialsSinceLastSeen: 0,
-            probability: 0.0,
-            hasBeenIntroduced: false
-        });
-    }
-
-    //Re-init the card probabilities
-    initCardProbs({ cards: initCards });
-
-    //has to be done once ahead of time to give valid values for the beginning of the test.
-    calculateCardProbabilities();
-}
-
-function getNumCardsBelow85(cards) {
-    var counter = 0;
-    _.each(cards, function(card) {
-        if (card.probability < 0.85) {
-            ++counter;
-        }
-    });
-    return counter;
-}
-
-function calculateCardProbabilities() {
-    var cardProbs = getCardProbs();
-    var totalTrials = cardProbs.numQuestionsAnswered;
-    var cards = cardProbs.cards;
-
-    _.each(cards, function(card) {
-        var questionSuccessCount = card.questionSuccessCount;
-        var questionFailureCount = card.questionFailureCount;
-        var totalQuestionStudies = questionSuccessCount + questionFailureCount;
-        var trialsSinceLastSeen = card.trialsSinceLastSeen;
-
-        var trialsSinceLastSeenOverTotalTrials = 0.0;
-        if (totalTrials !== 0) {
-            trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen / totalTrials;
-        }
-
-        var x = -3.0 +
-                 (2.4 * questionSuccessCount) +
-                 (0.8 * questionFailureCount) +
-                 (1.0 * totalQuestionStudies) +
-                -(0.3 * trialsSinceLastSeenOverTotalTrials);
-
-        var probability = 1.0 / (1.0 + Math.exp(-x));
-
-        card.probability = probability;
-    });
-}
-
-function getNextCardActRModel() {
-    Session.set("testType", "d");
-
-    var cardProbs = getCardProbs();
-    var numItemsPracticed = cardProbs.numQuestionsAnswered;
-    var cards = cardProbs.cards;
-
-    var indexForNewCard;
-    var showOverlearningText = false;
-
-    if (numItemsPracticed === 0) {
-        //introduce new card.  (#2 in the algorithm)
-        indexForNewCard = getIndexForNewCardToIntroduce(cards);
-        if (indexForNewCard === -1) {
-            if (Session.get("debugging")) {
-                console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
-            }
-            return; //DOH!
-        }
-    }
-    else {
-        indexForNewCard = selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards);
-        if (indexForNewCard === -1) {
-            //numbers 4 and 5 in the algorithm.
-            var numIntroduced = cardProbs.numQuestionsIntroduced;
-            if (getNumCardsBelow85(cards) === 0 && numIntroduced === cards.length) {
-                //number 5 in the algorithm.
-                indexForNewCard = selectLowestProbabilityCardIndex(cards);
-                showOverlearningText = true;
-            }
-            else {
-                //number 4 in the algorithm.
-                indexForNewCard = getIndexForNewCardToIntroduce(cards);
-                if (indexForNewCard === -1) {
-                    //if we have introduced all of the cards.
-                    indexForNewCard = selectLowestProbabilityCardIndex(cards);
-                }
-            }
-        }
-    }
-
-    //Found! Update everything and grab a reference to the card
-    modelCardSelected(indexForNewCard);
-    var card = cards[indexForNewCard];
-
-    //Save the card selection
-    setCurrentClusterIndex(indexForNewCard);
-    Session.set("currentQuestion", getStimQuestion(indexForNewCard, 0));
-    Session.set("currentAnswer", getStimAnswer(indexForNewCard, 0));
-    Session.set("showOverlearningText", showOverlearningText);
-
-    //Record the question and fire the new qustion handler
-    //Note that we include the current card data but we DON'T log question or
-    //answer in the card info (it's dup info)
-    recordUserTimeQuestion({
-        selType: "model",
-        cardModelData: _.omit(card, ["question", "answer"]),
-    });
-
-    newQuestionHandler();
-}
-
-//Called when a new card is selected to update stats
-function modelCardSelected(indexForNewCard) {
-    var cardProbs = getCardProbs();
-    cardProbs.numQuestionsIntroduced += 1;
-
-    var cards = cardProbs.cards;
-    //It has now been officially one more trial since all the other cards
-    //have been seen
-    _.each(cards, function(card, index) {
-        if (index != indexForNewCard) {
-            card.trialsSinceLastSeen += 1;
-        }
-    });
-
-    //Now card has been introduced/seen
-    var card = cards[indexForNewCard];
-    card.trialsSinceLastSeen = 0;
-    card.hasBeenIntroduced = true;
-}
-
-//Called when a card is answered to update stats
-function modelCardAnswered(wasCorrect) {
-    var cardProbs = getCardProbs();
-    cardProbs.numQuestionsAnswered += 1;
-
-    var card = null;
-    try {
-        card = cardProbs.cards[getCurrentClusterIndex()];
-    }
-    catch(err) {
-        console.log("Error getting card for update", err);
-    }
-
-    if (card) {
-        if (wasCorrect) card.questionSuccessCount += 1;
-        else            card.questionFailureCount += 1;
-    }
-
-    calculateCardProbabilities();
-}
-
-function getIndexForNewCardToIntroduce(cards) {
-    var indexToReturn = -1;
-
-    _.each(cards, function(card, index) {
-        if (!card.hasBeenIntroduced) {
-            indexToReturn = index;
-        }
-    });
-
-    return indexToReturn;
-}
-
-
-function selectHighestProbabilityAlreadyIntroducedCardLessThan85(cards) {
-    var currentMaxProbabilityLessThan85 = 0;
-    var indexToReturn = -1;
-
-    _.each(cards, function(card, index) {
-        if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
-            if (card.probability > currentMaxProbabilityLessThan85 && card.probability < 0.85) {
-                currentMaxProbabilityLessThan85 = card.probability;
-                indexToReturn = index;
-            }
-        }
-    });
-
-    return indexToReturn;
-}
-
-function selectLowestProbabilityCardIndex(cards) {
-    var currentMinProbability = 1;
-    var indexToReturn = 0;
-
-    _.each(cards, function(card, index) {
-        if (card.probability < currentMinProbability  && card.trialsSinceLastSeen > 2) {
-            currentMinProbability = card.probability;
-            indexToReturn = index;
-        }
-    });
-
-    return indexToReturn;
-}
-
 function failNoDeliveryParams(customMsg) {
     var errMsg;
 
@@ -1185,8 +823,6 @@ function failNoDeliveryParams(customMsg) {
 
 function setQuestionTimeout() {
     clearCardTimeout(); //No previous timeout now
-
-    var file = getCurrentTdfFile();
 
     var delayMs = 0;
 
@@ -1407,7 +1043,7 @@ function resumeFromUserTimesLog() {
     //since we might add other records below
     var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
 
-    //In addition to experimental condition, we allow a root TDF to specify a
+    //In addition to experimental condition, we allow a root TDF to specify
     //that the xcond parameter used for selecting from multiple deliveryParms's
     //is to be system assigned (as opposed to URL-specified)
     if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
@@ -1501,33 +1137,20 @@ function processUserTimesLog() {
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
 
-    //Assume not modeled and and not using card probs
-    Session.set("usingACTRModel",false);
-    initCardProbs(); //Blank out since not using ACT-R model
-
-    //check if tutor.setspec.isModeled is defined in the tdf
-    if (typeof tutor.setspec[0].isModeled !== "undefined") {
-        //if it is defined and is set to true, use the ACT-R Model methods.
-        if (tutor.setspec[0].isModeled == "true") {
-            Session.set("usingACTRModel",true);
-            console.log("INIT ACT-R Model for resume");
-            initializeActRModel(); //Will handle card probs for us
-        }
-    }
+    //Don't assume a particular unit type
+    Session.set("usingACTRModel", false);
+    Session.set("isScheduledTest", false);
 
     var currentStimName = getCurrentStimName();
 
     //Before the below options, reset current test data
     initUserProgress({
-        currentTestMode: (tutor.unit && tutor.unit.length ? "SCHEDULED" : "RANDOM"),
         progressDataArray: [],
         currentSchedule: {}
     });
 
-    //If we are scheduled, then default the current unit number
-    if (getUserProgress().currentTestMode === "SCHEDULED") {
-        Session.set("currentUnitNumber", 0);
-    }
+    //Default to first unit
+    Session.set("currentUnitNumber", 0);
 
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
@@ -1658,21 +1281,10 @@ function processUserTimesLog() {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
-            var selType = _.trim(entry.selType).toLowerCase();
-            if (selType == "random") {
-                //Currently nothing else needed
-            }
-            else if (selType == "schedule") {
-                //Currently nothing else needed
-            }
-            else if (selType == "model") {
-                //Perform the stats update on card selection and then override
-                //with the saved data from the original question
-                modelCardSelected(cardIndex);
+            //Note that this will currently only do something for model units
+            if (engine.unitType === "model") {
+                engine.cardSelected(cardIndex);
                 _.extend(getCardProbs().cards[cardIndex], entry.cardModelData);
-            }
-            else {
-                console.log("Ignoring user times log entry for question with selType", selType);
             }
         }
 
@@ -1710,10 +1322,8 @@ function processUserTimesLog() {
                 wasCorrect
             );
 
-            //If we are an ACT-R model, finish up calculations
-            if (Session.get("usingACTRModel")) {
-                modelCardAnswered(wasCorrect);
-            }
+            //Notify unit engine about card answer
+            engine.cardAnswered(wasCorrect);
 
             //We know the last question no longer applies
             lastQuestionEntry = null;
