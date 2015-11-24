@@ -296,14 +296,14 @@ function newQuestionHandler() {
     if (Session.get("usingACTRModel") && unitStartTimestamp > 0) {
         //Do we have a time limit?
         var tutor = getCurrentTdfFile().tdfs.tutor;
-        var params = Helpers.firstElement(tutor.deliveryparams);
+        var params = _.first(tutor.deliveryparams);
 
         var practiceTime = 0;
         var finalInstruct = "";
 
         if (params) {
-            practiceTime = Helpers.intVal(Helpers.firstElement(params.practiceseconds));
-            finalInstruct = Helpers.trim(Helpers.firstElement(params.finalInstructions));
+            practiceTime = _.intval(_.first(params.practiceseconds));
+            finalInstruct = _.trim(_.first(params.finalInstructions));
         }
 
         if (practiceTime) {
@@ -529,7 +529,7 @@ function handleUserInput(e , source) {
         userAnswer = "[timeout]";
     }
     else if (source === "keypress") {
-        userAnswer = Helpers.trim($('#userAnswer').val()).toLowerCase();
+        userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
     else if (source === "buttonClick") {
         userAnswer = e.currentTarget.name;
@@ -576,7 +576,7 @@ function handleUserInput(e , source) {
     //Figure out the review latency we should log
     var reviewLatency = 0;
     if (getTestType() === "d" && !isCorrect) {
-        reviewLatency = Helpers.intVal(getCurrentDeliveryParams().reviewstudy);
+        reviewLatency = _.intval(getCurrentDeliveryParams().reviewstudy);
     }
 
     //Now actually log the answer they gave (or the timeout)
@@ -628,10 +628,10 @@ function handleUserInput(e , source) {
     else if (getTestType() === "d") {
         //Drill - the timeout depends on how they did
         if (isCorrect) {
-            timeout = Helpers.intVal(deliveryParams.correctprompt);
+            timeout = _.intval(deliveryParams.correctprompt);
         }
         else {
-            timeout = Helpers.intVal(deliveryParams.reviewstudy);
+            timeout = _.intval(deliveryParams.reviewstudy);
         }
     }
     else {
@@ -898,7 +898,7 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
     // Note that we track the score in the user progress object, but we
     // copy it to the Session object for template updates
     scoring = getCurrentScoreValues();  // in format [correct, incorrect]
-    var oldScore = Helpers.intVal(prog.currentScore);
+    var oldScore = _.intval(prog.currentScore);
     var newScore = oldScore + (isCorrect ? scoring[0] : -scoring[1]);
     prog.currentScore = newScore;
     Session.set("currentScore", prog.currentScore);
@@ -1204,11 +1204,11 @@ function setQuestionTimeout() {
 
     if (getTestType() === "s") {
         //Study
-        delayMs = Helpers.intVal(deliveryParams.purestudy);
+        delayMs = _.intval(deliveryParams.purestudy);
     }
     else {
         //Not study - must be drill or test
-        delayMs = Helpers.intVal(deliveryParams.drill);
+        delayMs = _.intval(deliveryParams.drill);
     }
 
     if (delayMs < 1) {
@@ -1428,7 +1428,7 @@ function resumeFromUserTimesLog() {
             //Not present - we need to select one
             console.log("NO previous xcond for delivery - selecting one");
             xcondAction = "xcondassign";
-            var xcondCount = Helpers.intVal(Helpers.firstElement(setspec.randomizedDelivery));
+            var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
             xcondValue = Math.floor(Math.random() * xcondCount);
         }
 
@@ -1554,7 +1554,7 @@ function processUserTimesLog() {
         }
 
         //Only examine the messages that we care about
-        var action = Helpers.trim(entry.action).toLowerCase();
+        var action = _.trim(entry.action).toLowerCase();
 
         //Generally we use the last timestamp for our major actions. This will
         //currently only be set to false in the default/fall-thru else block
@@ -1658,7 +1658,7 @@ function processUserTimesLog() {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
-            var selType = Helpers.trim(entry.selType).toLowerCase();
+            var selType = _.trim(entry.selType).toLowerCase();
             if (selType == "random") {
                 //Currently nothing else needed
             }
