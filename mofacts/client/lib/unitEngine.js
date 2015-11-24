@@ -11,6 +11,8 @@
  * from defaultUnitEngine via _.extend
 */
 
+//TODO: test model unit timeout is working
+
 // Our "public" functions
 
 function create(func) {
@@ -105,17 +107,33 @@ function modelUnitEngine() {
 
     //Initialize cards as we'll need them for the created engine (for current model)
     function initializeActRModel() {
-        var numQuestions = getStimClusterCount();
+        var i;
 
+        var numQuestions = getStimClusterCount();
         var initCards = [];
-        for (var i = 0; i < numQuestions; ++i) {
+        for (i = 0; i < numQuestions; ++i) {
             initCards.push({
                 questionSuccessCount: 0,
                 questionFailureCount: 0,
                 trialsSinceLastSeen: 0,
                 probability: 0.0,
-                hasBeenIntroduced: false
+                hasBeenIntroduced: false,
+                canUse: false
             });
+        }
+
+        //Figure out which cluster numbers that they want
+        var unitClusterList = _.chain(getCurrentTdfUnit())
+            .prop("learningsession").first()
+            .prop("clusterlist").trim().value();
+
+        var clusterList = [];
+        Helpers.extractDelimFields(unitClusterList, clusterList);
+        for (i = 0; i < clusterList.length; ++i) {
+            var nums = Helpers.rangeVal(clusterList[i]);
+            for (var j = 0; j < nums.length; ++j) {
+                initCards[_.intval(nums[j])].canUse = true;
+            }
         }
 
         //Re-init the card probabilities
@@ -158,9 +176,17 @@ function modelUnitEngine() {
     //it). Note that we find in reverse order to mimic a bug in the original
     //code in case it was an intended side-effect
     function findNewCard(cards) {
-        return _.findLastIndex(cards, function(card){
-            return !card.hasBeenIntroduced;
-        });
+        var idx = -1;
+
+        for (var i = cards.length - 1; i >= 0; --i) {
+            var card = cards[i];
+            if (!card.hasBeenIntroduced && card.canUse) {
+                idx = i;
+                break;
+            }
+        }
+
+        return idx;
     }
 
     //Return index of card with minimum probability that was last seen at least
@@ -170,7 +196,7 @@ function modelUnitEngine() {
         var indexToReturn = 0;
 
         _.each(cards, function(card, index) {
-            if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
+            if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
                 if (card.probability < currentMin) {
                     currentMin = card.probability;
                     indexToReturn = index;
@@ -188,7 +214,7 @@ function modelUnitEngine() {
         var indexToReturn = -1;
 
         _.each(cards, function(card, index) {
-            if (card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
+            if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
                 if (card.probability > currentMax && card.probability < ceiling) {
                     currentMax = card.probability;
                     indexToReturn = index;
@@ -202,7 +228,7 @@ function modelUnitEngine() {
     //Return count of cards whose probability under prob
     function countCardsUnderProb(cards, prob) {
         return _.filter(cards, function(card) {
-            return card.probability < prob;
+            return card.canUse && card.probability < prob;
         }).length;
     }
 
@@ -322,14 +348,15 @@ function modelUnitEngine() {
 
         unitFinished: function() {
             var practiceSeconds = getCurrentDeliveryParams().practiceseconds;
-            if (practiceTime < 1.0) {
+            if (practiceSeconds < 1.0) {
                 //Less than a second is an error or a missing values
                 console.log("ERROR: no practice time found - will use 30 seconds");
-                practiceTime = 30.0;
+                practiceSeconds = 30.0;
             }
 
             var unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
-            return (unitElapsedTime > practiceTime);
+            console.log("Model practice check", unitElapsedTime, ">", practiceSeconds);
+            return (unitElapsedTime > practiceSeconds);
         }
     };
 }

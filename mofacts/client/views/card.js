@@ -1153,9 +1153,11 @@ function processUserTimesLog() {
 
     //Helper to determine if a unit specified by index has the given field
     var unitHasOption = function(unitIdx, optionName) {
-        return null !== _.chain(file.tdfs.tutor)
+        var unitSection = _.chain(file.tdfs.tutor)
             .prop("unit").prop(unitIdx)
             .prop(optionName).first().value();
+        console.log("UNIT CHECK", unitIdx, optionName, !!unitSection);
+        return !!unitSection;
     };
 
     //At this point, our state is set as if they just started this learning
@@ -1187,7 +1189,6 @@ function processUserTimesLog() {
                 Session.set("testType", undefined);
 
                 //Now we need to select an engine
-                var checkUnit = _.chain(file.tdfs.tutor).prop("unit").prop(instructUnit).value();
                 if (unitHasOption(instructUnit, "assessmentsession")) {
                     engine = createScheduleUnit();
                 }

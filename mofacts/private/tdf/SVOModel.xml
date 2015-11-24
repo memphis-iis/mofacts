@@ -1,0 +1,96 @@
+<tutor>
+    <setspec>
+        <name>Internal Testing with SVO and Models</name>
+        <lessonname>SVO Models</lessonname>
+        <userselect>true</userselect>
+        <randomizedDelivery>3</randomizedDelivery>
+        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <clustermodel></clustermodel>
+        <clustersize>1</clustersize>
+        <isModeled>false</isModeled>
+        <lfparameter>.85</lfparameter>
+        <shuffleclusters>20-35</shuffleclusters>
+        <swapclusters>0-19 20-35</swapclusters>
+        <swapclusters>0-4 5-9 10-14 15-19</swapclusters>
+    </setspec>
+
+    <unit>
+        <unitname>Show the questions</unitname>
+        <unitinstructions><![CDATA[Demographic Survey<br><br>
+Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
+        <buttonorder>fixed</buttonorder>
+        <deliveryparams>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore> <!--You get points for demographics in this test-->
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+        <buttontrial>false</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>5</templatesrepeated>
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
+            </conditiontemplatesbygroup>
+            <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>36-40</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitinstructions>Here comes the model!</unitinstructions>
+        <unitname>Model Unit</unitname>
+        <learningsession>
+            <clusterlist>0-5</clusterlist>
+        </learningsession>
+
+        <deliveryparams>
+            <practiceseconds>120</practiceseconds>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+
+        <deliveryparams>
+            <practiceseconds>240</practiceseconds>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+
+        <deliveryparams>
+            <practiceseconds>360</practiceseconds>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions>You are all done.</unitinstructions>
+    </unit>
+</tutor>
