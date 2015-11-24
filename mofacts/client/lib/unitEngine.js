@@ -23,7 +23,7 @@ function create(func) {
 
     engine.init();
 
-    return engine();
+    return engine;
 }
 
 createEmptyUnit = function() {
@@ -45,6 +45,7 @@ function defaultUnitEngine() {
         unitType: "DEFAULT",
         selectNextCard: function() { throw "Missing Implementation"; },
         cardSelected: function(selectVal) { throw "Missing Implementation"; },
+        findCurrentCardInfo: function() { throw "Missing Implementation"; },
         createQuestionLogEntry: function() { throw "Missing Implementation"; },
         cardAnswered: function(wasCorrect) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
@@ -55,7 +56,7 @@ function defaultUnitEngine() {
         // Functions we supply
         init: function() {
             console.log("Engine created for unit:", this.unitType);
-            initImpl();
+            this.initImpl();
         },
 
         writeQuestionEntry: function() {
@@ -78,6 +79,7 @@ function emptyUnitEngine() {
         unitFinished: function() { return true; },
 
         selectNextCard: function() { },
+        findCurrentCardInfo: function() { },
         cardSelected: function(selectVal) { },
         createQuestionLogEntry: function() { },
         cardAnswered: function(wasCorrect) { }
@@ -88,6 +90,18 @@ function emptyUnitEngine() {
 // Return an instance of the model-based unit engine
 function modelUnitEngine() {
     var unitStartTimestamp = Date.now();
+
+    var currentCardInfo = {
+        testType: 'd',
+        clusterIndex: -1,
+        condition: '',
+        whichStim : -1,
+        forceButtonTrial: false
+    };
+    function setCurrentCardInfo(clusterIndex, whichStim) {
+        currentCardInfo.clusterIndex = clusterIndex;
+        currentCardInfo.whichStim = whichStim;
+    }
 
     //Initialize cards as we'll need them for the created engine (for current model)
     function initializeActRModel() {
@@ -247,7 +261,14 @@ function modelUnitEngine() {
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
 
+            //Save for returning the info later (since we don't have a schedule)
+            setCurrentCardInfo(indexForNewCard, 0);
+
             return indexForNewCard; //Must return index for call to cardSelected
+        },
+
+        findCurrentCardInfo: function() {
+            return currentCardInfo;
         },
 
         cardSelected: function(selectVal) {
@@ -388,6 +409,14 @@ function scheduleUnitEngine() {
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
             Session.set("showOverlearningText", false);  //No overlearning in a schedule
+
+            return questInfo.clusterIndex;
+        },
+
+        findCurrentCardInfo: function() {
+            //selectNextCard increments questionIndex after setting all card
+            //info, so we need to use -1 for this info
+            return getSchedule().q[Session.get("questionIndex") - 1];
         },
 
         cardSelected: function(selectVal) {
@@ -395,14 +424,18 @@ function scheduleUnitEngine() {
         },
 
         createQuestionLogEntry: function() {
-            var unit = getCurrentUnitNumber();
-            var questionIndex = Session.get("questionIndex");
-            var questInfo = getSchedule().q[questionIndex];
-            var whichStim = questInfo.whichStim;
+            var questInfo = this.findCurrentCardInfo();
 
-            return {
-                whichStim: whichStim
-            };
+            try {
+                return {
+                    'whichStim': questInfo.whichStim
+                };
+            }
+            catch(e) {
+                console.log(e);
+                throw e;
+            }
+
         },
 
         cardAnswered: function(wasCorrect) {
@@ -413,7 +446,7 @@ function scheduleUnitEngine() {
             var questionIndex = Session.get("questionIndex");
             var unit = getCurrentUnitNumber();
             var schedule = null;
-            if (unit < file.tdfs.tutor.unit.length) {
+            if (unit < getCurrentTdfFile().tdfs.tutor.unit.length) {
                 schedule = getSchedule();
             }
 

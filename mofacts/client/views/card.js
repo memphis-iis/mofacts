@@ -327,11 +327,9 @@ function newQuestionHandler() {
             choicesArray = buttonOrder;
         }
         else {
-            //TODO: currentScheduledQInfo won't work with model unit
-            //Specified in the scheduled stim cluster
-            var currentSchedQuest = currentScheduledQInfo();
-            if (!!currentSchedQuest && typeof currentSchedQuest.whichStim !== "undefined") {
-                _.each(getCurrentFalseResponses(currentSchedQuest.whichStim), function(ele) {
+            var currentQuest = engine.findCurrentCardInfo();
+            if (!!currentQuest && typeof currentQuest.whichStim !== "undefined") {
+                _.each(getCurrentFalseResponses(currentQuest.whichStim), function(ele) {
                     choicesArray.push(ele);
                 });
             }
@@ -639,17 +637,19 @@ function getButtonTrial() {
     //Default to false
     var isButtonTrial = false;
 
-    //TODO: this won't work for model units
-
     var progress = getUserProgress();
-    if (progress && progress.currentSchedule) {
-        //We are scheduled that means the schedule knows if we are a button trial
-        //AND the current schedule question info may override that setting
-        var questInfo = currentScheduledQInfo();
-        if (questInfo && questInfo.forceButtonTrial) {
-            isButtonTrial = true;  //Override for one q
-        }
-        else if (!!progress.currentSchedule.isButtonTrial) {
+
+    var questInfo = engine.findCurrentCardInfo();
+    if (questInfo && questInfo.forceButtonTrial) {
+        //Did this question specifically override button trial?
+        isButtonTrial = true;
+    }
+    else {
+        //An entire schedule can override a button trial
+        var schedButtonTrial = _.chain(getUserProgress())
+            .prop("currentSchedule")
+            .prop("isButtonTrial").value();
+        if (!!schedButtonTrial) {
             isButtonTrial = true;  //Entire schedule is a button trial
         }
     }
@@ -731,7 +731,7 @@ function prepareCard() {
     if (!engine.unitFinished()) {
         //We have another card to show...
         var selReturn = engine.selectNextCard();
-        engine.selectedCard(selReturn);
+        engine.cardSelected(selReturn);
         engine.writeQuestionEntry();
         newQuestionHandler();
     }
@@ -757,15 +757,6 @@ function prepareCard() {
 
         return;
     }
-}
-
-//TODO: this only works for schedules
-//Return the current q info in the schedule - note that we don't check to make
-//sure that the caller SHOULD be calling us
-function currentScheduledQInfo() {
-    //Note that scheduledCard increments questionIndex - so we subtract
-    //one. Also note that this is whay scheduledCard doesn't call us
-    return getSchedule().q[Session.get("questionIndex") - 1];
 }
 
 function recordProgress(question, answer, userAnswer, isCorrect) {
@@ -1243,6 +1234,7 @@ function processUserTimesLog() {
             }
 
             //Update what we know about the session
+            //Note that the schedule unit engine will see and use this
             getUserProgress().currentSchedule = schedule;
             Session.set("currentUnitNumber", unit);
             Session.set("isScheduledTest", true);
