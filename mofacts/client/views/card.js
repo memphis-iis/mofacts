@@ -546,9 +546,9 @@ function handleUserInput(e , source) {
 
     //Now actually log the answer they gave (or the timeout)
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
-        questionIndex: Session.get("questionIndex"),
-        index: currCluster.clusterIndex,
-        shufIndex: currCluster.shufIndex,
+        questionIndex: _.intval(Session.get("questionIndex"), -1),
+        index: _.intval(currCluster.clusterIndex, -1),
+        shufIndex: _.intval(currCluster.shufIndex, -1),
         ttype: getTestType(),
         qtype: findQTypeSimpified(),
         guiSource: source,
@@ -796,13 +796,7 @@ function failNoDeliveryParams(customMsg) {
         errMsg = customMsg;
     }
     else {
-        errMsg = "There were no available delivery params to check for timeout values. ";
-        if (Session.get("isScheduledTest")) {
-            errMsg += "The current unit is missing a delivery params section";
-        }
-        else {
-            errMsg += "There is no top-level delivery params section for learning sessions";
-        }
+        errMsg = "The current unit is missing a delivery params section";
     }
 
     console.log(errMsg);
@@ -1127,11 +1121,6 @@ function processUserTimesLog() {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
-
-    //Don't assume a particular unit type
-    Session.set("usingACTRModel", false);
-    Session.set("isScheduledTest", false);
-
     var currentStimName = getCurrentStimName();
 
     //Before the below options, reset current test data
@@ -1238,7 +1227,6 @@ function processUserTimesLog() {
             //Note that the schedule unit engine will see and use this
             getUserProgress().currentSchedule = schedule;
             Session.set("currentUnitNumber", unit);
-            Session.set("isScheduledTest", true);
             Session.set("questionIndex", 0);
 
             //Blank out things that should restart with a schedule

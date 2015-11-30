@@ -16,7 +16,6 @@
  * debugging                 - Generic debugging flag
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
- * isScheduledTest
  * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
  * needResume
@@ -29,7 +28,6 @@
  * statsTotal                - Used by stats page template
  * statsUserTimeLogView      - User by stats page template
  * testType
- * usingACTRModel
  * */
 
 //Handle an entire session - note that we current don't limit this to the
@@ -44,7 +42,6 @@ sessionCleanUp = function() {
     Session.set("currentQuestion", undefined);
     Session.set("currentUnitNumber", 0);
     Session.set("currentScore", 0);
-    Session.set("isScheduledTest", undefined);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
@@ -56,7 +53,6 @@ sessionCleanUp = function() {
     Session.set("statsPercentage", undefined);
     Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
-    Session.set("usingACTRModel", undefined);
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {

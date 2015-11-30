@@ -323,6 +323,18 @@
         else {
             schedCondition = "N/A";
         }
+
+        //We used to use the last schedule for unit name, but we don't always have
+        //a schedule for the current unit (i.e. model-based units). Luckily we
+        //now store the unit name in the instruction log entry
+        var unitName = null;
+        if (!!lastinstruct && typeof lastinstruct.unitname !== "undefined") {
+            unitName = trim(lastinstruct.unitname);
+        }
+        if (!unitName && !!sched && typeof sched.unitname !== "undefined") {
+            unitName = trim(sched.unitname);
+        }
+
         if (format === 'basic') {
             //All done - put the record together
             return {
@@ -334,7 +346,7 @@
                     ),
                 username: d(username, ''),
                 selectedTdf: d(lastexpcond.selectedTdf, ''),
-                unitname: d(lastschedule.unitname, ''),
+                unitname: d(unitName, ''),
                 xcondition: xcond,
                 questionIndex: d(lastq.questionIndex, -1),
                 clusterIndex: d(lastq.clusterIndex, -1),
@@ -399,7 +411,7 @@
                 "Condition Namee": d(lasta.wasButtonTrial, false),
                 "Condition Typee": 'button trial',
                 "Level (Unit)": Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1)),
-                "Level (Unitname)": d(lastschedule.unitname, ''),
+                "Level (Unitname)": d(unitName, ''),
                 "Problem Name": d(lastq.selectedQuestion, ''),
                 "Step Name": stepName,
                 "Time": d(lastq.clientSideTimeStamp, 0),
@@ -518,6 +530,13 @@
                     }
                 }
 
+                //We might have carried a schedule over that we didn't need
+                var scheduleUnit = _.chain(lastschedule).prop("unitindex").intval(-1).value();
+                var questionUnit = _.chain(lastq).prop("currentUnit").intval(-1).value();
+                if (scheduleUnit != questionUnit) {
+                    lastschedule = {};
+                }
+
                 //FINALLY have enough to populate the record
                 var populated = null;
                 try {
@@ -525,6 +544,7 @@
                 }
                 catch (e) {
                     console.log("There was an error populating the record - it will be skipped", e);
+                    console.log("There was an error populating the record - it will be skipped", e.stack);
                     console.log(username,
                             JSON.stringify(lastexpcond),
                             JSON.stringify(lastschedule),

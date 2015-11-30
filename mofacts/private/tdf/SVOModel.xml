@@ -53,7 +53,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
         </learningsession>
 
         <deliveryparams>
-            <practiceseconds>120</practiceseconds>
+            <practiceseconds>30</practiceseconds>
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
@@ -65,7 +65,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
         </deliveryparams>
 
         <deliveryparams>
-            <practiceseconds>240</practiceseconds>
+            <practiceseconds>45</practiceseconds>
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
@@ -77,7 +77,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
         </deliveryparams>
 
         <deliveryparams>
-            <practiceseconds>360</practiceseconds>
+            <practiceseconds>60</practiceseconds>
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>

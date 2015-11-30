@@ -11,20 +11,11 @@
  * from defaultUnitEngine via _.extend
 */
 
-//TODO: test model unit timeout is working
-
 // Our "public" functions
 
 function create(func) {
     var engine = _.extend(defaultUnitEngine(), func());
-
-    //TODO: purge all use of these variables and then remove this setting
-    //Set the session variables that we used in legacy times to check these things
-    Session.set("isScheduledTest", false);
-    Session.set("usingACTRModel", false);
-
     engine.init();
-
     return engine;
 }
 
@@ -91,6 +82,9 @@ function emptyUnitEngine() {
 //////////////////////////////////////////////////////////////////////////////
 // Return an instance of the model-based unit engine
 function modelUnitEngine() {
+    //Checked against practice seconds. Notice that we capture this on unit
+    //creation, so if they leave in the middle of practice and come back to
+    //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
 
     var currentCardInfo = {
@@ -238,7 +232,6 @@ function modelUnitEngine() {
 
         initImpl: function() {
             initializeActRModel();
-            Session.set("usingACTRModel", true);
         },
 
         selectNextCard: function() {
@@ -419,7 +412,7 @@ function scheduleUnitEngine() {
         unitType: "schedule",
 
         initImpl: function() {
-            Session.set("isScheduledTest", true);
+            //Nothing currently
         },
 
         selectNextCard: function() {
