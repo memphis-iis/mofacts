@@ -227,21 +227,23 @@ getCurrentDeliveryParams = function (currUnit) {
         lockoutminutes: 0,
         fontsize: 3,
         correctscore: 1,
-        incorrectscore: 0
+        incorrectscore: 0,
+        practiceseconds: 0
     };
 
     //We've defined defaults - also define translatations for values
     var xlateBool = function(v) {
-        return  v ? Helpers.trim(v).toLowerCase() === "true" : false;
+        return  v ? _.trim(v).toLowerCase() === "true" : false;
     };
 
     var xlations = {
-        purestudy: Helpers.intVal,
+        purestudy: _.intval,
         skipstudy: xlateBool,
-        reviewstudy: Helpers.intVal,
-        correctprompt: Helpers.intVal,
-        lockoutminutes: Helpers.intVal,
-        fontsize: Helpers.intVal
+        reviewstudy: _.intval,
+        correctprompt: _.intval,
+        lockoutminutes: _.intval,
+        fontsize: _.intval,
+        practiceseconds: _.intval
     };
 
     var modified = false;
@@ -267,7 +269,7 @@ getCurrentDeliveryParams = function (currUnit) {
     if (sourceDelParams && sourceDelParams.length) {
         //Note that if there is no XCond or if they specify something
         //wacky we'll just go with index 0
-        var xcondIndex = Helpers.intVal(Session.get("experimentXCond"));
+        var xcondIndex = _.intval(Session.get("experimentXCond"));
         if (xcondIndex < 0 || xcondIndex >= sourceDelParams.length) {
             xcondIndex = 0; //Incorrect index gets 0
         }
@@ -276,7 +278,7 @@ getCurrentDeliveryParams = function (currUnit) {
         //If found del params, then use any values we find
         if (found) {
             for(fieldName in deliveryParams) {
-                var fieldVal = Helpers.firstElement(found[fieldName]);
+                var fieldVal = _.first(found[fieldName]);
                 if (fieldVal) {
                     deliveryParams[fieldName] = fieldVal;
                     modified = true;

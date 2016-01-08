@@ -217,6 +217,10 @@ Template.instructions.events({
         //current unit, we should log a duplicate instead
         var logAction = "instructions";
         var currUnit = Session.get("currentUnitNumber");
+        var unitName = _.chain(getCurrentTdfFile().tdfs.tutor)
+            .prop("unit")
+            .prop(_.intval(currUnit))
+            .prop("unitname").trim().value();
 
         var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
         var expKey = userTimesExpKey(true);
@@ -240,6 +244,7 @@ Template.instructions.events({
         //everything has been properly logged on the server
         recordUserTime(logAction, {
             'currentUnit': currUnit,
+            'unitname': unitName,
             'xcondition': Session.get("experimentXCond")
         }, function(error, result) {
             //We know they'll need to resume now

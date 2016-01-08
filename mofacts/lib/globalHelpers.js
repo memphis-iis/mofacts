@@ -23,7 +23,10 @@ if (!Date.now) {
 if (_ && _.mixin) {
     _.mixin({
         prop: function(obj, propname) {
-            if ((!obj && obj !== "") || !propname || !_.has(obj, propname)) {
+            if (_.isArray(obj) && _.isNumber(propname)) {
+                return obj[propname];
+            }
+            else if ((!obj && obj !== "") || !propname || !_.has(obj, propname)) {
                 return null;
             }
             else {
@@ -81,7 +84,7 @@ if (_ && _.mixin) {
 //setting the cardProbabilities data structure is always available (and
 //thus is in the lib folder)
 
-if (Meteor.isClient) {
+if (typeof Meteor !== "undefined" && Meteor.isClient) {
     //Initialize card probabilities, with optional initial data
     initCardProbs = function(overrideData) {
         var initVals = {
