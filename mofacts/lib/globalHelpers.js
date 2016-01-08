@@ -84,7 +84,7 @@ if (_ && _.mixin) {
 //setting the cardProbabilities data structure is always available (and
 //thus is in the lib folder)
 
-if (Meteor.isClient) {
+if (typeof Meteor !== "undefined" && Meteor.isClient) {
     //Initialize card probabilities, with optional initial data
     initCardProbs = function(overrideData) {
         var initVals = {

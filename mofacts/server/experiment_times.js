@@ -10,11 +10,9 @@
  *
  * To use in the Mongo console, run:
  *     mongo --quiet MoFaCT --eval "experiment='Music2.xml'" experiment_times.js
- * where MoFaCT is the database name on the local server
- *
- * Note that unlike other Meteor code, we don't assume that we have access to
- * the underscore library (since we might run as a Mongo script)
- *
+ * where MoFaCT is the database name on the local server. Please keep in mind
+ * that you'll need to make some changes if you're using the mongo client and
+ * are NOT running from the mofacts/server directory inside a git repo
  *
  * A note concerning indexes
  * ***************************
@@ -617,6 +615,15 @@
             if (typeof experiment === "undefined") {
                 print("You must specify an experiment when running this as a mongo script");
                 return;
+            }
+
+            if (typeof _ === "undefined") {
+                //We gave up once this script got complicated - now we manually load
+                //javascript into the mongo console... so you'll probably need to run
+                //this from a repo clone and not a Meteor bundle (of course, if you
+                //have a Meteor bundle, just use the web interface)
+                load("../../scripts/underscore.js");
+                load("../lib/globalHelpers.js");
             }
 
             var header = {};
