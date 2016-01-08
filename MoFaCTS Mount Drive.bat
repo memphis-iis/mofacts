@@ -1,3 +1,3 @@
-set PATH=%PATH%;C:\Program Files (x86)\Git\bin
-cd C:\Users\ppavlik\Documents\NetBeansProjects\mofacts
+set PATH=%PATH%;C:\Users\Phil Pavlik\AppData\Local\Programs\Git\usr\bin
+cd C:\Users\Phil Pavlik\Documents\NetBeansProjects\MoFaCTS
 cmd /k
