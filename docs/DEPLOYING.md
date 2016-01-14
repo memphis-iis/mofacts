@@ -45,6 +45,14 @@ $ chown -R www-data:www-data
 (Note: you could create your own and deploy to a completely different location
 if necessary.  There is nothing magical about these choices.)
 
+You might need to enable some functionality in your Apache server if it wasn't
+turned on by default. You need proxy and proxy_http:
+
+````
+$ sudo a2enmod proxy
+$ sudo a2enmod proxy_http
+````
+
 Now update the Apache config to proxy requests to your meteor server. Note
 that this config assumes that the DNS entry mofacts.optimallearning.org
 resovles to the server in question.  On a Debian server, the default site can
