@@ -99,6 +99,8 @@ function modelUnitEngine() {
         currentCardInfo.whichStim = whichStim;
     }
 
+//TODO load in all versions of each cluster
+
     //Initialize cards as we'll need them for the created engine (for current model)
     function initializeActRModel() {
         var i;
@@ -143,10 +145,27 @@ function modelUnitEngine() {
         var totalTrials = cardProbs.numQuestionsAnswered;
         var cards = cardProbs.cards;
 
+           //card==cluster
         _.each(cards, function(card) {
+            //Correct and incorrect responses for the cluster  
             var questionSuccessCount = card.questionSuccessCount;
             var questionFailureCount = card.questionFailureCount;
-            var totalQuestionStudies = questionSuccessCount + questionFailureCount;
+            var totalQuestionTests = questionSuccessCount + questionFailureCount;
+            
+            //Correct and incorrect responses for the version of the clusters
+            
+            //Correct and incorrect responses for the learner with this tdf
+            
+            //Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
+            
+            //Study trials for the cluster
+            
+            //Time in seconds since last seen (true time)
+            
+            //Time in seconds since first seen (true time)
+                        
+            //Time in seconds since first seen (summed time in practice)
+            
             var trialsSinceLastSeen = card.trialsSinceLastSeen;
 
             var trialsSinceLastSeenOverTotalTrials = 0.0;
@@ -157,7 +176,7 @@ function modelUnitEngine() {
             var x = -3.0 +
                      (2.4 * questionSuccessCount) +
                      (0.8 * questionFailureCount) +
-                     (1.0 * totalQuestionStudies) +
+                     (1.0 * totalQuestionTests) +
                     -(0.3 * trialsSinceLastSeenOverTotalTrials);
 
             var probability = 1.0 / (1.0 + Math.exp(-x));
