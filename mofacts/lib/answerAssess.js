@@ -150,16 +150,15 @@ Answers = {
     //Return [isCorrect, matchText] if userInput correctly matches answer -
     //taking into account both branching answers and edit distance
     answerIsCorrect: function(userInput, answer, setspec) {
-        var lfparameter = null;
-        if (setspec && setspec.lfparameter && setspec.lfparameter.length)
-            lfparameter = parseFloat(setspec.lfparameter[0]);
+        //Note that a missing or invalid lfparameter will result in a null value
+        var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
 
         if (answerIsBranched(answer)) {
             return matchBranching(answer, userInput, lfparameter);
         }
         else {
             var isCorrect, matchText;
-            var match = stringMatch(userInput, answer);
+            var match = stringMatch(userInput, answer, lfparameter);
 
             if (match === 0) {
                 isCorrect = false;
