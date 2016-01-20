@@ -17,8 +17,10 @@ var adminUserId = null;
 function getStimJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
-        if (err)
+        if (err) {
+            console.log("Error reading Stim JSON", err);
             throw err;
+        }
         future.return(xml2js.parseStringSync(data));
     });
     return future.wait();

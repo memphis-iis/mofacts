@@ -36,6 +36,8 @@ setCurrentClusterIndex = function(newIdx) {
 
 //Return the total number of stim clusters
 getStimClusterCount = function() {
+    console.log("Stimuli exists", Stimuli);
+    console.log("Stim name exists", getCurrentStimName());
     return Stimuli.findOne({fileName: getCurrentStimName()})
         .stimuli.setspec.clusters[0].cluster.length;
 };
