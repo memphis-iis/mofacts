@@ -139,6 +139,8 @@ function modelUnitEngine() {
         calculateCardProbabilities();
     }
 
+    //TODO: we should NOT honor shuffle/swap for this kind of unit
+
     //Calculate current card probabilities
     function calculateCardProbabilities() {
         var cardProbs = getCardProbs();
@@ -147,25 +149,35 @@ function modelUnitEngine() {
 
            //card==cluster
         _.each(cards, function(card) {
-            //Correct and incorrect responses for the cluster  
+            //Correct and incorrect responses for the cluster
             var questionSuccessCount = card.questionSuccessCount;
             var questionFailureCount = card.questionFailureCount;
             var totalQuestionTests = questionSuccessCount + questionFailureCount;
-            
+
             //Correct and incorrect responses for the version of the clusters
-            
+            //Does not include study
+
             //Correct and incorrect responses for the learner with this tdf
-            
+            //Does not include study
+
             //Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
-            
+            //This is exact match on correct (pre-tilde) section
+            //Does not include study
+
             //Study trials for the cluster
-            
-            //Time in seconds since last seen (true time)
-            
-            //Time in seconds since first seen (true time)
-                        
-            //Time in seconds since first seen (summed time in practice)
-            
+            //Make sure that study trials do NOT increment correct/incorrect counts above
+
+            //Time in seconds since cluster (not version) was last seen (true time)
+            //Includes study, drill, and test
+
+            //Time in seconds since cluster (not version) first seen (true time)
+            //Includes study, drill, and test
+
+            //(Note that diff of above 2 divided by trial count is = to spacing)
+
+            //Time in seconds since cluster (not version) first seen (summed time in practice)
+            //Includes study, drill, and test
+
             var trialsSinceLastSeen = card.trialsSinceLastSeen;
 
             var trialsSinceLastSeenOverTotalTrials = 0.0;
