@@ -1,3 +1,4 @@
+<!-- Archived from Henry's music project -->
 <tutor>
     <setspec>
         <name>Melody2</name> <!-- TAKEN FROM Music2-0.xml -->
@@ -368,10 +369,10 @@
     </unit>
 
     <unit>
-        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response. 
-        
+        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Siberian husky -into the Amazon Mechanical Turk website for this HIT and submit your response.
+
         If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
-        
+
         If the countdown below is 1 day or 7 days: No later than tomorrow morning, you will receive a private message (delivered to your email inbox) for instructions on Session 2. </unitinstructions>
         <unitname>Session 1 end</unitname>
 

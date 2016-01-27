@@ -47,9 +47,18 @@ function deploy() {
     echo "Renaming to " $BUNDLE_POSTDEP
     sudo mv $BUNDLE_NAME $BUNDLE_POSTDEP
 
-    echo "Rebuilding fibers in bundle/programs/server/node_modules"
-    sudo rm -fr bundle/programs/server/node_modules/fibers
-    sudo npm install fibers@1.0.1
+    echo "Rebuilding bcrypt and fibers in bundle/programs/server"
+    pushd bundle/programs/server
+    sudo npm install
+    sudo rm -fr node_modules/fibers
+    sudo rm -fr node_modules/bcrypt
+    sudo npm install fibers@1.0.1 bcrypt@0.7.7
+    popd
+    echo "Rebuilding npm-bcrypt in bundle/programs/server/npm/npm-bcrypt"
+    pushd bundle/programs/server/npm/npm-bcrypt
+    sudo rm -fr node_modules
+    sudo npm install bcrypt@0.7.7
+    popd
 
     echo "Insuring ownership of all files"
     sudo chown -R $EXEC_USER:$EXEC_USER *
