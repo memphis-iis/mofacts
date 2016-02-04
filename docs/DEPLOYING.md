@@ -255,10 +255,10 @@ ow we can execute `sudo npm install -g forever` as above
 
 ## Deployment
 
-Deploying MoFaCTs should be done the same as any other meteor application.
+You should deploy MoFaCTs just like any other meteor application.
 First you should bundle the application and copy that bundle to the server
 where you will be deploying. In the past you would do this with the bundle
-command. However, newer versions of Meteor now use the build command:
+command. Newer versions of Meteor now use the build command:
 
 ````
 $ cd mofacts/mofacts
@@ -266,19 +266,19 @@ $ meteor build ./build  --architecture os.linux.x86_64
 $ scp build/mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
 ````
 
-Some important notes!!! The architecture switch is based on the optimal
+Some important notes!!! The architecture switch used above is for the optimal
 learning server. If that should change for some reason, you'll need a
 different parameter. You should also note the main change from bundle command:
-we no longer specify the bundle name. In addition, we must specify a
+we no longer specify the bundle name. We must also specify a
 directory. We specify `build`, but there's nothing special about the name. For
 convenience, we've added mofacts/build to the main .gitignore file for this
 project so that you don't automatically add the build folder (and your latest
 bundle) to the git repo.
 
-Note that deploy.sh expects the bundle name to be mofacts.tar.gz. Currently
-this is the name selected by `meteor build`, so there shouldn't be a problem.
+Note that deploy.sh expects the bundle name to be mofacts.tar.gz.
+This is the name selected by `meteor build`, so there shouldn't be a problem.
 
-At this point, you could simply log in to the server and let the script take
+At this point, you could just log in to the server and let the script take
 over for you:
 
 ````
@@ -290,22 +290,20 @@ Assuming that your user ID has `sudo` rights, everything should work just
 fine.  The rest of this section details how you perform the same actions
 manually...
 
-It is assumed that all the following steps are performed on the server in the
-"home" directory for mofacts:
+You perform all the following steps on the server in the "home" directory for mofacts:
 
 ````
 $ cd /var/www/mofacts
 ````
 
 One note - remember that for security everything in this directory will owned
-by the www-data user.  As a result, many of the commands will be executed
-using `sudo`
+by the www-data user.  As a result, you will use `sudo` to execute most of the commands.
 
-First the bundle needs to be extracted.  Many meteor tutorials will then
-delete the bundle file.  The deploy.sh script changes the name of the file
-instead.  As a result, the deployment step only occurs when necessary (because
-it can only run when mofacts.tar.gz exists), but there is a copy of the file
-used for the currently running deployment (named mofacts.tar.gz.deployed).
+First you should extract the bundle.  Meteor tutorials will often recommend that you
+delete the bundle file, but our `deploy.sh` script changes the name of the file
+instead.  As a result, the deployment step occurs when necessary (because
+it runs when mofacts.tar.gz exists), but there is a copy of the file
+used for the running deployment (named mofacts.tar.gz.deployed).
 Also note that for safety you should delete the previous bundle.
 
 ````
@@ -360,6 +358,6 @@ The major functionality of the `deploy.sh` script is described above. If the
 script needs to be customized, all configuration is handled at the beginning
 of the script using environment variables.
 
-The script kills previous processes, deploys mofacts.tar.gz, and then starts
+The script terminates previous processes, deploys mofacts.tar.gz, and then starts
 the mofacts (meteor) process using forever.  As a result, it should usually do
 the "right thing".
