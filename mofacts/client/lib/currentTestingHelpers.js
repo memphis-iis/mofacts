@@ -123,12 +123,24 @@ getStimAnswer = function (index, whichAnswer) {
     return getStimCluster(index).response[whichAnswer];
 };
 
+//get the parameter at this index - this works using the same semantics as
+//getStimAnswer and getStimQuestion above. Note that we default to return 0
+getStimParameter = function (index, whichParameter) {
+    return _.chain(getStimCluster(index))
+        .prop("parameter")
+        .floatval()
+        .value();
+};
+
 //Simplified Q/A getters
 getCurrentStimQuestion = function(whichQuestion) {
     return getStimQuestion(getCurrentClusterIndex(), whichQuestion);
 };
 getCurrentStimAnswer = function(whichAnswer) {
     return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
+};
+getCurrentStimParameter = function(whichParameter) {
+    return getStimParameter(getCurrentClusterIndex(), whichParameter);
 };
 
 //Return the list of false responses corresponding to the current question/answer

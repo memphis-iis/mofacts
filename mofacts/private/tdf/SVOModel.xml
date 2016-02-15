@@ -4,7 +4,7 @@
         <lessonname>SVO Models</lessonname>
         <userselect>true</userselect>
         <randomizedDelivery>3</randomizedDelivery>
-        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <stimulusfile>SVO5stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>

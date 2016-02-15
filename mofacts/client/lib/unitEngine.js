@@ -115,9 +115,12 @@ function modelUnitEngine() {
     function setCurrentCardInfo(clusterIndex, whichStim) {
         currentCardInfo.clusterIndex = clusterIndex;
         currentCardInfo.whichStim = whichStim;
+        console.log("MODEL UNIT card selection => ",
+            "cluster-idx:", clusterIndex,
+            "whichStim:", 0,
+            "parameter", getStimParameter(clusterIndex, whichStim)
+        );
     }
-
-//TODO load in all versions of each cluster
 
     //Initialize cards as we'll need them for the created engine (for current model)
     function initializeActRModel() {
@@ -156,8 +159,6 @@ function modelUnitEngine() {
         //has to be done once ahead of time to give valid values for the beginning of the test.
         calculateCardProbabilities();
     }
-
-    //TODO: we should NOT honor shuffle/swap for this kind of unit
 
     //Calculate current card probabilities
     function calculateCardProbabilities() {
@@ -479,6 +480,12 @@ function scheduleUnitEngine() {
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
             Session.set("showOverlearningText", false);  //No overlearning in a schedule
+
+            console.log("SCHEDULE UNIT card selection => ",
+                "cluster-idx-unmapped:", questInfo.clusterIndex,
+                "whichStim:", whichStim,
+                "parameter", getCurrentStimParameter(whichStim)
+            );
 
             return questInfo.clusterIndex;
         },
