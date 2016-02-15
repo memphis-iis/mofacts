@@ -1262,9 +1262,13 @@ function processUserTimesLog() {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
-            //Note that this will currently only do something for model units
+            // Notify the current engine about the card selection.
+            engine.cardSelected(cardIndex);
             if (engine.unitType === "model") {
-                engine.cardSelected(cardIndex);
+                // Model-only card help.
+                // TODO: get this impl-specific code into the unit engine (and
+                //       note that it isn't super-trivial... the model engine needs
+                //       to know to do this ONLY on resume)
                 _.extend(getCardProbs().cards[cardIndex], entry.cardModelData);
             }
         }

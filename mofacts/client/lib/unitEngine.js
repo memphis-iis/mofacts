@@ -9,7 +9,23 @@
  *
  * Also note that the engines may assume that they are added on to the object
  * from defaultUnitEngine via _.extend
+ *
+ * A note about the session variable "ignoreClusterMapping"
+ * --------------------------------------------------------
+ * Cluster mapping is created and maintained by resume logic in card.js. It is
+ * honored by the utility functions in currentTestingHelpers.js. The mapping is
+ * based on the top-level shuffle/swap-type cluster mapping. Generally this mapping
+ * should be remembered per-user per-experiment after creation and honored. However,
+ * some units (currently just model-based units) actually want this functionality
+ * ignored (although the unit itself can select certain clusters). As a result,
+ * you'll see that our default model sets ignoreClusterMapping to False before
+ * calling the engine's initImpl method. If you need to turn off ignoreClusterMapping,
+ * you MUST do it in the engine's initImpl method (as we do in modelUnitEngine).
+ * We will also set it explicitly on one-time startup.
 */
+
+// First-time init of ignoreClusterMapping (see above)
+Session.set("ignoreClusterMapping", false);
 
 // Our "public" functions
 
@@ -49,7 +65,9 @@ function defaultUnitEngine() {
         // Functions we supply
         init: function() {
             console.log("Engine created for unit:", this.unitType);
+            Session.set("ignoreClusterMapping", false);
             this.initImpl();
+            console.log("CLUSTER MAPPING USE (not ignore):", !Session.get("ignoreClusterMapping"));
         },
 
         writeQuestionEntry: function() {
@@ -147,7 +165,7 @@ function modelUnitEngine() {
         var totalTrials = cardProbs.numQuestionsAnswered;
         var cards = cardProbs.cards;
 
-           //card==cluster
+        // Remember, a card is a cluster
         _.each(cards, function(card) {
             //Correct and incorrect responses for the cluster
             var questionSuccessCount = card.questionSuccessCount;
@@ -186,14 +204,12 @@ function modelUnitEngine() {
             }
 
             var x = -3.0 +
-                     (2.4 * questionSuccessCount) +
-                     (0.8 * questionFailureCount) +
-                     (1.0 * totalQuestionTests) +
-                    -(0.3 * trialsSinceLastSeenOverTotalTrials);
+                    (2.4 * questionSuccessCount) +
+                    (0.8 * questionFailureCount) +
+                    (1.0 * totalQuestionTests) +
+                   -(0.3 * trialsSinceLastSeenOverTotalTrials);
 
-            var probability = 1.0 / (1.0 + Math.exp(-x));
-
-            card.probability = probability;
+            card.probability = 1.0 / (1.0 + Math.exp(-x));
         });
     }
 
@@ -215,7 +231,7 @@ function modelUnitEngine() {
     }
 
     //Return index of card with minimum probability that was last seen at least
-    //2 trials ago. Default in index 0 in case no cards meet this criterion
+    //2 trials ago. Default to index 0 in case no cards meet this criterion
     function findMinProbCard(cards) {
         var currentMin = 1;
         var indexToReturn = 0;
@@ -262,6 +278,8 @@ function modelUnitEngine() {
         unitType: "model",
 
         initImpl: function() {
+            //We don't want cluster mapping for model-based optmization
+            Session.set("ignoreClusterMapping", true);
             initializeActRModel();
         },
 
@@ -300,10 +318,11 @@ function modelUnitEngine() {
                 }
             }
 
-            //Found! Update everything and grab a reference to the card
+            // Found! Update everything and grab a reference to the card
             var card = cards[indexForNewCard];
 
-            //Save the card selection
+            // Save the card selection
+            // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(indexForNewCard);
             Session.set("currentQuestion", getStimQuestion(indexForNewCard, 0));
             Session.set("currentAnswer", getStimAnswer(indexForNewCard, 0));
