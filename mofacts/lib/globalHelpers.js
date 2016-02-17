@@ -90,6 +90,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         var initVals = {
             numQuestionsAnswered: 0,
             numQuestionsIntroduced: 0,
+            numCorrectAnswers: 0,
             cards: []
         };
 

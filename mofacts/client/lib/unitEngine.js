@@ -99,6 +99,58 @@ function emptyUnitEngine() {
 
 //////////////////////////////////////////////////////////////////////////////
 // Return an instance of the model-based unit engine
+
+/* Stats information: we track the following stats in the card info structure.
+   (All properties are relative to the object returned by getCardProbs())
+    - Total stimuli shown to user: numQuestionsIntroduced
+    - Total responses given by user: numQuestionsAnswered
+    - Total correct NON-STUDY responses given by user: numCorrectAnswers
+    - Cluster correct answer count - card.questionSuccessCount
+    - Cluster incorrect answer count - card.questionFailureCount
+    - Trials since cluster seen - card.trialsSinceLastSeen
+    - If user has seen cluster - card.hasBeenIntroduced
+    - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
+    - Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
+*/
+
+//TODO: log and test
+//Correct and incorrect responses for the version of the clusters
+
+//TODO: log and test
+//Correct and incorrect responses for the learner with this tdf
+
+//TODO: init and document
+//TODO: increment
+//TODO: log and test
+//Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
+//This is exact match on correct (pre-tilde) section
+//Does not include study
+
+//TODO: init and document
+//TODO: increment
+//TODO: log and test
+//Study trials for the cluster (note that this must be logged in question, NOT answer)
+
+//TODO: init and document
+//TODO: increment
+//TODO: log and test
+//Time in seconds since cluster (not version) was last seen (true time)
+//Includes study, drill, and test
+
+//TODO: init and document
+//TODO: increment
+//TODO: log and test
+//Time in seconds since cluster (not version) first seen (true time)
+//Includes study, drill, and test
+
+//(Note that diff of above 2 divided by trial count is = to spacing)
+
+//TODO: init and document
+//TODO: increment
+//TODO: log and test
+//Time in seconds since cluster (not version) first seen (summed time in practice)
+//Includes study, drill, and test (so must be capturing in question)
+
 function modelUnitEngine() {
     //Checked against practice seconds. Notice that we capture this on unit
     //creation, so if they leave in the middle of practice and come back to
@@ -122,21 +174,37 @@ function modelUnitEngine() {
         );
     }
 
-    //Initialize cards as we'll need them for the created engine (for current model)
+    // Initialize cards as we'll need them for the created engine (for current
+    // model). Note that we assume TDF/Stimulus is set up and correct - AND
+    // that we've already turned off cluster mapping
     function initializeActRModel() {
-        var i;
+        var i, j;
 
         var numQuestions = getStimClusterCount();
         var initCards = [];
         for (i = 0; i < numQuestions; ++i) {
-            initCards.push({
+            var card = {
                 questionSuccessCount: 0,
                 questionFailureCount: 0,
                 trialsSinceLastSeen: 0,
                 probability: 0.0,
                 hasBeenIntroduced: false,
-                canUse: false
-            });
+                canUse: false,
+                stims: [],
+            };
+
+            // We keep per-stim results as well
+            var numStims = _.chain(getStimCluster(i))
+                .prop("display")
+                .prop("length").intval.value();
+            for (j = 0; j < numStims; ++j) {
+                card.stims.push({
+                    stimSuccessCount: 0,  //TODO: shouldn't include study
+                    stimFailureCount: 0,
+                });
+            }
+
+            initCards.push(card);
         }
 
         //Figure out which cluster numbers that they want
@@ -148,7 +216,7 @@ function modelUnitEngine() {
         Helpers.extractDelimFields(unitClusterList, clusterList);
         for (i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
-            for (var j = 0; j < nums.length; ++j) {
+            for (j = 0; j < nums.length; ++j) {
                 initCards[_.intval(nums[j])].canUse = true;
             }
         }
@@ -172,30 +240,6 @@ function modelUnitEngine() {
             var questionSuccessCount = card.questionSuccessCount;
             var questionFailureCount = card.questionFailureCount;
             var totalQuestionTests = questionSuccessCount + questionFailureCount;
-
-            //Correct and incorrect responses for the version of the clusters
-            //Does not include study
-
-            //Correct and incorrect responses for the learner with this tdf
-            //Does not include study
-
-            //Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
-            //This is exact match on correct (pre-tilde) section
-            //Does not include study
-
-            //Study trials for the cluster
-            //Make sure that study trials do NOT increment correct/incorrect counts above
-
-            //Time in seconds since cluster (not version) was last seen (true time)
-            //Includes study, drill, and test
-
-            //Time in seconds since cluster (not version) first seen (true time)
-            //Includes study, drill, and test
-
-            //(Note that diff of above 2 divided by trial count is = to spacing)
-
-            //Time in seconds since cluster (not version) first seen (summed time in practice)
-            //Includes study, drill, and test
 
             var trialsSinceLastSeen = card.trialsSinceLastSeen;
 
@@ -372,6 +416,9 @@ function modelUnitEngine() {
         cardAnswered: function(wasCorrect) {
             var cardProbs = getCardProbs();
             cardProbs.numQuestionsAnswered += 1;
+            if (wasCorrect) {
+                cardProbs.numCorrectAnswers += 1;
+            }
 
             var card = null;
             try {
@@ -385,6 +432,12 @@ function modelUnitEngine() {
             if (card) {
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
+
+                var stim = currentCardInfo.whichStim;
+                if (stim >= 0 && stim < card.stims.length) {
+                    if (wasCorrect) card.stims[stim].stimSuccessCount += 1;
+                    else            card.stims[stim].stimFailureCount += 1;
+                }
             }
 
             calculateCardProbabilities();
