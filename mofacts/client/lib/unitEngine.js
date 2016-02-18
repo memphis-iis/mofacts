@@ -111,6 +111,9 @@ function emptyUnitEngine() {
     - If user has seen cluster - card.hasBeenIntroduced
     - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
     - Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
+    - Correct answer count for answer (correct response) text - card.responses.responseSuccessCount
+    - Incorrect answer count for answer (correct response) text - card.responses.responseFailureCount
+    - Count of times study trials shown per cluster - card.studyTrialCount
 */
 
 //TODO: log and test
@@ -119,15 +122,11 @@ function emptyUnitEngine() {
 //TODO: log and test
 //Correct and incorrect responses for the learner with this tdf
 
-//TODO: init and document
-//TODO: increment
 //TODO: log and test
 //Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
 //This is exact match on correct (pre-tilde) section
 //Does not include study
 
-//TODO: init and document
-//TODO: increment
 //TODO: log and test
 //Study trials for the cluster (note that this must be logged in question, NOT answer)
 
@@ -186,22 +185,33 @@ function modelUnitEngine() {
             var card = {
                 questionSuccessCount: 0,
                 questionFailureCount: 0,
+                studyTrialCount: 0,
                 trialsSinceLastSeen: 0,
                 probability: 0.0,
                 hasBeenIntroduced: false,
                 canUse: false,
                 stims: [],
+                responses: {}
             };
 
-            // We keep per-stim results as well
-            var numStims = _.chain(getStimCluster(i))
-                .prop("display")
-                .prop("length").intval.value();
+            // We keep per-stim and re-response-text results as well
+            var cluster = getStimCluster(i);
+            var numStims = _.chain(cluster).prop("display").prop("length").intval.value();
             for (j = 0; j < numStims; ++j) {
+                // Per-stim counts
                 card.stims.push({
                     stimSuccessCount: 0,  //TODO: shouldn't include study
                     stimFailureCount: 0,
                 });
+
+                // Per-response counts
+                var response = Answers.getDisplayAnswerText(cluster.response[j]);
+                if (!(response in card.responses)) {
+                    card.responses[response] = {
+                        responseSuccessCount: 0,
+                        responseFailureCount: 0,
+                    };
+                }
             }
 
             initCards.push(card);
@@ -403,6 +413,9 @@ function modelUnitEngine() {
             var card = cards[indexForNewCard];
             card.trialsSinceLastSeen = 0;
             card.hasBeenIntroduced = true;
+            if (getTestType() === 's') {
+                card.studyTrialCount += 1;
+            }
         },
 
         createQuestionLogEntry: function() {
@@ -421,9 +434,11 @@ function modelUnitEngine() {
             }
 
             var card = null;
+            var answerText = null;
             try {
-                var idx = getStimCluster(getCurrentClusterIndex()).clusterIndex;
-                card = cardProbs.cards[idx];
+                var cluster = getStimCluster(getCurrentClusterIndex());
+                card = cardProbs.cards[cluster.clusterIndex];
+                answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
             }
             catch(err) {
                 console.log("Error getting card for update", err);
@@ -437,6 +452,11 @@ function modelUnitEngine() {
                 if (stim >= 0 && stim < card.stims.length) {
                     if (wasCorrect) card.stims[stim].stimSuccessCount += 1;
                     else            card.stims[stim].stimFailureCount += 1;
+                }
+
+                if (answerText) {
+                    if (wasCorrect) card.responses[answerText].responseSuccessCount += 1;
+                    else            card.responses[answerText].responseFailureCount += 1;
                 }
             }
 
