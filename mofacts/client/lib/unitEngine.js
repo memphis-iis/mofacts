@@ -170,20 +170,6 @@ function emptyUnitEngine() {
     - Count of times study trials shown per cluster - card.studyTrialCount
 */
 
-//TODO: log and test
-//Correct and incorrect responses for the version of the clusters
-
-//TODO: log and test
-//Correct and incorrect responses for the learner with this tdf
-
-//TODO: log and test
-//Correct and incorrect responses for response (accounts for transfer betwen versions and clusters sharing responses)
-//This is exact match on correct (pre-tilde) section
-//Does not include study
-
-//TODO: log and test
-//Study trials for the cluster (note that this must be logged in question, NOT answer)
-
 //TODO: init and document
 //TODO: increment
 //TODO: log and test
@@ -441,6 +427,8 @@ function modelUnitEngine() {
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(indexForNewCard, 0);
+
+            console.log("Model selected card:", displayify(card));
 
             return indexForNewCard; //Must return index for call to cardSelected
         },
