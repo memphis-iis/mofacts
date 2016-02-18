@@ -165,8 +165,8 @@ function emptyUnitEngine() {
     - If user has seen cluster - card.hasBeenIntroduced
     - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
     - Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
-    - Correct answer count for answer (correct response) text - card.responses.responseSuccessCount
-    - Incorrect answer count for answer (correct response) text - card.responses.responseFailureCount
+    - Correct answer count for answer (correct response) text - responses.responseSuccessCount
+    - Incorrect answer count for answer (correct response) text - responses.responseFailureCount
     - Count of times study trials shown per cluster - card.studyTrialCount
 */
 
@@ -221,6 +221,7 @@ function modelUnitEngine() {
 
         var numQuestions = getStimClusterCount();
         var initCards = [];
+        var initResponses = {};
         for (i = 0; i < numQuestions; ++i) {
             var card = {
                 questionSuccessCount: 0,
@@ -230,8 +231,7 @@ function modelUnitEngine() {
                 probability: 0.0,
                 hasBeenIntroduced: false,
                 canUse: false,
-                stims: [],
-                responses: {}
+                stims: []
             };
 
             // We keep per-stim and re-response-text results as well
@@ -246,8 +246,8 @@ function modelUnitEngine() {
 
                 // Per-response counts
                 var response = Answers.getDisplayAnswerText(cluster.response[j]);
-                if (!(response in card.responses)) {
-                    card.responses[response] = {
+                if (!(response in initResponses)) {
+                    initResponses[response] = {
                         responseSuccessCount: 0,
                         responseFailureCount: 0,
                     };
@@ -272,7 +272,7 @@ function modelUnitEngine() {
         }
 
         //Re-init the card probabilities
-        initCardProbs({ cards: initCards });
+        initCardProbs({ cards: initCards, responses: initResponses });
 
         //has to be done once ahead of time to give valid values for the beginning of the test.
         calculateCardProbabilities();
@@ -415,20 +415,26 @@ function modelUnitEngine() {
 
             // Found! Update everything and grab a reference to the card
             var card = cards[indexForNewCard];
+            var whichStim = 0; // Currently no version selection in the model
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(indexForNewCard);
-            Session.set("currentQuestion", getStimQuestion(indexForNewCard, 0));
-            Session.set("currentAnswer", getStimAnswer(indexForNewCard, 0));
+            Session.set("currentQuestion", getStimQuestion(indexForNewCard, whichStim));
+            Session.set("currentAnswer", getStimAnswer(indexForNewCard, whichStim));
             Session.set("testType", "d");
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
 
             //Save for returning the info later (since we don't have a schedule)
-            setCurrentCardInfo(indexForNewCard, 0);
+            setCurrentCardInfo(indexForNewCard, whichStim);
 
-            console.log("Model selected card:", displayify(card));
+            // only log this for teachers/admins
+            if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+                console.log("Model selected card:", displayify(card));
+                var responseText = Answers.getDisplayAnswerText(getStimCluster(indexForNewCard).response[whichStim]);
+                console.log("Response is", responseText, displayify(cardProbs.responses[responseText]));
+            }
 
             return indexForNewCard; //Must return index for call to cardSelected
         },
@@ -439,6 +445,18 @@ function modelUnitEngine() {
 
         cardSelected: function(selectVal, resumeData) {
             var indexForNewCard = _.intval(selectVal);  // See selectNextCard
+
+            // If this is a resume, we've been given originally logged data
+            // that we need to grab
+            if (!!resumeData) {
+                _.extend(card, resumeData.cardModelData);
+                _.extend(currentCardInfo, resumeData.currentCardInfo);
+                if (currentCardInfo.clusterIndex != indexForNewCard) {
+                    console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, indexForNewCard);
+                }
+                return;
+            }
+
             var cardProbs = getCardProbs();
             cardProbs.numQuestionsIntroduced += 1;
 
@@ -458,12 +476,6 @@ function modelUnitEngine() {
             if (getTestType() === 's') {
                 card.studyTrialCount += 1;
             }
-
-            // If this is a resume, we've been given originally logged data that
-            // we need to grab
-            if (!!resumeData) {
-                _.extend(card, resumeData.cardModelData);
-            }
         },
 
         createQuestionLogEntry: function() {
@@ -471,6 +483,7 @@ function modelUnitEngine() {
             var card = getCardProbs().cards[idx];
             return {
                 cardModelData: _.omit(card, ["question", "answer"]),
+                'currentCardInfo': _.extend({}, currentCardInfo)
             };
         },
 
@@ -491,12 +504,10 @@ function modelUnitEngine() {
                 cardProbs.numCorrectAnswers += 1;
             }
 
+            var cluster = getStimCluster(getCurrentClusterIndex());
             var card = null;
-            var answerText = null;
             try {
-                var cluster = getStimCluster(getCurrentClusterIndex());
                 card = cardProbs.cards[cluster.clusterIndex];
-                answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
             }
             catch(err) {
                 console.log("Error getting card for update", err);
@@ -511,11 +522,19 @@ function modelUnitEngine() {
                     if (wasCorrect) card.stims[stim].stimSuccessCount += 1;
                     else            card.stims[stim].stimFailureCount += 1;
                 }
+            }
 
-                if (answerText) {
-                    if (wasCorrect) card.responses[answerText].responseSuccessCount += 1;
-                    else            card.responses[answerText].responseFailureCount += 1;
-                }
+            var answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
+            if (answerText && answerText in cardProbs.responses) {
+                if (wasCorrect) cardProbs.responses[answerText].responseSuccessCount += 1;
+                else            cardProbs.responses[answerText].responseFailureCount += 1;
+            }
+            else {
+                console.log("COULD NOT STORE RESPONSE METRICS",
+                    answerText,
+                    currentCardInfo.whichStim,
+                    displayify(cluster.response),
+                    displayify(cardProbs.responses));
             }
 
             calculateCardProbabilities();
