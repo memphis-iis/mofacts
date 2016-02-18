@@ -1,39 +1,95 @@
 /* unitEngine.js
- * Unit engines handle question/answer selection for a particular unit. This
- * abstraction let's us treat scheduled-based and module-based units the same
- * in card.js
- *
- * A unit engine is "created" by returning an object from a function - note
- * that this is slightly different from JavaScript prototype object creation,
- * so these engines aren't created with the "new" keyword.
- *
- * Also note that the engines may assume that they are added on to the object
- * from defaultUnitEngine via _.extend
- *
- * A note about the session variable "ignoreClusterMapping"
- * --------------------------------------------------------
- * Cluster mapping is created and maintained by resume logic in card.js. It is
- * honored by the utility functions in currentTestingHelpers.js. The mapping is
- * based on the top-level shuffle/swap-type cluster mapping. Generally this mapping
- * should be remembered per-user per-experiment after creation and honored. However,
- * some units (currently just model-based units) actually want this functionality
- * ignored (although the unit itself can select certain clusters). As a result,
- * you'll see that our default model sets ignoreClusterMapping to False before
- * calling the engine's initImpl method. If you need to turn off ignoreClusterMapping,
- * you MUST do it in the engine's initImpl method (as we do in modelUnitEngine).
- * We will also set it explicitly on one-time startup.
-*/
+*******************************************************************************
+Unit engines handle question/answer selection for a particular unit. This
+abstraction let's us treat scheduled-based and module-based units the same in
+card.js
+
+A unit engine is "created" by returning an object from a function - note that
+this is slightly different from JavaScript prototype object creation, so these
+engines aren't created with the "new" keyword.
+
+Also note that the engines may assume that they are added on to the object
+from defaultUnitEngine via _.extend
+
+The engine "API"
+--------------------------
+
+We provide creation functions for each of the "unit engines" defined here. A
+unit engine extends the result of the defaultUnitEngine function call (via the
+_.extend function). A unit engine is required to implement:
+
+* field unitType - it should be a string identifying what kind of unit is
+supported (note that this will be logged in the UserTimesLog)
+
+* function selectNextCard - when called the engine will select the next card
+for display _and_ set the appropriate Session variables. The function should
+also return the cluster index identifying the card just selected.
+
+* function cardSelected (accepts selectVal and resumeData) - this function is
+called when a card is selected. It will also be called on resume. During "real
+time" use the function is called with the return value of selectNextCard (see
+above). During resume, seledctVal is set to the the cluster index in the user
+log. resumeData is set if and only if resume is happening. It will be the user
+log entry - note that this entry should be what was previously returned by
+createQuestionLogEntry (see below) plus any additional fields added during the
+server-side write.
+
+* function findCurrentCardInfo - when called, then engine should return an
+object with the currently selected card's information. See the model unit for
+an explicit definition of these fields. Note that the schedule unit just
+return an item from the current schedule's q array.
+
+* function createQuestionLogEntry - when called, the engined should return an
+object with all fields that should be written to the user log. This is used by
+writeQuestionEntry (see below). Also note that this object is what will be in
+the resumeData parameter in a call to cardSelected during resume logic (see
+above).
+
+* function cardAnswered (accepts wasCorrect) - called after the user provides
+a response. wasCorrect is a boolean value specifying whether the user
+correctly answered or not. Note that this function _IS_ called for study
+trials (even though no answer is given) - see the model unit engine for an
+example if why this matters.
+
+* function unitFinished - the unit engine should return true if the unit is
+completed (nothing more to display)
+
+* function initImpl - OPTIONAL! An engine may implement this function if it
+needs special startup logic to be called before it is used.
+
+* function writeQuestionEntry - Should _NOT_ be implemented by the engine.
+This function is supplied by the default (base) engine
+
+
+
+A note about the session variable "ignoreClusterMapping"
+--------------------------------------------------------
+
+Cluster mapping is created and maintained by resume logic in card.js. It is
+honored by the utility functions in currentTestingHelpers.js. The mapping is
+based on the top-level shuffle/swap-type cluster mapping. Generally this
+mapping should be remembered per-user per-experiment after creation and
+honored. However, some units (currently just model-based units) actually want
+this functionality ignored (although the unit itself can select certain
+clusters). As a result, you'll see that our default model sets
+ignoreClusterMapping to False before calling the engine's initImpl method. If
+you need to turn off ignoreClusterMapping, you MUST do it in the engine's
+initImpl method (as we do in modelUnitEngine). We will also set it explicitly
+on one-time startup.
+
+******************************************************************************/
 
 // First-time init of ignoreClusterMapping (see above)
 Session.set("ignoreClusterMapping", false);
 
-// Our "public" functions
-
+//Helper for our "public" functions
 function create(func) {
     var engine = _.extend(defaultUnitEngine(), func());
     engine.init();
     return engine;
 }
+
+// Our "public" functions
 
 createEmptyUnit = function() {
     return create(emptyUnitEngine);
@@ -53,8 +109,6 @@ function defaultUnitEngine() {
         // Things actual engines must supply
         unitType: "DEFAULT",
         selectNextCard: function() { throw "Missing Implementation"; },
-        cardSelected: function(selectVal) { throw "Missing Implementation"; },
-        findCurrentCardInfo: function() { throw "Missing Implementation"; },
         createQuestionLogEntry: function() { throw "Missing Implementation"; },
         cardAnswered: function(wasCorrect) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
@@ -91,7 +145,7 @@ function emptyUnitEngine() {
 
         selectNextCard: function() { },
         findCurrentCardInfo: function() { },
-        cardSelected: function(selectVal) { },
+        cardSelected: function(selectVal, resumeData) { },
         createQuestionLogEntry: function() { },
         cardAnswered: function(wasCorrect) { }
     };
@@ -200,7 +254,7 @@ function modelUnitEngine() {
             for (j = 0; j < numStims; ++j) {
                 // Per-stim counts
                 card.stims.push({
-                    stimSuccessCount: 0,  //TODO: shouldn't include study
+                    stimSuccessCount: 0,
                     stimFailureCount: 0,
                 });
 
@@ -395,7 +449,7 @@ function modelUnitEngine() {
             return currentCardInfo;
         },
 
-        cardSelected: function(selectVal) {
+        cardSelected: function(selectVal, resumeData) {
             var indexForNewCard = _.intval(selectVal);  // See selectNextCard
             var cardProbs = getCardProbs();
             cardProbs.numQuestionsIntroduced += 1;
@@ -416,6 +470,12 @@ function modelUnitEngine() {
             if (getTestType() === 's') {
                 card.studyTrialCount += 1;
             }
+
+            // If this is a resume, we've been given originally logged data that
+            // we need to grab
+            if (!!resumeData) {
+                _.extend(card, resumeData.cardModelData);
+            }
         },
 
         createQuestionLogEntry: function() {
@@ -427,6 +487,16 @@ function modelUnitEngine() {
         },
 
         cardAnswered: function(wasCorrect) {
+            // Study trials are a special case: we don't updated any of the
+            // metrics below. As a result, we just calculate probabilities and
+            // leave. Note that the calculate call is important because this is
+            // the only place we call it after init *and* something might have
+            // changed during question selection
+            if (getTestType() === 's') {
+                calculateCardProbabilities();
+                return;
+            }
+
             var cardProbs = getCardProbs();
             cardProbs.numQuestionsAnswered += 1;
             if (wasCorrect) {
@@ -569,7 +639,7 @@ function scheduleUnitEngine() {
             return getSchedule().q[Session.get("questionIndex") - 1];
         },
 
-        cardSelected: function(selectVal) {
+        cardSelected: function(selectVal, resumeData) {
             //Nothing currently
         },
 
