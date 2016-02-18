@@ -250,7 +250,7 @@ function modelUnitEngine() {
 
             // We keep per-stim and re-response-text results as well
             var cluster = getStimCluster(i);
-            var numStims = _.chain(cluster).prop("display").prop("length").intval.value();
+            var numStims = _.chain(cluster).prop("display").prop("length").intval().value();
             for (j = 0; j < numStims; ++j) {
                 // Per-stim counts
                 card.stims.push({
