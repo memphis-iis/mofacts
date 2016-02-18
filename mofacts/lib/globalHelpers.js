@@ -134,3 +134,29 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         return userProgress;
     };
 }
+
+// Useful function for display and debugging objects: returns an OK JSON
+// pretty-print textual representation of the object
+//Helpful wrapper around JSON.stringify, including timestamp field expansion
+displayify = function(obj) {
+    if (typeof obj === "string" || typeof obj === "number") {
+        return obj;
+    }
+    var dispObj = _.extend({}, obj);
+
+    try {
+        for (var prop in dispObj) {
+            if (prop.toLowerCase().endsWith('timestamp')) {
+                var ts = _.intval(_.prop(obj, prop));
+                if (ts > 0) {
+                    dispObj[prop] = " " + new Date(ts) + " (converted from " + ts + ")";
+                }
+            }
+        }
+    }
+    catch(e) {
+        console.log("Object displayify error", e);
+    }
+
+    return JSON.stringify(dispObj, null, 2);
+};
