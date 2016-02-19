@@ -276,7 +276,9 @@ function modelUnitEngine() {
 
         // Remember, a card is a cluster
         _.each(cards, function(card) {
-            //Correct and incorrect responses for the cluster
+            // TODO: grab all possible variables into local scope
+            // TODO: add a "whichStim loop" and grab all variables
+            // Correct and incorrect responses for the cluster
             var questionSuccessCount = card.questionSuccessCount;
             var questionFailureCount = card.questionFailureCount;
             var totalQuestionTests = questionSuccessCount + questionFailureCount;
@@ -427,12 +429,14 @@ function modelUnitEngine() {
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+                // TODO: log top-level numbers
+
                 // Log the entire card, which includes most stats
                 console.log("Model selected card:", displayify(card));
 
                 // Log time stats in human-readable form
                 var secs = function(t) { return (t / 1000.0) + ' secs'; };
-                var elaspedStr = function(t) { return t < 1 ? 'Never Seen': secs(Date.now() - t); };
+                var elapsedStr = function(t) { return t < 1 ? 'Never Seen': secs(Date.now() - t); };
                 console.log(
                     'Card First Seen:', elapsedStr(card.firstShownTimestamp),
                     'Card Last Seen:', elapsedStr(card.lastShownTimestamp),
