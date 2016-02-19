@@ -75,7 +75,11 @@ if (_ && _.mixin) {
             else {
                 return ss.replace(/^\s+|\s+$/gm, '');
             }
-        }
+        },
+
+        sum: function(lst) {
+            return _.reduce(lst, function(memo, num){ return memo + num; }, 0);    
+        },
     });
 }
 
