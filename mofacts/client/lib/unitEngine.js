@@ -45,11 +45,12 @@ writeQuestionEntry (see below). Also note that this object is what will be in
 the resumeData parameter in a call to cardSelected during resume logic (see
 above).
 
-* function cardAnswered (accepts wasCorrect) - called after the user provides
-a response. wasCorrect is a boolean value specifying whether the user
-correctly answered or not. Note that this function _IS_ called for study
-trials (even though no answer is given) - see the model unit engine for an
-example if why this matters.
+* function cardAnswered (accepts wasCorrect and resumeData) - called after the
+user provides a response. wasCorrect is a boolean value specifying whether the
+user correctly answered or not. resumeData is specified if and only if resume
+mode is active (just like cardSelected - see above). Note that this function
+_IS_ called for study trials (even though no answer is given) - see the model
+unit engine for an example if why this matters.
 
 * function unitFinished - the unit engine should return true if the unit is
 completed (nothing more to display)
@@ -59,7 +60,6 @@ needs special startup logic to be called before it is used.
 
 * function writeQuestionEntry - Should _NOT_ be implemented by the engine.
 This function is supplied by the default (base) engine
-
 
 
 A note about the session variable "ignoreClusterMapping"
@@ -109,8 +109,9 @@ function defaultUnitEngine() {
         // Things actual engines must supply
         unitType: "DEFAULT",
         selectNextCard: function() { throw "Missing Implementation"; },
+        cardSelected: function(selectVal, resumeData) { throw "Missing Implementation"; },
         createQuestionLogEntry: function() { throw "Missing Implementation"; },
-        cardAnswered: function(wasCorrect) { throw "Missing Implementation"; },
+        cardAnswered: function(wasCorrect, resumeData) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
 
         // Optional functions that engines can replace if they want
@@ -147,7 +148,7 @@ function emptyUnitEngine() {
         findCurrentCardInfo: function() { },
         cardSelected: function(selectVal, resumeData) { },
         createQuestionLogEntry: function() { },
-        cardAnswered: function(wasCorrect) { }
+        cardAnswered: function(wasCorrect, resumeData) { }
     };
 }
 
@@ -156,26 +157,25 @@ function emptyUnitEngine() {
 
 /* Stats information: we track the following stats in the card info structure.
    (All properties are relative to the object returned by getCardProbs())
-    - Total stimuli shown to user: numQuestionsIntroduced
-    - Total responses given by user: numQuestionsAnswered
-    - Total correct NON-STUDY responses given by user: numCorrectAnswers
-    - Cluster correct answer count - card.questionSuccessCount
-    - Cluster incorrect answer count - card.questionFailureCount
-    - Last time cluster was shown (in milliseconds since the epoch) - card.lastShownTimestamp
-    - First time cluster was shown (in milliseconds since the epoch) - card.firstShownTimestamp
-    - Trials since cluster seen - card.trialsSinceLastSeen
-    - If user has seen cluster - card.hasBeenIntroduced
-    - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
-    - Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
-    - Correct answer count for answer (correct response) text - responses.responseSuccessCount
-    - Incorrect answer count for answer (correct response) text - responses.responseFailureCount
-    - Count of times study trials shown per cluster - card.studyTrialCount
+
+- Total stimuli shown to user: numQuestionsIntroduced
+- Total responses given by user: numQuestionsAnswered
+- Total correct NON-STUDY responses given by user: numCorrectAnswers
+- Cluster correct answer count - card.questionSuccessCount
+- Cluster incorrect answer count - card.questionFailureCount
+- Last time cluster was shown (in milliseconds since the epoch) - card.lastShownTimestamp
+- First time cluster was shown (in milliseconds since the epoch) - card.firstShownTimestamp
+- Trials since cluster seen - card.trialsSinceLastSeen
+- If user has seen cluster - card.hasBeenIntroduced
+- Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
+- Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
+- Correct answer count for answer (correct response) text - responses.responseSuccessCount
+- Incorrect answer count for answer (correct response) text - responses.responseFailureCount
+- Count of times study trials shown per cluster - card.studyTrialCount
+- Practice times for the trials per cluster - this ia an ordered list of times,
+  each the number of milliseconds in practice - card.practiceTimes
 */
 
-
-//TODO: init and document, increment, then log and test
-//Time in seconds since cluster (not version) first seen (summed time in practice)
-//Includes study, drill, and test (so must be capturing in question)
 
 function modelUnitEngine() {
     //Checked against practice seconds. Notice that we capture this on unit
@@ -220,7 +220,8 @@ function modelUnitEngine() {
                 probability: 0.0,
                 hasBeenIntroduced: false,
                 canUse: false,
-                stims: []
+                stims: [],
+                practiceTimes: [],
             };
 
             // We keep per-stim and re-response-text results as well
@@ -426,17 +427,20 @@ function modelUnitEngine() {
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+                // Log the entire card, which includes most stats
                 console.log("Model selected card:", displayify(card));
 
-                var timeSinceLastSeen = card.lastShownTimestamp < 1 ?
-                    'Never Seen' :
-                    ((Date.now() - card.lastShownTimestamp) / 1000.0) + ' secs';
-                var timeSinceFirstSeen = card.firstShownTimestamp < 1 ?
-                    'Never Seen' :
-                    ((Date.now() - card.firstShownTimestamp) / 1000.0) + ' secs';
+                // Log time stats in human-readable form
+                var secs = function(t) { return (t / 1000.0) + ' secs'; };
+                var elaspedStr = function(t) { return t < 1 ? 'Never Seen': secs(Date.now() - t); };
+                console.log(
+                    'Card First Seen:', elapsedStr(card.firstShownTimestamp),
+                    'Card Last Seen:', elapsedStr(card.lastShownTimestamp),
+                    'Total time in practice:', secs(_.sum(card.practiceTimes)),
+                    'Previous Practice Times:', displayify(_.map(card.practiceTimes, secs))
+                );
 
-                console.log('Card First Seen:', timeSinceFirstSeen, "Card Last Seen:", timeSinceLastSeen);
-
+                // Display response and current response stats
                 var responseText = Answers.getDisplayAnswerText(getStimCluster(indexForNewCard).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbs.responses[responseText]));
             }
@@ -492,23 +496,9 @@ function modelUnitEngine() {
             };
         },
 
-        cardAnswered: function(wasCorrect) {
-            // Study trials are a special case: we don't updated any of the
-            // metrics below. As a result, we just calculate probabilities and
-            // leave. Note that the calculate call is important because this is
-            // the only place we call it after init *and* something might have
-            // changed during question selection
-            if (getTestType() === 's') {
-                calculateCardProbabilities();
-                return;
-            }
-
+        cardAnswered: function(wasCorrect, resumeData) {
+            // Get info we need for updates and logic below
             var cardProbs = getCardProbs();
-            cardProbs.numQuestionsAnswered += 1;
-            if (wasCorrect) {
-                cardProbs.numCorrectAnswers += 1;
-            }
-
             var cluster = getStimCluster(getCurrentClusterIndex());
             var card = null;
             try {
@@ -518,6 +508,29 @@ function modelUnitEngine() {
                 console.log("Error getting card for update", err);
             }
 
+            // Before our study trial check, capture if this is NOT a resume
+            // call (and we captured the time for the last question)
+            if (!resumeData && card.lastShownTimestamp > 0) {
+                card.practiceTimes.push(Date.now() - card.lastShownTimestamp);
+            }
+
+            // Study trials are a special case: we don't update any of the
+            // metrics below. As a result, we just calculate probabilities and
+            // leave. Note that the calculate call is important because this is
+            // the only place we call it after init *and* something might have
+            // changed during question selection
+            if (getTestType() === 's') {
+                calculateCardProbabilities();
+                return;
+            }
+
+            // "Global" stats
+            cardProbs.numQuestionsAnswered += 1;
+            if (wasCorrect) {
+                cardProbs.numCorrectAnswers += 1;
+            }
+
+            // "Card-level" stats (and below - e.g. stim-level stats)
             if (card) {
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
@@ -529,6 +542,7 @@ function modelUnitEngine() {
                 }
             }
 
+            // "Response" stats
             var answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
             if (answerText && answerText in cardProbs.responses) {
                 if (wasCorrect) cardProbs.responses[answerText].responseSuccessCount += 1;
@@ -542,6 +556,7 @@ function modelUnitEngine() {
                     displayify(cardProbs.responses));
             }
 
+            // All stats gathered - calculate probabilities
             calculateCardProbabilities();
         },
 
@@ -667,7 +682,7 @@ function scheduleUnitEngine() {
 
         },
 
-        cardAnswered: function(wasCorrect) {
+        cardAnswered: function(wasCorrect, resumeData) {
             //Nothing currently
         },
 

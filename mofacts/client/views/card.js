@@ -1303,7 +1303,7 @@ function processUserTimesLog() {
             );
 
             //Notify unit engine about card answer
-            engine.cardAnswered(wasCorrect);
+            engine.cardAnswered(wasCorrect, entry);
 
             //We know the last question no longer applies
             lastQuestionEntry = null;
