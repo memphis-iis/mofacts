@@ -371,12 +371,17 @@ function modelUnitEngine() {
         },
 
         selectNextCard: function() {
+            // The cluster (card) index, the cluster version (stim index), and
+            // whether or not we should show the overlearning text is determined
+            // here. See calculateCardProbabilities for how card.probability is
+            // calculated
+            var indexForNewCard;
+            var whichStim = 0; // Currently no version selection in the model
+            var showOverlearningText = false;
+
             var cardProbs = getCardProbs();
             var numItemsPracticed = cardProbs.numQuestionsAnswered;
             var cards = cardProbs.cards;
-
-            var indexForNewCard;
-            var showOverlearningText = false;
 
             if (numItemsPracticed === 0) {
                 indexForNewCard = findNewCard(cards);
@@ -407,7 +412,6 @@ function modelUnitEngine() {
 
             // Found! Update everything and grab a reference to the card
             var card = cards[indexForNewCard];
-            var whichStim = 0; // Currently no version selection in the model
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
@@ -429,7 +433,13 @@ function modelUnitEngine() {
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-                // TODO: log top-level numbers
+                console.log(">>>BEGIN METRICS>>>>>>>");
+
+                console.log("Overall user stats => ",
+                    "total trials:", cardProbs.numQuestionsIntroduced,
+                    "total responses:", cardProbs.numQuestionsAnswered,
+                    "total correct responses:", cardProbs.numCorrectAnswers
+                );
 
                 // Log the entire card, which includes most stats
                 console.log("Model selected card:", displayify(card));
@@ -447,6 +457,8 @@ function modelUnitEngine() {
                 // Display response and current response stats
                 var responseText = Answers.getDisplayAnswerText(getStimCluster(indexForNewCard).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbs.responses[responseText]));
+
+                console.log("<<<END   METRICS<<<<<<<");
             }
 
             return indexForNewCard; //Must return index for call to cardSelected
