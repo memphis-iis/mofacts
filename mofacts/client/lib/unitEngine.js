@@ -308,11 +308,11 @@ function modelUnitEngine() {
                 var stim = card.stims[i];
                 var stimSuccessCount = card.stims[i].stimSuccessCount;
                 var stimFailureCount = card.stims[i].stimFailureCount;
-                var stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, j));
+                var stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, i));
                 var resp = cardProbs.responses[stimResponseText];
                 var responseSuccessCount = resp.responseSuccessCount;
                 var responseFailureCount = resp.responseFailureCount;
-                var stimParameter = getStimParameter(cardIndex, j);
+                var stimParameter = getStimParameter(cardIndex, i);
 
                 // NOTE: Anything we would do/change/store per stim (cluster
                 // version) would go here
@@ -505,6 +505,9 @@ function modelUnitEngine() {
             var cards = cardProbs.cards;
             var card = cards[indexForNewCard];
 
+            // Update our top-level stats
+            cardProbs.numQuestionsIntroduced += 1;
+
             // If this is a resume, we've been given originally logged data
             // that we need to grab
             if (!!resumeData) {
@@ -515,9 +518,6 @@ function modelUnitEngine() {
                 }
                 return;
             }
-
-            // Update our top-level stats
-            cardProbs.numQuestionsIntroduced += 1;
 
             // Update stats for the card
             card.trialsSinceLastSeen = 0;
