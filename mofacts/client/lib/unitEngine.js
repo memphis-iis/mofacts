@@ -457,7 +457,11 @@ function modelUnitEngine() {
         },
 
         cardSelected: function(selectVal, resumeData) {
+            // Find objects we'll be touching
             var indexForNewCard = _.intval(selectVal);  // See selectNextCard
+            var cardProbs = getCardProbs();
+            var cards = cardProbs.cards;
+            var card = cards[indexForNewCard];
 
             // If this is a resume, we've been given originally logged data
             // that we need to grab
@@ -470,25 +474,23 @@ function modelUnitEngine() {
                 return;
             }
 
-            var cardProbs = getCardProbs();
+            // Update our top-level stats
             cardProbs.numQuestionsIntroduced += 1;
 
-            var cards = cardProbs.cards;
-            //It has now been officially one more trial since all the other cards
-            //have been seen
-            _.each(cards, function(card, index) {
-                if (index != indexForNewCard) {
-                    card.trialsSinceLastSeen += 1;
-                }
-            });
-
-            //Now card has been introduced/seen
-            var card = cards[indexForNewCard];
+            // Update stats for the card
             card.trialsSinceLastSeen = 0;
             card.hasBeenIntroduced = true;
             if (getTestType() === 's') {
                 card.studyTrialCount += 1;
             }
+
+            // It has now been officially one more trial since all the other cards
+            // have been seen
+            _.each(cards, function(card, index) {
+                if (index != indexForNewCard) {
+                    card.trialsSinceLastSeen += 1;
+                }
+            });
         },
 
         createQuestionLogEntry: function() {
