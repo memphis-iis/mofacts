@@ -268,33 +268,63 @@ function modelUnitEngine() {
         calculateCardProbabilities();
     }
 
-    //Calculate current card probabilities
+    // Calculate current card probabilities for every card - see selectNextCard
+    // the actual card/stim (cluster/version) selection
     function calculateCardProbabilities() {
+        // Get objects we need
         var cardProbs = getCardProbs();
         var totalTrials = cardProbs.numQuestionsAnswered;
         var cards = cardProbs.cards;
 
-        // Remember, a card is a cluster
-        _.each(cards, function(card) {
-            // TODO: grab all possible variables into local scope
-            // TODO: add a "whichStim loop" and grab all variables
-            // Correct and incorrect responses for the cluster
+        // Top-level metrics
+        var userTotalTrials = cardProbs.numQuestionsIntroduced;
+        var userTotalResponses = cardProbs.numQuestionsAnswered;
+        var userCorrectResponses = cardProbs.numCorrectAnswers;
+
+        // A few helpers
+        var secs = function(t) { return t / 1000.0; };
+        var elapsed = function(t) { return t < 1 ? 0 : secs(Date.now() - t); };
+
+        // Remember, a card is a cluster and a "stim" is a version of the cluster
+        _.each(cards, function(card, cardIndex) {
+            // NOTE: card.canUse is true if and only if it is in the clusterlist
+            // for the current unit. You could just return here if these clusters
+            // should be ignored (or do nothing if they should be included below)
+
+            // Current available metrics
             var questionSuccessCount = card.questionSuccessCount;
             var questionFailureCount = card.questionFailureCount;
-            var totalQuestionTests = questionSuccessCount + questionFailureCount;
+            var questionTotalTests = questionSuccessCount + questionFailureCount;
+            var questionTrialsSinceLastSeen = card.trialsSinceLastSeen;
+            var questionStudyTrialCount = card.studyTrialCount;
+            var questionSecsSinceLastShown = elapsed(card.lastShownTimestamp);
+            var questionSecsSinceFirstShown = elapsed(card.firstShownTimestamp);
+            var questionHasBeenIntroduced = card.hasBeenIntroduced;
+            var questionSecsInPractice = secs(_.sum(card.practiceTimes));
 
-            var trialsSinceLastSeen = card.trialsSinceLastSeen;
+            // Optimization: use an "old" style loop so that we don't define
+            // functions (closures) inside the card loop
+            for (var i = 0; i < card.stims.length; ++i) {
+                var stim = card.stims[i];
+                var stimSuccessCount = card.stims[i].stimSuccessCount;
+                var stimFailureCount = card.stims[i].stimFailureCount;
+                var stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, j));
+                var resp = cardProbs.responses[stimResponseText];
+                var responseSuccessCount = resp.responseSuccessCount;
+                var responseFailureCount = resp.responseFailureCount;
+                var stimParameter = getStimParameter(cardIndex, j);
 
-            var trialsSinceLastSeenOverTotalTrials = 0.0;
-            if (totalTrials !== 0) {
-                trialsSinceLastSeenOverTotalTrials = trialsSinceLastSeen / totalTrials;
+                // NOTE: Anything we would do/change/store per stim (cluster
+                // version) would go here
             }
 
+            //Calculate and store probability for card (cluster)
+            var elapsedRatio = totalTrials !== 0 ? questionTrialsSinceLastSeen / totalTrials : 0.0;
             var x = -3.0 +
                     (2.4 * questionSuccessCount) +
                     (0.8 * questionFailureCount) +
-                    (1.0 * totalQuestionTests) +
-                   -(0.3 * trialsSinceLastSeenOverTotalTrials);
+                    (1.0 * questionTotalTests) +
+                   -(0.3 * elapsedRatio);
 
             card.probability = 1.0 / (1.0 + Math.exp(-x));
         });
