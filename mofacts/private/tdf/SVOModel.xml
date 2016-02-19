@@ -53,30 +53,6 @@ Please answer the following 5 quick demographic questions, which may be useful f
         </learningsession>
 
         <deliveryparams>
-            <practiceseconds>30</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-
-        <deliveryparams>
-            <practiceseconds>45</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-
-        <deliveryparams>
             <practiceseconds>60</practiceseconds>
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
