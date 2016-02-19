@@ -161,6 +161,8 @@ function emptyUnitEngine() {
     - Total correct NON-STUDY responses given by user: numCorrectAnswers
     - Cluster correct answer count - card.questionSuccessCount
     - Cluster incorrect answer count - card.questionFailureCount
+    - Last time cluster was shown (in milliseconds since the epoch) - card.lastShownTimestamp
+    - First time cluster was shown (in milliseconds since the epoch) - card.firstShownTimestamp
     - Trials since cluster seen - card.trialsSinceLastSeen
     - If user has seen cluster - card.hasBeenIntroduced
     - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
@@ -170,23 +172,8 @@ function emptyUnitEngine() {
     - Count of times study trials shown per cluster - card.studyTrialCount
 */
 
-//TODO: init and document
-//TODO: increment
-//TODO: log and test
-//Time in seconds since cluster (not version) was last seen (true time)
-//Includes study, drill, and test
 
-//TODO: init and document
-//TODO: increment
-//TODO: log and test
-//Time in seconds since cluster (not version) first seen (true time)
-//Includes study, drill, and test
-
-//(Note that diff of above 2 divided by trial count is = to spacing)
-
-//TODO: init and document
-//TODO: increment
-//TODO: log and test
+//TODO: init and document, increment, then log and test
 //Time in seconds since cluster (not version) first seen (summed time in practice)
 //Includes study, drill, and test (so must be capturing in question)
 
@@ -228,6 +215,8 @@ function modelUnitEngine() {
                 questionFailureCount: 0,
                 studyTrialCount: 0,
                 trialsSinceLastSeen: 0,
+                lastShownTimestamp: 0,
+                firstShownTimestamp: 0,
                 probability: 0.0,
                 hasBeenIntroduced: false,
                 canUse: false,
@@ -392,7 +381,7 @@ function modelUnitEngine() {
                     if (Session.get("debugging")) {
                         console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
                     }
-                    return -1; //TODO: Need some kind of panic for this situation
+                    throw new Error("All cards have been introduced, but numQuestionsAnswered === 0");
                 }
             }
             else {
@@ -426,12 +415,28 @@ function modelUnitEngine() {
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
 
+            // About to show a card - record any times necessary
+            card.lastShownTimestamp = Date.now();
+            if (card.firstShownTimestamp < 1 && card.lastShownTimestamp > 0) {
+                card.firstShownTimestamp = card.lastShownTimestamp;
+            }
+
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(indexForNewCard, whichStim);
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
                 console.log("Model selected card:", displayify(card));
+
+                var timeSinceLastSeen = card.lastShownTimestamp < 1 ?
+                    'Never Seen' :
+                    ((Date.now() - card.lastShownTimestamp) / 1000.0) + ' secs';
+                var timeSinceFirstSeen = card.firstShownTimestamp < 1 ?
+                    'Never Seen' :
+                    ((Date.now() - card.firstShownTimestamp) / 1000.0) + ' secs';
+
+                console.log('Card First Seen:', timeSinceFirstSeen, "Card Last Seen:", timeSinceLastSeen);
+
                 var responseText = Answers.getDisplayAnswerText(getStimCluster(indexForNewCard).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbs.responses[responseText]));
             }
@@ -589,10 +594,7 @@ function scheduleUnitEngine() {
                     unitindex: unit
                 });
                 alert("There is an issue with the TDF - experiment cannot continue");
-                //TODO: these should be part of a "panic" function that is passed to our creator
-                //clearCardTimeout();
-                //leavePage("/profile");
-                return;
+                throw new Error("There is an issue with the TDF - experiment cannot continue");
             }
 
             //We save the current schedule and also log it to the UserTime collection
