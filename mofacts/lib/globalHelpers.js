@@ -78,7 +78,7 @@ if (_ && _.mixin) {
         },
 
         sum: function(lst) {
-            return _.reduce(lst, function(memo, num){ return memo + num; }, 0);    
+            return _.reduce(lst, function(memo, num){ return memo + num; }, 0);
         },
     });
 }
