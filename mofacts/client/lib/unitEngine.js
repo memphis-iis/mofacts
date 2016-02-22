@@ -316,14 +316,14 @@ function modelUnitEngine() {
 
                 // NOTE: Anything we would do/change/store per stim (cluster
                 // version) would go here
-                     
+
                 var baseLevel = 1 / ((1 + questionSecsInPractice + (questionSecsSinceFirstShown - questionSecsInPractice) * .0630) ^ .339);
                 if (questionStudyTrialCount + questionTotalTests === 0)
                 {
                     var meanspacing = 0;
                 } else
                 {
-                    var meanSpacing = log(1 + (100 + questionSecsSinceLastShown - questionSecsSinceFirstShown) 
+                    var meanSpacing = log(1 + (100 + questionSecsSinceLastShown - questionSecsSinceFirstShown)
                     / (questionStudyTrialCount + questionTotalTests));
                 }
                 var intbs = meanSpacing * baseLevel;
@@ -331,13 +331,13 @@ function modelUnitEngine() {
                 //Calculate and store probability for card (cluster)
                 var y = stimParameter+
                 0.866310634*((0.5 + stimSuccessCount)/(1 + stimSuccessCount+stimFailureCount) - 0.5)+
-                0.270707611*((0.5 + questionSuccessCount)/(1 + questionSuccessCount + questionFailureCount) - 0.5)+            
-                0.869477261*((0.5 + responseSuccessCount)/(1 + responseSuccessCount + responseFailureCount) - 0.5)+                     
+                0.270707611*((0.5 + questionSuccessCount)/(1 + questionSuccessCount + questionFailureCount) - 0.5)+
+                0.869477261*((0.5 + responseSuccessCount)/(1 + responseSuccessCount + responseFailureCount) - 0.5)+
                 3.642734384*((0.5 + userCorrectResponses)/(1 + userTotalResponses) - 0.5)+
                 3.714113953*(1/((1 + questionSecsSinceLastShown)^.339))+
                 2.244795778*intbs*log(1+stimSuccessCount+stimFailureCount) +
                 0.447943182*intbs*log(1+questionStudyTrialCount) +
-                0.500901271*intbs*log(1+responseSuccessCount+responseFailureCount);                                                                                                                                                               
+                0.500901271*intbs*log(1+responseSuccessCount+responseFailureCount);
                 card.probability = 1.0 / (1.0 + Math.exp(-y));
                }
         });
