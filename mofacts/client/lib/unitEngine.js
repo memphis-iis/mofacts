@@ -276,14 +276,18 @@ function modelUnitEngine() {
         var totalTrials = cardProbs.numQuestionsAnswered;
         var cards = cardProbs.cards;
 
+        // A few helpers
+        var secs = function(t) { return t / 1000.0; };
+        var elapsed = function(t) { return t < 1 ? 0 : secs(Date.now() - t); };
+        var log = Math.log;
+
         // Top-level metrics
         var userTotalTrials = cardProbs.numQuestionsIntroduced;
         var userTotalResponses = cardProbs.numQuestionsAnswered;
         var userCorrectResponses = cardProbs.numCorrectAnswers;
-
-        // A few helpers
-        var secs = function(t) { return t / 1000.0; };
-        var elapsed = function(t) { return t < 1 ? 0 : secs(Date.now() - t); };
+        var totalPracticeSecs = secs(
+            _.chain(cards).pluck('practiceTimes').flatten().sum().value()
+        );
 
         // Remember, a card is a cluster and a "stim" is a version of the cluster
         _.each(cards, function(card, cardIndex) {
@@ -301,6 +305,8 @@ function modelUnitEngine() {
             var questionSecsSinceFirstShown = elapsed(card.firstShownTimestamp);
             var questionHasBeenIntroduced = card.hasBeenIntroduced;
             var questionSecsInPractice = secs(_.sum(card.practiceTimes));
+            // Total time in practie for all other cards
+            var questionSecsPracticingOthers = totalPracticeSecs - questionSecsInPractice;
 
             // Optimization: use an "old" style loop so that we don't define
             // functions (closures) inside the card loop
@@ -572,7 +578,11 @@ function modelUnitEngine() {
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
             if (!resumeData && card.lastShownTimestamp > 0) {
-                card.practiceTimes.push(Date.now() - card.lastShownTimestamp);
+                var practice = Date.now() - card.lastShownTimestamp;
+                // We assume more than 5 minutes is an artifact of resume logic
+                if (practice < 5 * 60 * 1000) {
+                    card.practiceTimes.push(practice);
+                }
             }
 
             // Study trials are a special case: we don't update any of the
