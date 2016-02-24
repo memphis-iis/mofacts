@@ -323,7 +323,6 @@ function modelUnitEngine() {
                 // NOTE: Anything we would do/change/store per stim (cluster
                 // version) would go here
 
-                // TODO: update vagrantfile with 2gb of RAM
                 // TODO: questionSecsInPractice should be the new time variable from email
                 // TODO: y should be on stims (not cards - they don't have one)
                 // TODO: card selection should be stim selection
