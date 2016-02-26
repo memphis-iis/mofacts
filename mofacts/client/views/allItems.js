@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
-Template.profile.helpers({
+Template.allItems.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
@@ -15,7 +15,7 @@ Template.profile.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.profile.events({
+Template.allItems.events({
     'click .logoutLink' : function (event) {
         event.preventDefault();
         Meteor.logout( function (error) {
@@ -34,20 +34,14 @@ Template.profile.events({
         Router.go("/profile");
     },
 
-    'click .allItemsLink' : function (event) {
+    'click .adminLink' : function (event) {
         event.preventDefault();
-        Router.go("/allItems");
+        Router.go("/admin");
     },
 
     'click .allStudentsLink' : function (event) {
         event.preventDefault();
         Router.go("/allStudents");
-    },
-
-
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
     },
 
     // Start a TDF
@@ -66,7 +60,7 @@ Template.profile.events({
     }
 });
 
-Template.profile.rendered = function () {
+Template.allItems.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 

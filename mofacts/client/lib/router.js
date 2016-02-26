@@ -76,3 +76,12 @@ Router.route('/instructions', function () {
 Router.route('/stats', function () {
     this.render('statsPage');
 });
+
+Router.route('/allStudents', function () {
+    this.render('allStudents');
+});
+
+Router.route('/allItems', function () {
+    Session.set("clusterMapping", "");
+    this.render('allItems');
+});
