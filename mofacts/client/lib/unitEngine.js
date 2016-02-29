@@ -393,11 +393,12 @@ function modelUnitEngine() {
         var indexToReturn = 0;
 
         for (var i = probs.length - 1; i >= 0; --i) {
-            var card = cards[probs[i].cardIndex];
-            var stim = card.stims[probs[i].stimIndex];
+            var prob = probs[i];
+            var card = cards[prob.cardIndex];
+
             if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
-                if (stim.probability < currentMin) {
-                    currentMin = stim.probability;
+                if (prob.probability < currentMin) {   // Note that this is stim probability
+                    currentMin = prob.probability;
                     indexToReturn = i;
                 }
             }
@@ -413,12 +414,13 @@ function modelUnitEngine() {
         var indexToReturn = -1;
 
         for (var i = probs.length - 1; i >= 0; --i) {
-            var card = cards[probs[i].cardIndex];
-            var stim = card.stims[probs[i].stimIndex];
+            var prob = probs[i];
+            var card = cards[prob.cardIndex];
 
             if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
-                if (stim.probability > currentMax && stim.probability < ceiling) {
-                    currentMax = stim.probability;
+                // Note that we are checking stim probability
+                if (prob.probability > currentMax && prob.probability < ceiling) {
+                    currentMax = prob.probability;
                     indexToReturn = i;
                 }
             }
@@ -427,12 +429,14 @@ function modelUnitEngine() {
         return indexToReturn;
     }
 
-    //Return true if there are NO probs(for card+stim) whose probability < prob
-    function noCardsUnderProb(cards, probs, prob) {
+    //Return true if there are NO probs(for card+stim) whose probability < ceiling
+    function noCardsUnderProb(cards, probs, ceiling) {
         for (var i = probs.length - 1; i >= 0; --i) {
-            var card = cards[probs[i].cardIndex];
-            // currently unused: var stim = card.stims[probs[i].stimIndex];
-            if (card.canUse && card.probability < prob) {
+            var prob = probs[i];
+            var card = cards[prob.cardIndex];
+
+            // Note that this is stimulus probability
+            if (card.canUse && prob.probability < ceiling) {
                 return false;
             }
         }
@@ -464,6 +468,7 @@ function modelUnitEngine() {
 
             if (numItemsPracticed === 0) {
                 newProbIndex = findNewProb(cards, probs);
+                console.log('SELECTED: no items practiced', newProbIndex);
                 if (newProbIndex === -1) {
                     if (Session.get("debugging")) {
                         console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
@@ -477,6 +482,7 @@ function modelUnitEngine() {
                     var numIntroduced = cardProbs.numQuestionsIntroduced;
                     if (noCardsUnderProb(cards, probs, 0.85) && numIntroduced === cards.length) {
                         newProbIndex = findMinProbCard(cards);
+                        console.log('SELECTED: no max, no cards under .85, used min prob', newProbIndex);
                         showOverlearningText = true;
                     }
                     else {
@@ -484,8 +490,17 @@ function modelUnitEngine() {
                         if (newProbIndex === -1) {
                             //if we have introduced all of the cards.
                             newProbIndex = findMinProbCard(cards, probs);
+                            console.log('SELECTED: no max, not all intro, could not find new, used min prob', newProbIndex);
+                        }
+                        else {
+                            //TODO: remove this else
+                            console.log('SELECTED: no max, not all intro, find new worked', newProbIndex);
                         }
                     }
+                }
+                else {
+                    //TODO: remove this else
+                    console.log('SELECTED: found max prob card', newProbIndex);
                 }
             }
 
