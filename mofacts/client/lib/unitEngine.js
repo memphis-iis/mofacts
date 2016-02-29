@@ -169,11 +169,16 @@ function emptyUnitEngine() {
 - If user has seen cluster - card.hasBeenIntroduced
 - Correct answer count for stim (cluster version) - card.stims.stimSuccessCount
 - Incorrect answer count for stim (cluster version) - card.stims.stimFailureCount
+- If user has seen specific stimulus in a cluster - card.stims.hasBeenIntroduced
 - Correct answer count for answer (correct response) text - responses.responseSuccessCount
 - Incorrect answer count for answer (correct response) text - responses.responseFailureCount
 - Count of times study trials shown per cluster - card.studyTrialCount
 - Practice times for the trials per cluster - this ia an ordered list of times,
   each the number of milliseconds in practice - card.practiceTimes
+- Total time (in seconds) that other cards have been practiced since a card's
+  FIRST practice - card.otherPracticeTimeSinceFirst
+- Total time (in seconds) that other cards have been practiced since a card's
+  LAST practice - card.otherPracticeTimeSinceLast
 */
 
 
@@ -202,13 +207,16 @@ function modelUnitEngine() {
 
     // Initialize cards as we'll need them for the created engine (for current
     // model). Note that we assume TDF/Stimulus is set up and correct - AND
-    // that we've already turned off cluster mapping
+    // that we've already turned off cluster mapping. You'll note that although
+    // we nest stims under cards, we maintain a "flat" list of probabilities -
+    // this is to speed up calculations and make iteration below easier
     function initializeActRModel() {
         var i, j;
 
         var numQuestions = getStimClusterCount();
         var initCards = [];
         var initResponses = {};
+        var initProbs = [];
         for (i = 0; i < numQuestions; ++i) {
             var card = {
                 questionSuccessCount: 0,
@@ -217,11 +225,12 @@ function modelUnitEngine() {
                 trialsSinceLastSeen: 0,
                 lastShownTimestamp: 0,
                 firstShownTimestamp: 0,
-                probability: 0.0,
                 hasBeenIntroduced: false,
                 canUse: false,
                 stims: [],
                 practiceTimes: [],
+                otherPracticeTimeSinceFirst: 0,
+                otherPracticeTimeSinceLast: 0
             };
 
             // We keep per-stim and re-response-text results as well
@@ -232,6 +241,13 @@ function modelUnitEngine() {
                 card.stims.push({
                     stimSuccessCount: 0,
                     stimFailureCount: 0,
+                    hasBeenIntroduced: false,
+                });
+
+                initProbs.push({
+                    cardIndex: i,
+                    stimIndex: j,
+                    probability: 0
                 });
 
                 // Per-response counts
@@ -262,7 +278,11 @@ function modelUnitEngine() {
         }
 
         //Re-init the card probabilities
-        initCardProbs({ cards: initCards, responses: initResponses });
+        initCardProbs({
+            cards: initCards,
+            responses: initResponses,
+            probs: initProbs
+        });
 
         //has to be done once ahead of time to give valid values for the beginning of the test.
         calculateCardProbabilities();
@@ -275,6 +295,7 @@ function modelUnitEngine() {
         var cardProbs = getCardProbs();
         var totalTrials = cardProbs.numQuestionsAnswered;
         var cards = cardProbs.cards;
+        var probs = cardProbs.probs;
 
         // A few helpers
         var secs = function(t) { return t / 1000.0; };
@@ -289,11 +310,16 @@ function modelUnitEngine() {
             _.chain(cards).pluck('practiceTimes').flatten().sum().value()
         );
 
-        // Remember, a card is a cluster and a "stim" is a version of the cluster
-        _.each(cards, function(card, cardIndex) {
+        // Note that we use a "flat" probability structure - this is faster than
+        // a loop over our nested data structure, but it also gives us more readable
+        // code when we're setting something per stimulus
+        for (var i = 0; i < probs.length; ++i) {
             // NOTE: card.canUse is true if and only if it is in the clusterlist
             // for the current unit. You could just return here if these clusters
             // should be ignored (or do nothing if they should be included below)
+            var prob = probs[i];
+            var card = cards[prob.cardIndex];
+            var stim = card.stims[prob.stimIndex];
 
             // Current available metrics
             var questionSuccessCount = card.questionSuccessCount;
@@ -304,62 +330,54 @@ function modelUnitEngine() {
             var questionSecsSinceLastShown = elapsed(card.lastShownTimestamp);
             var questionSecsSinceFirstShown = elapsed(card.firstShownTimestamp);
             var questionHasBeenIntroduced = card.hasBeenIntroduced;
-            var questionSecsInPractice = secs(_.sum(card.practiceTimes));
-            // Total time in practie for all other cards
-            var questionSecsPracticingOthers = totalPracticeSecs - questionSecsInPractice;
+            // var questionSecsInPractice = secs(_.sum(card.practiceTimes));
+            var questionSecsPracticingOthers = secs(card.otherPracticeTimeSinceFirst);
 
-            // Optimization: use an "old" style loop so that we don't define
-            // functions (closures) inside the card loop
-            for (var i = 0; i < card.stims.length; ++i) {
-                var stim = card.stims[i];
-                var stimSuccessCount = card.stims[i].stimSuccessCount;
-                var stimFailureCount = card.stims[i].stimFailureCount;
-                var stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, i));
-                var resp = cardProbs.responses[stimResponseText];
-                var responseSuccessCount = resp.responseSuccessCount;
-                var responseFailureCount = resp.responseFailureCount;
-                var stimParameter = getStimParameter(cardIndex, i);
+            var stimSuccessCount = stim.stimSuccessCount;
+            var stimFailureCount = stim.stimFailureCount;
+            var stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(prob.cardIndex, prob.stimIndex));
+            var stimHasBeenIntroduced = stim.hasBeenIntroduced;
+            var resp = cardProbs.responses[stimResponseText];
+            var responseSuccessCount = resp.responseSuccessCount;
+            var responseFailureCount = resp.responseFailureCount;
+            var stimParameter = getStimParameter(prob.cardIndex, prob.stimIndex);
 
-                // NOTE: Anything we would do/change/store per stim (cluster
-                // version) would go here
+            var baseLevel = 1 / ((1 + questionSecsPracticingOthers + (questionSecsSinceFirstShown - questionSecsPracticingOthers) * 0.0630) ^ 0.339);
 
-                // TODO: questionSecsInPractice should be the new time variable from email
-                // TODO: y should be on stims (not cards - they don't have one)
-                // TODO: card selection should be stim selection
-                var baseLevel = 1 / ((1 + questionSecsInPractice + (questionSecsSinceFirstShown - questionSecsInPractice) * 0.0630) ^ 0.339);
-
-                var meanSpacing = 0;
-                if (questionStudyTrialCount + questionTotalTests !== 0) {
-                    meanSpacing = log(
-                        1 + (100 + questionSecsSinceLastShown - questionSecsSinceFirstShown) / (questionStudyTrialCount + questionTotalTests)
-                    );
-                }
-                var intbs = meanSpacing * baseLevel;
-
-                //Calculate and store probability for card (cluster)
-                var y = stimParameter+
-                0.866310634*((0.5 + stimSuccessCount)/(1 + stimSuccessCount+stimFailureCount) - 0.5)+
-                0.270707611*((0.5 + questionSuccessCount)/(1 + questionSuccessCount + questionFailureCount) - 0.5)+
-                0.869477261*((0.5 + responseSuccessCount)/(1 + responseSuccessCount + responseFailureCount) - 0.5)+
-                3.642734384*((0.5 + userCorrectResponses)/(1 + userTotalResponses) - 0.5)+
-                3.714113953*(1/((1 + questionSecsSinceLastShown)^0.339))+
-                2.244795778*intbs*log(1+stimSuccessCount+stimFailureCount) +
-                0.447943182*intbs*log(1+questionStudyTrialCount) +
-                0.500901271*intbs*log(1+responseSuccessCount+responseFailureCount);
-                card.probability = 1.0 / (1.0 + Math.exp(-y));
+            var meanSpacing = 0;
+            if (questionStudyTrialCount + questionTotalTests !== 0) {
+                meanSpacing = log(
+                    1 + (100 + questionSecsSinceLastShown - questionSecsSinceFirstShown) / (questionStudyTrialCount + questionTotalTests)
+                );
             }
-        });
+            var intbs = meanSpacing * baseLevel;
+
+            // Calculate and store probability for stim
+            var y = stimParameter+
+            0.866310634*((0.5 + stimSuccessCount)/(1 + stimSuccessCount+stimFailureCount) - 0.5)+
+            0.270707611*((0.5 + questionSuccessCount)/(1 + questionSuccessCount + questionFailureCount) - 0.5)+
+            0.869477261*((0.5 + responseSuccessCount)/(1 + responseSuccessCount + responseFailureCount) - 0.5)+
+            3.642734384*((0.5 + userCorrectResponses)/(1 + userTotalResponses) - 0.5)+
+            3.714113953*(1/((1 + questionSecsSinceLastShown)^0.339))+
+            2.244795778*intbs*log(1+stimSuccessCount+stimFailureCount) +
+            0.447943182*intbs*log(1+questionStudyTrialCount) +
+            0.500901271*intbs*log(1+responseSuccessCount+responseFailureCount);
+
+            prob.probability = 1.0 / (1.0 + Math.exp(-y));
+        }
     }
 
-    //Return index of card that hasn't been introduced (or -1 if we can't find
-    //it). Note that we find in reverse order to mimic a bug in the original
-    //code in case it was an intended side-effect
-    function findNewCard(cards) {
+    // Return index of PROB that hasn't been introduced (or -1 if we can't find
+    // it). Note that we find in reverse order to mimic a bug in the original
+    // code in case it was an intended side-effect
+    function findNewProb(cards, probs) {
         var idx = -1;
 
-        for (var i = cards.length - 1; i >= 0; --i) {
-            var card = cards[i];
-            if (!card.hasBeenIntroduced && card.canUse) {
+        for (var i = probs.length - 1; i >= 0; --i) {
+            var card = cards[probs[i].cardIndex];
+            var stim = card.stims[probs[i].stimIndex];
+            // TODO: Need to confirm this with Phil
+            if (card.canUse && !card.hasBeenIntroduced && !stim.hasBeenIntroduced) {
                 idx = i;
                 break;
             }
@@ -368,47 +386,57 @@ function modelUnitEngine() {
         return idx;
     }
 
-    //Return index of card with minimum probability that was last seen at least
-    //2 trials ago. Default to index 0 in case no cards meet this criterion
-    function findMinProbCard(cards) {
-        var currentMin = 1;
+    // Return index of PROB with minimum probability that was last seen at least
+    // 2 trials ago. Default to index 0 in case no probs meet this criterion
+    function findMinProbCard(cards, probs) {
+        var currentMin = 1.00001;
         var indexToReturn = 0;
 
-        _.each(cards, function(card, index) {
+        for (var i = probs.length - 1; i >= 0; --i) {
+            var card = cards[probs[i].cardIndex];
+            var stim = card.stims[probs[i].stimIndex];
             if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
-                if (card.probability < currentMin) {
-                    currentMin = card.probability;
-                    indexToReturn = index;
+                if (stim.probability < currentMin) {
+                    currentMin = stim.probability;
+                    indexToReturn = i;
                 }
             }
-        });
+        }
 
         return indexToReturn;
     }
 
-    //Return index of card with max probability that is under ceiling. If no
+    //Return index of PROB with max probability that is under ceiling. If no
     //card is found under ceiling then -1 is returned
-    function findMaxProbCard(cards, ceiling) {
+    function findMaxProbCard(cards, probs, ceiling) {
         var currentMax = 0;
         var indexToReturn = -1;
 
-        _.each(cards, function(card, index) {
+        for (var i = probs.length - 1; i >= 0; --i) {
+            var card = cards[probs[i].cardIndex];
+            var stim = card.stims[probs[i].stimIndex];
+
             if (card.canUse && card.hasBeenIntroduced && card.trialsSinceLastSeen > 2) {
-                if (card.probability > currentMax && card.probability < ceiling) {
-                    currentMax = card.probability;
-                    indexToReturn = index;
+                if (stim.probability > currentMax && stim.probability < ceiling) {
+                    currentMax = stim.probability;
+                    indexToReturn = i;
                 }
             }
-        });
+        }
 
         return indexToReturn;
     }
 
-    //Return count of cards whose probability under prob
-    function countCardsUnderProb(cards, prob) {
-        return _.filter(cards, function(card) {
-            return card.canUse && card.probability < prob;
-        }).length;
+    //Return true if there are NO probs(for card+stim) whose probability < prob
+    function noCardsUnderProb(cards, probs, prob) {
+        for (var i = probs.length - 1; i >= 0; --i) {
+            var card = cards[probs[i].cardIndex];
+            // currently unused: var stim = card.stims[probs[i].stimIndex];
+            if (card.canUse && card.probability < prob) {
+                return false;
+            }
+        }
+        return true;
     }
 
     //Our actual implementation
@@ -426,17 +454,17 @@ function modelUnitEngine() {
             // whether or not we should show the overlearning text is determined
             // here. See calculateCardProbabilities for how card.probability is
             // calculated
-            var indexForNewCard;
-            var whichStim = 0; // Currently no version selection in the model
+            var newProbIndex;
             var showOverlearningText = false;
 
             var cardProbs = getCardProbs();
             var numItemsPracticed = cardProbs.numQuestionsAnswered;
             var cards = cardProbs.cards;
+            var probs = cardProbs.probs;
 
             if (numItemsPracticed === 0) {
-                indexForNewCard = findNewCard(cards);
-                if (indexForNewCard === -1) {
+                newProbIndex = findNewProb(cards, probs);
+                if (newProbIndex === -1) {
                     if (Session.get("debugging")) {
                         console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
                     }
@@ -444,31 +472,34 @@ function modelUnitEngine() {
                 }
             }
             else {
-                indexForNewCard = findMaxProbCard(cards, 0.85);
-                if (indexForNewCard === -1) {
+                newProbIndex = findMaxProbCard(cards, probs, 0.85);
+                if (newProbIndex === -1) {
                     var numIntroduced = cardProbs.numQuestionsIntroduced;
-                    if (countCardsUnderProb(cards, 0.85) === 0 && numIntroduced === cards.length) {
-                        indexForNewCard = findMinProbCard(cards);
+                    if (noCardsUnderProb(cards, probs, 0.85) && numIntroduced === cards.length) {
+                        newProbIndex = findMinProbCard(cards);
                         showOverlearningText = true;
                     }
                     else {
-                        indexForNewCard = findNewCard(cards);
-                        if (indexForNewCard === -1) {
+                        newProbIndex = findNewProb(cards, probs);
+                        if (newProbIndex === -1) {
                             //if we have introduced all of the cards.
-                            indexForNewCard = findMinProbCard(cards);
+                            newProbIndex = findMinProbCard(cards, probs);
                         }
                     }
                 }
             }
 
             // Found! Update everything and grab a reference to the card
-            var card = cards[indexForNewCard];
+            var prob = probs[newProbIndex];
+            var cardIndex = prob.cardIndex;
+            var card = cards[cardIndex];
+            var whichStim = prob.stimIndex;
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
-            setCurrentClusterIndex(indexForNewCard);
-            Session.set("currentQuestion", getStimQuestion(indexForNewCard, whichStim));
-            Session.set("currentAnswer", getStimAnswer(indexForNewCard, whichStim));
+            setCurrentClusterIndex(cardIndex);
+            Session.set("currentQuestion", getStimQuestion(cardIndex, whichStim));
+            Session.set("currentAnswer", getStimAnswer(cardIndex, whichStim));
             Session.set("testType", "d");
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
@@ -480,7 +511,7 @@ function modelUnitEngine() {
             }
 
             //Save for returning the info later (since we don't have a schedule)
-            setCurrentCardInfo(indexForNewCard, whichStim);
+            setCurrentCardInfo(cardIndex, whichStim);
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
@@ -492,8 +523,10 @@ function modelUnitEngine() {
                     "total correct responses:", cardProbs.numCorrectAnswers
                 );
 
-                // Log the entire card, which includes most stats
+                // Log selections - note that the card output will also include the stim
+                console.log("Model selected prob:", displayify(prob));
                 console.log("Model selected card:", displayify(card));
+                console.log("Model selected stim:", displayify(card.stims[whichStim]));
 
                 // Log time stats in human-readable form
                 var secs = function(t) { return (t / 1000.0) + ' secs'; };
@@ -502,17 +535,18 @@ function modelUnitEngine() {
                     'Card First Seen:', elapsedStr(card.firstShownTimestamp),
                     'Card Last Seen:', elapsedStr(card.lastShownTimestamp),
                     'Total time in practice:', secs(_.sum(card.practiceTimes)),
-                    'Previous Practice Times:', displayify(_.map(card.practiceTimes, secs))
+                    'Previous Practice Times:', displayify(_.map(card.practiceTimes, secs)),
+                    'Total time in other practice:', secs(card.otherPracticeTimeSinceFirst)
                 );
 
                 // Display response and current response stats
-                var responseText = Answers.getDisplayAnswerText(getStimCluster(indexForNewCard).response[whichStim]);
+                var responseText = Answers.getDisplayAnswerText(getStimCluster(cardIndex).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbs.responses[responseText]));
 
                 console.log("<<<END   METRICS<<<<<<<");
             }
 
-            return indexForNewCard; //Must return index for call to cardSelected
+            return newProbIndex; //Must return index for call to cardSelected
         },
 
         findCurrentCardInfo: function() {
@@ -521,10 +555,14 @@ function modelUnitEngine() {
 
         cardSelected: function(selectVal, resumeData) {
             // Find objects we'll be touching
-            var indexForNewCard = _.intval(selectVal);  // See selectNextCard
+            var probIndex = _.intval(selectVal);  // See selectNextCard
+
             var cardProbs = getCardProbs();
+            var prob = cardProbs.probs[probIndex];
+            var indexForNewCard = prob.cardIndex;
             var cards = cardProbs.cards;
             var card = cards[indexForNewCard];
+            var stim = card.stims[prob.stimIndex];
 
             // Update our top-level stats
             cardProbs.numQuestionsIntroduced += 1;
@@ -543,6 +581,7 @@ function modelUnitEngine() {
             // Update stats for the card
             card.trialsSinceLastSeen = 0;
             card.hasBeenIntroduced = true;
+            stim.hasBeenIntroduced = true;
             if (getTestType() === 's') {
                 card.studyTrialCount += 1;
             }
@@ -568,10 +607,11 @@ function modelUnitEngine() {
         cardAnswered: function(wasCorrect, resumeData) {
             // Get info we need for updates and logic below
             var cardProbs = getCardProbs();
+            var cards = cardProbs.cards;
             var cluster = getStimCluster(getCurrentClusterIndex());
             var card = null;
             try {
-                card = cardProbs.cards[cluster.clusterIndex];
+                card = cards[cluster.clusterIndex];
             }
             catch(err) {
                 console.log("Error getting card for update", err);
@@ -583,7 +623,16 @@ function modelUnitEngine() {
                 var practice = Date.now() - card.lastShownTimestamp;
                 // We assume more than 5 minutes is an artifact of resume logic
                 if (practice < 5 * 60 * 1000) {
+                    // Capture the practice time. We also know that all the
+                    // other cards' "other practice" times should increase
                     card.practiceTimes.push(practice);
+                    card.otherPracticeTimeSinceLast = 0;
+                    _.each(cards, function(card, index) {
+                        if (index != cluster.clusterIndex) {
+                            card.otherPracticeTimeSinceFirst += practice;
+                            card.otherPracticeTimeSinceLast += practice;
+                        }
+                    });
                 }
             }
 
@@ -707,7 +756,7 @@ function scheduleUnitEngine() {
         },
 
         selectNextCard: function() {
-            var unit = getCurrentUnitNumber();
+            // currently unused: var unit = getCurrentUnitNumber();
             var questionIndex = Session.get("questionIndex");
             var questInfo = getSchedule().q[questionIndex];
             var whichStim = questInfo.whichStim;
