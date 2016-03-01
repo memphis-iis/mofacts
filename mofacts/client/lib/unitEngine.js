@@ -59,7 +59,8 @@ completed (nothing more to display)
 needs special startup logic to be called before it is used.
 
 * function writeQuestionEntry - Should _NOT_ be implemented by the engine.
-This function is supplied by the default (base) engine
+This function is supplied by the default (base) engine and takes selectVal,
+which should be the value returnen by selectNextCard
 
 
 A note about the session variable "ignoreClusterMapping"
@@ -125,10 +126,10 @@ function defaultUnitEngine() {
             console.log("CLUSTER MAPPING USE (not ignore):", !Session.get("ignoreClusterMapping"));
         },
 
-        writeQuestionEntry: function() {
+        writeQuestionEntry: function(selectVal) {
             recordUserTimeQuestion(
                 _.extend(
-                    { selType: this.unitType },
+                    { selType: this.unitType, 'selectVal': selectVal },
                     this.createQuestionLogEntry()
                 )
             );
@@ -468,7 +469,6 @@ function modelUnitEngine() {
 
             if (numItemsPracticed === 0) {
                 newProbIndex = findNewProb(cards, probs);
-                console.log('SELECTED: no items practiced', newProbIndex);
                 if (newProbIndex === -1) {
                     if (Session.get("debugging")) {
                         console.log("ERROR: All cards have been introduced, but numQuestionsAnswered === 0");
@@ -482,7 +482,6 @@ function modelUnitEngine() {
                     var numIntroduced = cardProbs.numQuestionsIntroduced;
                     if (noCardsUnderProb(cards, probs, 0.85) && numIntroduced === cards.length) {
                         newProbIndex = findMinProbCard(cards);
-                        console.log('SELECTED: no max, no cards under .85, used min prob', newProbIndex);
                         showOverlearningText = true;
                     }
                     else {
@@ -490,17 +489,8 @@ function modelUnitEngine() {
                         if (newProbIndex === -1) {
                             //if we have introduced all of the cards.
                             newProbIndex = findMinProbCard(cards, probs);
-                            console.log('SELECTED: no max, not all intro, could not find new, used min prob', newProbIndex);
-                        }
-                        else {
-                            //TODO: remove this else
-                            console.log('SELECTED: no max, not all intro, find new worked', newProbIndex);
                         }
                     }
-                }
-                else {
-                    //TODO: remove this else
-                    console.log('SELECTED: found max prob card', newProbIndex);
                 }
             }
 
@@ -588,7 +578,12 @@ function modelUnitEngine() {
                 _.extend(card, resumeData.cardModelData);
                 _.extend(currentCardInfo, resumeData.currentCardInfo);
                 if (currentCardInfo.clusterIndex != indexForNewCard) {
-                    console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, indexForNewCard);
+                    console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, indexForNewCard,
+                        "selectVal=", selectVal,
+                        "currentCardInfo=", displayify(currentCardInfo),
+                        "card=", displayify(card),
+                        "prob=", displayify(prob)
+                    );
                 }
                 return;
             }
