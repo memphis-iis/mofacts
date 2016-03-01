@@ -2,7 +2,7 @@
 // Template storage and helpers
 
 Template.allStudents.helpers({
-    username: function () {
+    uname: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
         }
@@ -10,6 +10,12 @@ Template.allStudents.helpers({
             return Meteor.user().username;
         }
     }
+});
+
+Template.userList.helpers({
+		usersList: function() {
+				return Meteor.users.find();
+		}
 });
 
 ////////////////////////////////////////////////////////////////////////////

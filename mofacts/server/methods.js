@@ -116,6 +116,12 @@ Meteor.publish(null, function () {
     return defaultData;
 });
 
+Meteor.publish('allUsers', function () {
+		console.log("Publishing allusers publication");
+		return Meteor.users.find({}, {fields: {username: 1}});
+});
+
+
 //Config for scheduled jobs - the start command is at the end of
 //Meteor.startup below
 SyncedCron.config({

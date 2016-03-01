@@ -71,15 +71,26 @@ Router.route('/admin', function () {
 
 Router.route('/instructions', function () {
     this.render('instructions');
-});
+}); 
 
 Router.route('/stats', function () {
     this.render('statsPage');
 });
 
 Router.route('/allStudents', function () {
+		Meteor.subscribe('allUsers');
     this.render('allStudents');
 });
+
+// Router.route('/allStudents', {
+// 		subscriptions: function () {
+// 				this.subscribe('allUsers');
+// 		},
+
+// 		action: function () {
+// 				this.render('allStudents');
+// 		}
+// });
 
 Router.route('/allItems', function () {
     Session.set("clusterMapping", "");
