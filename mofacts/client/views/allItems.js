@@ -88,6 +88,7 @@ Template.allItems.rendered = function () {
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
+        
         var setspec = _.chain(tdfObject)
             .prop("tdfs")
             .prop("tutor")

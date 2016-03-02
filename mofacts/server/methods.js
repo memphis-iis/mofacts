@@ -98,6 +98,7 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
     var userId = this.userId;
+    var allUsers = Meteor.users.find();
 
     //The default data published to everyone - all TDF's and stims, and the
     //user data (user times log and user record) for them

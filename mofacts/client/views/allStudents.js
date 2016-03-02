@@ -12,7 +12,7 @@ Template.allStudents.helpers({
     }
 });
 
-Template.userList.helpers({
+Template.allStudents.helpers({
 		usersList: function() {
 				return Meteor.users.find();
 		}
@@ -51,18 +51,30 @@ Template.allStudents.events({
         Router.go("/admin");
     },
 
-    // Start a TDF
-    'click .stimButton' : function (event) {
-        event.preventDefault();
-        console.log(event);
-
-        var target = $(event.currentTarget);
-        selectTdf(
-            target.data("tdfkey"),
-            target.data("lessonname"),
-            target.data("stimulusfile"),
-            target.data("tdffilename"),
-            "User button click"
-        );
+    'click .studentButton' : function (event) {
+        event.preventDefault();        
     }
 });
+
+Template.allStudents.rendered = function () {
+ 
+    var allUsers = Meteor.users.find().fetch();
+
+    var addButton = function(btnObj) {
+        $("#studentButtonContainer").append(
+            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
+                btnObj
+            )
+        );
+    };
+
+    allUsers.forEach( function (user) {
+
+        addButton(
+            $("<button type='button' id='"+user._id+"' name='"+user.username+"'></button>")
+                .addClass("btn btn-block studentButton")
+                .data("studentkey", user._id)
+                .html(user.username)
+        );
+    });
+};

@@ -36,18 +36,14 @@
     </nav>  <!-- close nav -->
 
     <div class="container">        
-      <legend class="text-center">All Students</legend>
-			{{> userList}}
+        <legend class="text-center">All Students</legend>
+        
+        <div class="row" id="studentButtonContainer">
+            <legend class="text-center">All Students</legend>
+        </div>
     </div>
+
 </template>
 
-<template name="userList">
-	Users
-	{{#each usersList}}
-   	{{username}}
-	{{/each}}
-</template>
 
-<template name="userItem">
-	{{username}}
-</template>
+

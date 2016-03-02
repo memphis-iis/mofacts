@@ -78,19 +78,14 @@ Router.route('/stats', function () {
 });
 
 Router.route('/allStudents', function () {
-		Meteor.subscribe('allUsers');
-    this.render('allStudents');
+    this.subscribe('allUsers').wait();
+    if (this.ready()){
+        this.render('allStudents');
+    }else{
+        this.render('');
+    }
+    
 });
-
-// Router.route('/allStudents', {
-// 		subscriptions: function () {
-// 				this.subscribe('allUsers');
-// 		},
-
-// 		action: function () {
-// 				this.render('allStudents');
-// 		}
-// });
 
 Router.route('/allItems', function () {
     Session.set("clusterMapping", "");
