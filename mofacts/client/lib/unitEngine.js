@@ -457,7 +457,7 @@ function modelUnitEngine() {
         selectNextCard: function() {
             // The cluster (card) index, the cluster version (stim index), and
             // whether or not we should show the overlearning text is determined
-            // here. See calculateCardProbabilities for how card.probability is
+            // here. See calculateCardProbabilities for how prob.probability is
             // calculated
             var newProbIndex;
             var showOverlearningText = false;
@@ -519,7 +519,7 @@ function modelUnitEngine() {
             setCurrentCardInfo(cardIndex, whichStim);
 
             // only log this for teachers/admins
-            if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+            if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"] || Meteor.user().username.startsWith('debug'))) {
                 console.log(">>>BEGIN METRICS>>>>>>>");
 
                 console.log("Overall user stats => ",
