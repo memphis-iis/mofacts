@@ -128,6 +128,7 @@ getStimAnswer = function (index, whichAnswer) {
 getStimParameter = function (index, whichParameter) {
     return _.chain(getStimCluster(index))
         .prop("parameter")
+        .prop(_.intval(whichParameter))
         .floatval()
         .value();
 };
