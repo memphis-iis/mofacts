@@ -57,7 +57,6 @@ sessionCleanUp = function() {
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {
-        initCardProbs();
         initUserProgress();
     }
 };

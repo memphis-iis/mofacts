@@ -80,44 +80,17 @@ if (_ && _.mixin) {
         sum: function(lst) {
             return _.reduce(
                 lst,
-                function(memo, num){ return memo + (isFinite(num) ? num : 0.0); }, 
+                function(memo, num){ return memo + (isFinite(num) ? num : 0.0); },
                 0
             );
         },
     });
 }
 
-//Card probabilities setup and retrieval - used by ACT-R model
-//Note that this is only used on the client, but we want to make sure that
-//setting the cardProbabilities data structure is always available (and
-//thus is in the lib folder)
+// User progress data - Note that this is only used on the client, but we want
+// to make sure that it is always available (and thus is in the lib folder)
 
 if (typeof Meteor !== "undefined" && Meteor.isClient) {
-    //Initialize card probabilities, with optional initial data
-    initCardProbs = function(overrideData) {
-        var initVals = {
-            numQuestionsAnswered: 0,
-            numQuestionsIntroduced: 0,
-            numCorrectAnswers: 0,
-            cards: []
-        };
-
-        if (!!overrideData) {
-            initVals = _.extend(initVals, overrideData);
-        }
-
-        cardProbabilities = initVals;
-    };
-
-    //Provide access to card probabilities. Note that this function provides
-    //an always-created object with lazy init.
-    getCardProbs = function() {
-        if (!cardProbabilities) {
-            initCardProbs();
-        }
-        return cardProbabilities;
-    };
-
     //Initialize user progress storage, with optional initial data
     initUserProgress = function(overrideData) {
         var initVals = {
