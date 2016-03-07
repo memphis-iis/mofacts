@@ -613,10 +613,10 @@ function modelUnitEngine() {
                     // other cards' "other practice" times should increase
                     card.practiceTimes.push(practice);
                     card.otherPracticeTimeSinceLast = 0;
-                    _.each(cards, function(card, index) {
-                        if (index != cluster.clusterIndex) {
-                            card.otherPracticeTimeSinceFirst += practice;
-                            card.otherPracticeTimeSinceLast += practice;
+                    _.each(cards, function(otherCard, index) {
+                        if (index != cluster.clusterIndex && otherCard.firstShownTimestamp > 0) {
+                            otherCard.otherPracticeTimeSinceFirst += practice;
+                            otherCard.otherPracticeTimeSinceLast += practice;
                         }
                     });
                 }
