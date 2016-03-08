@@ -52,7 +52,8 @@ Template.allStudents.events({
     },
 
     'click .studentButton' : function (event) {
-        event.preventDefault();        
+        event.preventDefault();      
+        Router.go('/student');  
     }
 });
 

@@ -118,7 +118,6 @@ Meteor.publish(null, function () {
 });
 
 Meteor.publish('allUsers', function () {
-		console.log("Publishing allusers publication");
 		return Meteor.users.find({}, {fields: {username: 1}});
 });
 

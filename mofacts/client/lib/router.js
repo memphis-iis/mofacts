@@ -87,6 +87,14 @@ Router.route('/allStudents', function () {
     
 });
 
+Router.route('/student', function () {
+    this.render('student');
+}); 
+
+Router.route('/Items', function () {
+    this.render('Items');
+}); 
+
 Router.route('/allItems', function () {
     Session.set("clusterMapping", "");
     this.render('allItems');

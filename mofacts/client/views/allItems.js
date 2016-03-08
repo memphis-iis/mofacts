@@ -39,15 +39,9 @@ Template.allItems.events({
         Router.go("/admin");
     },
 
-    'click .allStudentsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allStudents");
-    },
-
     // Start a TDF
     'click .stimButton' : function (event) {
-        event.preventDefault();
-        console.log(event);
+    event.preventDefault();
 
         var target = $(event.currentTarget);
         selectTdf(
@@ -214,6 +208,5 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 
     //Go directly to the card session - which will decide whether or
     //not to show instruction
-    Session.set("needResume", true);
-    Router.go("/card");
+    Router.go("/Items");
 }

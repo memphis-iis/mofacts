@@ -60,6 +60,8 @@ legend {
 
 .stimButton {
     height: 75px;
+    overflow: hidden;
+    text-overflow:ellipsis;
 }
 
 .navbar {
@@ -200,3 +202,4 @@ input:focus {
     font-family: "Lato",sans-serif;
     color: #585858;
 }
+

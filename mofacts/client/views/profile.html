@@ -1,6 +1,6 @@
 <!-- MAIN profile template -->
 <template name="profile">
-    <nav class="navbar navbar-inverse" role="navigation">
+    <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
@@ -24,13 +24,8 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#" class="homeLink">Home</a></li>                            
-                            <li class="divider"></li>
-                            <li><a href="#" class="allItemsLink">All Items</a></li>
-                            {{#if isInRole 'admin,teacher'}}
-                            <li class="divider"></li>
-                            <li><a href="#" class="allStudentsLink">All Students</a></li>
-                            {{/if}}
+                            <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
+                            <li><a href="#" class="allItemsLink">Progress</a></li>
                             <li class="divider"></li>
                             <li><a href="#" class="logoutLink">Logout</a></li>
                         </ul>
