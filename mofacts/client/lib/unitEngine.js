@@ -358,17 +358,17 @@ function modelUnitEngine() {
         p.stimParameter = getStimParameter(prob.cardIndex, prob.stimIndex);
 
         // Calculated metrics
-        p.baseLevel = 1 / ((1 + p.questionSecsPracticingOthers + (p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.0630) ^ 0.339);
+        p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.0630),  0.339);
 
         p.meanSpacing = 0;
         if (p.questionStudyTrialCount + p.questionTotalTests !== 0) {
             p.meanSpacing = Math.log(
-                1 + (100 + p.questionSecsSinceLastShown - p.questionSecsSinceFirstShown) / (p.questionStudyTrialCount + p.questionTotalTests)
+                1 + (100 + p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests)
             );
         }
         p.intbs = p.meanSpacing * p.baseLevel;
 
-        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / ((1 + p.questionSecsSinceLastShown) ^ 0.339);
+        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.339);
 
         // Calculate and store probability for stim
         p.y = p.stimParameter+
