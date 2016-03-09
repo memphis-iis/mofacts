@@ -171,8 +171,6 @@ Template.allItems.rendered = function () {
 
 //Actual logic for selecting and starting a TDF
 function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
-    console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
-
     //make sure session variables are cleared from previous tests
     sessionCleanUp();
 
