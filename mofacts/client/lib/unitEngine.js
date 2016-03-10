@@ -587,7 +587,8 @@ function modelUnitEngine() {
             var card = cardProbabilities.cards[idx];
             return {
                 'cardModelData':   _.omit(card, ["question", "answer"]),
-                'currentCardInfo': _.extend({}, currentCardInfo)
+                'currentCardInfo': _.extend({}, currentCardInfo),
+                'whichStim': currentCardInfo.whichStim
             };
         },
 

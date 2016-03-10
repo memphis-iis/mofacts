@@ -35,7 +35,7 @@ if (_ && _.mixin) {
         },
 
         intval: function(src, defaultVal) {
-            if (!src && src !== false) {
+            if (!src && src !== false && src !== 0) {
                 src = "";
             }
             else {
