@@ -77,14 +77,14 @@ Router.route('/stats', function () {
     this.render('statsPage');
 });
 
-Router.route('/allStudents', function () {
+//Router waits on all of the users to be found before the page is rendered
+Router.route('/itemStats', function () {
     this.subscribe('allUsers').wait();
     if (this.ready()){
-        this.render('allStudents');
+        this.render('itemStats');
     }else{
         this.render('');
     }
-    
 });
 
 Router.route('/student', function () {

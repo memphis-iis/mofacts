@@ -61,7 +61,7 @@ legend {
 .stimButton {
     height: 75px;
     overflow: hidden;
-    text-overflow:ellipsis;
+    text-overflow:ellipsis; /*Changed to keep text from overflowing outside of the button*/
 }
 
 .navbar {

@@ -1,4 +1,4 @@
-Template.student.helpers({
+Template.itemStats.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
@@ -6,10 +6,11 @@ Template.student.helpers({
         else {
             return Meteor.user().username;
         }
-    }
+    },
+
 });
 
-Template.student.events({
+Template.itemStats.events({
     'click .logoutLink' : function (event) {
         event.preventDefault();
         Meteor.logout( function (error) {
@@ -28,22 +29,16 @@ Template.student.events({
         Router.go("/profile");
     },
 
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
-    'click .allStudentsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allStudents");
-    },
-
-
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");
     },
 
-    //This is where the meterics and graphs for the individual student will be housed later
+    'click .allItemsLink' : function (event) {
+        event.preventDefault();
+        Router.go("/allItems");
+    }
+
+    //This file will later house the logic for the graphs and metrics for the item
 
 });

@@ -54,6 +54,9 @@ Template.allItems.events({
     }
 });
 
+//Same logic used in the profile template, except when the button is clicked, 
+//it passes all of the information to the next items page
+
 Template.allItems.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
@@ -204,7 +207,5 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
         selectedHow: how
     });
 
-    //Go directly to the card session - which will decide whether or
-    //not to show instruction
     Router.go("/Items");
 }
