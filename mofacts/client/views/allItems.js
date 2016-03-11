@@ -207,5 +207,5 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
         selectedHow: how
     });
 
-    Router.go("/Items");
+    Router.go("/choose");
 }
