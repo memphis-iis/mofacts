@@ -53,11 +53,6 @@ Template.Items.rendered = function() {
 	var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
         .stimuli.setspec.clusters[0].cluster;
 
-    var colors = ["#ff3337", "#ff7733",     //Same as allStudents: Used for coloring of tiles
-                  "#ff9933", "#33ff96",
-                  "#33acff", "#336dff",
-                  "#ff8d33", "#5a33ff"];
-
     var addButton = function(btnObj) {
         $("#itemButtonContainer").append(
             $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
@@ -67,19 +62,27 @@ Template.Items.rendered = function() {
     };
 
     cluster.forEach( function(item){    
-
+		
         function random(min, max) {
             return Math.floor(Math.random() * (max-min)) + min; //function to be removed later
         }
-
-
+				
+				// Currently just randomly assigning the score to the item. In production, this or a similar variable will be assigned already.
+				//item.score = Math.floor(Math.random()*100)/100;
+				item.score = randomScore();
+				//
+				
+				// For convenience only, assign an easy variable the button's color.
+				var colorIndex = determineColorIndex(item.score);
+				
         //Buttons that contain the name of the item which is named response inside of the cluster
         addButton(
             $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
-                .css("background", colors[random(0,7)])
-                .html(item.response[0])
-
+								.css("background", colors[colorIndex])
+						    //Retained for testing purposes.
+                .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
+								//.html(item.response[0])
         );
     });
 
