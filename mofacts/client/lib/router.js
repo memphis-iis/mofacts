@@ -99,3 +99,7 @@ Router.route('/allItems', function () {
     Session.set("clusterMapping", "");
     this.render('allItems');
 });
+
+Router.route('/testpage', function() {
+		this.render('tester');
+});
