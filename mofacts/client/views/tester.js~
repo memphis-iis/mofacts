@@ -1,0 +1,11 @@
+var testItems = new Mongo.Collection(null);
+
+Template.tester.helpers({
+		username: function() {
+				return Meteor.user().username;
+		}
+});
+
+Template.tester.rendered = function() {
+		
+};
