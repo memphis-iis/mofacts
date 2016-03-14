@@ -264,6 +264,11 @@ Template.instructions.events({
         });
     },
 
+    'click .allItemsLink' : function (event) {
+        event.preventDefault();
+        Router.go("/allItems");
+    },
+
     'click .homeLink' : function (event) {
         event.preventDefault();
         leavePage("/profile");

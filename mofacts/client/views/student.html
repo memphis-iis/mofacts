@@ -19,24 +19,34 @@
             </div>  <!-- close header -->
 
             <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" class="homeLink">Home</a></li>                            
-                            <li class="divider"></li>
-                            <li><a href="#" class="allItemsLink">All Items</a></li>
-                            {{#if isInRole 'admin,teacher'}}
-                            <li class="divider"></li>
-                            <li><a href="#" class="allStudentsLink">All Students</a></li>
-                            {{/if}}
-                            <li class="divider"></li>
-                            <li><a href="#" class="logoutLink">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
+               <ul class="nav navbar-nav navbar-right">
+                  <li class="dropdown">
+                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
+                     <ul class="dropdown-menu">
+                        <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
+                        <li><a href="#" class="allItemsLink">Progress</a></li>
+                        <li class="divider"></li>
+                        <li><a href="#" class="logoutLink">Logout</a></li>
+                     </ul>
+                  </li>
+               </ul>
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
+
+    <div class="container">
+      <legend class="text-center">Graphs Go Here</legend>
+      {{> lineGraphAverage}}
+      <div class="legend" style="border: 4px solid black; display: inline; padding-right: 5px;">
+         <svg height="10" width="35">
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:rgb(255,0,0);stroke-width:5" />
+            Sorry, your browser does not support inline SVG.
+         </svg> - Class
+         <svg height="10" width="35">
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#F05B4F;stroke-width:5" />
+            Sorry, your browser does not support inline SVG.
+         </svg> - Student
+      </div>
+   </div>
 
 </template>
