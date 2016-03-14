@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
-Template.profile.helpers({
+Template.allItems.helpers({
     username: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
@@ -15,7 +15,7 @@ Template.profile.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.profile.events({
+Template.allItems.events({
     'click .logoutLink' : function (event) {
         event.preventDefault();
         Meteor.logout( function (error) {
@@ -34,17 +34,6 @@ Template.profile.events({
         Router.go("/profile");
     },
 
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
-    'click .allStudentsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allStudents");
-    },
-
-
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");
@@ -52,8 +41,7 @@ Template.profile.events({
 
     // Start a TDF
     'click .stimButton' : function (event) {
-        event.preventDefault();
-        console.log(event);
+    event.preventDefault();
 
         var target = $(event.currentTarget);
         selectTdf(
@@ -66,7 +54,10 @@ Template.profile.events({
     }
 });
 
-Template.profile.rendered = function () {
+//Same logic used in the profile template, except when the button is clicked, 
+//it passes all of the information to the next items page
+
+Template.allItems.rendered = function () {
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 
@@ -94,6 +85,7 @@ Template.profile.rendered = function () {
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
+        
         var setspec = _.chain(tdfObject)
             .prop("tdfs")
             .prop("tutor")
@@ -182,8 +174,6 @@ Template.profile.rendered = function () {
 
 //Actual logic for selecting and starting a TDF
 function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
-    console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
-
     //make sure session variables are cleared from previous tests
     sessionCleanUp();
 
@@ -217,8 +207,5 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
         selectedHow: how
     });
 
-    //Go directly to the card session - which will decide whether or
-    //not to show instruction
-    Session.set("needResume", true);
-    Router.go("/card");
+    Router.go("/choose");
 }

@@ -133,3 +133,16 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         return userProgress;
     };
 }
+
+// Moved function from within the file to here to modularize code.
+// This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
+//INPUT: score, a float between 0 and 1
+//OUTPUT: an integer, which corresponds here to the index in the color array indicating score's correctness
+determineColorIndex = function(score) {
+		return Math.floor(score/(1/colors.length));
+}
+
+// Simple function to randomly assign a value between 0 and 1, to 2 digits. E.g. .42, 1.00, .28
+randomScore = function() {
+		return Math.floor(Math.random()*100)/100;
+}

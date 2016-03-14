@@ -69,10 +69,45 @@ Router.route('/admin', function () {
     this.render('admin');
 });
 
+Router.route('/choose', function () {
+    this.render('choose');
+});
+
 Router.route('/instructions', function () {
     this.render('instructions');
 });
 
 Router.route('/stats', function () {
     this.render('statsPage');
+});
+
+//Router waits on all of the users to be found before the page is rendered
+Router.route('/itemStats', function () {
+    this.render('itemStats');
+});
+
+Router.route('/allStudents', function(){
+    this.subscribe('allUsers').wait();
+    if (this.ready()){
+        this.render('allStudents');
+    }else{
+        this.render('');
+    }
+});
+
+Router.route('/student', function () {
+    this.render('student');
+});
+
+Router.route('/Items', function () {
+    this.render('Items');
+});
+
+Router.route('/allItems', function () {
+    Session.set("clusterMapping", "");
+    this.render('allItems');
+});
+
+Router.route('/testpage', function() {
+		this.render('tester');
 });
