@@ -26,6 +26,7 @@ ecmascript-runtime@0.2.6
 ejson@1.0.7
 email@1.0.8
 fastclick@1.0.7
+fourseven:scss@3.4.1
 geojson-utils@1.0.4
 html-tools@1.0.5
 htmljs@1.0.5
@@ -46,6 +47,7 @@ localstorage@1.0.5
 logging@1.0.8
 meteor@1.1.10
 meteor-platform@1.2.3
+mfpierre:chartist-js@1.6.1
 minifiers@1.1.7
 minimongo@1.0.10
 mobile-status-bar@1.0.6

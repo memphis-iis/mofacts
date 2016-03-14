@@ -75,7 +75,7 @@ Router.route('/choose', function () {
 
 Router.route('/instructions', function () {
     this.render('instructions');
-}); 
+});
 
 Router.route('/stats', function () {
     this.render('statsPage');
@@ -97,11 +97,11 @@ Router.route('/allStudents', function(){
 
 Router.route('/student', function () {
     this.render('student');
-}); 
+});
 
 Router.route('/Items', function () {
     this.render('Items');
-}); 
+});
 
 Router.route('/allItems', function () {
     Session.set("clusterMapping", "");
