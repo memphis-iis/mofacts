@@ -1,46 +1,52 @@
 <template name="itemStats">
-    <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">MoFaCTS
-                    {{#if isInRole 'admin,teacher'}}
-                        {{#if isInRole 'admin'}} Administrator {{/if}}
-                        {{#if isInRole 'teacher'}} Teacher {{/if}}
-                    {{else}}
-                        Student
-                    {{/if}}
-                </a>
-            </div>  <!-- close header -->
+   <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
+      <div class="container">
+         <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MoFaCTS
+               {{#if isInRole 'admin,teacher'}}
+               {{#if isInRole 'admin'}} Administrator {{/if}}
+               {{#if isInRole 'teacher'}} Teacher {{/if}}
+               {{else}}
+               Student
+               {{/if}}
+            </a>
+         </div>  <!-- close header -->
 
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
-                            <li><a href="#" class="allItemsLink">Progress</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" class="logoutLink">Logout</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>  <!-- close navbar-collapse -->
-        </div>  <!-- close container -->
-    </nav>  <!-- close nav -->
+         <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav navbar-right">
+               <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                     <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
+                     <li><a href="#" class="allItemsLink">Progress</a></li>
+                     <li class="divider"></li>
+                     <li><a href="#" class="logoutLink">Logout</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </div>  <!-- close navbar-collapse -->
+      </div>  <!-- close container -->
+   </nav>  <!-- close nav -->
 
-    <div class="container">
-        <legend class="text-center">Graphs Go Here</legend>
-        {{> lineGraphSingle}}
-        {{#if isInRole 'admin,teacher'}}
-            {{> allStudents}}
-            <br><br>>
-        {{/if}}
-    </div>
+   <div class="container">
+      <legend class="text-center">Graphs Go Here</legend>
+      {{> lineGraphSingle}}
+      <div class="legend" style="border: 4px solid black; display: inline; padding-right: 5px;">
+         <svg height="10" width="35">
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:rgb(255,0,0);stroke-width:5" />
+            Sorry, your browser does not support inline SVG.
+         </svg> - Student
+      </div>
+      {{#if isInRole 'admin,teacher'}}
+      {{> allStudents}}
+      <br><br>>
+      {{/if}}
+   </div>
 
 </template>
