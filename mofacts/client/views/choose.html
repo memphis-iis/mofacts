@@ -1,6 +1,5 @@
-<template name="allStudents"> 
-
-	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+<template name="choose">
+    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
@@ -32,16 +31,14 @@
                 </ul>
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
-    </nav>  <!-- close nav -->   
+    </nav>  <!-- close nav -->
 
-    <div class="container">        
-        <legend class="text-center">All Students</legend>        
-        <div class="row" id="studentButtonContainer">
-            <legend class="text-center">All Students</legend>
+    <div class="container">
+        <legend class="text-center">Select A System</legend>
+        <div class="row" id="chooseButtonContainer">            
+            <a href="#" class="btn btn-info studentButton" role="button">All Students</a>
+            <br><br>
+            <a href="#" class="btn btn-info itemsButton" role="button">All Items</a>
         </div>
     </div>
-
 </template>
-
-
-

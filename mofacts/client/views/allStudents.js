@@ -2,7 +2,7 @@
 // Template storage and helpers
 
 Template.allStudents.helpers({
-    uname: function () {
+    username: function () {
         if (!haveMeteorUser()) {
             routeToSignin();
         }

@@ -69,6 +69,10 @@ Router.route('/admin', function () {
     this.render('admin');
 });
 
+Router.route('/choose', function () {
+    this.render('choose');
+});
+
 Router.route('/instructions', function () {
     this.render('instructions');
 }); 
@@ -79,9 +83,13 @@ Router.route('/stats', function () {
 
 //Router waits on all of the users to be found before the page is rendered
 Router.route('/itemStats', function () {
+    this.render('itemStats');
+});
+
+Router.route('/allStudents', function(){
     this.subscribe('allUsers').wait();
     if (this.ready()){
-        this.render('itemStats');
+        this.render('allStudents');
     }else{
         this.render('');
     }
