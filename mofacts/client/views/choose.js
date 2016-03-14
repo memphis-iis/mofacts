@@ -28,6 +28,11 @@ Template.choose.events({
         Router.go("/profile");
     },
 
+    'click .allItemsLink' : function (event) {
+      event.preventDefault();
+      Router.go("/allItems");
+   },
+
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");
@@ -41,7 +46,6 @@ Template.choose.events({
     'click .itemsButton' : function (event) {
     	event.preventDefault();
     	Router.go("/Items");
-    }
+   }
+
 });
-
-
