@@ -54,7 +54,7 @@ Template.allItems.events({
     }
 });
 
-//Same logic used in the profile template, except when the button is clicked, 
+//Same logic used in the profile template, except when the button is clicked,
 //it passes all of the information to the next items page
 
 Template.allItems.rendered = function () {
@@ -85,7 +85,7 @@ Template.allItems.rendered = function () {
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
-        
+
         var setspec = _.chain(tdfObject)
             .prop("tdfs")
             .prop("tutor")

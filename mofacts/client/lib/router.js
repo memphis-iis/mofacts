@@ -70,7 +70,10 @@ Router.route('/admin', function () {
 });
 
 Router.route('/choose', function () {
-    this.render('choose');
+   if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+       this.render('/choose');
+   } else {
+   this.redirect('/itemStats') }
 });
 
 Router.route('/instructions', function () {
