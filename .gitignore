@@ -10,3 +10,4 @@ mofacts/build
 /nbproject/private/
 /nbproject/
 .meteor
+Vagrantfile
