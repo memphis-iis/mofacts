@@ -116,7 +116,8 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
     };
 }
 
-<<<<<<< HEAD
+// MoFaCTs-4882's Additions
+
 // Moved function from within the file to here to modularize code.
 // This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
 //INPUT: score, a float between 0 and 1
@@ -155,4 +156,3 @@ displayify = function(obj) {
 
     return JSON.stringify(dispObj, null, 2);
 };
->>>>>>> remotes/ppavlik/mofacts/master
