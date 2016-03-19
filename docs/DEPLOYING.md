@@ -4,14 +4,14 @@ This document gives an overview of deploying MoFaCTS to a Debian server,
 although in reality this is also a brief guide to deploying any meteor-based
 application.
 
-There are four sections: Requirements, Deployment, Execution, and "deploy.sh
-overview".  It is assumed that you would work through the requirements section
+Four main sections follow: Requirements, Deployment, Execution, and "deploy.sh
+overview".  We assume that you will work through the requirements section
 and create your own script for deployment and execution.  The deploy.sh
 section describes the script in this directory provided for your convenience.
 
-*_Important:_* This document is for setting up a new server from scratch and
-documenting what was done for optimallearning.org.  If you are working on the
-optimallearning.org server, then you probably only care about deploying a new
+*_Important:_* This document describes setting up a new server from scratch and
+documents the setup process for optimallearning.org.  If you are working on the
+optimallearning.org server, then you probably care about deploying a new
 version of the MoFaCT system:
 
  * Create a bundle on your dev system named mofacts.tar.gz
@@ -19,19 +19,18 @@ version of the MoFaCT system:
  * Log in to optimallearning.org, navigate to /var/www/mofacts, and
    run ./deploy.sh
 
-You'll note that these three steps are spelled out in detail in the
-deployment section below.
+You'll note that the deployment section below spells these three steps out in detail.
 
 
 ## Requirements
 
-The first requirement is that you have a functional Linux server.  The
+First you must have a functional Linux server.  The
 particular flavor of Linux shouldn't matter, but this document (and
 the deploy.sh script) assume a Debian-based OS.
 
 ### Apache Web Server
 
-First install the Apache web server.  It is assumed that the "base" document
+First install the Apache web server.  We assume that the "base" document
 directory for serving HTTP is /var/www/html and that the Apache user is www-
 data. You should also create a home directory for mofacts owned by the Apache
 user.
@@ -42,8 +41,8 @@ $ sudo mkdir mofacts
 $ chown -R www-data:www-data
 ````
 
-(Note: you could create your own and deploy to a completely different location
-if necessary.  There is nothing magical about these choices.)
+(Note: you could create your own and deploy to a different location
+if necessary.  None of these choices are magical.)
 
 You might need to enable some functionality in your Apache server if it wasn't
 turned on by default. You need proxy and proxy_http:
@@ -55,8 +54,8 @@ $ sudo a2enmod proxy_http
 
 Now update the Apache config to proxy requests to your meteor server. Note
 that this config assumes that the DNS entry mofacts.optimallearning.org
-resovles to the server in question.  On a Debian server, the default site can
-be configured by modifying `/etc/apache2/sites-enabled/000-default.conf` and
+resovles to the server in question.  On a Debian server, you can configure the default site
+by modifying `/etc/apache2/sites-enabled/000-default.conf` and
 adding:
 
 ````xml
@@ -69,19 +68,121 @@ adding:
 ````
 
 When a browser request for `mofacts.optimallearning.org`, then Apache will
-proxy the request to port 3000.  As a result MoFaCTS only needs to listen on
+proxy the request to port 3000.  As a result MoFaCTS needs to listen on
 the local network interface and isn't directory exposed to the internet.
+
+### Apache SSL
+
+The above is a decent default Apache configuration. You should also consider
+using SSL on a production mofacts server. The server at mofacts.optimallearning.org
+uses Let's Encrypt for SSL certs. If you follow this route, you'll need to do some extra setup.
+
+***NOTE:*** before working through this section you should have performed the setup above and insured that your server is working.
+Once everything is working you can proceed with the SSL setup below. This allow you to
+start the SSL setup with a known working system, ***and*** the letsencrypt tool will
+handle moving the proxy setup from the HTTP config to the HTTPS config for you automatically.
+
+First you should enable SSL using Let's Encrypt tools. You should make sure you
+have git and libaugeas0 installed:
+
+````
+$ sudo apt-get install git libaugeas0
+````
+
+Then you can clone the letsencrypt repository and use the letsencrypt-auto tool.
+If your server is properly configured, the tool will be able to get you an
+SSL cert, install it, and configure Apache to use it. When the automated tool
+asks if you want all HTTP traffic direct to HTTPS, be sure to say yes.
+A sample session with letsencrypt installed in `/opt` would look something
+like:
+
+````
+$ sudo git clone https://github.com/letsencrypt/letsencrypt /opt/letsencrypt
+$ cd /opt/letsencrypt
+$ ./letsencrypt-auto --apache -d mofacts.optimallearning.org
+````
+
+You will need to make a some more adjustments to enabled all Meteor enabled. The
+main issue is that the default SSL setup won't proxy websockets. Although
+Meteor can work around this, you'll get better performance if websockets are working.
+First, you'll need one more proxy module for websockets:
+
+````
+$ sudo a2enmod proxy_wstunnel
+````
+
+If you've been following along with the directions above, you should now have
+two files to edit in `/etc/apache2/sites-enabled/`:
+
+#### 000-default.conf
+
+(Note that this may not represent the entire file. This listing should be
+enough to identify what you need to change).
+
+````xml
+<VirtualHost *:80>
+    ServerName mofacts.optimallearning.org
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+    ProxyPreserveHost on
+
+    RewriteEngine on
+
+    # Added by mofacts installer
+    ReWriteCond %{SERVER_PORT} !^443$
+    # This allows DDP clients like ObjectiveDDP and Meteor-Unity to connect
+    RewriteRule ^/websocket wss://%{SERVER_NAME}/websocket [NC,R,L]
+    # This allows the meteor webapp to connect
+    RewriteRule ^/sockjs/(.*)/websocket wss://%{SERVER_NAME}/sockjs/$1/websocket [NC,R,L]
+
+    # from lets encrypt
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,QSA,R=permanent]
+</VirtualHost>
+````
+
+The top section should already be there, and the bottom section marked as
+`# from lets encrypt` should also be there. You'll need to add the middle
+6 lines beginning with `# Added by mofacts installer`. Also note that the order
+of these instructions matter, so be careful.
+
+#### 000-default-le-ssl.conf
+
+(Note that this may not represent the entire file. This listing should be
+enough to identify what you need to change).
+
+````xml
+<VirtualHost *:443>
+    ServerName mofacts.optimallearning.org
+
+    #Added by lets encrypt
+    SSLCertificateFile /etc/letsencrypt/live/mofacts.optimallearning.org/cert.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/mofacts.optimallearning.org/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+    SSLCertificateChainFile /etc/letsencrypt/live/mofacts.optimallearning.org/chain.pem
+
+    #Added by mofacts installer
+    ProxyRequests Off
+    ProxyPass /websocket ws://localhost:3000/websocket
+    ProxyPassMatch ^/sockjs/(.*)/websocket ws://localhost:3000/sockjs/$1/websocket
+
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+    ProxyPreserveHost on
+</VirtualHost>
+````
+
+As before, most of the file should already be there. You
+need to add the four lines starting with `# Added by mofacts installer`. Remember,
+order matters.
 
 ### MongoDB
 
 Next install MongoDB.  The default installation method for your OS should be
-fine.  It is assumed that the MongoDB will be listening on the local network
+fine.  We assume that MongoDB will be listening on the local network
 interface (127.0.0.1) and the default port (27017).
 
-The required database should be created automatically, but you can pre-create
-the db if you want.  Keep in mind that databases and collections are created
-lazily, so you'll need to create a dummy record in a dummy collection in your
-database to force creation.  For instance, using the mongo shell:
+MongoDB will created the required database automatically on first access, but you can pre-create
+the db if you want.  For instance, using the mongo shell:
 
 ````
 $ mongo
@@ -103,13 +204,13 @@ bye
 
 ### Node.js
 
-A fairly recent Node.js should be installed on the server.  Please see the
+Meteor requires a specific Node.js version, which you should install on the server.  Please see the
 node.js installation guide for details, but building node.js from source isn't
 difficult.  Note that if your Debian-based OS has a package named `nodejs-
 legacy`, you'll need to install three packages: nodejs, npm, and nodejs-
-legacy.  If you're building from source, npm should be installed for you.
+legacy.  The node.js install process should install npm for you.
 
-Once that is done, npm should be used to install the `forever` package:
+Now you can use npm to install the `forever` package:
 
 ````
 $ sudo npm install -g forever
@@ -117,7 +218,7 @@ $ sudo npm install -g forever
 
 _Important:_ As of this writing, the version of node.js supplied by the Debian
 Jessie distribution is to old for the latest version of Meteor. As a result,
-we manually compile and install node.js (and therefore npm).
+we manually compile and install node.js (which includes npm).
 
 First we find the version of node bundle with meteor. We use a functioning
 Vagrant development VM and the helper mnode script to get the current version.
@@ -149,15 +250,15 @@ user@fec239-1:~/node $ make
 user@fec239-1:~/node $ sudo make install
 ````
 
-And finally we can execute `sudo npm install -g forever` as above
+ow we can execute `sudo npm install -g forever` as above
 
 
 ## Deployment
 
-Deploying MoFaCTs should be done the same as any other meteor application.
+You should deploy MoFaCTs just like any other meteor application.
 First you should bundle the application and copy that bundle to the server
 where you will be deploying. In the past you would do this with the bundle
-command. However, newer versions of Meteor now use the build command:
+command. Newer versions of Meteor now use the build command:
 
 ````
 $ cd mofacts/mofacts
@@ -165,19 +266,19 @@ $ meteor build ./build  --architecture os.linux.x86_64
 $ scp build/mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
 ````
 
-Some important notes!!! The architecture switch is based on the optimal
+Some important notes!!! The architecture switch used above is for the optimal
 learning server. If that should change for some reason, you'll need a
 different parameter. You should also note the main change from bundle command:
-we no longer specify the bundle name. In addition, we must specify a
+we no longer specify the bundle name. We must also specify a
 directory. We specify `build`, but there's nothing special about the name. For
 convenience, we've added mofacts/build to the main .gitignore file for this
 project so that you don't automatically add the build folder (and your latest
 bundle) to the git repo.
 
-Note that deploy.sh expects the bundle name to be mofacts.tar.gz. Currently
-this is the name selected by `meteor build`, so there shouldn't be a problem.
+Note that deploy.sh expects the bundle name to be mofacts.tar.gz.
+This is the name selected by `meteor build`, so there shouldn't be a problem.
 
-At this point, you could simply log in to the server and let the script take
+At this point, you could just log in to the server and let the script take
 over for you:
 
 ````
@@ -189,22 +290,20 @@ Assuming that your user ID has `sudo` rights, everything should work just
 fine.  The rest of this section details how you perform the same actions
 manually...
 
-It is assumed that all the following steps are performed on the server in the
-"home" directory for mofacts:
+You perform all the following steps on the server in the "home" directory for mofacts:
 
 ````
 $ cd /var/www/mofacts
 ````
 
 One note - remember that for security everything in this directory will owned
-by the www-data user.  As a result, many of the commands will be executed
-using `sudo`
+by the www-data user.  As a result, you will use `sudo` to execute most of the commands.
 
-First the bundle needs to be extracted.  Many meteor tutorials will then
-delete the bundle file.  The deploy.sh script changes the name of the file
-instead.  As a result, the deployment step only occurs when necessary (because
-it can only run when mofacts.tar.gz exists), but there is a copy of the file
-used for the currently running deployment (named mofacts.tar.gz.deployed).
+First you should extract the bundle.  Meteor tutorials will often recommend that you
+delete the bundle file, but our `deploy.sh` script changes the name of the file
+instead.  As a result, the deployment step occurs when necessary (because
+it runs when mofacts.tar.gz exists), but there is a copy of the file
+used for the running deployment (named mofacts.tar.gz.deployed).
 Also note that for safety you should delete the previous bundle.
 
 ````
@@ -259,6 +358,6 @@ The major functionality of the `deploy.sh` script is described above. If the
 script needs to be customized, all configuration is handled at the beginning
 of the script using environment variables.
 
-The script kills previous processes, deploys mofacts.tar.gz, and then starts
+The script terminates previous processes, deploys mofacts.tar.gz, and then starts
 the mofacts (meteor) process using forever.  As a result, it should usually do
 the "right thing".

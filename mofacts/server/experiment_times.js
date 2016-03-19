@@ -211,13 +211,18 @@
 
 //Create our output record
     function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
-        //Return the default value if the given value isn't "truthy" BUT numeric
-        //zero (0) is considered "truthy".
-        var d = function (val, defval) {
-            if (!val && val !== 0)
-                return defval;
-            else
-                return val;
+        // Return the default value if the given value isn't "truthy" BUT numeric
+        // zero (0) is considered "truthy". Note that the default value is always
+        // the last argument
+        var d = function () {
+            var lastIndex = arguments.length - 1;
+            for (var i = 0; i < lastIndex; ++i) {
+                var val = arguments[i];
+                if (!!val || val === 0) {
+                    return val;
+                }
+            }
+            return arguments[lastIndex]; //Default value
         };
 
         //Get the "actual" schedule object out of the last sched entry
@@ -343,7 +348,7 @@
                         d(lastinstruct.currentUnit, -1)
                     ),
                 username: d(username, ''),
-                selectedTdf: d(lastexpcond.selectedTdf, ''),
+                selectedTdf: d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, ''),
                 unitname: d(unitName, ''),
                 xcondition: xcond,
                 questionIndex: d(lastq.questionIndex, -1),
@@ -395,10 +400,22 @@
             state.stepNameSeen[stepName] = stepCount;
             stepName = stepCount + " " + stepName;
 
+            var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
+
+            var whichStim = d(lastq.whichStim, -1);
+            if (whichStim < 0) {
+                // For models, even if the q record is broken we might be able
+                // to find whichStim
+                whichStim = _.chain(lastq)
+                    .prop('currentCardInfo')
+                    .prop('whichStim').intval(-1)
+                    .value();
+            }
+
             return {
                 "Anon Student Id": d(username, ''),
-                "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + d(lastexpcond.selectedTdf, ''), //hack
-                "Condition Namea": d(lastexpcond.selectedTdf, ''),
+                "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + tdfName, //hack
+                "Condition Namea": tdfName,
                 "Condition Typea": 'tdf file',
                 "Condition Nameb": xcond,
                 "Condition Typeb": 'xcondition',
@@ -428,7 +445,7 @@
                 "CF (Display Order)": d(lastq.questionIndex, -1),
                 "CF (Stim File Index)": d(lastq.clusterIndex, -1),
                 "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
-                "CF (Stimulus Version)": d(lastq.whichStim, -1),
+                "CF (Stimulus Version)": whichStim,
                 "CF (Correct Answer)": corans,
                 "CF (Overlearning)": d(lastq.showOverlearningText, false),
                 "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),

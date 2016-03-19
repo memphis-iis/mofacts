@@ -44,7 +44,65 @@ writeUserLogEntries = function(experiment, objectsToLog, userId) {
     action["$push"][experiment_key] = allVals;
 
     UserTimesLog.update( {_id: userId}, action, {upsert: true} );
+    logUserMetrics(userId, experiment_key, valsToPush);
 };
+
+//Utility - update server-side metrics when we see an answer
+function logUserMetrics(userId, experimentKey, valsToCheck) {
+    //Gather the answers we should use to check
+    var i;
+    var answers = [];
+    for (i = 0; i < valsToCheck.length; i++) {
+        var recAction = _.prop(valsToCheck[i], "action");
+        if (recAction == "answer" || recAction == "[timeout]") {
+            answers.push(valsToCheck[i]);
+        }
+    }
+
+    //Leave if nothing to do
+    if (answers.length < 1) {
+        return;
+    }
+
+    //Insure record matching ID is present while working around MongoDB 2.4 bug
+    try {
+        UserMetrics.update({_id: userId}, {'$set': {'preUpdate': true}}, {upsert: true});
+    }
+    catch(e) {
+        console.log("Ignoring user metric upsert ", e);
+    }
+
+    var makeKey = function(idx, fieldName) {
+        return experimentKey + '.' + idx + '.' + fieldName;
+    };
+
+    for(i = 0; i < answers.length; ++i) {
+        var answer = answers[i];
+        var ttype = _.trim(_.prop(answer, "ttype"));
+        var idx = _.intval(_.prop(answer, "shufIndex"));
+
+        var action;
+        if (ttype == 's') {
+            //Study
+            var reviewTime = _.intval(_.prop(answer, "inferredReviewLatency"));
+            action = [{ '$push': {}, '$inc': {} }];
+            action[0]['$push'][makeKey(idx, 'studyTimes')] = reviewTime;
+            action[0]['$inc' ][makeKey(idx, 'studyCount')] = 1;
+        }
+        else {
+            var isCorrect = !!_.prop(answer, "isCorrect");
+            var answerTime = _.intval(_.prop(answer, "endLatency"));
+            action = [{'$push': {}, '$inc': {}}];
+            action[0]['$push'][makeKey(idx, 'answerTimes')] = answerTime;
+            action[0]['$inc' ][makeKey(idx, 'questionCount')] = 1;
+            action[0]['$inc' ][makeKey(idx, 'correctAnswerCount')] = (isCorrect ? 1 : 0);
+        }
+
+        for (var j = 0; j < action.length; ++j) {
+            UserMetrics.update({_id: userId}, action[j]);
+        }
+    }
+}
 
 //Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
 userLogGetTdfId = function(userid, experiment) {

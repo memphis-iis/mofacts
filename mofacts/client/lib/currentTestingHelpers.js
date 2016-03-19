@@ -4,6 +4,9 @@
  * and/or the current trial. Much of this functionality began in card.js
  * but has been moved here for easier use. See also lib/sessionUtils.js for
  * a better list of Session variables we currently use.
+ *
+ * Note that we will optionally ignore cluster mapping if ignoreClusterMapping
+ * is true. See unitEngine.js for how this is set on a per unit engine basis.
  * */
 
 //Return the current fontsize from the TDF
@@ -36,8 +39,6 @@ setCurrentClusterIndex = function(newIdx) {
 
 //Return the total number of stim clusters
 getStimClusterCount = function() {
-    console.log("Stimuli exists", Stimuli);
-    console.log("Stim name exists", getCurrentStimName());
     return Stimuli.findOne({fileName: getCurrentStimName()})
         .stimuli.setspec.clusters[0].cluster.length;
 };
@@ -48,7 +49,12 @@ getStimCluster = function (index) {
     var clusterMapping = Session.get("clusterMapping");
     var mappedIndex;
 
-    if(clusterMapping) {
+    if(Session.get("ignoreClusterMapping")) {
+        //No mapping performed (a model unit)
+        mappedIndex = index;
+    }
+    else if(clusterMapping) {
+        //Generic, normal functioning - use the previously defined mapping
         mappedIndex = clusterMapping[index];
     }
     else {
@@ -117,12 +123,25 @@ getStimAnswer = function (index, whichAnswer) {
     return getStimCluster(index).response[whichAnswer];
 };
 
+//get the parameter at this index - this works using the same semantics as
+//getStimAnswer and getStimQuestion above. Note that we default to return 0
+getStimParameter = function (index, whichParameter) {
+    return _.chain(getStimCluster(index))
+        .prop("parameter")
+        .prop(_.intval(whichParameter))
+        .floatval()
+        .value();
+};
+
 //Simplified Q/A getters
 getCurrentStimQuestion = function(whichQuestion) {
     return getStimQuestion(getCurrentClusterIndex(), whichQuestion);
 };
 getCurrentStimAnswer = function(whichAnswer) {
     return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
+};
+getCurrentStimParameter = function(whichParameter) {
+    return getStimParameter(getCurrentClusterIndex(), whichParameter);
 };
 
 //Return the list of false responses corresponding to the current question/answer

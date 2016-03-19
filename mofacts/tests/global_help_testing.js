@@ -85,6 +85,27 @@ test_suite("underscore mixins", function() {
         assert.deepEqual(42, _.chain(obj).prop('nestedmiss').first().prop('sub').prop('s').intval(42).value());
         assert.deepEqual(0.42, _.chain(obj).prop('nested').first().prop('sub').prop('miss').floatval(0.42).value());
     });
+
+    unit_test("Mixin _.sum", function(logger) {
+        assert.deepEqual(0, _.sum());
+        assert.deepEqual(0, _.sum([]));
+        assert.deepEqual(0, _.sum([0]));
+        assert.deepEqual(0, _.sum([0, 0]));
+        assert.deepEqual(42.1, _.sum([0, 42, 0.1]));
+    });
+
+    unit_test("total practice time demo/test for sum", function(logger){
+        var cards = [
+            { name: 'A', times: [10, 20, 30] },
+            { name: 'B', notimes: true },
+            { name: 'C', times: [] },
+            { name: 'D', times: [40] },
+            { name: 'E', times: [0.42] },
+        ];
+
+        var calc = _.chain(cards).pluck('times').flatten().sum().value();
+        assert.deepEqual(10+20+30+40+0.42, calc);
+    });
 });
 
 test_report();

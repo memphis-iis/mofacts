@@ -737,7 +737,7 @@ function prepareCard() {
         //We have another card to show...
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
-        engine.writeQuestionEntry();
+        engine.writeQuestionEntry(selReturn);
         newQuestionHandler();
     }
     else {
@@ -1267,11 +1267,12 @@ function processUserTimesLog() {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
-            //Note that this will currently only do something for model units
-            if (engine.unitType === "model") {
-                engine.cardSelected(cardIndex);
-                _.extend(getCardProbs().cards[cardIndex], entry.cardModelData);
-            }
+            // Notify the current engine about the card selection (and note that
+            // the engine knows that this is a resume because we're passing the
+            // log entry back to it). The entry should include the original
+            // selection value to pass in, but if it doesn't we default to
+            // cardIndex (which should work for all units except the model)
+            engine.cardSelected(entry.selectVal || cardIndex, entry);
         }
 
         else if (action === "answer" || action === "[timeout]") {
@@ -1309,7 +1310,7 @@ function processUserTimesLog() {
             );
 
             //Notify unit engine about card answer
-            engine.cardAnswered(wasCorrect);
+            engine.cardAnswered(wasCorrect, entry);
 
             //We know the last question no longer applies
             lastQuestionEntry = null;

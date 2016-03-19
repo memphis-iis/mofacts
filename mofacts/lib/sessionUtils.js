@@ -16,6 +16,7 @@
  * debugging                 - Generic debugging flag
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
+ * ignoreClusterMapping      - see unitEngine.js and currentTestingHelpers.js
  * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
  * needResume
@@ -56,7 +57,6 @@ sessionCleanUp = function() {
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {
-        initCardProbs();
         initUserProgress();
     }
 };
