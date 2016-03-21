@@ -101,8 +101,8 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
-        }
-
+        
+}
         userProgress = initVals;
     };
 
@@ -130,7 +130,6 @@ determineColorIndex = function(score) {
 randomScore = function() {
 		return Math.floor(Math.random()*100)/100;
 }
-=======
 // Useful function for display and debugging objects: returns an OK JSON
 // pretty-print textual representation of the object
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
