@@ -99,6 +99,10 @@ Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
     var userId = this.userId;
 
+    // Currently allow people to see all stats
+    // TODO: change this based on user's role
+    var metricsQuery = {};
+
     //The default data published to everyone - all TDF's and stims, and the
     //user data (user times log and user record) for them
     var defaultData = [
@@ -110,7 +114,8 @@ Meteor.publish(null, function () {
             have_aws_id: 1,
             have_aws_secret: 1,
             use_sandbox: 1
-        }})
+        }}),
+        UserMetrics.find(metricsQuery)
     ];
 
     return defaultData;
