@@ -15,7 +15,7 @@
 
     
     <unit>
-        <unitinstructions>Here comes the model!</unitinstructions>
+        <unitinstructions>Here comes the optimized learning.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
             <clusterlist>0-17</clusterlist>
@@ -26,7 +26,7 @@
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>6000</reviewstudy>
+            <reviewstudy>12000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
