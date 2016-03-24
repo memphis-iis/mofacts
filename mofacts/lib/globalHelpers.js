@@ -35,7 +35,7 @@ if (_ && _.mixin) {
         },
 
         intval: function(src, defaultVal) {
-            if (!src && src !== false) {
+            if (!src && src !== false && src !== 0) {
                 src = "";
             }
             else {
@@ -75,40 +75,22 @@ if (_ && _.mixin) {
             else {
                 return ss.replace(/^\s+|\s+$/gm, '');
             }
-        }
+        },
+
+        sum: function(lst) {
+            return _.reduce(
+                lst,
+                function(memo, num){ return memo + (isFinite(num) ? num : 0.0); },
+                0
+            );
+        },
     });
 }
 
-//Card probabilities setup and retrieval - used by ACT-R model
-//Note that this is only used on the client, but we want to make sure that
-//setting the cardProbabilities data structure is always available (and
-//thus is in the lib folder)
+// User progress data - Note that this is only used on the client, but we want
+// to make sure that it is always available (and thus is in the lib folder)
 
 if (typeof Meteor !== "undefined" && Meteor.isClient) {
-    //Initialize card probabilities, with optional initial data
-    initCardProbs = function(overrideData) {
-        var initVals = {
-            numQuestionsAnswered: 0,
-            numQuestionsIntroduced: 0,
-            cards: []
-        };
-
-        if (!!overrideData) {
-            initVals = _.extend(initVals, overrideData);
-        }
-
-        cardProbabilities = initVals;
-    };
-
-    //Provide access to card probabilities. Note that this function provides
-    //an always-created object with lazy init.
-    getCardProbs = function() {
-        if (!cardProbabilities) {
-            initCardProbs();
-        }
-        return cardProbabilities;
-    };
-
     //Initialize user progress storage, with optional initial data
     initUserProgress = function(overrideData) {
         var initVals = {
@@ -119,8 +101,8 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
-        }
-
+        
+}
         userProgress = initVals;
     };
 
@@ -134,6 +116,8 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
     };
 }
 
+// MoFaCTs-4882's Additions
+
 // Moved function from within the file to here to modularize code.
 // This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
 //INPUT: score, a float between 0 and 1
@@ -146,3 +130,28 @@ determineColorIndex = function(score) {
 randomScore = function() {
 		return Math.floor(Math.random()*100)/100;
 }
+// Useful function for display and debugging objects: returns an OK JSON
+// pretty-print textual representation of the object
+//Helpful wrapper around JSON.stringify, including timestamp field expansion
+displayify = function(obj) {
+    if (typeof obj === "string" || typeof obj === "number") {
+        return obj;
+    }
+    var dispObj = _.extend({}, obj);
+
+    try {
+        for (var prop in dispObj) {
+            if (prop.toLowerCase().endsWith('timestamp')) {
+                var ts = _.intval(_.prop(obj, prop));
+                if (ts > 0) {
+                    dispObj[prop] = " " + new Date(ts) + " (converted from " + ts + ")";
+                }
+            }
+        }
+    }
+    catch(e) {
+        console.log("Object displayify error", e);
+    }
+
+    return JSON.stringify(dispObj, null, 2);
+};

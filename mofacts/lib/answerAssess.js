@@ -42,11 +42,15 @@ function stringMatch(s1, s2, lfparameter) {
                 Math.max(s1.length, s2.length)
             );
             if (editDistScore >= lfparameter) {
-                return 2;
+                return 2;  //Close enough
             }
             else {
-                return 0;
+                return 0;  //No match
             }
+        }
+        else {
+            //Nope - must compare exactly
+            return 0;
         }
     }
 }

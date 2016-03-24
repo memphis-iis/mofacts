@@ -24,6 +24,7 @@ Template.lineGraphAverage.rendered = function(){
         axisY: {
           onlyInteger: true,
           offset: 20
-        }
+        },
+        lineSmooth: false
     });
 }

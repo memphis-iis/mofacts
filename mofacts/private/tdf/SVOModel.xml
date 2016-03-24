@@ -4,15 +4,35 @@
         <lessonname>SVO Models</lessonname>
         <userselect>true</userselect>
         <randomizedDelivery>3</randomizedDelivery>
-        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <stimulusfile>SVO5stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
-        <shuffleclusters>20-35</shuffleclusters>
-        <swapclusters>0-19 20-35</swapclusters>
-        <swapclusters>0-4 5-9 10-14 15-19</swapclusters>
+        <shuffleclusters>0-17</shuffleclusters>
     </setspec>
+
+
+    
+    <unit>
+        <unitinstructions>Here comes the model!</unitinstructions>
+        <unitname>Model Unit</unitname>
+        <learningsession>
+            <clusterlist>0-17</clusterlist>
+        </learningsession>
+
+        <deliveryparams>
+            <practiceseconds>3600</practiceseconds>
+            <drill>12000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>6000</reviewstudy>
+            <correctprompt>750</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
 
     <unit>
         <unitname>Show the questions</unitname>
@@ -39,54 +59,10 @@ Please answer the following 5 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>36-40</clusterlist>
+            <clusterlist>18-22</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
-    </unit>
-
-    <unit>
-        <unitinstructions>Here comes the model!</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-            <clusterlist>0-5</clusterlist>
-        </learningsession>
-
-        <deliveryparams>
-            <practiceseconds>30</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-
-        <deliveryparams>
-            <practiceseconds>45</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-
-        <deliveryparams>
-            <practiceseconds>60</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
     </unit>
 
     <unit>

@@ -61,6 +61,7 @@ Template.Items.rendered = function() {
         );
     };
 
+
     cluster.forEach( function(item){    
 		
         function random(min, max) {
