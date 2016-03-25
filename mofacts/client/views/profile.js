@@ -9,6 +9,10 @@ Template.profile.helpers({
         else {
             return Meteor.user().username;
         }
+    },
+
+    simulationChecked: function() {
+        return Session.get("runSimulation");
     }
 });
 
@@ -52,6 +56,12 @@ Template.profile.events({
             target.data("tdffilename"),
             "User button click"
         );
+    },
+
+    'click #simulation': function(event, template) {
+        var checked = template.$("#simulation").prop('checked');
+        Session.set("runSimulation", checked);
+        console.log("runSimulation", Session.get("runSimulation"));
     }
 });
 

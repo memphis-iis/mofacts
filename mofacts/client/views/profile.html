@@ -41,7 +41,13 @@
         {{/if}}
 
         <div class="row" id="testButtonContainer">
-            <legend class="text-center">Your Practice Modules</legend>
+            <legend class="text-center">
+                Your Practice Modules
+                {{#if isInRole 'admin,teacher'}}
+                    <br>
+                    <input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?
+                {{/if}}
+            </legend>
         </div>
 
         {{#if isInRole 'admin,teacher'}}

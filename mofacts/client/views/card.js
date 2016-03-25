@@ -67,22 +67,28 @@ var currentQuestionSound = null; //See later in this file for sound functions
 var timeoutName = null;
 var timeoutFunc = null;
 var timeoutDelay = null;
+var simTimeoutName = null;
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
 //and over
 function clearCardTimeout() {
-    if (!!timeoutName) {
-        try {
+    try {
+        if (!!timeoutName) {
             Meteor.clearTimeout(timeoutName);
         }
-        catch(e) {
-            console.log("Error clearing meteor timeout", e, timeoutName);
+        if (!!simTimeoutName) {
+            Meteor.clearTimeout(simTimeoutName);
         }
     }
+    catch(e) {
+        console.log("Error clearing meteor timeout", e);
+    }
+
     timeoutName = null;
     timeoutFunc = null;
     timeoutDelay = null;
+    simTimeoutName = null;
 }
 
 //Start a timeout count
@@ -102,6 +108,49 @@ function resetMainCardTimeout() {
     beginMainCardTimeout(savedDelay, savedFunc);
 }
 
+//Set a special timeout to handle simulation if necessary
+function checkSimulation() {
+    if (!Session.get("runSimulation")) {
+        console.log("NO-SIM: run simulation not set"); //TODO: remove
+        return;
+    }
+    if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+        console.log("NO-SIM: role wrong"); //TODO: remove
+        return;
+    }
+
+    var setspec = _.chain(getCurrentTdfFile())
+        .prop("tdfs")
+        .prop("tutor")
+        .prop("setspec").first()
+        .value();
+    if (!setspec) {
+        console.log("NO-SIM: no setspec"); //TODO: remove
+        return;
+    }
+
+    var simTimeout = _.chain(setspec).prop("simTimeout").intval(0).value();
+    if (simTimeout <= 0) {
+        console.log("NO-SIM: no timeout"); //TODO: remove
+        return;
+    }
+
+    var simCorrectProb = _.chain(setspec).prop("simCorrectProb").floatval(0.0).value();
+    if (simCorrectProb <= 0.0) {
+        console.log("NO-SIM: no correct prob"); //TODO: remove
+        return;
+    }
+
+    // If we we are here, then we should set a timeout to sim a correct answer
+    var correct = Math.random() <= simCorrectProb;
+    console.log("SIM: will simulate response with correct=", correct, "in", simTimeout);
+    simTimeoutName = Meteor.setTimeout(function() {
+        console.log("SIM: Fired!");
+        simTimeoutName = null;
+        handleUserInput({}, 'simulation', correct);
+    }, simTimeout);
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
@@ -117,7 +166,6 @@ function leavePage(dest) {
 }
 
 Template.card.events({
-
     'focus #userAnswer' : function() {
         //Not much right now
     },
@@ -281,7 +329,7 @@ Template.card.helpers({
 
     currentScore: function() {
         return Session.get("currentScore");
-    },
+    }
 });
 
 
@@ -391,6 +439,7 @@ function newQuestionHandler() {
     }
 
     setQuestionTimeout();
+    checkSimulation();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
@@ -459,7 +508,7 @@ function playCurrentQuestionSound(onEndCallback) {
     currentQuestionSound.play();
 }
 
-function handleUserInput(e , source) {
+function handleUserInput(e, source, simAnswerCorrect) {
     var isTimeout = false;
     var key;
     if (source === "timeout") {
@@ -473,7 +522,7 @@ function handleUserInput(e , source) {
             keypressTimestamp = Date.now();
         }
     }
-    else if (source === "buttonClick") {
+    else if (source === "buttonClick" || source === "simulation") {
         //to save space we will just go ahead and act like it was a key press.
         key = 13;
     }
@@ -499,11 +548,14 @@ function handleUserInput(e , source) {
     else if (source === "buttonClick") {
         userAnswer = e.currentTarget.name;
     }
+    else if (source === "simulation") {
+        userAnswer = simAnswerCorrect ? "SIM: Correct Answer" : "SIM: Wrong Answer";
+    }
 
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    var isCorrect = userAnswerFeedback(userAnswer, isTimeout);
+    var isCorrect = userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect);
 
     //Note that we must provide the client-side timestamp since we need it...
     //Pretty much everywhere else relies on recordUserTime to provide it.
@@ -658,13 +710,14 @@ function getButtonTrial() {
 }
 
 //Take care of user feedback - and return whether or not the user correctly
-//answered the question
-function userAnswerFeedback(userAnswer, isTimeout) {
+//answered the question. simCorrect will usually be undefined/null BUT if
+//it is true or false we know this is part of a simulation call
+function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     var isCorrect = null;
 
-    //Nothing to evaluate - it was a study. To make things easier, we just
-    //pretend they answered exactly correct
+    //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s") {
+        //Study -
         isCorrect = true;
         isTimeout = false;
     }
@@ -694,6 +747,10 @@ function userAnswerFeedback(userAnswer, isTimeout) {
     else if (isCorrect) {
         //We've already marked this as a correct answer
         handleAnswerState(true, "Please study the answer");
+    }
+    else if (typeof simCorrect === "boolean") {
+        //Simulation! We know what they did
+        handleAnswerState(simCorrect, "Simulation");
     }
     else {
         correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
