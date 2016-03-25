@@ -71,23 +71,9 @@ Template.allStudents.rendered = function () {
     currTdfUsers.forEach( function (user) {
 				// Fetch the username from the main database and associate it with our smaller listing here.
 				user.username = Meteor.users.findOne({_id: user._id}, {username: true}).username;
-
-				var computeUserScore = function(user) {
-						var indivUserQuery = {};
-						indivUserQuery['_id'] = user._id;
-						// We use findOne because there should only ever be one user with any given id.
-						var indivUser = UserMetrics.findOne(indivUserQuery);
-						var askCount = 0;
-						var correctCount = 0;
-						_.chain(indivUser).prop(tdfDBName).each( function (item) {
-								askCount = askCount + _.chain(item).prop('questionCount').intval().value();
-								correctCount = correctCount + _.chain(item).prop('correctAnswerCount').intval().value();
-						});
-						return correctCount/askCount;
-				};
 				
 				// Compute the user's average score across this system to appear on the button (and to color it).
-				user.score = computeUserScore(user);
+				user.score = computeUserScore(user, tdfDBName);
 				
 				// For convenience only, we assign the index to a variable so the code down below is less messy.
 				var colorIndex = determineColorIndex(user.score);

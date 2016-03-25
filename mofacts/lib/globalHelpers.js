@@ -134,14 +134,14 @@ randomScore = function() {
 // Moved from client view to here for code separation purposes.
 //INPUT: user, which is an object containing an _id which corresponds to a doc in UserMetrics
 //OUTPUT: a ratio which is the user's average score across all items for the client's current system.
-computeUserScore = function(user) {
+computeUserScore = function(user, tdfname) {
 		var indivUserQuery = {};
 		indivUserQuery['_id'] = user._id;
 		// We use findOne because there should only ever be one user with any given id.
 		var indivUser = UserMetrics.findOne(indivUserQuery);
 		var askCount = 0;
 		var correctCount = 0;
-		_.chain(indivUser).prop(tdfDBName).each( function (item) {
+		_.chain(indivUser).prop(tdfname).each( function (item) {
 				askCount = askCount + _.chain(item).prop('questionCount').intval().value();
 				correctCount = correctCount + _.chain(item).prop('correctAnswerCount').intval().value();
 		});
