@@ -94,6 +94,7 @@ function logUserMetrics(userId, experimentKey, valsToCheck) {
             var answerTime = _.intval(_.prop(answer, "endLatency"));
             action = [{'$push': {}, '$inc': {}}];
             action[0]['$push'][makeKey(idx, 'answerTimes')] = answerTime;
+            action[0]['$push'][makeKey(idx, 'answerCorrect')] = isCorrect;
             action[0]['$inc' ][makeKey(idx, 'questionCount')] = 1;
             action[0]['$inc' ][makeKey(idx, 'correctAnswerCount')] = (isCorrect ? 1 : 0);
         }
