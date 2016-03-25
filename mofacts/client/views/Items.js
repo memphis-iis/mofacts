@@ -78,11 +78,11 @@ Template.Items.rendered = function() {
 				
         //Buttons that contain the name of the item which is named response inside of the cluster
         addButton(
-            $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
+            $("<button type='button' id='"+item.display[0]+"' name='"+item.display[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
 								.css("background", colors[colorIndex])
 						    //Retained for testing purposes.
-                .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
+                .html(item.display[0]+", "+Math.floor((100*item.score))+"%")
 								//.html(item.response[0])
         );
     });
