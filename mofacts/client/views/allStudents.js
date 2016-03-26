@@ -56,7 +56,7 @@ Template.allStudents.rendered = function () {
 
 		// We have to build the query as a JavaScript object to get only the users that have done questions on this test.
 		var userQuery = {};
-		var tdfDBName = getCurrentTdfName().replace(".", "_");
+		var tdfDBName = buildTdfDBName(getCurrentTdfName());
 		userQuery[tdfDBName] = {$exists: true};
     var currTdfUsers = UserMetrics.find(userQuery);
 		//
@@ -76,13 +76,13 @@ Template.allStudents.rendered = function () {
 				user.score = computeUserScore(user, tdfDBName);
 				
 				// For convenience only, we assign the index to a variable so the code down below is less messy.
-				var colorIndex = determineColorIndex(user.score);
+				var buttonColor = determineButtonColor(user.score);
 
         addButton(
             $("<button type='button' id='"+user._id+"' name='"+user._id+"'></button>")
                 .addClass("btn btn-block studentButton")
                 .data("studentkey", user._id)
-                .css("background", colors[colorIndex])
+                .css("background", buttonColor)
                 .html(user.username+", "+Math.floor((100*user.score))+"%")
         );
     });
