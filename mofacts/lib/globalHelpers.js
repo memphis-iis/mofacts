@@ -123,13 +123,60 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 //INPUT: score, a float between 0 and 1
 //OUTPUT: an integer, which corresponds here to the index in the color array indicating score's correctness
 determineColorIndex = function(score) {
-		return Math.floor(score/(1/colors.length));
+		if (score == 1) {
+				return colors.length-1;
+		} else {
+				return Math.floor(score/(1/colors.length));
+		}
+}
+
+// Moved this function out to accommodate the NaN situations
+//INPUT: a score, a float between 0 and 1
+//OUTPUT: a hex color code corresponding to the item's desired color.
+determineButtonColor = function(score) {
+		return (isNaN(score)) ? "#b0b09b" : colors[determineColorIndex(score)];
 }
 
 // Simple function to randomly assign a value between 0 and 1, to 2 digits. E.g. .42, 1.00, .28
 randomScore = function() {
 		return Math.floor(Math.random()*100)/100;
 }
+
+// Moved from client view to here for code separation purposes.
+//INPUT: user, which is an object containing an _id which corresponds to a doc in UserMetrics, and the name of the relevant Tdf (in Mongo-recognizable format)
+//OUTPUT: a ratio which is the user's average score across all items for the client's current system.
+computeUserScore = function(user, tdfname) {
+		var indivUserQuery = {};
+		indivUserQuery['_id'] = user._id;
+		// We use findOne because there should only ever be one user with any given id.
+		var indivUser = UserMetrics.findOne(indivUserQuery);
+		var askCount = 0;
+		var correctCount = 0;
+		_.chain(indivUser).prop(tdfname).each( function (item) {
+				askCount = askCount + _.chain(item).prop('questionCount').intval().value();
+				correctCount = correctCount + _.chain(item).prop('correctAnswerCount').intval().value();
+		});
+		return correctCount/askCount;
+};
+
+// Simple function for taking the filename of the given Tdf and converting it to the format Mongo recognizes.
+buildTdfDBName = function (tdfname) {
+		return tdfname.replace(".", "_");
+};
+
+// INPUT: an item from a Tdf, the name of that tdf (in Mongo-recognizable format)
+// OUTPUT: a ratio to 2 decimal places which is the average score of all students who have attempted this item
+computeItemAverage = function(item, tdfname) {
+		var userList = UserMetrics.find().fetch();
+		var askCount = 0;
+		var correctCount = 0;
+		_.chain(userList).each( function(user) {
+				askCount = askCount + _.chain(user).prop(tdfname).prop(item).prop('questionCount').intval().value();
+				correctCount = correctCount + _.chain(user).prop(tdfname).prop(item).prop('correctAnswerCount').intval().value();
+		});
+		return correctCount/askCount;
+}
+
 // Useful function for display and debugging objects: returns an OK JSON
 // pretty-print textual representation of the object
 //Helpful wrapper around JSON.stringify, including timestamp field expansion

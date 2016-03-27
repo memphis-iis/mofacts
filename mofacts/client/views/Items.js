@@ -63,24 +63,21 @@ Template.Items.rendered = function() {
 
 
     cluster.forEach( function(item){    
-		
-        function random(min, max) {
-            return Math.floor(Math.random() * (max-min)) + min; //function to be removed later
-        }
 				
-				// Currently just randomly assigning the score to the item. In production, this or a similar variable will be assigned already.
-				//item.score = Math.floor(Math.random()*100)/100;
-				item.score = randomScore();
+				// Computes the item's average across the system
+				var itemId = _.indexOf(cluster, item);
+				item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
 				//
 				
 				// For convenience only, assign an easy variable the button's color.
-				var colorIndex = determineColorIndex(item.score);
+				var buttonColor = determineButtonColor(item.score);
+				
 				
         //Buttons that contain the name of the item which is named response inside of the cluster
         addButton(
             $("<button type='button' id='"+item.display[0]+"' name='"+item.display[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
-								.css("background", colors[colorIndex])
+								.css("background", buttonColor)
 						    //Retained for testing purposes.
                 .html(item.display[0]+", "+Math.floor((100*item.score))+"%")
 								//.html(item.response[0])
