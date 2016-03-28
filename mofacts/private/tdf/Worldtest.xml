@@ -6,6 +6,8 @@
         <clustersize>1</clustersize>
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
+        <simTimeout>350</simTimeout>
+        <simCorrectProb>0.75</simCorrectProb>
     </setspec>
 
     <unit>

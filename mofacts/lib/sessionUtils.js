@@ -21,6 +21,7 @@
  * loginMode                 - untouched in sessionCleanUp
  * needResume
  * questionIndex
+ * runSimulation
  * showOverlearningText
  * statsAnswerDetails        - Used by stats page template
  * statsCorrect              - Used by stats page template
