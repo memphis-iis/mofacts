@@ -177,6 +177,53 @@ computeItemAverage = function(item, tdfname) {
 		return correctCount/askCount;
 }
 
+// Simple function to generate the numbers from 1..end
+generateNaturals = function(end) {
+		var returnArray = [];
+		for (var i=0; i<end; i++) {
+				returnArray[i]=i;
+		}
+		return returnArray;
+}
+
+//INPUT: Student, a string representing the ID of the student to retrieve the data from, tdfName, a string representing the name of the current TDF (in Mongo-recognizable format), optionBool, which is false for latency, true for correctness
+//OUPUT: an array containing values with indices representing the 'opportunity' number. The 0th slot is always initialized to "0".
+// TODO: make this more functional, maps, filter, etc.
+generateStudentGraphData = function(studentID, tdfname, optionBool) {
+		var userData = UserMetrics.find({'_id' : studentID}).fetch();
+		var itemData = [];
+		var itemCount = [];
+		console.log(_.chain(userData[0]).prop(tdfname).value());
+		_.chain(userData[0]).prop(tdfname).each( function(item) {
+				//Each item in the TDF
+				for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
+						if (itemCount.length <= i) {
+								itemCount.push(0);
+								itemData.push(0);
+						}
+						itemCount[i]++;
+						if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+								if (optionBool) {
+										itemData[i]++;
+								} else {
+										itemData[i] += item.answerTimes[i];
+ 										
+								}
+						}
+				}
+				
+		});
+		// Now we have the data, turn it into averages, replacing itemData's values with the averages
+		for (var i=0; i<itemData.length; i++) {
+				itemData[i] = itemData[i] / itemCount[i];
+		}
+		// Quick-and-dirty checking to make sure that the last element isn't just 0.
+		if (itemData[itemData.length-1] == 0) {
+				itemData.pop();
+		}
+		return itemData;
+}
+
 // Useful function for display and debugging objects: returns an OK JSON
 // pretty-print textual representation of the object
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
