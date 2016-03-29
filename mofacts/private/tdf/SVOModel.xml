@@ -12,8 +12,6 @@
         <shuffleclusters>0-17</shuffleclusters>
     </setspec>
 
-
-    
     <unit>
         <unitinstructions>Here comes the optimized learning.</unitinstructions>
         <unitname>Model Unit</unitname>
