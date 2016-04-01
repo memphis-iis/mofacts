@@ -11,6 +11,7 @@ underscore
 ovcharik:howler
 
 alanning:roles
-standard-minifiers
 http
 percolate:synced-cron
+standard-minifier-css
+standard-minifier-js
