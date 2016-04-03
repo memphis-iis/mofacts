@@ -6,7 +6,13 @@ Template.student.helpers({
         else {
             return Meteor.user().username;
         }
-    }
+    },
+		studentDataLat: function () {
+				return generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), false);
+		},
+		studentDataCor: function () {
+				return generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), true);
+		},
 });
 
 Template.student.events({

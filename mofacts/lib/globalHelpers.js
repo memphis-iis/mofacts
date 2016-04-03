@@ -186,6 +186,44 @@ generateNaturals = function(end) {
 		return returnArray;
 }
 
+//INPUT: itemID, an integer which represents the index of the item in the cluster
+//       tdfname, a string representing the Mongo-friendly current TDF
+//       optionBool, a boolean, where true is for correctness data, false is for latency data
+//OUTPUT: an array containing average values for each "opportunity", where the opportunity is the index in the array
+generateItemGraphData = function(itemID, tdfname, optionBool) {
+		var itemQuery = {};
+		var itemData = []; //either correctness or latency, hence 'data'
+		var itemCount = [];
+		itemQuery[tdfname+"."+itemID] = {$exists: true};
+		var scoreArray = UserMetrics.find(itemQuery).fetch();
+		_.chain(scoreArray).each(function (user) {
+				var itemCurrUser = _.chain(user).prop(tdfname).prop(itemID).value();
+				for (var i=0; i<_.chain(itemCurrUser).prop('questionCount').intval().value(); i++) {
+						if (itemCount.length <= i) {
+								itemCount.push(0);
+								itemData.push(0);
+						}
+						itemCount[i]++;
+						if (!(_.isUndefined(itemCurrUser.answerCorrect)) && itemCurrUser.answerCorrect[i]) {
+								if (optionBool) {
+										itemData[i]++;
+								} else {
+										itemData[i] += itemCurrUser.answerTimes[i];
+								}
+						}
+				}
+		});
+		console.log(itemData);
+		console.log(itemCount);
+		for (var i=0; i<itemData.length; i++) {
+				itemData[i] /= itemCount[i];
+		}
+		if (_.last(itemData) === 0) {
+				itemData.pop();
+		}
+		return itemData;
+}
+
 //INPUT: Student, a string representing the ID of the student to retrieve the data from, tdfName, a string representing the name of the current TDF (in Mongo-recognizable format), optionBool, which is false for latency, true for correctness
 //OUPUT: an array containing values with indices representing the 'opportunity' number. The 0th slot is always initialized to "0".
 // TODO: make this more functional, maps, filter, etc.
@@ -215,12 +253,16 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 		});
 		// Now we have the data, turn it into averages, replacing itemData's values with the averages
 		for (var i=0; i<itemData.length; i++) {
-				itemData[i] = itemData[i] / itemCount[i];
+				itemData[i] /= itemCount[i];
 		}
 		// Quick-and-dirty checking to make sure that the last element isn't just 0.
-		if (itemData[itemData.length-1] == 0) {
+		if (_.last(itemData) === 0) {
 				itemData.pop();
 		}
+		// if (itemData[itemData.length-1] == 0) {
+		// 		itemData.pop();
+		// }
+		
 		return itemData;
 }
 

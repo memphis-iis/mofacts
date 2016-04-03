@@ -9,18 +9,16 @@
 
 
 Template.lineGraphAverage.rendered = function(){
-		// Currently this generates the latency graph. You would change the 3rd arg to 'true' to obtain the correctness graph. labelData should be agnostic.
-		var studentData = generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), true);
-		var labelData = generateNaturals(studentData.length);
+
     new Chartist.Line('.ct-chart', {
-        labels: labelData,
+        labels: [1,2,3,4,5],
         series: [{
            name: 'Student',
-           data: studentData
-         } //,  {
-        //    name: 'Average',
-        //    data: [4, 4, 3, 3, 2, 2, 1, 1]
-        // }
+						data: [1,2,3,4]
+         } ,  {
+           name: 'Average',
+           data: [4, 4, 3, 3, 2, 2, 1, 1]
+        }
 								]
     }, {
         low: 0,

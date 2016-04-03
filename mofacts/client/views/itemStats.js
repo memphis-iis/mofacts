@@ -7,6 +7,12 @@ Template.itemStats.helpers({
             return Meteor.user().username;
         }
     },
+		itemDataLat: function () {
+				return generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), false);
+		},
+		itemDataCor: function () {
+				return generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), true);
+		},	
 
 });
 

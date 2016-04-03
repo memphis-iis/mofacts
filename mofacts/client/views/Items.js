@@ -40,6 +40,8 @@ Template.Items.events({
     },
 
     'click .stimButton' : function (event) {
+				var target = $(event.currentTarget);
+				Session.set('currItem', target.data("itemkey"));
         event.preventDefault();
         Router.go('/itemStats');
     }
@@ -77,6 +79,7 @@ Template.Items.rendered = function() {
         addButton(
             $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
+						    .data("itemkey", itemId)
 								.css("background", buttonColor)
 						    //Retained for testing purposes.
                 .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
