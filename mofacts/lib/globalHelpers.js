@@ -224,6 +224,40 @@ generateItemGraphData = function(itemID, tdfname, optionBool) {
 		return itemData;
 }
 
+generateClassGraphData = function(tdfname, optionBool) {
+		var userDataQuery = {};
+		var userData = [];
+		userDataQuery[tdfname] = {$exists: true};
+		userData = UserMetrics.find(userDataQuery).fetch();
+		var classData = [];
+		var classCount = [];
+		_.chain(userData).each(function(user) {
+				_.chain(user).prop(tdfname).each(function(item) {
+						for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
+								if (classCount.length <= 1) {
+										classCount.push(0);
+										classData.push(0);
+								}
+								classCount[i]++;
+								if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+										if (optionBool) {
+												classData[i]++;
+										} else {
+												classData[i] += item.answerTimes[i];
+										}
+								}
+						}
+				});
+		});
+		for (var i=0; i<classData.length; i++) {
+				classData[i] /= classCount[i];
+		}
+		if (_.last(classData) === 0) {
+				classData.pop();
+		}
+		return classData;
+};
+
 //INPUT: Student, a string representing the ID of the student to retrieve the data from, tdfName, a string representing the name of the current TDF (in Mongo-recognizable format), optionBool, which is false for latency, true for correctness
 //OUPUT: an array containing values with indices representing the 'opportunity' number. The 0th slot is always initialized to "0".
 // TODO: make this more functional, maps, filter, etc.

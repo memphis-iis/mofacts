@@ -13,6 +13,12 @@ Template.student.helpers({
 		studentDataCor: function () {
 				return generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), true);
 		},
+		classDataLat: function () {
+				return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
+		},
+		classDataCor: function() {
+				return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
+		}
 });
 
 Template.student.events({
