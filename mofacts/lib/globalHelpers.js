@@ -218,7 +218,7 @@ generateItemGraphData = function(itemID, tdfname, optionBool) {
 		for (var i=0; i<itemData.length; i++) {
 				itemData[i] /= itemCount[i];
 		}
-		if (_.last(itemData) === 0) {
+		if (_.last(itemCount) === 0) {
 				itemData.pop();
 		}
 		return itemData;
@@ -285,18 +285,20 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 				}
 				
 		});
+		console.log(displayify(itemData));
+		console.log(displayify(itemCount));
 		// Now we have the data, turn it into averages, replacing itemData's values with the averages
 		for (var i=0; i<itemData.length; i++) {
 				itemData[i] /= itemCount[i];
 		}
 		// Quick-and-dirty checking to make sure that the last element isn't just 0.
-		if (_.last(itemData) === 0) {
+		if (_.last(itemCount) === 0) {
 				itemData.pop();
 		}
 		// if (itemData[itemData.length-1] == 0) {
 		// 		itemData.pop();
 		// }
-		
+		console.log(displayify(itemData));
 		return itemData;
 }
 

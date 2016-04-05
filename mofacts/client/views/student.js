@@ -8,10 +8,14 @@ Template.student.helpers({
         }
     },
 		studentDataLat: function () {
-				return generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), false);
+				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+				con
+				return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
+				
 		},
 		studentDataCor: function () {
-				return generateStudentGraphData(Session.get('currStudent'), buildTdfDBName(getCurrentTdfName()), true);
+				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;				
+				return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
 		},
 		classDataLat: function () {
 				return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
