@@ -100,11 +100,12 @@ Template.itemStats.rendered = function () {
          Template.itemStats.__helpers[" itemDataCor"]()
       ]
    }, {
+      high: 1,
       low: 0,
       fullWidth: true,
       height: 300,
       axisY: {
-         onlyInteger: true,
+         onlyInteger: false,
          offset: 50
       },
       lineSmooth: false

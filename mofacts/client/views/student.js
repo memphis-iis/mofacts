@@ -1,28 +1,27 @@
 Template.student.helpers({
-    username: function () {
-        if (!haveMeteorUser()) {
-            routeToSignin();
-        }
-        else {
-            return Meteor.user().username;
-        }
-    },
-		studentDataLat: function () {
-				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-				con
-				return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
-				
-		},
-		studentDataCor: function () {
-				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;				
-				return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
-		},
-		classDataLat: function () {
-				return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
-		},
-		classDataCor: function() {
-				return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
-		}
+   username: function () {
+      if (!haveMeteorUser()) {
+         routeToSignin();
+      }
+      else {
+         return Meteor.user().username;
+      }
+   },
+   studentDataLat: function () {
+      var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+      return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
+
+   },
+   studentDataCor: function () {
+      var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+      return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
+   },
+   classDataLat: function () {
+      return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
+   },
+   classDataCor: function () {
+      return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
+   }
 });
 
 Template.student.events({
@@ -93,6 +92,43 @@ Template.student.rendered = function () {
       studentDataCorRes.push(i);
    }
 
+   if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+
+   new Chartist.Line('#reptitionLatency', {
+      labels: studentDataLatRes,
+      series: [
+         Template.student.__helpers[" studentDataLat"](),
+         Template.student.__helpers[" classDataLat"]()
+      ]
+   }, {
+      low: 0,
+      fullWidth: true,
+      height: 300,
+      axisY: {
+         onlyInteger: true,
+         offset: 50
+      },
+      lineSmooth: false
+   });
+
+   new Chartist.Line('#reptitionCorrectness', {
+      labels: studentDataCorRes,
+      series: [
+         Template.student.__helpers[" studentDataCor"](),
+         Template.student.__helpers[" classDataCor"]()
+      ]
+   }, {
+      high: 1,
+      low: 0,
+      fullWidth: true,
+      height: 300,
+      axisY: {
+         onlyInteger: false,
+         offset: 50
+      },
+      lineSmooth: false
+   });
+} else {
    new Chartist.Line('#reptitionLatency', {
       labels: studentDataLatRes,
       series: [
@@ -124,4 +160,5 @@ Template.student.rendered = function () {
       },
       lineSmooth: false
    });
+}
 }
