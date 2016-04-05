@@ -82,31 +82,31 @@ Template.itemStats.rendered = function () {
       labels: itemDataLatRes,
       series: [
          Template.itemStats.__helpers[" itemDataLat"]()
-   ]
-}, {
-   low: 0,
-   fullWidth: true,
-   height: 300,
-   axisY: {
-      onlyInteger: true,
-      offset: 50
-   },
-   lineSmooth: false
-});
+      ]
+   }, {
+      low: 0,
+      fullWidth: true,
+      height: 300,
+      axisY: {
+         onlyInteger: true,
+         offset: 50
+      },
+      lineSmooth: false
+   });
 
-new Chartist.Line('#reptitionCorrectness', {
-   labels: itemDataCorRes,
-   series: [
-      Template.itemStats.__helpers[" itemDataCor"]()
-   ]
-}, {
-   low: 0,
-   fullWidth: true,
-   height: 300,
-   axisY: {
-      onlyInteger: true,
-      offset: 50
-   },
-   lineSmooth: false
-});
+   new Chartist.Line('#reptitionCorrectness', {
+      labels: itemDataCorRes,
+      series: [
+         Template.itemStats.__helpers[" itemDataCor"]()
+      ]
+   }, {
+      low: 0,
+      fullWidth: true,
+      height: 300,
+      axisY: {
+         onlyInteger: true,
+         offset: 50
+      },
+      lineSmooth: false
+   });
 }

@@ -73,7 +73,7 @@ Router.route('/choose', function () {
    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
        this.render('/choose');
    } else {
-   this.redirect('/itemStats') }
+   this.redirect('/student') }
 });
 
 Router.route('/instructions', function () {
