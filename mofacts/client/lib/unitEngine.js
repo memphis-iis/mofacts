@@ -189,6 +189,29 @@ function modelUnitEngine() {
     //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
 
+    //We cache the stimuli found since it shouldn't change during the unit
+    var cachedStimuli = null;
+    function fastGetStimCluster(index) {
+        if (!cachedStimuli) {
+            cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
+        }
+        return getStimCluster(index, cachedStimuli);
+    }
+    //And we use the caching to implement our our gets for question, answer, and parameter
+    function fastGetStimParameter(clusterIndex, whichParameter) {
+        return _.chain(fastGetStimCluster(clusterIndex))
+            .prop("parameter")
+            .prop(_.intval(whichParameter))
+            .floatval()
+            .value();
+    }
+    function fastGetStimQuestion(index, whichQuestion) {
+        return fastGetStimCluster(index).display[whichQuestion];
+    }
+    function fastGetStimAnswer(index, whichAnswer) {
+        return fastGetStimCluster(index).response[whichAnswer];
+    }
+
     var currentCardInfo = {
         testType: 'd',
         clusterIndex: -1,
@@ -202,7 +225,7 @@ function modelUnitEngine() {
         console.log("MODEL UNIT card selection => ",
             "cluster-idx:", clusterIndex,
             "whichStim:", whichStim,
-            "parameter", getStimParameter(clusterIndex, whichStim)
+            "parameter", fastGetStimParameter(clusterIndex, whichStim)
         );
     }
 
@@ -252,7 +275,7 @@ function modelUnitEngine() {
             };
 
             // We keep per-stim and re-response-text results as well
-            var cluster = getStimCluster(i);
+            var cluster = fastGetStimCluster(i);
             var numStims = _.chain(cluster).prop("display").prop("length").intval().value();
             for (j = 0; j < numStims; ++j) {
                 // Per-stim counts
@@ -260,7 +283,7 @@ function modelUnitEngine() {
                     stimSuccessCount: 0,
                     stimFailureCount: 0,
                     hasBeenIntroduced: false,
-                    parameter: getStimParameter(i, j)
+                    parameter: fastGetStimParameter(i, j)
                 });
 
                 initProbs.push({
@@ -351,11 +374,11 @@ function modelUnitEngine() {
         // Stimulus/cluster-version metrics
         p.stimSuccessCount = stim.stimSuccessCount;
         p.stimFailureCount = stim.stimFailureCount;
-        p.stimResponseText = Answers.getDisplayAnswerText(getStimAnswer(prob.cardIndex, prob.stimIndex));
+        p.stimResponseText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex));
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
-        p.stimParameter = getStimParameter(prob.cardIndex, prob.stimIndex);
+        p.stimParameter = fastGetStimParameter(prob.cardIndex, prob.stimIndex);
 
         // Calculated metrics
         p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.0630),  0.339);
@@ -481,8 +504,8 @@ function modelUnitEngine() {
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
-            Session.set("currentQuestion", getStimQuestion(cardIndex, whichStim));
-            Session.set("currentAnswer", getStimAnswer(cardIndex, whichStim));
+            Session.set("currentQuestion", fastGetStimQuestion(cardIndex, whichStim));
+            Session.set("currentAnswer", fastGetStimAnswer(cardIndex, whichStim));
             Session.set("testType", "d");
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
@@ -523,7 +546,7 @@ function modelUnitEngine() {
                 );
 
                 // Display response and current response stats
-                var responseText = Answers.getDisplayAnswerText(getStimCluster(cardIndex).response[whichStim]);
+                var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbabilities.responses[responseText]));
 
                 console.log("<<<END   METRICS<<<<<<<");
@@ -583,7 +606,7 @@ function modelUnitEngine() {
         },
 
         createQuestionLogEntry: function() {
-            var idx = getStimCluster(getCurrentClusterIndex()).clusterIndex;
+            var idx = fastGetStimCluster(getCurrentClusterIndex()).clusterIndex;
             var card = cardProbabilities.cards[idx];
             return {
                 'cardModelData':   _.omit(card, ["question", "answer"]),
@@ -595,14 +618,8 @@ function modelUnitEngine() {
         cardAnswered: function(wasCorrect, resumeData) {
             // Get info we need for updates and logic below
             var cards = cardProbabilities.cards;
-            var cluster = getStimCluster(getCurrentClusterIndex());
-            var card = null;
-            try {
-                card = cards[cluster.clusterIndex];
-            }
-            catch(err) {
-                console.log("Error getting card for update", err);
-            }
+            var cluster = fastGetStimCluster(getCurrentClusterIndex());
+            var card = _.prop(cards, cluster.clusterIndex);
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
