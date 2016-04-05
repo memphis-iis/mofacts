@@ -43,9 +43,10 @@ getStimClusterCount = function() {
         .stimuli.setspec.clusters[0].cluster.length;
 };
 
-//Return the stim file cluster matching the index AFTER mapping it per the
-//current sessions cluster mapping
-getStimCluster = function (index) {
+// Return the stim file cluster matching the index AFTER mapping it per the
+// current sessions cluster mapping. Note that they are allowed to give us
+// a cached stimuli document for optimization
+getStimCluster = function (index, cachedStimuli) {
     var clusterMapping = Session.get("clusterMapping");
     var mappedIndex;
 
@@ -64,7 +65,10 @@ getStimCluster = function (index) {
         mappedIndex = 0;
     }
 
-    var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
+    if (!cachedStimuli) {
+        cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
+    }
+    var cluster = cachedStimuli
         .stimuli
         .setspec
         .clusters[0]

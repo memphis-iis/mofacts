@@ -1,48 +1,75 @@
-//  card.js - the implementation behind card.html (and thus
-//  the main GUI implementation for MoFaCTS).
-//
-//  There is quite a bit of logic in this file, but most of it is commented locally.
-//  One note to keep in mind that much of the direct access to the TDF and Stim
-//  files has been abstracted out to places like currentTestingHelpers.js
-//
-//  This is important because that abstract is used to do things like support
-//  multiple deliveryParam (the x-condition logic) and centralize some of the
-//  checked that we do to make sure everything is functioning correctly.
-//
-//
-//  Timeout logic overview
-//  ------------------------
-//
-//  Currently we use the appropriate deliveryparams section. For scheduled trials
-//  we use the deliveryparams of the current unit. Note that "x-conditions" can be
-//  used to select from multiple deliveryparams in any unit.
-//
-//  All timeouts are specified in milliseconds and should be at least one (1).
-//
-//  There are two settings that correspond to what most people think of as the
-//  "trial timeout". That is the amount of time that may elapse from the beginning
-//  of a trial before the user runs out of time to answer (see the function
-//  setQuestionTimeout):
-//
-//      purestudy - The amount of time a "study" trial is displayed
-//
-//      drill     - The amount of time a user has to answer a drill or test trial
-//
-//  There are two "timeouts" that are used after the user has answered (see
-//  the function handleUserInput):
-//
-//      reviewstudy    - If a user answers a drill trial incorrectly, the correct
-//                       answer is displayed for this long
-//
-//      correctprompt  - If a user gets a drill trial correct, the amount of time
-//                       the feedback message is shown
-//
-//  Note that if the trial is "test", feedback is show for neither correct nor
-//  incorrect responses.
-//
-//  Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
-//  timebeforefeedback are not currently implemented.
+/*
+card.js - the implementation behind card.html (and thus
+the main GUI implementation for MoFaCTS).
 
+There is quite a bit of logic in this file, but most of it is commented locally.
+One note to keep in mind that much of the direct access to the TDF and Stim
+files has been abstracted out to places like currentTestingHelpers.js
+
+This is important because that abstract is used to do things like support
+multiple deliveryParam (the x-condition logic) and centralize some of the
+checked that we do to make sure everything is functioning correctly.
+
+
+Timeout logic overview
+------------------------
+
+Currently we use the appropriate deliveryparams section. For scheduled trials
+we use the deliveryparams of the current unit. Note that "x-conditions" can be
+used to select from multiple deliveryparams in any unit.
+
+All timeouts are specified in milliseconds and should be at least one (1).
+
+There are two settings that correspond to what most people think of as the
+"trial timeout". That is the amount of time that may elapse from the beginning
+of a trial before the user runs out of time to answer (see the function
+setQuestionTimeout):
+
+purestudy - The amount of time a "study" trial is displayed
+
+drill     - The amount of time a user has to answer a drill or test trial
+
+There are two "timeouts" that are used after the user has answered (see
+the function handleUserInput):
+
+reviewstudy   - If a user answers a drill trial incorrectly, the correct
+                  answer is displayed for this long
+
+correctprompt - If a user gets a drill trial correct, the amount of time
+                the feedback message is shown
+
+Note that if the trial is "test", feedback is show for neither correct nor
+incorrect responses.
+
+Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
+timebeforefeedback are not currently implemented.
+
+
+Simulation Overview
+----------------------
+
+If the current user is an admin or teacher, they may check the "Simulate if
+TDF param present?" checkbox on the profile screen (located above the buttons
+for the various user-visible TDF's). Doing so sets the runSimulation session
+variable.
+
+For each question displayed here, if the runSimulation session variable is
+true, if the user is an admin or teacher, and if the TDF has the appropriate
+parameters set then a simulation timeout will be set. When that timeout fires,
+the system will simulate an answer. This behavior is controlled by the two TDF
+parameters (which should be in the top-level setspec):
+
+    * simTimeout - (integer) the number of milliseconds to wait before the
+      answer is given.
+    * simCorrectProb - (float) probability (0.0 < p <= 1.0) that the correct
+      answer is given.
+
+Then no simulation will take place if either parameter is:
+
+    * Missing
+    * Invalid (not interpretable as a number)
+    * Less than or equal to zero
+*/
 
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
@@ -110,12 +137,9 @@ function resetMainCardTimeout() {
 
 //Set a special timeout to handle simulation if necessary
 function checkSimulation() {
-    if (!Session.get("runSimulation")) {
-        console.log("NO-SIM: run simulation not set"); //TODO: remove
-        return;
-    }
-    if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-        console.log("NO-SIM: role wrong"); //TODO: remove
+    if (!Session.get("runSimulation") ||
+        !Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))
+    {
         return;
     }
 
@@ -124,20 +148,11 @@ function checkSimulation() {
         .prop("tutor")
         .prop("setspec").first()
         .value();
-    if (!setspec) {
-        console.log("NO-SIM: no setspec"); //TODO: remove
-        return;
-    }
 
     var simTimeout = _.chain(setspec).prop("simTimeout").intval(0).value();
-    if (simTimeout <= 0) {
-        console.log("NO-SIM: no timeout"); //TODO: remove
-        return;
-    }
-
     var simCorrectProb = _.chain(setspec).prop("simCorrectProb").floatval(0.0).value();
-    if (simCorrectProb <= 0.0) {
-        console.log("NO-SIM: no correct prob"); //TODO: remove
+
+    if (simTimeout <= 0 || simCorrectProb <= 0.0) {
         return;
     }
 
