@@ -21,12 +21,17 @@ Template.itemStats.events({
       e.preventDefault();
       if (document.getElementById("reptitionLatency").style.display == "none") {
          document.getElementById("reptitionLatency").style.display="block";
+         document.getElementById("reptitionLatencyTitle").style.display="block";
          document.getElementById("reptitionCorrectness").style.display="none";
+         document.getElementById("reptitionCorrectnessTitle").style.display="none";
       }
       else {
          document.getElementById("reptitionLatency").style.display="none";
+         document.getElementById("reptitionLatencyTitle").style.display="none";
          document.getElementById("reptitionCorrectness").style.display="block";
          document.getElementById("reptitionCorrectness").style.visibility="visible";
+         document.getElementById("reptitionCorrectnessTitle").style.display="block";
+         document.getElementById("reptitionCorrectnessTitle").style.visibility="visible";
       }
    },
 

@@ -29,12 +29,17 @@ Template.student.events({
       e.preventDefault();
       if (document.getElementById("reptitionLatency").style.display == "none") {
          document.getElementById("reptitionLatency").style.display="block";
+         document.getElementById("reptitionLatencyTitle").style.display="block";
          document.getElementById("reptitionCorrectness").style.display="none";
+         document.getElementById("reptitionCorrectnessTitle").style.display="none";
       }
       else {
          document.getElementById("reptitionLatency").style.display="none";
+         document.getElementById("reptitionLatencyTitle").style.display="none";
          document.getElementById("reptitionCorrectness").style.display="block";
          document.getElementById("reptitionCorrectness").style.visibility="visible";
+         document.getElementById("reptitionCorrectnessTitle").style.display="block";
+         document.getElementById("reptitionCorrectnessTitle").style.visibility="visible";
       }
    },
 
@@ -94,71 +99,71 @@ Template.student.rendered = function () {
 
    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
 
-   new Chartist.Line('#reptitionLatency', {
-      labels: studentDataLatRes,
-      series: [
-         Template.student.__helpers[" studentDataLat"](),
-         Template.student.__helpers[" classDataLat"]()
-      ]
-   }, {
-      low: 0,
-      fullWidth: true,
-      height: 300,
-      axisY: {
-         onlyInteger: true,
-         offset: 50
-      },
-      lineSmooth: false
-   });
+      new Chartist.Line('#reptitionLatency', {
+         labels: studentDataLatRes,
+         series: [
+            Template.student.__helpers[" studentDataLat"](),
+            Template.student.__helpers[" classDataLat"]()
+         ]
+      }, {
+         low: 0,
+         fullWidth: true,
+         height: 300,
+         axisY: {
+            onlyInteger: true,
+            offset: 50
+         },
+         lineSmooth: false
+      });
 
-   new Chartist.Line('#reptitionCorrectness', {
-      labels: studentDataCorRes,
-      series: [
-         Template.student.__helpers[" studentDataCor"](),
-         Template.student.__helpers[" classDataCor"]()
-      ]
-   }, {
-      high: 1,
-      low: 0,
-      fullWidth: true,
-      height: 300,
-      axisY: {
-         onlyInteger: false,
-         offset: 50
-      },
-      lineSmooth: false
-   });
-} else {
-   new Chartist.Line('#reptitionLatency', {
-      labels: studentDataLatRes,
-      series: [
-         Template.student.__helpers[" studentDataLat"]()
-      ]
-   }, {
-      low: 0,
-      fullWidth: true,
-      height: 300,
-      axisY: {
-         onlyInteger: true,
-         offset: 50
-      },
-      lineSmooth: false
-   });
+      new Chartist.Line('#reptitionCorrectness', {
+         labels: studentDataCorRes,
+         series: [
+            Template.student.__helpers[" studentDataCor"](),
+            Template.student.__helpers[" classDataCor"]()
+         ]
+      }, {
+         high: 1,
+         low: 0,
+         fullWidth: true,
+         height: 300,
+         axisY: {
+            onlyInteger: false,
+            offset: 50
+         },
+         lineSmooth: false
+      });
+   } else {
+      new Chartist.Line('#reptitionLatency', {
+         labels: studentDataLatRes,
+         series: [
+            Template.student.__helpers[" studentDataLat"]()
+         ]
+      }, {
+         low: 0,
+         fullWidth: true,
+         height: 300,
+         axisY: {
+            onlyInteger: true,
+            offset: 50
+         },
+         lineSmooth: false
+      });
 
-   new Chartist.Line('#reptitionCorrectness', {
-      labels: studentDataCorRes,
-      series: [
-         Template.student.__helpers[" studentDataCor"]()
-      ]
-   }, {
-      low: 0,
-      fullWidth: true,
-      height: 300,
-      axisY: {
-         onlyInteger: true,
-         offset: 50
-      },
-      lineSmooth: false
-   });
-}
+      new Chartist.Line('#reptitionCorrectness', {
+         labels: studentDataCorRes,
+         series: [
+            Template.student.__helpers[" studentDataCor"]()
+         ]
+      }, {
+         low: 0,
+         fullWidth: true,
+         height: 300,
+         axisY: {
+            onlyInteger: true,
+            offset: 50
+         },
+         lineSmooth: false
+      });
+   }
 }
