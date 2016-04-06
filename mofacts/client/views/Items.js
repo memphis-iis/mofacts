@@ -98,6 +98,7 @@ Template.Items.rendered = function() {
         
 
         addButton1(
+
             $("<button type='button' id='"+item.display[0]+"' name='"+item.display[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
 						    .data("itemkey", itemId)
@@ -108,7 +109,7 @@ Template.Items.rendered = function() {
         );
 
         addButton2(
-            $("<button type='button' id='"item.response[0]+"' name='"+item.response[0]+"'></button>")
+            $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
                             .data("itemkey", itemId)
                                 .css("background", buttonColor)
