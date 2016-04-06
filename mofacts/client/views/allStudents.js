@@ -47,6 +47,8 @@ Template.allStudents.events({
     },
 
     'click .studentButton' : function (event) {
+				var target = $(event.currentTarget);
+				Session.set('currStudent', target.data("studentkey"));
         event.preventDefault();      
         Router.go('/student');  
     }

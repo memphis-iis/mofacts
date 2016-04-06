@@ -203,3 +203,12 @@ input:focus {
     color: #585858;
 }
 
+.switchButton {
+    background: #118C4E;
+    color: white;
+    font-size: 20px;
+}
+
+.wrapper {
+    text-align: left;
+}
