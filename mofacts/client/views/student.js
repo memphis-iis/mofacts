@@ -9,18 +9,26 @@ Template.student.helpers({
    },
    studentDataLat: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-      return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
+      var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
+      studentDataLatVar.unshift(null);
+      return studentDataLatVar;
 
    },
    studentDataCor: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-      return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
+      var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
+      studentDataCorVar.unshift(null);
+      return studentDataCorVar;
    },
    classDataLat: function () {
-      return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
+      var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
+      classDataLatVar.unshift(null);
+      return classDataLatVar;
    },
    classDataCor: function () {
-      return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
+      var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
+      classDataCorVar.unshift(null);
+      return classDataCorVar;
    }
 });
 
@@ -157,10 +165,11 @@ Template.student.rendered = function () {
          ]
       }, {
          low: 0,
+         high: 1,
          fullWidth: true,
          height: 300,
          axisY: {
-            onlyInteger: true,
+            onlyInteger: false,
             offset: 50
          },
          lineSmooth: false
