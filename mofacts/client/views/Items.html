@@ -10,10 +10,10 @@
                 </button>
                 <a class="navbar-brand" href="#">MoFaCTS
                     {{#if isInRole 'admin,teacher'}}
-                        {{#if isInRole 'admin'}} Administrator {{/if}}
-                        {{#if isInRole 'teacher'}} Teacher {{/if}}
+                    {{#if isInRole 'admin'}} Administrator {{/if}}
+                    {{#if isInRole 'teacher'}} Teacher {{/if}}
                     {{else}}
-                        Student
+                    Student
                     {{/if}}
                 </a>
             </div>  <!-- close header -->
@@ -36,9 +36,22 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
-    <legend class="text-center">Select A System</legend>
-        <div class="row" id="itemButtonContainer">
-            <legend class="text-center">Select an Item</legend>
+        <legend class="text-center">Select an Item</legend>
+
+        <div class="row" id="itemButtonContainer1">
+            <legend class="text-center">Select an Item
+                <div class="wrapper">
+                    <input type="submit" class="switchButton" value="Switch Button Labels">
+                </div>
+            </legend>
+        </div>
+
+        <div class="row" id="itemButtonContainer2">
+            <legend class="text-center">Select an Item
+                <div class="wrapper">
+                    <input type="submit" class="switchButton" value="Switch Button Labels">
+                </div>
+            </legend>
         </div>
 
     </div>

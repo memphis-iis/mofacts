@@ -14,6 +14,7 @@ caching-compiler@1.0.2
 caching-html-compiler@1.0.4
 callback-hook@1.0.6
 check@1.1.2
+d3js:d3@3.5.8
 ddp@1.2.3
 ddp-client@1.2.3
 ddp-common@1.2.3
@@ -26,6 +27,7 @@ ecmascript-runtime@0.2.8
 ejson@1.0.9
 email@1.0.10
 fastclick@1.0.9
+fourseven:scss@3.4.1
 geojson-utils@1.0.6
 html-tools@1.0.7
 htmljs@1.0.7
@@ -39,7 +41,6 @@ iron:location@1.0.11
 iron:middleware-stack@1.0.11
 iron:router@1.0.12
 iron:url@1.0.11
-mfpierre:chartist-js@1.6.1
 jquery@1.11.6
 launch-screen@1.0.8
 livedata@1.0.16
@@ -47,6 +48,7 @@ localstorage@1.0.7
 logging@1.0.10
 meteor@1.1.12
 meteor-platform@1.2.4
+mfpierre:chartist-js@1.6.1
 minifier-css@1.1.9
 minifier-js@1.1.9
 minimongo@1.0.12

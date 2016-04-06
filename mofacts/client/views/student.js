@@ -25,8 +25,8 @@ Template.student.helpers({
 });
 
 Template.student.events({
-   'click .switchGraph': function (e) {
-      e.preventDefault();
+   'click .switchButton': function (event) {
+      event.preventDefault();
       if (document.getElementById("reptitionLatency").style.display == "none") {
          document.getElementById("reptitionLatency").style.display="block";
          document.getElementById("reptitionLatencyTitle").style.display="block";

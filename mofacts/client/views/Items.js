@@ -44,6 +44,18 @@ Template.Items.events({
 				Session.set('currItem', target.data("itemkey"));
         event.preventDefault();
         Router.go('/itemStats');
+    },
+
+    'click .switchButton' : function (event) {
+        event.preventDefault();
+        if (document.getElementById("itemButtonContainer1").style.display == "none"){
+            document.getElementById("itemButtonContainer1").style.display = "block";
+            document.getElementById("itemButtonContainer2").style.display = "none";
+        }else{
+            document.getElementById("itemButtonContainer1").style.display = "none";
+            document.getElementById("itemButtonContainer2").style.display = "block";
+        }
+                
     }
 
 });
@@ -55,17 +67,24 @@ Template.Items.rendered = function() {
 	var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
         .stimuli.setspec.clusters[0].cluster;
 
-    var addButton = function(btnObj) {
-        $("#itemButtonContainer").append(
+    var addButton1 = function(btnObj) {
+        $("#itemButtonContainer1").append(
             $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
                 btnObj
             )
         );
     };
+    var addButton2 = function(btnObj) {
+        $("#itemButtonContainer2").append(
+            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
+                btnObj
+            )
+        ).hide();
+    };
 
 
     cluster.forEach( function(item){    
-				
+
 				// Computes the item's average across the system
 				var itemId = _.indexOf(cluster, item);
 				item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
@@ -76,15 +95,29 @@ Template.Items.rendered = function() {
 				
 				
         //Buttons that contain the name of the item which is named response inside of the cluster
-        addButton(
-            $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
+        
+
+        addButton1(
+            $("<button type='button' id='itemButton' name='"+item.display[0]+"'></button>")
                 .addClass("btn btn-block stimButton")
 						    .data("itemkey", itemId)
 								.css("background", buttonColor)
 						    //Retained for testing purposes.
-                .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
+                .html(item.display[0]+", "+Math.floor((100*item.score))+"%")
 								//.html(item.response[0])
         );
+
+        addButton2(
+            $("<button type='button' id='itemButton' name='"+item.display[0]+"'></button>")
+                .addClass("btn btn-block stimButton")
+                            .data("itemkey", itemId)
+                                .css("background", buttonColor)
+                            //Retained for testing purposes.
+                .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
+                                //.html(item.response[0])
+        );
+
+        
     });
 
 };
