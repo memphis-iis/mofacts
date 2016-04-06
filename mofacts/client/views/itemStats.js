@@ -9,7 +9,7 @@ Template.itemStats.helpers({
    },
    itemDataLat: function () {
       var itemDataLatVar = generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), false);
-      itemDataLatVar.unshift(0);
+      itemDataLatVar.unshift(10000);
       return itemDataLatVar;
    },
    itemDataCor: function () {
@@ -76,13 +76,13 @@ Template.itemStats.rendered = function () {
    var itemDataLatLeng = Template.itemStats.__helpers[" itemDataLat"]().length;
    // Auto populate an array from 0 to length of specified function.
    var itemDataLatRes = [];
-   for (var i = 1; i <= itemDataLatLeng; i++) {
+   for (var i = 0; i <= itemDataLatLeng; i++) {
       itemDataLatRes.push(i);
    }
    // Repeat above.
    var itemDataCorLeng = Template.itemStats.__helpers[" itemDataCor"]().length;
    var itemDataCorRes = [];
-   for (var i = 1; i <= itemDataCorLeng; i++) {
+   for (var i = 0; i <= itemDataCorLeng; i++) {
       itemDataCorRes.push(i);
    }
 

@@ -10,24 +10,24 @@ Template.student.helpers({
    studentDataLat: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
       var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
-      studentDataLatVar.unshift(null);
+      studentDataLatVar.unshift(10000);
       return studentDataLatVar;
 
    },
    studentDataCor: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
       var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
-      studentDataCorVar.unshift(null);
+      studentDataCorVar.unshift(0);
       return studentDataCorVar;
    },
    classDataLat: function () {
       var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
-      classDataLatVar.unshift(null);
+      classDataLatVar.unshift(10000);
       return classDataLatVar;
    },
    classDataCor: function () {
       var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
-      classDataCorVar.unshift(null);
+      classDataCorVar.unshift(0);
       return classDataCorVar;
    }
 });
@@ -95,13 +95,13 @@ Template.student.rendered = function () {
    var studentDataLatLeng = Template.student.__helpers[" studentDataLat"]().length;
    // Auto populate an array from 0 to length of specified function.
    var studentDataLatRes = [];
-   for (var i = 1; i <= studentDataLatLeng; i++) {
+   for (var i = 0; i <= studentDataLatLeng; i++) {
       studentDataLatRes.push(i);
    }
    // Repeat above.
    var studentDataCorLeng = Template.student.__helpers[" studentDataCor"]().length;
    var studentDataCorRes = [];
-   for (var i = 1; i <= studentDataCorLeng; i++) {
+   for (var i = 0; i <= studentDataCorLeng; i++) {
       studentDataCorRes.push(i);
    }
 
