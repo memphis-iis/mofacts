@@ -84,7 +84,7 @@ Template.Items.rendered = function() {
 
 
     cluster.forEach( function(item){    
-
+                
 				// Computes the item's average across the system
 				var itemId = _.indexOf(cluster, item);
 				item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
@@ -108,8 +108,16 @@ Template.Items.rendered = function() {
 								//.html(item.response[0])
         );
 
+        //disables buttons in first container
+        if (isNaN(item.score)){
+            document.getElementById(item.display[0]).disabled = true;
+        }else{
+            document.getElementById(item.display[0]).disabled = false;
+        }
+
+        //changed button ID to ItemId to avoid overlap to disable buttons
         addButton2(
-            $("<button type='button' id='"+item.response[0]+"' name='"+item.response[0]+"'></button>")
+            $("<button type='button' id='"+itemId+"' name='"+itemId+"'></button>")
                 .addClass("btn btn-block stimButton")
                             .data("itemkey", itemId)
                                 .css("background", buttonColor)
@@ -118,6 +126,12 @@ Template.Items.rendered = function() {
                                 //.html(item.response[0])
         );
 
+        //disables buttons in the second container
+        if (isNaN(item.score)){
+            document.getElementById(itemId).disabled = true;
+        }else{
+            document.getElementById(itemId).disabled = false;
+        }
         
     });
 
