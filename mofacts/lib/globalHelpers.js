@@ -101,7 +101,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
-        
+
 }
         userProgress = initVals;
     };
@@ -279,11 +279,11 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 										itemData[i]++;
 								} else {
 										itemData[i] += item.answerTimes[i];
- 										
+
 								}
 						}
 				}
-				
+
 		});
 		console.log(displayify(itemData));
 		console.log(displayify(itemCount));

@@ -8,12 +8,15 @@ Template.itemStats.helpers({
       }
    },
    itemDataLat: function () {
-      return generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), false);
+      var itemDataLatVar = generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), false);
+      itemDataLatVar.unshift(0);
+      return itemDataLatVar;
    },
    itemDataCor: function () {
-      return generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), true);
+      var itemDataCorVar = generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), true);
+      itemDataCorVar.unshift(0);
+      return itemDataCorVar;
    },
-
 });
 
 Template.itemStats.events({
