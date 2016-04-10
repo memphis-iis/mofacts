@@ -4,7 +4,7 @@
 <tutor>
     <setspec>
         <name>Music Intervals</name>
-        <lessonname>Music Intervals</lessonname>
+        <lessonname>Music Intervals Experiment (demo)</lessonname>
         <userselect>true</userselect>
         <stimulusfile>Music2stim-demo.xml</stimulusfile>
         <clustermodel></clustermodel>

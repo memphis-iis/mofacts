@@ -1,39 +1,16 @@
 <tutor>
     <setspec>
         <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Cloze Practice of Basic Statistics</lessonname>
+        <lessonname>Optimized Drill Practice of Hiragana and Katakana</lessonname>
         <userselect>true</userselect>
-        <randomizedDelivery>3</randomizedDelivery>
-        <stimulusfile>SVO5stims.xml</stimulusfile>
+        <stimulusfile>Hiraganastims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
-        <shuffleclusters>0-17</shuffleclusters>
-        
         <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.75</simCorrectProb>
+        <simCorrectProb>0.85</simCorrectProb>
     </setspec>
-
-    <unit>
-        <unitinstructions>Here comes the optimized learning.</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-            <clusterlist>0-17</clusterlist>
-        </learningsession>
-
-        <deliveryparams>
-            <practiceseconds>1000000</practiceseconds>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>12000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
 
     <unit>
         <unitname>Show the questions</unitname>
@@ -60,10 +37,30 @@ Please answer the following 5 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>18-22</clusterlist>
+            <clusterlist>92-96</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitinstructions>Here comes the optimized learning of Japanese hiragana and katakana.</unitinstructions>
+        <unitname>Model Unit</unitname>
+        <learningsession>
+            <clusterlist>0-91</clusterlist>
+        </learningsession>
+
+        <deliveryparams>
+            <practiceseconds>1000000</practiceseconds>
+            <drill>8000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>5000</reviewstudy>
+            <correctprompt>750</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
     </unit>
 
     <unit>

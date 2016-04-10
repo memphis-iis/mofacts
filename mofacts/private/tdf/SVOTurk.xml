@@ -1,8 +1,8 @@
 <tutor>
     <setspec>
         <name>Statistics Practice</name>
-        <lessonname>SVO TURK</lessonname>
-        <userselect>true</userselect>
+        <lessonname>Statistics Cloze Sentence Experiment test</lessonname>
+        <userselect>false</userselect>
         <randomizedDelivery>3</randomizedDelivery>
         <experimentTarget>svoturktesting</experimentTarget>
         <stimulusfile>SVO4stims.xml</stimulusfile>

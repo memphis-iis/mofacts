@@ -1,13 +1,13 @@
 <tutor>
     <setspec>
-        <lessonname>Countries of the World test</lessonname>
+        <lessonname>Optimized Drill Practice of World Countries</lessonname>
         <stimulusfile>Worldstim.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
 
-        <simTimeout>350</simTimeout>
+        <simTimeout>3500</simTimeout>
         <simCorrectProb>0.75</simCorrectProb>
     </setspec>
 
