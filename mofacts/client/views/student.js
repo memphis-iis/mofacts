@@ -29,7 +29,11 @@ Template.student.helpers({
       var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
       classDataCorVar.unshift(null);
       return classDataCorVar;
-   }
+   },
+		itemData: function () {
+				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+				return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
+		}
 });
 
 Template.student.events({
