@@ -194,6 +194,7 @@ generateItemGraphData = function(itemID, tdfname, optionBool) {
 		var itemQuery = {};
 		var itemData = []; //either correctness or latency, hence 'data'
 		var itemCount = [];
+		var corCount = 0;
 		itemQuery[tdfname+"."+itemID] = {$exists: true};
 		var scoreArray = UserMetrics.find(itemQuery).fetch();
 		_.chain(scoreArray).each(function (user) {
@@ -205,6 +206,7 @@ generateItemGraphData = function(itemID, tdfname, optionBool) {
 						}
 						itemCount[i]++;
 						if (!(_.isUndefined(itemCurrUser.answerCorrect)) && itemCurrUser.answerCorrect[i]) {
+								corCount++;
 								if (optionBool) {
 										itemData[i]++;
 								} else {
@@ -216,7 +218,14 @@ generateItemGraphData = function(itemID, tdfname, optionBool) {
 		///console.log(itemData);
 		///console.log(itemCount);
 		for (var i=0; i<itemData.length; i++) {
-				itemData[i] /= itemCount[i];
+				if (optionBool && (!(corCount === 0))) {
+						itemData[i] /= itemCount[i];
+				} else if (!(corCount === 0)) {
+						itemData[i] /= corCount;
+				} else {
+						itemData[i] = 0;
+				}
+				
 		}
 		if (_.last(itemCount) === 0) {
 				itemData.pop();
@@ -231,6 +240,7 @@ generateClassGraphData = function(tdfname, optionBool) {
 		userData = UserMetrics.find(userDataQuery).fetch();
 		var classData = [];
 		var classCount = [];
+		var corCount = 0;
 		_.chain(userData).each(function(user) {
 				_.chain(user).prop(tdfname).each(function(item) {
 						for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
@@ -240,6 +250,7 @@ generateClassGraphData = function(tdfname, optionBool) {
 								}
 								classCount[i]++;
 								if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+										corCount++;
 										if (optionBool) {
 												classData[i]++;
 										} else {
@@ -249,8 +260,15 @@ generateClassGraphData = function(tdfname, optionBool) {
 						}
 				});
 		});
-		for (var i=0; i<classData.length; i++) {
-				classData[i] /= classCount[i];
+		for (var i=0; i<itemData.length; i++) {
+				if (optionBool && (!(corCount === 0))) {
+						classData[i] /= classCount[i];
+				} else if (!(corCount === 0)) {
+						classData[i] /= corCount;
+				} else {
+						classData[i] = 0;
+				}
+				
 		}
 		if (_.last(classData) === 0) {
 				classData.pop();
@@ -265,6 +283,7 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 		var userData = UserMetrics.find({'_id' : studentID}).fetch();
 		var itemData = [];
 		var itemCount = [];
+		var corCount = 0;
 		///console.log(_.chain(userData[0]).prop(tdfname).value());
 		_.chain(userData[0]).prop(tdfname).each( function(item) {
 				//Each item in the TDF
@@ -275,6 +294,7 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 						}
 						itemCount[i]++;
 						if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+								corCount++;
 								if (optionBool) {
 										itemData[i]++;
 								} else {
@@ -289,7 +309,14 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 		///console.log(displayify(itemCount));
 		// Now we have the data, turn it into averages, replacing itemData's values with the averages
 		for (var i=0; i<itemData.length; i++) {
-				itemData[i] /= itemCount[i];
+				if (optionBool && (!(corCount === 0))) {
+						itemData[i] /= itemCount[i];
+				} else if (!(corCount === 0)) {
+						itemData[i] /= corCount;
+				} else {
+						itemData[i] = 0;
+				}
+				
 		}
 		// Quick-and-dirty checking to make sure that the last element isn't just 0.
 		if (_.last(itemCount) === 0) {
@@ -344,7 +371,7 @@ generateStudentPerItemData = function(studentID, tdfname) {
 				// TODO Figure out how to associate ID to the item.
 				itemToPush = {};
 				itemToPush['correctRatio'] = corCount/totCount;
-				itemToPush['avgLatency'] = corTime/totCount;
+				itemToPush['avgLatency'] = corTime/corCount;
 				itemStats.push(itemToPush);
 		});
 		// Poor, hack-y way to associate the ID of the item to the object in the array.
