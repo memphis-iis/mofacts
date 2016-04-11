@@ -5,13 +5,13 @@ although in reality this is also a brief guide to deploying any meteor-based
 application.
 
 Four main sections follow: Requirements, Deployment, Execution, and "deploy.sh
-overview".  We assume that you will work through the requirements section
-and create your own script for deployment and execution.  The deploy.sh
-section describes the script in this directory provided for your convenience.
+overview". We assume that you will work through the requirements section and
+create your own script for deployment and execution. The deploy.sh section
+describes the script in this directory provided for your convenience.
 
-*_Important:_* This document describes setting up a new server from scratch and
-documents the setup process for optimallearning.org.  If you are working on the
-optimallearning.org server, then you probably care about deploying a new
+*_Important:_* This document describes setting up a new server from scratch
+and documents the setup process for optimallearning.org. If you are working on
+the optimallearning.org server, then you probably care about deploying a new
 version of the MoFaCT system:
 
  * Create a bundle on your dev system named mofacts.tar.gz
@@ -19,18 +19,22 @@ version of the MoFaCT system:
  * Log in to optimallearning.org, navigate to /var/www/mofacts, and
    run ./deploy.sh
 
-You'll note that the deployment section below spells these three steps out in detail.
+You'll note that the deployment section below spells these three steps out in
+detail.
+
+If you are looking for scripts for setting up a new server, you should look in
+the `../scripts/server` directory.
 
 
 ## Requirements
 
-First you must have a functional Linux server.  The
-particular flavor of Linux shouldn't matter, but this document (and
-the deploy.sh script) assume a Debian-based OS.
+First you must have a functional Linux server. The particular flavor of Linux
+shouldn't matter, but this document (and the deploy.sh script) assume a
+Debian-based OS.
 
 ### Apache Web Server
 
-First install the Apache web server.  We assume that the "base" document
+First install the Apache web server. We assume that the "base" document
 directory for serving HTTP is /var/www/html and that the Apache user is www-
 data. You should also create a home directory for mofacts owned by the Apache
 user.
@@ -41,8 +45,8 @@ $ sudo mkdir mofacts
 $ chown -R www-data:www-data
 ````
 
-(Note: you could create your own and deploy to a different location
-if necessary.  None of these choices are magical.)
+(Note: you could create your own and deploy to a different location if
+necessary. None of these choices are magical.)
 
 You might need to enable some functionality in your Apache server if it wasn't
 turned on by default. You need proxy and proxy_http:
@@ -54,8 +58,8 @@ $ sudo a2enmod proxy_http
 
 Now update the Apache config to proxy requests to your meteor server. Note
 that this config assumes that the DNS entry mofacts.optimallearning.org
-resovles to the server in question.  On a Debian server, you can configure the default site
-by modifying `/etc/apache2/sites-enabled/000-default.conf` and
+resovles to the server in question. On a Debian server, you can configure the
+default site by modifying `/etc/apache2/sites-enabled/000-default.conf` and
 adding:
 
 ````xml
@@ -68,7 +72,7 @@ adding:
 ````
 
 When a browser request for `mofacts.optimallearning.org`, then Apache will
-proxy the request to port 3000.  As a result MoFaCTS needs to listen on
+proxy the request to port 3000. As a result MoFaCTS needs to listen on
 the local network interface and isn't directory exposed to the internet.
 
 ### Apache SSL
@@ -177,12 +181,12 @@ order matters.
 
 ### MongoDB
 
-Next install MongoDB.  The default installation method for your OS should be
-fine.  We assume that MongoDB will be listening on the local network
-interface (127.0.0.1) and the default port (27017).
+Next install MongoDB. The default installation method for your OS should be
+fine. We assume that MongoDB will be listening on the local network interface
+(127.0.0.1) and the default port (27017).
 
-MongoDB will created the required database automatically on first access, but you can pre-create
-the db if you want.  For instance, using the mongo shell:
+MongoDB will created the required database automatically on first access, but
+you can pre-create the db if you want. For instance, using the mongo shell:
 
 ````
 $ mongo
@@ -204,11 +208,12 @@ bye
 
 ### Node.js
 
-Meteor requires a specific Node.js version, which you should install on the server.  Please see the
-node.js installation guide for details, but building node.js from source isn't
-difficult.  Note that if your Debian-based OS has a package named `nodejs-
-legacy`, you'll need to install three packages: nodejs, npm, and nodejs-
-legacy.  The node.js install process should install npm for you.
+Meteor requires a specific Node.js version, which you should install on the
+server. Please see the node.js installation guide for details, but building
+node.js from source isn't difficult. Note that if your Debian-based OS has a
+package named `nodejs-legacy`, you'll need to install three packages: nodejs,
+npm, and nodejs-legacy. The node.js install process should install npm for
+you.
 
 Now you can use npm to install the `forever` package:
 
@@ -266,17 +271,17 @@ $ meteor build ./build  --architecture os.linux.x86_64
 $ scp build/mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
 ````
 
-Some important notes!!! The architecture switch used above is for the optimal
-learning server. If that should change for some reason, you'll need a
+***Some important notes:*** The architecture switch used above is for the
+optimal learning server. If that should change for some reason, you'll need a
 different parameter. You should also note the main change from bundle command:
-we no longer specify the bundle name. We must also specify a
-directory. We specify `build`, but there's nothing special about the name. For
-convenience, we've added mofacts/build to the main .gitignore file for this
-project so that you don't automatically add the build folder (and your latest
-bundle) to the git repo.
+we no longer specify the bundle name. We must also specify a directory. We
+specify `build`, but there's nothing special about the name. For convenience,
+we've added mofacts/build to the main .gitignore file for this project so that
+you don't automatically add the build folder (and your latest bundle) to the
+git repo.
 
-Note that deploy.sh expects the bundle name to be mofacts.tar.gz.
-This is the name selected by `meteor build`, so there shouldn't be a problem.
+Note that deploy.sh expects the bundle name to be mofacts.tar.gz. This is the
+name selected by `meteor build`, so there shouldn't be a problem.
 
 At this point, you could just log in to the server and let the script take
 over for you:
@@ -287,24 +292,26 @@ $ ./deploy.sh
 ````
 
 Assuming that your user ID has `sudo` rights, everything should work just
-fine.  The rest of this section details how you perform the same actions
+fine. The rest of this section details how you perform the same actions
 manually...
 
-You perform all the following steps on the server in the "home" directory for mofacts:
+You perform all the following steps on the server in the "home" directory for
+mofacts:
 
 ````
 $ cd /var/www/mofacts
 ````
 
 One note - remember that for security everything in this directory will owned
-by the www-data user.  As a result, you will use `sudo` to execute most of the commands.
+by the www-data user. As a result, you will use `sudo` to execute most of the
+commands.
 
-First you should extract the bundle.  Meteor tutorials will often recommend that you
-delete the bundle file, but our `deploy.sh` script changes the name of the file
-instead.  As a result, the deployment step occurs when necessary (because
-it runs when mofacts.tar.gz exists), but there is a copy of the file
-used for the running deployment (named mofacts.tar.gz.deployed).
-Also note that for safety you should delete the previous bundle.
+First you should extract the bundle. Meteor tutorials will often recommend
+that you delete the bundle file, but our `deploy.sh` script changes the name
+of the file instead. As a result, the deployment step occurs when necessary
+(because it runs when mofacts.tar.gz exists), but there is a copy of the file
+used for the running deployment (named mofacts.tar.gz.deployed). Also note
+that for safety you should delete the previous bundle.
 
 ````
 $ sudo rm -fr bundle
@@ -313,16 +320,17 @@ $ sudo -E -u www-data tar -zxf mofacts.tar.gz
 $ sudo mv mofacts.tar.gz mofacts.tar.gz.deployed
 ````
 
-Now that the bundle has been extracted, any node.js packages requiring native
-OS support need to be rebuilt.  MoFaCT doesn't use of packages like that
-directly, but meteor uses the `fibers` package:
+Now that you have extracted the bundle, you need to rebuild any node.js
+packages requiring native OS support. MoFaCT doesn't use of packages like
+that directly, but meteor uses the `fibers` package:
 
 ````
 $ sudo rm -fr bundle/programs/server/node_modules/fibers
 $ sudo npm install fibers@1.0.1
 ````
 
-As a final step, the ownership of all involved files should be changed.
+As a final step, you should insure the ownership of all involved files is
+correct.
 
 ````
 $ sudo chown -R www-data:www-data *
@@ -331,8 +339,8 @@ $ sudo chown -R www-data:www-data *
 ## Execution
 
 One possible gotcha to note is that there isn't any service stop or restart
-functionality currently supported.  As a result, any previous instance of the
-process should be killed before starting a new one:
+functionality supported. As a result, you should kill any previous instance of
+the process before starting a new one:
 
 ````
 $ sudo killall nodejs
@@ -341,11 +349,11 @@ $ sudo killall nodejs
 Note that this assumes that no other node.js processes are running on your
 server.
 
-When executing a meteor app, a few environment variables need to be specified.
-As a result, it's important to use the `-E` switch with `sudo` so that these
-variables are maintained.  In addition, node and meteor both examine the HOME
-environment variable, so it should be set correctly as well. Finally, note
-that the node.js `forever` package is used to run meteor as a daemon process:
+When executing a meteor app, you must specify some environment variables. As a
+result, it's important to use the `-E` switch with `sudo` so the commands can
+"see" these variables. Node and meteor both examine the HOME environment
+variable, so you must set it as well. We use the node.js `forever` package to
+run meteor as a daemon process.
 
 ````
 $ export HOME=$(pwd)
@@ -354,10 +362,10 @@ $ sudo -E -u www-data forever start bundle/main.js
 
 ## deploy.sh description
 
-The major functionality of the `deploy.sh` script is described above. If the
-script needs to be customized, all configuration is handled at the beginning
-of the script using environment variables.
+See above for the major functionality in the `deploy.sh` script. If you need
+to customize the script, you should be able to change one (or more) of the
+configuration variables at the beginning of the script.
 
-The script terminates previous processes, deploys mofacts.tar.gz, and then starts
-the mofacts (meteor) process using forever.  As a result, it should usually do
-the "right thing".
+The script terminates previous processes, deploys mofacts.tar.gz, and starts
+the mofacts (meteor) process using forever. As a result, it should do the
+"right thing".
