@@ -6,111 +6,111 @@ Session.set("experimentXCond", "");
 Session.set("clusterMapping", "");
 
 routeToSignin = function() {
-    if (Session.get("loginMode") === "experiment") {
-        var routeParts = ['/experiment'];
+   if (Session.get("loginMode") === "experiment") {
+      var routeParts = ['/experiment'];
 
-        var target = Session.get("experimentTarget");
-        if (target) {
-            routeParts.push(target);
-            var xcond = Session.get("experimentXCond");
-            if (xcond) {
-                routeParts.push(xcond);
-            }
-        }
+      var target = Session.get("experimentTarget");
+      if (target) {
+         routeParts.push(target);
+         var xcond = Session.get("experimentXCond");
+         if (xcond) {
+            routeParts.push(xcond);
+         }
+      }
 
-        Router.go(routeParts.join('/'));
-    }
-    else {
-        Router.go("/signin");
-    }
+      Router.go(routeParts.join('/'));
+   }
+   else {
+      Router.go("/signin");
+   }
 };
 
 Router.configure({
-    layoutTemplate: 'DefaultLayout'
+   layoutTemplate: 'DefaultLayout'
 });
 
 Router.route('/experiment/:target?/:xcond?', function() {
-    Session.set("loginMode", "experiment");
+   Session.set("loginMode", "experiment");
 
-    var target = this.params.target || "";
-    var xcond = this.params.xcond || "";
+   var target = this.params.target || "";
+   var xcond = this.params.xcond || "";
 
-    Session.set("experimentTarget", target);
-    Session.set("experimentXCond", xcond);
+   Session.set("experimentTarget", target);
+   Session.set("experimentXCond", xcond);
 
-    console.log("EXPERIMENT target:", target, "xcond", xcond);
+   console.log("EXPERIMENT target:", target, "xcond", xcond);
 
-    Session.set("clusterMapping", "");
-    this.render('signIn');
+   Session.set("clusterMapping", "");
+   this.render('signIn');
 });
 
 Router.route('/signin', function () {
-    this.render('signIn');
+   this.render('signIn');
 });
 
 Router.route('/signup', function () {
-    this.render('signUp');
+   this.render('signUp');
 });
 
 Router.route('/', function () {
-    this.render('signIn');
+   this.render('signIn');
 });
 
 Router.route('/profile', function () {
-    Session.set("clusterMapping", "");
-    this.render('profile');
+   Session.set("clusterMapping", "");
+   this.render('profile');
 });
 
 Router.route('/card', function () {
-    this.render('card');
+   this.render('card');
 });
 
 Router.route('/admin', function () {
-    this.render('admin');
+   this.render('admin');
 });
 
 Router.route('/choose', function () {
    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-       this.render('/choose');
+      this.render('/choose');
    } else {
-   this.redirect('/itemStats') }
-});
+      this.redirect('/student') }
+   });
 
-Router.route('/instructions', function () {
-    this.render('instructions');
-});
+   Router.route('/instructions', function () {
+      this.render('instructions');
+   });
 
-Router.route('/stats', function () {
-    this.render('statsPage');
-});
+   Router.route('/stats', function () {
+      this.render('statsPage');
+   });
 
-//Router waits on all of the users to be found before the page is rendered
-Router.route('/itemStats', function () {
-    this.render('itemStats');
-});
+   //Router waits on all of the users to be found before the page is rendered
+   Router.route('/itemStats', function () {
+      this.render('itemStats');
+   });
 
-Router.route('/allStudents', function(){
-    this.subscribe('allUsers').wait();
-    if (this.ready()){
-        this.render('allStudents');
-    }else{
-        this.render('');
-    }
-});
+   Router.route('/allStudents', function(){
+      this.subscribe('allUsers').wait();
+      if (this.ready()){
+         this.render('allStudents');
+      }else{
+         this.render('');
+      }
+   });
 
-Router.route('/student', function () {
-    this.render('student');
-});
+   Router.route('/student', function () {
+      this.render('student');
+   });
 
-Router.route('/Items', function () {
-    this.render('Items');
-});
+   Router.route('/Items', function () {
+      this.render('Items');
+   });
 
-Router.route('/allItems', function () {
-    Session.set("clusterMapping", "");
-    this.render('allItems');
-});
+   Router.route('/allItems', function () {
+      Session.set("clusterMapping", "");
+      this.render('allItems');
+   });
 
-Router.route('/testpage', function() {
-		this.render('tester');
-});
+   Router.route('/testpage', function() {
+      this.render('tester');
+   });
