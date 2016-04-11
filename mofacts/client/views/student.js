@@ -10,7 +10,7 @@ Template.student.helpers({
    studentDataLat: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
       var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
-      studentDataLatVar.unshift(10000);
+      studentDataLatVar.unshift(7500);
       return studentDataLatVar;
 
    },
@@ -22,7 +22,7 @@ Template.student.helpers({
    },
    classDataLat: function () {
       var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
-      classDataLatVar.unshift(10000);
+      classDataLatVar.unshift(7500);
       return classDataLatVar;
    },
    classDataCor: function () {

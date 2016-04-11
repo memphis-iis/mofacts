@@ -9,7 +9,7 @@ Template.itemStats.helpers({
    },
    itemDataLat: function () {
       var itemDataLatVar = generateItemGraphData(Session.get('currItem'), buildTdfDBName(getCurrentTdfName()), false);
-      itemDataLatVar.unshift(10000);
+      itemDataLatVar.unshift(7500);
       return itemDataLatVar;
    },
    itemDataCor: function () {

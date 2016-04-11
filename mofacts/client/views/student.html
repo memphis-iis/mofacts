@@ -1,3 +1,51 @@
+<head>
+<style>
+.graphs {
+   position: relative;
+}
+
+[data-x-axis]::before {
+   content: attr(data-x-axis);
+   position: absolute;
+   width: 100%;
+   text-align: center;
+   left: 0;
+   bottom: 0;
+   font-size: 1.25rem;
+   color: #000000;
+}
+
+[data-y-axis]::after {
+   content: attr(data-y-axis);
+   position: absolute;
+   top: 40%;
+   left: -40px;
+   font-size: 1.15rem;
+   color: #000000;
+   text-align: center;
+   transform: rotate(-90deg)translateY(50%);
+}
+
+.ct-label {
+   fill: rgba(0, 0, 0, 1);
+   color: rgba(0, 0, 0, 1);
+   font-size: 1.00rem;
+   line-height: 1;
+   font-weight: bolder;
+}
+
+.ct-series-a .ct-line,
+.ct-series-a .ct-point {
+   stroke: red;
+}
+
+.ct-series-b .ct-line,
+.ct-series-b .ct-point {
+   stroke: blue;
+}
+</style>
+</head>
+
 <template name="student">
    <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
       <div class="container">
@@ -46,17 +94,17 @@
          <input type="submit" class="switchButton" value="Change Graph">
       </div>
       <div class="graphs">
-         <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Latency (sec)" id="reptitionLatency" style="display:block"></div>
+         <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Latency (ms)" id="reptitionLatency" style="display:block"></div>
          <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Correctness (%)" id="reptitionCorrectness" style="display:block; visibility:hidden"></div>
       </div>
       <div class="legend">
          {{#if isInRole 'admin,teacher'}}
          <svg height="10" width="35">
-            <line x1="10" y1="5" x2="35" y2="5" style="stroke:rgb(255,0,0);stroke-width:5" />
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#0000FF;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
          </svg> - Class
          <svg height="10" width="35">
-            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#F05B4F;stroke-width:5" />
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#FF0000;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
          </svg> - Student
          {{else}}
