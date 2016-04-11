@@ -260,7 +260,7 @@ generateClassGraphData = function(tdfname, optionBool) {
 						}
 				});
 		});
-		for (var i=0; i<itemData.length; i++) {
+		for (var i=0; i<classData.length; i++) {
 				if (optionBool && (!(corCount === 0))) {
 						classData[i] /= classCount[i];
 				} else if (!(corCount === 0)) {
