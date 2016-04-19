@@ -8,22 +8,33 @@ Template.Items.helpers({
         }
     },
 
-    prompts: function(){
-        try{
-            var names = getStimPrompts();
-            return names;
-        }catch(e){
-            console.log(e);
-        }
-    },
+    //Calls the getCluster() from the globalHelpers where it returns the stim cluster.
+    //Then the necessary information is generated for the item which is used by the html file.
+    //Each object is sent to an array where the spacebars loop iterates over the array populating the buttons.
+    items: function(){
+        cluster = getCluster();
+        var buttons = [];
 
-    responses: function(){
-        try{
-            var names = getStimResponses();
-            return names;
-        }catch(e){
-            console.log(e);
-        }
+        cluster.forEach(function(item){
+            var itemId = _.indexOf(cluster, item);
+            item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
+
+            item.itemId = itemId;
+            item.buttonColor = determineButtonColor(item.score);
+            item.display = item.display[0];
+            item.response = item.response[0];
+
+            if (isNaN(item.score)){
+                item.clickable = false;
+            }else{
+                item.clickable = true;
+            }
+
+            buttons.push(item);
+
+        });
+        console.log(buttons);
+        return buttons;
     },
 
 });
@@ -78,81 +89,4 @@ Template.Items.events({
 
 });
 
-
-Template.Items.rendered = function() {
-
- //    //Finds all of the items inside of the cluster: used for displaying on tiles
-	// var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
- //        .stimuli.setspec.clusters[0].cluster;
-
- //    var addButton1 = function(btnObj) {
- //        $("#itemButtonContainer1").append(
- //            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
- //                btnObj
- //            )
- //        );
- //    };
- //    var addButton2 = function(btnObj) {
- //        $("#itemButtonContainer2").append(
- //            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
- //                btnObj
- //            )
- //        ).hide();
- //    };
-
-
- //    cluster.forEach( function(item){    
-                
-	// 			// Computes the item's average across the system
-	// 			var itemId = _.indexOf(cluster, item);
-	// 			item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
-	// 			//
-				
-	// 			// For convenience only, assign an easy variable the button's color.
-	// 			var buttonColor = determineButtonColor(item.score);
-				
-				
- //        //Buttons that contain the name of the item which is named response inside of the cluster
-        
-
- //        addButton1(
-
- //            $("<button type='button' id='"+item.display[0]+"' name='"+item.display[0]+"'></button>")
- //                .addClass("btn btn-block stimButton")
-	// 					    .data("itemkey", itemId)
-	// 							.css("background", buttonColor)
-	// 					    //Retained for testing purposes.
- //                .html(item.display[0]+", "+Math.floor((100*item.score))+"%")
-	// 							//.html(item.response[0])
- //        );
-
- //        //disables buttons in first container
- //        if (isNaN(item.score)){
- //            document.getElementById(item.display[0]).disabled = true;
- //        }else{
- //            document.getElementById(item.display[0]).disabled = false;
- //        }
-
- //        //changed button ID to ItemId to avoid overlap to disable buttons
- //        addButton2(
-            
- //            $("<button type='button' id='"+itemId+"' name='"+itemId+"'></button>")
- //                .addClass("btn btn-block stimButton")
- //                            .data("itemkey", itemId)
- //                                .css("background", buttonColor)
- //                            //Retained for testing purposes.
- //                .html(item.response[0]+", "+Math.floor((100*item.score))+"%")
- //                                //.html(item.response[0])
- //        );
-
- //        //disables buttons in the second container
- //        if (isNaN(item.score)){
- //            document.getElementById(itemId).disabled = true;
- //        }else{
- //            document.getElementById(itemId).disabled = false;
- //        }
-        
- //    });
-
-};
 
