@@ -186,6 +186,28 @@ generateNaturals = function(end) {
 		return returnArray;
 }
 
+getStimPrompts = function(){
+	var names = [];
+	var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
+        .stimuli.setspec.clusters[0].cluster;
+        
+    cluster.forEach(function(item){
+    	names.push(item.display[0]);
+    });
+    return names;
+}
+
+getStimResponses = function(){
+	var names = [];
+	var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
+        .stimuli.setspec.clusters[0].cluster;
+
+    cluster.forEach(function(item){
+    	names.push(item.response[0]);
+    });
+    return names;
+}
+
 //INPUT: itemID, an integer which represents the index of the item in the cluster
 //       tdfname, a string representing the Mongo-friendly current TDF
 //       optionBool, a boolean, where true is for correctness data, false is for latency data
