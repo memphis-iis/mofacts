@@ -35,7 +35,7 @@ Template.Items.helpers({
         });
         console.log(buttons);
         return buttons;
-    },
+    }
 
 });
 
@@ -70,7 +70,7 @@ Template.Items.events({
 
     'click .stimButton' : function (event) {
 				var target = $(event.currentTarget);
-				Session.set('currItem', target.data("itemkey"));
+				Session.set('currItem', event.target.id);
         event.preventDefault();
         Router.go('/itemStats');
     },
