@@ -24,7 +24,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
             <reviewstudy>16000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
-            <correctscore>1</correctscore> <!--You get points for demographics in this test-->
+            <correctscore>0</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
         <buttontrial>false</buttontrial>

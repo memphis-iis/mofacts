@@ -1,15 +1,16 @@
 <tutor>
     <setspec>
         <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Drill Practice of Hiragana and Katakana</lessonname>
+        <lessonname>Optimized Drill Practice of Heart Reading</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Hiraganastims.xml</stimulusfile>
+        <stimulusfile>Heartstims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
+         <shuffleclusters>0-21</shuffleclusters>
     </setspec>
 
     <unit>
@@ -37,25 +38,25 @@ Please answer the following 5 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>92-96</clusterlist>
+            <clusterlist>22-26</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
-        <unitinstructions>Here comes the optimized learning of Japanese hiragana and katakana.</unitinstructions>
+        <unitinstructions>Here comes the optimized learning of the heart function reading.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-91</clusterlist>
+            <clusterlist>0-21</clusterlist>
         </learningsession>
 
         <deliveryparams>
-            <practiceseconds>1000000</practiceseconds>
-            <drill>8000</drill>
-            <purestudy>16000</purestudy>
+            <practiceseconds>1800</practiceseconds>
+            <drill>12000</drill>
+            <purestudy>12000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
+            <reviewstudy>12000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>

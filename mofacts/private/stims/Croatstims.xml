@@ -1,0 +1,835 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: no XML declaration present -->
+<setspec>
+    <clusters>
+        <cluster>
+            <parameter>-0.76</parameter>
+            <display>ne</display>
+            <response>no</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.76</parameter>
+            <display>sounds/croatian/ne</display>
+            <response>no</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.76</parameter>
+            <display>ili</display>
+            <response>or</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.76</parameter>
+            <display>sounds/croatian/ili</display>
+            <response>or</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.79</parameter>
+            <display>i</display>
+            <response>and</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.79</parameter>
+            <display>sounds/croatian/i</display>
+            <response>and</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.79</parameter>
+            <display>kako</display>
+            <response>how</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.79</parameter>
+            <display>sounds/croatian/kako</display>
+            <response>how</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.79</parameter>
+            <display>da</display>
+            <response>yes</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.79</parameter>
+            <display>sounds/croatian/da</display>
+            <response>yes</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.82</parameter>
+            <display>dođi</display>
+            <response>come</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.82</parameter>
+            <display>sounds/croatian/dodi</display>
+            <response>come</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.82</parameter>
+            <display>što</display>
+            <response>what</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.82</parameter>
+            <display>sounds/croatian/sto</display>
+            <response>what</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.82</parameter>
+            <display>kada</display>
+            <response>when</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.82</parameter>
+            <display>sounds/croatian/kada</display>
+            <response>when</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>požar!</display>
+            <response>fire!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/fire_hr</display>
+            <response>fire!</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>u pomoć!</display>
+            <response>help!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/help_hr</display>
+            <response>help!</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>možda</display>
+            <response>maybe</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/mozda</display>
+            <response>maybe</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>oprostite</display>
+            <response>sorry</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/sorry2_hr</display>
+            <response>sorry</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>stani!</display>
+            <response>stop!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/pronunciation_cs_stání</display>
+            <response>stop!</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.85</parameter>
+            <display>gdje</display>
+            <response>where</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.85</parameter>
+            <display>sounds/croatian/gdje</display>
+            <response>where</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.88</parameter>
+            <display>dom zdravlja</display>
+            <response>clinic</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.88</parameter>
+            <display>sounds/croatian/dom_zdravlja</display>
+            <response>clinic</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.88</parameter>
+            <display>zdravlje</display>
+            <response>health</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.88</parameter>
+            <display>sounds/croatian/zdravlje</display>
+            <response>health</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.88</parameter>
+            <display>molim</display>
+            <response>please</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.88</parameter>
+            <display>sounds/croatian/pronunciation_bs_molim</display>
+            <response>please</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.88</parameter>
+            <display>hvala</display>
+            <response>thanks</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.88</parameter>
+            <display>sounds/croatian/hvala</display>
+            <response>thanks</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>dobrodošli</display>
+            <response>welcome</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/welcome_hr</display>
+            <response>welcome</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>nazovi me</display>
+            <response>call me</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/nazovi_me</display>
+            <response>call me</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>živjeli!</display>
+            <response>cheers!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/cheers_hr</display>
+            <response>cheers!</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>doviđenja</display>
+            <response>goodbye</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/dovidenja</display>
+            <response>goodbye</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>bok</display>
+            <response>hi, bye</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/bok</display>
+            <response>hi, bye</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.91</parameter>
+            <display>vidimo se</display>
+            <response>see you</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.91</parameter>
+            <display>sounds/croatian/vidimo_se</display>
+            <response>see you</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>nesreća</display>
+            <response>accident</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/nesreca</display>
+            <response>accident</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>zbogom</display>
+            <response>goodbye</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/goodbye_hr</display>
+            <response>goodbye</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>ćao</display>
+            <response>greeting</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/hello2_hr</display>
+            <response>greeting</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>bolnica</display>
+            <response>hospital</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/bolnica</display>
+            <response>hospital</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>koliko</display>
+            <response>how much</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/koliko</display>
+            <response>how much</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.94</parameter>
+            <display>ja sam iz ...</display>
+            <response>i'm from</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.94</parameter>
+            <display>sounds/croatian/imfrom_hr</display>
+            <response>i'm from</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.97</parameter>
+            <display>ispričavam se!</display>
+            <response>excuse me</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.97</parameter>
+            <display>sounds/croatian/excuseme2_hr</display>
+            <response>excuse me</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.97</parameter>
+            <display>sretno</display>
+            <response>good luck</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.97</parameter>
+            <display>sounds/croatian/goodluck_hr</display>
+            <response>good luck</response>
+        </cluster>
+        <cluster>
+            <parameter>-0.97</parameter>
+            <display>hvala</display>
+            <response>thank you</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-0.97</parameter>
+            <display>sounds/croatian/thankyou1_hr</display>
+            <response>thank you</response>
+        </cluster>
+        <cluster>
+            <parameter>-1</parameter>
+            <display>sretan put!</display>
+            <response>bon voyage</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1</parameter>
+            <display>sounds/croatian/bonvoyage_hr</display>
+            <response>bon voyage</response>
+        </cluster>
+        <cluster>
+            <parameter>-1</parameter>
+            <display>laku noć</display>
+            <response>good night</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1</parameter>
+            <display>sounds/croatian/goodnight_hr</display>
+            <response>good night</response>
+        </cluster>
+        <cluster>
+            <parameter>-1</parameter>
+            <display>nema problema</display>
+            <response>no problem</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1</parameter>
+            <display>sounds/croatian/nema_problema</display>
+            <response>no problem</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.03</parameter>
+            <display>dobar tek!</display>
+            <response>bon appetit</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.03</parameter>
+            <display>sounds/croatian/bonappetit_hr</display>
+            <response>bon appetit</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.06</parameter>
+            <display>dobro jutro</display>
+            <response>good morning</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.06</parameter>
+            <display>sounds/croatian/dobro_jutro</display>
+            <response>good morning</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.06</parameter>
+            <display>kako ste? (frm)</display>
+            <response>how are you?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.06</parameter>
+            <display>sounds/croatian/howareyou2_hr</display>
+            <response>how are you?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.06</parameter>
+            <display>ne znam</display>
+            <response>i don't know</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.06</parameter>
+            <display>sounds/croatian/pronunciation_sr_ne_znam</display>
+            <response>i don't know</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.06</parameter>
+            <display>razumijem</display>
+            <response>i understand</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.06</parameter>
+            <display>sounds/croatian/understand_hr</display>
+            <response>i understand</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.09</parameter>
+            <display>dobra večer</display>
+            <response>good evening</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.09</parameter>
+            <display>sounds/croatian/goodevening_hr</display>
+            <response>good evening</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.09</parameter>
+            <display>dobro jutro</display>
+            <response>good morning</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.09</parameter>
+            <display>sounds/croatian/goodmorning_hr</display>
+            <response>good morning</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.12</parameter>
+            <display>sretan rođendan</display>
+            <response>happy birthday</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.12</parameter>
+            <display>sounds/croatian/sretan_rodendan</display>
+            <response>happy birthday</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.12</parameter>
+            <display>zovem se ...</display>
+            <response>my name is ...</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.12</parameter>
+            <display>sounds/croatian/mynameis_hr</display>
+            <response>my name is ...</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.12</parameter>
+            <display>gdje je to?</display>
+            <response>where is that?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.12</parameter>
+            <display>sounds/croatian/gdje_je_to</display>
+            <response>where is that?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.12</parameter>
+            <display>nema na čemu</display>
+            <response>you're welcome</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.12</parameter>
+            <display>sounds/croatian/nema_na_cemu</display>
+            <response>you're welcome</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.15</parameter>
+            <display>dobar dan</display>
+            <response>good afternoon</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.15</parameter>
+            <display>sounds/croatian/goodafternoon_hr</display>
+            <response>good afternoon</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.15</parameter>
+            <display>lijep vam dan želim!(frm)</display>
+            <response>have a nice day</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.15</parameter>
+            <display>sounds/croatian/haveaniceday2_hr</display>
+            <response>have a nice day</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.15</parameter>
+            <display>pustite me na miru!</display>
+            <response>leave me alone!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.15</parameter>
+            <display>sounds/croatian/leavemealone_hr</display>
+            <response>leave me alone!</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.15</parameter>
+            <display>neki drugi put</display>
+            <response>some other time</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.15</parameter>
+            <display>sounds/croatian/neki_drugi_put</display>
+            <response>some other time</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.18</parameter>
+            <display>pozovite policiju!</display>
+            <response>call the police!</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.18</parameter>
+            <display>sounds/croatian/police_hr</display>
+            <response>call the police!</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.18</parameter>
+            <display>koliko imaš godina?</display>
+            <response>how old are you?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.18</parameter>
+            <display>sounds/croatian/koliko_imas_godina</display>
+            <response>how old are you?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.18</parameter>
+            <display>dugo se nismo vidjeli</display>
+            <response>long time no see</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.18</parameter>
+            <display>sounds/croatian/longtimenosee_hr</display>
+            <response>long time no see</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.18</parameter>
+            <display>koliko je sati?</display>
+            <response>what time is it?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.18</parameter>
+            <display>sounds/croatian/koliko_je_sati</display>
+            <response>what time is it?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.21</parameter>
+            <display>koliko košta ovo?</display>
+            <response>how much is this?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.21</parameter>
+            <display>sounds/croatian/howmuch2_hr</display>
+            <response>how much is this?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.21</parameter>
+            <display>kako se zovete? (frm)</display>
+            <response>what's your name?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.21</parameter>
+            <display>sounds/croatian/name2_hr</display>
+            <response>what's your name?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.24</parameter>
+            <display>ne razumijem</display>
+            <response>i don't understand</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.24</parameter>
+            <display>sounds/croatian/nounderstand_hr</display>
+            <response>i don't understand</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.24</parameter>
+            <display>nema na čemu</display>
+            <response>reply to thank you</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.24</parameter>
+            <display>sounds/croatian/yourewelcome_hr</display>
+            <response>reply to thank you</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.27</parameter>
+            <display>drago mi je</display>
+            <response>pleased to meet you</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.27</parameter>
+            <display>sounds/croatian/meet_hr</display>
+            <response>pleased to meet you</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.27</parameter>
+            <display>gdje idemo?</display>
+            <response>where are we going?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.27</parameter>
+            <display>sounds/croatian/gdje_idemo</display>
+            <response>where are we going?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.27</parameter>
+            <display>odakle ste? (frm)</display>
+            <response>where are you from?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.27</parameter>
+            <display>sounds/croatian/wherefrom2_hr</display>
+            <response>where are you from?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.27</parameter>
+            <display>gdje je zahod?</display>
+            <response>where's the toilet?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.27</parameter>
+            <display>sounds/croatian/toilet_hr</display>
+            <response>where's the toilet?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.3</parameter>
+            <display>molim vas, možete li mi to zapisati?</display>
+            <response>please write it down</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.3</parameter>
+            <display>sounds/croatian/write_hr</display>
+            <response>please write it down</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.33</parameter>
+            <display>govoriš li engleski?</display>
+            <response>do you speak english?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.33</parameter>
+            <display>sounds/croatian/govorisliengleski</display>
+            <response>do you speak english?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.33</parameter>
+            <display>gladna sam</display>
+            <response>i'm hungry (feminine)</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.33</parameter>
+            <display>sounds/croatian/gladna_sam</display>
+            <response>i'm hungry (feminine)</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.36</parameter>
+            <display>govorite li hrvatski? (frm)</display>
+            <response>do you speak croatian?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.36</parameter>
+            <display>sounds/croatian/doyouspeak2_hr</display>
+            <response>do you speak croatian?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.36</parameter>
+            <display>gladan sam</display>
+            <response>i'm hungry (masculine)</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.36</parameter>
+            <display>sounds/croatian/gladan_sam</display>
+            <response>i'm hungry (masculine)</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.36</parameter>
+            <display>hvala, dobro. a vi? (frm)</display>
+            <response>thanks, good, and you?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.36</parameter>
+            <display>sounds/croatian/fine_hr</display>
+            <response>thanks, good, and you?</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.42</parameter>
+            <display>možete li pričati sporije? (frm)</display>
+            <response>please speak more slowly</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.42</parameter>
+            <display>sounds/croatian/slowly2_hr</display>
+            <response>please speak more slowly</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.45</parameter>
+            <display>da, (nešto) malo govorim hrvatski</display>
+            <response>yes, i speak bad croatian</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.45</parameter>
+            <display>sounds/croatian/yesalittle_hr</display>
+            <response>yes, i speak bad croatian</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.63</parameter>
+            <display>kako se kaže .... na hrvatskom?</display>
+            <response>how do you say ... in croatian?</response>
+        </cluster>
+        <cluster>
+            <displayType>Sound</displayType>
+            <parameter>-1.63</parameter>
+            <display>sounds/croatian/howtosay_hr</display>
+            <response>how do you say ... in croatian?</response>
+        </cluster>
+
+        
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Did you have a high school Croatian class?</display>
+            <response>Yes</response>
+            <falseResponse>No</falseResponse>
+        </cluster>
+        <cluster>
+            <display>How many college Croatian classes have you taken?</display>
+            <response>0</response>
+            <falseResponse>1</falseResponse>
+            <falseResponse>2</falseResponse>
+            <falseResponse>3 or more</falseResponse>
+        </cluster>
+    </clusters>
+</setspec>

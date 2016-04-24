@@ -1,15 +1,16 @@
 <tutor>
     <setspec>
         <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Drill Practice of Hiragana and Katakana</lessonname>
+        <lessonname>Optimized Drill Practice of Croatian Phrases</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Hiraganastims.xml</stimulusfile>
+        <stimulusfile>Croatstims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
+       
     </setspec>
 
     <unit>
@@ -21,7 +22,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
             <drill>12000000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
+            <reviewstudy>8000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
             <correctscore>0</correctscore>
@@ -37,25 +38,25 @@ Please answer the following 5 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>92-96</clusterlist>
+            <clusterlist>144-148</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
     </unit>
 
     <unit>
-        <unitinstructions>Here comes the optimized learning of Japanese hiragana and katakana.</unitinstructions>
+        <unitinstructions>Here comes the optimized learning of the Croatian phrases.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-91</clusterlist>
+            <clusterlist>0-143</clusterlist>
         </learningsession>
 
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>
-            <drill>8000</drill>
-            <purestudy>16000</purestudy>
+            <drill>12000</drill>
+            <purestudy>12000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
+            <reviewstudy>8000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
