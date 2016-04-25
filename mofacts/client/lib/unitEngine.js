@@ -490,7 +490,7 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var probs = cardProbabilities.probs;
 
-            newProbIndex = findMaxProbCard(cards, probs, 0.85);
+            newProbIndex = findMaxProbCard(cards, probs, 0.90);
             if (newProbIndex === -1) {
                 newProbIndex = findMinProbCard(cards, probs);
             }

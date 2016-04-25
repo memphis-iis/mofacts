@@ -2,7 +2,7 @@
     <setspec>
         <name>Statistics Practice</name> <!-- TAKEN FROM Music2-0.xml -->
         <lessonname>medium SVO test</lessonname>
-        <userselect>true</userselect> <!-- Don't show up for users -->
+        <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>SVO4stims.xml</stimulusfile>
         <clustermodel></clustermodel>
         <clustersize>1</clustersize>
