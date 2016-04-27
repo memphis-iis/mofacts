@@ -342,11 +342,15 @@ findKey = function(obj, value) {
 }
 
 //INPUT: studentID, an identifying ID for the student, tdfname, the Mongo-friendly database name for the current TDF.
-generateStudentPerItemData = function(studentID, tdfname) {
+//generateStudentPerItemData = function(studentID, tdfname) {
+generateStudentPerItemData = function(studentID, tdfname, currStim) {		
 		//Fetch the data from the db
 		var userDataQuery = {};
 		userDataQuery[tdfname] = {$exists: true};
 		var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
+
+		// Get current items for associating the names with the IDs
+		var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
 		///console.log(userData);
 		///console.log(userData[0][tdfname]);
 		var itemStats = [];
@@ -370,13 +374,14 @@ generateStudentPerItemData = function(studentID, tdfname) {
 				}
 				// TODO Figure out how to associate ID to the item.
 				itemToPush = {};
-				itemToPush['correctRatio'] = corCount/totCount;
-				itemToPush['avgLatency'] = corTime/corCount;
+				itemToPush['correctRatio'] = Math.round((corCount/totCount) * 100) / 100;
+				itemToPush['avgLatency'] = _.isNaN(corTime/corCount)? 0: corTime/corCount;
 				itemStats.push(itemToPush);
 		});
 		// Poor, hack-y way to associate the ID of the item to the object in the array.
 		for (var i=0; i<itemStats.length; i++) {
 				itemStats[i]['itemID'] = itemIDList[i];
+				itemStats[i]['name'] = cluster[itemIDList[i]].display[0];
 		}
 		///console.log(itemStats);
 		return itemStats;
