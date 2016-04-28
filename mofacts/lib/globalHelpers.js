@@ -185,7 +185,16 @@ generateNaturals = function(end) {
 		}
 		return returnArray;
 }
-
+//Generates the cluster for template helpers
+getCluster = function(){
+	try{
+		var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
+         		.stimuli.setspec.clusters[0].cluster;
+		return cluster;
+	}catch(e){
+		console.log(e);
+	}
+}
 //INPUT: itemID, an integer which represents the index of the item in the cluster
 //       tdfname, a string representing the Mongo-friendly current TDF
 //       optionBool, a boolean, where true is for correctness data, false is for latency data
