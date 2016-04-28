@@ -69,8 +69,8 @@ Template.Items.events({
     },
 
     'click .stimButton' : function (event) {
-				var target = $(event.currentTarget);
-				Session.set('currItem', event.target.id);
+		var target = $(event.currentTarget);
+		Session.set('currItem', event.target.id); //Sets the session variable to the current item
         event.preventDefault();
         Router.go('/itemStats');
     },
