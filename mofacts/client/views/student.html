@@ -43,6 +43,7 @@
 .ct-series-b .ct-point {
    stroke: blue;
 }
+
 </style>
 </head>
 
@@ -115,5 +116,27 @@
          {{/if}}
       </div>
    </div>
-
+	 <div class="container">
+		 <div class="table-responsive">          
+			 <table class="table" style="background-color: white">
+				 <thead>
+					 <tr>
+						 <th>Item Name</th>
+						 <th>Correctness Ratio</th>
+						 <th>Average Latency</th>
+					 </tr>
+				 </thead>
+				 <tbody>
+					 {{#each item in itemData}}
+					 <tr>
+						 <td>{{item.name}}</td>
+						 <td>{{item.correctRatio}}</td>
+						 <td>{{item.avgLatency}}ms</td>
+					 </tr>
+					 {{/each}}
+				 </tbody>
+			 </table>
+		 </div>
+	 </div>
+	 
 </template>

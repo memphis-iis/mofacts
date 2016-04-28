@@ -7,7 +7,7 @@
         <shuffleclusters>0-0</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>
-        <userselect>true</userselect> <!-- Change to false when done testing -->
+        <userselect>false</userselect> <!-- Change to false when done testing -->
     </setspec>
 
     <unit>

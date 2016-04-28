@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>SVO4</lessonname>
+        <lessonname>Statistics Cloze Sentence Experiment (demo)</lessonname>
         <stimulusfile>SVO4stims.xml</stimulusfile>
         <experimentTarget>svo</experimentTarget>
         <randomizedDelivery>3</randomizedDelivery>
