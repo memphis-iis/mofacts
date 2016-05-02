@@ -22,6 +22,7 @@ Template.itemStats.helpers({
 Template.itemStats.events({
    'click .switchButton': function (event) {
       event.preventDefault();
+      drawChart();
       if (document.getElementById("reptitionLatency").style.display == "none") {
          document.getElementById("reptitionLatency").style.display="block";
          document.getElementById("reptitionLatencyTitle").style.display="block";
@@ -32,9 +33,7 @@ Template.itemStats.events({
          document.getElementById("reptitionLatency").style.display="none";
          document.getElementById("reptitionLatencyTitle").style.display="none";
          document.getElementById("reptitionCorrectness").style.display="block";
-         document.getElementById("reptitionCorrectness").style.visibility="visible";
          document.getElementById("reptitionCorrectnessTitle").style.display="block";
-         document.getElementById("reptitionCorrectnessTitle").style.visibility="visible";
       }
    },
 
@@ -71,7 +70,12 @@ Template.itemStats.events({
 });
 
 Template.itemStats.rendered = function () {
+   Tracker.autorun(function(){
+      drawChart();
+   })
+}
 
+var drawChart = function () {
    // Find out the length of the array returned from the specified function.
    var itemDataLatLeng = Template.itemStats.__helpers[" itemDataLat"]().length;
    // Auto populate an array from 0 to length of specified function.

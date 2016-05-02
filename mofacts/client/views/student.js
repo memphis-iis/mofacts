@@ -7,6 +7,11 @@ Template.student.helpers({
          return Meteor.user().username;
       }
    },
+
+   selectedUsername: function () {
+      return (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+   },
+
    studentDataLat: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
       var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
@@ -14,31 +19,36 @@ Template.student.helpers({
       return studentDataLatVar;
 
    },
+
    studentDataCor: function () {
       var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
       var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
       studentDataCorVar.unshift(0);
       return studentDataCorVar;
    },
+
    classDataLat: function () {
       var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
       classDataLatVar.unshift(7500);
       return classDataLatVar;
    },
+
    classDataCor: function () {
       var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
       classDataCorVar.unshift(0);
       return classDataCorVar;
    },
-		itemData: function () {
-				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-				return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
-		}
+
+   itemData: function () {
+      var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+      return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
+   }
 });
 
 Template.student.events({
    'click .switchButton': function (event) {
       event.preventDefault();
+      drawChart();
       if (document.getElementById("reptitionLatency").style.display == "none") {
          document.getElementById("reptitionLatency").style.display="block";
          document.getElementById("reptitionLatencyTitle").style.display="block";
@@ -49,9 +59,7 @@ Template.student.events({
          document.getElementById("reptitionLatency").style.display="none";
          document.getElementById("reptitionLatencyTitle").style.display="none";
          document.getElementById("reptitionCorrectness").style.display="block";
-         document.getElementById("reptitionCorrectness").style.visibility="visible";
          document.getElementById("reptitionCorrectnessTitle").style.display="block";
-         document.getElementById("reptitionCorrectnessTitle").style.visibility="visible";
       }
    },
 
@@ -83,7 +91,6 @@ Template.student.events({
       Router.go("/allStudents");
    },
 
-
    'click .adminLink' : function (event) {
       event.preventDefault();
       Router.go("/admin");
@@ -94,6 +101,12 @@ Template.student.events({
 });
 
 Template.student.rendered = function () {
+   Tracker.autorun(function(){
+      drawChart();
+   })
+}
+
+var drawChart = function () {
 
    // Find out the length of the array returned from the specified function.
    var studentDataLatLeng = Template.student.__helpers[" studentDataLat"]().length;
