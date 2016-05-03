@@ -86,10 +86,10 @@
 
    <div class="container">
       <div class="title" id="reptitionLatencyTitle" style="display:block">
-         <legend class="text-center">Latency / Reptition</legend>
+         <legend class="text-center">Latency / Reptition<br>{{studentName}}</legend>
       </div>
       <div class="title" id="reptitionCorrectnessTitle" style="display:block; visibility:hidden">
-         <legend class="text-center">Correctness / Reptition</legend>
+         <legend class="text-center">Correctness / Reptition<br>{{studentName}}</legend>
       </div>
       <div class="wrapper" style="text-align:center">
          <input type="submit" class="switchButton" value="Change Graph">
@@ -116,6 +116,10 @@
          {{/if}}
       </div>
    </div>
+	 studentDataLat: {{studentDataLat}}<br>
+	 studentDataCor: {{studentDataCor}}<br>
+	 classDataLat: {{classDataLat}}<br>
+	 classDataCor: {{classDataCor}}
 	 <div class="container">
 		 <div class="table-responsive">          
 			 <table class="table" style="background-color: white">

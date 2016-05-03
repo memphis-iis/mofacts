@@ -33,7 +33,13 @@ Template.student.helpers({
 		itemData: function () {
 				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
 				return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
-		}
+		},
+		// studentName: function() {
+		// 		var query = {};
+		// 		query['_id'] = Session.get('currStudent');
+		// 		query['username'] = true;
+		// 		return Meteor.users.findOne(query)['username'];
+		// }
 });
 
 Template.student.events({
