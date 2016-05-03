@@ -49,6 +49,7 @@ Template.allStudents.events({
     'click .studentButton' : function (event) {
 				var target = $(event.currentTarget);
 				Session.set('currStudent', target.data("studentkey"));
+				Session.set('currUsername', target.data("usernameKey"));
         event.preventDefault();      
         Router.go('/student');  
     }
@@ -84,6 +85,7 @@ Template.allStudents.rendered = function () {
             $("<button type='button' id='"+user._id+"' name='"+user._id+"'></button>")
                 .addClass("btn btn-block studentButton")
                 .data("studentkey", user._id)
+                .data("usernameKey", user.username)
                 .css("background", buttonColor)
                 .html(user.username+", "+Math.floor((100*user.score))+"%")
         );

@@ -9,7 +9,8 @@ Template.student.helpers({
    },
 
    selectedUsername: function () {
-      return (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+      var currStudent = Session.get('currUsername');
+      return currStudent;
    },
 
    studentDataLat: function () {

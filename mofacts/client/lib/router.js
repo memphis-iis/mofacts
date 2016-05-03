@@ -84,7 +84,6 @@ Router.route('/choose', function () {
       this.render('statsPage');
    });
 
-   //Router waits on all of the users to be found before the page is rendered
    Router.route('/itemStats', function () {
       this.render('itemStats');
    });
