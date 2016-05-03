@@ -9,8 +9,7 @@ Template.student.helpers({
    },
 
    selectedUsername: function () {
-      var currStudent = Session.get('currUsername');
-      return currStudent;
+      return (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currUsername') : Meteor.user().username;
    },
 
    studentDataLat: function () {
@@ -39,16 +38,10 @@ Template.student.helpers({
       classDataCorVar.unshift(0);
       return classDataCorVar;
    },
-		itemData: function () {
-				var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-				return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
-		},
-		// studentName: function() {
-		// 		var query = {};
-		// 		query['_id'] = Session.get('currStudent');
-		// 		query['username'] = true;
-		// 		return Meteor.users.findOne(query)['username'];
-		// }
+   itemData: function () {
+      var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
+      return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
+   }
 });
 
 Template.student.events({
