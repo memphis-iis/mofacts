@@ -214,7 +214,7 @@ input:focus {
 }
 
 .table {
-    border: 1px solid #585858;
+    border: 1px solid #000000;
 }
 
 .table-bordered > thead > tr > th,
@@ -223,7 +223,7 @@ input:focus {
 .table-bordered > thead > tr > td,
 .table-bordered > tbody > tr > td,
 .table-bordered > tfoot > tr > td {
-  border: 1px solid #585858;
+  border: 1px solid #000000;
   border-right-width:1px;
   border-left-width:0px;
 }

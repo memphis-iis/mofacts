@@ -11,25 +11,27 @@
    text-align: center;
    left: 0;
    bottom: 0;
-   font-size: 1.25rem;
-   color: #000000;
+   font-size: 1.45rem;
+   color: rgba(0, 0, 0, 1);
+   font-weight: bolder;
 }
 
 [data-y-axis]::after {
    content: attr(data-y-axis);
    position: absolute;
    top: 40%;
-   left: -40px;
-   font-size: 1.25rem;
-   color: #000000;
+   left: -60px;
+   font-size: 1.45rem;
+   color: rgba(0, 0, 0, 1);
    text-align: center;
    transform: rotate(-90deg)translateY(50%);
+   font-weight: bolder;
 }
 
 .ct-label {
    fill: rgba(0, 0, 0, 1);
    color: rgba(0, 0, 0, 1);
-   font-size: 1.00rem;
+   font-size: 1.45rem;
    line-height: 1;
    font-weight: bolder;
 }
@@ -37,6 +39,11 @@
 .ct-series-a .ct-line,
 .ct-series-a .ct-point {
    stroke: #C40233;
+}
+
+.ct-chart .ct-grid {
+   stroke: #000000;
+   stroke-dasharray: none;
 }
 </style>
 </head>
@@ -78,14 +85,17 @@
    </nav>  <!-- close nav -->
 
    <div class="container">
-      <div class="title" id="reptitionLatencyTitle" style="display:block">
-         <legend class="text-center">Latency / Reptition</legend>
-      </div>
-      <div class="title" id="reptitionCorrectnessTitle" style="display:none">
-         <legend class="text-center">Correctness / Reptition</legend>
-      </div>
-      <div class="wrapper" style="text-align:center">
-         <input type="submit" class="switchButton" value="Change Graph">
+      <div class="titleContainer" style="display:block">
+         <div class="title" id="reptitionLatencyTitle" style="display:block">
+            <legend class="text-center">Latency / Reptition</legend>
+         </div>
+         <div class="title" id="reptitionCorrectnessTitle" style="display:none">
+            <legend class="text-center">Correctness / Reptition</legend>
+         </div>
+         <div class="wrapper" style="text-align:center">
+            <input type="submit" class="switchButton" value="Change Graph">
+         </div>
+         <br>
       </div>
       <div class="graphs">
          <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Latency (ms)" id="reptitionLatency" style="display:block"></div>
@@ -95,7 +105,7 @@
          <svg height="10" width="35">
             <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
-         </svg> - Class
+         </svg> - <b>Class</b>
       </div>
    </div>
 
