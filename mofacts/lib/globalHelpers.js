@@ -168,12 +168,21 @@ buildTdfDBName = function (tdfname) {
 // OUTPUT: a ratio to 2 decimal places which is the average score of all students who have attempted this item
 computeItemAverage = function(item, tdfname) {
 		var userList = UserMetrics.find().fetch();
+		//console.log(displayify(userList));
 		var askCount = 0;
 		var correctCount = 0;
 		_.chain(userList).each( function(user) {
-				askCount = askCount + _.chain(user).prop(tdfname).prop(item).prop('questionCount').intval().value();
-				correctCount = correctCount + _.chain(user).prop(tdfname).prop(item).prop('correctAnswerCount').intval().value();
+				askCount = askCount + _.chain(user).prop(tdfname).prop(item.toString()).prop('questionCount').intval().value();
+				correctCount = correctCount + _.chain(user).prop(tdfname).prop(item.toString()).prop('correctAnswerCount').intval().value();
+				if (item == '0') {
+						console.log(correctCount);
+						console.log(askCount);
+						console.log(displayify(_.chain(user).prop(tdfname).prop(item.toString()).value()));
+				}
 		});
+		// if (item === 0) {
+		// 		console.log(askCount+":"+correctCount+":"+item);
+		// }
 		return correctCount/askCount;
 }
 

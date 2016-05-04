@@ -23,7 +23,6 @@ Template.Items.helpers({
             item.buttonColor = determineButtonColor(item.score);
             item.display = item.display[0];
             item.response = item.response[0];
-
             if (isNaN(item.score)){
                 item.clickable = false;
             }else{
