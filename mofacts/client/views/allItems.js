@@ -41,8 +41,7 @@ Template.allItems.events({
 
     // Start a TDF
     'click .stimButton' : function (event) {
-    event.preventDefault();
-
+        event.preventDefault();
         var target = $(event.currentTarget);
         selectTdf(
             target.data("tdfkey"),

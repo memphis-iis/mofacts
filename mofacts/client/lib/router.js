@@ -69,6 +69,8 @@ Router.route('/admin', function () {
    this.render('admin');
 });
 
+//Sends the user to the choose page where the user can choose 
+//between viewing all of the items or all of the students for the system. 
 Router.route('/choose', function () {
    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
       this.render('/choose');
@@ -84,10 +86,12 @@ Router.route('/choose', function () {
       this.render('statsPage');
    });
 
+   //Graph pages
    Router.route('/itemStats', function () {
       this.render('itemStats');
    });
 
+   //Used for all of the students on the system
    Router.route('/allStudents', function(){
       this.subscribe('allUsers').wait();
       if (this.ready()){
@@ -97,14 +101,17 @@ Router.route('/choose', function () {
       }
    });
 
+   //Individual student page
    Router.route('/student', function () {
       this.render('student');
    });
 
+   //The item page that houses all the items for a system
    Router.route('/Items', function () {
       this.render('Items');
    });
 
+   //A listing of all of the systems/tests
    Router.route('/allItems', function () {
       Session.set("clusterMapping", "");
       this.render('allItems');
