@@ -212,3 +212,18 @@ input:focus {
 .wrapper {
     text-align: left;
 }
+
+.table {
+    border: 1px solid #585858;
+}
+
+.table-bordered > thead > tr > th,
+.table-bordered > tbody > tr > th,
+.table-bordered > tfoot > tr > th,
+.table-bordered > thead > tr > td,
+.table-bordered > tbody > tr > td,
+.table-bordered > tfoot > tr > td {
+  border: 1px solid #585858;
+  border-right-width:1px;
+  border-left-width:0px;
+}

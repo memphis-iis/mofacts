@@ -253,7 +253,8 @@ generateClassGraphData = function(tdfname, optionBool) {
 		_.chain(userData).each(function(user) {
 				_.chain(user).prop(tdfname).each(function(item) {
 						for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
-								if (classCount.length <= 1) {
+								if (classCount.length <= i) {
+										//console.log("Increasing data array size by 1 from "+classCount.length);
 										classCount.push(0);
 										classData.push(0);
 								}
@@ -269,19 +270,23 @@ generateClassGraphData = function(tdfname, optionBool) {
 						}
 				});
 		});
+		//We now have the raw data, and here we convert the classData to the averages.
 		for (var i=0; i<classData.length; i++) {
 				if (optionBool && (!(corCount === 0))) {
+						//console.log("Count: "+classCount[i]);
 						classData[i] /= classCount[i];
 				} else if (!(corCount === 0)) {
 						classData[i] /= corCount;
-				} else {
+				} else if (classCount[i] === 0) {
 						classData[i] = 0;
 				}
 				
 		}
-		if (_.last(classData) === 0) {
+		if (_.last(classCount) === 0) {
+				//console.log("Last datapoint had 0 attempts, we're removing it.")
 				classData.pop();
 		}
+		//console.log(classData);
 		return classData;
 };
 
@@ -327,14 +332,14 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 				}
 				
 		}
-		// Quick-and-dirty checking to make sure that the last element isn't just 0.
+		// Quick-and-dirty checking to make sure that the last element isn't because of 0 attempts made.
 		if (_.last(itemCount) === 0) {
 				itemData.pop();
 		}
 		// if (itemData[itemData.length-1] == 0) {
 		// 		itemData.pop();
 		// }
-		///console.log(displayify(itemData));
+		// console.log(displayify(itemData));
 		return itemData;
 }
 
@@ -351,6 +356,7 @@ findKey = function(obj, value) {
 }
 
 //INPUT: studentID, an identifying ID for the student, tdfname, the Mongo-friendly database name for the current TDF.
+//OUTPUT: an array of objects, where each object represents an item the student has attempted, containing that item's metrics for that student.
 //generateStudentPerItemData = function(studentID, tdfname) {
 generateStudentPerItemData = function(studentID, tdfname, currStim) {		
 		//Fetch the data from the db

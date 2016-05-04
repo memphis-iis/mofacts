@@ -33,7 +33,7 @@ Template.Items.helpers({
             buttons.push(item);
 
         });
-        console.log(buttons);
+        
         return buttons;
     }
 
@@ -70,11 +70,12 @@ Template.Items.events({
 
     'click .stimButton' : function (event) {
 		var target = $(event.currentTarget);
-		Session.set('currItem', event.target.id); //Sets the session variable to the current item
+		Session.set('currItem', event.target.id); 
         event.preventDefault();
         Router.go('/itemStats');
     },
 
+    //Used for switching between the prompts and the reponses
     'click .switchButton' : function (event) {
         event.preventDefault();
         if (document.getElementById("itemButtonContainer1").style.display == "none"){
