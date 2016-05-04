@@ -2,6 +2,7 @@
 <style>
 .graphs {
    position: relative;
+
 }
 
 [data-x-axis]::before {
@@ -103,7 +104,7 @@
          <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Latency (ms)" id="reptitionLatency" style="display:block"></div>
          <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Correctness (%)" id="reptitionCorrectness" style="display:none"></div>
       </div>
-      <div class="legend">
+      <div class="legend" style="padding-bottom: 5%;">
          {{#if isInRole 'admin,teacher'}}
          <svg height="10" width="35">
             <line x1="10" y1="5" x2="35" y2="5" style="stroke:#0087BD;stroke-width:5" />
@@ -123,7 +124,7 @@
    </div>
 	 <div class="container">
 		 <div class="table-responsive">
-			 <table class="table">
+			 <table class="table table-bordered">
 				 <thead>
 					 <tr>
 						 <th>Item Name</th>
