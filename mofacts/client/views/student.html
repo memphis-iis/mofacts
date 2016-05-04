@@ -2,7 +2,6 @@
 <style>
 .graphs {
    position: relative;
-
 }
 
 [data-x-axis]::before {
@@ -12,7 +11,7 @@
    text-align: center;
    left: 0;
    bottom: 0;
-   font-size: 1.15rem;
+   font-size: 1.45rem;
    color: rgba(0, 0, 0, 1);
    font-weight: bolder;
 }
@@ -21,8 +20,8 @@
    content: attr(data-y-axis);
    position: absolute;
    top: 40%;
-   left: -40px;
-   font-size: 1.15rem;
+   left: -60px;
+   font-size: 1.45rem;
    color: rgba(0, 0, 0, 1);
    text-align: center;
    transform: rotate(-90deg)translateY(50%);
@@ -32,7 +31,7 @@
 .ct-label {
    fill: rgba(0, 0, 0, 1);
    color: rgba(0, 0, 0, 1);
-   font-size: 1.15rem;
+   font-size: 1.45rem;
    line-height: 1;
    font-weight: bolder;
 }
@@ -46,7 +45,6 @@
 .ct-series-b .ct-point {
    stroke: #0087BD;
 }
-
 </style>
 </head>
 
@@ -109,16 +107,16 @@
          <svg height="10" width="35">
             <line x1="10" y1="5" x2="35" y2="5" style="stroke:#0087BD;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
-         </svg> - Class
+         </svg> - <b>Class</b>
          <svg height="10" width="35">
             <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
-         </svg> - {{selectedUsername}}
+         </svg> - <b>{{selectedUsername}}</b>
          {{else}}
          <svg height="10" width="35">
             <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
             Sorry, your browser does not support inline SVG.
-         </svg> - {{selectedUsername}}
+         </svg> - <b>{{selectedUsername}}</b>
          {{/if}}
       </div>
    </div>
