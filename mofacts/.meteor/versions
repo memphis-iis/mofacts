@@ -48,7 +48,7 @@ localstorage@1.0.9
 logging@1.0.12
 meteor@1.1.14
 meteor-platform@1.2.6
-mfpierre:chartist-js@1.6.1
+mfpierre:chartist-js@1.6.2
 minifier-css@1.1.11
 minifier-js@1.1.11
 minimongo@1.0.16
