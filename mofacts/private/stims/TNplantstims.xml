@@ -1,0 +1,717 @@
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.58</parameter> 
+            <display>images/TNplants/RWS_IMG2124.JPG</display>
+            <response>pawpaw</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.61</parameter> 
+            <display>images/TNplants/J_M_IMG0577.JPG</display>
+            <response>pin oak</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.64</parameter> 
+            <display>images/TNplants/J_M_IMG0972.JPG</display>
+            <response>blackgum</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.64</parameter> 
+            <display>images/TNplants/PCD1293_IMG0093.JPG</display>
+            <response>blackhaw</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.64</parameter> 
+            <display>images/TNplants/PCD1771_IMG0008.JPG</display>
+            <response>sourwood</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.64</parameter> 
+            <display>images/TNplants/PCD0889_IMG0022.JPG</display>
+            <response>sweetbay</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.64</parameter> 
+            <display>images/TNplants/J_M_IMG0088.JPG</display>
+            <response>sweetgum</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/ML500_IMG0014.JPG</display>
+            <response>box elder</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/A_C_IMG0030.JPG</display>
+            <response>deerberry</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/A_C_IMG2564.JPG</display>
+            <response>red maple</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/MBK_IMG0001.JPG</display>
+            <response>sassafras</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/6151_IMG02144.JPG</display>
+            <response>wafer ash</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/PCD0878_IMG0011.JPG</display>
+            <response>white ash</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.67</parameter> 
+            <display>images/TNplants/PCD1757_IMG0008.JPG</display>
+            <response>white oak</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/RCM_IMG0473.JPG</display>
+            <response>coralberry</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/J_M_IMG0268.JPG</display>
+            <response>pitch pine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/RWS_IMG2333.JPG</display>
+            <response>red spruce</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/PCD0874_IMG0045.JPG</display>
+            <response>sweet fern</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/J_M_IMG0091.JPG</display>
+            <response>tulip tree</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.7</parameter> 
+            <display>images/TNplants/BKL_IMG0057.JPG</display>
+            <response>willow oak</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.73</parameter> 
+            <display>images/TNplants/A_C_IMG3236.JPG</display>
+            <response>river birch</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.73</parameter> 
+            <display>images/TNplants/PCD3946_IMG0021.JPG</display>
+            <response>sugar maple</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.73</parameter> 
+            <display>images/TNplants/A_C_IMG0195.JPG</display>
+            <response>sweet birch</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.73</parameter> 
+            <display>images/TNplants/J_M_IMG0070.JPG</display>
+            <response>witch hazel</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/MBK_IMG0002.JPG</display>
+            <response>bald cypress</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/J_M_IMG1307.JPG</display>
+            <response>black cherry</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/PCD2321_IMG0033.JPG</display>
+            <response>black locust</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/SAW_01872.JPG</display>
+            <response>black walnut</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/J_M_IMG1500.JPG</display>
+            <response>cucumbertree</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/A_C_IMG2671.JPG</display>
+            <response>flame azalea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/A_C_IMG0278.JPG</display>
+            <response>great laurel</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/PCD1285_IMG0055.JPG</display>
+            <response>joe-pye weed</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/PCD4891_IMG0015.JPG</display>
+            <response>smooth sumac</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.76</parameter> 
+            <display>images/TNplants/PCD1771_IMG0064.JPG</display>
+            <response>swamp azalea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/RWS_IMG1587.JPG</display>
+            <response>american plum</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/A_C_IMG1660.JPG</display>
+            <response>butterflyweed</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/SAW_03027.JPG</display>
+            <response>chinkapin oak</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/JH_00016.JPG</display>
+            <response>common yarrow</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/SAW_02770.JPG</display>
+            <response>loblolly pine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/RWS_IMG1411.JPG</display>
+            <response>striped maple</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/A_C_IMG2386.JPG</display>
+            <response>virginia pine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.79</parameter> 
+            <display>images/TNplants/TLM_IMG00361.JPG</display>
+            <response>wild bergamot</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/PCD3950_IMG0087.JPG</display>
+            <response>american beech</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/SAW_01805.JPG</display>
+            <response>american holly</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/PCD2321_IMG0032.JPG</display>
+            <response>bristly locust</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/J_M_IMG0022.JPG</display>
+            <response>eastern redbud</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/A_C_IMG3931.JPG</display>
+            <response>greek valerian</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/RWS_IMG1043.JPG</display>
+            <response>new jersey tea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/RWS_IMG0718.JPG</display>
+            <response>pignut hickory</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/A_C_IMG0029.JPG</display>
+            <response>sundial lupine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/6151_IMG00198.JPG</display>
+            <response>swamp milkweed</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.82</parameter> 
+            <display>images/TNplants/BGNP_0188.JPG</display>
+            <response>wild hydrangea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/6151_IMG00336.JPG</display>
+            <response>blue mistflower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/RWS_IMG0857.JPG</display>
+            <response>cardinal flower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/A_C_IMG0086.JPG</display>
+            <response>catawba rosebay</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/SAW_03860.JPG</display>
+            <response>eastern hemlock</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/TLM_IMG00214.JPG</display>
+            <response>mountain laurel</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/A_C_IMG3196.JPG</display>
+            <response>scarlet beebalm</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/PCD0002_IMG0050.JPG</display>
+            <response>scarlet buckeye</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/PCD2413_IMG0070.JPG</display>
+            <response>swamp sunflower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/6151_IMG03257.JPG</display>
+            <response>trumpet creeper</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/A_C_IMG1105.JPG</display>
+            <response>white snakeroot</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.85</parameter> 
+            <display>images/TNplants/PCD3422_IMG0055.JPG</display>
+            <response>wild blue phlox</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/A_C_IMG2904.JPG</display>
+            <response>bigleaf magnolia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/J_M_IMG0010.JPG</display>
+            <response>blue wild indigo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/A_C_IMG3309.JPG</display>
+            <response>common persimmon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/PCD3897_IMG0077.JPG</display>
+            <response>eastern bluestar</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/PCD1323_IMG0089.JPG</display>
+            <response>northern catalpa</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/J_M_IMG0996.JPG</display>
+            <response>northern red oak</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.88</parameter> 
+            <display>images/TNplants/J_M_IMG1430.JPG</display>
+            <response>white fringetree</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/J_M_IMG1616.JPG</display>
+            <response>american basswood</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/J_M_IMG0017.JPG</display>
+            <response>american hornbeam</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/ML504_IMG0085.JPG</display>
+            <response>american sycamore</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/BGNP_0284.JPG</display>
+            <response>atlantic ninebark</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/RWS_IMG2360.JPG</display>
+            <response>bitternut hickory</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/6151_IMG00293.JPG</display>
+            <response>common buttonbush</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/6151_IMG02416.JPG</display>
+            <response>common elderberry</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/PCD1293_IMG0053.JPG</display>
+            <response>coral honeysuckle</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/RCM_IMG2652.JPG</display>
+            <response>eastern red cedar</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/J_M_IMG0041.JPG</display>
+            <response>flowering dogwood</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/BGNP_0040.JPG</display>
+            <response>new england aster</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.91</parameter> 
+            <display>images/TNplants/A_C_IMG1461.JPG</display>
+            <response>small's penstemon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/6151_IMG00485.JPG</display>
+            <response>carolina jessamine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/J_M_IMG0086.JPG</display>
+            <response>dense blazing star</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/BGNP_0237.JPG</display>
+            <response>great blue lobelia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/J_M_IMG0763.JPG</display>
+            <response>northern spicebush</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/SAW_01355.JPG</display>
+            <response>rattlesnake master</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/A_C_IMG0023.JPG</display>
+            <response>southern arrowwood</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.94</parameter> 
+            <display>images/TNplants/A_C_IMG0318.JPG</display>
+            <response>virginia bluebells</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.97</parameter> 
+            <display>images/TNplants/PCD3957_IMG0039.JPG</display>
+            <response>american bladdernut</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.97</parameter> 
+            <display>images/TNplants/TLM_IMG00071.JPG</display>
+            <response>common serviceberry</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.97</parameter> 
+            <display>images/TNplants/SAW_02018.JPG</display>
+            <response>dotted blazing star</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.97</parameter> 
+            <display>images/TNplants/A_C_IMG2987.JPG</display>
+            <response>fall obedient plant</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-0.97</parameter> 
+            <display>images/TNplants/6151_IMG02755.JPG</display>
+            <response>lanceleaf coreopsis</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1</parameter> 
+            <display>images/TNplants/A_C_IMG3433.JPG</display>
+            <response>allegheny chinquapin</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1</parameter> 
+            <display>images/TNplants/CF_IMG0326.JPG</display>
+            <response>prairie blazing star</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1</parameter> 
+            <display>images/TNplants/SAW_02540.JPG</display>
+            <response>purple passionflower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1</parameter> 
+            <display>images/TNplants/SAW_00999.JPG</display>
+            <response>threadleaf coreopsis</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/JCB_IMG0010.JPG</display>
+            <response>alternateleaf dogwood</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/6151_IMG00258.JPG</display>
+            <response>american beautyberry </response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/A_C_IMG0727.JPG</display>
+            <response>american mountain ash</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/PCD3898_IMG0081.JPG</display>
+            <response>devil's walking stick</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/J_M_IMG0899.JPG</display>
+            <response>eastern red columbine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.03</parameter> 
+            <display>images/TNplants/PCD3632_IMG0082.JPG</display>
+            <response>mississippi penstemon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.06</parameter> 
+            <display>images/TNplants/PCD2945_IMG0070.JPG</display>
+            <response>eastern gray penstemon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.09</parameter> 
+            <display>images/TNplants/PCD4237_IMG0035.JPG</display>
+            <response>green-headed coneflower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.09</parameter> 
+            <display>images/TNplants/SAW_03957.JPG</display>
+            <response>rusty blackhaw viburnum</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.09</parameter> 
+            <display>images/TNplants/A_C_IMG0595.JPG</display>
+            <response>shrubby st. john's-wort</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.12</parameter> 
+            <display>images/TNplants/A_C_IMG3452.JPG</display>
+            <response>american strawberry bush</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.12</parameter> 
+            <display>images/TNplants/BGNP_0186.JPG</display>
+            <response>crimson-eyed rose-mallow</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.15</parameter> 
+            <display>images/TNplants/A_C_IMG3145.JPG</display>
+            <response>eastern purple coneflower</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <parameter>-1.21</parameter> 
+            <display>images/TNplants/PCD3442_IMG0011.JPG</display>
+            <response>narrowleaf evening-primrose</response>
+        </cluster>
+
+
+
+
+
+        
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Did you have a high school Botany class?</display>
+            <response>Yes</response>
+            <falseResponse>No</falseResponse>
+        </cluster>
+        <cluster>
+            <display>How many college Botany classes have you taken?</display>
+            <response>0</response>
+            <falseResponse>1</falseResponse>
+            <falseResponse>2</falseResponse>
+            <falseResponse>3 or more</falseResponse>
+        </cluster>
+    </clusters>
+</setspec>
