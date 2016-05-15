@@ -1,5 +1,5 @@
-set PATH=%PATH%;C:\Users\ppavlik\AppData\Local\Programs\Git\usr\bin
-cd C:\Users\ppavlik\Documents\NetBeansProjects\MoFaCTS
+set PATH=%PATH%;C:\Users\ppavl\AppData\Local\Programs\Git\usr\bin
+cd C:\Users\ppavl\Documents\NetBeansProjects\MoFaCTS
 vagrant up
 vagrant ssh -c 'cd mofacts/mofacts; ./run_meteor'
 pause
