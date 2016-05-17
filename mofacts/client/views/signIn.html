@@ -20,37 +20,45 @@
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
+    <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+        <legend>Sign In</legend>
+    </div>
 
-    <div class="container">
-        <div class="row">
-            <legend class="text-center">Sign In</legend>
-            <form class="form-horizontal" role="form">
-                {{#if isExperiment}}
-                <div class="form-group">
-                    <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
-                        <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your ID">
-                    </div>
-                </div>
-                {{else}}
-                <div class="form-group">
-                    <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
-                        <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">
-                    </div>
-                    <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
-                </div>
-                <div class="form-group">
-                    <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
-                        <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
-                    </div>
-                </div>
-                {{/if}}
-                <div class="form-group">
-                    <div class="col-xs-offset-4 col-xs-4 col-sm-offset-4 col-sm-4 col-md-offset-5 col-md-2 col-lg-offset-5 col-lg-2">
-                        <button type="button" id="signInButton" class="btn ">Sign In</button>
-                    </div>
-                    <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
-                </div>
-            </form>
+    <div class="col-xs-offset-1 col-xs-6 col-sm-offset-1 col-sm-4 col-md-offset-1 col-md-2 col-lg-offset-1 col-lg-2">
+
+
+        {{#if isExperiment}}
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your ID">
         </div>
+        {{else}}
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">
+            <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+        </div>
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
+        </div>
+        {{/if}}
+        <div class="form-group">
+            <button type="button" id="signInButton" class="btn ">Sign In</button>
+            <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
+        </div>
+        <br>
+    </div>
+
+     <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+        <legend>Mobile Fact and Concept Training System (MoFaCTS):</legend>
+        <ul>    
+            <li>is a system in development that helps students learn information such as facts or concepts.</li>
+            <li>is a browser-based web-application, with source code available <a href="https://bitbucket.org/ppavlik/mofacts">here</a>.</li>
+            <li>is now available with the content modules above.</li>
+            <li>uses a quantitative model of your prior performance to select an item to learn that will optimally balance the challenge of the selection relative to your current ability with the item.</li>
+            <li>has a model of performance outcome that tracks both prior performance (i.e. past successes and failures to get the answers under different contexts) and memory factors, such as recency, frequency, spacing and forgetting.</li>
+            <li>saves all of your results to track your learning over seconds, minutes, days, weeks and possibly longer intervals.</li>
+            <li>was designed by Dr. Philip Pavlik, and many other important collaborators who have been his co-authors, listed <a href="https://www.researchgate.net/profile/Phil_Pavlik_Jr/publications">here</a>.</li>
+            <li>was implemented a series of talented programmers, who are given credit <a href="http://optimallearning.org/mobile-fact-and-concept-training-system-mofacts-beta.html">here</a>.</li>
+            <li>can also be used to run experiments for collecting controlled data, which is used to create and refine the quantitative model.</li>
+        </ul>
     </div>
 </template>
