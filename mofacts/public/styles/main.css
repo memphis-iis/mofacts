@@ -25,6 +25,22 @@ h1, h2, h3, h4, h5, h6 {
     color: #000;
 }
 
+
+ul {
+  margin: 0;
+}
+ul.dashed {
+  list-style-type: none;
+}
+ul.dashed > li {
+  text-indent: -15px;
+}
+ul.dashed > li:before {
+  content: "-  ";
+  text-indent: -15px;
+  font-weight: bold;
+}
+
 #cardQuestionImg {
     width:auto;
     height:340px; /* Height is expected to be changed: see index.js */

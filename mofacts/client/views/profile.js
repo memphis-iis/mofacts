@@ -73,7 +73,7 @@ Template.profile.rendered = function () {
 
     var addButton = function(btnObj) {
         $("#testButtonContainer").append(
-            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
+            $("<div class='col-xs-6 col-sm-4 col-md-3 col-lg-3 text-center'><br></div>").prepend(
                 btnObj
             )
         );
