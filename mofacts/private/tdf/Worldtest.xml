@@ -7,7 +7,7 @@
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
 
-        <simTimeout>3500</simTimeout>
+        <simTimeout>1500</simTimeout>
         <simCorrectProb>0.75</simCorrectProb>
     </setspec>
 
@@ -23,7 +23,7 @@
             <purestudy>10000</purestudy>
             <drill>10000</drill>
             <skipstudy>false</skipstudy>
-            <reviewstudy>2000</reviewstudy>
+            <reviewstudy>1000</reviewstudy>
             <correctprompt>500</correctprompt>
 
             <fontsize>3</fontsize>

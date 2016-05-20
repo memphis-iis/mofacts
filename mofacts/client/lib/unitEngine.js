@@ -585,19 +585,21 @@ function modelUnitEngine() {
                         "prob=", displayify(prob)
                     );
                 }
-                return;
             }
-
-            // Update stats for the card
-            card.trialsSinceLastSeen = 0;
-            card.hasBeenIntroduced = true;
-            stim.hasBeenIntroduced = true;
-            if (getTestType() === 's') {
-                card.studyTrialCount += 1;
+            else {
+                // If this is NOT a resume (and is just normal display mode for
+                // a learner) then we need to update stats for the card
+                card.trialsSinceLastSeen = 0;
+                card.hasBeenIntroduced = true;
+                stim.hasBeenIntroduced = true;
+                if (getTestType() === 's') {
+                    card.studyTrialCount += 1;
+                }
             }
 
             // It has now been officially one more trial since all the other cards
-            // have been seen
+            // have been seen - and we need to do this whether or NOT we are in
+            // resume mode
             _.each(cards, function(card, index) {
                 if (index != indexForNewCard) {
                     card.trialsSinceLastSeen += 1;
