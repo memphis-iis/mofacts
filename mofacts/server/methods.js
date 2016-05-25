@@ -93,6 +93,8 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
     };
 }
 
+// TODO: we need to reign-in the allUsers in our default pub AND the allUsers pub
+
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications

@@ -69,54 +69,55 @@ Router.route('/admin', function () {
    this.render('admin');
 });
 
-//Sends the user to the choose page where the user can choose 
-//between viewing all of the items or all of the students for the system. 
+//Sends the user to the choose page where the user can choose
+//between viewing all of the items or all of the students for the system.
 Router.route('/choose', function () {
-   if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-      this.render('/choose');
-   } else {
-      this.redirect('/student') }
-   });
+    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+        this.render('/choose');
+    } else {
+        this.redirect('/student');
+    }
+});
 
-   Router.route('/instructions', function () {
-      this.render('instructions');
-   });
+Router.route('/instructions', function () {
+    this.render('instructions');
+});
 
-   Router.route('/stats', function () {
-      this.render('statsPage');
-   });
+Router.route('/stats', function () {
+    this.render('statsPage');
+});
 
-   //Graph pages
-   Router.route('/itemStats', function () {
-      this.render('itemStats');
-   });
+//Graph pages
+Router.route('/itemStats', function () {
+    this.render('itemStats');
+});
 
-   //Used for all of the students on the system
-   Router.route('/allStudents', function(){
-      this.subscribe('allUsers').wait();
-      if (this.ready()){
-         this.render('allStudents');
-      }else{
-         this.render('');
-      }
-   });
+//Used for all of the students on the system
+Router.route('/allStudents', function(){
+    this.subscribe('allUsers').wait();
+    if (this.ready()){
+        this.render('allStudents');
+    }else{
+        this.render('');
+    }
+});
 
-   //Individual student page
-   Router.route('/student', function () {
-      this.render('student');
-   });
+//Individual student page
+Router.route('/student', function () {
+    this.render('student');
+});
 
-   //The item page that houses all the items for a system
-   Router.route('/Items', function () {
-      this.render('Items');
-   });
+//The item page that houses all the items for a system
+Router.route('/Items', function () {
+    this.render('Items');
+});
 
-   //A listing of all of the systems/tests
-   Router.route('/allItems', function () {
-      Session.set("clusterMapping", "");
-      this.render('allItems');
-   });
+//A listing of all of the systems/tests
+Router.route('/allItems', function () {
+    Session.set("clusterMapping", "");
+    this.render('allItems');
+});
 
-   Router.route('/testpage', function() {
-      this.render('tester');
-   });
+Router.route('/testpage', function() {
+    this.render('tester');
+});

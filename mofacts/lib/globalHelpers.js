@@ -102,7 +102,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
 
-}
+        }
         userProgress = initVals;
     };
 
@@ -116,303 +116,6 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
     };
 }
 
-// MoFaCTs-4882's Additions
-
-// Moved function from within the file to here to modularize code.
-// This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
-//INPUT: score, a float between 0 and 1
-//OUTPUT: an integer, which corresponds here to the index in the color array indicating score's correctness
-determineColorIndex = function(score) {
-		if (score == 1) {
-				return colors.length-1;
-		} else {
-				return Math.floor(score/(1/colors.length));
-		}
-}
-
-// Moved this function out to accommodate the NaN situations
-//INPUT: a score, a float between 0 and 1
-//OUTPUT: a hex color code corresponding to the item's desired color.
-determineButtonColor = function(score) {
-		return (isNaN(score)) ? "#b0b09b" : colors[determineColorIndex(score)];
-}
-
-// Simple function to randomly assign a value between 0 and 1, to 2 digits. E.g. .42, 1.00, .28
-randomScore = function() {
-		return Math.floor(Math.random()*100)/100;
-}
-
-// Moved from client view to here for code separation purposes.
-//INPUT: user, which is an object containing an _id which corresponds to a doc in UserMetrics, and the name of the relevant Tdf (in Mongo-recognizable format)
-//OUTPUT: a ratio which is the user's average score across all items for the client's current system.
-computeUserScore = function(user, tdfname) {
-		var indivUserQuery = {};
-		indivUserQuery['_id'] = user._id;
-		// We use findOne because there should only ever be one user with any given id.
-		var indivUser = UserMetrics.findOne(indivUserQuery);
-		var askCount = 0;
-		var correctCount = 0;
-		_.chain(indivUser).prop(tdfname).each( function (item) {
-				askCount = askCount + _.chain(item).prop('questionCount').intval().value();
-				correctCount = correctCount + _.chain(item).prop('correctAnswerCount').intval().value();
-		});
-		return correctCount/askCount;
-};
-
-// Simple function for taking the filename of the given Tdf and converting it to the format Mongo recognizes.
-buildTdfDBName = function (tdfname) {
-		return tdfname.replace(".", "_");
-};
-
-// INPUT: an item from a Tdf, the name of that tdf (in Mongo-recognizable format)
-// OUTPUT: a ratio to 2 decimal places which is the average score of all students who have attempted this item
-computeItemAverage = function(item, tdfname) {
-		var userList = UserMetrics.find().fetch();
-		//console.log(displayify(userList));
-		var askCount = 0;
-		var correctCount = 0;
-		_.chain(userList).each( function(user) {
-				askCount = askCount + _.chain(user).prop(tdfname).prop(item.toString()).prop('questionCount').intval().value();
-				correctCount = correctCount + _.chain(user).prop(tdfname).prop(item.toString()).prop('correctAnswerCount').intval().value();
-				if (item == '0') {
-						console.log(correctCount);
-						console.log(askCount);
-						console.log(displayify(_.chain(user).prop(tdfname).prop(item.toString()).value()));
-				}
-		});
-		// if (item === 0) {
-		// 		console.log(askCount+":"+correctCount+":"+item);
-		// }
-		return correctCount/askCount;
-}
-
-// Simple function to generate the numbers from 1..end
-generateNaturals = function(end) {
-		var returnArray = [];
-		for (var i=0; i<end; i++) {
-				returnArray[i]=i;
-		}
-		return returnArray;
-}
-//Generates the cluster for template helpers
-getCluster = function(){
-	try{
-		var cluster = Stimuli.findOne({fileName: getCurrentStimName()})
-         		.stimuli.setspec.clusters[0].cluster;
-		return cluster;
-	}catch(e){
-		console.log(e);
-	}
-}
-//INPUT: itemID, an integer which represents the index of the item in the cluster
-//       tdfname, a string representing the Mongo-friendly current TDF
-//       optionBool, a boolean, where true is for correctness data, false is for latency data
-//OUTPUT: an array containing average values for each "opportunity", where the opportunity is the index in the array
-generateItemGraphData = function(itemID, tdfname, optionBool) {
-		var itemQuery = {};
-		var itemData = []; //either correctness or latency, hence 'data'
-		var itemCount = [];
-		var corCount = 0;
-		itemQuery[tdfname+"."+itemID] = {$exists: true};
-		var scoreArray = UserMetrics.find(itemQuery).fetch();
-		_.chain(scoreArray).each(function (user) {
-				var itemCurrUser = _.chain(user).prop(tdfname).prop(itemID).value();
-				for (var i=0; i<_.chain(itemCurrUser).prop('questionCount').intval().value(); i++) {
-						if (itemCount.length <= i) {
-								itemCount.push(0);
-								itemData.push(0);
-						}
-						itemCount[i]++;
-						if (!(_.isUndefined(itemCurrUser.answerCorrect)) && itemCurrUser.answerCorrect[i]) {
-								corCount++;
-								if (optionBool) {
-										itemData[i]++;
-								} else {
-										itemData[i] += itemCurrUser.answerTimes[i];
-								}
-						}
-				}
-		});
-		///console.log(itemData);
-		///console.log(itemCount);
-		for (var i=0; i<itemData.length; i++) {
-				if (optionBool && (!(corCount === 0))) {
-						itemData[i] /= itemCount[i];
-				} else if (!(corCount === 0)) {
-						itemData[i] /= corCount;
-				} else {
-						itemData[i] = 0;
-				}
-				
-		}
-		if (_.last(itemCount) === 0) {
-				itemData.pop();
-		}
-		return itemData;
-}
-
-generateClassGraphData = function(tdfname, optionBool) {
-		var userDataQuery = {};
-		var userData = [];
-		userDataQuery[tdfname] = {$exists: true};
-		userData = UserMetrics.find(userDataQuery).fetch();
-		var classData = [];
-		var classCount = [];
-		var corCount = 0;
-		_.chain(userData).each(function(user) {
-				_.chain(user).prop(tdfname).each(function(item) {
-						for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
-								if (classCount.length <= i) {
-										//console.log("Increasing data array size by 1 from "+classCount.length);
-										classCount.push(0);
-										classData.push(0);
-								}
-								classCount[i]++;
-								if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
-										corCount++;
-										if (optionBool) {
-												classData[i]++;
-										} else {
-												classData[i] += item.answerTimes[i];
-										}
-								}
-						}
-				});
-		});
-		//We now have the raw data, and here we convert the classData to the averages.
-		for (var i=0; i<classData.length; i++) {
-				if (optionBool && (!(corCount === 0))) {
-						//console.log("Count: "+classCount[i]);
-						classData[i] /= classCount[i];
-				} else if (!(corCount === 0)) {
-						classData[i] /= corCount;
-				} else if (classCount[i] === 0) {
-						classData[i] = 0;
-				}
-				
-		}
-		if (_.last(classCount) === 0) {
-				//console.log("Last datapoint had 0 attempts, we're removing it.")
-				classData.pop();
-		}
-		//console.log(classData);
-		return classData;
-};
-
-//INPUT: studentID, a string representing the ID of the student to retrieve the data from, tdfName, a string representing the name of the current TDF (in Mongo-recognizable format), optionBool, which is false for latency, true for correctness
-//OUPUT: an array containing values with indices representing the 'opportunity' number. The 0th slot is always initialized to "0".
-// TODO: make this more functional, maps, filter, etc.
-generateStudentGraphData = function(studentID, tdfname, optionBool) {
-		var userData = UserMetrics.find({'_id' : studentID}).fetch();
-		var itemData = [];
-		var itemCount = [];
-		var corCount = 0;
-		///console.log(_.chain(userData[0]).prop(tdfname).value());
-		_.chain(userData[0]).prop(tdfname).each( function(item) {
-				//Each item in the TDF
-				for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
-						if (itemCount.length <= i) {
-								itemCount.push(0);
-								itemData.push(0);
-						}
-						itemCount[i]++;
-						if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
-								corCount++;
-								if (optionBool) {
-										itemData[i]++;
-								} else {
-										itemData[i] += item.answerTimes[i];
-
-								}
-						}
-				}
-
-		});
-		///console.log(displayify(itemData));
-		///console.log(displayify(itemCount));
-		// Now we have the data, turn it into averages, replacing itemData's values with the averages
-		for (var i=0; i<itemData.length; i++) {
-				if (optionBool && (!(corCount === 0))) {
-						itemData[i] /= itemCount[i];
-				} else if (!(corCount === 0)) {
-						itemData[i] /= corCount;
-				} else {
-						itemData[i] = 0;
-				}
-				
-		}
-		// Quick-and-dirty checking to make sure that the last element isn't because of 0 attempts made.
-		if (_.last(itemCount) === 0) {
-				itemData.pop();
-		}
-		// if (itemData[itemData.length-1] == 0) {
-		// 		itemData.pop();
-		// }
-		// console.log(displayify(itemData));
-		return itemData;
-}
-
-findKey = function(obj, value) {
-  var key;
-
-  _.each(obj, function (v, k) {
-    if (v === value) {
-      key = k;
-    }
-  });
-
-  return key;
-}
-
-//INPUT: studentID, an identifying ID for the student, tdfname, the Mongo-friendly database name for the current TDF.
-//OUTPUT: an array of objects, where each object represents an item the student has attempted, containing that item's metrics for that student.
-//generateStudentPerItemData = function(studentID, tdfname) {
-generateStudentPerItemData = function(studentID, tdfname, currStim) {		
-		//Fetch the data from the db
-		var userDataQuery = {};
-		userDataQuery[tdfname] = {$exists: true};
-		var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
-
-		// Get current items for associating the names with the IDs
-		var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
-		///console.log(userData);
-		///console.log(userData[0][tdfname]);
-		var itemStats = [];
-		var corCount;
-		var corTime ;
-		var totCount;
-		var itemToPush;
-		var itemIDList = _.keys(userData[0][tdfname]);
-		_.chain(userData[0]).prop(tdfname).each(function(item) {
-				///console.log(displayify(item));
-				corCount = 0;
-				totCount = 0;
-				corTime = 0;
-				//Iterate over the item's correctness data
-				for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
-						totCount++;
-						if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
-								corCount++;
-								corTime += item.answerTimes[i];
-						}
-				}
-				// TODO Figure out how to associate ID to the item.
-				itemToPush = {};
-				itemToPush['correctRatio'] = Math.round((corCount/totCount) * 100) / 100;
-				itemToPush['avgLatency'] = _.isNaN(corTime/corCount)? 0: corTime/corCount;
-				itemStats.push(itemToPush);
-		});
-		// Poor, hack-y way to associate the ID of the item to the object in the array.
-		for (var i=0; i<itemStats.length; i++) {
-				itemStats[i]['itemID'] = itemIDList[i];
-				itemStats[i]['name'] = cluster[itemIDList[i]].display[0];
-		}
-		///console.log(itemStats);
-		return itemStats;
-}
-
-
-																		
 // Useful function for display and debugging objects: returns an OK JSON
 // pretty-print textual representation of the object
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
@@ -437,4 +140,287 @@ displayify = function(obj) {
     }
 
     return JSON.stringify(dispObj, null, 2);
+};
+
+
+// MoFaCTs-4882's Additions
+// TODO: look to move these into their module
+// TODO: good opportunity to clean up our global modules
+
+// Moved function from within the file to here to modularize code.
+// This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
+//INPUT: score, a float between 0 and 1
+//OUTPUT: an integer, which corresponds here to the index in the color array indicating score's correctness
+determineColorIndex = function(score) {
+    if (score == 1) {
+            return colors.length-1;
+    } else {
+            return Math.floor(score/(1/colors.length));
+    }
+};
+
+// Moved this function out to accommodate the NaN situations
+//INPUT: a score, a float between 0 and 1
+//OUTPUT: a hex color code corresponding to the item's desired color.
+determineButtonColor = function(score) {
+    return (isNaN(score)) ? "#b0b09b" : colors[determineColorIndex(score)];
+};
+
+// Simple function to randomly assign a value between 0 and 1, to 2 digits. E.g. .42, 1.00, .28
+randomScore = function() {
+    return Math.floor(Math.random()*100)/100;
+};
+
+// Moved from client view to here for code separation purposes.
+//INPUT: user, which is an object containing an _id which corresponds to a doc in UserMetrics, and the name of the relevant Tdf (in Mongo-recognizable format)
+//OUTPUT: a ratio which is the user's average score across all items for the client's current system.
+computeUserScore = function(user, tdfname) {
+    var indivUserQuery = {'_id': user._id};
+    // We use findOne because there should only ever be one user with any given id.
+    var indivUser = UserMetrics.findOne(indivUserQuery);
+    var askCount = 0;
+    var correctCount = 0;
+    _.chain(indivUser).prop(tdfname).each( function (item) {
+            askCount = askCount + _.chain(item).prop('questionCount').intval().value();
+            correctCount = correctCount + _.chain(item).prop('correctAnswerCount').intval().value();
+    });
+    return correctCount/askCount;
+};
+
+// Simple function for taking the filename of the given Tdf and converting it to the format Mongo recognizes.
+buildTdfDBName = function (tdfname) {
+    return tdfname.replace(".", "_");
+};
+
+// INPUT: an item from a Tdf, the name of that tdf (in Mongo-recognizable format)
+// OUTPUT: a ratio to 2 decimal places which is the average score of all students who have attempted this item
+computeItemAverage = function(item, tdfname) {
+    var userList = UserMetrics.find().fetch();
+    //console.log(displayify(userList));
+    var askCount = 0;
+    var correctCount = 0;
+    _.chain(userList).each( function(user) {
+        var itemRef = _.chain(user).prop(tdfname).prop(item.toString()).value();
+        askCount += _.intval(itemRef.questionCount || 0);
+        correctCount += _.intval(itemRef.correctAnswerCount || 0);
+        if (item == '0') {
+            console.log(correctCount);
+            console.log(askCount);
+            console.log(displayify(_.chain(user).prop(tdfname).prop(item.toString()).value()));
+        }
+    });
+    return correctCount/askCount;
+};
+
+// Simple function to generate the numbers from 1..end
+generateNaturals = function(end) {
+    var returnArray = [];
+    for (var i = 0; i < end; i++) {
+        returnArray[i] = i;
+    }
+    return returnArray;
+};
+
+// TODO: they shouldn't need this... and is it overriding another function?
+//Generates the cluster for template helpers
+getCluster = function(){
+    try {
+        return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
+    }
+    catch(e){
+        console.log(e);
+    }
+};
+
+//INPUT: itemID, an integer which represents the index of the item in the cluster
+//       tdfname, a string representing the Mongo-friendly current TDF
+//       optionBool, a boolean, where true is for correctness data, false is for latency data
+//OUTPUT: an array containing average values for each "opportunity", where the opportunity is the index in the array
+generateItemGraphData = function(itemID, tdfname, optionBool) {
+    var itemQuery = {};
+    var itemData = []; //either correctness or latency, hence 'data'
+    var itemCount = [];
+    var corCount = 0;
+    itemQuery[tdfname+"."+itemID] = {$exists: true};
+    var scoreArray = UserMetrics.find(itemQuery).fetch();
+    _.chain(scoreArray).each(function (user) {
+        var itemCurrUser = _.chain(user).prop(tdfname).prop(itemID).value();
+        var questionCount = _.intval(itemCurrUser.questionCount || 0);
+        for (var i = 0; i < questionCount; i++) {
+            if (itemCount.length <= i) {
+                itemCount.push(0);
+                itemData.push(0);
+            }
+            itemCount[i]++;
+            if (!(_.isUndefined(itemCurrUser.answerCorrect)) && itemCurrUser.answerCorrect[i]) {
+                corCount++;
+                if (optionBool) {
+                    itemData[i]++;
+                } else {
+                    itemData[i] += itemCurrUser.answerTimes[i];
+                }
+            }
+        }
+    });
+
+    for (var i = 0; i < itemData.length; i++) {
+        if (optionBool && corCount !== 0) {
+            itemData[i] /= itemCount[i];
+        } else if (corCount !== 0) {
+            itemData[i] /= corCount;
+        } else {
+            itemData[i] = 0;
+        }
+    }
+    if (_.last(itemCount) === 0) {
+            itemData.pop();
+    }
+    return itemData;
+};
+
+generateClassGraphData = function(tdfname, optionBool) {
+    var userDataQuery = {};
+    var userData = [];
+    userDataQuery[tdfname] = {$exists: true};
+    userData = UserMetrics.find(userDataQuery).fetch();
+    var classData = [];
+    var classCount = [];
+    var corCount = 0;
+    _.chain(userData).each(function(user) {
+        _.chain(user).prop(tdfname).each(function(item) {
+            for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
+                if (classCount.length <= i) {
+                    //console.log("Increasing data array size by 1 from "+classCount.length);
+                    classCount.push(0);
+                    classData.push(0);
+                }
+                classCount[i]++;
+                if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+                    corCount++;
+                    if (optionBool) {
+                        classData[i]++;
+                    } else {
+                        classData[i] += item.answerTimes[i];
+                    }
+                }
+            }
+        });
+    });
+
+    //We now have the raw data, and here we convert the classData to the averages.
+    for (var i=0; i<classData.length; i++) {
+        if (optionBool && corCount !== 0) {
+            //console.log("Count: "+classCount[i]);
+            classData[i] /= classCount[i];
+        } else if (corCount !== 0) {
+            classData[i] /= corCount;
+        } else if (classCount[i] === 0) {
+            classData[i] = 0;
+        }
+    }
+    if (_.last(classCount) === 0) {
+        //console.log("Last datapoint had 0 attempts, we're removing it.")
+        classData.pop();
+    }
+    //console.log(classData);
+    return classData;
+};
+
+//INPUT: studentID, a string representing the ID of the student to retrieve the data from, tdfName, a string representing the name of the current TDF (in Mongo-recognizable format), optionBool, which is false for latency, true for correctness
+//OUPUT: an array containing values with indices representing the 'opportunity' number. The 0th slot is always initialized to "0".
+generateStudentGraphData = function(studentID, tdfname, optionBool) {
+    var userData = UserMetrics.find({'_id' : studentID}).fetch();
+    var itemData = [];
+    var itemCount = [];
+    var corCount = 0;
+
+    _.chain(userData[0]).prop(tdfname).each(function(item) {
+        //Each item in the TDF
+        var questionCount = _.intval(item.questionCount || 0);
+        for (var i = 0; i < questionCount; i++) {
+            if (itemCount.length <= i) {
+                itemCount.push(0);
+                itemData.push(0);
+            }
+            itemCount[i]++;
+            if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+                corCount++;
+                if (optionBool) {
+                    itemData[i]++;
+                } else {
+                    itemData[i] += item.answerTimes[i];
+                }
+            }
+        }
+    });
+
+    // Now we have the data, turn it into averages, replacing itemData's values with the averages
+    for (var i = 0; i < itemData.length; i++) {
+        if (optionBool && corCount !== 0) {
+            itemData[i] /= itemCount[i];
+        } else if (corCount !== 0) {
+            itemData[i] /= corCount;
+        } else {
+            itemData[i] = 0;
+        }
+    }
+
+    // Quick-and-dirty checking to make sure that the last element isn't because of 0 attempts made.
+    if (_.last(itemCount) === 0) {
+        itemData.pop();
+    }
+    return itemData;
+};
+
+findKey = function(obj, value) {
+    var key;
+
+    _.each(obj, function (v, k) {
+        if (v === value) {
+            key = k;
+        }
+    });
+
+    return key;
+};
+
+//INPUT: studentID, an identifying ID for the student, tdfname, the Mongo-friendly database name for the current TDF.
+//OUTPUT: an array of objects, where each object represents an item the student has attempted, containing that item's metrics for that student.
+//generateStudentPerItemData = function(studentID, tdfname) {
+generateStudentPerItemData = function(studentID, tdfname, currStim) {
+    //Fetch the data from the db
+    var userDataQuery = {};
+    userDataQuery[tdfname] = {$exists: true};
+    var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
+
+    var itemIDList = _.keys(userData[0][tdfname]);
+    var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
+
+    // Get current items for associating the names with the IDs
+    var itemStats = [];
+    _.chain(userData[0]).prop(tdfname).each(function(item) {
+        var corCount = 0;
+        var totCount = 0;
+        var corTime = 0;
+        //Iterate over the item's correctness data
+        var questionCount = _.intval(item.questionCount || 0);
+        for (var i = 0; i < questionCount; i++) {
+            totCount++;
+            if (!(_.isUndefined(item.answerCorrect)) && item.answerCorrect[i]) {
+                corCount++;
+                corTime += item.answerTimes[i];
+            }
+        }
+
+        var newIndex = itemStats.length;
+        var itemID = itemIDList[newIndex];
+        itemStats.push({
+            'correctRatio': Math.round((corCount/totCount) * 100) / 100,
+            'avgLatency': _.isNaN(corTime/corCount) ? 0 : corTime/corCount,
+            'itemID': itemID,
+            'name': _.first(cluster[itemID].display),
+        });
+    });
+
+    return itemStats;
 };
