@@ -33,7 +33,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
                 <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>5</templatesrepeated>
+                <templatesrepeated>3</templatesrepeated>
                 <group>0,b,t,0 0,b,t,0 0,b,t,0            </group>
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3         </initialpositions>
@@ -48,7 +48,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
         <unitinstructions>Here comes the optimized learning of the rules of bridge.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-21</clusterlist>
+            <clusterlist>0-70</clusterlist>
         </learningsession>
 
         <deliveryparams>
