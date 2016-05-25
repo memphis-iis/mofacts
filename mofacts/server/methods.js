@@ -93,11 +93,11 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
     };
 }
 
-
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
     var userId = this.userId;
+    var allUsers = Meteor.users.find();
 
     // Currently allow people to see all stats
     // TODO: change this based on user's role
@@ -120,6 +120,11 @@ Meteor.publish(null, function () {
 
     return defaultData;
 });
+
+Meteor.publish('allUsers', function () {
+		return Meteor.users.find({}, {fields: {username: 1}});
+});
+
 
 //Config for scheduled jobs - the start command is at the end of
 //Meteor.startup below

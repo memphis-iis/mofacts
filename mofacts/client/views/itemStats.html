@@ -1,0 +1,107 @@
+<head>
+<style>
+.graphs {
+   position: relative;
+}
+
+[data-x-axis]::before {
+   content: attr(data-x-axis);
+   position: absolute;
+   width: 100%;
+   text-align: center;
+   left: 0;
+   bottom: 0;
+   font-size: 1.45rem;
+   color: rgba(0, 0, 0, 1);
+   font-weight: bolder;
+}
+
+[data-y-axis]::after {
+   content: attr(data-y-axis);
+   position: absolute;
+   top: 40%;
+   left: -60px;
+   font-size: 1.45rem;
+   color: rgba(0, 0, 0, 1);
+   text-align: center;
+   transform: rotate(-90deg)translateY(50%);
+   font-weight: bolder;
+}
+
+.ct-label {
+   fill: rgba(0, 0, 0, 1);
+   color: rgba(0, 0, 0, 1);
+   font-size: 1.45rem;
+   line-height: 1;
+   font-weight: bolder;
+}
+
+.ct-series-a .ct-line,
+.ct-series-a .ct-point {
+   stroke: #C40233;
+}
+</style>
+</head>
+
+<template name="itemStats">
+   <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
+      <div class="container">
+         <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+               <span class="sr-only">Toggle navigation</span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+               <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">MoFaCTS
+               {{#if isInRole 'admin,teacher'}}
+               {{#if isInRole 'admin'}} Administrator {{/if}}
+               {{#if isInRole 'teacher'}} Teacher {{/if}}
+               {{else}}
+               Student
+               {{/if}}
+            </a>
+         </div>  <!-- close header -->
+
+         <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="nav navbar-nav navbar-right">
+               <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
+                  <ul class="dropdown-menu">
+                     <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
+                     <li><a href="#" class="allItemsLink">Progress</a></li>
+                     <li class="divider"></li>
+                     <li><a href="#" class="logoutLink">Logout</a></li>
+                  </ul>
+               </li>
+            </ul>
+         </div>  <!-- close navbar-collapse -->
+      </div>  <!-- close container -->
+   </nav>  <!-- close nav -->
+
+   <div class="container">
+      <div class="titleContainer" style="display:block">
+         <div class="title" id="reptitionLatencyTitle" style="display:block">
+            <legend class="text-center">Latency / Reptition</legend>
+         </div>
+         <div class="title" id="reptitionCorrectnessTitle" style="display:none">
+            <legend class="text-center">Correctness / Reptition</legend>
+         </div>
+         <div class="wrapper" style="text-align:center">
+            <input type="submit" class="switchButton" value="Change Graph">
+         </div>
+         <br>
+      </div>
+      <div class="graphs">
+         <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Latency (ms)" id="reptitionLatency" style="display:block"></div>
+         <div class="ct-chart .ct-major-twelfth" data-x-axis="Repetition" data-y-axis="Correctness (%)" id="reptitionCorrectness" style="display:none"></div>
+      </div>
+      <div class="legend">
+         <svg height="10" width="35">
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
+            Sorry, your browser does not support inline SVG.
+         </svg> - <b>Class</b>
+      </div>
+   </div>
+
+</template>

@@ -1,6 +1,6 @@
 
 <template name="card">
-    <nav class="navbar navbar-inverse" role="navigation">
+    <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
@@ -20,6 +20,8 @@
                         <a href="" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" class="homeLink">Home</a></li>
+                            <li class="divider"></li>
+                            <li><a href="#" class="allItemsLink">Progress</a></li>
                             <li class="divider"></li>
                             <li><a href="#" class="logoutLink">Logout</a></li>
                             {{#if isInRole 'admin,teacher'}}

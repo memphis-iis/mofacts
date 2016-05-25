@@ -38,6 +38,17 @@ Template.profile.events({
         Router.go("/profile");
     },
 
+    'click .allItemsLink' : function (event) {
+        event.preventDefault();
+        Router.go("/allItems");
+    },
+
+    'click .allStudentsLink' : function (event) {
+        event.preventDefault();
+        Router.go("/allStudents");
+    },
+
+
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");
