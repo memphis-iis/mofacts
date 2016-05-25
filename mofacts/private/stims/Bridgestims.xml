@@ -1,0 +1,755 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!-- was: no XML declaration present -->
+<setspec>									
+    <clusters>	
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.478999999999998</parameter>	
+            <display>The players __________ from each other form partnerships as North‑South and East‑West.</display>	
+            <response>across</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.479299999999998</parameter>	
+            <display>Each deal consists of two parts – the __________, where the four players bid in a clockwise rotation describing their hands, the play, where the side that wins the bidding __________ tries to take the tricks necessary to fulfill their contract and scoring.</display>	
+            <response>auction</response>	
+            <parameter>-0.479249999999998</parameter>	
+            <display>Each deal consists of two parts – the auction, where the four __________ers bid in a clockwise rotation describing their hands, the __________, where the side that wins the bidding auction tries to take the tricks necessary to fulfill their contract and scoring.</display>	
+            <response>play</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.479599999999998</parameter>	
+            <display>__________ is the language of bridge.</display>	
+            <response>Bidding</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.479899999999998</parameter>	
+            <display>Its purpose is to __________ information about the strengths and weaknesses of each player’s hand to his partner.</display>	
+            <response>relay</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.480199999999999</parameter>	
+            <display>A bid consists of a __________ and a suit (spades, hearts, diamonds, clubs or notrump, a designation indicating no trump suit).</display>	
+            <response>number</response>	
+            <parameter>-0.480149999999999</parameter>	
+            <display>A bid consists of a number and a __________ (spades, hearts, diamonds, clubs or notrump, a designation indicating no trump __________).</display>	
+            <response>suit</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.480499999999999</parameter>	
+            <display>The suits are assigned value with __________ the highest, then spades, then hearts, then diamonds, and clubs the lowest.</display>	
+            <response>notrump</response>	
+            <parameter>-0.480449999999999</parameter>	
+            <display>The suits are assigned value with notrump the highest, then spades, then __________, then diamonds, and clubs the lowest.</display>	
+            <response>hearts</response>	
+            <parameter>-0.480399999999999</parameter>	
+            <display>The suits are assigned value with notrump the highest, then spades, then hearts, then __________, and clubs the lowest.</display>	
+            <response>diamonds</response>	
+            <parameter>-0.480349999999999</parameter>	
+            <display>The suits are assigned value with notrump the highest, then spades, then hearts, then diamonds, and __________ the lowest.</display>	
+            <response>clubs</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.480799999999999</parameter>	
+            <display>A __________ heart bid means the pair intends to take six tricks plus __________, or seven tricks total, with hearts as trump.</display>	
+            <response>one</response>	
+            <parameter>-0.480749999999999</parameter>	
+            <display>A one heart bid means the pair intends to take __________ tricks plus one, or seven tricks total, with hearts as trump.</display>	
+            <response>six</response>	
+            <parameter>-0.480699999999999</parameter>	
+            <display>A one heart bid means the pair intends to take six tricks __________ one, or seven tricks total, with hearts as trump.</display>	
+            <response>plus</response>	
+            <parameter>-0.480649999999999</parameter>	
+            <display>A one heart bid means the pair intends to take six tricks plus one, or __________ tricks total, with hearts as trump.</display>	
+            <response>seven</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.481099999999999</parameter>	
+            <display>In the bidding phase, the __________ makes the first call, either a pass or a bid, and the auction proceeds clockwise until it is ended by three successive players saying Pass.  </display>	
+            <response>dealer</response>	
+            <parameter>-0.481049999999999</parameter>	
+            <display>In the bidding phase, the dealer makes the __________ call, either a pass or a bid, and the auction proceeds clockwise until it is ended by three successive players saying Pass.  </display>	
+            <response>first</response>	
+            <parameter>-0.480999999999999</parameter>	
+            <display>In the bidding phase, the dealer makes the first call, either a pass or a bid, and the auction proceeds __________ until it is ended by three successive players saying Pass.  </display>	
+            <response>clockwise</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.481399999999999</parameter>	
+            <display>The final bid becomes the __________. </display>	
+            <response>contract</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.481699999999999</parameter>	
+            <display>This means that one pair has __________ to make a certain number of tricks (six plus the number indicated in the bid) in a particular suit or in notrump.</display>	
+            <response>contracted</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.481999999999999</parameter>	
+            <display>The first player to __________ the suit of the final contract – or the first to bid notrump, if that is the case – becomes the declarer.</display>	
+            <response>name</response>	
+            <parameter>-0.481949999999999</parameter>	
+            <display>The first player to name the __________ of the final contract – or the first to bid notrump, if that is the case – becomes the declarer.</display>	
+            <response>suit</response>	
+            <parameter>-0.481899999999999</parameter>	
+            <display>The first player to name the suit of the final contract – or the first to bid notrump, if that is the case – becomes the __________.</display>	
+            <response>declarer</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.482299999999999</parameter>	
+            <display>The person to the __________ of the declarer makes the opening lead, and the declarer’s partner, the dummy, places his hand face up on the table.</display>	
+            <response>left</response>	
+            <parameter>-0.482249999999999</parameter>	
+            <display>The person to the left of the __________ makes the opening lead, and the __________’s partner, the dummy, places his hand face up on the table.</display>	
+            <response>declarer</response>	
+            <parameter>-0.482199999999999</parameter>	
+            <display>The person to the left of the declarer makes the __________ lead, and the declarer’s partner, the dummy, places his hand face up on the table.</display>	
+            <response>opening</response>	
+            <parameter>-0.482149999999999</parameter>	
+            <display>The person to the left of the declarer makes the opening lead, and the declarer’s __________, the dummy, places his hand face up on the table.</display>	
+            <response>partner</response>	
+            <parameter>-0.482099999999999</parameter>	
+            <display>The person to the left of the declarer makes the opening lead, and the declarer’s partner, the __________, places his hand face up on the table.</display>	
+            <response>dummy</response>	
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.482599999999999</parameter>	
+            <display>At this point, the __________ becomes an observer while his partner, the declarer, plays the cards from his own and the __________ hand.</display>	
+            <response>dummy</response>	
+            <parameter>-0.482549999999999</parameter>	
+            <display>At this point, the dummy becomes an __________ while his partner, the declarer, plays the cards from his own and the dummy hand.</display>	
+            <response>observer</response>	
+            <parameter>-0.482499999999999</parameter>	
+            <display>At this point, the dummy becomes an observer while his partner, the __________, plays the cards from his own and the dummy hand.</display>	
+            <response>declarer</response>	
+            <parameter>-0.482449999999999</parameter>	
+            <display>At this point, the dummy becomes an observer while his partner, the declarer, __________ the cards from his own and the dummy hand.</display>	
+            <response>plays</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.482899999999999</parameter>	
+            <display>A pair __________ its contract by winning tricks equal to or more than the number bid.</display>	
+            <response>fulfills</response>	
+            <parameter>-0.482849999999999</parameter>	
+            <display>A pair fulfills its contract by winning tricks __________ to or more than the number bid.</display>	
+            <response>equal</response>	
+            <parameter>-0.482799999999999</parameter>	
+            <display>A pair fulfills its contract by winning tricks equal to or __________ than the number bid.</display>	
+            <response>more</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.483199999999999</parameter>	
+            <display>A __________ consists of four cards, one from each player’s hand, played in clockwise order.</display>	
+            <response>trick</response>	
+            <parameter>-0.483149999999999</parameter>	
+            <display>A trick consists of four cards, one from each player’s hand, played in __________ order.</display>	
+            <response>clockwise</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.483499999999999</parameter>	
+            <display>When a pair does __________ make its contract – does __________ take the tricks required by the level of the bid – there is a penalty.</display>	
+            <response>not</response>	
+            <parameter>-0.483449999999999</parameter>	
+            <display>When a pair does not make its contract – does not take the tricks required by the level of the bid – there is a __________.</display>	
+            <response>penalty</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.483799999999999</parameter>	
+            <display>__________ bridge, the original and still most popular form of contract bridge, is played for points.</display>	
+            <response>Rubber</response>	
+            <parameter>-0.483749999999999</parameter>	
+            <display>Rubber bridge, the original and still most popular form of contract bridge, is played for __________.</display>	
+            <response>points</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.484099999999999</parameter>	
+            <display>In __________ bridge, the same hands are played more than once, thereby eliminating much of the luck of the deal.</display>	
+            <response>duplicate</response>	
+            <parameter>-0.484049999999999</parameter>	
+            <display>In duplicate bridge, the same hands are played more than once, thereby __________ much of the luck of the deal.</display>	
+            <response>eliminating</response>	
+            <parameter>-0.483999999999999</parameter>	
+            <display>In duplicate bridge, the same hands are played more than once, thereby eliminating much of the __________ of the deal.</display>	
+            <response>luck</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.484399999999999</parameter>	
+            <display>__________, limited to four deals, is a faster rubber bridge game popular in clubs and homes.</display>	
+            <response>Chicago</response>	
+            <parameter>-0.484349999999999</parameter>	
+            <display>Chicago, limited to __________ deals, is a faster rubber bridge game popular in clubs and homes.</display>	
+            <response>four</response>	
+            <parameter>-0.484299999999999</parameter>	
+            <display>Chicago, limited to four deals, is a __________ rubber bridge game popular in clubs and homes.</display>	
+            <response>faster</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.484699999999999</parameter>	
+            <display>to __________ a game of bridge, draw cards to select the person to deal the cards (the dealer).</display>	
+            <response>start</response>	
+            <parameter>-0.484649999999999</parameter>	
+            <display>to start a game of bridge, __________ cards to select the person to deal the cards (the dealer).</display>	
+            <response>draw</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.484999999999999</parameter>	
+            <display>This person distributes the cards face down, in __________ rotation one at a time, until each player at the table has a hand consisting of 13 cards.</display>	
+            <response>clockwise</response>	
+            <parameter>-0.484949999999999</parameter>	
+            <display>This person distributes the cards face down, in clockwise rotation __________, until each player at the table has a hand consisting of 13 cards.</display>	
+            <response>one at a time</response>	
+            <parameter>-0.484899999999999</parameter>	
+            <display>This person distributes the cards face down, in clockwise rotation one at a time, until each player at the table has a hand consisting of __________ cards.</display>	
+            <response>13</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.485299999999999</parameter>	
+            <display>After the play of each __________ is completed, the opportunity to __________ moves around the table clockwise so that each person has a turn to __________ out the cards.</display>	
+            <response>deal</response>	
+            <parameter>-0.485249999999999</parameter>	
+            <display>After the play of each deal is completed, the opportunity to deal __________ around the table clockwise so that each person has a turn to deal out the cards.</display>	
+            <response>moves</response>	
+            <parameter>-0.485199999999999</parameter>	
+            <display>After the play of each deal is completed, the opportunity to deal moves around the table __________ so that each person has a turn to deal out the cards.</display>	
+            <response>clockwise</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.485599999999999</parameter>	
+            <display>Each partnership tries to __________ (or take) as many tricks as possible.</display>	
+            <response>win</response>	
+            <parameter>-0.485549999999999</parameter>	
+            <display>Each partnership tries to win (or take) as many __________ as possible.</display>	
+            <response>tricks</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.485899999999999</parameter>	
+            <display>In bridge the __________ of your hand comes from two main sources: high-card points and long suits.</display>	
+            <response>strength</response>	
+            <parameter>-0.485849999999999</parameter>	
+            <display>In bridge the strength of your hand comes from two main sources: __________ points and long suits.</display>	
+            <response>high-card</response>	
+            <parameter>-0.485799999999999</parameter>	
+            <display>In bridge the strength of your hand comes from two main sources: high-card points and __________ suits.</display>	
+            <response>long</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.486199999999999</parameter>	
+            <display>High-card points (HCP): Ace = __________; king = 3; queen = 2;  jack = 1.</display>	
+            <response>4</response>	
+            <parameter>-0.486149999999999</parameter>	
+            <display>High-card points (HCP): Ace = 4; king = __________; queen = 2;  jack = 1.</display>	
+            <response>3</response>	
+            <parameter>-0.486099999999999</parameter>	
+            <display>High-card points (HCP): Ace = 4; king = 3; queen = __________;  jack = 1.</display>	
+            <response>2</response>	
+            <parameter>-0.486049999999999</parameter>	
+            <display>High-card points (HCP): Ace = 4; king = 3; queen = 2;  jack = __________.</display>	
+            <response>1</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.486499999999999</parameter>	
+            <display>__________-card suit = 1; a six-card suit = 2; a seven-card suit = 3; and an eight-card suit = 4.</display>	
+            <response>Five</response>	
+            <parameter>-0.486449999999999</parameter>	
+            <display>Five-card suit = __________; a six-card suit = 2; a seven-card suit = 3; and an eight-card suit = 4.</display>	
+            <response>1</response>	
+            <parameter>-0.486399999999999</parameter>	
+            <display>Five-card suit = 1; a six-card suit = __________; a seven-card suit = 3; and an eight-card suit = 4.</display>	
+            <response>2</response>	
+            <parameter>-0.486349999999999</parameter>	
+            <display>Five-card suit = 1; a six-card suit = 2; a seven-card suit = __________; and an eight-card suit = 4.</display>	
+            <response>3</response>	
+            <parameter>-0.486299999999999</parameter>	
+            <display>Five-card suit = 1; a six-card suit = 2; a seven-card suit = 3; and an eight-card suit = __________.</display>	
+            <response>4</response>	
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.486799999999999</parameter>	
+            <display>Once you have __________ your hand, the next step is to bid according to its strength and shape.</display>	
+            <response>valued</response>	
+            <parameter>-0.486749999999999</parameter>	
+            <display>Once you have valued your hand, the next step is to __________ according to its strength and shape.</display>	
+            <response>bid</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.487099999999999</parameter>	
+            <display>The __________ has the first chance to bid.</display>	
+            <response>dealer</response>	
+            <parameter>-0.487049999999999</parameter>	
+            <display>The dealer has the __________ chance to bid.</display>	
+            <response>first</response>	
+            <parameter>-0.486999999999999</parameter>	
+            <display>The dealer has the first chance to __________.</display>	
+            <response>bid</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.487399999999999</parameter>	
+            <display>If the dealer has at least __________ high-card points in the hand and a preference for one suit over another (usually decided by the length of the suit), dealer makes a bid to let his partner know which suit he prefers.</display>	
+            <response>12</response>	
+            <parameter>-0.487349999999999</parameter>	
+            <display>If the dealer has at least 12 __________ points in the hand and a preference for one suit over another (usually decided by the length of the suit), dealer makes a bid to let his partner know which suit he prefers.</display>	
+            <response>high-card</response>	
+            <parameter>-0.487299999999999</parameter>	
+            <display>If the dealer has at least 12 high-card points in the hand and a preference for one __________ over another (usually decided by the length of the __________), dealer makes a bid to let his partner know which __________ he prefers.</display>	
+            <response>suit</response>	
+            <parameter>-0.487249999999999</parameter>	
+            <display>If the dealer has at least 12 high-card points in the hand and a preference for one suit over another (usually decided by the length of the suit), dealer makes a __________ to let his partner know which suit he prefers.</display>	
+            <response>bid</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.487699999999999</parameter>	
+            <display>If the dealer doesn’t have many high-cards and doesn’t want to make a bid, he says __________.</display>	
+            <response>pass</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.487999999999999</parameter>	
+            <display>Bids must be made according to the __________ of suits: clubs, diamonds, hearts, spades and finally notrump.</display>	
+            <response>hierarchy</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.488299999999999</parameter>	
+            <display>Thus, if 1 __________ is the opening bid, the next hand to bid must bid at least 1 diamond, the next hand at least 1 heart and so on.</display>	
+            <response>club</response>	
+            <parameter>-0.488249999999999</parameter>	
+            <display>Thus, if 1 club is the opening bid, the next hand to bid must bid at least 1 __________, the next hand at least 1 heart and so on.</display>	
+            <response>diamond</response>	
+            <parameter>-0.488199999999999</parameter>	
+            <display>Thus, if 1 club is the opening bid, the next hand to bid must bid at least 1 diamond, the next hand at least 1 __________ and so on.</display>	
+            <response>heart</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.488599999999999</parameter>	
+            <display>If declarer were to open 1 __________, the next bid would have to be 1 notrump or 2 clubs, 2 diamonds or 2 hearts.</display>	
+            <response>spade</response>	
+            <parameter>-0.488549999999999</parameter>	
+            <display>If declarer were to open 1 spade, the next bid would have to be 1 __________ or 2 clubs, 2 diamonds or 2 hearts.</display>	
+            <response>notrump</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.488899999999999</parameter>	
+            <display>After the dealer makes a decision, each player in turn has an opportunity to either __________ or pass.</display>	
+            <response>bid</response>	
+            <parameter>-0.488849999999999</parameter>	
+            <display>After the dealer makes a decision, each player in turn has an opportunity to either bid or __________.</display>	
+            <response>pass</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.489199999999999</parameter>	
+            <display>At the end of the bidding, each partnership will have decided on the suit it wants to __________ as trumps and if it has enough strength (high-cards) to bid for the privilege of naming trumps.</display>	
+            <response>name</response>	
+            <parameter>-0.489149999999999</parameter>	
+            <display>At the end of the bidding, each partnership will have decided on the __________ it wants to name as trumps and if it has enough strength (high-cards) to bid for the privilege of naming trumps.</display>	
+            <response>suit</response>	
+            <parameter>-0.489099999999999</parameter>	
+            <display>At the end of the bidding, each partnership will have decided on the suit it wants to name as trumps and __________ it has enough strength (high-cards) to bid for the privilege of naming trumps.</display>	
+            <response>if</response>	
+            <parameter>-0.489049999999999</parameter>	
+            <display>At the end of the bidding, each partnership will have decided on the suit it wants to name as trumps and if it has enough __________ (high-cards) to bid for the privilege of naming trumps.</display>	
+            <response>strength</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.489499999999999</parameter>	
+            <display>The bidding ends when __________ players in succession say pass.</display>	
+            <response>three</response>	
+            <parameter>-0.489449999999999</parameter>	
+            <display>The bidding ends when three players in succession say __________.</display>	
+            <response>pass</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.489799999999999</parameter>	
+            <display>With 0 to __________ points, pass.</display>	
+            <response>12</response>	
+            <parameter>-0.489749999999999</parameter>	
+            <display>With 0 to 12 points, __________.</display>	
+            <response>pass</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.490099999999999</parameter>	
+            <display>With __________ or more points, open the bidding with one of your longest suits.</display>	
+            <response>13</response>	
+            <parameter>-0.490049999999999</parameter>	
+            <display>With 13 or more points, __________ the bidding with one of your longest suits.</display>	
+            <response>open</response>	
+            <parameter>-0.489999999999999</parameter>	
+            <display>With 13 or more points, open the bidding with one of your __________est suits.</display>	
+            <response>long</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.490399999999999</parameter>	
+            <display>With __________ to 17 high-card points and a balanced hand (one where all suits are represented with at least two or more cards), open 1 notrump.</display>	
+            <response>15</response>	
+            <parameter>-0.490349999999999</parameter>	
+            <display>With 15 to __________ high-card points and a balanced hand (one where all suits are represented with at least two or more cards), open 1 notrump.</display>	
+            <response>17</response>	
+            <parameter>-0.490299999999999</parameter>	
+            <display>With 15 to 17 high-card points and a __________d hand (one where all suits are represented with at least two or more cards), open 1 notrump.</display>	
+            <response>balance</response>	
+            <parameter>-0.490249999999999</parameter>	
+            <display>With 15 to 17 high-card points and a balanced hand (one where all suits are represented with at least __________ or more cards), open 1 notrump.</display>	
+            <response>two</response>	
+            <parameter>-0.490199999999999</parameter>	
+            <display>With 15 to 17 high-card points and a balanced hand (one where all suits are represented with at least two or more cards), open 1 __________.</display>	
+            <response>notrump</response>	
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.490699999999999</parameter>	
+            <display>The partners on a bridge team have certain __________ to play.</display>	
+            <response>roles</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.490999999999999</parameter>	
+            <display>The __________bidder describes his hand to his partner.</display>	
+            <response>opening </response>	
+            <parameter>-0.490949999999999</parameter>	
+            <display>The opening bidder __________ his hand to his partner.</display>	
+            <response>describes</response>	
+            <parameter>-0.490899999999999</parameter>	
+            <display>The opening bidder describes his __________ to his partner.</display>	
+            <response>hand</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.491299999999999</parameter>	
+            <display>The __________ of the opening bidder becomes the captain and assumes the role of deciding on the best denomination and the best level for the final contract.</display>	
+            <response>partner</response>	
+            <parameter>-0.491249999999999</parameter>	
+            <display>The partner of the opening bidder becomes the __________ and assumes the role of deciding on the best denomination and the best level for the final contract.</display>	
+            <response>captain</response>	
+            <parameter>-0.491199999999999</parameter>	
+            <display>The partner of the opening bidder becomes the captain and assumes the role of __________ on the best denomination and the best level for the final contract.</display>	
+            <response>deciding</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.491599999999999</parameter>	
+            <display>The __________ of the opening bidder knows more about the combined strength of the two hands after hearing the opening bid and looking at his own hand.</display>	
+            <response>partner</response>	
+            <parameter>-0.491549999999999</parameter>	
+            <display>The partner of the opening bidder __________ more about the combined strength of the two hands after hearing the opening bid and looking at his own hand.</display>	
+            <response>knows</response>	
+            <parameter>-0.491499999999999</parameter>	
+            <display>The partner of the opening bidder knows more about the __________ strength of the two hands after hearing the opening bid and looking at his own hand.</display>	
+            <response>combined</response>	
+            <parameter>-0.491449999999999</parameter>	
+            <display>The partner of the opening bidder knows more about the combined __________ of the two hands after hearing the opening bid and looking at his own hand.</display>	
+            <response>strength</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.491899999999999</parameter>	
+            <display>Final bids can be __________, game contracts, or part-game contracts.</display>	
+            <response>slams</response>	
+            <parameter>-0.491849999999999</parameter>	
+            <display>Final bids can be slams, __________ contracts, or part-__________ contracts.</display>	
+            <response>game</response>	
+            <parameter>-0.491799999999999</parameter>	
+            <display>Final bids can be slams, game contracts, or __________ contracts.</display>	
+            <response>part-game</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.492199999999999</parameter>	
+            <display>They can be __________ suit (spades or hearts) contracts or minor suit (diamonds or clubs) contracts.</display>	
+            <response>major</response>	
+            <parameter>-0.492149999999999</parameter>	
+            <display>They can be major suit (spades or hearts) contracts or __________ suit (diamonds or clubs) contracts.</display>	
+            <response>minor</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.492499999999999</parameter>	
+            <display>The __________ is the player who first mentions the suit or notrump that becomes the final contract.</display>	
+            <response>declarer</response>	
+            <parameter>-0.492449999999999</parameter>	
+            <display>The declarer is the player who __________ mentions the suit or notrump that becomes the final contract.</display>	
+            <response>first</response>	
+            <parameter>-0.492399999999999</parameter>	
+            <display>The declarer is the player who first __________ the suit or notrump that becomes the final contract.</display>	
+            <response>mentions</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.492799999999999</parameter>	
+            <display>The __________ is the player to the left of the declarer who starts the play by making the opening lead, playing a card face-up on the table.</display>	
+            <response>opener</response>	
+            <parameter>-0.492749999999999</parameter>	
+            <display>The opener is the player to the __________ of the declarer who starts the play by making the opening lead, playing a card face-up on the table.</display>	
+            <response>left</response>	
+            <parameter>-0.492699999999999</parameter>	
+            <display>The opener is the player to the left of the __________ who starts the play by making the opening lead, playing a card face-up on the table.</display>	
+            <response>declarer</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.493099999999999</parameter>	
+            <display>Against __________ contracts, it is a good idea to lead your longest suit because that could be your best source of extra tricks.</display>	
+            <response>notrump</response>	
+            <parameter>-0.493049999999999</parameter>	
+            <display>Against notrump contracts, it is a good idea to __________ your longest suit because that could be your best source of extra tricks.</display>	
+            <response>lead</response>	
+            <parameter>-0.492999999999999</parameter>	
+            <display>Against notrump contracts, it is a good idea to lead your __________ suit because that could be your best source of extra tricks.</display>	
+            <response>longest</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4934</parameter>	
+            <display>With a sequence, __________ or more cards in a row, lead the top card of the sequence.</display>	
+            <response>three</response>	
+            <parameter>-0.49335</parameter>	
+            <display>With a sequence, three or __________ cards in a row, lead the top card of the sequence.</display>	
+            <response>more</response>	
+            <parameter>-0.4933</parameter>	
+            <display>With a sequence, three or more cards in a row, __________ the top card of the sequence.</display>	
+            <response>lead</response>	
+            <parameter>-0.49325</parameter>	
+            <display>With a sequence, three or more cards in a row, lead the __________ card of the sequence.</display>	
+            <response>top</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4937</parameter>	
+            <display>If you have __________ sequence, lead low.</display>	
+            <response>no</response>	
+            <parameter>-0.49365</parameter>	
+            <display>If you have no __________, lead low.</display>	
+            <response>sequence</response>	
+            <parameter>-0.4936</parameter>	
+            <display>If you have no sequence, lead __________.</display>	
+            <response>low</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.494</parameter>	
+            <display>Against __________ contracts, you can still lead the top of a sequence, but you no longer need to lead your longest suit.</display>	
+            <response>trump</response>	
+            <parameter>-0.49395</parameter>	
+            <display>Against trump contracts, you can still lead the top of a sequence, but you __________ longer need to lead your longest suit.</display>	
+            <response>no</response>	
+            <parameter>-0.4939</parameter>	
+            <display>Against trump contracts, you can still lead the top of a sequence, but you no longer need to lead your __________ suit.</display>	
+            <response>longest</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4943</parameter>	
+            <display>Your __________ have a trump suit and can usually prevent you from taking tricks in your long suit.</display>	
+            <response>opponents</response>	
+            <parameter>-0.49425</parameter>	
+            <display>Your opponents have a __________ suit and can usually prevent you from taking tricks in your long suit.</display>	
+            <response>trump</response>	
+            <parameter>-0.4942</parameter>	
+            <display>Your opponents have a trump suit and can usually __________ you from taking tricks in your long suit.</display>	
+            <response>prevent</response>	
+            <parameter>-0.49415</parameter>	
+            <display>Your opponents have a trump suit and can usually prevent you from taking tricks in your __________ suit.</display>	
+            <response>long</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4946</parameter>	
+            <display>__________ it is a good idea to lead a short suit if it isn't the trump suit.</display>	
+            <response>Sometimes</response>	
+            <parameter>-0.49455</parameter>	
+            <display>Sometimes it is a good idea to __________ a short suit if it isn't the trump suit.</display>	
+            <response>lead</response>	
+            <parameter>-0.4945</parameter>	
+            <display>Sometimes it is a good idea to lead a short suit if it __________ the trump suit.</display>	
+            <response>isn't</response>	
+            <parameter>-0.49445</parameter>	
+            <display>Sometimes it is a good idea to lead a short suit if it isn't the __________ suit.</display>	
+            <response>trump</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4949</parameter>	
+            <display>Your partnership wants to take tricks as __________ as possible.</display>	
+            <response>quickly</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4952</parameter>	
+            <display>In __________ rotation, each player has to follow suit, by playing a card of the same suit as the one led.</display>	
+            <response>clockwise</response>	
+            <parameter>-0.49515</parameter>	
+            <display>In clockwise rotation, each player has to __________ suit, by playing a card of the same suit as the one led.</display>	
+            <response>follow</response>	
+            <parameter>-0.4951</parameter>	
+            <display>In clockwise rotation, each player has to follow __________, by playing a card of the same __________ as the one led.</display>	
+            <response>suit</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4955</parameter>	
+            <display>If a __________ is led, for example, each player must play a __________ if possible.</display>	
+            <response>heart|spade|diamond|club</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4958</parameter>	
+            <display>Only if a player __________ follow suit can that person discard (i.e., play a card of another suit).</display>	
+            <response>cannot</response>	
+            <parameter>-0.49575</parameter>	
+            <display>Only if a player cannot __________ suit can that person discard (i.e., play a card of another suit).</display>	
+            <response>follow</response>	
+            <parameter>-0.4957</parameter>	
+            <display>Only if a player cannot follow suit can that person __________ (i.e., play a card of another suit).</display>	
+            <response>discard</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4961</parameter>	
+            <display>The __________ card in the suit led wins the trick for the player who played it when playing a notrump bid.</display>	
+            <response>highest</response>	
+            <parameter>-0.49605</parameter>	
+            <display>The highest card in the __________ led wins the trick for the player who played it when playing a notrump bid.</display>	
+            <response>suit</response>	
+            <parameter>-0.496</parameter>	
+            <display>The highest card in the suit led __________ the trick for the player who played it when playing a notrump bid.</display>	
+            <response>wins</response>	
+            <parameter>-0.49595</parameter>	
+            <display>The highest card in the suit led wins the trick for the player who played it when playing a __________ bid.</display>	
+            <response>notrump</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4964</parameter>	
+            <display>Having a __________ suit is something like having one suit wild.</display>	
+            <response>trump</response>	
+            <parameter>-0.49635</parameter>	
+            <display>Having a trump suit is something like having one suit __________.</display>	
+            <response>wild</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4967</parameter>	
+            <display>When a player can __________ longer follow suit, a trump can be played, and the trump is higher and more powerful than any card in the suit led.</display>	
+            <response>no</response>	
+            <parameter>-0.49665</parameter>	
+            <display>When a player can no longer follow suit, a __________ can be played, and the __________ is higher and more powerful than any card in the suit led.</display>	
+            <response>trump</response>	
+            <parameter>-0.4966</parameter>	
+            <display>When a player can no longer follow suit, a trump can be played, and the trump is __________ and more powerful than any card in the suit led.</display>	
+            <response>higher</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.497</parameter>	
+            <display>You score highest for bidding and making a grand slam of __________ clubs, __________ diamonds, __________ hearts, __________ spades, or __________ notrump where you can lose no tricks to the opponents.</display>	
+            <response>7</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4973</parameter>	
+            <display>To bid a grand __________, the partnership should have a total of 37 or more points.</display>	
+            <response>slam</response>	
+            <parameter>-0.49725</parameter>	
+            <display>To bid a grand slam, the partnership should have a total of __________ or more points.</display>	
+            <response>37</response>										
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4976</parameter>	
+            <display>The next best score comes from bidding and making a small slam of __________ clubs, __________ diamonds, __________ hearts, __________  spades, or __________NT where you can lose only one trick to the opponents.</display>	
+            <response>6</response>													
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4979</parameter>	
+            <display>To bid a __________ slam, the partnership needs a total of 33 to 36 points.</display>	
+            <response>small</response>	
+            <parameter>-0.49785</parameter>	
+            <display>To bid a small slam, the partnership needs a total of __________ to 36 points.</display>	
+            <response>33</response>	
+            <parameter>-0.4978</parameter>	
+            <display>To bid a small slam, the partnership needs a total of 33 to __________ points.</display>	
+            <response>36</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4982</parameter>	
+            <display>There are __________ game bonuses which are more attainable than a slam contract.</display>	
+            <response>five</response>	
+            <parameter>-0.49815</parameter>	
+            <display>There are five __________ bonuses which are more attainable than a slam contract.</display>	
+            <response>game</response>	
+            <parameter>-0.4981</parameter>	
+            <display>There are five game __________ which are more attainable than a slam contract.</display>	
+            <response>bonuses</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4985</parameter>	
+            <display>__________ notrump requires that you bid for and make 9 tricks, and the player needs about 26 points.</display>	
+            <response>3</response>	
+            <parameter>-0.49845</parameter>	
+            <display>3 __________ requires that you bid for and make 9 tricks, and the player needs about 26 points.</display>	
+            <response>notrump</response>	
+            <parameter>-0.4984</parameter>	
+            <display>3 notrump requires that you bid for and make __________ tricks, and the player needs about 26 points.</display>	
+            <response>9</response>	
+            <parameter>-0.49835</parameter>	
+            <display>3 notrump requires that you bid for and make 9 tricks, and the player needs about __________ points.</display>	
+            <response>26</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4988</parameter>	
+            <display>__________ spades or hearts require that you bid and make 10 tricks and can be bid when the partnership has a total of 26 points.</display>	
+            <response>4</response>	
+            <parameter>-0.49875</parameter>	
+            <display>4 __________ require that you bid and make 10 tricks and can be bid when the partnership has a total of 26 points.</display>	
+            <response>spades or hearts|hearts or spades</response>	
+            <parameter>-0.4987</parameter>	
+            <display>4 spades or hearts require that you bid and make __________ tricks and can be bid when the partnership has a total of 26 points.</display>	
+            <response>10</response>	
+            <parameter>-0.49865</parameter>	
+            <display>4 spades or hearts require that you bid and make 10 tricks and can be bid when the partnership has a total of __________ points.</display>	
+            <response>26</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4991</parameter>	
+            <display>__________ diamonds or clubs require that you bid and commit to making 11 tricks, and 29 points are suggested for a contract at this level.</display>	
+            <response>5</response>	
+            <parameter>-0.49905</parameter>	
+            <display>5 __________ require that you bid and commit to making 11 tricks, and 29 points are suggested for a contract at this level.</display>	
+            <response>diamonds or clubs|clubs or diamonds</response>	
+            <parameter>-0.499</parameter>	
+            <display>5 diamonds or clubs require that you bid and commit to making __________ tricks, and 29 points are suggested for a contract at this level.</display>	
+            <response>11</response>	
+            <parameter>-0.49895</parameter>	
+            <display>5 diamonds or clubs require that you bid and commit to making 11 tricks, and __________ points are suggested for a contract at this level.</display>	
+            <response>29</response>				
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4994</parameter>	
+            <display>Experience has shown that if you and your partner have at least __________ trump cards in your combined hands, you can usually take one more trick in a suit contract than you could in a notrump contract.</display>	
+            <response>eight</response>	
+            <parameter>-0.49935</parameter>	
+            <display>Experience has shown that if you and your partner have at least eight __________ cards in your combined hands, you can usually take one more trick in a suit contract than you could in a no__________ contract.</display>	
+            <response>trump</response>	
+            <parameter>-0.4993</parameter>	
+            <display>Experience has shown that if you and your partner have at least eight trump cards in your combined hands, you can usually take __________ trick in a suit contract than you could in a notrump contract.</display>	
+            <response>one more</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.4997</parameter>	
+            <display>In a __________ (less than a game bid), the partnership receives points for every trick made.</display>	
+            <response>part-game</response>	
+            <parameter>-0.49965</parameter>	
+            <display>In a part-game (less than a game bid), the partnership receives __________ for every trick made.</display>	
+            <response>points</response>	
+            <parameter>-0.4996</parameter>	
+            <display>In a part-game (less than a game bid), the partnership receives points for __________ trick made.</display>	
+            <response>every</response>							
+        </cluster>
+        <cluster>            <displayType>Cloze</displayType>	
+            <parameter>-0.5</parameter>	
+            <display>In a __________ the partnership is not eligible for the bonus it would get for bidding a game or a slam.</display>	
+            <response>part-game</response>	
+            <parameter>-0.49995</parameter>	
+            <display>In a part-game the partnership is __________ eligible for the bonus it would get for bidding a game or a slam.</display>	
+            <response>not</response>	
+            <parameter>-0.4999</parameter>	
+            <display>In a part-game the partnership is not eligible for the __________ it would get for bidding a game or a slam.</display>	
+            <response>bonus</response>							
+        </cluster>
+				
+        <cluster>          									
+            <display>Age?</display>									
+            <response>18-25</response>									
+            <falseResponse>26-34</falseResponse>									
+            <falseResponse>35-54</falseResponse>									
+            <falseResponse>55-64</falseResponse>									
+            <falseResponse>65 and over</falseResponse>									
+        </cluster>									
+        <cluster>           									
+            <display>Gender?</display>									
+            <response>Male</response>									
+            <falseResponse>Female</falseResponse>									
+            <falseResponse>Other</falseResponse>									
+            <falseResponse>Prefer not to answer</falseResponse>									
+        </cluster>									
+        <cluster>        									
+            <display>Which is the highest level of education you have completed?</display>									
+            <response>Less than High School</response>									
+            <falseResponse>High School or GED</falseResponse>									
+            <falseResponse>Some College</falseResponse>									
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>									
+            <falseResponse>Graduate Degree</falseResponse>									
+        </cluster>									
+       								
+    </clusters>									
+</setspec>									
