@@ -147,23 +147,33 @@ displayify = function(obj) {
 // TODO: look to move these into their module
 // TODO: good opportunity to clean up our global modules
 
-// Moved function from within the file to here to modularize code.
-// This function determines a score's correctness. Since it operates off colors.length, it is size-agnostic provided colors is sorted from 0->bad, ..., n->good
-//INPUT: score, a float between 0 and 1
-//OUTPUT: an integer, which corresponds here to the index in the color array indicating score's correctness
-determineColorIndex = function(score) {
-    if (score == 1) {
-            return colors.length-1;
-    } else {
-            return Math.floor(score/(1/colors.length));
-    }
-};
 
 // Moved this function out to accommodate the NaN situations
 //INPUT: a score, a float between 0 and 1
 //OUTPUT: a hex color code corresponding to the item's desired color.
 determineButtonColor = function(score) {
-    return (isNaN(score)) ? "#b0b09b" : colors[determineColorIndex(score)];
+    // The colors used to gradient the buttons based on correctness scores.
+    // They need to be sorted with the most wrong color first, and the most
+    // right color last. The current schema is bad=red, good=blue. Also notice
+    // that we return a special color if score is NaN.
+    var colors = [
+        "#800000", "#990000", "#b10000", "#cc0000", "#e60000", "#ff0000", "#ff1a1a", "#ff3333", "#ff4d4d", "#ff6666",
+        "#6666ff", "#4d4dff", "#3333ff", "#1a1aff", "#0000ff", "#0000e6", "#0000cc", "#0000b3", "#000099", "#000080"
+    ];
+
+    if (isNaN(score)) {
+        return "#b0b09b";
+    }
+
+    var colorIndex;
+    if (score == 1) {
+        colorIndex = colors.length - 1;
+    }
+    else {
+        colorIndex = Math.floor(score / (1.0 / colors.length));
+    }
+
+    return colors[colorIndex];
 };
 
 // Simple function to randomly assign a value between 0 and 1, to 2 digits. E.g. .42, 1.00, .28
@@ -219,17 +229,6 @@ generateNaturals = function(end) {
         returnArray[i] = i;
     }
     return returnArray;
-};
-
-// TODO: they shouldn't need this... and is it overriding another function?
-//Generates the cluster for template helpers
-getCluster = function(){
-    try {
-        return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
-    }
-    catch(e){
-        console.log(e);
-    }
 };
 
 //INPUT: itemID, an integer which represents the index of the item in the cluster

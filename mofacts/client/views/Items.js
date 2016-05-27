@@ -8,15 +8,19 @@ Template.Items.helpers({
         }
     },
 
-    //Calls the getCluster() from the globalHelpers where it returns the stim cluster.
-    //Then the necessary information is generated for the item which is used by the html file.
-    //Each object is sent to an array where the spacebars loop iterates over the array populating the buttons.
+    // Generate the necessary information from the stim cluster array. Each
+    // object is sent to an array where the spacebars loop iterates over the
+    // array populating the buttons.
     items: function(){
-        cluster = getCluster();
-        var buttons = [];
+        var cluster = _.chain(Stimuli.findOne({fileName: getCurrentStimName()}))
+            .prop("stimuli")
+            .prop("setspec")
+            .prop("clusters").first()
+            .prop("cluster")
+            .value();
 
-        cluster.forEach(function(item){
-            var itemId = _.indexOf(cluster, item);
+        var buttons = [];
+        _.each(cluster, function(item, itemId){
             item.score = computeItemAverage(itemId, buildTdfDBName(getCurrentTdfName()));
 
             item.itemId = itemId;
@@ -25,14 +29,14 @@ Template.Items.helpers({
             item.response = item.response[0];
             if (isNaN(item.score)){
                 item.clickable = false;
-            }else{
+            }
+            else{
                 item.clickable = true;
             }
 
             buttons.push(item);
-
         });
-        
+
         return buttons;
     }
 
@@ -68,8 +72,8 @@ Template.Items.events({
     },
 
     'click .stimButton' : function (event) {
-		var target = $(event.currentTarget);
-		Session.set('currItem', event.target.id); 
+        var target = $(event.currentTarget);
+        Session.set('currItem', event.target.id);
         event.preventDefault();
         Router.go('/itemStats');
     },
@@ -84,9 +88,7 @@ Template.Items.events({
             document.getElementById("itemButtonContainer1").style.display = "none";
             document.getElementById("itemButtonContainer2").style.display = "block";
         }
-                
+
     }
 
 });
-
-

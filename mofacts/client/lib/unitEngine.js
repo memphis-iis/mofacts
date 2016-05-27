@@ -411,12 +411,12 @@ function modelUnitEngine() {
     // Calculate current card probabilities for every card - see selectNextCard
     // the actual card/stim (cluster/version) selection
     function calculateCardProbabilities() {
-        // Note that we use a "flat" probability structure - this is faster than
-        // a loop over our nested data structure, but it also gives us more readable
+        // We use a "flat" probability structure - this is faster than a loop
+        // over our nested data structure, but it also gives us more readable
         // code when we're setting something per stimulus
         var probs = cardProbabilities.probs;
         for (var i = 0; i < probs.length; ++i) {
-            // NOTE: card.canUse is true if and only if it is in the clusterlist
+            // card.canUse is true if and only if it is in the clusterlist
             // for the current unit. You could just return here if these clusters
             // should be ignored (or do nothing if they should be included below)
             var parms = calculateSingleProb(probs[i]);
