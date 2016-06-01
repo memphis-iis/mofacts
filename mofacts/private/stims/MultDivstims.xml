@@ -1,0 +1,651 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: no XML declaration present -->
+<setspec>
+    <clusters>
+        <cluster>	
+            <parameter>-0.490050000000001</parameter>	
+            <display>1 × 1 =</display>	
+            <response>1</response>			
+            <parameter>-0.490100000000001</parameter>	
+            <display>1 ÷ 1 =</display>	
+            <response>1</response>	
+            <parameter>-0.490150000000001</parameter>	
+            <display>1 × 2 =</display>	
+            <response>2</response>			
+            <parameter>-0.490200000000001</parameter>	
+            <display>2 ÷ 1 =</display>	
+            <response>2</response>	
+            <parameter>-0.490250000000001</parameter>	
+            <display>1 × 3 =</display>	
+            <response>3</response>			
+            <parameter>-0.490300000000001</parameter>	
+            <display>3 ÷ 1 =</display>	
+            <response>3</response>	
+            <parameter>-0.490350000000001</parameter>	
+            <display>1 × 4 =</display>	
+            <response>4</response>			
+            <parameter>-0.490400000000001</parameter>	
+            <display>4 ÷ 1 =</display>	
+            <response>4</response>	
+            <parameter>-0.490450000000001</parameter>	
+            <display>1 × 5 =</display>	
+            <response>5</response>			
+            <parameter>-0.490500000000001</parameter>	
+            <display>5 ÷ 1 =</display>	
+            <response>5</response>	
+            <parameter>-0.490550000000001</parameter>	
+            <display>1 × 6 =</display>	
+            <response>6</response>			
+            <parameter>-0.490600000000001</parameter>	
+            <display>6 ÷ 1 =</display>	
+            <response>6</response>	
+            <parameter>-0.490650000000001</parameter>	
+            <display>1 × 7 =</display>	
+            <response>7</response>			
+            <parameter>-0.490700000000001</parameter>	
+            <display>7 ÷ 1 =</display>	
+            <response>7</response>	
+            <parameter>-0.490750000000001</parameter>	
+            <display>1 × 8 =</display>	
+            <response>8</response>			
+            <parameter>-0.490800000000001</parameter>	
+            <display>8 ÷ 1 =</display>	
+            <response>8</response>	
+            <parameter>-0.490850000000001</parameter>	
+            <display>1 × 9 =</display>	
+            <response>9</response>			
+            <parameter>-0.490900000000001</parameter>	
+            <display>9 ÷ 1 =</display>	
+            <response>9</response>	
+            <parameter>-0.490950000000001</parameter>	
+            <display>1 × 10 =</display>	
+            <response>10</response>			
+            <parameter>-0.491000000000001</parameter>	
+            <display>10 ÷ 1 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.491050000000001</parameter>	
+            <display>2 × 1 =</display>	
+            <response>2</response>			
+            <parameter>-0.491100000000001</parameter>	
+            <display>2 ÷ 2 =</display>	
+            <response>1</response>	
+            <parameter>-0.491150000000001</parameter>	
+            <display>2 × 2 =</display>	
+            <response>4</response>			
+            <parameter>-0.491200000000001</parameter>	
+            <display>4 ÷ 2 =</display>	
+            <response>2</response>	
+            <parameter>-0.491250000000001</parameter>	
+            <display>2 × 3 =</display>	
+            <response>6</response>			
+            <parameter>-0.491300000000001</parameter>	
+            <display>6 ÷ 2 =</display>	
+            <response>3</response>	
+            <parameter>-0.491350000000001</parameter>	
+            <display>2 × 4 =</display>	
+            <response>8</response>			
+            <parameter>-0.491400000000001</parameter>	
+            <display>8 ÷ 2 =</display>	
+            <response>4</response>	
+            <parameter>-0.491450000000001</parameter>	
+            <display>2 × 5 =</display>	
+            <response>10</response>			
+            <parameter>-0.491500000000001</parameter>	
+            <display>10 ÷ 2 =</display>	
+            <response>5</response>	
+            <parameter>-0.491550000000001</parameter>	
+            <display>2 × 6 =</display>	
+            <response>12</response>			
+            <parameter>-0.491600000000001</parameter>	
+            <display>12 ÷ 2 =</display>	
+            <response>6</response>	
+            <parameter>-0.491650000000001</parameter>	
+            <display>2 × 7 =</display>	
+            <response>14</response>			
+            <parameter>-0.491700000000001</parameter>	
+            <display>14 ÷ 2 =</display>	
+            <response>7</response>	
+            <parameter>-0.491750000000001</parameter>	
+            <display>2 × 8 =</display>	
+            <response>16</response>			
+            <parameter>-0.491800000000001</parameter>	
+            <display>16 ÷ 2 =</display>	
+            <response>8</response>	
+            <parameter>-0.491850000000001</parameter>	
+            <display>2 × 9 =</display>	
+            <response>18</response>			
+            <parameter>-0.491900000000001</parameter>	
+            <display>18 ÷ 2 =</display>	
+            <response>9</response>	
+            <parameter>-0.491950000000001</parameter>	
+            <display>2 × 10 =</display>	
+            <response>20</response>			
+            <parameter>-0.492000000000001</parameter>	
+            <display>20 ÷ 2 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.492050000000001</parameter>	
+            <display>3 × 1 =</display>	
+            <response>3</response>			
+            <parameter>-0.492100000000001</parameter>	
+            <display>3 ÷ 3 =</display>	
+            <response>1</response>	
+            <parameter>-0.492150000000001</parameter>	
+            <display>3 × 2 =</display>	
+            <response>6</response>			
+            <parameter>-0.492200000000001</parameter>	
+            <display>6 ÷ 3 =</display>	
+            <response>2</response>	
+            <parameter>-0.492250000000001</parameter>	
+            <display>3 × 3 =</display>	
+            <response>9</response>			
+            <parameter>-0.492300000000001</parameter>	
+            <display>9 ÷ 3 =</display>	
+            <response>3</response>	
+            <parameter>-0.492350000000001</parameter>	
+            <display>3 × 4 =</display>	
+            <response>12</response>			
+            <parameter>-0.492400000000001</parameter>	
+            <display>12 ÷ 3 =</display>	
+            <response>4</response>	
+            <parameter>-0.492450000000001</parameter>	
+            <display>3 × 5 =</display>	
+            <response>15</response>			
+            <parameter>-0.492500000000001</parameter>	
+            <display>15 ÷ 3 =</display>	
+            <response>5</response>	
+            <parameter>-0.492550000000001</parameter>	
+            <display>3 × 6 =</display>	
+            <response>18</response>			
+            <parameter>-0.492600000000001</parameter>	
+            <display>18 ÷ 3 =</display>	
+            <response>6</response>	
+            <parameter>-0.492650000000001</parameter>	
+            <display>3 × 7 =</display>	
+            <response>21</response>			
+            <parameter>-0.492700000000001</parameter>	
+            <display>21 ÷ 3 =</display>	
+            <response>7</response>	
+            <parameter>-0.492750000000001</parameter>	
+            <display>3 × 8 =</display>	
+            <response>24</response>			
+            <parameter>-0.492800000000001</parameter>	
+            <display>24 ÷ 3 =</display>	
+            <response>8</response>	
+            <parameter>-0.492850000000001</parameter>	
+            <display>3 × 9 =</display>	
+            <response>27</response>			
+            <parameter>-0.492900000000001</parameter>	
+            <display>27 ÷ 3 =</display>	
+            <response>9</response>	
+            <parameter>-0.492950000000001</parameter>	
+            <display>3 × 10 =</display>	
+            <response>30</response>			
+            <parameter>-0.493000000000001</parameter>	
+            <display>30 ÷ 3 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.493050000000001</parameter>	
+            <display>4 × 1 =</display>	
+            <response>4</response>			
+            <parameter>-0.493100000000001</parameter>	
+            <display>4 ÷ 4 =</display>	
+            <response>1</response>	
+            <parameter>-0.493150000000001</parameter>	
+            <display>4 × 2 =</display>	
+            <response>8</response>			
+            <parameter>-0.493200000000001</parameter>	
+            <display>8 ÷ 4 =</display>	
+            <response>2</response>	
+            <parameter>-0.493250000000001</parameter>	
+            <display>4 × 3 =</display>	
+            <response>12</response>			
+            <parameter>-0.493300000000001</parameter>	
+            <display>12 ÷ 4 =</display>	
+            <response>3</response>	
+            <parameter>-0.493350000000001</parameter>	
+            <display>4 × 4 =</display>	
+            <response>16</response>			
+            <parameter>-0.493400000000001</parameter>	
+            <display>16 ÷ 4 =</display>	
+            <response>4</response>	
+            <parameter>-0.493450000000001</parameter>	
+            <display>4 × 5 =</display>	
+            <response>20</response>			
+            <parameter>-0.493500000000001</parameter>	
+            <display>20 ÷ 4 =</display>	
+            <response>5</response>	
+            <parameter>-0.493550000000001</parameter>	
+            <display>4 × 6 =</display>	
+            <response>24</response>			
+            <parameter>-0.493600000000001</parameter>	
+            <display>24 ÷ 4 =</display>	
+            <response>6</response>	
+            <parameter>-0.493650000000001</parameter>	
+            <display>4 × 7 =</display>	
+            <response>28</response>			
+            <parameter>-0.493700000000001</parameter>	
+            <display>28 ÷ 4 =</display>	
+            <response>7</response>	
+            <parameter>-0.493750000000001</parameter>	
+            <display>4 × 8 =</display>	
+            <response>32</response>			
+            <parameter>-0.493800000000001</parameter>	
+            <display>32 ÷ 4 =</display>	
+            <response>8</response>	
+            <parameter>-0.493850000000001</parameter>	
+            <display>4 × 9 =</display>	
+            <response>36</response>			
+            <parameter>-0.493900000000001</parameter>	
+            <display>36 ÷ 4 =</display>	
+            <response>9</response>	
+            <parameter>-0.493950000000001</parameter>	
+            <display>4 × 10 =</display>	
+            <response>40</response>			
+            <parameter>-0.494000000000001</parameter>	
+            <display>40 ÷ 4 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.494050000000001</parameter>	
+            <display>5 × 1 =</display>	
+            <response>5</response>			
+            <parameter>-0.494100000000001</parameter>	
+            <display>5 ÷ 5 =</display>	
+            <response>1</response>	
+            <parameter>-0.494150000000001</parameter>	
+            <display>5 × 2 =</display>	
+            <response>10</response>			
+            <parameter>-0.494200000000001</parameter>	
+            <display>10 ÷ 5 =</display>	
+            <response>2</response>	
+            <parameter>-0.494250000000001</parameter>	
+            <display>5 × 3 =</display>	
+            <response>15</response>			
+            <parameter>-0.494300000000001</parameter>	
+            <display>15 ÷ 5 =</display>	
+            <response>3</response>	
+            <parameter>-0.494350000000001</parameter>	
+            <display>5 × 4 =</display>	
+            <response>20</response>			
+            <parameter>-0.494400000000001</parameter>	
+            <display>20 ÷ 5 =</display>	
+            <response>4</response>	
+            <parameter>-0.494450000000001</parameter>	
+            <display>5 × 5 =</display>	
+            <response>25</response>			
+            <parameter>-0.494500000000001</parameter>	
+            <display>25 ÷ 5 =</display>	
+            <response>5</response>	
+            <parameter>-0.494550000000001</parameter>	
+            <display>5 × 6 =</display>	
+            <response>30</response>			
+            <parameter>-0.494600000000001</parameter>	
+            <display>30 ÷ 5 =</display>	
+            <response>6</response>	
+            <parameter>-0.494650000000001</parameter>	
+            <display>5 × 7 =</display>	
+            <response>35</response>			
+            <parameter>-0.494700000000001</parameter>	
+            <display>35 ÷ 5 =</display>	
+            <response>7</response>	
+            <parameter>-0.494750000000001</parameter>	
+            <display>5 × 8 =</display>	
+            <response>40</response>			
+            <parameter>-0.494800000000001</parameter>	
+            <display>40 ÷ 5 =</display>	
+            <response>8</response>	
+            <parameter>-0.494850000000001</parameter>	
+            <display>5 × 9 =</display>	
+            <response>45</response>			
+            <parameter>-0.494900000000001</parameter>	
+            <display>45 ÷ 5 =</display>	
+            <response>9</response>	
+            <parameter>-0.494950000000001</parameter>	
+            <display>5 × 10 =</display>	
+            <response>50</response>			
+            <parameter>-0.495000000000001</parameter>	
+            <display>50 ÷ 5 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.495050000000001</parameter>	
+            <display>6 × 1 =</display>	
+            <response>6</response>			
+            <parameter>-0.495100000000001</parameter>	
+            <display>6 ÷ 6 =</display>	
+            <response>1</response>	
+            <parameter>-0.495150000000001</parameter>	
+            <display>6 × 2 =</display>	
+            <response>12</response>			
+            <parameter>-0.495200000000001</parameter>	
+            <display>12 ÷ 6 =</display>	
+            <response>2</response>	
+            <parameter>-0.495250000000001</parameter>	
+            <display>6 × 3 =</display>	
+            <response>18</response>			
+            <parameter>-0.495300000000001</parameter>	
+            <display>18 ÷ 6 =</display>	
+            <response>3</response>	
+            <parameter>-0.495350000000001</parameter>	
+            <display>6 × 4 =</display>	
+            <response>24</response>			
+            <parameter>-0.495400000000001</parameter>	
+            <display>24 ÷ 6 =</display>	
+            <response>4</response>	
+            <parameter>-0.495450000000001</parameter>	
+            <display>6 × 5 =</display>	
+            <response>30</response>			
+            <parameter>-0.4955</parameter>	
+            <display>30 ÷ 6 =</display>	
+            <response>5</response>	
+            <parameter>-0.49555</parameter>	
+            <display>6 × 6 =</display>	
+            <response>36</response>			
+            <parameter>-0.4956</parameter>	
+            <display>36 ÷ 6 =</display>	
+            <response>6</response>	
+            <parameter>-0.49565</parameter>	
+            <display>6 × 7 =</display>	
+            <response>42</response>			
+            <parameter>-0.4957</parameter>	
+            <display>42 ÷ 6 =</display>	
+            <response>7</response>	
+            <parameter>-0.49575</parameter>	
+            <display>6 × 8 =</display>	
+            <response>48</response>			
+            <parameter>-0.4958</parameter>	
+            <display>48 ÷ 6 =</display>	
+            <response>8</response>	
+            <parameter>-0.49585</parameter>	
+            <display>6 × 9 =</display>	
+            <response>54</response>			
+            <parameter>-0.4959</parameter>	
+            <display>54 ÷ 6 =</display>	
+            <response>9</response>	
+            <parameter>-0.49595</parameter>	
+            <display>6 × 10 =</display>	
+            <response>60</response>			
+            <parameter>-0.496</parameter>	
+            <display>60 ÷ 6 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.49605</parameter>	
+            <display>7 × 1 =</display>	
+            <response>7</response>			
+            <parameter>-0.4961</parameter>	
+            <display>7 ÷ 7 =</display>	
+            <response>1</response>	
+            <parameter>-0.49615</parameter>	
+            <display>7 × 2 =</display>	
+            <response>14</response>			
+            <parameter>-0.4962</parameter>	
+            <display>14 ÷ 7 =</display>	
+            <response>2</response>	
+            <parameter>-0.49625</parameter>	
+            <display>7 × 3 =</display>	
+            <response>21</response>			
+            <parameter>-0.4963</parameter>	
+            <display>21 ÷ 7 =</display>	
+            <response>3</response>	
+            <parameter>-0.49635</parameter>	
+            <display>7 × 4 =</display>	
+            <response>28</response>			
+            <parameter>-0.4964</parameter>	
+            <display>28 ÷ 7 =</display>	
+            <response>4</response>	
+            <parameter>-0.49645</parameter>	
+            <display>7 × 5 =</display>	
+            <response>35</response>			
+            <parameter>-0.4965</parameter>	
+            <display>35 ÷ 7 =</display>	
+            <response>5</response>	
+            <parameter>-0.49655</parameter>	
+            <display>7 × 6 =</display>	
+            <response>42</response>			
+            <parameter>-0.4966</parameter>	
+            <display>42 ÷ 7 =</display>	
+            <response>6</response>	
+            <parameter>-0.49665</parameter>	
+            <display>7 × 7 =</display>	
+            <response>49</response>			
+            <parameter>-0.4967</parameter>	
+            <display>49 ÷ 7 =</display>	
+            <response>7</response>	
+            <parameter>-0.49675</parameter>	
+            <display>7 × 8 =</display>	
+            <response>56</response>			
+            <parameter>-0.4968</parameter>	
+            <display>56 ÷ 7 =</display>	
+            <response>8</response>	
+            <parameter>-0.49685</parameter>	
+            <display>7 × 9 =</display>	
+            <response>63</response>			
+            <parameter>-0.4969</parameter>	
+            <display>63 ÷ 7 =</display>	
+            <response>9</response>	
+            <parameter>-0.49695</parameter>	
+            <display>7 × 10 =</display>	
+            <response>70</response>			
+            <parameter>-0.497</parameter>	
+            <display>70 ÷ 7 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.49705</parameter>	
+            <display>8 × 1 =</display>	
+            <response>8</response>			
+            <parameter>-0.4971</parameter>	
+            <display>8 ÷ 8 =</display>	
+            <response>1</response>	
+            <parameter>-0.49715</parameter>	
+            <display>8 × 2 =</display>	
+            <response>16</response>			
+            <parameter>-0.4972</parameter>	
+            <display>16 ÷ 8 =</display>	
+            <response>2</response>	
+            <parameter>-0.49725</parameter>	
+            <display>8 × 3 =</display>	
+            <response>24</response>			
+            <parameter>-0.4973</parameter>	
+            <display>24 ÷ 8 =</display>	
+            <response>3</response>	
+            <parameter>-0.49735</parameter>	
+            <display>8 × 4 =</display>	
+            <response>32</response>			
+            <parameter>-0.4974</parameter>	
+            <display>32 ÷ 8 =</display>	
+            <response>4</response>	
+            <parameter>-0.49745</parameter>	
+            <display>8 × 5 =</display>	
+            <response>40</response>			
+            <parameter>-0.4975</parameter>	
+            <display>40 ÷ 8 =</display>	
+            <response>5</response>	
+            <parameter>-0.49755</parameter>	
+            <display>8 × 6 =</display>	
+            <response>48</response>			
+            <parameter>-0.4976</parameter>	
+            <display>48 ÷ 8 =</display>	
+            <response>6</response>	
+            <parameter>-0.49765</parameter>	
+            <display>8 × 7 =</display>	
+            <response>56</response>			
+            <parameter>-0.4977</parameter>	
+            <display>56 ÷ 8 =</display>	
+            <response>7</response>	
+            <parameter>-0.49775</parameter>	
+            <display>8 × 8 =</display>	
+            <response>64</response>			
+            <parameter>-0.4978</parameter>	
+            <display>64 ÷ 8 =</display>	
+            <response>8</response>	
+            <parameter>-0.49785</parameter>	
+            <display>8 × 9 =</display>	
+            <response>72</response>			
+            <parameter>-0.4979</parameter>	
+            <display>72 ÷ 8 =</display>	
+            <response>9</response>	
+            <parameter>-0.49795</parameter>	
+            <display>8 × 10 =</display>	
+            <response>80</response>			
+            <parameter>-0.498</parameter>	
+            <display>80 ÷ 8 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.49805</parameter>	
+            <display>9 × 1 =</display>	
+            <response>9</response>			
+            <parameter>-0.4981</parameter>	
+            <display>9 ÷ 9 =</display>	
+            <response>1</response>	
+            <parameter>-0.49815</parameter>	
+            <display>9 × 2 =</display>	
+            <response>18</response>			
+            <parameter>-0.4982</parameter>	
+            <display>18 ÷ 9 =</display>	
+            <response>2</response>	
+            <parameter>-0.49825</parameter>	
+            <display>9 × 3 =</display>	
+            <response>27</response>			
+            <parameter>-0.4983</parameter>	
+            <display>27 ÷ 9 =</display>	
+            <response>3</response>	
+            <parameter>-0.49835</parameter>	
+            <display>9 × 4 =</display>	
+            <response>36</response>			
+            <parameter>-0.4984</parameter>	
+            <display>36 ÷ 9 =</display>	
+            <response>4</response>	
+            <parameter>-0.49845</parameter>	
+            <display>9 × 5 =</display>	
+            <response>45</response>			
+            <parameter>-0.4985</parameter>	
+            <display>45 ÷ 9 =</display>	
+            <response>5</response>	
+            <parameter>-0.49855</parameter>	
+            <display>9 × 6 =</display>	
+            <response>54</response>			
+            <parameter>-0.4986</parameter>	
+            <display>54 ÷ 9 =</display>	
+            <response>6</response>	
+            <parameter>-0.49865</parameter>	
+            <display>9 × 7 =</display>	
+            <response>63</response>			
+            <parameter>-0.4987</parameter>	
+            <display>63 ÷ 9 =</display>	
+            <response>7</response>	
+            <parameter>-0.49875</parameter>	
+            <display>9 × 8 =</display>	
+            <response>72</response>			
+            <parameter>-0.4988</parameter>	
+            <display>72 ÷ 9 =</display>	
+            <response>8</response>	
+            <parameter>-0.49885</parameter>	
+            <display>9 × 9 =</display>	
+            <response>81</response>			
+            <parameter>-0.4989</parameter>	
+            <display>81 ÷ 9 =</display>	
+            <response>9</response>	
+            <parameter>-0.49895</parameter>	
+            <display>9 × 10 =</display>	
+            <response>90</response>			
+            <parameter>-0.499</parameter>	
+            <display>90 ÷ 9 =</display>	
+            <response>10</response>	
+        </cluster>
+        <cluster>	
+            <parameter>-0.49905</parameter>	
+            <display>10 × 1 =</display>	
+            <response>10</response>			
+            <parameter>-0.4991</parameter>	
+            <display>10 ÷ 10 =</display>	
+            <response>1</response>	
+            <parameter>-0.49915</parameter>	
+            <display>10 × 2 =</display>	
+            <response>20</response>			
+            <parameter>-0.4992</parameter>	
+            <display>20 ÷ 10 =</display>	
+            <response>2</response>	
+            <parameter>-0.49925</parameter>	
+            <display>10 × 3 =</display>	
+            <response>30</response>			
+            <parameter>-0.4993</parameter>	
+            <display>30 ÷ 10 =</display>	
+            <response>3</response>	
+            <parameter>-0.49935</parameter>	
+            <display>10 × 4 =</display>	
+            <response>40</response>			
+            <parameter>-0.4994</parameter>	
+            <display>40 ÷ 10 =</display>	
+            <response>4</response>	
+            <parameter>-0.49945</parameter>	
+            <display>10 × 5 =</display>	
+            <response>50</response>			
+            <parameter>-0.4995</parameter>	
+            <display>50 ÷ 10 =</display>	
+            <response>5</response>	
+            <parameter>-0.49955</parameter>	
+            <display>10 × 6 =</display>	
+            <response>60</response>			
+            <parameter>-0.4996</parameter>	
+            <display>60 ÷ 10 =</display>	
+            <response>6</response>	
+            <parameter>-0.49965</parameter>	
+            <display>10 × 7 =</display>	
+            <response>70</response>			
+            <parameter>-0.4997</parameter>	
+            <display>70 ÷ 10 =</display>	
+            <response>7</response>	
+            <parameter>-0.49975</parameter>	
+            <display>10 × 8 =</display>	
+            <response>80</response>			
+            <parameter>-0.4998</parameter>	
+            <display>80 ÷ 10 =</display>	
+            <response>8</response>	
+            <parameter>-0.49985</parameter>	
+            <display>10 × 9 =</display>	
+            <response>90</response>			
+            <parameter>-0.4999</parameter>	
+            <display>90 ÷ 10 =</display>	
+            <response>9</response>	
+            <parameter>-0.49995</parameter>	
+            <display>10 × 10 =</display>	
+            <response>100</response>			
+            <parameter>-0.5</parameter>	
+            <display>100 ÷ 10 =</display>	
+            <response>10</response>	
+        </cluster>
+
+        
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+    </clusters>
+</setspec>
