@@ -4,7 +4,10 @@
 
 var lockoutInterval = null;
 var lockoutFreeTime = null;
+var lockoutHandled = false;
 var serverNotify = null;
+// Will get set on first periodic check and cleared when we leave the page
+var displayTimeStart = null;
 
 function startLockoutInterval() {
     clearLockoutInterval();
@@ -20,11 +23,13 @@ function clearLockoutInterval() {
     }
     lockoutInterval = null;
     lockoutFreeTime = null;
+    lockoutHandled = false;
     serverNotify = null;
 }
 
 function leavePage(dest) {
     clearLockoutInterval();
+    displayTimeStart = null;
     if (typeof dest === "function") {
         dest();
     }
@@ -45,15 +50,57 @@ function currLockOutMinutes() {
         lockoutminutes = Helpers.intVal(deliveryParams.lockoutminutes);
     }
 
-    console.log("LOCKOUT:", lockoutminutes);
+    console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
     return lockoutminutes;
 }
 
 function lockoutKick() {
-    if (!lockoutInterval && currLockOutMinutes() > 0) {
+    var display = getDisplayTimeouts();
+    var doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
+    var doLockout = (!lockoutInterval && currLockOutMinutes() > 0);
+    if (doDisplay || doLockout) {
         console.log("interval kicked");
         startLockoutInterval();
     }
+}
+
+// Min and Max display seconds: if these are enabled, they determine
+// potential messages, the continue button functionality, and may even move
+// the screen forward. HOWEVER, the lockout functionality currently overrides
+// this functionality (i.e. we don't check this stuff while we are locked out)
+function getDisplayTimeouts() {
+    var unit = getCurrentTdfUnit();
+    return {
+        'minSecs': _.chain(unit).prop("instructionminseconds").first().intval(0).value(),
+        'maxSecs': _.chain(unit).prop("instructionmaxseconds").first().intval(0).value()
+    };
+}
+
+// Handy time display function
+function secondsToDisplay(timeLeftInSecs) {
+    var timeLeft = _.floatval(timeLeftInSecs);
+
+    var secs = timeLeft % 60;
+    timeLeft = Math.floor(timeLeft / 60);
+    var mins = timeLeft % 60;
+    timeLeft = Math.floor(timeLeft / 60);
+    var hrs  = timeLeft % 24;
+    timeLeft = Math.floor(timeLeft / 24);
+    var days = timeLeft;
+
+    var timeLeftDisplay = "";
+
+    if (days > 0) {
+        timeLeftDisplay += days.toString() + " days, ";
+    }
+    if (hrs > 0) {
+        timeLeftDisplay += hrs.toString()  + " hours, ";
+    }
+    if (mins > 0) {
+        timeLeftDisplay += mins.toString() + " minutes, ";
+    }
+
+    return timeLeftDisplay + secs.toString() + " seconds";
 }
 
 //Called intermittently to see if we are still locked out
@@ -71,36 +118,25 @@ function lockoutPeriodicCheck() {
         }
     }
 
+    // Lockout handling
     if (Date.now() >= lockoutFreeTime) {
         //All done - clear out time remaining, hide the display, enable the
         //continue button, and stop the lockout timer
-        $("#lockoutTimeRemaining").html("");
-        $("#lockoutDisplay").hide();
-        $("#continueButton").prop("disabled", false);
-        clearLockoutInterval();
+        if (!lockoutHandled) {
+            $("#lockoutTimeRemaining").html("");
+            $("#lockoutDisplay").hide();
+            $("#continueButton").prop("disabled", false);
+            // Since the interval will continue to fire, we need to know we've
+            // done this
+            lockoutHandled = true;
+        }
     }
     else {
-        //Still locked
+        //Still locked - handle and then bail
 
         //Figure out how to display time remaining
-        var timeLeft = lockoutFreeTime - Date.now(); //Start in ms
-
-        timeLeft = Math.floor(timeLeft / 1000);
-        var secs = timeLeft % 60;
-        timeLeft = Math.floor(timeLeft / 60);
-        var mins = timeLeft % 60;
-        timeLeft = Math.floor(timeLeft / 60);
-        var hrs  = timeLeft % 24;
-        timeLeft = Math.floor(timeLeft / 24);
-        var days = timeLeft;
-
-        var timeLeftDisplay = "Time Remaining: ";
-        if (days > 0) {
-            timeLeftDisplay += days.toString() + " days, ";
-        }
-        timeLeftDisplay += hrs.toString()  + " hours, " +
-                           mins.toString() + " minutes, " +
-                           secs.toString() + " seconds";
+        timeLeft = Math.floor((lockoutFreeTime - Date.now()) / 1000.0);
+        var timeLeftDisplay = "Time Remaining: " + secondsToDisplay(timeLeft);
 
         //Insure they can see the lockout message, update the time remaining
         //message, and disable the continue button
@@ -139,7 +175,101 @@ function lockoutPeriodicCheck() {
             };
             serverNotify();
         }
+        //IMPORTANT: we're leaving
+        return;
     }
+
+    // Lockout logic has been handled - if we're here then we're unlocked
+    // Get the display min/max handling
+    var display = getDisplayTimeouts();
+    if (display.minSecs > 0 || display.maxSecs > 0) {
+        if (!displayTimeStart) {
+            displayTimeStart = Date.now();  //Start tracking time
+        }
+
+        var elapsedSecs = Math.floor((1.0 + Date.now() - displayTimeStart) / 1000.0);
+        var dispLeft;
+
+        if (elapsedSecs <= display.minSecs) {
+            // Haven't reached min yet
+            $("#continueButton").prop("disabled", true);
+            dispLeft = display.minSecs - elapsedSecs;
+            if (dispLeft >= 1.0) {
+                $("#displayTimeoutMsg").text("You will be able to continue in: " + secondsToDisplay(dispLeft));
+            }
+            else {
+                $("#displayTimeoutMsg").text(""); // Don't display 0 secs
+            }
+        }
+        else if (elapsedSecs <= display.maxSecs) {
+            // Between min and max
+            $("#continueButton").prop("disabled", false);
+            dispLeft = display.maxSecs - elapsedSecs;
+            if (dispLeft >= 1.0) {
+                $("#displayTimeoutMsg").text("Progress will continue in: " + secondsToDisplay(dispLeft));
+            }
+            else {
+                $("#displayTimeoutMsg").text("");
+            }
+        }
+        else if (display.maxSecs > 0.0) {
+            // Past max and a max was specified - it's time to go
+            $("#continueButton").prop("disabled", true);
+            $("#displayTimeoutMsg").text("");
+            userContinue();
+        }
+    }
+    else {
+        // No display handling - if lockout is fine then we can stop polling
+        if (lockoutHandled) {
+            clearLockoutInterval();
+        }
+    }
+}
+
+// Called when users continues to next screen
+function userContinue() {
+    //On resume, seeing an "instructions" log event is seen as a breaking point
+    //in the TDF session (since it's supposed to be the beginning of a new unit).
+    //As a result, we only want to log an instruction record ONCE PER UNIT. In
+    //the unlikely event we've already logged an instruction record for the
+    //current unit, we should log a duplicate instead
+    var logAction = "instructions";
+    var currUnit = Session.get("currentUnitNumber");
+    var unitName = _.chain(getCurrentTdfFile().tdfs.tutor)
+        .prop("unit")
+        .prop(_.intval(currUnit))
+        .prop("unitname").trim().value();
+
+    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+    var expKey = userTimesExpKey(true);
+
+    var entries = _.prop(userLog, expKey) || [];
+
+    var dup = _.find(entries, function(rec){
+        return (
+            _.prop(rec, "action") === "instructions" &&
+            _.prop(rec, "currentUnit") === currUnit
+        );
+    });
+    if (!!dup) {
+        console.log("Found dup instruction", dup);
+        Meteor.call("debugLog", "Found dup instruction. User:", Meteor.userId(), "Entry:", dup);
+        logAction = "instructions-dup";
+    }
+
+    //Record the fact that we just showed instruction. Also - we use a
+    //call back to redirect to the card display screen to make sure that
+    //everything has been properly logged on the server
+    recordUserTime(logAction, {
+        'currentUnit': currUnit,
+        'unitname': unitName,
+        'xcondition': Session.get("experimentXCond")
+    }, function(error, result) {
+        //We know they'll need to resume now
+        Session.set("needResume", true);
+        leavePage("/card");
+    });
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -197,7 +327,6 @@ Template.instructions.helpers({
     }
 });
 
-
 Template.instructions.rendered = function() {
     //Make sure lockout interval timer is running
     lockoutKick();
@@ -209,48 +338,7 @@ Template.instructions.rendered = function() {
 Template.instructions.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
-
-        //On resume, seeing an "instructions" log event is seen as a breaking point
-        //in the TDF session (since it's supposed to be the beginning of a new unit).
-        //As a result, we only want to log an instruction record ONCE PER UNIT. In
-        //the unlikely event we've already logged an instruction record for the
-        //current unit, we should log a duplicate instead
-        var logAction = "instructions";
-        var currUnit = Session.get("currentUnitNumber");
-        var unitName = _.chain(getCurrentTdfFile().tdfs.tutor)
-            .prop("unit")
-            .prop(_.intval(currUnit))
-            .prop("unitname").trim().value();
-
-        var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-        var expKey = userTimesExpKey(true);
-
-        var entries = _.prop(userLog, expKey) || [];
-
-        var dup = _.find(entries, function(rec){
-            return (
-                _.prop(rec, "action") === "instructions" &&
-                _.prop(rec, "currentUnit") === currUnit
-            );
-        });
-        if (!!dup) {
-            console.log("Found dup instruction", dup);
-            Meteor.call("debugLog", "Found dup instruction. User:", Meteor.userId(), "Entry:", dup);
-            logAction = "instructions-dup";
-        }
-
-        //Record the fact that we just showed instruction. Also - we use a
-        //call back to redirect to the card display screen to make sure that
-        //everything has been properly logged on the server
-        recordUserTime(logAction, {
-            'currentUnit': currUnit,
-            'unitname': unitName,
-            'xcondition': Session.get("experimentXCond")
-        }, function(error, result) {
-            //We know they'll need to resume now
-            Session.set("needResume", true);
-            leavePage("/card");
-        });
+        userContinue();
     },
 
     'click .logoutLink' : function (event) {

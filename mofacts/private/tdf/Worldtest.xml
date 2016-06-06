@@ -14,8 +14,12 @@
     <unit>
         <unitname>Model Practice</unitname>
         <unitinstructions>Do your best to identify the country shown</unitinstructions>
+        <instructionminseconds>5</instructionminseconds>
+        <instructionmaxseconds>10</instructionmaxseconds>
 
         <learningsession>
+            <displayminseconds></displayminseconds>
+            <displaymaxseconds></displaymaxseconds>
             <clusterlist>0-175</clusterlist>
         </learningsession>
 
