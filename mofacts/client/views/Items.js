@@ -1,3 +1,25 @@
+// INPUT: an item from a Tdf, the name of that tdf (in Mongo-recognizable
+//        format)
+// OUTPUT: a ratio to 2 decimal places which is the average score of all
+//         students who have attempted this item
+function computeItemAverage(item, tdfname) {
+    var userList = UserMetrics.find().fetch();
+    //console.log(displayify(userList));
+    var askCount = 0;
+    var correctCount = 0;
+    _.chain(userList).each( function(user) {
+        var itemRef = _.chain(user).prop(tdfname).prop(item.toString()).value();
+        askCount += _.intval(itemRef.questionCount || 0);
+        correctCount += _.intval(itemRef.correctAnswerCount || 0);
+        if (item == '0') {
+            console.log(correctCount);
+            console.log(askCount);
+            console.log(displayify(_.chain(user).prop(tdfname).prop(item.toString()).value()));
+        }
+    });
+    return correctCount/askCount;
+}
+
 Template.Items.helpers({
     username: function () {
         if (!haveMeteorUser()) {
@@ -30,7 +52,7 @@ Template.Items.helpers({
             if (isNaN(item.score)){
                 item.clickable = false;
             }
-            else{
+            else {
                 item.clickable = true;
             }
 
@@ -39,7 +61,6 @@ Template.Items.helpers({
 
         return buttons;
     }
-
 });
 
 Template.Items.events({
@@ -84,11 +105,10 @@ Template.Items.events({
         if (document.getElementById("itemButtonContainer1").style.display == "none"){
             document.getElementById("itemButtonContainer1").style.display = "block";
             document.getElementById("itemButtonContainer2").style.display = "none";
-        }else{
+        }
+        else{
             document.getElementById("itemButtonContainer1").style.display = "none";
             document.getElementById("itemButtonContainer2").style.display = "block";
         }
-
     }
-
 });

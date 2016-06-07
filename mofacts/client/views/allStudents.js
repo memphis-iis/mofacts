@@ -1,6 +1,24 @@
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
+//INPUT: user, which is an object containing an _id which corresponds to a doc
+//       in UserMetrics, and the name of the relevant Tdf (in Mongo-recognizable
+//       format)
+//OUTPUT: a ratio which is the user's average score across all items for the
+//        client's current system.
+function computeUserScore(user, tdfname) {
+    var indivUserQuery = {'_id': user._id};
+    // We use findOne because there should only ever be one user with any given id.
+    var indivUser = UserMetrics.findOne(indivUserQuery);
+    var askCount = 0;
+    var correctCount = 0;
+    _.chain(indivUser).prop(tdfname).each(function(item) {
+        askCount += _.chain(item).prop('questionCount').intval().value();
+        correctCount += _.chain(item).prop('correctAnswerCount').intval().value();
+    });
+    return correctCount / askCount;  // Note the possible of DBZ which would return NaN
+}
+
 Template.allStudents.helpers({
     username: function () {
         if (!haveMeteorUser()) {
@@ -10,25 +28,24 @@ Template.allStudents.helpers({
             return Meteor.user().username;
         }
     },
-		students: function() {
-				var buttons = [];
-				
-				var userQuery = {};
-				var tdfDBName = buildTdfDBName(getCurrentTdfName());
-				userQuery[tdfDBName] = {$exists: true};
-				var currTdfUsers = UserMetrics.find(userQuery);
-				
-				currTdfUsers.forEach(function(student) {
-						student.username = Meteor.users.findOne({_id: student._id}, {username: true}).username;
-						student.score = computeUserScore(student, tdfDBName);						
-						student.buttonColor = determineButtonColor(student.score);
+    students: function() {
+        var buttons = [];
 
-						buttons.push(student);
-				});
-				
-				return buttons;
-		}
-   
+        var userQuery = {};
+        var tdfDBName = buildTdfDBName(getCurrentTdfName());
+        userQuery[tdfDBName] = {$exists: true};
+        var currTdfUsers = UserMetrics.find(userQuery);
+
+        currTdfUsers.forEach(function(student) {
+            student.username = Meteor.users.findOne({_id: student._id}, {username: true}).username;
+            student.score = computeUserScore(student, tdfDBName);
+            student.buttonColor = determineButtonColor(student.score);
+
+            buttons.push(student);
+        });
+
+        return buttons;
+    }
 });
 
 
@@ -38,10 +55,10 @@ Template.allStudents.helpers({
 Template.allStudents.events({
     'click .logoutLink' : function (event) {
         event.preventDefault();
-        Meteor.logout( function (error) {
+        Meteor.logout(function (error) {
             if (typeof error !== "undefined") {
                 //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
+                console.log("User:" + Meteor.user() +" ERROR:" + error);
             }
             else {
                 routeToSignin();
@@ -59,7 +76,6 @@ Template.allStudents.events({
         Router.go("/allItems");
     },
 
-
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");
@@ -68,47 +84,14 @@ Template.allStudents.events({
     //Sets the session variable for the student that is selected
     //along with setting the username for display on the graph legend
     'click .studentButton' : function (event) {
-		var target = $(event.currentTarget);
-		Session.set('currStudent', event.target.id);
-		Session.set('currUsername', event.target.value);
-        event.preventDefault();      
-        Router.go('/student');  
+        var target = $(event.currentTarget);
+        Session.set('currStudent', event.target.id);
+        Session.set('currUsername', event.target.value);
+        event.preventDefault();
+        Router.go('/student');
     }
 });
 
 Template.allStudents.rendered = function () {
-
-	// We have to build the query as a JavaScript object to get only the users that have done questions on this test.
-	// var userQuery = {};
-	// var tdfDBName = buildTdfDBName(getCurrentTdfName());
-	// userQuery[tdfDBName] = {$exists: true};
-  //   var currTdfUsers = UserMetrics.find(userQuery);
-	
-  //   var addButton = function(btnObj) {
-  //       $("#studentButtonContainer").append(
-  //           $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
-  //               btnObj
-  //           )
-  //       );
-  //   };
-
-  //   currTdfUsers.forEach( function (user) {
-	// 	// Fetch the username from the main database and associate it with our smaller listing here.
-	// 	user.username = Meteor.users.findOne({_id: user._id}, {username: true}).username;
-				
-	// 	// Compute the user's average score across this system to appear on the button (and to color it).
-	// 	user.score = computeUserScore(user, tdfDBName);
-				
-	// 	// For convenience only, we assign the index to a variable so the code down below is less messy.
-	// 	var buttonColor = determineButtonColor(user.score);
-
-  //       addButton(
-  //           $("<button type='button' id='"+user._id+"' name='"+user._id+"'></button>")
-  //               .addClass("btn btn-block studentButton")
-  //               .data("studentkey", user._id)
-  //               .data("usernameKey", user.username)
-  //               .css("background", buttonColor)
-  //               .html(user.username+", "+Math.floor((100*user.score))+"%")
-  //       );
-  //   });
+    // No longer used - see version history for previous code
 };
