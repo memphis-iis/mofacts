@@ -15,13 +15,13 @@ if (!Date.now) {
 Date.secsIntervalString = function(elapsedSecs) {
     var timeLeft = _.floatval(elapsedSecs);
 
-    var secs = timeLeft % 60;
+    var secs = _.intval(timeLeft % 60);
     timeLeft = Math.floor(timeLeft / 60);
-    var mins = timeLeft % 60;
+    var mins = _.intval(timeLeft % 60);
     timeLeft = Math.floor(timeLeft / 60);
-    var hrs  = timeLeft % 24;
+    var hrs  = _.intval(timeLeft % 24);
     timeLeft = Math.floor(timeLeft / 24);
-    var days = timeLeft;
+    var days = _.intval(timeLeft);
 
     var timeLeftDisplay = "";
 

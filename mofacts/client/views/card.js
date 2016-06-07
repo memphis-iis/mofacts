@@ -192,10 +192,6 @@ function getDisplayTimeouts() {
     };
 }
 
-// TODO: test with min=0 max=0
-// TODO: test with min=X max=Y
-// TODO: test with min=0 max=X
-// TODO: test with min=X max=0
 function varLenDisplayTimeout() {
     if (!unitStartTimestamp) {
         return;
@@ -215,7 +211,7 @@ function varLenDisplayTimeout() {
     if (elapsed <= display.minSecs) {
         // Haven't reached min yet
         $("#continueButton").prop("disabled", true);
-        dispLeft = display.minSecs - elapsedSecs;
+        dispLeft = display.minSecs - elapsed;
         if (dispLeft >= 1.0) {
             $("#displayTimeoutMsg").text("You will be able to continue in: " + Date.secsIntervalString(dispLeft));
         }
@@ -223,10 +219,10 @@ function varLenDisplayTimeout() {
             $("#displayTimeoutMsg").text(""); // Don't display 0 secs
         }
     }
-    else if (elapsedSecs <= display.maxSecs) {
+    else if (elapsed <= display.maxSecs) {
         // Between min and max
         $("#continueButton").prop("disabled", false);
-        dispLeft = display.maxSecs - elapsedSecs;
+        dispLeft = display.maxSecs - elapsed;
         if (dispLeft >= 1.0) {
             $("#displayTimeoutMsg").text("Progress will continue in: " + Date.secsIntervalString(dispLeft));
         }
