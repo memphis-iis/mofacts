@@ -12,6 +12,32 @@ if (!Date.now) {
     };
 }
 
+Date.secsIntervalString = function(elapsedSecs) {
+    var timeLeft = _.floatval(elapsedSecs);
+
+    var secs = timeLeft % 60;
+    timeLeft = Math.floor(timeLeft / 60);
+    var mins = timeLeft % 60;
+    timeLeft = Math.floor(timeLeft / 60);
+    var hrs  = timeLeft % 24;
+    timeLeft = Math.floor(timeLeft / 24);
+    var days = timeLeft;
+
+    var timeLeftDisplay = "";
+
+    if (days > 0) {
+        timeLeftDisplay += days.toString() + " days, ";
+    }
+    if (hrs > 0) {
+        timeLeftDisplay += hrs.toString()  + " hours, ";
+    }
+    if (mins > 0) {
+        timeLeftDisplay += mins.toString() + " minutes, ";
+    }
+
+    return timeLeftDisplay + secs.toString() + " seconds";
+};
+
 //Helper function for underscore that accesses a property by name but
 //returns null either the object is "falsey" or the property is missing
 // Given o = {a: {z: [1,2,3]}} then

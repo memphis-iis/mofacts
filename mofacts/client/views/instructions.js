@@ -76,34 +76,7 @@ function getDisplayTimeouts() {
     };
 }
 
-// Handy time display function
-function secondsToDisplay(timeLeftInSecs) {
-    var timeLeft = _.floatval(timeLeftInSecs);
-
-    var secs = timeLeft % 60;
-    timeLeft = Math.floor(timeLeft / 60);
-    var mins = timeLeft % 60;
-    timeLeft = Math.floor(timeLeft / 60);
-    var hrs  = timeLeft % 24;
-    timeLeft = Math.floor(timeLeft / 24);
-    var days = timeLeft;
-
-    var timeLeftDisplay = "";
-
-    if (days > 0) {
-        timeLeftDisplay += days.toString() + " days, ";
-    }
-    if (hrs > 0) {
-        timeLeftDisplay += hrs.toString()  + " hours, ";
-    }
-    if (mins > 0) {
-        timeLeftDisplay += mins.toString() + " minutes, ";
-    }
-
-    return timeLeftDisplay + secs.toString() + " seconds";
-}
-
-//Called intermittently to see if we are still locked out
+// Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
         var lastTimestamp = Session.get("lastTimestamp");
@@ -136,7 +109,7 @@ function lockoutPeriodicCheck() {
 
         //Figure out how to display time remaining
         timeLeft = Math.floor((lockoutFreeTime - Date.now()) / 1000.0);
-        var timeLeftDisplay = "Time Remaining: " + secondsToDisplay(timeLeft);
+        var timeLeftDisplay = "Time Remaining: " + Date.secsIntervalString(timeLeft);
 
         //Insure they can see the lockout message, update the time remaining
         //message, and disable the continue button
@@ -195,7 +168,7 @@ function lockoutPeriodicCheck() {
             $("#continueButton").prop("disabled", true);
             dispLeft = display.minSecs - elapsedSecs;
             if (dispLeft >= 1.0) {
-                $("#displayTimeoutMsg").text("You will be able to continue in: " + secondsToDisplay(dispLeft));
+                $("#displayTimeoutMsg").text("You will be able to continue in: " + Date.secsIntervalString(dispLeft));
             }
             else {
                 $("#displayTimeoutMsg").text(""); // Don't display 0 secs
@@ -206,7 +179,7 @@ function lockoutPeriodicCheck() {
             $("#continueButton").prop("disabled", false);
             dispLeft = display.maxSecs - elapsedSecs;
             if (dispLeft >= 1.0) {
-                $("#displayTimeoutMsg").text("Progress will continue in: " + secondsToDisplay(dispLeft));
+                $("#displayTimeoutMsg").text("Progress will continue in: " + Date.secsIntervalString(dispLeft));
             }
             else {
                 $("#displayTimeoutMsg").text("");
@@ -218,9 +191,16 @@ function lockoutPeriodicCheck() {
             $("#displayTimeoutMsg").text("");
             userContinue();
         }
+        else {
+            // Past max and no valid maximum - they get a continue button
+            $("#continueButton").prop("disabled", false);
+            $("#displayTimeoutMsg").text("Please click the continue button when you are done");
+        }
     }
     else {
         // No display handling - if lockout is fine then we can stop polling
+        $("#continueButton").prop("disabled", false);
+        $("#displayTimeoutMsg").text("");
         if (lockoutHandled) {
             clearLockoutInterval();
         }

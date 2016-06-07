@@ -6,9 +6,9 @@ There is quite a bit of logic in this file, but most of it is commented locally.
 One note to keep in mind that much of the direct access to the TDF and Stim
 files has been abstracted out to places like currentTestingHelpers.js
 
-This is important because that abstract is used to do things like support
+This is important because that abstraction is used to do things like support
 multiple deliveryParam (the x-condition logic) and centralize some of the
-checked that we do to make sure everything is functioning correctly.
+checks that we do to make sure everything is functioning correctly.
 
 
 Timeout logic overview
@@ -33,7 +33,7 @@ There are two "timeouts" that are used after the user has answered (see
 the function handleUserInput):
 
 reviewstudy   - If a user answers a drill trial incorrectly, the correct
-                  answer is displayed for this long
+                answer is displayed for this long
 
 correctprompt - If a user gets a drill trial correct, the amount of time
                 the feedback message is shown
@@ -94,28 +94,41 @@ var currentQuestionSound = null; //See later in this file for sound functions
 var timeoutName = null;
 var timeoutFunc = null;
 var timeoutDelay = null;
+var varLenTimeoutName = null;
 var simTimeoutName = null;
+
+// Helper - return elapsed seconds since unit started. Note that this is
+// technically seconds since unit RESUME began (when we set unitStartTimestamp)
+function elapsedSecs() {
+    if (!unitStartTimestamp) {
+        return 0.0;
+    }
+    return (Date.now() - unitStartTimestamp) / 1000.0;
+}
 
 //Note that this isn't just a convenience function - it should be called
 //before we route to other templates so that the timeout doesn't fire over
 //and over
 function clearCardTimeout() {
-    try {
-        if (!!timeoutName) {
-            Meteor.clearTimeout(timeoutName);
+    var safeClear = function(clearFunc, clearParm) {
+        try {
+            if (!!clearParm) {
+                clearFunc(clearParm);
+            }
         }
-        if (!!simTimeoutName) {
-            Meteor.clearTimeout(simTimeoutName);
+        catch(e) {
+            console.log("Error clearing meteor timeout/interval", e);
         }
-    }
-    catch(e) {
-        console.log("Error clearing meteor timeout", e);
-    }
+    };
+    safeClear(Meteor.clearTimeout, timeoutName);
+    safeClear(Meteor.clearTimeout, simTimeoutName);
+    safeClear(Meteor.clearInterval, varLenTimeoutName);
 
     timeoutName = null;
     timeoutFunc = null;
     timeoutDelay = null;
     simTimeoutName = null;
+    varLenTimeoutName = null;
 }
 
 //Start a timeout count
@@ -125,6 +138,7 @@ function beginMainCardTimeout(delay, func) {
     timeoutFunc = func;
     timeoutDelay = delay;
     timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
+    varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
 
 //Reset the previously set timeout counter
@@ -164,6 +178,73 @@ function checkSimulation() {
         simTimeoutName = null;
         handleUserInput({}, 'simulation', correct);
     }, simTimeout);
+}
+
+// Min and Max display seconds: if these are enabled, they determine
+// potential messages, the continue button functionality, and may even move
+// the screen forward.  This is nearly identical to the function of the same
+// name in instructions.js (where we use two similar parameters)
+function getDisplayTimeouts() {
+    var session = _.chain(getCurrentTdfUnit()).prop("learningsession").first().value();
+    return {
+        'minSecs': _.chain(session).prop("displayminseconds").first().intval(0).value(),
+        'maxSecs': _.chain(session).prop("displaymaxseconds").first().intval(0).value()
+    };
+}
+
+// TODO: test with min=0 max=0
+// TODO: test with min=X max=Y
+// TODO: test with min=0 max=X
+// TODO: test with min=X max=0
+function varLenDisplayTimeout() {
+    if (!unitStartTimestamp) {
+        return;
+    }
+
+    var display = getDisplayTimeouts();
+    if (!(display.minSecs > 0.0 || display.maxSecs > 0.0)) {
+        // No variable display parameters - we can stop the interval
+        $("#continueButton").prop("disabled", false);
+        $("#displayTimeoutMsg").text("");
+        Meteor.clearInterval(varLenTimeoutName);
+        varLenTimeoutName = null;
+        return;
+    }
+
+    var elapsed = elapsedSecs();
+    if (elapsed <= display.minSecs) {
+        // Haven't reached min yet
+        $("#continueButton").prop("disabled", true);
+        dispLeft = display.minSecs - elapsedSecs;
+        if (dispLeft >= 1.0) {
+            $("#displayTimeoutMsg").text("You will be able to continue in: " + Date.secsIntervalString(dispLeft));
+        }
+        else {
+            $("#displayTimeoutMsg").text(""); // Don't display 0 secs
+        }
+    }
+    else if (elapsedSecs <= display.maxSecs) {
+        // Between min and max
+        $("#continueButton").prop("disabled", false);
+        dispLeft = display.maxSecs - elapsedSecs;
+        if (dispLeft >= 1.0) {
+            $("#displayTimeoutMsg").text("Progress will continue in: " + Date.secsIntervalString(dispLeft));
+        }
+        else {
+            $("#displayTimeoutMsg").text("");
+        }
+    }
+    else if (display.maxSecs > 0.0) {
+        // Past max and a max was specified - it's time to go
+        $("#continueButton").prop("disabled", true);
+        $("#displayTimeoutMsg").text("");
+        unitIsFinished();
+    }
+    else {
+        // Past max and no valid maximum - they get a continue button
+        $("#continueButton").prop("disabled", false);
+        $("#displayTimeoutMsg").text("Please click the continue button when you are done");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -214,7 +295,6 @@ Template.card.events({
 
     'click .statsPageLink' : function (event) {
         event.preventDefault();
-        clearCardTimeout();
         leavePage(statsPageUpdate); //In statsPage.js
     },
 
@@ -244,7 +324,12 @@ Template.card.events({
             //"regular" logged-in user - go back to home page
             leavePage("/profile");
         }
-    }
+    },
+
+    'click #continueButton' : function (event) {
+        event.preventDefault();
+        unitIsFinished();
+    },
 });
 
 ////////////////////////////////////////////////////////////////////////////
@@ -279,8 +364,7 @@ Template.card.rendered = function() {
 Template.card.helpers({
     username: function () {
         if (!haveMeteorUser()) {
-            clearCardTimeout();
-            routeToSignin();
+            leavePage(routeToSignin);
         }
         else {
             return Meteor.user().username;
@@ -358,7 +442,7 @@ Template.card.helpers({
 
 
 function newQuestionHandler() {
-    console.log("NQ handler", (Date.now() - unitStartTimestamp||1) / 1000.0);
+    console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
 
     var textFocus = false; //We'll set to true if needed
 
@@ -793,46 +877,47 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
 }
 
 function prepareCard() {
-    var file = getCurrentTdfFile();
-
     if (Session.get("questionIndex") === undefined) {
-        //At this point, a missing question index is assumed to mean "start
-        //with the first question"
+        // At this point, a missing question index is assumed to mean "start
+        // with the first question"
         Session.set("questionIndex", 0);
     }
 
-    var questionIndex = Session.get("questionIndex");
-    var unit = getCurrentUnitNumber();
-    console.log("prepareCard for Schedule (Unit,QIdx)=", unit, questionIndex);
-
-    if (!engine.unitFinished()) {
-        //We have another card to show...
+    if (engine.unitFinished()) {
+        unitIsFinished();
+    }
+    else {
+        // Not finished - we have another card to show...
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
         engine.writeQuestionEntry(selReturn);
         newQuestionHandler();
     }
+}
+
+// Called when the current unit is done. This should be either unit-defined (see
+// prepareCard) or user-initiated (see the continue button event and the var
+// len display timeout function)
+function unitIsFinished() {
+    clearCardTimeout();
+
+    var file = getCurrentTdfFile();
+    var unit = getCurrentUnitNumber();
+
+    Session.set("questionIndex", 0);
+    Session.set("clusterIndex", undefined);
+    var newUnit = unit + 1;
+    Session.set("currentUnitNumber", newUnit);
+
+    if (newUnit < file.tdfs.tutor.unit.length) {
+        //Just hit a new unit - we need to restart with instructions
+        console.log("UNIT FINISHED: show instructions for next unit", newUnit);
+        leavePage("/instructions");
+    }
     else {
-        //We just finished a unit
-        clearCardTimeout();
-
-        Session.set("questionIndex", 0);
-        Session.set("clusterIndex", undefined);
-        var newUnit = unit + 1;
-        Session.set("currentUnitNumber", newUnit);
-
-        if (newUnit < file.tdfs.tutor.unit.length) {
-            //Just hit a new unit - we need to restart with instructions
-            console.log("UNIT FINISHED: show instructions for next unit", newUnit);
-            leavePage("/instructions");
-        }
-        else {
-            //We have run out of units - return home for now
-            console.log("UNIT FINISHED: No More Units");
-            leavePage("/profile");
-        }
-
-        return;
+        //We have run out of units - return home for now
+        console.log("UNIT FINISHED: No More Units");
+        leavePage("/profile");
     }
 }
 
@@ -1025,6 +1110,10 @@ function resumeFromUserTimesLog() {
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
     Session.set("lastTimestamp", 0);
+
+    //Disallow continuing (it will be turned on somewhere else)
+    $("#displayTimeoutMsg").text("");
+    $("#continueButton").prop("disabled", true);
 
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
