@@ -891,6 +891,8 @@ function prepareCard() {
     }
 }
 
+// TODO: if called for something like the Continue button, we need to make sure
+//       that a future resume knows that this unit is finished
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
