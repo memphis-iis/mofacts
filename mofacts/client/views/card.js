@@ -891,12 +891,10 @@ function prepareCard() {
     }
 }
 
-// TODO: if called for something like the Continue button, we need to make sure
-//       that a future resume knows that this unit is finished
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
-function unitIsFinished() {
+function unitIsFinished(reason) {
     clearCardTimeout();
 
     var file = getCurrentTdfFile();
@@ -907,16 +905,21 @@ function unitIsFinished() {
     var newUnit = unit + 1;
     Session.set("currentUnitNumber", newUnit);
 
+    var leaveTarget;
     if (newUnit < file.tdfs.tutor.unit.length) {
         //Just hit a new unit - we need to restart with instructions
         console.log("UNIT FINISHED: show instructions for next unit", newUnit);
-        leavePage("/instructions");
+        leaveTarget = "/instructions";
     }
     else {
         //We have run out of units - return home for now
         console.log("UNIT FINISHED: No More Units");
-        leavePage("/profile");
+        leaveTarget = "/profile";
     }
+
+    //TODO: log a unit-end log entry
+    //TODO: actually use that message in our resume logic
+    leavePage(leaveTarget);
 }
 
 function recordProgress(question, answer, userAnswer, isCorrect) {
@@ -1300,8 +1303,7 @@ function processUserTimesLog() {
     var lastQuestionEntry = null;
 
     //prepareCard will handle whether or not new units see instructions, but
-    //it will miss instructions for the very first unit. Note that we only need
-    //to worry about this if we actually have units
+    //it will miss instructions for the very first unit.
     var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
 
     //Helper to determine if a unit specified by index has the given field

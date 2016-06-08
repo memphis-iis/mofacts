@@ -6,67 +6,66 @@ Session.set("experimentXCond", "");
 Session.set("clusterMapping", "");
 
 routeToSignin = function() {
-   if (Session.get("loginMode") === "experiment") {
-      var routeParts = ['/experiment'];
+    if (Session.get("loginMode") === "experiment") {
+        var routeParts = ['/experiment'];
 
-      var target = Session.get("experimentTarget");
-      if (target) {
-         routeParts.push(target);
-         var xcond = Session.get("experimentXCond");
-         if (xcond) {
-            routeParts.push(xcond);
-         }
-      }
+        var target = Session.get("experimentTarget");
+        if (target) {
+            routeParts.push(target);
+            var xcond = Session.get("experimentXCond");
+            if (xcond) {
+                routeParts.push(xcond);
+            }
+        }
 
-      Router.go(routeParts.join('/'));
-   }
-   else {
-      Router.go("/signin");
-   }
+        Router.go(routeParts.join('/'));
+    }
+    else {
+        Router.go("/signin");
+    }
 };
 
 Router.configure({
-   layoutTemplate: 'DefaultLayout'
+    layoutTemplate: 'DefaultLayout'
 });
 
 Router.route('/experiment/:target?/:xcond?', function() {
-   Session.set("loginMode", "experiment");
+    Session.set("loginMode", "experiment");
 
-   var target = this.params.target || "";
-   var xcond = this.params.xcond || "";
+    var target = this.params.target || "";
+    var xcond = this.params.xcond || "";
 
-   Session.set("experimentTarget", target);
-   Session.set("experimentXCond", xcond);
+    Session.set("experimentTarget", target);
+    Session.set("experimentXCond", xcond);
 
-   console.log("EXPERIMENT target:", target, "xcond", xcond);
+    console.log("EXPERIMENT target:", target, "xcond", xcond);
 
-   Session.set("clusterMapping", "");
-   this.render('signIn');
+    Session.set("clusterMapping", "");
+    this.render('signIn');
 });
 
 Router.route('/signin', function () {
-   this.render('signIn');
+    this.render('signIn');
 });
 
 Router.route('/signup', function () {
-   this.render('signUp');
+    this.render('signUp');
 });
 
 Router.route('/', function () {
-   this.render('signIn');
+    this.render('signIn');
 });
 
 Router.route('/profile', function () {
-   Session.set("clusterMapping", "");
-   this.render('profile');
+    this.render('profile');
 });
 
 Router.route('/card', function () {
-   this.render('card');
+    this.render('card');
 });
 
 Router.route('/admin', function () {
-   this.render('admin');
+    this.render('admin');
 });
 
 //Sends the user to the choose page where the user can choose
@@ -74,7 +73,8 @@ Router.route('/admin', function () {
 Router.route('/choose', function () {
     if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
         this.render('/choose');
-    } else {
+    }
+    else {
         this.redirect('/student');
     }
 });
@@ -97,7 +97,8 @@ Router.route('/allStudents', function(){
     this.subscribe('allUsers').wait();
     if (this.ready()){
         this.render('allStudents');
-    }else{
+    }
+    else{
         this.render('');
     }
 });
