@@ -917,9 +917,12 @@ function unitIsFinished(reason) {
         leaveTarget = "/profile";
     }
 
-    //TODO: log a unit-end log entry
-    //TODO: actually use that message in our resume logic
-    leavePage(leaveTarget);
+    // TODO: actually use this in the resume below (and handle final unit completion)
+    recordUserTime("unit-end", {
+        'currentUnit': newUnit - 1,  // Remember we just finished a unit
+    }, function(error, result) {
+        leavePage(leaveTarget);
+    });
 }
 
 function recordProgress(question, answer, userAnswer, isCorrect) {
