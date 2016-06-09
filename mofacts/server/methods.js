@@ -93,17 +93,10 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
     };
 }
 
-// TODO: we need to reign-in the allUsers in our default pub AND the allUsers pub
-
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
     var userId = this.userId;
-    var allUsers = Meteor.users.find();
-
-    // Currently allow people to see all stats
-    // TODO: change this based on user's role
-    var metricsQuery = {};
 
     //The default data published to everyone - all TDF's and stims, and the
     //user data (user times log and user record) for them
@@ -117,14 +110,14 @@ Meteor.publish(null, function () {
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find(metricsQuery)
+        UserMetrics.find({})
     ];
 
     return defaultData;
 });
 
 Meteor.publish('allUsers', function () {
-		return Meteor.users.find({}, {fields: {username: 1}});
+	return Meteor.users.find({}, {fields: {username: 1}});
 });
 
 
