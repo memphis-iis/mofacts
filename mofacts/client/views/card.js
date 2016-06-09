@@ -1371,7 +1371,7 @@ function processUserTimesLog() {
             //Logged completion of unit - if this is the final unit we also
             //know that the TDF is completed
             var finishedUnit = _.intval(entry.currentUnit, -1);
-            var checkUnit = _.inval(Session.get("currentUnitNumber"), -2);
+            var checkUnit = _.intval(Session.get("currentUnitNumber"), -2);
             if (finishedUnit >= 0 && checkUnit === finishedUnit) {
                 //Correctly matches current unit - reset
                 needFirstUnitInstructions = false;
