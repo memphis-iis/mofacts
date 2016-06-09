@@ -126,12 +126,10 @@ Template.itemStats.rendered = function () {
 };
 
 var drawChart = function () {
-    // Find out the length of the array returned from the specified function.
-    var itemDataLatLeng = Template.itemStats.__helpers[" itemDataLat"]().length;
-
     var i;
 
     // Auto populate an array from 0 to length of specified function.
+    var itemDataLatLeng = Template.itemStats.__helpers[" itemDataLat"]().length;
     var itemDataLatRes = [];
     for (i = 0; i <= itemDataLatLeng; i++) {
         itemDataLatRes.push(i);

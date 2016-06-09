@@ -9,12 +9,12 @@ function computeItemAverage(item, tdfname) {
     var correctCount = 0;
     _.chain(userList).each( function(user) {
         var itemRef = _.chain(user).prop(tdfname).prop(item.toString()).value();
-        askCount += _.intval(itemRef.questionCount || 0);
-        correctCount += _.intval(itemRef.correctAnswerCount || 0);
+        askCount = _.chain(itemRef).prop("questionCount").intval().value();
+        correctCount = _.chain(itemRef).prop("correctCount").intval().value();
         if (item == '0') {
             console.log(correctCount);
             console.log(askCount);
-            console.log(displayify(_.chain(user).prop(tdfname).prop(item.toString()).value()));
+            console.log(displayify(itemRef));
         }
     });
     return correctCount/askCount;
