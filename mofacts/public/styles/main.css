@@ -1,3 +1,5 @@
+/*csslint qualified-headings:false, unique-headings:false, ids:false, universal-selector:false */
+
 body {
     background-color: #C1E1A6;
     font-family: 'Lato', sans-serif;
@@ -8,6 +10,45 @@ body {
 h1, h2, h3, h4, h5, h6 {
     color: #C1E1A6;
     font-family: 'Lato', sans-serif;
+}
+
+@media (max-width: 768px) {
+    .sound-img {
+        width: 32px;
+        height: 32px;
+    }
+    .btn-responsive {
+        padding: 2px 4px;
+        font-size: 80%;
+        line-height: 1;
+        border-radius: 3px;
+    }
+    #textQuestion {
+        font-size: 80%;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+    .sound-img {
+        width: 100px;
+        height: 100px;
+    }
+    .btn-responsive {
+        padding: 4px 9px;
+        font-size: 90%;
+        line-height: 1.2;
+    }
+}
+
+@media (min-width: 993px) {
+    .sound-img {
+        width:100px;
+        height:100px;
+    }
+    .btn-responsive {
+        padding: inherit;
+        line-height: inherit;
+    }
 }
 
 .visible-text,
@@ -27,18 +68,18 @@ h1, h2, h3, h4, h5, h6 {
 
 
 ul {
-  margin: 0;
+    margin: 0;
 }
 ul.dashed {
-  list-style-type: none;
+    list-style-type: none;
 }
 ul.dashed > li {
-  text-indent: -15px;
+    text-indent: -15px;
 }
 ul.dashed > li:before {
-  content: "-  ";
-  text-indent: -15px;
-  font-weight: bold;
+    content: "-  ";
+    text-indent: -15px;
+    font-weight: bold;
 }
 
 #cardQuestionImg {
@@ -70,14 +111,14 @@ img {
 legend {
     color: #585858;
     font-family: 'Lato', sans-serif;
-   font-size: 28px;
+    font-size: 28px;
     border-color: #C1E1A6;
 }
 
 .stimButton {
     height: 75px;
     overflow: hidden;
-    text-overflow:ellipsis; /*Changed to keep text from overflowing outside of the button*/
+    text-overflow: ellipsis; /*Changed to keep text from overflowing outside of the button*/
 }
 
 .navbar {
@@ -239,7 +280,7 @@ input:focus {
 .table-bordered > thead > tr > td,
 .table-bordered > tbody > tr > td,
 .table-bordered > tfoot > tr > td {
-  border: 1px solid #585858;
-  border-right-width:1px;
-  border-left-width:0px;
+    border: 1px solid #585858;
+    border-right-width: 1px;
+    border-left-width: 0;
 }

@@ -429,6 +429,11 @@ Template.card.helpers({
 
     currentScore: function() {
         return Session.get("currentScore");
+    },
+
+    haveDispTimeout: function() {
+        var disp = getDisplayTimeouts();
+        return (disp.minSecs > 0 || disp.maxSecs > 0);
     }
 });
 
@@ -1016,6 +1021,13 @@ function showUserInteraction(isGoodNews, news) {
         .addClass(isGoodNews ? "alert-success" : "alert-danger")
         .text(news)
         .show();
+
+    // Scroll to ensure correct view in on screen
+    var offset = $("#feedbackTarget").offset().top - $(window).scrollTop();
+    if(offset > window.innerHeight) {
+        // Not in view so scroll to it
+        $('html,body').animate({scrollTop: offset}, 100);
+    }
 }
 
 function hideUserInteraction() {
@@ -1023,6 +1035,13 @@ function hideUserInteraction() {
         .removeClass("text-align alert alert-success alert-danger")
         .html("")
         .hide();
+
+    // Scroll to ensure correct view in on screen
+    var offset = $("#stimulusTarget").offset().top - $(window).scrollTop();
+    if(offset > window.innerHeight) {
+        // Not in view so scroll to it
+        $('html,body').animate({scrollTop: offset}, 100);
+    }
 }
 
 function stopUserInput() {
@@ -1544,7 +1563,6 @@ function processUserTimesLog() {
     else if (moduleCompleted) {
         //They are DONE!
         console.log("TDF already completed - leaving for profile page.");
-        leavePage("/profile");
     }
     else {
         //We have an answer (or no questions at all) - run next question logic

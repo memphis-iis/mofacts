@@ -36,6 +36,8 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
+        <div id="stimulusTarget"></div>
+
         {{#if trial}}
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info {{fontSizeClass}}"
@@ -44,7 +46,7 @@
                 {{{currentQuestion}}}
                 {{/if}}
                 {{#if audioCard}}
-                <img src="images/speaker.png" style="width:100px; height:100px;">
+                <img src="images/speaker.png" class="sound-img">
                 {{/if}}
                 {{#if imageCard}}
                 <img id="cardQuestionImg" src={{currentQuestion}}>
@@ -61,7 +63,7 @@
                 {{/unless}}
                 <div>
                     {{#if skipstudy}}
-                    <button type='button' id='continueStudy' name='continueStudy' class='btn  btn-block'>
+                    <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive'>
                         Continue
                     </button>
                     {{/if}}
@@ -84,7 +86,7 @@
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#each buttonList}}
-                        <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton'>
+                        <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton btn-responsive'>
                             {{buttonValue}}
                         </button></div>
                         {{/each}}
@@ -93,20 +95,24 @@
             </div> <!-- close row -->
         {{/if}}
 
-        <div class="row">
+        <div class="row userInteractionContainer">
             <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="UserInteraction" hidden></div>
         </div>
 
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="continueContainer">
                 <div class="visible-text">
-                    <button type="button" id="continueButton" class="btn">
+                    {{#if haveDispTimeout}}
+                    <button type="button" id="continueButton" class="btn btn-responsive">
                         Continue
                     </button>
+                    {{/if}}
                     <h3 id="displayTimeoutMsg"></h3>
                 </div>
             </div>
         </div>
+
+        <div id="feedbackTarget"></div>
 
         {{#if isInRole 'teacher'}}
         <div class="row">
@@ -131,7 +137,7 @@
         <div class="row">
             <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
                 <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-                <button id="overlearningButton" type="button" class="btn " style="width: auto;">Home</button>
+                <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Home</button>
             </div>
         </div>
 
@@ -147,7 +153,7 @@
                         <div id="finalInstructionsText"></div>
                     </div>
                     <div class="modal-footer visible-text">
-                        <button type="button" class="btn btn-default instructModalDismiss" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default btn-responsive instructModalDismiss" data-dismiss="modal">Close</button>
                     </div>
                 </div>
             </div>

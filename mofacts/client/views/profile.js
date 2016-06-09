@@ -84,7 +84,7 @@ Template.profile.rendered = function () {
 
     var addButton = function(btnObj) {
         $("#testButtonContainer").append(
-            $("<div class='col-xs-6 col-sm-4 col-md-3 col-lg-3 text-center'><br></div>").prepend(
+            $("<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>").prepend(
                 btnObj
             )
         );
@@ -157,7 +157,7 @@ Template.profile.rendered = function () {
 
         addButton(
             $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
-                .addClass("btn btn-block stimButton")
+                .addClass("btn btn-block btn-responsive stimButton")
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
                 .data("tdfkey", tdfObject._id)
