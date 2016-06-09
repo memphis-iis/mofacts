@@ -163,10 +163,3 @@ Router.route('/allItems',  {
         this.render('allItems');
     }
 });
-
-Router.route('/testpage',  {
-    name: "client.teacher.testpage",
-    action:  function() {
-        this.render('tester');
-    }
-});
