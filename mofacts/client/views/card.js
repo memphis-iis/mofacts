@@ -234,7 +234,7 @@ function varLenDisplayTimeout() {
         // Past max and a max was specified - it's time to go
         $("#continueButton").prop("disabled", true);
         $("#displayTimeoutMsg").text("");
-        unitIsFinished();
+        unitIsFinished('DisplaMaxSecs exceeded');
     }
     else {
         // Past max and no valid maximum - they get a continue button
@@ -324,7 +324,7 @@ Template.card.events({
 
     'click #continueButton' : function (event) {
         event.preventDefault();
-        unitIsFinished();
+        unitIsFinished('Continue Button Pressed');
     },
 });
 
@@ -880,7 +880,7 @@ function prepareCard() {
     }
 
     if (engine.unitFinished()) {
-        unitIsFinished();
+        unitIsFinished('Unit Engine');
     }
     else {
         // Not finished - we have another card to show...
@@ -917,8 +917,8 @@ function unitIsFinished(reason) {
         leaveTarget = "/profile";
     }
 
-    // TODO: actually use this in the resume below (and handle final unit completion)
     recordUserTime("unit-end", {
+        'reason': reason,
         'currentUnit': newUnit - 1,  // Remember we just finished a unit
     }, function(error, result) {
         leavePage(leaveTarget);
@@ -1318,6 +1318,23 @@ function processUserTimesLog() {
         return !!unitSection;
     };
 
+    //It's possible that they clicked Continue on a final unit, so we need to
+    //know to act as if we're done
+    var moduleCompleted = false;
+
+    //Reset current engine
+    var resetEngine = function(currUnit) {
+        if (unitHasOption(currUnit, "assessmentsession")) {
+            engine = createScheduleUnit();
+        }
+        else if (unitHasOption(currUnit, "learningsession")) {
+            engine = createModelUnit();
+        }
+        else {
+            engine = createEmptyUnit();
+        }
+    };
+
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
@@ -1346,15 +1363,35 @@ function processUserTimesLog() {
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
 
-                //Now we need to select an engine
-                if (unitHasOption(instructUnit, "assessmentsession")) {
-                    engine = createScheduleUnit();
-                }
-                else if (unitHasOption(instructUnit, "learningsession")) {
-                    engine = createModelUnit();
+                resetEngine(instructUnit);
+            }
+        }
+
+        else if (action === "unit-end") {
+            //Logged completion of unit - if this is the final unit we also
+            //know that the TDF is completed
+            var finishedUnit = _.intval(entry.currentUnit, -1);
+            var checkUnit = _.inval(Session.get("currentUnitNumber"), -2);
+            if (finishedUnit >= 0 && checkUnit === finishedUnit) {
+                //Correctly matches current unit - reset
+                needFirstUnitInstructions = false;
+                lastQuestionEntry = null;
+
+                Session.set("questionIndex", 0);
+                Session.set("clusterIndex", undefined);
+                Session.set("currentQuestion", undefined);
+                Session.set("currentAnswer", undefined);
+                Session.set("testType", undefined);
+
+                if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
+                    //Completed
+                    moduleCompleted = true;
                 }
                 else {
-                    engine = createEmptyUnit();
+                    //Moving to next unit
+                    checkUnit += 1;
+                    Session.set("currentUnitNumber", checkUnit);
+                    resetEngine(checkUnit);
                 }
             }
         }
@@ -1503,6 +1540,11 @@ function processUserTimesLog() {
         //Question outstanding: force question display and let them give an answer
         console.log("RESUME FINISHED: displaying current question");
         newQuestionHandler();
+    }
+    else if (moduleCompleted) {
+        //They are DONE!
+        console.log("TDF already completed - leaving for profile page.");
+        leavePage("/profile");
     }
     else {
         //We have an answer (or no questions at all) - run next question logic
