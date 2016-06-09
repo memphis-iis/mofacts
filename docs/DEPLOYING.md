@@ -4,10 +4,10 @@ This document gives an overview of deploying MoFaCTS to a Debian server,
 although in reality this is also a brief guide to deploying any meteor-based
 application.
 
-Four main sections follow: Requirements, Deployment, Execution, and "deploy.sh
+Four main sections follow: Requirements, Deployment, Running, and "deploy.sh
 overview". We assume that you will work through the requirements section and
-create your own script for deployment and execution. The deploy.sh section
-describes the script in this directory provided for your convenience.
+create your own scripts for deploying and running Mofacts. The deploy.sh
+section describes the script in this directory provided for your convenience.
 
 *_Important:_* This document describes setting up a new server from scratch
 and documents the setup process for optimallearning.org. If you are working on
@@ -255,7 +255,7 @@ user@fec239-1:~/node $ make
 user@fec239-1:~/node $ sudo make install
 ````
 
-ow we can execute `sudo npm install -g forever` as above
+Now we can run `sudo npm install -g forever` as above
 
 
 ## Deployment
@@ -267,7 +267,7 @@ command. Newer versions of Meteor now use the build command:
 
 ````
 $ cd mofacts/mofacts
-$ meteor build ./build  --architecture os.linux.x86_64
+$ meteor build ../build  --architecture os.linux.x86_64
 $ scp build/mofacts.tar.gz myuser@optimallearning.org:/var/www/mofacts
 ````
 
@@ -303,7 +303,7 @@ $ cd /var/www/mofacts
 ````
 
 One note - remember that for security everything in this directory will owned
-by the www-data user. As a result, you will use `sudo` to execute most of the
+by the www-data user. As a result, you will use `sudo` to run most of the
 commands.
 
 First you should extract the bundle. Meteor tutorials will often recommend
@@ -336,10 +336,10 @@ correct.
 $ sudo chown -R www-data:www-data *
 ````
 
-## Execution
+## Running
 
 One possible gotcha to note is that there isn't any service stop or restart
-functionality supported. As a result, you should kill any previous instance of
+functionality supported. As a result, you should stop any previous instance of
 the process before starting a new one:
 
 ````
