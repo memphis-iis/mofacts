@@ -29,96 +29,144 @@ Router.configure({
     layoutTemplate: 'DefaultLayout'
 });
 
-Router.route('/experiment/:target?/:xcond?', function() {
-    Session.set("loginMode", "experiment");
+Router.route('/experiment/:target?/:xcond?', {
+    name: "client.experiment",
+    action: function() {
+        Session.set("loginMode", "experiment");
 
-    var target = this.params.target || "";
-    var xcond = this.params.xcond || "";
+        var target = this.params.target || "";
+        var xcond = this.params.xcond || "";
 
-    Session.set("experimentTarget", target);
-    Session.set("experimentXCond", xcond);
+        Session.set("experimentTarget", target);
+        Session.set("experimentXCond", xcond);
 
-    console.log("EXPERIMENT target:", target, "xcond", xcond);
+        console.log("EXPERIMENT target:", target, "xcond", xcond);
 
-    Session.set("clusterMapping", "");
-    this.render('signIn');
+        Session.set("clusterMapping", "");
+        this.render('signIn');
+    }
 });
 
-Router.route('/signin', function () {
-    this.render('signIn');
+Router.route('/signin', {
+    name: "client.signin",
+    action: function () {
+        this.render('signIn');
+    }
 });
 
-Router.route('/signup', function () {
-    this.render('signUp');
+Router.route('/signup', {
+    name: "client.signup",
+    action: function () {
+        this.render('signUp');
+    }
 });
 
-Router.route('/', function () {
-    this.render('signIn');
+Router.route('/', {
+    name: "client.index",
+    action: function () {
+        this.render('signIn');
+    }
 });
 
-Router.route('/profile', function () {
-    this.render('profile');
+Router.route('/profile', {
+    name: "client.profile",
+    action: function () {
+        this.render('profile');
+    }
 });
 
-Router.route('/card', function () {
-    this.render('card');
+Router.route('/card', {
+    name: "client.card",
+    action: function () {
+        this.render('card');
+    }
 });
 
-Router.route('/admin', function () {
-    this.render('admin');
+Router.route('/admin', {
+    name: "client.admin",
+    action: function () {
+        this.render('admin');
+    }
 });
 
 //Sends the user to the choose page where the user can choose
 //between viewing all of the items or all of the students for the system.
-Router.route('/choose', function () {
-    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-        this.render('/choose');
-    }
-    else {
-        this.redirect('/student');
+Router.route('/choose', {
+    name: "client.teacher.choose",
+    action: function () {
+        if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+            this.render('/choose');
+        }
+        else {
+            this.redirect('/student');
+        }
     }
 });
 
-Router.route('/instructions', function () {
-    this.render('instructions');
+Router.route('/instructions', {
+    name: "client.instructions",
+    action: function () {
+        this.render('instructions');
+    }
 });
 
-Router.route('/stats', function () {
-    this.render('statsPage');
+Router.route('/stats', {
+    name: "client.stats",
+    action: function () {
+        this.render('statsPage');
+    }
 });
 
 //Graph pages
-Router.route('/itemStats', function () {
-    this.render('itemStats');
+Router.route('/itemStats', {
+    name: "client.teacher.itemStats",
+    action: function () {
+        this.render('itemStats');
+    }
 });
 
 //Used for all of the students on the system
-Router.route('/allStudents', function(){
-    this.subscribe('allUsers').wait();
-    if (this.ready()){
-        this.render('allStudents');
-    }
-    else{
-        this.render('');
+Router.route('/allStudents', {
+    name: "client.teacher.allstudents",
+    action: function() {
+        this.subscribe('allUsers').wait();
+        if (this.ready()) {
+            this.render('allStudents');
+        }
+        else {
+            this.render('');
+        }
     }
 });
 
 //Individual student page
-Router.route('/student', function () {
-    this.render('student');
+Router.route('/student',  {
+    name: "client.teacher.student",
+    action: function () {
+        this.render('student');
+    }
 });
 
 //The item page that houses all the items for a system
-Router.route('/Items', function () {
-    this.render('Items');
+Router.route('/Items',  {
+    name: "client.teacher.items",
+    action:  function () {
+        this.render('Items');
+    }
 });
 
 //A listing of all of the systems/tests
-Router.route('/allItems', function () {
-    Session.set("clusterMapping", "");
-    this.render('allItems');
+Router.route('/allItems',  {
+    name: "client.teacher.allitems",
+    action:  function () {
+        Session.set("clusterMapping", "");
+        this.render('allItems');
+    }
 });
 
-Router.route('/testpage', function() {
-    this.render('tester');
+Router.route('/testpage',  {
+    name: "client.teacher.testpage",
+    action:  function() {
+        this.render('tester');
+    }
 });

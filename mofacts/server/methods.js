@@ -446,6 +446,7 @@ Meteor.startup(function () {
 
 //We use a special server-side route for our experimental data download
 Router.route("experiment-data", {
+    name: "server.data",
     where: "server",
     path: "/experiment-data/:expKey/:format",
     action: function () {
