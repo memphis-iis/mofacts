@@ -889,6 +889,11 @@ function prepareCard() {
     }
     else {
         // Not finished - we have another card to show...
+        // Before we change anything, if we are showing an image we will change
+        // it to a 1x1 pixel (so the old image doesn't stick around if there is
+        // lag while loading the new image)
+        $('#cardQuestionImg').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==');
+        // Actual next card logic
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
         engine.writeQuestionEntry(selReturn);
