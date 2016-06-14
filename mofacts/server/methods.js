@@ -161,14 +161,12 @@ Meteor.startup(function () {
     });
 
     //Rewrite TDF and Stimuli documents if we have a file
-    //IMPORTANT: this will change the records' _id fields!!
-    var isXML = function (fn) {
-        return fn.indexOf('.xml') >= 0;
-    };
-
     //You'll note our lack of upsert in the loops below - we don't want _id to
     //change under MongoDB 2.4 (later versions of Mongo don't have the bug)
 
+    var isXML = function (fn) {
+        return fn.indexOf('.xml') >= 0;
+    };
     _.each(
         _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
         function (ele, idx, lst) {
