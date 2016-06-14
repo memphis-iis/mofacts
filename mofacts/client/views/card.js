@@ -740,14 +740,26 @@ function handleUserInput(e, source, simAnswerCorrect) {
         displayedSystemResponse: $("#UserInteraction").text() || ""
     });
 
+    // TODO: test all this
     // Special: count the number of timeouts in a row IF we are on
-    // an optimized unit. If the count is too high, we leave the page
-    if (isTimeout) {
-        timeoutsSeen++;
-        // TODO: if mod unit, check and possibly leave page
+    // an optimized unit. If the count is too high, we leave the page.
+    // This behavior is controlled by autostopTimeoutThreshold, which
+    // defaults to 2.
+    if (!isTimeout) {
+        timeoutsSeen = 0;  // Reset count
     }
     else {
-        timeoutsSeen = 0;  // Reset count
+        // Anothing timeout!
+        timeoutsSeen++;
+        if (_.prop(engine, "unitType") === "model") {
+            var threshold = _.chain(getCurrentDeliveryParams())
+                .prop("autostopTimeoutThreshold")
+                .intval(2).value();
+            if (timeoutsSeen >= threshold) {
+                console.log("Hit timeout threshold - quitting");
+                leavePage("/profile");
+            }
+        }
     }
 
     //record progress in userProgress variable storage (note that this is
