@@ -1,0 +1,735 @@
+<setspec>     <!--Cluster 0 Factual concept 1 button coded    Cluster 1 Applied concept 1 button coded    Cluster 2 Fac 1 short answer coded    Cluster 3 Appl 1 short coded -->    
+    <clusters>         
+        <cluster>            
+            <display>Which component(s) of the circulatory system acts as a pump?</display>            
+            <response>the heart</response>            
+            <falseResponse>the valves</falseResponse>            
+            <falseResponse>the lungs</falseResponse>            
+            <falseResponse>the blood vessels</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Why doesn't oxygen rich blood flow directly from the lungs to the rest of the body?</display>            
+            <response>because blood needs a pump to circulate it</response>            
+            <falseResponse>because blood must go back to the heart so the heart can receive blood also</falseResponse>            
+            <falseResponse>because valves stop the bloodflow</falseResponse>            
+            <falseResponse>because the blood needs to have the oxygen removed first (before it goes to the rest of the body)</falseResponse>        
+        </cluster>        
+        <cluster>          
+            <displayType>cloze</displayType>            
+            <display>Which component(s) of the circulatory system acts as a pump?</display>            
+            <response>(?=.*heart).*$~Correct;.*~Incorrect. The correct answer is the heart.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Why doesn't oxygen rich blood flow directly from the lungs to the rest of the body?</display>            
+            <response>(?=.*pump).*$|((?=.*mov)|(?=.*circul)).*$~Correct;.*~Incorrect. The correct answer is because blood needs a pump to circulate it.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Which type of blood vessel does blood flow through first when leaving the heart?</display>            
+            <response>arteries</response>            
+            <falseResponse>veins</falseResponse>            
+            <falseResponse>alveoli</falseResponse>            
+            <falseResponse>capillaries</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Why do the arteries have thicker walls than other blood vessels?</display>            
+            <response>because arteries must withstand the high pressure of the blood coming directly from the pump/heart</response>            
+            <falseResponse>because arteries carry blood with a very high concentration of oxygen</falseResponse>            
+            <falseResponse>because arteries have muscles in their walls to pump blood</falseResponse>            
+            <falseResponse>because arteries must contain (and control) more blood than other blood vessels</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which type of blood vessel does blood flow through first when leaving the heart?</display>            
+            <response>(?=.*arter).*$~Correct;.*~Incorrect. The correct answer is arteries.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Why do the arteries have thicker walls than other blood vessels?</display>            
+            <response>(?=.*pressure).*$~Correct;.*~Incorrect. The correct answer is because arteries must withstand the high pressure of blood coming directly from the heart/pump.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Which type of blood vessel carries blood toward the heart?</display>            
+            <response>veins</response>            
+            <falseResponse>capillaries</falseResponse>            
+            <falseResponse>arteries</falseResponse>            
+            <falseResponse>atrium</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>What type of blood vessel would carry blood with the highest concentration of carbon dioxide?</display>            
+            <response>veins</response>            
+            <falseResponse>arteries</falseResponse>            
+            <falseResponse>capillaries</falseResponse>            
+            <falseResponse>lungs</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which type of blood vessel carries blood toward the heart?</display>            
+            <response>(?=.*vein).*$~Correct;.*~Incorrect. The correct answer is veins.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What type of blood vessel would carry blood with the highest concentration of carbon dioxide?</display>            
+            <response>(?=.*vein).*$~Correct;.*~Incorrect. The correct answer is veins.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What is the size difference between vessels close to the heart and those further away?</display>            
+            <response>blood vessels closer to the heart are larger than those further away</response>            
+            <falseResponse>blood vessels further away are bigger than those closer to the heart</falseResponse>            
+            <falseResponse>blood vessels further away are double the size of those closer to the heart</falseResponse>            
+            <falseResponse>there is no size difference</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Where are the largest veins in the body located?</display>            
+            <response>near the heart</response>            
+            <falseResponse>in the neck</falseResponse>            
+            <falseResponse>in the extremeties</falseResponse>            
+            <falseResponse>near the groin</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What is the size difference between vessels close to the heart and those further away?</display>            
+            <response>(?=.*small)((?=.*fur)|(?=.*far)|(?=.*away)).*$|((?=.*large)|(?=.*big))((?=.*close)|(?=.*near)|(?=.*around)).*$~Correct;.*~Incorrect. The correct answer is blood vessels closer to the heart are larger than those further away.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Where are the largest veins in the body located?</display>            
+            <response>(?=.*heart).*$~Correct;.*~Incorrect. The correct answer is near the heart.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What are the top and bottom chambers of the heart called? Answer in that order.</display>            
+            <response>atria and ventricles</response>            
+            <falseResponse>right and left atria</falseResponse>            
+            <falseResponse>atria and alveoli</falseResponse>            
+            <falseResponse>alveoli and ventricles</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>How many discharging chamber(s) are there in the heart and how many discharging chamber(s) are there per circle of the circulatory system? Answer in that order.</display>            
+            <response>two discharging chambers total, one per circle</response>            
+            <falseResponse>four discharging chambers total, two per circle</falseResponse>            
+            <falseResponse>four discharging chambers total, one per circle</falseResponse>            
+            <falseResponse>two discharging chambers total, two per circle</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What are the top and bottom chambers of the heart called? Answer in that order.</display>            
+            <response>(atri)(.*ventric).*$~Correct;.*~Incorrect. The correct answer is atria and ventricles.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>How many discharging chamber(s) are there in the heart and how many discharging chamber(s) are there per circle of the circulatory system? Answer in that order.</display>            
+            <response>((two)|(2))((.*one)|(.*1)).*$~Correct;.*~Incorrect. The correct answer is two discharging chambers total, and one per circle.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Which of the septums in the heart is/are solid and which has/have openings? Answer in that order.</display>            
+            <response>the vertical septum is solid and the horizontal septum has openings</response>            
+            <falseResponse>ventricles are solid and atria have openings</falseResponse>            
+            <falseResponse>all of the septums in the heart have openings</falseResponse>            
+            <falseResponse>all of the septums in the heart are solid</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>A defect called "hole in the heart" causes a hole to form in one of the septums of the heart. Which septum would this abnormality refer to?</display>            
+            <response>vertical septum</response>            
+            <falseResponse>hoirzonal septum</falseResponse>            
+            <falseResponse>left septum</falseResponse>            
+            <falseResponse>right septum</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which of the septums in the heart is/are solid and which has/have openings? Answer in that order.</display>            
+            <response>((.*vertic)|(.*ventricular)(.*atrial))(.*horizontal).*$~Correct;.*~Incorrect. The correct answer is the vertical septum is solid and the horizontal septum has openings.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>A defect called "hole in the heart" causes a hole to form in one of the septums of the heart. Which septum would this abnormality refer to?</display>            
+            <response>((?=.*vertic)|(?=.*ventric)|(?=.*atrial)).*$~Correct;.*~Incorrect. The correct answer is vertical septum.</response>        
+        </cluster>        "<cluster>            
+            <display>How many circles are there in the circulatory system?</display>            
+            <response>2</response>            
+            <falseResponse>3</falseResponse>            
+            <falseResponse>1</falseResponse>            
+            <falseResponse>4</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>What does it mean that the heart is a ""double-pump""?</display>            
+            <response>it pumps blood out for both circles (out of the left side and out of the right side).            </response>            
+            <falseResponse>It pumps twice as much blood</falseResponse>            
+            <falseResponse>It pumps blood into the heart and out of the heart</falseResponse>            
+            <falseResponse>It pumps oxygen to parts of the body and also pumps blood to other parts</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>How many circles are there in the circulatory system?</display>            
+            <response>((?=.*two)|(?=.*2)).*$~Correct;.*~Incorrect. The correct answer is 2.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What does it mean that the heart is a ""double-pump""?</display>            
+            <response>((?=.*oxy)(?=.*carbon dio)).*$|((?=.*circle)|(?=.*cycle))|((?=.*left)(?=.*right)).*$~Correct;.*~Incorrect. The correct answer is it pumps blood out for both circles (out of the left side and out of the right side).</response>        
+        </cluster>"        <cluster>            
+            <display>The ____ side of the heart receives blood from the veins and pumps it to ____.</display>            
+            <response>right, the lungs</response>            
+            <falseResponse>left, the body</falseResponse>            
+            <falseResponse>left, the lungs</falseResponse>            
+            <falseResponse>right, the left side</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Blood with a high concentration of oxygen is sometimes referred to as "fresh blood." Which chamber(s) of the heart would contain fresh blood?</display>            
+            <response>the left atrium and left ventricle</response>            
+            <falseResponse>the right atrium and right ventricle</falseResponse>            
+            <falseResponse>the atria</falseResponse>            
+            <falseResponse>the ventricles</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>The ____ side of the heart receives blood from the veins and pumps it to ____.</display>            
+            <response>(right)((.*lung)|(.*pulmon)).*$~Correct;.*~Incorrect. The correct answer is right, the lungs.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Blood with a high concentration of oxygen is sometimes referred to as "fresh blood." Which chamber(s) of the heart would contain fresh blood?</display>            
+            <response>(?=.*right).*$~Incorrect. The correct answer is the left atrium and left ventricle.;(?=.*left)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the left atrium and left ventricle.</response>        
+        </cluster>        
+        <cluster>            
+            <display>The ___ side of the heart receives blood from the lungs and pumps  it to _____.</display>            
+            <response>left, the body</response>            
+            <falseResponse>right, the lungs</falseResponse>            
+            <falseResponse>left, the right side</falseResponse>            
+            <falseResponse>left, the ventricles</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Blood with a high concentration of carbon dioxide is a dark red color. Which chamber(s) of the heart would contain dark red blood?</display>            
+            <response>the right atrium and right ventricle </response>            
+            <falseResponse>the left atrium and left ventricle</falseResponse>            
+            <falseResponse>the atria</falseResponse>            
+            <falseResponse>the ventricles</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>The ___ side of the heart receives blood from the lungs and pumps  it to _____.</display>            
+            <response>(left)((.*body)|(.*systemic)).*$~Correct;.*~Incorrect. The correct answer is left, the body.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Blood with a high concentration of carbon dioxide is a dark red color. Which chamber(s) of the heart would contain dark red blood?</display>            
+            <response>(?=.*right)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the right atrium and right ventricle.</response>        
+        </cluster>        
+        <cluster>            
+            <display>In the heart, what physically separates the two circles of the circulatory system?</display>            
+            <response>vertical septum</response>            
+            <falseResponse>chest</falseResponse>            
+            <falseResponse>valves</falseResponse>            
+            <falseResponse>horizontal septum</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Why is it important for the two circles of the circulatory system physically separated from each other?</display>            
+            <response>so that the oxygen-rich blood and carbon dioxide-rich blood do not mix</response>            
+            <falseResponse>so the circles don't get to bunched up together</falseResponse>            
+            <falseResponse>so that the correct amount of blood is pumped</falseResponse>            
+            <falseResponse>so that the circles are kept separated to the right and left side of the body</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>In the heart, what physically separates the two circles of the circulatory system?</display>            
+            <response>((?=.*vertical)|(?=.*atrial)|(?=.*ventricular))((?=.*sept)|(?=.*wall)).*$~Correct;.*~Incorrect. The correct answer is vertical septum.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Why is it important for the two circles of the circulatory system physically separated from each other?</display>            
+            <response>((?=.*mix)|(?=.*combin)).*$~Correct;.*~Incorrect. The correct answer is so that the oxygen-rich blood and carbon dioxide-rich blood do not mix.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Blood is sent to various parts of the body from which specific  chamber of the heart?</display>            
+            <response>left ventricle</response>            
+            <falseResponse>left atrium</falseResponse>            
+            <falseResponse>right atrium</falseResponse>            
+            <falseResponse>right ventricle</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Which specific chamber(s) of the heart would need the thickest (strongest) walls and why?</display>            
+            <response>the left ventricle because it propels blood to the rest of the body</response>            
+            <falseResponse>the right atrium because they receives large amounts of blood</falseResponse>            
+            <falseResponse>the left and right ventricles because they are closer to the chest and need more protection</falseResponse>            
+            <falseResponse>The left atrium and left ventricle because they have oxygen-rich blood.</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Blood is sent to various parts of the body from which specific  chamber of the heart?</display>            
+            <response>(?=.*left)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is left ventricle.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which specific chamber(s) of the heart would need the thickest (strongest) walls and why?</display>            
+            <response>(?=.*left )(?=.*ventric)((?=.*propel)|(?=.*pump))((?=.*body)|(?=.*systemic)).*$~Correct;.*~Incorrect. The correct answer is the left ventricle because it must propel blood to the rest of the body.</response>        
+        </cluster>        
+        <cluster>            
+            <display>In terms of interacting with the cells of the body, blood serves what two functions?</display>            
+            <response>Blood delivers oxygen and removes carbon dioxide</response>            
+            <falseResponse>Blood offers protection from infection and temperature regulation</falseResponse>            
+            <falseResponse>Blood is responsible for communication and transportation</falseResponse>            
+            <falseResponse>Blood moves cells and keeps the heart pumping</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Some aquatic species do not have circulatory systems because the water around them essentially serves the same function as the human circulatory system. What function would the water around them serve? </display>            
+            <response>provides nutrients and eliminates toxins through gas exchange</response>            
+            <falseResponse>provides temperature control </falseResponse>            
+            <falseResponse>provides pressure to keep the blood vessels in place</falseResponse>            
+            <falseResponse>provides a pump through wave motion</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>In terms of interacting with the cells of the body, blood serves what two functions?</display>            
+            <response>(?=((.*tak)|(.*rid)|(.*remov)).*(carbon diox))(?=((.*bring)|(.*deliver)|(.*giv)|(.*suppl)).*(oxy))|(?=.*gas)(?=.*exchang).*~Correct;.*~Incorrect. The correct answer is blood delivers oxygen and removes carbon dioxide.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Some aquatic species do not have circulatory systems because the water around them essentially serves the same function as the human circulatory system. What function would the water around them serve? </display>            
+            <response>(?=((.*tak)|(.*rid)|(.*remov)).*(carbon diox))(?=((.*bring)|(.*deliver)|(.*giv)|(.*suppl)).*(oxy))|(?=.*gas)(?=.*exchang).*~Correct;.*~Incorrect. The correct answer is provides nutrients and eliminates toxins through gas exchange.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Which blood vessel allows oxygen and carbon dioxide to pass in and out?</display>            
+            <response>capillaries</response>            
+            <falseResponse>alveoli</falseResponse>            
+            <falseResponse>arteries</falseResponse>            
+            <falseResponse>veins</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Why are the walls of capillaries much thinner than the other blood  vessels?</display>            
+            <response>to allow for gas exchange</response>            
+            <falseResponse>because capillaries carry less blood</falseResponse>            
+            <falseResponse>so that the blood can flow through them more quickly</falseResponse>            
+            <falseResponse>because capillaries must reach tiny parts of the body</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which blood vessel allows oxygen and carbon dioxide to pass in and out?</display>            
+            <response>(?=.*capil).*$~Correct;.*~Incorrect. The correct answer is capillaries.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Why are the walls of capillaries much thinner than the other blood  vessels?</display>            
+            <response>(?=.*gas)(?=.*exchang).*$|(?=.*oxy)(?=.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is to allow for gas e xchange.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What is the first part of the heartbeat?</display>            
+            <response>the heart muscles contracting</response>            
+            <falseResponse>the heart muscles expanding</falseResponse>            
+            <falseResponse>the walls of the heart bumping against the rib cage</falseResponse>            
+            <falseResponse>the heart valves opening</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>What effect would stronger heart muscle have on a person's heart rate and why?</display>            
+            <response>it would lower the heart rate because the heart can pump more blood with each contraction</response>            
+            <falseResponse>it would increase the heart rate because the heart is strong enough to pump blood at a faster rate</falseResponse>            
+            <falseResponse>it would lower the heart rate because it takes more effort to contract the large muscles</falseResponse>            
+            <falseResponse>it would increase the heart rate because the rest of the body would likely also be strong, and need more blood/oxygen</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What is the first part of the heartbeat?</display>            
+            <response>((?=.*contract)|(?=.*squeez)).*$~Correct;.*~Incorrect. The correct answer is the heart muscles contracting.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What effect would stronger heart muscle have on a person's heart rate and why?</display>            
+            <response>(?=.*more)((?=.*low)|(?=.*decrease))((?=.*pump)|(?=.*beat)|(?=.*contract)).*$~Correct;.*~Incorrect. The correct answer is it would lower the heart rate because the heart can pump more blood with each contraction.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Which part of the heart contracts first in each heartbeat?</display>            
+            <response>atria</response>            
+            <falseResponse>the right side</falseResponse>            
+            <falseResponse>ventricles</falseResponse>            
+            <falseResponse>left atrium</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>If the left atrium is contracting now, when does the right atrium contract?</display>            
+            <response>the right atrium would contract at the same time as the left atrium</response>            
+            <falseResponse>the right atrium would contract before the left atrium</falseResponse>            
+            <falseResponse>the right atrium would contract after the left atrium</falseResponse>            
+            <falseResponse>the right atrium does not contract</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Which part of the heart contracts first in each heartbeat?</display>            
+            <response>(?=.*atri).*$~Correct;.*~Incorrect. The correct answer is atria.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>If the left atrium is contracting now, when does the right atrium contract?</display>            
+            <response>((?=.*now)|(?=.*same)|(?=.*during)).*$~Correct;.*~Incorrect. The correct answer is at the same time.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What prevents blood from flowing backward in the heart?</display>            
+            <response>valves</response>            
+            <falseResponse>presure</falseResponse>            
+            <falseResponse>veins</falseResponse>            
+            <falseResponse>air</falseResponse>        
+        </cluster>        
+        <cluster>            
+            <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>            
+            <response>valves</response>            
+            <falseResponse>muscles</falseResponse>            
+            <falseResponse>cholesterol</falseResponse>            
+            <falseResponse>capillaries</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What prevents blood from flowing backward in the heart?</display>            
+            <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>            
+            <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>        
+        </cluster>        <!--PRETEST items 64-79-->        
+        <cluster>            
+            <display>How many chambers are there in the heart?</display>            
+            <response>4</response>            
+            <falseResponse>3</falseResponse>            
+            <falseResponse>2</falseResponse>            
+            <falseResponse>1</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>How many chambers are there in the heart?</display>            
+            <response>((?=.*four)|(?=.*4)).*$~Correct;.*~Incorrect. The correct answer is 4.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What gas do the cells in our bodies need to function, and what gas do they release as a waste product? Answer in that order.</display>            
+            <response>oxygen and carbon dioxide</response>            
+            <falseResponse>oxygen and hydrogen</falseResponse>            
+            <falseResponse>carbon dioxide and oxygen</falseResponse>            
+            <falseResponse>Hydrogen and carbon dioxide </falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What gas do the cells in our bodies need to function, and what gas do they release as a waste product? Answer in that order.</display>            
+            <response>(oxy)(.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is oxygen and carbon dioxide.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Where is the heart located in relation to the lungs?</display>            
+            <response>the heart is located between the lungs</response>            
+            <falseResponse>the heart is located to the left of the lungs</falseResponse>            
+            <falseResponse>the heart is located to the right of the lungs</falseResponse>            
+            <falseResponse>the heart is located above the lungs</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Where is the heart located in relation to the lungs?</display>            
+            <response>((?=.*between)|(?=.*middle)).*$~Correct;.*~Incorrect. The correct answer is the heart is located between the lungs.</response>        
+        </cluster>        
+        <cluster>            
+            <display>Veins that carry blood from different parts of the body empty blood in which specific chamber of the heart?</display>            
+            <response>right atrium</response>            
+            <falseResponse>right ventricle</falseResponse>            
+            <falseResponse>left atrium</falseResponse>            
+            <falseResponse>left ventricle</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>Veins that carry blood from different parts of the body empty blood in which specific chamber of the heart?</display>            
+            <response>(?=.*right)(?=.*atria).*$~Correct;.*~Incorrect. The correct answer is right atrium.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What are the tiny air sacs in the lungs called?</display>            
+            <response>alveoli</response>            
+            <falseResponse>capillaries</falseResponse>            
+            <falseResponse>polyps</falseResponse>            
+            <falseResponse>pods</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What are the tiny air sacs in the lungs called?</display>            
+            <response>(?=.*alveo).*$~Correct;.*~Incorrect. The correct answer is alveoli.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What are the three major types of blood vesslels?</display>            
+            <response>capillaries, veins, and arteries</response>            
+            <falseResponse>veins, ventricles, and capillaries</falseResponse>            
+            <falseResponse>veins, atria, and ventricles</falseResponse>            
+            <falseResponse>capillaries, chambers, and veins</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What are the three major types of blood vesslels?</display>            
+            <response>(?=.*capil)(?=.*vein)(?=.*arter).*$~Correct;.*~Incorrect. The correct answer is capillaries, veins, and arteries.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What are the walls of the heart made out of?</display>            
+            <response>muscle</response>            
+            <falseResponse>cartilage</falseResponse>            
+            <falseResponse>tendon</falseResponse>            
+            <falseResponse>valves</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What are the walls of the heart made out of?</display>            
+            <response>(?=.*musc).*$~Correct;.*~Incorrect. The correct answer is muscle.</response>        
+        </cluster>        
+        <cluster>            
+            <display>What is the smallest type of blood vessel?</display>            
+            <response>capillaries</response>            
+            <falseResponse>veins</falseResponse>            
+            <falseResponse>arteries</falseResponse>            
+            <falseResponse>ventricles</falseResponse>        
+        </cluster>        
+        <cluster>             
+            <displayType>cloze</displayType>            
+            <display>What is the smallest type of blood vessel?</display>            
+            <response>(?=.*capil).*$~Correct;.*~Incorrect. The correct answer is capillaries.</response>        
+        </cluster>        <!--emotions: clusters 80-85-->        
+   								
+        <cluster>									
+            <display>Age?</display>									
+            <response>18-25</response>									
+            <falseResponse>26-34</falseResponse>									
+            <falseResponse>35-54</falseResponse>									
+            <falseResponse>55-64</falseResponse>									
+            <falseResponse>65 and over</falseResponse>									
+        </cluster>									
+        <cluster>									
+            <display>Gender?</display>									
+            <response>Male</response>									
+            <falseResponse>Female</falseResponse>									
+            <falseResponse>Other</falseResponse>									
+            <falseResponse>Prefer not to answer</falseResponse>									
+        </cluster>									
+        <cluster>									
+            <display>Which is the highest level of education you have completed?</display>									
+            <response>Less than High School</response>									
+            <falseResponse>High School or GED</falseResponse>									
+            <falseResponse>Some College</falseResponse>									
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>									
+            <falseResponse>Graduate Degree</falseResponse>									
+        </cluster>									
+        <cluster>									
+           <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
+<br><br> Examples of professions that would require you to select "No" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc.]]></display>
+            <response>Yes</response>									
+            <falseResponse>No</falseResponse>									
+        </cluster>									
+                                 
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.5</parameter>            
+            <display>The __________ to the heart, the fewer the veins there are, and the larger they are.</display>            
+            <response>closer</response>            
+            <parameter>-0.50001</parameter>            
+            <display>The closer to the heart, the fewer the veins there are, and the larger they are.</display>            
+            <response>fewer|less</response>            
+            <parameter>-0.50002</parameter>            
+            <display>The closer to the heart, the fewer the veins there are, and the __________ they are.</display>            
+            <response>larger</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50003</parameter>            
+            <display>First moving away from the heart in the __________, then traveling to various parts of the body in capillaries, and lastly going back to the heart through the veins.</display>            
+            <response>arteries</response>            
+            <parameter>-0.50004</parameter>            
+            <display>First moving away from the heart in the arteries, then traveling to various parts of the body in __________, and lastly going back to the heart through the veins.</display>            
+            <response>capillaries</response>            
+            <parameter>-0.50005</parameter>            
+            <display>First moving away from the heart in the arteries, then traveling to various parts of the body in capillaries, and lastly going back to the heart through the __________.</display>            
+            <response>veins</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50006</parameter>            
+            <display>Each __________ chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
+            <response>top</response>            
+            <parameter>-0.50007</parameter>            
+            <display>Each top chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
+            <response>atrium|atria</response>            
+            <parameter>-0.50008</parameter>            
+            <display>Each top chamber is called an atrium (plural: atria) and can be thought of as __________ chambers. </display>            
+            <response>receiving</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50009</parameter>            
+            <display>The __________ chambers are called ventricles and can be thought of as discharging chambers.</display>            
+            <response>bottom</response>            
+            <parameter>-0.5001</parameter>            
+            <display>The bottom chambers are called __________ and can be thought of as discharging chambers.</display>            
+            <response>ventricles</response>            
+            <parameter>-0.500109999999999</parameter>            
+            <display>The bottom chambers are called ventricles and can be thought of as __________ chambers.</display>            
+            <response>discharging</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500119999999999</parameter>            
+            <display>Blood can flow from the __________ down into the ventricles, because there are openings in the horizontal septum that separates them. </display>            
+            <response>atria</response>            
+            <parameter>-0.500129999999999</parameter>            
+            <display>Blood can flow from the atria down into the __________, because there are openings in the horizontal septum that separates them. </display>            
+            <response>ventricles</response>            
+            <parameter>-0.500139999999999</parameter>            
+            <display>Blood can flow from the atria down into the ventricles, because there are openings in the horizontal septum that separates them. </display>            
+            <response>openings|valves|holes</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500149999999999</parameter>            
+            <display>But the __________ septum is solid, with no openings.</display>            
+            <response>vertical</response>            
+            <parameter>-0.500159999999999</parameter>            
+            <display>But the vertical septum is solid, with no openings.</display>            
+            <response>septum|wall</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500169999999999</parameter>            
+            <display>The __________ is actually made up of two circles. </display>            
+            <response>circulatory system</response>            
+            <parameter>-0.500179999999999</parameter>            
+            <display>The circulatory system is actually made up of two circles. </display>            
+            <response>two|2</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500189999999999</parameter>            
+            <display>The heart is a __________ pump whose two parts work in unison. </display>            
+            <response>double</response>            
+            <parameter>-0.500199999999999</parameter>            
+            <display>The heart is a double __________ whose two parts work in unison. </display>            
+            <response>pump</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500209999999999</parameter>            
+            <display>The __________ side receives the blood from veins and pumps it to the lungs.</display>            
+            <response>right</response>            
+            <parameter>-0.500219999999999</parameter>            
+            <display>The right side receives the blood from __________ and pumps it to the lungs.</display>            
+            <response>veins</response>            
+            <parameter>-0.500229999999999</parameter>            
+            <display>The right side receives the blood from veins and pumps it to the __________.</display>            
+            <response>lungs</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500239999999999</parameter>            
+            <display>The __________ side receives the blood from the lungs and pumps it to the rest of the body.</display>            
+            <response>left</response>            
+            <parameter>-0.500249999999999</parameter>            
+            <display>The left side receives the blood from the __________ and pumps it to the rest of the body.</display>            
+            <response>lungs</response>            
+            <parameter>-0.500259999999999</parameter>            
+            <display>The left side receives the blood from the lungs and pumps it to the rest of the body.</display>            
+            <response>rest of the body|body|body parts|parts of the body</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500269999999999</parameter>            
+            <display>The __________ that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
+            <response>veins</response>            
+            <parameter>-0.500279999999999</parameter>            
+            <display>The veins that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
+            <response>body parts|body|rest of the body|parts of the body</response>            
+            <parameter>-0.500289999999999</parameter>            
+            <display>The veins that carry blood back from the body parts empty the blood into the __________ of the heart. </display>            
+            <response>right atrium</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500299999999999</parameter>            
+            <display>The blood then flows down into the __________, which pumps it into the lungs and back to the heart, into the left atrium</display>            
+            <response>right ventricle</response>            
+            <parameter>-0.500309999999999</parameter>            
+            <display>The blood then flows down into the right ventricle, which pumps it into the __________ and back to the heart, into the left atrium</display>            
+            <response>lungs</response>            
+            <parameter>-0.500319999999999</parameter>            
+            <display>The blood then flows down into the right ventricle, which pumps it into the lungs and back to the heart, into the __________</display>            
+            <response>left atrium</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500329999999998</parameter>            
+            <display>It brings __________ to the body cells and takes away their carbon dioxide.</display>            
+            <response>oxygen</response>            
+            <parameter>-0.500339999999998</parameter>            
+            <display>It brings oxygen to the body cells and takes away their __________.</display>            
+            <response>carbon dioxide</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500349999999998</parameter>            
+            <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>thin walls|walls</response>            
+            <parameter>-0.500359999999998</parameter>            
+            <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>tiny capillaries|capillaries</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500369999999998</parameter>            
+            <display>As the blood flows through the __________ in the body, carrying its supply of oxygen, it also collects carbon dioxide.</display>            
+            <response>capillaries</response>            
+            <parameter>-0.500379999999998</parameter>            
+            <display>As the blood flows through the capillaries in the body, carrying its supply of __________, it also collects carbon dioxide.</display>            
+            <response>oxygen</response>            
+            <parameter>-0.500389999999998</parameter>            
+            <display>As the blood flows through the capillaries in the body, carrying its supply of oxygen, it also collects __________.</display>            
+            <response>carbon dioxide</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500399999999998</parameter>            
+            <display>Blood from the heart flows through these __________, passing carbon dioxide into the tiny air sacs.</display>            
+            <response>capillaries</response>            
+            <parameter>-0.500409999999998</parameter>            
+            <display>Blood from the heart flows through these capillaries, passing __________ into the tiny air sacs.</display>            
+            <response>carbon dioxide</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500419999999998</parameter>            
+            <display>The __________-rich blood is returned to the left atrium of the heart and pumped out to the body through the left ventricle.</display>            
+            <response>oxygen</response>            
+            <parameter>-0.500429999999998</parameter>            
+            <display>The oxygen-rich blood is returned to the __________ of the heart and pumped out to the body through the left ventricle.</display>            
+            <response>left atrium</response>            
+            <parameter>-0.500439999999998</parameter>            
+            <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body through the __________.</display>            
+            <response>left ventricle</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500449999999998</parameter>            
+            <display>The contraction starts with the __________, which push blood into the ventricles. </display>            
+            <response>atria</response>            
+            <parameter>-0.500459999999998</parameter>            
+            <display>The contraction starts with the atria, which push blood into the __________. </display>            
+            <response>ventricles</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500469999999998</parameter>            
+            <display>The __________ is the first part of the heartbeat.</display>            
+            <response>contraction</response>            
+            <parameter>-0.500479999999998</parameter>            
+            <display>The contraction is the __________ part of the heartbeat.</display>            
+            <response>first</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500489999999998</parameter>            
+            <display>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. </display>            
+            <response>backward|up</response>            
+            <parameter>-0.500499999999998</parameter>            
+            <display>Blood cannot flow backward into the arteries because little trapdoors called __________ stop it. </display>            
+            <response>valves</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500509999999998</parameter>            
+            <display>Valves also guard the openings from the __________ into the ventricles. </display>            
+            <response>atria</response>            
+            <parameter>-0.500519999999998</parameter>            
+            <display>Valves also guard the openings from the atria into the __________. </display>            
+            <response>ventricles</response>        
+        </cluster>    
+    </clusters>
+</setspec>
