@@ -358,8 +358,9 @@ Template.card.rendered = function() {
     }
 };
 
+
 Template.card.helpers({
-    username: function () {
+    'username': function () {
         if (!haveMeteorUser()) {
             leavePage(routeToSignin);
         }
@@ -368,71 +369,87 @@ Template.card.helpers({
         }
     },
 
-    textCard: function() {
+    'currentQuestion': function() {
+        return Session.get("currentQuestion");
+    },
+
+    'displayAnswer': function() {
+        return Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+    },
+
+    'rawAnswer': function() {
+        return Session.get("currentAnswer");
+    },
+
+    'currentProgress': function() {
+        return Session.get("questionIndex");
+    },
+
+    'textCard': function() {
         return getQuestionType() === "text";
     },
 
-    audioCard: function() {
+    'audioCard': function() {
         return getQuestionType() === "sound";
     },
 
-    imageCard: function() {
+    'imageCard': function() {
         return getQuestionType() === "image";
     },
 
-    clozeCard: function() {
+    'clozeCard': function() {
         return getQuestionType() === "cloze";
     },
 
-    textOrClozeCard: function() {
+    'textOrClozeCard': function() {
         var qt = getQuestionType();
         return qt === "text" || qt === "cloze";
     },
 
-    test: function() {
+    'test': function() {
         return getTestType() === "t";
     },
 
-    study: function() {
+    'study': function() {
         return getTestType() === "s";
     },
 
-    drill: function() {
+    'drill': function() {
         return getTestType() === "d";
     },
 
-    trial: function() {
+    'trial': function() {
         var type = getTestType();
         return type === "d" || type === "s" || type === "t";
     },
 
-    testordrill: function() {
+    'testordrill': function() {
         var type = getTestType();
         return type === "d" || type === "t";
     },
 
-    fontSizeClass: function() {
+    'fontSizeClass': function() {
         // Take advantage of Bootstrap h1-h5 classes
         return 'h' + getCurrentFontSize().toString();
     },
 
-    skipstudy: function() {
+    'skipstudy': function() {
         return getCurrentDeliveryParams().skipstudy;
     },
 
-    buttonTrial: function() {
+    'buttonTrial': function() {
         return Session.get("buttonTrial");
     },
 
-    buttonList: function() {
+    'buttonList': function() {
         return buttonList.find({}, {sort: {idx: 1}});
     },
 
-    currentScore: function() {
+    'currentScore': function() {
         return Session.get("currentScore");
     },
 
-    haveDispTimeout: function() {
+    'haveDispTimeout': function() {
         var disp = getDisplayTimeouts();
         return (disp.minSecs > 0 || disp.maxSecs > 0);
     }
