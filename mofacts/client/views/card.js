@@ -84,6 +84,7 @@ function clearButtonList() {
     buttonList.remove({'temp': 1});
 }
 
+var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
 var unitStartTimestamp = 0;
 var trialTimestamp = 0;
 var keypressTimestamp = 0;
@@ -722,6 +723,16 @@ function handleUserInput(e, source, simAnswerCorrect) {
         displayedSystemResponse: $("#UserInteraction").text() || ""
     });
 
+    // Special: count the number of timeouts in a row IF we are on
+    // an optimized unit. If the count is too high, we leave the page
+    if (isTimeout) {
+        timeoutsSeen++;
+        // TODO: if mod unit, check and possibly leave page
+    }
+    else {
+        timeoutsSeen = 0;  // Reset count
+    }
+
     //record progress in userProgress variable storage (note that this is
     //helpful and used on the stats page, but the user times log is the
     //"system of record"
@@ -1124,6 +1135,7 @@ function resumeFromUserTimesLog() {
     console.log("Resuming from previous User Times info (if any)");
 
     //Clear any previous permutation and/or timeout call
+    timeoutsSeen = 0;
     clearCardTimeout();
     keypressTimestamp = 0;
     trialTimestamp = 0;
