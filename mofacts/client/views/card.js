@@ -429,6 +429,11 @@ Template.card.helpers({
 
     currentScore: function() {
         return Session.get("currentScore");
+    },
+
+    haveDispTimeout: function() {
+        var disp = getDisplayTimeouts();
+        return (disp.minSecs > 0 || disp.maxSecs > 0);
     }
 });
 
@@ -884,6 +889,11 @@ function prepareCard() {
     }
     else {
         // Not finished - we have another card to show...
+        // Before we change anything, if we are showing an image we will change
+        // it to a 1x1 pixel (so the old image doesn't stick around if there is
+        // lag while loading the new image)
+        $('#cardQuestionImg').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==');
+        // Actual next card logic
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
         engine.writeQuestionEntry(selReturn);
@@ -1016,6 +1026,13 @@ function showUserInteraction(isGoodNews, news) {
         .addClass(isGoodNews ? "alert-success" : "alert-danger")
         .text(news)
         .show();
+
+    // Scroll to ensure correct view in on screen
+    var offset = $("#feedbackTarget").offset().top - $(window).scrollTop();
+    if(offset > window.innerHeight) {
+        // Not in view so scroll to it
+        $('html,body').animate({scrollTop: offset}, 100);
+    }
 }
 
 function hideUserInteraction() {
@@ -1023,6 +1040,13 @@ function hideUserInteraction() {
         .removeClass("text-align alert alert-success alert-danger")
         .html("")
         .hide();
+
+    // Scroll to ensure correct view in on screen
+    var offset = $("#stimulusTarget").offset().top - $(window).scrollTop();
+    if(offset > window.innerHeight) {
+        // Not in view so scroll to it
+        $('html,body').animate({scrollTop: offset}, 100);
+    }
 }
 
 function stopUserInput() {
@@ -1544,7 +1568,6 @@ function processUserTimesLog() {
     else if (moduleCompleted) {
         //They are DONE!
         console.log("TDF already completed - leaving for profile page.");
-        leavePage("/profile");
     }
     else {
         //We have an answer (or no questions at all) - run next question logic
