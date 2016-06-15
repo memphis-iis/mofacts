@@ -19,7 +19,7 @@ var crypto = Npm.require('crypto');
               "U5OG4eLB1SHxx5C9pffpI2pi7p31of4nYGb5FnsxodGxrDlJI6j2ituf5iqD" +
               "5GkWDW7QZZi3feiuUebJhsDfmlvlr73hDahAeTUH4p4g22QybcP5G2mV9blm" +
               "Zf0k837VTvUMsoBCOpurjDFyX9fpL1FFMpWZ4eXveH7I5Ck2h0wtmgCVpCJX"
-    ; //TODO: get a real key
+    ; //TODO: get a real key when we have an external config file
 
     encryptUserData = function(data) {
         var cipher = crypto.createCipher(algo, key);
