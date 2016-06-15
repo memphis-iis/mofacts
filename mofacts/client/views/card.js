@@ -613,6 +613,7 @@ function playCurrentQuestionSound(onEndCallback) {
             if (currentQuestionSound) {
                 currentQuestionSound.isCurrentlyPlaying = true;
             }
+            console.log("Sound played");
         },
 
         onend: function() {
@@ -622,6 +623,7 @@ function playCurrentQuestionSound(onEndCallback) {
             if (!!onEndCallback) {
                 onEndCallback();
             }
+            console.log("Sound completed");
         },
     });
 
