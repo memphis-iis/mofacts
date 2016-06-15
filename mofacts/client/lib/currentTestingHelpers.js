@@ -253,7 +253,8 @@ getCurrentDeliveryParams = function (currUnit) {
         fontsize: 3,
         correctscore: 1,
         incorrectscore: 0,
-        practiceseconds: 0
+        practiceseconds: 0,
+        autostopTimeoutThreshold: -1
     };
 
     //We've defined defaults - also define translatations for values

@@ -753,15 +753,24 @@ function handleUserInput(e, source, simAnswerCorrect) {
     else {
         // Anothing timeout!
         timeoutsSeen++;
-        if (_.prop(engine, "unitType") === "model") {
-            var threshold = _.chain(getCurrentDeliveryParams())
-                .prop("autostopTimeoutThreshold")
-                .intval(2).value();
-            if (timeoutsSeen >= threshold) {
-                console.log("Hit timeout threshold - quitting");
-                leavePage("/profile");
-                return;  // We are totally done
-            }
+
+        // Figure out threshold
+        // The default val is -1 since getCurrentDeliveryParams doesn't know if
+        // the current unit is a learning session (default of 2) or a scheduled
+        // session (default of 0).
+        // Also note: threshold < 1 means no autostop at all
+        var threshold = _.chain(getCurrentDeliveryParams())
+            .prop("autostopTimeoutThreshold")
+            .intval(-1).value();  //same def val as getCurrentDeliveryParams
+
+        if (threshold < 0) {
+            threshold = (_.prop(engine, "unitType") === "model") ? 2 : 0;
+        }
+
+        if (threshold > 0 && timeoutsSeen >= threshold) {
+            console.log("Hit timeout threshold", threshold, "Quitting");
+            leavePage("/profile");
+            return;  // We are totally done
         }
     }
 
