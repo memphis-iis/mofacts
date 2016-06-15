@@ -760,6 +760,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
             if (timeoutsSeen >= threshold) {
                 console.log("Hit timeout threshold - quitting");
                 leavePage("/profile");
+                return;  // We are totally done
             }
         }
     }
