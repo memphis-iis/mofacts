@@ -478,21 +478,18 @@ function newQuestionHandler() {
         //are we using specified choice order for buttons?
         //Or do we get them from the cluster?
         var buttonOrder = [];
-        try {
-            if (file && file.tdfs.tutor.unit[unitNumber].buttonorder) {
-                var btnOrderTxt = file.tdfs.tutor.unit[unitNumber].buttonorder;
-                buttonOrder = (btnOrderTxt + '').split(",");
-                if (!buttonOrder || !buttonOrder.length) {
-                    buttonOrder = []; //Just use empty array
-                }
+        var btnOrderTxt = _.chain(file)
+            .prop("tdfs").prop("tutor")
+            .prop("unit").prop(unitNumber)
+            .prop("buttonorder").value();
+        if (btnOrderTxt) {
+            buttonOrder = _.trim(btnOrderTxt).split(",");
+            if (!buttonOrder || !buttonOrder.length) {
+                buttonOrder = []; //Just use empty array
             }
-        }
-        catch (e) {
-            console.log("Error find button order (will use []): " + e);
         }
 
         var choicesArray = [];
-
         if (buttonOrder.length > 1) {
             //Top-level specification for buttons
             choicesArray = buttonOrder;
