@@ -84,7 +84,7 @@ This will start the virtual machine. Since this is the first time you've
 actually started it, a provisioning scripting will run. This script will take
 some time since it will doing a variety of things, including downloading and
 installing software. If this step fails, the safest way to restart is to
-destroy the virtual machine and start over:
+delete the virtual machine and start over:
 
 ````
 $ vagrant destroy
@@ -147,7 +147,7 @@ the default `27017`.
 
 As implied above, the general idea is that you edit source code, look at data,
 test the application, commit code to the repository, etc. in your native
-operating system. The vagrant-controlled virtual machine is where you execute
+operating system. The vagrant-controlled virtual machine is where you run
 the project in a suitable environment for testing.
 
 ## When you're done with development
@@ -164,7 +164,7 @@ $ vagrant halt
 ````
 
 This is fine for the end of a development session, but if you want to remove
-the virtual machine from your computer you can destroy it:
+the virtual machine from your computer you can delete it:
 
 ````
 $ vagrant destroy
