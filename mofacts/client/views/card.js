@@ -739,7 +739,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
         displayedSystemResponse: $("#UserInteraction").text() || ""
     });
 
-    // TODO: test all this
     // Special: count the number of timeouts in a row IF we are on
     // an optimized unit. If the count is too high, we leave the page.
     // This behavior is controlled by autostopTimeoutThreshold, which
