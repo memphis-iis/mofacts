@@ -189,7 +189,7 @@ function lockoutPeriodicCheck() {
             // Past max and a max was specified - it's time to go
             $("#continueButton").prop("disabled", true);
             $("#displayTimeoutMsg").text("");
-            userContinue();
+            instructContinue();
         }
         else {
             // Past max and no valid maximum - they get a continue button
@@ -208,7 +208,9 @@ function lockoutPeriodicCheck() {
 }
 
 // Called when users continues to next screen
-function userContinue() {
+// SUPER-IMPORTANT: note that this can be called outside this template, so it
+// must only reference visible from anywhere on the client
+instructContinue = function () {
     //On resume, seeing an "instructions" log event is seen as a breaking point
     //in the TDF session (since it's supposed to be the beginning of a new unit).
     //As a result, we only want to log an instruction record ONCE PER UNIT. In
@@ -250,7 +252,7 @@ function userContinue() {
         Session.set("needResume", true);
         leavePage("/card");
     });
-}
+};
 
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers
@@ -268,14 +270,7 @@ Template.instructions.helpers({
     },
 
     instructions: function () {
-        var currUnit = getCurrentTdfUnit();
-        var instructions = null;
-
-        if (currUnit) {
-            instructions = currUnit.unitinstructions;
-        }
-
-        return instructions || "Please do your best to answer each question.";
+        return _.chain(getCurrentTdfUnit()).prop("unitinstructions").trim().value();
     },
 
     islockout: function() {
@@ -318,7 +313,7 @@ Template.instructions.rendered = function() {
 Template.instructions.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
-        userContinue();
+        instructContinue();
     },
 
     'click .logoutLink' : function (event) {

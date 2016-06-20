@@ -105,7 +105,21 @@ Router.route('/choose', {
 
 Router.route('/instructions', {
     name: "client.instructions",
+    onBeforeAction: function() {
+        // TODO: this is broken - maybe we need an instruction check wherever we are routing?
+        // If there aren't any instructions we just move on
+        var txt = _.chain(getCurrentTdfUnit()).prop("unitinstructions").trim().value();
+        if (!txt) {
+            console.log("Instructions empty: skipping");
+            instructContinue();
+        }
+        else {
+            console.log("Allowing instruction route to continue");
+            this.next();
+        }
+    },
     action: function () {
+        //Everything
         this.render('instructions');
     }
 });

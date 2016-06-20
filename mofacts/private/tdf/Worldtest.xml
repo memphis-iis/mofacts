@@ -12,10 +12,12 @@
     </setspec>
 
     <unit>
-        <unitname>Model Practice</unitname>
+        <unitname>Instructions</unitname>
         <unitinstructions>Do your best to identify the country shown</unitinstructions>
-        <instructionminseconds></instructionminseconds>
-        <instructionmaxseconds></instructionmaxseconds>
+    </unit>
+
+    <unit>
+        <unitname>Model Practice</unitname>
 
         <learningsession>
             <displayminseconds></displayminseconds>
