@@ -3,15 +3,18 @@
 body {
     background-color: #C1E1A6;
     font-family: 'Lato', sans-serif;
-    color: #585858;
+    color: #000000;
     font-size: 18px;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #C1E1A6;
+    color: #000000;
     font-family: 'Lato', sans-serif;
 }
-
+s1 {
+    color: white;
+    font-family: 'Lato', sans-serif;
+}
 @media (max-width: 768px) {
     .sound-img {
         width: 32px;
@@ -109,7 +112,7 @@ img {
 }
 
 legend {
-    color: #585858;
+    color: #000000;
     font-family: 'Lato', sans-serif;
     font-size: 28px;
     border-color: #C1E1A6;
@@ -126,7 +129,7 @@ legend {
 }
 
 .navbar-inverse {
-    background-color: #585858;
+    background-color: #000000;
 }
 
 .navbar-inverse .navbar-brand {
@@ -137,13 +140,13 @@ legend {
 
 .navbar-inverse .navbar-nav > li > a {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
 }
 
 .navbar-inverse .navbar-nav > li > a:focus {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
 }
 
@@ -160,10 +163,11 @@ legend {
     font-size: 16px;
     white-space:normal;
     width: 100%;
+    
 }
 
 .btn:hover {
-    background-color: #585858;
+    background-color: #000000;
     color:white;
 }
 
@@ -196,37 +200,37 @@ legend {
 }
 
 .dropdown-menu {
-    background-color: #585858;
+    background-color: #000000;
     color: white;
 }
 
 .dropdown-menu > li > a:focus {
-    background-color: #585858;
+    background-color: #000000;
     color: white;
 }
 
 .dropdown-menu > li > a {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
     border-color: black;
 }
 
 .dropdown-menu body {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
 }
 
 .dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
     color: white;
-    background-color: #585858;
+    background-color: #000000;
     font-family: 'Lato', sans-serif;
 }
 
@@ -257,7 +261,7 @@ input:focus {
 .modal {
     background-color: #C1E1A6;
     font-family: "Lato",sans-serif;
-    color: #585858;
+    color: #000000;
 }
 
 .switchButton {
@@ -271,7 +275,7 @@ input:focus {
 }
 
 .table {
-    border: 1px solid #585858;
+    border: 1px solid #000000;
 }
 
 .table-bordered > thead > tr > th,
@@ -280,7 +284,7 @@ input:focus {
 .table-bordered > thead > tr > td,
 .table-bordered > tbody > tr > td,
 .table-bordered > tfoot > tr > td {
-    border: 1px solid #585858;
+    border: 1px solid #000000;
     border-right-width: 1px;
     border-left-width: 0;
 }

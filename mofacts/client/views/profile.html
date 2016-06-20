@@ -21,15 +21,12 @@
 
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">{{username}} <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" class="homeLink">Home</a></li>           <li class="divider"></li>
-                            <li><a href="#" class="allItemsLink">Progress</a></li>
-                            <li class="divider"></li>
-                            <li><a href="#" class="logoutLink">Logout</a></li>
-                        </ul>
-                    </li>
+                    <TABLE BORDER="0">
+                        <tr><td><s1>{{username}}</s1></td><td>&nbsp;</td>
+                            <td> <button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Home</button></td><td>&nbsp;</td>
+                            <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td><td>&nbsp;</td>
+                            <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td></tr>
+                    </table>
                 </ul>
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
@@ -43,7 +40,7 @@
 
         <div class="row" id="testButtonContainer">
             <legend class="text-center">
-                Your Practice Modules
+                Practice modules:
                 {{#if isInRole 'admin,teacher'}}
                     <br>
                     <input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?
@@ -63,7 +60,6 @@
         {{/if}}
         
 </div>
-    
     <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
         <legend>Mobile Fact and Concept Training System (MoFaCTS):</legend>
          <ul class="dashed">    

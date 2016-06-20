@@ -361,7 +361,7 @@
         <cluster>            
             <display>What prevents blood from flowing backward in the heart?</display>            
             <response>valves</response>            
-            <falseResponse>presure</falseResponse>            
+            <falseResponse>pressure</falseResponse>            
             <falseResponse>veins</falseResponse>            
             <falseResponse>air</falseResponse>        
         </cluster>        
@@ -381,104 +381,7 @@
             <displayType>cloze</displayType>            
             <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>            
             <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>        
-        </cluster>        <!--PRETEST items 64-79-->        
-        <cluster>            
-            <display>How many chambers are there in the heart?</display>            
-            <response>4</response>            
-            <falseResponse>3</falseResponse>            
-            <falseResponse>2</falseResponse>            
-            <falseResponse>1</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>How many chambers are there in the heart?</display>            
-            <response>((?=.*four)|(?=.*4)).*$~Correct;.*~Incorrect. The correct answer is 4.</response>        
-        </cluster>        
-        <cluster>            
-            <display>What gas do the cells in our bodies need to function, and what gas do they release as a waste product? Answer in that order.</display>            
-            <response>oxygen and carbon dioxide</response>            
-            <falseResponse>oxygen and hydrogen</falseResponse>            
-            <falseResponse>carbon dioxide and oxygen</falseResponse>            
-            <falseResponse>Hydrogen and carbon dioxide </falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>What gas do the cells in our bodies need to function, and what gas do they release as a waste product? Answer in that order.</display>            
-            <response>(oxy)(.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is oxygen and carbon dioxide.</response>        
-        </cluster>        
-        <cluster>            
-            <display>Where is the heart located in relation to the lungs?</display>            
-            <response>the heart is located between the lungs</response>            
-            <falseResponse>the heart is located to the left of the lungs</falseResponse>            
-            <falseResponse>the heart is located to the right of the lungs</falseResponse>            
-            <falseResponse>the heart is located above the lungs</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>Where is the heart located in relation to the lungs?</display>            
-            <response>((?=.*between)|(?=.*middle)).*$~Correct;.*~Incorrect. The correct answer is the heart is located between the lungs.</response>        
-        </cluster>        
-        <cluster>            
-            <display>Veins that carry blood from different parts of the body empty blood in which specific chamber of the heart?</display>            
-            <response>right atrium</response>            
-            <falseResponse>right ventricle</falseResponse>            
-            <falseResponse>left atrium</falseResponse>            
-            <falseResponse>left ventricle</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>Veins that carry blood from different parts of the body empty blood in which specific chamber of the heart?</display>            
-            <response>(?=.*right)(?=.*atria).*$~Correct;.*~Incorrect. The correct answer is right atrium.</response>        
-        </cluster>        
-        <cluster>            
-            <display>What are the tiny air sacs in the lungs called?</display>            
-            <response>alveoli</response>            
-            <falseResponse>capillaries</falseResponse>            
-            <falseResponse>polyps</falseResponse>            
-            <falseResponse>pods</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>What are the tiny air sacs in the lungs called?</display>            
-            <response>(?=.*alveo).*$~Correct;.*~Incorrect. The correct answer is alveoli.</response>        
-        </cluster>        
-        <cluster>            
-            <display>What are the three major types of blood vesslels?</display>            
-            <response>capillaries, veins, and arteries</response>            
-            <falseResponse>veins, ventricles, and capillaries</falseResponse>            
-            <falseResponse>veins, atria, and ventricles</falseResponse>            
-            <falseResponse>capillaries, chambers, and veins</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>What are the three major types of blood vesslels?</display>            
-            <response>(?=.*capil)(?=.*vein)(?=.*arter).*$~Correct;.*~Incorrect. The correct answer is capillaries, veins, and arteries.</response>        
-        </cluster>        
-        <cluster>            
-            <display>What are the walls of the heart made out of?</display>            
-            <response>muscle</response>            
-            <falseResponse>cartilage</falseResponse>            
-            <falseResponse>tendon</falseResponse>            
-            <falseResponse>valves</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>What are the walls of the heart made out of?</display>            
-            <response>(?=.*musc).*$~Correct;.*~Incorrect. The correct answer is muscle.</response>        
-        </cluster>        
-        <cluster>            
-            <display>What is the smallest type of blood vessel?</display>            
-            <response>capillaries</response>            
-            <falseResponse>veins</falseResponse>            
-            <falseResponse>arteries</falseResponse>            
-            <falseResponse>ventricles</falseResponse>        
-        </cluster>        
-        <cluster>             
-            <displayType>cloze</displayType>            
-            <display>What is the smallest type of blood vessel?</display>            
-            <response>(?=.*capil).*$~Correct;.*~Incorrect. The correct answer is capillaries.</response>        
-        </cluster>        <!--emotions: clusters 80-85-->        
-   								
+        </cluster>       		
         <cluster>									
             <display>Age?</display>									
             <response>18-25</response>									
@@ -508,6 +411,228 @@
             <response>Yes</response>									
             <falseResponse>No</falseResponse>									
         </cluster>									
-                   
+                          
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.5</parameter>            
+            <display>A heartbeat __________ two parts.</display>            
+            <response>has</response>            
+            <parameter>-0.50001</parameter>            
+            <display>A heartbeat has two __________.</display>            
+            <response>parts</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50002</parameter>            
+            <display>The bottom chambers are called ventricles and __________ be thought of as discharging chambers.</display>            
+            <response>can</response>            
+            <parameter>-0.50003</parameter>            
+            <display>The bottom chambers are called ventricles and can be thought of as __________ chambers.</display>            
+            <response>discharging</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50004</parameter>            
+            <display>The left ventricle of the heart sends __________ out through a big artery and from there, into branching arteries that carry it to various parts of the body.</display>            
+            <response>blood</response>            
+            <parameter>-0.50005</parameter>            
+            <display>The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries __________ carry it to various parts of the body.</display>            
+            <response>that</response>            
+            <parameter>-0.50006</parameter>            
+            <display>The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries that carry it to __________ parts of the body.</display>            
+            <response>various</response>            
+            <parameter>-0.50007</parameter>            
+            <display>The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries that carry it to various __________ of the body.</display>            
+            <response>parts</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50008</parameter>            
+            <display>Its walls __________ made of thick muscle.</display>            
+            <response>are</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.50009</parameter>            
+            <display>The __________ is a pump.</display>            
+            <response>heart</response>            
+            <parameter>-0.5001</parameter>            
+            <display>The heart is a __________.</display>            
+            <response>pump</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500109999999999</parameter>            
+            <display>But the arteries __________ branch again and again, to form many smaller tubes.</display>            
+            <response>soon</response>            
+            <parameter>-0.500119999999999</parameter>            
+            <display>But the arteries soon branch again and again, to form many __________ tubes.</display>            
+            <response>smaller</response>            
+            <parameter>-0.500129999999999</parameter>            
+            <display>But the arteries soon branch again and again, to form many smaller __________.</display>            
+            <response>tubes</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500139999999999</parameter>            
+            <display>Then the __________ of the ventricles squeeze together and force the blood out into the arteries.</display>            
+            <response>walls</response>            
+            <parameter>-0.500149999999999</parameter>            
+            <display>Then the walls of the __________ squeeze together and force the blood out into the arteries.</display>            
+            <response>ventricles</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500159999999999</parameter>            
+            <display>These __________ pass easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>gases</response>            
+            <parameter>-0.500169999999999</parameter>            
+            <display>These gases __________ easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>pass</response>            
+            <parameter>-0.500179999999999</parameter>            
+            <display>These gases pass __________ back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>easily</response>            
+            <parameter>-0.500189999999999</parameter>            
+            <display>These gases pass easily back and __________ through the thin walls of the tiny capillaries.</display>            
+            <response>forth</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500199999999999</parameter>            
+            <display>The __________ side receives the blood from the lungs and pumps it to the rest of the body.</display>            
+            <response>left</response>            
+            <parameter>-0.500209999999999</parameter>            
+            <display>The left __________ receives the blood from the lungs and pumps it to the rest of the body.</display>            
+            <response>side</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500219999999999</parameter>            
+            <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped __________ to the body through the left ventricle.</display>            
+            <response>out</response>            
+            <parameter>-0.500229999999999</parameter>            
+            <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the __________ through the left ventricle.</display>            
+            <response>body</response>            
+            <parameter>-0.500239999999999</parameter>            
+            <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body __________ the left ventricle.</display>            
+            <response>through</response>            
+            <parameter>-0.500249999999999</parameter>            
+            <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body through the __________ ventricle.</display>            
+            <response>left</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500259999999999</parameter>            
+            <display>The blood is then pumped into the __________ ventricle, and then to the lungs.</display>            
+            <response>right</response>            
+            <parameter>-0.500269999999999</parameter>            
+            <display>The blood is then pumped into the right __________, and then to the lungs.</display>            
+            <response>ventricle</response>            
+            <parameter>-0.500279999999999</parameter>            
+            <display>The blood is then pumped into the right ventricle, and then to the __________.</display>            
+            <response>lungs</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500289999999999</parameter>            
+            <display>The circulatory system is actually __________ up of two circles.</display>            
+            <response>made</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500299999999999</parameter>            
+            <display>The arteries that leave the heart __________ thick tubes.</display>            
+            <response>are</response>            
+            <parameter>-0.500309999999999</parameter>            
+            <display>The arteries that leave the heart are thick __________.</display>            
+            <response>tubes</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500319999999999</parameter>            
+            <display>__________ oxygen and carbon dioxide are carried in the blood mainly by the red blood cells.</display>            
+            <response>Both</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500329999999998</parameter>            
+            <display>The right side __________ the blood from veins and pumps it to the lungs.</display>            
+            <response>receives</response>            
+            <parameter>-0.500339999999998</parameter>            
+            <display>The right side receives the blood from veins and __________ it to the lungs.</display>            
+            <response>pumps</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500349999999998</parameter>            
+            <display>The __________ is then returned to the right atrium.</display>            
+            <response>blood</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500359999999998</parameter>            
+            <display>__________ can squeeze (contract) to send blood rushing out.</display>            
+            <response>They</response>            
+            <parameter>-0.500369999999998</parameter>            
+            <display>They __________ squeeze (contract) to send blood rushing out.</display>            
+            <response>can</response>            
+            <parameter>-0.500379999999998</parameter>            
+            <display>They can squeeze (contract) to send blood __________ out.</display>            
+            <response>rushing</response>            
+            <parameter>-0.500389999999998</parameter>            
+            <display>They can squeeze (contract) to send blood rushing __________.</display>            
+            <response>out</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500399999999998</parameter>            
+            <display>The tiniest blood vessels, called capillaries, are so small you __________ need a microscope to see them.</display>            
+            <response>would</response>            
+            <parameter>-0.500409999999998</parameter>            
+            <display>The tiniest blood vessels, called capillaries, are so small you would need a microscope to __________ them.</display>            
+            <response>see</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500419999999998</parameter>            
+            <display>It is hollow and __________ fill up with blood.</display>            
+            <response>can</response>            
+            <parameter>-0.500429999999998</parameter>            
+            <display>It is hollow and can __________ up with blood.</display>            
+            <response>fill</response>            
+            <parameter>-0.500439999999998</parameter>            
+            <display>It is hollow and can fill up with __________.</display>            
+            <response>blood</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500449999999998</parameter>            
+            <display>The veins that carry __________ back from the body parts empty the blood into the right atrium of the heart.</display>            
+            <response>blood</response>            
+            <parameter>-0.500459999999998</parameter>            
+            <display>The veins that carry blood __________ from the body parts empty the blood into the right atrium of the heart.</display>            
+            <response>back</response>            
+            <parameter>-0.500469999999998</parameter>            
+            <display>The veins that carry blood back from the body parts __________ the blood into the right atrium of the heart.</display>            
+            <response>empty</response>            
+            <parameter>-0.500479999999998</parameter>            
+            <display>The veins that carry blood back from the body parts empty the __________ into the right atrium of the heart.</display>            
+            <response>blood</response>            
+            <parameter>-0.500489999999998</parameter>            
+            <display>The veins that carry blood back from the body parts empty the blood __________ the right atrium of the heart.</display>            
+            <response>into</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500499999999998</parameter>            
+            <display>__________ the heart muscle contracts.</display>            
+            <response>First</response>            
+            <parameter>-0.500509999999998</parameter>            
+            <display>First the __________ muscle contracts.</display>            
+            <response>heart</response>            
+            <parameter>-0.500519999999998</parameter>            
+            <display>First the heart muscle __________.</display>            
+            <response>contracts</response>        
+        </cluster>    
     </clusters>
 </setspec>
