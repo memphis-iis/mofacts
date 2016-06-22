@@ -105,23 +105,21 @@ Router.route('/choose', {
 
 Router.route('/instructions', {
     name: "client.instructions",
-    onBeforeAction: function() {
-        // TODO: this is broken - maybe we need an instruction check wherever we are routing?
-        // If there aren't any instructions we just move on
+    action: function () {
+        console.log("Instruction route proceeding");
+        this.render('instructions');
+    },
+    onAfterAction: function() {
+        // If we've routed to the instructions but there's nothing to do then
+        // it's time to move on. We do NOT do this in onBeforeAction because
+        // we have instruction logic that needs to have handled and Iron Router
+        // doesn't like us setting up async re-routes.
         var txt = _.chain(getCurrentTdfUnit()).prop("unitinstructions").trim().value();
         if (!txt) {
             console.log("Instructions empty: skipping");
             instructContinue();
         }
-        else {
-            console.log("Allowing instruction route to continue");
-            this.next();
-        }
     },
-    action: function () {
-        //Everything
-        this.render('instructions');
-    }
 });
 
 Router.route('/stats', {
