@@ -81,6 +81,8 @@
         <unitname>Random Optimal</unitname>
         <learningsession>
             <clusterlist>68-88</clusterlist>
+            <displayminseconds>30</displayminseconds>
+            <displaymaxseconds>60</displaymaxseconds>
         </learningsession>
         <deliveryparams>
             <displayminseconds>30</displayminseconds>
