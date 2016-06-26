@@ -54,7 +54,6 @@
             <display>sounds/music2/18</display>
             <response>Octave</response>
         </cluster>
-
         <cluster>
             <displayType>Sound</displayType>
             <display>sounds/music2/19</display>

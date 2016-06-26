@@ -2,54 +2,466 @@
 <!-- was: no XML declaration present -->
 <setspec>
     <clusters>
-<cluster>	<parameter>-2.49549999999999</parameter>	<display>あ</display>	<response>a</response>	</cluster>	<cluster>	<parameter>-2.49549499999999</parameter>	<display>ア</display>	<response>a</response>	</cluster>
-<cluster>	<parameter>-2.49559999999999</parameter>	<display>か</display>	<response>ka</response>	</cluster>	<cluster>	<parameter>-2.49559499999999</parameter>	<display>カ</display>	<response>ka</response>	</cluster>
-<cluster>	<parameter>-2.49569999999999</parameter>	<display>さ</display>	<response>sa</response>	</cluster>	<cluster>	<parameter>-2.49569499999999</parameter>	<display>サ</display>	<response>sa</response>	</cluster>
-<cluster>	<parameter>-2.49579999999999</parameter>	<display>た</display>	<response>ta</response>	</cluster>	<cluster>	<parameter>-2.49579499999999</parameter>	<display>タ</display>	<response>ta</response>	</cluster>
-<cluster>	<parameter>-2.49589999999999</parameter>	<display>な</display>	<response>na</response>	</cluster>	<cluster>	<parameter>-2.49589499999999</parameter>	<display>ナ</display>	<response>na</response>	</cluster>
-<cluster>	<parameter>-2.49599999999999</parameter>	<display>は</display>	<response>ha</response>	</cluster>	<cluster>	<parameter>-2.49599499999999</parameter>	<display>ハ</display>	<response>ha</response>	</cluster>
-<cluster>	<parameter>-2.49609999999999</parameter>	<display>ま</display>	<response>ma</response>	</cluster>	<cluster>	<parameter>-2.49609499999999</parameter>	<display>マ</display>	<response>ma</response>	</cluster>
-<cluster>	<parameter>-2.49619999999999</parameter>	<display>や</display>	<response>ya</response>	</cluster>	<cluster>	<parameter>-2.49619499999999</parameter>	<display>ヤ</display>	<response>ya</response>	</cluster>
-<cluster>	<parameter>-2.49629999999999</parameter>	<display>ら</display>	<response>ra</response>	</cluster>	<cluster>	<parameter>-2.49629499999999</parameter>	<display>ラ</display>	<response>ra</response>	</cluster>
-<cluster>	<parameter>-2.49639999999999</parameter>	<display>わ</display>	<response>wa</response>	</cluster>	<cluster>	<parameter>-2.49639499999999</parameter>	<display>ワ</display>	<response>wa</response>	</cluster>
-<cluster>	<parameter>-2.49649999999999</parameter>	<display>ん</display>	<response>n</response>	</cluster>	<cluster>	<parameter>-2.49649499999999</parameter>	<display>ン</display>	<response>n</response>	</cluster>
-<cluster>	<parameter>-2.49659999999999</parameter>	<display>い</display>	<response>i</response>	</cluster>	<cluster>	<parameter>-2.49659499999999</parameter>	<display>イ</display>	<response>i</response>	</cluster>
-<cluster>	<parameter>-2.49669999999999</parameter>	<display>き</display>	<response>ki</response>	</cluster>	<cluster>	<parameter>-2.49669499999999</parameter>	<display>キ</display>	<response>ki</response>	</cluster>
-<cluster>	<parameter>-2.49679999999999</parameter>	<display>し</display>	<response>shi</response>	</cluster>	<cluster>	<parameter>-2.49679499999999</parameter>	<display>シ</display>	<response>shi</response>	</cluster>
-<cluster>	<parameter>-2.49689999999999</parameter>	<display>ち</display>	<response>chi</response>	</cluster>	<cluster>	<parameter>-2.49689499999999</parameter>	<display>チ</display>	<response>chi</response>	</cluster>
-<cluster>	<parameter>-2.49699999999999</parameter>	<display>に</display>	<response>ni</response>	</cluster>	<cluster>	<parameter>-2.49699499999999</parameter>	<display>ニ</display>	<response>ni</response>	</cluster>
-<cluster>	<parameter>-2.49709999999999</parameter>	<display>ひ</display>	<response>hi</response>	</cluster>	<cluster>	<parameter>-2.49709499999999</parameter>	<display>ヒ</display>	<response>hi</response>	</cluster>
-<cluster>	<parameter>-2.49719999999999</parameter>	<display>み</display>	<response>mi</response>	</cluster>	<cluster>	<parameter>-2.49719499999999</parameter>	<display>ミ</display>	<response>mi</response>	</cluster>
-<cluster>	<parameter>-2.49729999999999</parameter>	<display>り</display>	<response>ri</response>	</cluster>	<cluster>	<parameter>-2.49729499999999</parameter>	<display>リ</display>	<response>ri</response>	</cluster>
-<cluster>	<parameter>-2.49739999999999</parameter>	<display>う</display>	<response>u</response>	</cluster>	<cluster>	<parameter>-2.49739499999999</parameter>	<display>ウ</display>	<response>u</response>	</cluster>
-<cluster>	<parameter>-2.49749999999999</parameter>	<display>く</display>	<response>ku</response>	</cluster>	<cluster>	<parameter>-2.49749499999999</parameter>	<display>ク</display>	<response>ku</response>	</cluster>
-<cluster>	<parameter>-2.49759999999999</parameter>	<display>す</display>	<response>su</response>	</cluster>	<cluster>	<parameter>-2.497595</parameter>	<display>ス</display>	<response>su</response>	</cluster>
-<cluster>	<parameter>-2.4977</parameter>	<display>つ</display>	<response>tsu</response>	</cluster>	<cluster>	<parameter>-2.497695</parameter>	<display>ツ</display>	<response>tsu</response>	</cluster>
-<cluster>	<parameter>-2.4978</parameter>	<display>ぬ</display>	<response>nu</response>	</cluster>	<cluster>	<parameter>-2.497795</parameter>	<display>ヌ</display>	<response>nu</response>	</cluster>
-<cluster>	<parameter>-2.4979</parameter>	<display>ふ</display>	<response>fu</response>	</cluster>	<cluster>	<parameter>-2.497895</parameter>	<display>フ</display>	<response>fu</response>	</cluster>
-<cluster>	<parameter>-2.498</parameter>	<display>む</display>	<response>mu</response>	</cluster>	<cluster>	<parameter>-2.497995</parameter>	<display>ム</display>	<response>mu</response>	</cluster>
-<cluster>	<parameter>-2.4981</parameter>	<display>ゆ</display>	<response>yu</response>	</cluster>	<cluster>	<parameter>-2.498095</parameter>	<display>ユ</display>	<response>yu</response>	</cluster>
-<cluster>	<parameter>-2.4982</parameter>	<display>る</display>	<response>ru</response>	</cluster>	<cluster>	<parameter>-2.498195</parameter>	<display>ル</display>	<response>ru</response>	</cluster>
-<cluster>	<parameter>-2.4983</parameter>	<display>え</display>	<response>e</response>	</cluster>	<cluster>	<parameter>-2.498295</parameter>	<display>エ</display>	<response>e</response>	</cluster>
-<cluster>	<parameter>-2.4984</parameter>	<display>け</display>	<response>ke</response>	</cluster>	<cluster>	<parameter>-2.498395</parameter>	<display>ケ</display>	<response>ke</response>	</cluster>
-<cluster>	<parameter>-2.4985</parameter>	<display>せ</display>	<response>se</response>	</cluster>	<cluster>	<parameter>-2.498495</parameter>	<display>セ</display>	<response>se</response>	</cluster>
-<cluster>	<parameter>-2.4986</parameter>	<display>て</display>	<response>te</response>	</cluster>	<cluster>	<parameter>-2.498595</parameter>	<display>テ</display>	<response>te</response>	</cluster>
-<cluster>	<parameter>-2.4987</parameter>	<display>ね</display>	<response>ne</response>	</cluster>	<cluster>	<parameter>-2.498695</parameter>	<display>ネ</display>	<response>ne</response>	</cluster>
-<cluster>	<parameter>-2.4988</parameter>	<display>へ</display>	<response>he</response>	</cluster>	<cluster>	<parameter>-2.498795</parameter>	<display>ヘ</display>	<response>he</response>	</cluster>
-<cluster>	<parameter>-2.4989</parameter>	<display>め</display>	<response>me</response>	</cluster>	<cluster>	<parameter>-2.498895</parameter>	<display>メ</display>	<response>me</response>	</cluster>
-<cluster>	<parameter>-2.499</parameter>	<display>れ</display>	<response>re</response>	</cluster>	<cluster>	<parameter>-2.498995</parameter>	<display>レ</display>	<response>re</response>	</cluster>
-<cluster>	<parameter>-2.4991</parameter>	<display>お</display>	<response>o</response>	</cluster>	<cluster>	<parameter>-2.499095</parameter>	<display>オ</display>	<response>o</response>	</cluster>
-<cluster>	<parameter>-2.4992</parameter>	<display>こ</display>	<response>ko</response>	</cluster>	<cluster>	<parameter>-2.499195</parameter>	<display>コ</display>	<response>ko</response>	</cluster>
-<cluster>	<parameter>-2.4993</parameter>	<display>そ</display>	<response>so</response>	</cluster>	<cluster>	<parameter>-2.499295</parameter>	<display>ソ</display>	<response>so</response>	</cluster>
-<cluster>	<parameter>-2.4994</parameter>	<display>と</display>	<response>to</response>	</cluster>	<cluster>	<parameter>-2.499395</parameter>	<display>ト</display>	<response>to</response>	</cluster>
-<cluster>	<parameter>-2.4995</parameter>	<display>の</display>	<response>no</response>	</cluster>	<cluster>	<parameter>-2.499495</parameter>	<display>ノ</display>	<response>no</response>	</cluster>
-<cluster>	<parameter>-2.4996</parameter>	<display>ほ</display>	<response>ho</response>	</cluster>	<cluster>	<parameter>-2.499595</parameter>	<display>ホ</display>	<response>ho</response>	</cluster>
-<cluster>	<parameter>-2.4997</parameter>	<display>も</display>	<response>mo</response>	</cluster>	<cluster>	<parameter>-2.499695</parameter>	<display>モ</display>	<response>mo</response>	</cluster>
-<cluster>	<parameter>-2.4998</parameter>	<display>よ</display>	<response>yo</response>	</cluster>	<cluster>	<parameter>-2.499795</parameter>	<display>ヨ</display>	<response>yo</response>	</cluster>
-<cluster>	<parameter>-2.4999</parameter>	<display>ろ</display>	<response>ro</response>	</cluster>	<cluster>	<parameter>-2.499895</parameter>	<display>ロ</display>	<response>ro</response>	</cluster>
-<cluster>	<parameter>-2.5</parameter>	<display>を</display>	<response>wo</response>	</cluster>	<cluster>	<parameter>-2.499995</parameter>	<display>ヲ</display>	<response>wo</response>	</cluster>
-
-
+        <cluster>
+            <parameter>-2.49549999999999</parameter>
+            <display>あ</display>
+            <response>a</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49549499999999</parameter>
+            <display>ア</display>
+            <response>a</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49559999999999</parameter>
+            <display>か</display>
+            <response>ka</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49559499999999</parameter>
+            <display>カ</display>
+            <response>ka</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49569999999999</parameter>
+            <display>さ</display>
+            <response>sa</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49569499999999</parameter>
+            <display>サ</display>
+            <response>sa</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49579999999999</parameter>
+            <display>た</display>
+            <response>ta</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49579499999999</parameter>
+            <display>タ</display>
+            <response>ta</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49589999999999</parameter>
+            <display>な</display>
+            <response>na</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49589499999999</parameter>
+            <display>ナ</display>
+            <response>na</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49599999999999</parameter>
+            <display>は</display>
+            <response>ha</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49599499999999</parameter>
+            <display>ハ</display>
+            <response>ha</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49609999999999</parameter>
+            <display>ま</display>
+            <response>ma</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49609499999999</parameter>
+            <display>マ</display>
+            <response>ma</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49619999999999</parameter>
+            <display>や</display>
+            <response>ya</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49619499999999</parameter>
+            <display>ヤ</display>
+            <response>ya</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49629999999999</parameter>
+            <display>ら</display>
+            <response>ra</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49629499999999</parameter>
+            <display>ラ</display>
+            <response>ra</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49639999999999</parameter>
+            <display>わ</display>
+            <response>wa</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49639499999999</parameter>
+            <display>ワ</display>
+            <response>wa</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49649999999999</parameter>
+            <display>ん</display>
+            <response>n</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49649499999999</parameter>
+            <display>ン</display>
+            <response>n</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49659999999999</parameter>
+            <display>い</display>
+            <response>i</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49659499999999</parameter>
+            <display>イ</display>
+            <response>i</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49669999999999</parameter>
+            <display>き</display>
+            <response>ki</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49669499999999</parameter>
+            <display>キ</display>
+            <response>ki</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49679999999999</parameter>
+            <display>し</display>
+            <response>shi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49679499999999</parameter>
+            <display>シ</display>
+            <response>shi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49689999999999</parameter>
+            <display>ち</display>
+            <response>chi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49689499999999</parameter>
+            <display>チ</display>
+            <response>chi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49699999999999</parameter>
+            <display>に</display>
+            <response>ni</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49699499999999</parameter>
+            <display>ニ</display>
+            <response>ni</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49709999999999</parameter>
+            <display>ひ</display>
+            <response>hi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49709499999999</parameter>
+            <display>ヒ</display>
+            <response>hi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49719999999999</parameter>
+            <display>み</display>
+            <response>mi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49719499999999</parameter>
+            <display>ミ</display>
+            <response>mi</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49729999999999</parameter>
+            <display>り</display>
+            <response>ri</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49729499999999</parameter>
+            <display>リ</display>
+            <response>ri</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49739999999999</parameter>
+            <display>う</display>
+            <response>u</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49739499999999</parameter>
+            <display>ウ</display>
+            <response>u</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49749999999999</parameter>
+            <display>く</display>
+            <response>ku</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49749499999999</parameter>
+            <display>ク</display>
+            <response>ku</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.49759999999999</parameter>
+            <display>す</display>
+            <response>su</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.497595</parameter>
+            <display>ス</display>
+            <response>su</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4977</parameter>
+            <display>つ</display>
+            <response>tsu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.497695</parameter>
+            <display>ツ</display>
+            <response>tsu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4978</parameter>
+            <display>ぬ</display>
+            <response>nu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.497795</parameter>
+            <display>ヌ</display>
+            <response>nu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4979</parameter>
+            <display>ふ</display>
+            <response>fu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.497895</parameter>
+            <display>フ</display>
+            <response>fu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498</parameter>
+            <display>む</display>
+            <response>mu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.497995</parameter>
+            <display>ム</display>
+            <response>mu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4981</parameter>
+            <display>ゆ</display>
+            <response>yu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498095</parameter>
+            <display>ユ</display>
+            <response>yu</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4982</parameter>
+            <display>る</display>
+            <response>ru</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498195</parameter>
+            <display>ル</display>
+            <response>ru</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4983</parameter>
+            <display>え</display>
+            <response>e</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498295</parameter>
+            <display>エ</display>
+            <response>e</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4984</parameter>
+            <display>け</display>
+            <response>ke</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498395</parameter>
+            <display>ケ</display>
+            <response>ke</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4985</parameter>
+            <display>せ</display>
+            <response>se</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498495</parameter>
+            <display>セ</display>
+            <response>se</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4986</parameter>
+            <display>て</display>
+            <response>te</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498595</parameter>
+            <display>テ</display>
+            <response>te</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4987</parameter>
+            <display>ね</display>
+            <response>ne</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498695</parameter>
+            <display>ネ</display>
+            <response>ne</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4988</parameter>
+            <display>へ</display>
+            <response>he</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498795</parameter>
+            <display>ヘ</display>
+            <response>he</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4989</parameter>
+            <display>め</display>
+            <response>me</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498895</parameter>
+            <display>メ</display>
+            <response>me</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499</parameter>
+            <display>れ</display>
+            <response>re</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.498995</parameter>
+            <display>レ</display>
+            <response>re</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4991</parameter>
+            <display>お</display>
+            <response>o</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499095</parameter>
+            <display>オ</display>
+            <response>o</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4992</parameter>
+            <display>こ</display>
+            <response>ko</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499195</parameter>
+            <display>コ</display>
+            <response>ko</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4993</parameter>
+            <display>そ</display>
+            <response>so</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499295</parameter>
+            <display>ソ</display>
+            <response>so</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4994</parameter>
+            <display>と</display>
+            <response>to</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499395</parameter>
+            <display>ト</display>
+            <response>to</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4995</parameter>
+            <display>の</display>
+            <response>no</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499495</parameter>
+            <display>ノ</display>
+            <response>no</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4996</parameter>
+            <display>ほ</display>
+            <response>ho</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499595</parameter>
+            <display>ホ</display>
+            <response>ho</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4997</parameter>
+            <display>も</display>
+            <response>mo</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499695</parameter>
+            <display>モ</display>
+            <response>mo</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4998</parameter>
+            <display>よ</display>
+            <response>yo</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499795</parameter>
+            <display>ヨ</display>
+            <response>yo</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.4999</parameter>
+            <display>ろ</display>
+            <response>ro</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499895</parameter>
+            <display>ロ</display>
+            <response>ro</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.5</parameter>
+            <display>を</display>
+            <response>wo</response>
+        </cluster>
+        <cluster>
+            <parameter>-2.499995</parameter>
+            <display>ヲ</display>
+            <response>wo</response>
+        </cluster>
         <cluster>
             <display>Age?</display>
             <response>18-25</response>

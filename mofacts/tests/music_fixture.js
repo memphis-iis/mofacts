@@ -19,12 +19,6 @@ MusicTDF = function() { return {
                     "stimulusfile" : [
                         "Music2stim.xml"
                     ],
-                    "clustermodel" : [
-                        ""
-                    ],
-                    "clustersize" : [
-                        "1"
-                    ],
                     "isModeled" : [
                         "false"
                     ],

@@ -57,7 +57,6 @@
         <unitname>Text Instuctions</unitname> 
         <unitinstructions><![CDATA[Next, you will read a text about the Circulatory System. You are asked to spend 5 minutes minimum and up to 10 minutes maximum to read this text, after which you will continue to the next portion of the experiment. The text is <b>all on one webpage</b>. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
     </unit> 
-    
     <unit> 
         <unitname>Text</unitname> 
         <instructionminseconds>30</instructionminseconds> 

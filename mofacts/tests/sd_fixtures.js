@@ -14,12 +14,6 @@ SDTDF = function() { return {
                     "stimulusfile" : [
                         "SDTrainTestStims.xml"
                     ],
-                    "clustermodel" : [
-                        ""
-                    ],
-                    "clustersize" : [
-                        "1"
-                    ],
                     "xshuffleclusters" : [
                         "0-30"
                     ],

@@ -3,32 +3,26 @@
         <name>SDTrainTest</name>
         <lessonname>SDTrainTest</lessonname>
         <stimulusfile>SDTrainTestStims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <shuffleclusters>0-23</shuffleclusters>
         <swapclusters>0-23 25-26 28-29 30-30</swapclusters>
         <lfparameter>.85</lfparameter>
         <isModeled>false</isModeled>
         <userselect>false</userselect> <!-- Don't show up for users -->
     </setspec>
-
     <unit>
         <unitname>Introduction</unitname>
         <unitinstructions>This is a system testing module for Cloze trials</unitinstructions>
     </unit>
-
     <unit>
         <unitname>Statistic SD Pre-Study</unitname>
         <unitinstructions>Please study
         </unitinstructions>
-
         <deliveryparams>
             <purestudy>10000</purestudy>
             <skipstudy>true</skipstudy>
             <reviewstudy>1</reviewstudy>
             <correctprompt>1</correctprompt>
         </deliveryparams>
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
@@ -61,23 +55,18 @@
             <randomchoices>0-0 1-1 2</randomchoices>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitname>Statistic SD Unit</unitname>
         <unitinstructions>Statistics Memory Experiment
-
             Task: Please fill in the missing word or hit ENTER to see the fill in.
-
             Goal: Type the missing word within 12 seconds to score a point.
         </unitinstructions>
-
         <deliveryparams>
             <purestudy>1</purestudy>
             <skipstudy>false</skipstudy>
             <reviewstudy>5000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
@@ -110,7 +99,6 @@
             <randomchoices>2</randomchoices>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitname>Final</unitname>
         <unitinstructions>Thank you for testing</unitinstructions>

@@ -1,17 +1,13 @@
 <tutor>
     <setspec>
-        <name>Internal Testing with SVO and Models</name>
         <lessonname>Optimized Drill Practice of Greek letter names</lessonname>
         <userselect>true</userselect>
         <stimulusfile>Greekstims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
     </setspec>
-
     <unit>
         <unitname>Show the questions</unitname>
         <unitinstructions><![CDATA[Demographic Survey<br><br>
@@ -42,14 +38,12 @@ Please answer the following 3 quick demographic questions, which may be useful f
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitinstructions>Here comes the optimized learning of Greek letter names.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
             <clusterlist>0-47</clusterlist>
         </learningsession>
-
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>
             <drill>8000</drill>
@@ -62,7 +56,6 @@ Please answer the following 3 quick demographic questions, which may be useful f
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
-
     <unit>
         <unitname>last</unitname>
         <unitinstructions>You are all done.</unitinstructions>

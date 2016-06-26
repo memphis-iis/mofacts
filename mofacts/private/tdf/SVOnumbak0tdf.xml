@@ -4,8 +4,6 @@
         <lessonname>SVOnumbak0tdf.xml</lessonname>
         <userselect>false</userselect> 
         <stimulusfile>SVO4stims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter> 
         <shuffleclusters>0-17 18-35</shuffleclusters>
@@ -86,14 +84,14 @@ Please answer the following 5 quick demographic questions, which may be useful f
                 <group> 0,f,z,0 0,f,z,21  
                     r,f,z,0 r,f,z,18 </group> 
             </conditiontemplatesbygroup>
-            <initialpositions>A_2  A_2	D_2	D_1	E_2	G_2						
-                C_2	C_2	A_2	A_2	D_2	D_1	E_2	F_2	G_1	H_2		
-                B_2	B_2	A_2	A_2	D_2	D_1	E_2	F_2	G_2			
-                B_2	B_2	A_2	A_2	D_2	D_1	E_2	G_1	H_2			
-                A_1	A_1	D_2	D_1	E_1	G_2						
-                A_1	A_1	D_2	D_1	E_1	G_1	H_1					
-                B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_2			
-                C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
+            <initialpositions>A_2  A_2D_2D_1E_2G_2
+                C_2C_2A_2A_2D_2D_1E_2F_2G_1H_2
+                B_2B_2A_2A_2D_2D_1E_2F_2G_2
+                B_2B_2A_2A_2D_2D_1E_2G_1H_2
+                A_1A_1D_2D_1E_1G_2
+                A_1A_1D_2D_1E_1G_1H_1
+                B_1B_1A_1A_1D_2D_1E_1F_1G_2
+                C_1C_1B_1B_1A_1A_1D_2D_1E_1F_1G_1H_1
             </initialpositions> 
             <randomizegroups>false</randomizegroups> 
             <clusterlist>0-15</clusterlist> 
@@ -106,13 +104,9 @@ Please answer the following 5 quick demographic questions, which may be useful f
         <turkemailsubject>Link for 3$ Bonus for Turk HIT</turkemailsubject>
         <turkemail><![CDATA[
 Dear Amazon Turk Worker,
-
 Recently you completed part 1 of a 2 part experiment called 'Memory for Statistics Experiment 3', which paid $2.00. Now we would appreciate it if you would please return do part 2. It is a bit less work than part 1, but we pay a $3.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.
-
 Please avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. You have 54 sentences remaining.'
-
 Here is the link to finish: http://mofacts.optimallearning.org/experiment/svo
-
 Thanks for your help,
 Phil
         ]]></turkemail>
@@ -137,7 +131,6 @@ If the countdown below is 1 day or 3 days, you will receive a private Turk messa
     <unit>
         <unitname>Posttest</unitname>
         <unitinstructions>Memory for Statistics Experiment
-
             Thanks for continuing. You have 54 sentences remaining. </unitinstructions>
         <deliveryparams>
             <drill>12000</drill>            

@@ -28,7 +28,6 @@
             <display>Why doesn't oxygen rich blood flow directly from the lungs to the rest of the body?</display>
             <response>(?=.*pump).*$|((?=.*mov)|(?=.*circul)).*$~Correct;.*~Incorrect. The correct answer is because blood needs a pump to circulate it.</response>
         </cluster>
-
         <cluster>
             <display>Which type of blood vessel does blood flow through first when leaving the heart?</display>
             <response>arteries</response>
@@ -53,7 +52,6 @@
             <display>Why do the arteries have thicker walls than other blood vessels?</display>
             <response>(?=.*pressure).*$~Correct;.*~Incorrect. The correct answer is because arteries must withstand the high pressure of blood coming directly from the heart/pump.</response>
         </cluster>
-
         <cluster>
             <display>Which type of blood vessel carries blood toward the heart?</display>
             <response>veins</response>
@@ -78,7 +76,6 @@
             <display>What type of blood vessel would carry blood with the highest concentration of carbon dioxide?</display>
             <response>(?=.*vein).*$~Correct;.*~Incorrect. The correct answer is veins.</response>
         </cluster>
-
         <cluster>
             <display>What is the size difference between vessels close to the heart and those further away?</display>
             <response>blood vessels closer to the heart are larger than those further away</response>
@@ -103,7 +100,6 @@
             <display>Where are the largest veins in the body located?</display>
             <response>(?=.*heart).*$~Correct;.*~Incorrect. The correct answer is near the heart.</response>
         </cluster>
-
         <cluster>
             <display>What are the top and bottom chambers of the heart called? Answer in that order.</display>
             <response>atria and ventricles</response>
@@ -128,7 +124,6 @@
             <display>How many discharging chamber(s) are there in the heart and how many discharging chamber(s) are there per circle of the circulatory system? Answer in that order.</display>
             <response>((two)|(2))((.*one)|(.*1)).*$~Correct;.*~Incorrect. The correct answer is two discharging chambers total, and one per circle.</response>
         </cluster>
-
         <cluster>
             <display>Which of the septums in the heart is/are solid and which has/have openings? Answer in that order.</display>
             <response>the vertical septum is solid and the horizontal septum has openings</response>
@@ -153,7 +148,6 @@
             <display>A defect called "hole in the heart" causes a hole to form in one of the septums of the heart. Which septum would this abnormality refer to?</display>
             <response>((?=.*vertic)|(?=.*ventric)|(?=.*atrial)).*$~Correct;.*~Incorrect. The correct answer is vertical septum.</response>
         </cluster>
-
         "<cluster>
             <display>How many circles are there in the circulatory system?</display>
             <response>2</response>
@@ -179,7 +173,6 @@
             <display>What does it mean that the heart is a ""double-pump""?</display>
             <response>((?=.*oxy)(?=.*carbon dio)).*$|((?=.*circle)|(?=.*cycle))|((?=.*left)(?=.*right)).*$~Correct;.*~Incorrect. The correct answer is it pumps blood out for both circles (out of the left side and out of the right side).</response>
         </cluster>"
-
         <cluster>
             <display>The ____ side of the heart receives blood from the veins and pumps it to ____.</display>
             <response>right, the lungs</response>
@@ -204,7 +197,6 @@
             <display>Blood with a high concentration of oxygen is sometimes referred to as "fresh blood." Which chamber(s) of the heart would contain fresh blood?</display>
             <response>(?=.*right).*$~Incorrect. The correct answer is the left atrium and left ventricle.;(?=.*left)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the left atrium and left ventricle.</response>
         </cluster>
-
         <cluster>
             <display>The ___ side of the heart receives blood from the lungs and pumps  it to _____.</display>
             <response>left, the body</response>
@@ -229,7 +221,6 @@
             <display>Blood with a high concentration of carbon dioxide is a dark red color. Which chamber(s) of the heart would contain dark red blood?</display>
             <response>(?=.*right)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the right atrium and right ventricle.</response>
         </cluster>
-
         <cluster>
             <display>In the heart, what physically separates the two circles of the circulatory system?</display>
             <response>vertical septum</response>
@@ -254,7 +245,6 @@
             <display>Why is it important for the two circles of the circulatory system physically separated from each other?</display>
             <response>((?=.*mix)|(?=.*combin)).*$~Correct;.*~Incorrect. The correct answer is so that the oxygen-rich blood and carbon dioxide-rich blood do not mix.</response>
         </cluster>
-
         <cluster>
             <display>Blood is sent to various parts of the body from which specific  chamber of the heart?</display>
             <response>left ventricle</response>
@@ -279,7 +269,6 @@
             <display>Which specific chamber(s) of the heart would need the thickest (strongest) walls and why?</display>
             <response>(?=.*left )(?=.*ventric)((?=.*propel)|(?=.*pump))((?=.*body)|(?=.*systemic)).*$~Correct;.*~Incorrect. The correct answer is the left ventricle because it must propel blood to the rest of the body.</response>
         </cluster>
-
         <cluster>
             <display>In terms of interacting with the cells of the body, blood serves what two functions?</display>
             <response>Blood delivers oxygen and removes carbon dioxide</response>
@@ -304,7 +293,6 @@
             <display>Some aquatic species do not have circulatory systems because the water around them essentially serves the same function as the human circulatory system. What function would the water around them serve? </display>
             <response>(?=((.*tak)|(.*rid)|(.*remov)).*(carbon diox))(?=((.*bring)|(.*deliver)|(.*giv)|(.*suppl)).*(oxy))|(?=.*gas)(?=.*exchang).*~Correct;.*~Incorrect. The correct answer is provides nutrients and eliminates toxins through gas exchange.</response>
         </cluster>
-
         <cluster>
             <display>Which blood vessel allows oxygen and carbon dioxide to pass in and out?</display>
             <response>capillaries</response>
@@ -329,7 +317,6 @@
             <display>Why are the walls of capillaries much thinner than the other blood  vessels?</display>
             <response>(?=.*gas)(?=.*exchang).*$|(?=.*oxy)(?=.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is to allow for gas e xchange.</response>
         </cluster>
-
         <cluster>
             <display>What is the first part of the heartbeat?</display>
             <response>the heart muscles contracting</response>
@@ -354,7 +341,6 @@
             <display>What effect would stronger heart muscle have on a person's heart rate and why?</display>
             <response>(?=.*more)((?=.*low)|(?=.*decrease))((?=.*pump)|(?=.*beat)|(?=.*contract)).*$~Correct;.*~Incorrect. The correct answer is it would lower the heart rate because the heart can pump more blood with each contraction.</response>
         </cluster>
-
         <cluster>
             <display>Which part of the heart contracts first in each heartbeat?</display>
             <response>atria</response>
@@ -379,7 +365,6 @@
             <display>If the left atrium is contracting now, when does the right atrium contract?</display>
             <response>((?=.*now)|(?=.*same)|(?=.*during)).*$~Correct;.*~Incorrect. The correct answer is at the same time.</response>
         </cluster>
-
         <cluster>
             <display>What prevents blood from flowing backward in the heart?</display>
             <response>valves</response>
@@ -404,7 +389,6 @@
             <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>
             <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>
         </cluster>
-
         <!--PRETEST items 64-79-->
         <cluster>
             <display>How many chambers are there in the heart?</display>
@@ -430,7 +414,6 @@
             <display>What gas do the cells in our bodies need to function, and what gas do they release as a waste product? Answer in that order.</display>
             <response>(oxy)(.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is oxygen and carbon dioxide.</response>
         </cluster>
-
         <cluster>
             <display>Where is the heart located in relation to the lungs?</display>
             <response>the heart is located between the lungs</response>
@@ -455,7 +438,6 @@
             <display>Veins that carry blood from different parts of the body empty blood in which specific chamber of the heart?</display>
             <response>(?=.*right)(?=.*atria).*$~Correct;.*~Incorrect. The correct answer is right atrium.</response>
         </cluster>
-
         <cluster>
             <display>What are the tiny air sacs in the lungs called?</display>
             <response>alveoli</response>
@@ -480,7 +462,6 @@
             <display>What are the three major types of blood vesslels?</display>
             <response>(?=.*capil)(?=.*vein)(?=.*arter).*$~Correct;.*~Incorrect. The correct answer is capillaries, veins, and arteries.</response>
         </cluster>
-
         <cluster>
             <display>What are the walls of the heart made out of?</display>
             <response>muscle</response>
@@ -505,7 +486,6 @@
             <display>What is the smallest type of blood vessel?</display>
             <response>(?=.*capil).*$~Correct;.*~Incorrect. The correct answer is capillaries.</response>
         </cluster>
-
         <!--emotions: clusters 80-85-->
         <cluster>
             <display><![CDATA[Frustration. <br><br>Currently I am feeling <b>frustrated.]]></display>
@@ -557,34 +537,33 @@
         </cluster>
         <!--demographics: clusters 86-89-->
         <cluster>
-           <display>What is your age?</display>
-           <response>18-25</response>
-           <falseResponse>26-34</falseResponse>
-           <falseResponse>35-54</falseResponse>
-           <falseResponse>55-64</falseResponse>
-           <falseResponse>65 and over</falseResponse>
-       </cluster>
-       <cluster>
-           <display>What is your gender?</display>
-           <response>Male</response>
-           <falseResponse>Female</falseResponse>
-           <falseResponse>Other</falseResponse>
-           <falseResponse>Prefer not to answer</falseResponse>
-       </cluster>
-       <cluster>
-           <display>Which is the highest level of education you have completed?</display>
-           <response>Less than High School</response>
-           <falseResponse>High School or GED</falseResponse>
-           <falseResponse>Some College</falseResponse>
-           <falseResponse>4-year College Degree/ Bachelors</falseResponse>
-           <falseResponse>Graduate Degree</falseResponse>
-       </cluster>
-       <cluster>
-           <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
-<br><br> Examples of professions that would require you to select "No" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc.]]></display>
-           <response>Yes</response>
-           <falseResponse>No</falseResponse>
+            <display>What is your age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
         </cluster>
-                   
+        <cluster>
+            <display>What is your gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+        <cluster>
+            <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
+<br><br> Examples of professions that would require you to select "No" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc.]]></display>
+            <response>Yes</response>
+            <falseResponse>No</falseResponse>
+        </cluster>
     </clusters>
 </setspec>

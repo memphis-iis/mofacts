@@ -120,7 +120,7 @@ AssessmentSession = {
                 }
 
                 //Choose random numbers to use throughout the template
-                var randOffset = Math.floor(Math.random() * settings.clusterSize);
+                var randOffset = Math.floor(Math.random());
 
                 //Work through the group elements
                 for (k = 0; k < templateSize; ++k) {
@@ -159,11 +159,6 @@ AssessmentSession = {
 
                     var location = Helpers.intVal(parts[3]);
 
-                    //For proto, re-randomize for every k
-                    if (settings.specType === "proto") {
-                        randOffset = Math.floor(Math.random() * settings.clusterSize);
-                    }
-
                     var offStr = parts[0].toLowerCase(); //Selects stim from cluster w/ multiple stims
                     if (offStr === "m") {
                         //Trial from model
@@ -186,7 +181,7 @@ AssessmentSession = {
                         var condition = groupName + "-" + index;
 
                         var st = settings.specType.toLowerCase();
-                        if ( (settings.clusterSize == 1) && (st === "structuralpairs" || st === "structuralgroups") ) {
+                        if ( (st === "structuralpairs" || st === "structuralgroups") ) {
                             condition += "-" + offset + "-0";
                             offset = 0;
                         }
@@ -195,10 +190,7 @@ AssessmentSession = {
                             condition += "-" + "H";
                         }
 
-                        //Note that the offset is to one of the display/response pairs in
-                        //cluster[pairNum], which is different from FaCT - and implies
-                        //that we currently only support a clusterSize of 1
-                        var pairNum = settings.clusterSize * clusterNum;
+                        var pairNum = clusterNum;
                         setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
                     } //offset is Model or something else?
                 } //k (walk thru group elements)
@@ -243,7 +235,6 @@ AssessmentSession = {
     //object with the parameters as specified by the Assessment Session
     loadAssessmentSettings: function(setspec, unit) {
         var settings = {
-            clusterSize: 1,
             specType: "unspecified",
             groupNames: [],
             templateSizes: [],
@@ -281,7 +272,6 @@ AssessmentSession = {
         };
 
         //Get the setspec settings first
-        settings.clusterSize = Helpers.intVal(setspec.clustersize);
         settings.specType = Helpers.display(setspec.clustermodel);
 
         //The "easy" "top-level" settings

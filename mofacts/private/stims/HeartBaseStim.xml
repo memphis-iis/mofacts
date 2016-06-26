@@ -382,35 +382,34 @@
             <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>            
             <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>        
         </cluster>
-        <cluster>									
-            <display>Age?</display>									
-            <response>18-25</response>									
-            <falseResponse>26-34</falseResponse>									
-            <falseResponse>35-54</falseResponse>									
-            <falseResponse>55-64</falseResponse>									
-            <falseResponse>65 and over</falseResponse>									
-        </cluster>									
-        <cluster>									
-            <display>Gender?</display>									
-            <response>Male</response>									
-            <falseResponse>Female</falseResponse>									
-            <falseResponse>Other</falseResponse>									
-            <falseResponse>Prefer not to answer</falseResponse>									
-        </cluster>									
-        <cluster>									
-            <display>Which is the highest level of education you have completed?</display>									
-            <response>Less than High School</response>									
-            <falseResponse>High School or GED</falseResponse>									
-            <falseResponse>Some College</falseResponse>									
-            <falseResponse>4-year College Degree/ Bachelors</falseResponse>									
-            <falseResponse>Graduate Degree</falseResponse>									
-        </cluster>									
-        <cluster>									
-           <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+        <cluster>
+            <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
 <br><br> Examples of professions that would require you to select "No" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc.]]></display>
-            <response>Yes</response>									
-            <falseResponse>No</falseResponse>									
-        </cluster>									
-                   
+            <response>Yes</response>
+            <falseResponse>No</falseResponse>
+        </cluster>
     </clusters>
 </setspec>

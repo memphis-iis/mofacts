@@ -794,8 +794,6 @@
             <display>sounds/croatian/howtosay_hr</display>
             <response>how do you say ... in croatian?</response>
         </cluster>
-
-        
         <cluster>
             <display>Age?</display>
             <response>18-25</response>
