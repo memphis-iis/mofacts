@@ -33,10 +33,10 @@ Template.allStudents.helpers({
 
         var userQuery = {};
         var tdfDBName = buildTdfDBName(getCurrentTdfName());
-        userQuery[tdfDBName] = {$exists: true};
+        userQuery[tdfDBName] = {'$exists': true};
         var currTdfUsers = UserMetrics.find(userQuery);
 
-        currTdfUsers.forEach(function(student) {
+        _.chain(currTdfUsers).each(currTdfUsers, function(student) {
             student.username = Meteor.users.findOne({_id: student._id}, {username: true}).username;
             student.score = computeUserScore(student, tdfDBName);
             student.buttonColor = determineButtonColor(student.score);

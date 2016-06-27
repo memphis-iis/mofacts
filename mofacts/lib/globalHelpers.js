@@ -11,6 +11,12 @@ if (!Date.now) {
         return new Date().getTime();
     };
 }
+if (!String.prototype.endsWith) {
+    String.prototype.endsWith = function(str) {
+       return new RegExp(str + "$").test(str);
+   };
+}
+
 
 Date.secsIntervalString = function(elapsedSecs) {
     var timeLeft = _.floatval(elapsedSecs);
@@ -48,6 +54,13 @@ Date.secsIntervalString = function(elapsedSecs) {
 // _.chain(o).prop('bad start').prop('z') == null
 if (_ && _.mixin) {
     _.mixin({
+        safekeys: function(obj) {
+            if (_.isString(obj) || !_.isObject(obj)) {
+                return [];
+            }
+            return _.keys(obj);  //TODO: don't throw error on non-object
+        },
+
         prop: function(obj, propname) {
             if (_.isArray(obj) && _.isNumber(propname)) {
                 return obj[propname];
@@ -146,9 +159,21 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 // pretty-print textual representation of the object
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
 displayify = function(obj) {
+    // Strings and numbers are simple
     if (typeof obj === "string" || typeof obj === "number") {
-        return obj;
+        return obj + "";
     }
+
+    // Array: return with displayify run on each member
+    if (_.isArray(obj)) {
+        var dispArr = [];
+        for (var i = 0; i < obj.length; ++i) {
+            dispArr.push(displayify(obj[i])); //Recursion!
+        }
+        return JSON.stringify(dispArr, null, 2);
+    }
+
+    // Object - perform some special formatting on a copy
     var dispObj = _.extend({}, obj);
 
     try {

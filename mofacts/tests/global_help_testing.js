@@ -86,6 +86,20 @@ test_suite("underscore mixins", function() {
         assert.deepEqual(0.42, _.chain(obj).prop('nested').first().prop('sub').prop('miss').floatval(0.42).value());
     });
 
+    unit_test("Mixin _.safekeys", function(logger) {
+        assert.deepEqual([], _.safekeys());
+        assert.deepEqual([], _.safekeys({}));
+        assert.deepEqual([], _.safekeys(null));
+        assert.deepEqual([], _.safekeys(""));
+        assert.deepEqual([], _.safekeys(0));
+        assert.deepEqual([], _.safekeys(1));
+        assert.deepEqual([], _.safekeys([]));
+
+        assert.deepEqual(['a'], _.safekeys({'a': null}));
+        assert.deepEqual(['a'], _.safekeys({'a': 1}));
+        assert.deepEqual(['a'], _.safekeys({'a': {'b': 2}}));
+    });
+
     unit_test("Mixin _.sum", function(logger) {
         assert.deepEqual(0, _.sum());
         assert.deepEqual(0, _.sum([]));

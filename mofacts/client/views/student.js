@@ -60,7 +60,7 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
     var itemCount = [];
     var corCount = 0;
 
-    _.chain(userData[0]).prop(tdfname).each(function(item) {
+    _.chain(userData).first().prop(tdfname).each(function(item) {
         //Each item in the TDF
         var questionCount = _.intval(item.questionCount || 0);
         for (var i = 0; i < questionCount; i++) {
@@ -112,12 +112,12 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
     userDataQuery[tdfname] = {$exists: true};
     var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
 
-    var itemIDList = _.keys(userData[0][tdfname]);
+    var itemIDList = _.chain(userData).first().prop(tdfname).safekeys().value();
     var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
 
     // Get current items for associating the names with the IDs
     var itemStats = [];
-    _.chain(userData[0]).prop(tdfname).each(function(item) {
+    _.chain(userData).first().prop(tdfname).each(function(item) {
         var corCount = 0;
         var totCount = 0;
         var corTime = 0;
@@ -157,11 +157,15 @@ Template.student.helpers({
 
     //Returns the username for the graph legend
     selectedUsername: function () {
+        if (!haveMeteorUser())
+            return "";
         return (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currUsername') : Meteor.user().username;
     },
 
     //Data for the student latency
     studentDataLat: function () {
+        if (!haveMeteorUser())
+            return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
         var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
         studentDataLatVar.unshift(7500);
@@ -170,6 +174,8 @@ Template.student.helpers({
 
     //data for the student correctness
     studentDataCor: function () {
+        if (!haveMeteorUser())
+            return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
         var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
         studentDataCorVar.unshift(0);
@@ -191,6 +197,8 @@ Template.student.helpers({
     },
 
     itemData: function () {
+        if (!haveMeteorUser())
+            return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
         return generateStudentPerItemData(user, buildTdfDBName(getCurrentTdfName()));
     }
