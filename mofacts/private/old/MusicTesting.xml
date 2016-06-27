@@ -5,18 +5,13 @@
         <userselect>false</userselect>
         <experimentTarget>musictest</experimentTarget>
         <stimulusfile>Music2stim.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <isModeled>false</isModeled>
-      
         <buttonorder>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonorder>
     </setspec>
-
     <unit>
         <unitname>Introduction</unitname>
         <picture>/resources/images/IntervalInstructions.jpg</picture>
     </unit>
-
     <unit>
         <unitname>Minor 3rd</unitname>
         <unitinstructions> Click the OK button to hear one example of a minor 3rd as a harmony and as a melody (not necessarily in that order).
@@ -48,7 +43,6 @@
             <permutefinalresult>0-1</permutefinalresult>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitname>last</unitname>
         <unitinstructions><![CDATA[

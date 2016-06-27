@@ -2,8 +2,6 @@
     <setspec>
         <lessonname>Images</lessonname>
         <stimulusfile>Imagestims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <shuffleclusters>0-1 2-2</shuffleclusters>
         <swapclusters>0-1 2-2</swapclusters>
         <lfparameter>0.80</lfparameter>
@@ -11,7 +9,6 @@
         <experimentTarget>imgtest</experimentTarget>
         <userselect>false</userselect>
     </setspec>
-    
     <unit>
         <deliveryparams>
             <purestudy>10000</purestudy>

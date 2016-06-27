@@ -1,29 +1,25 @@
 <tutor>
     <setspec>
-        <lessonname>Swahili Vocabulary test</lessonname><userselect>false</userselect>
+        <lessonname>Swahili Vocabulary test</lessonname>
+        <userselect>false</userselect>
         <stimulusfile>Swahilistims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <shuffleclusters>0-16</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>
         <experimentTarget>swa</experimentTarget>
     </setspec>
-
     <unit>
         <unitname>Instructions</unitname>
         <unitinstructions>
             Welcome to a basic lesson on Swahili!
         </unitinstructions>
     </unit>
-
     <unit>
         <unitname>Swahili Training</unitname>
         <unitinstructions><![CDATA[
             Enter answer in the prompt box below each question.  Please
             attempt to answer all questions presented.
         ]]></unitinstructions>
-
         <deliveryparams>
             <drill>10000</drill>
             <purestudy>10000</purestudy>
@@ -31,9 +27,7 @@
             <reviewstudy>2000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
-
         <buttontrial>true</buttontrial>
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
@@ -54,13 +48,11 @@
             <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitname>Swahili Post-test</unitname>
         <unitinstructions>
             Let's see if you can remember the answers!
         </unitinstructions>
-
         <deliveryparams>
             <drill>10000</drill>
             <purestudy>10000</purestudy>
@@ -68,9 +60,7 @@
             <reviewstudy>2000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
-
         <buttontrial>false</buttontrial> <!-- fill in the blank -->
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
@@ -91,7 +81,6 @@
             <permutefinalresult>0-16</permutefinalresult>
         </assessmentsession>
     </unit>
-
     <unit>
         <unitname>Final</unitname>
         <unitinstructions>

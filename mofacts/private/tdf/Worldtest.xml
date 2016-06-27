@@ -2,11 +2,8 @@
     <setspec>
         <lessonname>Optimized Drill Practice of World Countries</lessonname>
         <stimulusfile>Worldstim.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
-
         <simTimeout>1500</simTimeout>
         <simCorrectProb>0.75</simCorrectProb>
     </setspec>
@@ -18,25 +15,23 @@
 
     <unit>
         <unitname>Model Practice</unitname>
-
+        <unitinstructions></unitinstructions>
+        <instructionminseconds></instructionminseconds>
+        <instructionmaxseconds></instructionmaxseconds>
         <learningsession>
             <displayminseconds></displayminseconds>
             <displaymaxseconds></displaymaxseconds>
             <clusterlist>0-175</clusterlist>
         </learningsession>
-
         <deliveryparams>
             <purestudy>10000</purestudy>
             <drill>10000</drill>
             <skipstudy>false</skipstudy>
             <reviewstudy>1000</reviewstudy>
             <correctprompt>500</correctprompt>
-
             <fontsize>3</fontsize>
-
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-
             <practiceseconds>300</practiceseconds>
             <finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
         </deliveryparams>

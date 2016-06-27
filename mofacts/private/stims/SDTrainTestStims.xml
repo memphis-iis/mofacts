@@ -1,221 +1,221 @@
 <setspec>
     <clusters>
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[A _______ is a small part or quantity intended to show what the whole, or population,<br>is like.]]></display>
             <response>sample</response>
             <display><![CDATA[A sample is a small part or quantity intended to show what the _______, or<br>population, is like.]]></display>
             <response>whole</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[A sample is meant to _______ the quality or style of the entity, or population,<br>from which it came.]]></display>
             <response>represent</response>
             <display><![CDATA[A sample is meant to represent the quality or style of the entity, or _______,<br>from which it came.]]></display>
             <response>population</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The sample size is the number of _______ you took from your population.]]></display>
             <response>observations</response>
             <display><![CDATA[The sample size is the number of observations you took from your _______.]]></display>
             <response>population</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[When your study involves human subjects, your _______ is the group of people<br>who participated in the study.]]></display>
             <response>sample</response>
             <display><![CDATA[When your study involves human subjects, your sample is the _______ of people<br>who participated in the study.]]></display>
             <response>group</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[We use the term _______ to refer to how different, or how diverse, are the<br>data in your sample.]]></display>
             <response>variability</response>
             <display><![CDATA[We use the term variability to refer to how _______, or how diverse, are the<br>data in your sample.]]></display>
             <response>different</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[A _______ is one of many different ways we can describe traits of our sample.]]></display>
             <response>statistic</response>
             <display><![CDATA[A statistic is one of many different ways we can describe traits of our _______.]]></display>
             <response>sample</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[Examples of _______ are the mean, standard deviation, and variance; each term<br>has its own use (or several uses) in summarizing a set of observations.]]></display>
             <response>statistics</response>
             <display><![CDATA[Examples of statistics are the mean, standard deviation, and variance; each<br>term has its own use (or several uses) in summarizing a set of _______.]]></display>
             <response>observations</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The statistical term for the "_______" is called the "mean."]]></display>
             <response>average</response>
             <display><![CDATA[The statistical term for the "average" is called the "_______."]]></display>
             <response>mean</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The _______ is one number that represents a trait of the most typical member<br>in the sample.]]></display>
             <response>mean</response>
             <display><![CDATA[The mean is one number that represents a trait of the most _______ member in<br>the sample.]]></display>
             <response>typical</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[When you _______ all the numbers in a set and then divide by the amount of<br>numbers you have, you get a statistic called the mean.]]></display>
             <response>sum</response>
             <display><![CDATA[When you sum all the numbers in a set and then divide by the amount of numbers<br>you have, you get a statistic called the _______.]]></display>
             <response>mean</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[_______ and standard deviation are ways to conceptualize variability.]]></display>
             <response>variance</response>
             <display><![CDATA[Variance and _______ are ways to conceptualize variability.]]></display>
             <response>standard deviation</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The term "difference from the mean" is the resulting number when you _______<br>a certain observation from the average of that sample.]]></display>
             <response>subtract</response>
             <display><![CDATA[The term "difference from the mean" is the resulting number when you subtract<br>a certain observation from the _______ of that sample.]]></display>
             <response>average</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[We are studying weight. In order to calculate Bob's difference from the mean,<br>we subtract Bob's _______ weight from the average weight.]]></display>
             <response>observed</response>
             <display><![CDATA[We are studying weight. In order to calculate Bob's difference from the mean,<br>we subtract Bob's observed weight from the _______ weight.]]></display>
             <response>average</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[When you _______ the difference between one score and the mean score, you are<br>computing the variance for that measurement]]></display>
             <response>square</response>
             <display><![CDATA[When you square the difference between one score and the mean score, you are<br>computing the _______ for that measurement]]></display>
             <response>variance</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[When you sum the variance for the all of your measurements, you get the sum<br>of _______ from the mean in that sample.]]></display>
             <response>squared differences</response>
             <display><![CDATA[When you sum the variance for the all of your measurements, you get the sum<br>of squared differences from the _______ in that sample.]]></display>
             <response>mean</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[In a typical sample, some observations are _______ the mean, and others are<br>above the mean.]]></display>
             <response>below</response>
             <display><![CDATA[In a typical sample, some observations are below the mean, and others are _______<br>the mean.]]></display>
             <response>above</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[In calculating the variance for a sample, you must _______ the differences<br>from the mean before add them.]]></display>
             <response>square</response>
             <display><![CDATA[In calculating the variance for a sample, you must square the differences from<br>the mean before _______ them.]]></display>
             <response>add</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[While calculating variance, one reason we add the _______ differences from<br>the mean, and not the actual differences, is that some of the latter type<br>will be positive, and others negative.]]></display>
             <response>squared</response>
             <display><![CDATA[While calculating variance, one reason we add the squared differences from<br>the mean, and not the _______ differences, is that some of the latter type<br>will be positive, and others negative.]]></display>
             <response>actual</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[If you were to add the _______ differences from the mean, the positive and<br>negative numbers would cancel out and underestimate the variability of the<br>sample.]]></display>
             <response>actual</response>
             <display><![CDATA[If you were to add the actual differences from the mean, the positive and negative<br>numbers would cancel out and _______ the variability of the sample.]]></display>
             <response>underestimate</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The "sum of squared errors," which is often abbreviated to "sum of squares,"<br>is what happens when you add all the squared _______ from the mean.]]></display>
             <response>differences</response>
             <display><![CDATA[The "sum of squared errors," which is often abbreviated to "sum of squares,"<br>is what happens when you add all the squared differences from the _______.]]></display>
             <response>mean</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[You get the _______ of a sample when you divide the sum of squared errors by<br>the number that is one fewer than the total number observations.]]></display>
             <response>variance</response>
             <display><![CDATA[You get the variance of a sample when you divide the sum of squared errors<br>by the number that is one _______ than the total number observations.]]></display>
             <response>fewer</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[If the sum of squared errors in a dataset is 100 and that dataset had 11 _______,<br>then you divide 100 by one less than 11, or 100/(11-1), or 100/10, or 10<br>to get the variance.]]></display>
             <response>observations</response>
             <display><![CDATA[If the sum of squared errors in a dataset is 100 and that dataset had 11 observations,<br>then you divide 100 by one less than 11, or 100/(11-1), or 100/10, or 10<br>to get the _______.]]></display>
             <response>variance</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The _______ of the variance is the standard deviation]]></display>
             <response>square root</response>
             <display><![CDATA[The square root of the variance is the _______]]></display>
             <response>standard deviation</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[One reason we do not typically work with variances is that, in _______ the<br>differences from the mean prior to adding them, we are now working with<br>a different metric from the observations.]]></display>
             <response>squaring</response>
             <display><![CDATA[One reason we do not typically work with variances is that, in squaring the<br>differences from the mean prior to adding them, we are now working with<br>a different _______ from the observations.]]></display>
             <response>metric</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[Squaring a value also changes the _______. For example, squaring something<br>measured in pounds will change the unit of measurement to "pounds squared."]]></display>
             <response>metric</response>
             <display><![CDATA[Squaring a value also changes the metric. For example, squaring something measured<br>in pounds will change the unit of measurement to "pounds _______."]]></display>
             <response>squared</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[The variance is usually too big for descriptive purposes because it is the<br>_______ not of actual differences from the mean but of the squares of those<br>differences.]]></display>
             <response>sum</response>
             <display><![CDATA[The variance is usually too big for descriptive purposes because it is the<br>sum not of actual differences from the mean but of the _______ of those<br>differences.]]></display>
             <response>squares</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[Taking the square root of the variance will _______ the value, thus undoing<br>the inflation that occurred when we added the squared differences.]]></display>
             <response>shrink</response>
             <display><![CDATA[Taking the square root of the variance will shrink the value, thus undoing<br>the _______ that occurred when we added the squared differences.]]></display>
             <response>inflation</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[Taking the square root of the variance will revert the value back to the same<br>_______ as your observations.]]></display>
             <response>metric</response>
             <display><![CDATA[Taking the square root of the variance will revert the value back to the same<br>metric as your _______.]]></display>
             <response>observations</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[A standard deviation can be thought of as one number that tells you, on average,<br>how far off the _______ observation is from the average of the sample.]]></display>
             <response>typical</response>
             <display><![CDATA[A standard deviation can be thought of as one number that tells you, on _______,<br>how far off the typical observation is from the average of the sample.]]></display>
             <response>average</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[(Test NextLast/Stim0) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
             <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
             <display><![CDATA[(Test NextLast/Stim1) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
             <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
         </cluster>
-
-        <cluster><displayType>Cloze</displayType>
+        <cluster>
+            <displayType>Cloze</displayType>
             <display><![CDATA[(Test Last/Stim0) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
             <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
             <display><![CDATA[(Test Last/Stim1) _______ is a convenient way to discuss the typical difference from the sample<br>mean because it is in the same metric as the observations.]]></display>
             <response>std*.*dev.*~Yes - the answer is standard deviation;var~No - variance is actually the square of the stdev;.*~I have no idea what you meant by that</response>
         </cluster>
-
     </clusters>
 </setspec>

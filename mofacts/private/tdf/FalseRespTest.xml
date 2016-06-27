@@ -2,20 +2,16 @@
     <setspec>
         <lessonname>Response Types test</lessonname>
         <stimulusfile>FalseRespTest.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <shuffleclusters>0-0</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>
         <userselect>false</userselect> <!-- Change to false when done testing -->
     </setspec>
-
     <unit>
         <unitname>Show the questions</unitname>
         <unitinstructions><![CDATA[
             You should see both kinds of false responses
         ]]></unitinstructions>
-
         <deliveryparams>
             <drill>10000</drill>
             <purestudy>10000</purestudy>
@@ -23,9 +19,7 @@
             <reviewstudy>6000</reviewstudy>
             <correctprompt>500</correctprompt>
         </deliveryparams>
-
         <buttontrial>false</buttontrial>
-
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>

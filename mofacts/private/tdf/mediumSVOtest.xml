@@ -4,8 +4,6 @@
         <lessonname>medium SVO test</lessonname>
         <userselect>false</userselect> <!-- Don't show up for users -->
         <stimulusfile>SVO4stims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
     </setspec>
@@ -13,7 +11,6 @@
         <unitname>Statistics Practice</unitname>
         <unitinstructions><![CDATA[
             Memory for Statistics Experiment<br><br>
- 
             Task: You will see a sequence of sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 8 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.
             Hit ENTER after typing to submit your response.  ]]></unitinstructions>
         <deliveryparams>
@@ -39,6 +36,4 @@
             <randomchoices>4</randomchoices> 
         </assessmentsession>
     </unit>
-
-
 </tutor>

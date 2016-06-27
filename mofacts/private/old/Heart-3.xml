@@ -3,8 +3,6 @@
         <name>HeartAppliedSA</name> 
         <lessonname>Heart-3</lessonname>
         <stimulusfile>Heartstims.xml</stimulusfile>
-        <clustermodel></clustermodel>
-        <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <timeoutInSeconds>15</timeoutInSeconds>
         <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters>
@@ -70,9 +68,7 @@ The text is all on one page; once you click Continue on that page, you will not 
     <unit>
         <unitname>Text</unitname>
         <unitinstructions><![CDATA[<b>The Circulatory System <br><br>
-
 The Heart</b><br>
-
        <p>An adult's heart is about the size of a large orange and weighs a little less than a pound. It is hollow and can fill up with blood. The heart is in the middle of the chest. It fits snugly between the two lungs. The pointed tip at the bottom of the heart touches the front wall of the chest. Every time the heart beats, it goes 'thump' against the chest wall. 
 <br>
        <p>The heart is a pump. Its walls are made of thick muscle. They can squeeze (contract) to send blood rushing out. The blood flows smoothly in tubes called blood vessels.First the blood flows into tubes called arteries. The arteries that leave the heart are thick tubes. But the arteries soon branch again and again, to form many smaller tubes. These blood vessels carry blood to all parts of the body.
@@ -82,7 +78,6 @@ The Heart</b><br>
        <p>If you could see inside your heart you would see that a vertical wall of (solid) muscle divides it down the middle, into a left half and a right half. The muscular wall is called a septum. Another septum in the heart is horizontal and separates the rounded top part of the heart from the cone-shaped bottom part. So there are actually four chambers (spaces) inside the heart. Each top chamber is called an atrium (plural: atria) and can be thought of as "receiving" chambers. The bottom chambers are called ventricles and can be thought of as "discharging" chambers. Blood can flow from the atria down into the ventricles, because there are openings in the horizontal septum that separates them. But the vertical septum is solid, with no openings.
 <br><br>
 <b>The Circulation of Blood</b><br>
-
        <p>The circulatory system is actually made up of two circles. The heart is a double pump whose two parts work in unison. The right side receives the blood from veins and pumps it to the lungs; the left side receives the blood from the lungs and pumps it to the rest of the body. Blood cannot flow back and forth between the left and right halves of the heart, because the septum that separates them is solid, keeping the two circles separate.
 <br>
        <p>The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries that carry it to various parts of the body. The veins that carry blood back from the body parts empty the blood into the right atrium of the heart. The blood then flows down into the right ventricle, which pumps it into the lungs and back to the heart, into the left atrium. From there the blood flows into the left ventricle, where it is once again pumped out into the body.
@@ -99,8 +94,6 @@ The Heart</b><br>
        <p>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. Valves also guard the openings from the atria into the ventricles. So there is always one-way traffic in the heart. The valves keep blood from flowing backward. These valves, and every other component discussed in this text, are essential in maintaining a healthy heart and normal blood circulation.]]>
         </unitinstructions>
     </unit>
-    
-    
     <unit> 
         <unitname>Emotions1</unitname> 
         <unitinstructions><![CDATA[Please rate how much you agree with each of the following statements regarding how you are <b>currently feeling</b>. Each page will ask about a different emotion, which you may or may not be feeling.]]></unitinstructions> 
@@ -168,8 +161,8 @@ The Heart</b><br>
                 A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8
             </initialpositions>
             <randomizegroups>false</randomizegroups>
-           <!-- <clusterlist>0-0 4-4 8-8 12-12 16-16 20-20 24-24 28-28</clusterlist>  -->
-           <!-- <clusterlist>1-1 5-5 9-9 13-13 17-17 21-21 25-25 29-29</clusterlist>-->        
+            <!-- <clusterlist>0-0 4-4 8-8 12-12 16-16 20-20 24-24 28-28</clusterlist>  -->
+            <!-- <clusterlist>1-1 5-5 9-9 13-13 17-17 21-21 25-25 29-29</clusterlist>-->        
             <!--<clusterlist>2-2 6-6 10-10 14-14 18-18 22-22 26-26 30-30</clusterlist>-->
             <clusterlist>3-3 7-7 11-11 15-15 19-19 23-23 27-27 31-31</clusterlist>  
             <assignrandomclusters>false</assignrandomclusters>

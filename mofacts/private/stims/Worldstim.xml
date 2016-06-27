@@ -1,183 +1,884 @@
-<setspec>	
-	<clusters>
-            
-
-<cluster><displayType>Image</displayType><display>images/Countries/afghanistan_sm_2011.gif</display><response>Afghanistan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/albania_sm_2011.gif</display><response>Albania</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/algeria_sm_2011.gif</display><response>Algeria</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/andorra_sm_2011.gif</display><response>Andorra</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/angola_sm_2011.gif</display><response>Angola</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/argentina_sm_2011.gif</display><response>Argentina</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/armenia_sm_2011.gif</display><response>Armenia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/australia_sm_2011.gif</display><response>Australia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/austria_sm_2011.gif</display><response>Austria</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/azerbaijan_sm_2011.gif</display><response>Azerbaijan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bahrain_sm_2011.gif</display><response>Bahrain</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bangladesh_sm_2011.gif</display><response>Bangladesh</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/belarus_sm_2011.gif</display><response>Belarus</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/belgium_sm_2011.gif</display><response>Belgium</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/belize_sm_2011.gif</display><response>Belize</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/benin_sm_2011.gif</display><response>Benin</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bhutan_sm_2011.gif</display><response>Bhutan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bolivia_sm_2011.gif</display><response>Bolivia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bosnia_herzegovina_sm_2011.gif</display><response>Bosnia and Herzegovina</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/botswana_sm_2011.gif</display><response>Botswana</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/brazil_sm_2011.gif</display><response>Brazil</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/brunei_sm_2011.gif</display><response>Brunei</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/bulgaria_sm_2011.gif</display><response>Bulgaria</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/burkina_faso_sm_2011.gif</display><response>Burkina Faso</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/burma_sm_2011.gif</display><response>Burma</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/burundi_sm_2011.gif</display><response>Burundi</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/cambodia_sm_2011.gif</display><response>Cambodia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/cameroon_sm_2011.gif</display><response>Cameroon</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/canada_sm_2011.gif</display><response>Canada</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/central_african_republic_sm_2011.gif</display><response>Central African Republic</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/chad_sm_2011.gif</display><response>Chad</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/chile_sm_2011.gif</display><response>Chile</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/china_sm_2011.gif</display><response>China</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/colombia_sm_2011.gif</display><response>Colombia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/congo_demrep_sm_2011.gif</display><response>DR of Congo</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/congo_republic_sm_2011.gif</display><response>Republic of Congo</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/costa_rica_sm_2011.gif</display><response>Costa Rica</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/cote_divoire_sm_2011.gif</display><response>Cote d'Ivoire</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/croatia_sm_2011.gif</display><response>Croatia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/cuba_sm_2011.gif</display><response>Cuba</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/cyprus_sm_2011.gif</display><response>Cyprus</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/czech_republic_sm_2011.gif</display><response>Czech Republic</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/denmark_sm_2011.gif</display><response>Denmark</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/djibouti_sm_2011.gif</display><response>Djibouti</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/dominica_sm_2011.gif</display><response>Dominica</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/dominican_republic_sm_2011.gif</display><response>Dominican Republic</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/ecuador_sm_2011.gif</display><response>Ecuador</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/egypt_sm_2011.gif</display><response>Egypt</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/el_salvador_sm_2011.gif</display><response>El Salvador</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/equatorial_guinea_sm_2011.gif</display><response>Equatorial Guinea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/eritrea_sm_2011.gif</display><response>Eritrea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/estonia_sm_2011.gif</display><response>Estonia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/ethiopia_sm_2011.gif</display><response>Ethiopia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/finland_sm_2011.gif</display><response>Finland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/france_sm_2011.gif</display><response>France</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/gabon_sm_2011.gif</display><response>Gabon</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/gambia_sm_2011.gif</display><response>Gambia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/gaza_strip_sm_2011.gif</display><response>Gaza Strip</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/georgia_sm_2011.gif</display><response>Georgia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/germany_sm_2011.gif</display><response>Germany</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/ghana_sm_2011.gif</display><response>Ghana</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/gibraltar_sm_2011.gif</display><response>Gibraltar</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/greece_sm_2011.gif</display><response>Greece</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/greenland_sm_2011.gif</display><response>Greenland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/guatemala_sm_2011.gif</display><response>Guatemala</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/guinea_bissau_sm_2011.gif</display><response>Guinea Bissau</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/guinea_sm_2011.gif</display><response>Guinea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/guyana_sm_2011.gif</display><response>Guyana</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/haiti_sm_2011.gif</display><response>Haiti</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/honduras_sm_2011.gif</display><response>Honduras</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/hong_kong_sm_2011.gif</display><response>Hong Kong</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/hungary_sm_2011.gif</display><response>Hungary</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/iceland_sm_2011.gif</display><response>Iceland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/india_sm_2011.gif</display><response>India</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/indonesia_sm_2011.gif</display><response>Indonesia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/iran_sm_2011.gif</display><response>Iran</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/iraq_sm_2011.gif</display><response>Iraq</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/ireland_sm_2011.gif</display><response>Ireland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/israel_sm_2011.gif</display><response>Israel</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/italy_sm_2011.gif</display><response>Italy</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/jamaica_sm_2011.gif</display><response>Jamaica</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/japan_sm_2011.gif</display><response>Japan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/jordan_sm_2011.gif</display><response>Jordan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/kazakhstan_sm_2011.gif</display><response>Kazakhstan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/kenya_sm_2011.gif</display><response>Kenya</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/korea_north_sm_2011.gif</display><response>North Korea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/korea_south_sm_2011.gif</display><response>South Korea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/kosovo_sm_2011.gif</display><response>Kosovo</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/kuwait_sm_2011.gif</display><response>Kuwait</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/kyrgyzstan_sm_2011.gif</display><response>Kyrgyzstan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/laos_sm_2011.gif</display><response>Laos</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/latvia_sm_2011.gif</display><response>Latvia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/lebanon_sm_2011.gif</display><response>Lebanon</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/lesotho_sm_2011.gif</display><response>Lesotho</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/liberia_sm_2011.gif</display><response>Liberia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/libya_sm_2011.gif</display><response>Libya</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/liechtenstein_sm_2011.gif</display><response>Liechtenstein</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/lithuania_sm_2011.gif</display><response>Lithuania</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/luxembourg_sm_2011.gif</display><response>Luxembourg</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/macedonia_sm_2011.gif</display><response>Macedonia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/madagascar_sm_2011.gif</display><response>Madagascar</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/malawi_sm_2011.gif</display><response>Malawi</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/malaysia_sm_2011.gif</display><response>Malaysia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/mali_sm_2011.gif</display><response>Mali</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/malta_sm_2011.gif</display><response>Malta</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/mauritania_sm_2011.gif</display><response>Mauritania</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/mexico_sm_2011.gif</display><response>Mexico</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/moldova_sm_2011.gif</display><response>Moldova</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/monaco_sm_2011.gif</display><response>Monaco</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/mongolia_sm_2011.gif</display><response>Mongolia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/montenegro_sm_2011.gif</display><response>Montenegro</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/morocco_sm_2011.gif</display><response>Morocco</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/mozambique_sm_2011.gif</display><response>Mozambique</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/namibia_sm_2011.gif</display><response>Namibia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/nepal_sm_2011.gif</display><response>Nepal</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/netherlands_sm_2011.gif</display><response>Netherlands</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/new_zealand_sm_2011.gif</display><response>New Zealand</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/nicaragua_sm_2011.gif</display><response>Nicaragua</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/niger_sm_2011.gif</display><response>Niger</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/nigeria_sm_2011.gif</display><response>Nigeria</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/norway_sm_2011.gif</display><response>Norway</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/oman_sm_2011.gif</display><response>Oman</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/pakistan_sm_2011.gif</display><response>Pakistan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/panama_sm_2011.gif</display><response>Panama</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/papua_new_guinea_sm_2011.gif</display><response>Papua New Guinea</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/paraguay_sm_2011.gif</display><response>Paraguay</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/peru_sm_2011.gif</display><response>Peru</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/philippines_sm_2011.gif</display><response>Philippines</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/poland_sm_2011.gif</display><response>Poland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/portugal_sm_2011.gif</display><response>Portugal</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/puerto_rico_sm_2011.gif</display><response>Puerto Rico</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/qatar_sm_2011.gif</display><response>Qatar</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/romania_sm_2011.gif</display><response>Romania</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/russia_sm_2011.gif</display><response>Russia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/rwanda_sm_2011.gif</display><response>Rwanda</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/saudi_arabia_sm_2011.gif</display><response>Saudi Arabia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/senegal_sm_2011.gif</display><response>Senegal</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/serbia_sm_2011.gif</display><response>Serbia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/sierra_leone_sm_2011.gif</display><response>Sierra Leone</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/singapore_sm_2011.gif</display><response>Singapore</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/slovakia_sm_2011.gif</display><response>Slovakia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/slovenia_sm_2011.gif</display><response>Slovenia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/somalia_sm_2011.gif</display><response>Somalia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/south_africa_sm_2011.gif</display><response>South Africa</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/south_sudan_sm_2011.gif</display><response>South Sudan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/spain_sm_2011.gif</display><response>Spain</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/sri_lanka_sm_2011.gif</display><response>Sri Lanka</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/sudan_sm_2011.gif</display><response>Sudan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/suriname_sm_2011.gif</display><response>Suriname</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/swaziland_sm_2011.gif</display><response>Swaziland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/sweden_sm_2011.gif</display><response>Sweden</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/switzerland_sm_2011.gif</display><response>Switzerland</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/syria_sm_2011.gif</display><response>Syria</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/taiwan_sm_2011.gif</display><response>Taiwan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/tajikistan_sm_2011.gif</display><response>Tajikistan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/tanzania_sm_2011.gif</display><response>Tanzania</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/thailand_sm_2011.gif</display><response>Thailand</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/timor_leste_sm_2011.gif</display><response>Timor-Leste</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/togo_sm_2011.gif</display><response>Togo</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/tunisia_sm_2011.gif</display><response>Tunisia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/turkey_sm_2011.gif</display><response>Turkey</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/turkmenistan_sm_2011.gif</display><response>Turkmenistan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/uganda_sm_2011.gif</display><response>Uganda</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/ukraine_sm_2011.gif</display><response>Ukraine</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/united_arab_emirates_sm_2011.gif</display><response>United Arab Emirates</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/united_kingdom_sm_2011.gif</display><response>United Kingdom</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/united_states_sm_2011.gif</display><response>United States</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/uruguay_sm_2011.gif</display><response>Uruguay</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/uzbekistan_sm_2011.gif</display><response>Uzbekistan</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/venezuela_sm_2011.gif</display><response>Venezuela</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/vietnam_sm_2011.gif</display><response>Vietnam</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/west_bank_sm_2011.gif</display><response>West Bank</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/western_sahara_sm_2011.gif</display><response>Western Sahara</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/yemen_sm_2011.gif</display><response>Yemen</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/zambia_sm_2011.gif</display><response>Zambia</response></cluster>
-<cluster><displayType>Image</displayType><display>images/Countries/zimbabwe_sm_2011.gif</display><response>Zimbabwe</response></cluster>
-
-	</clusters>
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/afghanistan_sm_2011.gif</display>
+            <response>Afghanistan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/albania_sm_2011.gif</display>
+            <response>Albania</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/algeria_sm_2011.gif</display>
+            <response>Algeria</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/andorra_sm_2011.gif</display>
+            <response>Andorra</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/angola_sm_2011.gif</display>
+            <response>Angola</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/argentina_sm_2011.gif</display>
+            <response>Argentina</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/armenia_sm_2011.gif</display>
+            <response>Armenia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/australia_sm_2011.gif</display>
+            <response>Australia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/austria_sm_2011.gif</display>
+            <response>Austria</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/azerbaijan_sm_2011.gif</display>
+            <response>Azerbaijan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bahrain_sm_2011.gif</display>
+            <response>Bahrain</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bangladesh_sm_2011.gif</display>
+            <response>Bangladesh</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/belarus_sm_2011.gif</display>
+            <response>Belarus</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/belgium_sm_2011.gif</display>
+            <response>Belgium</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/belize_sm_2011.gif</display>
+            <response>Belize</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/benin_sm_2011.gif</display>
+            <response>Benin</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bhutan_sm_2011.gif</display>
+            <response>Bhutan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bolivia_sm_2011.gif</display>
+            <response>Bolivia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bosnia_herzegovina_sm_2011.gif</display>
+            <response>Bosnia and Herzegovina</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/botswana_sm_2011.gif</display>
+            <response>Botswana</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/brazil_sm_2011.gif</display>
+            <response>Brazil</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/brunei_sm_2011.gif</display>
+            <response>Brunei</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/bulgaria_sm_2011.gif</display>
+            <response>Bulgaria</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/burkina_faso_sm_2011.gif</display>
+            <response>Burkina Faso</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/burma_sm_2011.gif</display>
+            <response>Burma</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/burundi_sm_2011.gif</display>
+            <response>Burundi</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/cambodia_sm_2011.gif</display>
+            <response>Cambodia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/cameroon_sm_2011.gif</display>
+            <response>Cameroon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/canada_sm_2011.gif</display>
+            <response>Canada</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/central_african_republic_sm_2011.gif</display>
+            <response>Central African Republic</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/chad_sm_2011.gif</display>
+            <response>Chad</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/chile_sm_2011.gif</display>
+            <response>Chile</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/china_sm_2011.gif</display>
+            <response>China</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/colombia_sm_2011.gif</display>
+            <response>Colombia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/congo_demrep_sm_2011.gif</display>
+            <response>DR of Congo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/congo_republic_sm_2011.gif</display>
+            <response>Republic of Congo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/costa_rica_sm_2011.gif</display>
+            <response>Costa Rica</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/cote_divoire_sm_2011.gif</display>
+            <response>Cote d'Ivoire</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/croatia_sm_2011.gif</display>
+            <response>Croatia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/cuba_sm_2011.gif</display>
+            <response>Cuba</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/cyprus_sm_2011.gif</display>
+            <response>Cyprus</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/czech_republic_sm_2011.gif</display>
+            <response>Czech Republic</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/denmark_sm_2011.gif</display>
+            <response>Denmark</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/djibouti_sm_2011.gif</display>
+            <response>Djibouti</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/dominica_sm_2011.gif</display>
+            <response>Dominica</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/dominican_republic_sm_2011.gif</display>
+            <response>Dominican Republic</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/ecuador_sm_2011.gif</display>
+            <response>Ecuador</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/egypt_sm_2011.gif</display>
+            <response>Egypt</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/el_salvador_sm_2011.gif</display>
+            <response>El Salvador</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/equatorial_guinea_sm_2011.gif</display>
+            <response>Equatorial Guinea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/eritrea_sm_2011.gif</display>
+            <response>Eritrea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/estonia_sm_2011.gif</display>
+            <response>Estonia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/ethiopia_sm_2011.gif</display>
+            <response>Ethiopia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/finland_sm_2011.gif</display>
+            <response>Finland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/france_sm_2011.gif</display>
+            <response>France</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/gabon_sm_2011.gif</display>
+            <response>Gabon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/gambia_sm_2011.gif</display>
+            <response>Gambia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/gaza_strip_sm_2011.gif</display>
+            <response>Gaza Strip</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/georgia_sm_2011.gif</display>
+            <response>Georgia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/germany_sm_2011.gif</display>
+            <response>Germany</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/ghana_sm_2011.gif</display>
+            <response>Ghana</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/gibraltar_sm_2011.gif</display>
+            <response>Gibraltar</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/greece_sm_2011.gif</display>
+            <response>Greece</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/greenland_sm_2011.gif</display>
+            <response>Greenland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/guatemala_sm_2011.gif</display>
+            <response>Guatemala</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/guinea_bissau_sm_2011.gif</display>
+            <response>Guinea Bissau</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/guinea_sm_2011.gif</display>
+            <response>Guinea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/guyana_sm_2011.gif</display>
+            <response>Guyana</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/haiti_sm_2011.gif</display>
+            <response>Haiti</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/honduras_sm_2011.gif</display>
+            <response>Honduras</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/hong_kong_sm_2011.gif</display>
+            <response>Hong Kong</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/hungary_sm_2011.gif</display>
+            <response>Hungary</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/iceland_sm_2011.gif</display>
+            <response>Iceland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/india_sm_2011.gif</display>
+            <response>India</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/indonesia_sm_2011.gif</display>
+            <response>Indonesia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/iran_sm_2011.gif</display>
+            <response>Iran</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/iraq_sm_2011.gif</display>
+            <response>Iraq</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/ireland_sm_2011.gif</display>
+            <response>Ireland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/israel_sm_2011.gif</display>
+            <response>Israel</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/italy_sm_2011.gif</display>
+            <response>Italy</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/jamaica_sm_2011.gif</display>
+            <response>Jamaica</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/japan_sm_2011.gif</display>
+            <response>Japan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/jordan_sm_2011.gif</display>
+            <response>Jordan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/kazakhstan_sm_2011.gif</display>
+            <response>Kazakhstan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/kenya_sm_2011.gif</display>
+            <response>Kenya</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/korea_north_sm_2011.gif</display>
+            <response>North Korea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/korea_south_sm_2011.gif</display>
+            <response>South Korea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/kosovo_sm_2011.gif</display>
+            <response>Kosovo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/kuwait_sm_2011.gif</display>
+            <response>Kuwait</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/kyrgyzstan_sm_2011.gif</display>
+            <response>Kyrgyzstan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/laos_sm_2011.gif</display>
+            <response>Laos</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/latvia_sm_2011.gif</display>
+            <response>Latvia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/lebanon_sm_2011.gif</display>
+            <response>Lebanon</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/lesotho_sm_2011.gif</display>
+            <response>Lesotho</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/liberia_sm_2011.gif</display>
+            <response>Liberia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/libya_sm_2011.gif</display>
+            <response>Libya</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/liechtenstein_sm_2011.gif</display>
+            <response>Liechtenstein</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/lithuania_sm_2011.gif</display>
+            <response>Lithuania</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/luxembourg_sm_2011.gif</display>
+            <response>Luxembourg</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/macedonia_sm_2011.gif</display>
+            <response>Macedonia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/madagascar_sm_2011.gif</display>
+            <response>Madagascar</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/malawi_sm_2011.gif</display>
+            <response>Malawi</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/malaysia_sm_2011.gif</display>
+            <response>Malaysia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/mali_sm_2011.gif</display>
+            <response>Mali</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/malta_sm_2011.gif</display>
+            <response>Malta</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/mauritania_sm_2011.gif</display>
+            <response>Mauritania</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/mexico_sm_2011.gif</display>
+            <response>Mexico</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/moldova_sm_2011.gif</display>
+            <response>Moldova</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/monaco_sm_2011.gif</display>
+            <response>Monaco</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/mongolia_sm_2011.gif</display>
+            <response>Mongolia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/montenegro_sm_2011.gif</display>
+            <response>Montenegro</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/morocco_sm_2011.gif</display>
+            <response>Morocco</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/mozambique_sm_2011.gif</display>
+            <response>Mozambique</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/namibia_sm_2011.gif</display>
+            <response>Namibia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/nepal_sm_2011.gif</display>
+            <response>Nepal</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/netherlands_sm_2011.gif</display>
+            <response>Netherlands</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/new_zealand_sm_2011.gif</display>
+            <response>New Zealand</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/nicaragua_sm_2011.gif</display>
+            <response>Nicaragua</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/niger_sm_2011.gif</display>
+            <response>Niger</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/nigeria_sm_2011.gif</display>
+            <response>Nigeria</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/norway_sm_2011.gif</display>
+            <response>Norway</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/oman_sm_2011.gif</display>
+            <response>Oman</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/pakistan_sm_2011.gif</display>
+            <response>Pakistan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/panama_sm_2011.gif</display>
+            <response>Panama</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/papua_new_guinea_sm_2011.gif</display>
+            <response>Papua New Guinea</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/paraguay_sm_2011.gif</display>
+            <response>Paraguay</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/peru_sm_2011.gif</display>
+            <response>Peru</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/philippines_sm_2011.gif</display>
+            <response>Philippines</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/poland_sm_2011.gif</display>
+            <response>Poland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/portugal_sm_2011.gif</display>
+            <response>Portugal</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/puerto_rico_sm_2011.gif</display>
+            <response>Puerto Rico</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/qatar_sm_2011.gif</display>
+            <response>Qatar</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/romania_sm_2011.gif</display>
+            <response>Romania</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/russia_sm_2011.gif</display>
+            <response>Russia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/rwanda_sm_2011.gif</display>
+            <response>Rwanda</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/saudi_arabia_sm_2011.gif</display>
+            <response>Saudi Arabia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/senegal_sm_2011.gif</display>
+            <response>Senegal</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/serbia_sm_2011.gif</display>
+            <response>Serbia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/sierra_leone_sm_2011.gif</display>
+            <response>Sierra Leone</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/singapore_sm_2011.gif</display>
+            <response>Singapore</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/slovakia_sm_2011.gif</display>
+            <response>Slovakia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/slovenia_sm_2011.gif</display>
+            <response>Slovenia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/somalia_sm_2011.gif</display>
+            <response>Somalia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/south_africa_sm_2011.gif</display>
+            <response>South Africa</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/south_sudan_sm_2011.gif</display>
+            <response>South Sudan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/spain_sm_2011.gif</display>
+            <response>Spain</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/sri_lanka_sm_2011.gif</display>
+            <response>Sri Lanka</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/sudan_sm_2011.gif</display>
+            <response>Sudan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/suriname_sm_2011.gif</display>
+            <response>Suriname</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/swaziland_sm_2011.gif</display>
+            <response>Swaziland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/sweden_sm_2011.gif</display>
+            <response>Sweden</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/switzerland_sm_2011.gif</display>
+            <response>Switzerland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/syria_sm_2011.gif</display>
+            <response>Syria</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/taiwan_sm_2011.gif</display>
+            <response>Taiwan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/tajikistan_sm_2011.gif</display>
+            <response>Tajikistan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/tanzania_sm_2011.gif</display>
+            <response>Tanzania</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/thailand_sm_2011.gif</display>
+            <response>Thailand</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/timor_leste_sm_2011.gif</display>
+            <response>Timor-Leste</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/togo_sm_2011.gif</display>
+            <response>Togo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/tunisia_sm_2011.gif</display>
+            <response>Tunisia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/turkey_sm_2011.gif</display>
+            <response>Turkey</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/turkmenistan_sm_2011.gif</display>
+            <response>Turkmenistan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/uganda_sm_2011.gif</display>
+            <response>Uganda</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/ukraine_sm_2011.gif</display>
+            <response>Ukraine</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/united_arab_emirates_sm_2011.gif</display>
+            <response>United Arab Emirates</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/united_kingdom_sm_2011.gif</display>
+            <response>United Kingdom</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/united_states_sm_2011.gif</display>
+            <response>United States</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/uruguay_sm_2011.gif</display>
+            <response>Uruguay</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/uzbekistan_sm_2011.gif</display>
+            <response>Uzbekistan</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/venezuela_sm_2011.gif</display>
+            <response>Venezuela</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/vietnam_sm_2011.gif</display>
+            <response>Vietnam</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/west_bank_sm_2011.gif</display>
+            <response>West Bank</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/western_sahara_sm_2011.gif</display>
+            <response>Western Sahara</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/yemen_sm_2011.gif</display>
+            <response>Yemen</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/zambia_sm_2011.gif</display>
+            <response>Zambia</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/Countries/zimbabwe_sm_2011.gif</display>
+            <response>Zimbabwe</response>
+        </cluster>
+    </clusters>
 </setspec>
