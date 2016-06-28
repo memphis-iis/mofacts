@@ -1,3 +1,5 @@
+//TODO: we need handle empty data when charting
+
 generateClassGraphData = function(tdfname, optionBool) {
     var userDataQuery = {};
     var userData = [];
