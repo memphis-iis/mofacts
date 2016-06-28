@@ -168,7 +168,6 @@ Template.student.helpers({
             return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
         var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
-        studentDataLatVar.unshift(7500);
         return studentDataLatVar;
     },
 
@@ -178,21 +177,18 @@ Template.student.helpers({
             return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
         var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
-        studentDataCorVar.unshift(0);
         return studentDataCorVar;
     },
 
     //data for the class average latency
     classDataLat: function () {
         var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
-        classDataLatVar.unshift(7500);
         return classDataLatVar;
     },
 
     //data for class average correctness
     classDataCor: function () {
         var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
-        classDataCorVar.unshift(0);
         return classDataCorVar;
     },
 

@@ -58,7 +58,7 @@ if (_ && _.mixin) {
             if (_.isString(obj) || !_.isObject(obj)) {
                 return [];
             }
-            return _.keys(obj);  //TODO: don't throw error on non-object
+            return _.keys(obj);
         },
 
         prop: function(obj, propname) {
