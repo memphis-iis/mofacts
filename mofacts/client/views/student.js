@@ -1,18 +1,13 @@
-//TODO: we need handle empty data when charting
-
 generateClassGraphData = function(tdfname, optionBool) {
     var userDataQuery = {};
-    var userData = [];
     userDataQuery[tdfname] = {$exists: true};
-    userData = UserMetrics.find(userDataQuery).fetch();
     var classData = [];
     var classCount = [];
     var corCount = 0;
-    _.chain(userData).each(function(user) {
+    UserMetrics.find(userDataQuery).forEach(function(user) {
         _.chain(user).prop(tdfname).each(function(item) {
             for (var i=0; i<_.chain(item).prop('questionCount').intval().value(); i++) {
-                if (classCount.length <= i) {
-                    //console.log("Increasing data array size by 1 from "+classCount.length);
+                while (classCount.length <= i) {
                     classCount.push(0);
                     classData.push(0);
                 }
@@ -32,7 +27,6 @@ generateClassGraphData = function(tdfname, optionBool) {
     //We now have the raw data, and here we convert the classData to the averages.
     for (var i=0; i<classData.length; i++) {
         if (optionBool && corCount !== 0) {
-            //console.log("Count: "+classCount[i]);
             classData[i] /= classCount[i];
         }
         else if (corCount !== 0) {
@@ -43,10 +37,9 @@ generateClassGraphData = function(tdfname, optionBool) {
         }
     }
     if (_.last(classCount) === 0) {
-        //console.log("Last datapoint had 0 attempts, we're removing it.")
         classData.pop();
     }
-    //console.log(classData);
+
     return classData;
 };
 
@@ -57,16 +50,16 @@ generateClassGraphData = function(tdfname, optionBool) {
 // OUPUT: an array containing values with indices representing the 'opportunity'
 //        number. The 0th slot is always initialized to "0".
 generateStudentGraphData = function(studentID, tdfname, optionBool) {
-    var userData = UserMetrics.find({'_id' : studentID}).fetch();
+    var userData = UserMetrics.findOne({'_id' : studentID});
     var itemData = [];
     var itemCount = [];
     var corCount = 0;
 
-    _.chain(userData).first().prop(tdfname).each(function(item) {
+    _.chain(userData).prop(tdfname).each(function(item, itemIndex) {
         //Each item in the TDF
         var questionCount = _.intval(item.questionCount || 0);
         for (var i = 0; i < questionCount; i++) {
-            if (itemCount.length <= i) {
+            while (itemCount.length <= i) {
                 itemCount.push(0);
                 itemData.push(0);
             }
@@ -169,8 +162,7 @@ Template.student.helpers({
         if (!haveMeteorUser())
             return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-        var studentDataLatVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
-        return studentDataLatVar;
+        return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), false);
     },
 
     //data for the student correctness
@@ -178,20 +170,17 @@ Template.student.helpers({
         if (!haveMeteorUser())
             return [];
         var user = (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]))? Session.get('currStudent') : Meteor.user()._id;
-        var studentDataCorVar = generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
-        return studentDataCorVar;
+        return generateStudentGraphData(user, buildTdfDBName(getCurrentTdfName()), true);
     },
 
     //data for the class average latency
     classDataLat: function () {
-        var classDataLatVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
-        return classDataLatVar;
+        return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), false);
     },
 
     //data for class average correctness
     classDataCor: function () {
-        var classDataCorVar = generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
-        return classDataCorVar;
+        return generateClassGraphData(buildTdfDBName(getCurrentTdfName()), true);
     },
 
     itemData: function () {
@@ -205,20 +194,9 @@ Template.student.helpers({
 Template.student.events({
     'click .switchButton': function (event) {
         event.preventDefault();
+        // Swap between latency and correctness
+        $(".toggled").toggleClass("displayed");
         drawChart();
-        //TODO: switch to jQuery
-        if (document.getElementById("reptitionLatency").style.display == "none") {
-            document.getElementById("reptitionLatency").style.display="block";
-            document.getElementById("reptitionLatencyTitle").style.display="block";
-            document.getElementById("reptitionCorrectness").style.display="none";
-            document.getElementById("reptitionCorrectnessTitle").style.display="none";
-        }
-        else {
-            document.getElementById("reptitionLatency").style.display="none";
-            document.getElementById("reptitionLatencyTitle").style.display="none";
-            document.getElementById("reptitionCorrectness").style.display="block";
-            document.getElementById("reptitionCorrectnessTitle").style.display="block";
-        }
     },
 
     'click .logoutLink' : function (event) {
@@ -264,90 +242,92 @@ Template.student.rendered = function () {
 var drawChart = function () {
     var i;
 
-    // Find out the length of the array returned from the specified function.
-    var studentDataLatLeng = Template.student.__helpers[" studentDataLat"]().length;
+    // Get our series and populate a range array for chart labeling
 
-    // Auto populate an array from 0 to length of specified function.
+    var latencySeries = [Template.student.__helpers[" studentDataLat"]()];
+    var studentDataLatLeng = latencySeries[0].length;
     var studentDataLatRes = [];
     for (i = 0; i <= studentDataLatLeng; i++) {
         studentDataLatRes.push(i);
     }
 
-    // Repeat above.
-    var studentDataCorLeng = Template.student.__helpers[" studentDataCor"]().length;
+    var correctSeries = [Template.student.__helpers[" studentDataCor"]()];
+    var studentDataCorLeng = correctSeries[0].length;
     var studentDataCorRes = [];
     for (i = 0; i <= studentDataCorLeng; i++) {
         studentDataCorRes.push(i);
     }
 
-    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-        new Chartist.Line('#reptitionLatency', {
-            labels: studentDataLatRes,
-            series: [
-                Template.student.__helpers[" studentDataLat"](),
-                Template.student.__helpers[" classDataLat"]()
-            ]
-            }, {
-            low: 0,
-            fullWidth: true,
-            height: 300,
-            axisY: {
-                onlyInteger: true,
-                offset: 50
-            },
-            lineSmooth: false
-        });
+    // Include extra series in "admin mode"
 
-        new Chartist.Line('#reptitionCorrectness', {
-            labels: studentDataCorRes,
-            series: [
-                Template.student.__helpers[" studentDataCor"](),
-                Template.student.__helpers[" classDataCor"]()
-            ]
-        }, {
-            high: 1,
-            low: 0,
-            fullWidth: true,
-            height: 300,
-            axisY: {
-                onlyInteger: false,
-                offset: 50
-            },
-            lineSmooth: false
-        });
+    if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
+        latencySeries.push(Template.student.__helpers[" classDataLat"]());
+        correctSeries.push(Template.student.__helpers[" classDataCor"]());
+    }
+
+    // Return true if none of the series has data
+    var seriesEmpty = function(seriesArray) {
+        for(var i = 0; i < seriesArray.length; ++i) {
+            if (seriesArray[i].length > 0) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    // Now actually create the charts - but only if we can find the proper
+    // elements and there is data to display
+    var drawCondLine = function(targetSelector, isEmpty, dataDescrip, chartData, chartConfig) {
+        var target = $(targetSelector).get(0);
+        if (!target) {
+            return;
+        }
+        if (isEmpty) {
+            $(target)
+                .removeClass("show-axis")
+                .html("<div class='nodata'>No " + dataDescrip + " data available</div>");
+        }
+        else {
+            $(target).addClass("show-axis");
+            // Note that we provide some default values that can be overridden
+            new Chartist.Line(target, chartData, _.extend({
+                low: 0,
+                fullWidth: true,
+                height: 300,
+                lineSmooth: false
+            }, chartConfig));
+        }
+    };
+
+    var latencyEmpty = seriesEmpty(latencySeries);
+    var correctEmpty = seriesEmpty(correctSeries);
+
+    //Don't show the legend if there's no data
+    if (latencyEmpty && correctEmpty) {
+        $(".legend").hide();
     }
     else {
-        new Chartist.Line('#reptitionLatency', {
-            labels: studentDataLatRes,
-            series: [
-                Template.student.__helpers[" studentDataLat"]()
-            ]
-        }, {
-            low: 0,
-            fullWidth: true,
-            height: 300,
-            axisY: {
-                onlyInteger: true,
-                offset: 50
-            },
-            lineSmooth: false
-        });
-
-        new Chartist.Line('#reptitionCorrectness', {
-            labels: studentDataCorRes,
-            series: [
-                Template.student.__helpers[" studentDataCor"]()
-            ]
-        }, {
-            low: 0,
-            high: 1,
-            fullWidth: true,
-            height: 300,
-            axisY: {
-                onlyInteger: false,
-                offset: 50
-            },
-            lineSmooth: false
-        });
+        $(".legend").show();
     }
+
+    drawCondLine('#reptitionLatency', latencyEmpty, 'latency', {
+        labels: studentDataLatRes,
+        series: latencySeries
+    }, {
+        axisY: {
+            onlyInteger: true,
+            offset: 50
+        }
+    });
+
+    drawCondLine('#reptitionCorrectness', correctEmpty, 'correctness', {
+        labels: studentDataCorRes,
+        series: correctSeries
+    }, {
+        high: 1,
+        axisY: {
+            onlyInteger: false,
+            offset: 50
+        },
+    });
 };

@@ -163,7 +163,7 @@ legend {
     font-size: 16px;
     white-space:normal;
     width: 100%;
-    
+
 }
 
 .btn:hover {
@@ -288,3 +288,60 @@ input:focus {
     border-right-width: 1px;
     border-left-width: 0;
 }
+
+/* BEGIN CSS for charting */
+
+.graphs {
+   position: relative;
+}
+
+div.show-axis[data-x-axis]::before {
+   content: attr(data-x-axis);
+   position: absolute;
+   width: 100%;
+   text-align: center;
+   left: 0;
+   bottom: 0;
+   font-size: 1.45rem;
+   color: #000;
+   font-weight: bolder;
+}
+
+div.show-axis[data-y-axis]::after {
+   content: attr(data-y-axis);
+   position: absolute;
+   top: 40%;
+   left: -7rem;
+   font-size: 1.45rem;
+   color: #000;
+   text-align: center;
+   transform: rotate(-90deg)translateY(50%);
+   font-weight: bolder;
+}
+
+.ct-label {
+   fill: #000;
+   color: #000;
+   font-size: 1.45rem;
+   line-height: 1;
+   font-weight: bolder;
+}
+
+.ct-series-a .ct-line,
+.ct-series-a .ct-point {
+   stroke: #C40233
+}
+
+.ct-series-b .ct-line,
+.ct-series-b .ct-point {
+   stroke: #0087BD;
+}
+
+.toggled {
+    display: none;
+}
+.displayed {
+    display: block;
+}
+
+/* END CSS for charting */
