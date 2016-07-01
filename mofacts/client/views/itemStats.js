@@ -10,9 +10,9 @@ function generateItemGraphData(itemID, tdfname, optionBool) {
     var itemData = []; //either correctness or latency, hence 'data'
     var itemCount = [];
     var corCount = 0;
+
     itemQuery[tdfname+"."+itemID] = {$exists: true};
-    var scoreArray = UserMetrics.find(itemQuery).fetch();
-    _.chain(scoreArray).each(function (user) {
+    UserMetrics.find(itemQuery).forEach(function (user) {
         var itemCurrUser = _.chain(user).prop(tdfname).prop(itemID).value();
         var questionCount = _.intval(itemCurrUser.questionCount || 0);
         for (var i = 0; i < questionCount; i++) {
@@ -74,20 +74,8 @@ Template.itemStats.helpers({
 Template.itemStats.events({
     'click .switchButton': function (event) {
         event.preventDefault();
+        $(".toggled").toggleClass("displayed");
         drawChart();
-        //TODO: switch to jQuery
-        if (document.getElementById("reptitionLatency").style.display == "none") {
-            document.getElementById("reptitionLatency").style.display="block";
-            document.getElementById("reptitionLatencyTitle").style.display="block";
-            document.getElementById("reptitionCorrectness").style.display="none";
-            document.getElementById("reptitionCorrectnessTitle").style.display="none";
-        }
-        else {
-            document.getElementById("reptitionLatency").style.display="none";
-            document.getElementById("reptitionLatencyTitle").style.display="none";
-            document.getElementById("reptitionCorrectness").style.display="block";
-            document.getElementById("reptitionCorrectnessTitle").style.display="block";
-        }
     },
 
     'click .logoutLink' : function (event) {
@@ -128,50 +116,55 @@ Template.itemStats.rendered = function () {
 var drawChart = function () {
     var i;
 
-    // Auto populate an array from 0 to length of specified function.
-    var itemDataLatLeng = Template.itemStats.__helpers[" itemDataLat"]().length;
-    var itemDataLatRes = [];
-    for (i = 0; i <= itemDataLatLeng; i++) {
-        itemDataLatRes.push(i);
-    }
+    // Get our series and populate a range array for chart labeling
 
-    // Repeat above.
-    var itemDataCorLeng = Template.itemStats.__helpers[" itemDataCor"]().length;
-    var itemDataCorRes = [];
-    for (i = 0; i <= itemDataCorLeng; i++) {
-        itemDataCorRes.push(i);
-    }
+    var latencySeries = Template.itemStats.__helpers[" itemDataLat"]();
+    var itemDataLatRes = _.range(latencySeries.length);  // from 0 to len-1
 
-    new Chartist.Line('#reptitionLatency', {
-        labels: itemDataLatRes,
-        series: [
-            Template.itemStats.__helpers[" itemDataLat"]()
-        ]
-    }, {
-        low: 0,
-        fullWidth: true,
-        height: 300,
+    var correctSeries = Template.itemStats.__helpers[" itemDataCor"]();
+    var itemDataCorRes = _.range(correctSeries.length);  // from 0 to len-1
+
+    // Now actually create the charts - but only if we can find the proper
+    // elements and there is data to display
+    var drawCondLine = function(targetSelector, labels, series, dataDescrip, chartConfig) {
+        var target = $(targetSelector).get(0);
+        if (!target) {
+            return;
+        }
+        if (series.length < 1) {
+            $(target)
+                .removeClass("show-axis")
+                .html("<div class='nodata'>No " + dataDescrip + " data available</div>");
+        }
+        else {
+            $(target).addClass("show-axis");
+            // Note that we provide some default values that can be overridden
+            var chartData = {
+                'labels': labels,
+                'series': [series]
+            };
+
+            var fullConfig = _.extend({
+                low: 0,
+                fullWidth: true,
+                height: 300,
+                lineSmooth: false
+            }, chartConfig);
+
+            new Chartist.Line(target, chartData, fullConfig);
+        }
+    };
+
+    drawCondLine('#reptitionLatency', itemDataLatRes, latencySeries, "latency", {
         axisY: {
-            onlyInteger: true,
-            offset: 50
-        },
-        lineSmooth: false
+            onlyInteger: true
+        }
     });
 
-    new Chartist.Line('#reptitionCorrectness', {
-        labels: itemDataCorRes,
-        series: [
-            Template.itemStats.__helpers[" itemDataCor"]()
-        ]
-    }, {
+    drawCondLine('#reptitionCorrectness', itemDataCorRes, correctSeries, "correctness", {
         high: 1,
-        low: 0,
-        fullWidth: true,
-        height: 300,
         axisY: {
-            onlyInteger: false,
-            offset: 50
-            },
-        lineSmooth: false
+            onlyInteger: false
+        }
     });
 };

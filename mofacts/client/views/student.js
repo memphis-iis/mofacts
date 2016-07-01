@@ -245,18 +245,11 @@ var drawChart = function () {
     // Get our series and populate a range array for chart labeling
 
     var latencySeries = [Template.student.__helpers[" studentDataLat"]()];
-    var studentDataLatLeng = latencySeries[0].length;
-    var studentDataLatRes = [];
-    for (i = 0; i <= studentDataLatLeng; i++) {
-        studentDataLatRes.push(i);
-    }
+    var studentDataLatRes = _.range(latencySeries[0].length);
 
     var correctSeries = [Template.student.__helpers[" studentDataCor"]()];
     var studentDataCorLeng = correctSeries[0].length;
-    var studentDataCorRes = [];
-    for (i = 0; i <= studentDataCorLeng; i++) {
-        studentDataCorRes.push(i);
-    }
+    var studentDataCorRes = _.range(correctSeries[0].length);
 
     // Include extra series in "admin mode"
 
@@ -315,8 +308,7 @@ var drawChart = function () {
         series: latencySeries
     }, {
         axisY: {
-            onlyInteger: true,
-            offset: 50
+            onlyInteger: true
         }
     });
 
@@ -326,8 +318,7 @@ var drawChart = function () {
     }, {
         high: 1,
         axisY: {
-            onlyInteger: false,
-            offset: 50
+            onlyInteger: false
         },
     });
 };
