@@ -3,7 +3,7 @@
         <name>Internal Testing with SVO and Models</name>
         <lessonname>Optimized Drill Practice of Heart Reading</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Heartstims.xml</stimulusfile>
+        <stimulusfile>HeartOptimstims.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
