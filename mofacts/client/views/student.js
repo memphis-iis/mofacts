@@ -26,10 +26,10 @@ generateClassGraphData = function(tdfname, optionBool) {
 
     //We now have the raw data, and here we convert the classData to the averages.
     for (var i=0; i<classData.length; i++) {
-        if (optionBool && corCount !== 0) {
+        if (optionBool && classCount[i] !== 0) {
             classData[i] /= classCount[i];
         }
-        else if (corCount !== 0) {
+        else if (!optionBool && corCount !== 0) {
             classData[i] /= corCount;
         }
         else if (classCount[i] === 0) {
@@ -78,10 +78,10 @@ generateStudentGraphData = function(studentID, tdfname, optionBool) {
 
     // Now we have the data, turn it into averages, replacing itemData's values with the averages
     for (var i = 0; i < itemData.length; i++) {
-        if (optionBool && corCount !== 0) {
+        if (optionBool && itemCount[i] !== 0) {
             itemData[i] /= itemCount[i];
         }
-        else if (corCount !== 0) {
+        else if (!optionBool && corCount !== 0) {
             itemData[i] /= corCount;
         }
         else {
@@ -129,8 +129,9 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
         var newIndex = itemStats.length;
         var itemID = itemIDList[newIndex];
         itemStats.push({
-            'correctRatio': Math.round((corCount/totCount) * 100) / 100,
-            'avgLatency': _.isNaN(corTime/corCount) ? 0 : corTime/corCount,
+            'correctRatio': (corCount/totCount).toFixed(2),
+            'avgLatency': (_.isNaN(corTime/corCount) ? 0 : corTime/corCount).toFixed(1),
+            'repetitions': totCount,
             'itemID': itemID,
             'name': _.first(cluster[itemID].display),
         });
@@ -239,34 +240,51 @@ Template.student.rendered = function () {
     });
 };
 
+// in-place modify the series AND return it
+// Note that due to irregularities in Chartist, we insure we have at least
+// 2 "points" - even if they won't be displayed. (But keep in mind that we
+// don't want to show spurious data if our series is empty.)
+function safeSeries(series) {
+    if (!series || series.length < 1)
+        return series;
+
+    while (series.length < 2) {
+        series.push(null);  // null are missing points
+    }
+    return series;
+}
+
+// Return true if none of the series has data
+function seriesEmpty(seriesArray) {
+    for(var i = 0; i < seriesArray.length; ++i) {
+        if (seriesArray[i].length > 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 var drawChart = function () {
     var i;
 
     // Get our series and populate a range array for chart labeling
+    // Note that due to irregularities in Chartist, we insure we have at least
+    // 2 "points" - even if they won't be displayed. (But keep in mind that we
+    // don't want to show spurious data if our series is empty.)
 
-    var latencySeries = [Template.student.__helpers[" studentDataLat"]()];
+    var latencySeries = [safeSeries(Template.student.__helpers[" studentDataLat"]())];
     var studentDataLatRes = _.range(latencySeries[0].length);
 
-    var correctSeries = [Template.student.__helpers[" studentDataCor"]()];
+    var correctSeries = [safeSeries(Template.student.__helpers[" studentDataCor"]())];
     var studentDataCorLeng = correctSeries[0].length;
     var studentDataCorRes = _.range(correctSeries[0].length);
 
     // Include extra series in "admin mode"
 
     if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-        latencySeries.push(Template.student.__helpers[" classDataLat"]());
-        correctSeries.push(Template.student.__helpers[" classDataCor"]());
+        latencySeries.push(safeSeries(Template.student.__helpers[" classDataLat"]()));
+        correctSeries.push(safeSeries(Template.student.__helpers[" classDataCor"]()));
     }
-
-    // Return true if none of the series has data
-    var seriesEmpty = function(seriesArray) {
-        for(var i = 0; i < seriesArray.length; ++i) {
-            if (seriesArray[i].length > 0) {
-                return false;
-            }
-        }
-        return true;
-    };
 
     // Now actually create the charts - but only if we can find the proper
     // elements and there is data to display

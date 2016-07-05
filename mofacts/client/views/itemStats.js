@@ -1,5 +1,3 @@
-//TODO: we need handle empty data when charting
-
 //INPUT: itemID, an integer which represents the index of the item in the cluster
 //       tdfname, a string representing the Mongo-friendly current TDF
 //       optionBool, a boolean, where true is for correctness data, false is for latency data
@@ -34,10 +32,10 @@ function generateItemGraphData(itemID, tdfname, optionBool) {
     });
 
     for (var i = 0; i < itemData.length; i++) {
-        if (optionBool && corCount !== 0) {
+        if (optionBool && itemCount[i] !== 0) {
             itemData[i] /= itemCount[i];
         }
-        else if (corCount !== 0) {
+        else if (!optionBool && corCount !== 0) {
             itemData[i] /= corCount;
         }
         else {
@@ -113,15 +111,29 @@ Template.itemStats.rendered = function () {
     });
 };
 
+// in-place modify the series AND return it
+// Note that due to irregularities in Chartist, we insure we have at least
+// 2 "points" - even if they won't be displayed. (But keep in mind that we
+// don't want to show spurious data if our series is empty.)
+function safeSeries(series) {
+    if (!series || series.length < 1)
+        return series;
+
+    while (series.length < 2) {
+        series.push(null);  // null are missing points
+    }
+    return series;
+}
+
 var drawChart = function () {
     var i;
 
     // Get our series and populate a range array for chart labeling
 
-    var latencySeries = Template.itemStats.__helpers[" itemDataLat"]();
-    var itemDataLatRes = _.range(latencySeries.length);  // from 0 to len-1
+    var latencySeries = safeSeries(Template.itemStats.__helpers[" itemDataLat"]());
+    var correctSeries = safeSeries(Template.itemStats.__helpers[" itemDataCor"]());
 
-    var correctSeries = Template.itemStats.__helpers[" itemDataCor"]();
+    var itemDataLatRes = _.range(latencySeries.length);  // from 0 to len-1
     var itemDataCorRes = _.range(correctSeries.length);  // from 0 to len-1
 
     // Now actually create the charts - but only if we can find the proper

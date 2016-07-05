@@ -1,5 +1,5 @@
 <template name="student">
-   <nav class="navbar navbar-inverse navbar fixed-top" role="navigation">
+   <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
       <div class="container">
          <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
@@ -75,14 +75,16 @@
                          <th>Item Name</th>
                          <th>Correctness Ratio</th>
                          <th>Average Latency</th>
+                         <th>Repetitions</th>
                      </tr>
                  </thead>
                  <tbody>
                      {{#each item in itemData}}
                      <tr>
                          <td>{{item.name}}</td>
-                         <td>{{item.correctRatio}}</td>
-                         <td>{{item.avgLatency}}ms</td>
+                         <td class="numeric-cell">{{item.correctRatio}}</td>
+                         <td class="numeric-cell">{{item.avgLatency}}ms</td>
+                         <td class="numeric-cell">{{item.repetitions}}</td>
                      </tr>
                      {{/each}}
                  </tbody>
