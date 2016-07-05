@@ -163,7 +163,6 @@ legend {
     font-size: 16px;
     white-space:normal;
     width: 100%;
-
 }
 
 .btn:hover {
@@ -293,6 +292,10 @@ input:focus {
 
 .graphs {
    position: relative;
+}
+
+.numeric-cell {
+    text-align: right;
 }
 
 div.show-axis[data-x-axis]::before {
