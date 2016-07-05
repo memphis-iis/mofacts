@@ -1617,6 +1617,7 @@ function processUserTimesLog() {
     else if (moduleCompleted) {
         //They are DONE!
         console.log("TDF already completed - leaving for profile page.");
+        leavePage("/profile");
     }
     else {
         //We have an answer (or no questions at all) - run next question logic
