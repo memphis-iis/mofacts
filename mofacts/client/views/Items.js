@@ -11,11 +11,11 @@ function computeItemAverage(item, tdfname) {
         var itemRef = _.chain(user).prop(tdfname).prop(item.toString()).value();
         askCount = _.chain(itemRef).prop("questionCount").intval().value();
         correctCount = _.chain(itemRef).prop("correctCount").intval().value();
-        if (item == '0') {
-            console.log(correctCount);
-            console.log(askCount);
-            console.log(displayify(itemRef));
-        }
+        // if (item == '0') {
+        //     console.log(correctCount);
+        //     console.log(askCount);
+        //     console.log(displayify(itemRef));
+        // }
     });
     return correctCount/askCount;
 }
