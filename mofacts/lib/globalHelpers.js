@@ -12,9 +12,15 @@ if (!Date.now) {
     };
 }
 if (!String.prototype.endsWith) {
-    String.prototype.endsWith = function(str) {
-       return new RegExp(str + "$").test(str);
-   };
+    String.prototype.endsWith = function(searchString, position) {
+        var subjectString = this.toString();
+        if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+            position = subjectString.length;
+        }
+        position -= searchString.length;
+        var lastIndex = subjectString.indexOf(searchString, position);
+        return lastIndex !== -1 && lastIndex === position;
+    };
 }
 
 
@@ -161,7 +167,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 displayify = function(obj) {
     // Strings and numbers are simple
     if (typeof obj === "string" || typeof obj === "number") {
-        return obj + "";
+        return obj;
     }
 
     // Array: return with displayify run on each member
@@ -170,7 +176,8 @@ displayify = function(obj) {
         for (var i = 0; i < obj.length; ++i) {
             dispArr.push(displayify(obj[i])); //Recursion!
         }
-        return JSON.stringify(dispArr, null, 2);
+        var spacing = (dispArr.length <= 3 || _.isNumber(obj[0])) ? 0 : 2;
+        return JSON.stringify(dispArr, null, spacing);
     }
 
     // Object - perform some special formatting on a copy
