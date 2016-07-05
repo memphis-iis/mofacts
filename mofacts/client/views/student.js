@@ -273,11 +273,11 @@ var drawChart = function () {
     // don't want to show spurious data if our series is empty.)
 
     var latencySeries = [safeSeries(Template.student.__helpers[" studentDataLat"]())];
-    var studentDataLatRes = _.range(latencySeries[0].length);
+    var studentDataLatRes = _.range(1, latencySeries[0].length+1);
 
     var correctSeries = [safeSeries(Template.student.__helpers[" studentDataCor"]())];
     var studentDataCorLeng = correctSeries[0].length;
-    var studentDataCorRes = _.range(correctSeries[0].length);
+    var studentDataCorRes = _.range(1, correctSeries[0].length+1);
 
     // Include extra series in "admin mode"
 

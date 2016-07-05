@@ -133,8 +133,8 @@ var drawChart = function () {
     var latencySeries = safeSeries(Template.itemStats.__helpers[" itemDataLat"]());
     var correctSeries = safeSeries(Template.itemStats.__helpers[" itemDataCor"]());
 
-    var itemDataLatRes = _.range(latencySeries.length);  // from 0 to len-1
-    var itemDataCorRes = _.range(correctSeries.length);  // from 0 to len-1
+    var itemDataLatRes = _.range(1, latencySeries.length+1);  // from 1 to len
+    var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
 
     // Now actually create the charts - but only if we can find the proper
     // elements and there is data to display
