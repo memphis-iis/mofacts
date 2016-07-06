@@ -114,9 +114,11 @@ Router.route('/instructions', {
         // it's time to move on. We do NOT do this in onBeforeAction because
         // we have instruction logic that needs to have handled and Iron Router
         // doesn't like us setting up async re-routes.
-        var txt = _.chain(getCurrentTdfUnit()).prop("unitinstructions").trim().value();
-        if (!txt) {
-            console.log("Instructions empty: skipping");
+        var unit = getCurrentTdfUnit();
+        var txt = _.chain(unit).prop("unitinstructions").first().trim().value();
+        var pic = _.chain(unit).prop("picture").first().trim().value();
+        if (!txt && !pic) {
+            console.log("Instructions empty: skipping", displayify(unit));
             instructContinue();
         }
     },
