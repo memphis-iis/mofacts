@@ -481,68 +481,98 @@ function newQuestionHandler() {
     var file = getCurrentTdfFile();
     var currUnit = file.tdfs.tutor.unit[unitNumber];
 
-    if (getButtonTrial()) {
+    // Buttons are determined by 3 options: buttonorder, wrongButtonOptions,
+    // wrongButtonCount:
+    //
+    // 1. buttonorder - can be "fixed" or "random" with a default of fixed.
+    //
+    // 2. wrongButtonOptions - the list of button labels to use. If empty the
+    //    button labels will be taken from the current stim cluster.
+    //
+    // 3. wrongButtonCount - The number of WRONG buttons to display (so final
+    //    button is wrongButtonCount + 1 for the correct answer). This is ONLY    used
+    //    if buttonorder is random.
+    //
+    // For fixed order, we just use the button labels we find per #2 above. For
+    // random order, we take wrongButtonOptions random buttons from the wrong button
+    // labels, add in the correct answer, and shuffle the order of buttons. NOTE: the
+    // above implies that the correct answer must be in the button label list if you
+    // use fixed button order and wrongButtonOptions. See the Music TDF for an
+    // example.
+    if (!getButtonTrial()) {
+        //Not a button trial
+        clearButtonList();
+        Session.set("buttonTrial", false);
+        textFocus = true; //Need the text box focused
+        $("#textEntryRow").show();
+    }
+    else {
+        // Is a button trial - we need to figure out what to show
         Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
         var cluster = getStimCluster(getCurrentClusterIndex());
+        var currentQuest = engine.findCurrentCardInfo();
 
-        //are we using specified choice order for buttons?
-        //Or do we get them from the cluster?
-        var buttonOrder = [];
-        var btnOrderTxt = _.chain(file)
-            .prop("tdfs").prop("tutor")
-            .prop("unit").prop(unitNumber)
-            .prop("buttonorder").value();
-        if (btnOrderTxt) {
-            buttonOrder = _.trim(btnOrderTxt).split(",");
-            if (!buttonOrder || !buttonOrder.length) {
-                buttonOrder = []; //Just use empty array
-            }
+        var buttonChoices = [];
+
+        var buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
+        if (buttonOrder !== "random") {
+            //Only choices are random or fixed, and we def to fixed
+            buttonOrder = "fixed";
         }
 
-        var choicesArray = [];
-        if (buttonOrder.length > 1) {
-            //Top-level specification for buttons
-            choicesArray = buttonOrder;
+        var wrongButtonOptions = _.chain(currUnit).prop("wrongButtonOptions").first().trim().value();
+        if (wrongButtonOptions) {
+            buttonChoices = wrongButtonOptions.split(",");
         }
-        else {
-            var currentQuest = engine.findCurrentCardInfo();
+        if (!buttonChoices || buttonChoices.length < 1) {
+            buttonChoices = [];
             if (!!currentQuest && typeof currentQuest.whichStim !== "undefined") {
                 _.each(getCurrentFalseResponses(currentQuest.whichStim), function(ele) {
-                    choicesArray.push(ele);
+                    buttonChoices.push(ele);
                 });
             }
+        }
+        if (!buttonChoices || buttonChoices.length < 1) {
+            //Whoops - they didn't specify any alternate choices
+            console.log("A button trial requires some false responses");
+            throw new Error("Bad TDF or Stim file");
+        }
 
-            if (choicesArray.length < 1) {
-                //Whoops - they didn't specify any alternate choices
-                console.log("A button trial requires some false responses");
-                throw new Error("Bad TDF or Stim file");
-            }
+        var wrongButtonCount = _.chain(currUnit).prop("wrongButtonOptions").first().intval().value();
+        if (wrongButtonCount < 1) {
+            wrongButtonCount = buttonChoices.length;
+        }
 
-            //Currently we only show 5 option button trials - so we only
-            //use 4 false responses
-            if (choicesArray.length > 3) {
-                if (buttonOrder[0] === "random") {
-                    Helpers.shuffle(choicesArray);
-                }
-                choicesArray = choicesArray.splice(0, 5);
-            }
+        var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
 
-            //Need to make sure they also have a correct option :)
-            var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
-            if (!!correctAnswer) {
-                choicesArray.unshift(correctAnswer);
+        if (buttonOrder === "fixed") {
+            // Currently nothing to do - the buttonChoices array is correct
+        }
+        else if (buttonOrder === "random") {
+            // Randomized buttons: remove the correct answer, shuffle, keep only
+            // wrongButtonCount options, add the correct answer back in, and
+            // reshuffle
+            var shuffled = _.reject(buttonChoices, function(one) {
+                return one === correctAnswer;
+            });
+            Helpers.shuffle(shuffled);
+            if (shuffled.length > wrongButtonCount) {
+                shuffled = shuffled.splice(0, wrongButtonCount);
             }
-            if (buttonOrder[0] === "random") {
-                Helpers.shuffle(choicesArray);
-            }
+            shuffled.push(correctAnswer);
+            Helpers.shuffle(shuffled);
+            buttonChoices = shuffled;
+        }
+        else {
+            throw new Error("Unknown buttonorder option " + buttonOrder);
         }
 
         clearButtonList();
         Session.set("buttonTrial", true);
 
-        _.each(choicesArray, function(val, idx) {
+        _.each(buttonChoices, function(val, idx) {
             buttonList.insert({
                 temp: 1,         //Deleted when clearing
                 idx: idx,        //Will be ordered by array index
@@ -550,13 +580,6 @@ function newQuestionHandler() {
                 buttonValue: val
             });
         });
-    }
-    else {
-        //Not a button trial
-        clearButtonList();
-        Session.set("buttonTrial", false);
-        textFocus = true; //Need the text box focused
-        $("#textEntryRow").show();
     }
 
     //If this is a study-trial and we are displaying a cloze, then we should

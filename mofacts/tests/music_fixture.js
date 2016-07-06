@@ -23,6 +23,11 @@ MusicTDF = function() { return {
                         "false"
                     ],
                     "buttonorder" : [
+                        "fixed"
+                    ],
+                    "wrongButtonCount" : [
+                    ],
+                    "wrongButtonOptions" : [
                         "Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd"
                     ]
                 }
