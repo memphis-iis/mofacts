@@ -34,6 +34,22 @@
     <div class="container">
         <div id="stimulusTarget"></div>
 
+        <!-- Progress bar while resuming -->
+        {{#if inResume}}
+        <div class="row">
+            <div class="col-md-offset-1 col-md-10">
+                <h3>Loading...</h3>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped active" role="progressbar"
+                        aria-valuemin="0" aria-valuemax="100"
+                        aria-valuenow="50" style="width: 50%; min-width: 2em;">
+                        <span id="resumeMsg">Working...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+
         {{#if trial}}
         <div class="row">
             <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info {{fontSizeClass}}"

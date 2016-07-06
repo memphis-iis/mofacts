@@ -460,7 +460,11 @@ Template.card.helpers({
     'haveDispTimeout': function() {
         var disp = getDisplayTimeouts();
         return (disp.minSecs > 0 || disp.maxSecs > 0);
-    }
+    },
+
+    'inResume': function() {
+        return Session.get("inResume");
+    },
 });
 
 
@@ -1161,7 +1165,7 @@ function getCurrentUserTimesLog() {
 //exception in resumeFromUserTimesLog will break our resume logic until the user has
 //reloaded the page and started over. This is actually a good thing, since a broken resume
 //should stop us cold.
-var inResume = false;
+Session.set('inResume', false);
 
 //Re-initialize our User Progress and Card Probabilities internal storage
 //from the user times log. Note that most of the logic will be in
@@ -1171,11 +1175,11 @@ var inResume = false;
 //sure our server-side call regarding experimental conditions has completed
 //before continuing to resume the session
 function resumeFromUserTimesLog() {
-    if (inResume) {
+    if (Session.get('inResume')) {
         console.log("RESUME DENIED - already running in resume");
         return;
     }
-    inResume = true;
+    Session.set('inResume', true);
 
     console.log("Resuming from previous User Times info (if any)");
 
@@ -1362,7 +1366,7 @@ function resumeFromUserTimesLog() {
     //returns and we know we've logged what happened
     recordUserTimeMulti(serverRecords, function() {
         processUserTimesLog();
-        inResume = false; //Can finally turn off resume protection
+        Session.set('inResume', false);
     });
 }
 
@@ -1419,7 +1423,22 @@ function processUserTimesLog() {
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
-    _.each(getCurrentUserTimesLog(), function(entry, index) {
+    _.each(getCurrentUserTimesLog(), function(entry, index, currentList) {
+        // NOTE: this won't really work since we're in a tight loop. If we really
+        // want to get this to work, we would need asynch loop processing (see
+        // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
+        // if you're unfamiliar). For now we just leave the code in, but only
+        // execute our useless update every 5 records.
+        // NOTE: ALSO IMPORTANT - remember that you will need to integrate with
+        // Meteor's handling of the event loop (so base your async loop on
+        // Meteor.setTimeout or something)
+        if (index % 5 === 0) {
+            var progress = (index + 1.0) / currentList.length;
+            progress = _.intval(progress * 100);
+            $('#resumeMsg').text(progress + "% Complete");
+            $('.progress-bar').css('width', progress+'%').attr('aria-valuenow', progress);
+        }
+
         if (!entry.action) {
             console.log("Ignoring user times entry with no action");
             return;
