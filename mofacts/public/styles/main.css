@@ -1,4 +1,4 @@
-/*csslint qualified-headings:false, unique-headings:false, ids:false, universal-selector:false */
+/*csslint qualified-headings:false, unique-headings:false, ids:false, universal-selector:false, font-sizes:false */
 
 body {
     background-color: #C1E1A6;
@@ -170,6 +170,13 @@ legend {
     color:white;
 }
 
+/*Override button hover above for buttons on the navbar*/
+.navbar .btn:hover {
+    color:white;
+    background: #118C4E;
+    opacity: 0.65;
+}
+
 .btn-fix {
     width: auto;
 }
@@ -186,7 +193,6 @@ legend {
     min-height: 100%;
     font-size: 100px;
     text-align: right;
-    filter: alpha(opacity=0);
     opacity: 0;
     background: white;
     cursor: inherit;

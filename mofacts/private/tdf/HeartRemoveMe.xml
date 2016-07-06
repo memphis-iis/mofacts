@@ -13,8 +13,8 @@
     <unit>
         <unitname>Intro</unitname>
         <unitinstructions><![CDATA[Just testing<br><br>Here's some instructions.]]></unitinstructions>
-        <instructionminseconds>5</instructionminseconds>
-        <instructionmaxseconds>10</instructionmaxseconds> 
+        <instructionminseconds>6</instructionminseconds>
+        <instructionmaxseconds>600</instructionmaxseconds> 
     </unit>
     <unit>
         <unitinstructions></unitinstructions>
@@ -22,7 +22,7 @@
         <learningsession>
             <clusterlist>0-21</clusterlist>
             <displayminseconds>10</displayminseconds>
-            <displaymaxseconds>20</displaymaxseconds>
+            <displaymaxseconds>600</displaymaxseconds>
         </learningsession>
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>

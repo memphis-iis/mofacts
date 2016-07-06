@@ -193,6 +193,14 @@ function getDisplayTimeouts() {
     };
 }
 
+function setDispTimeoutText(txt) {
+    var msg = _.trim(txt || "");
+    if (msg.length > 0) {
+        msg = " (" + msg + ")";
+    }
+    $("#displayTimeoutMsg").text(msg);
+}
+
 function varLenDisplayTimeout() {
     if (!unitStartTimestamp) {
         return;
@@ -202,7 +210,7 @@ function varLenDisplayTimeout() {
     if (!(display.minSecs > 0.0 || display.maxSecs > 0.0)) {
         // No variable display parameters - we can stop the interval
         $("#continueButton").prop("disabled", false);
-        $("#displayTimeoutMsg").text("");
+        setDispTimeoutText("");
         Meteor.clearInterval(varLenTimeoutName);
         varLenTimeoutName = null;
         return;
@@ -214,10 +222,10 @@ function varLenDisplayTimeout() {
         $("#continueButton").prop("disabled", true);
         dispLeft = display.minSecs - elapsed;
         if (dispLeft >= 1.0) {
-            $("#displayTimeoutMsg").text("You will be able to continue in: " + Date.secsIntervalString(dispLeft));
+            setDispTimeoutText("You can continue in: " + Date.secsIntervalString(dispLeft));
         }
         else {
-            $("#displayTimeoutMsg").text(""); // Don't display 0 secs
+            setDispTimeoutText(""); // Don't display 0 secs
         }
     }
     else if (elapsed <= display.maxSecs) {
@@ -225,22 +233,22 @@ function varLenDisplayTimeout() {
         $("#continueButton").prop("disabled", false);
         dispLeft = display.maxSecs - elapsed;
         if (dispLeft >= 1.0) {
-            $("#displayTimeoutMsg").text("Progress will continue in: " + Date.secsIntervalString(dispLeft));
+            setDispTimeoutText("Time remaining: " + Date.secsIntervalString(dispLeft));
         }
         else {
-            $("#displayTimeoutMsg").text("");
+            setDispTimeoutText("");
         }
     }
     else if (display.maxSecs > 0.0) {
         // Past max and a max was specified - it's time to go
         $("#continueButton").prop("disabled", true);
-        $("#displayTimeoutMsg").text("");
+        setDispTimeoutText("");
         unitIsFinished('DisplaMaxSecs exceeded');
     }
     else {
         // Past max and no valid maximum - they get a continue button
         $("#continueButton").prop("disabled", false);
-        $("#displayTimeoutMsg").text("Please click the continue button when you are done");
+        setDispTimeoutText("You can continue whenever you want");
     }
 }
 
@@ -1189,7 +1197,7 @@ function resumeFromUserTimesLog() {
     Session.set("lastTimestamp", 0);
 
     //Disallow continuing (it will be turned on somewhere else)
-    $("#displayTimeoutMsg").text("");
+    setDispTimeoutText("");
     $("#continueButton").prop("disabled", true);
 
     //So here's the place where we'll use the ROOT tdf instead of just the

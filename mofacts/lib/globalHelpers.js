@@ -41,13 +41,13 @@ Date.secsIntervalString = function(elapsedSecs) {
         timeLeftDisplay += days.toString() + " days, ";
     }
     if (hrs > 0) {
-        timeLeftDisplay += hrs.toString()  + " hours, ";
+        timeLeftDisplay += hrs.toString()  + " hr, ";
     }
     if (mins > 0) {
-        timeLeftDisplay += mins.toString() + " minutes, ";
+        timeLeftDisplay += mins.toString() + " min, ";
     }
 
-    return timeLeftDisplay + secs.toString() + " seconds";
+    return timeLeftDisplay + secs.toString() + " sec";
 };
 
 //Helper function for underscore that accesses a property by name but
