@@ -774,10 +774,10 @@ function handleUserInput(e, source, simAnswerCorrect) {
         displayedSystemResponse: $("#UserInteraction").text() || ""
     });
 
-    // Special: count the number of timeouts in a row IF we are on
-    // an optimized unit. If the count is too high, we leave the page.
-    // This behavior is controlled by autostopTimeoutThreshold, which
-    // defaults to 2.
+    // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+    // is specified and we have seen that many (or more) timeouts in a row, then
+    // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+    // this feature MUST be turned on in the TDF.
     if (!isTimeout) {
         timeoutsSeen = 0;  // Reset count
     }
@@ -785,18 +785,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
         // Anothing timeout!
         timeoutsSeen++;
 
-        // Figure out threshold
-        // The default val is -1 since getCurrentDeliveryParams doesn't know if
-        // the current unit is a learning session (default of 2) or a scheduled
-        // session (default of 0).
+        // Figure out threshold (with default of 0)
         // Also note: threshold < 1 means no autostop at all
         var threshold = _.chain(getCurrentDeliveryParams())
             .prop("autostopTimeoutThreshold")
-            .intval(-1).value();  //same def val as getCurrentDeliveryParams
-
-        if (threshold < 0) {
-            threshold = (_.prop(engine, "unitType") === "model") ? 2 : 0;
-        }
+            .intval(0).value();
 
         if (threshold > 0 && timeoutsSeen >= threshold) {
             console.log("Hit timeout threshold", threshold, "Quitting");
