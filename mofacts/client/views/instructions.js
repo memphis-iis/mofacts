@@ -76,6 +76,14 @@ function getDisplayTimeouts() {
     };
 }
 
+function setDispTimeoutText(txt) {
+    var msg = _.trim(txt || "");
+    if (msg.length > 0) {
+        msg = " (" + msg + ")";
+    }
+    $("#displayTimeoutMsg").text(msg);
+}
+
 // Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
@@ -168,10 +176,10 @@ function lockoutPeriodicCheck() {
             $("#continueButton").prop("disabled", true);
             dispLeft = display.minSecs - elapsedSecs;
             if (dispLeft >= 1.0) {
-                $("#displayTimeoutMsg").text("You will be able to continue in: " + Date.secsIntervalString(dispLeft));
+                setDispTimeoutText("You can continue in: " + Date.secsIntervalString(dispLeft));
             }
             else {
-                $("#displayTimeoutMsg").text(""); // Don't display 0 secs
+                setDispTimeoutText(""); // Don't display 0 secs
             }
         }
         else if (elapsedSecs <= display.maxSecs) {
@@ -179,28 +187,28 @@ function lockoutPeriodicCheck() {
             $("#continueButton").prop("disabled", false);
             dispLeft = display.maxSecs - elapsedSecs;
             if (dispLeft >= 1.0) {
-                $("#displayTimeoutMsg").text("Progress will continue in: " + Date.secsIntervalString(dispLeft));
+                setDispTimeoutText("Time remaining: " + Date.secsIntervalString(dispLeft));
             }
             else {
-                $("#displayTimeoutMsg").text("");
+                setDispTimeoutText("");
             }
         }
         else if (display.maxSecs > 0.0) {
             // Past max and a max was specified - it's time to go
             $("#continueButton").prop("disabled", true);
-            $("#displayTimeoutMsg").text("");
+            setDispTimeoutText("");
             instructContinue();
         }
         else {
             // Past max and no valid maximum - they get a continue button
             $("#continueButton").prop("disabled", false);
-            $("#displayTimeoutMsg").text("Please click the continue button when you are done");
+            setDispTimeoutText("You can continue whenever you want");
         }
     }
     else {
         // No display handling - if lockout is fine then we can stop polling
         $("#continueButton").prop("disabled", false);
-        $("#displayTimeoutMsg").text("");
+        setDispTimeoutText("");
         if (lockoutHandled) {
             clearLockoutInterval();
         }

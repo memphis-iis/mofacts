@@ -53,17 +53,28 @@
                             <h2 id="lockoutTimeRemaining">&nbsp;</h2>
                         </div>
                     {{/if}}
-
-                    {{#if allowcontinue}}
-                    <div class="visible-text">
-                        <button type="button" id="continueButton" class="btn">
-                            Continue
-                        </button>
-                        <h3 id="displayTimeoutMsg"></h3>
-                    </div>
-                    {{/if}}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Use a fixed footer if we have something to show -->
+    {{#if allowcontinue}}
+    <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+        <div class="container">
+            <div class="navbar-header">
+                <ul class="nav nav-justified">
+                    <li>&nbsp;</li>
+                    <li>
+                        <button type="button" id="continueButton" class="button btn navbar-btn" style="text-align:center;">
+                            Continue
+                            <span id="displayTimeoutMsg"></span>
+                        </button>
+                    </li>
+                    <li>&nbsp;</li>
+                </ul>
+            </div>  <!-- close header -->
+        </div>  <!-- close container -->
+    </nav>  <!-- close nav -->
+    {{/if}}
 </template>
