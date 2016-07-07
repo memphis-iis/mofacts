@@ -24,6 +24,7 @@
             <clusterlist>0-175</clusterlist>
         </learningsession>
         <deliveryparams>
+            <autostopTimeoutThreshold></autostopTimeoutThreshold>
             <purestudy>10000</purestudy>
             <drill>10000</drill>
             <skipstudy>false</skipstudy>
