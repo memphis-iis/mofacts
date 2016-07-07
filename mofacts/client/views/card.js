@@ -1443,17 +1443,14 @@ function processUserTimesLog() {
         // NOTE: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
-        // if you're unfamiliar). For now we just leave the code in, but only
-        // execute our useless update every 5 records.
+        // if you're unfamiliar). As a result, we just have a loading message
         // NOTE: ALSO IMPORTANT - remember that you will need to integrate with
         // Meteor's handling of the event loop (so base your async loop on
         // Meteor.setTimeout or something)
-        if (index % 5 === 0) {
-            var progress = (index + 1.0) / currentList.length;
-            progress = _.intval(progress * 100);
-            $('#resumeMsg').text(progress + "% Complete");
-            $('.progress-bar').css('width', progress+'%').attr('aria-valuenow', progress);
-        }
+        // var progress = (index + 1.0) / currentList.length;
+        // progress = _.intval(progress * 100);
+        // $('#resumeMsg').text(progress + "% Complete");
+        // $('.progress-bar').css('width', progress+'%').attr('aria-valuenow', progress);
 
         if (!entry.action) {
             console.log("Ignoring user times entry with no action");
