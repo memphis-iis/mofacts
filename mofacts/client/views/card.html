@@ -17,14 +17,14 @@
                     <li>
                         <p class="navbar-text">Score: <span class="badge">{{currentScore}}</span></p>
                     </li>
-
-
-                    <TABLE BORDER="0">
-                        <tr><td><s1>{{username}}</s1></td><td>&nbsp;</td>
-                            <td> <button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Home</button></td><td>&nbsp;</td>
-                            <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td><td>&nbsp;</td>
-                            <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td></tr>
-                    </table>
+                    <li>
+                        <TABLE BORDER="0">
+                            <tr><td><s1>{{username}}</s1></td><td>&nbsp;</td>
+                                <td> <button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Home</button></td><td>&nbsp;</td>
+                                <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td><td>&nbsp;</td>
+                                <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td></tr>
+                        </table>
+                    </li>
                 </ul>
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
@@ -166,11 +166,11 @@
     {{#if haveDispTimeout}}
     <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
         <div class="container">
-            <div class="navbar-header">
+            <div class="navbar-header" style="width:100%">
                 <ul class="nav nav-justified">
                     <li>&nbsp;</li>
                     <li>
-                        <button type="button" id="continueButton" class="button btn navbar-btn" style="text-align:center;">
+                        <button type="button" id="continueButton" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
                             Continue
                             <span id="displayTimeoutMsg"></span>
                         </button>
