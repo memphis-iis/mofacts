@@ -67,6 +67,16 @@ function execute() {
     #So we also need to reset anything needed by that user
     export HOME=$(pwd)
 
+    # The settings file MUST exist - and then we put the contents in the
+    # environment variable required by Meteor
+    export SETTINGS_FILE=$HOME/settings.json
+    if [ ! -f $SETTINGS_FILE ]; then
+        echo "Could not find $SETTINGS_FILE"
+        echo "Execution can NOT continue"
+        exit 2
+    fi
+
+    export METEOR_SETTINGS=$(cat $SETTINGS_FILE)
     sudo -E -u $EXEC_USER forever start bundle/main.js
 }
 
