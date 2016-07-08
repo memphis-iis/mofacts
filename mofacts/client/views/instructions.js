@@ -47,7 +47,7 @@ function currLockOutMinutes() {
     var lockoutminutes = 0;
 
     if (deliveryParams && deliveryParams.lockoutminutes) {
-        lockoutminutes = Helpers.intVal(deliveryParams.lockoutminutes);
+        lockoutminutes = _.intval(deliveryParams.lockoutminutes);
     }
 
     console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
@@ -136,8 +136,8 @@ function lockoutPeriodicCheck() {
                 //We're in experiment mode and locked out - if they should get a Turk email,
                 //now is the time to let the server know we've shown a lockout msg
                 var currUnit = getCurrentTdfUnit();
-                var turkemail = Helpers.trim(Helpers.firstElement(currUnit.turkemail));
-                var subject = Helpers.trim(Helpers.firstElement(currUnit.turkemailsubject));
+                var turkemail = _.trim(_.safefirst(currUnit.turkemail));
+                var subject = _.trim(_.safefirst(currUnit.turkemailsubject));
 
                 if (!turkemail) {
                     return; //No message to show

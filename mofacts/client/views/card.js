@@ -1261,7 +1261,7 @@ function resumeFromUserTimesLog() {
             console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
             subTdf = _.sample(setspec.condition);
             conditionAction = "expcondition";
-            conditionData.note = "Selected from " + Helpers.display(setspec.condition.length) + " conditions";
+            conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
         }
 
         if (!subTdf) {
@@ -1533,7 +1533,7 @@ function processUserTimesLog() {
                 //There was an error creating the schedule - there's really nothing
                 //left to do since the experiment is broken
                 recordUserTime("FAILURE to read schedule from user time log", {
-                    unitname: Helpers.display(currUnit.unitname),
+                    unitname: _.display(currUnit.unitname),
                     unitindex: unit
                 });
                 alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");

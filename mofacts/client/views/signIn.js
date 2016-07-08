@@ -60,8 +60,8 @@ function UserPasswordCheck() {
     $(".errcheck").hide();
 
     var experiment = Session.get("loginMode") === "experiment";
-    var newUsername = Helpers.trim($("#signInUsername").val());
-    var newPassword = Helpers.trim(experiment ? "" : $("#password").val());
+    var newUsername = _.trim($("#signInUsername").val());
+    var newPassword = _.trim(experiment ? "" : $("#password").val());
 
     if (!!newUsername & newPassword === "") {
         newPassword = Helpers.blankPassword(newUsername);

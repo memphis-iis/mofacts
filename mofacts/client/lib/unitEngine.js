@@ -733,7 +733,7 @@ function scheduleUnitEngine() {
                 //There was an error creating the schedule - there's really nothing
                 //left to do since the experiment is broken
                 recordUserTime("FAILURE to create schedule", {
-                    unitname: Helpers.display(currUnit.unitname),
+                    unitname: _.display(currUnit.unitname),
                     unitindex: unit
                 });
                 alert("There is an issue with the TDF - experiment cannot continue");
@@ -744,7 +744,7 @@ function scheduleUnitEngine() {
             progress.currentSchedule = schedule;
 
             recordUserTime("schedule", {
-                unitname: Helpers.display(currUnit.unitname),
+                unitname: _.display(currUnit.unitname),
                 unitindex: unit,
                 schedule: schedule
             });

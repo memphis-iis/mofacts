@@ -6,6 +6,15 @@ require("./dinky_test.js");
 require("../lib/globalHelpers.js");
 
 test_suite("underscore mixins", function() {
+    unit_test("_.first works as expected", function(logger) {
+        assert.deepEqual(null, _.safefirst(null));
+        assert.deepEqual(null, _.safefirst([]));
+        assert.deepEqual(null, _.safefirst(42));
+
+        assert.deepEqual(42, _.safefirst([42]));
+        assert.deepEqual(42, _.safefirst([42,1,2,3]));
+    });
+
     unit_test("Mixin _.intval and _.floatval", function(logger) {
         var obj = {
             si: ' 42 ',

@@ -11,15 +11,15 @@
 
 //Return the current fontsize from the TDF
 getCurrentFontSize = function () {
-    return Helpers.intVal(getCurrentDeliveryParams().fontsize);
+    return _.intval(getCurrentDeliveryParams().fontsize);
 };
 
 //Return [correctscore, incorrectscore] for our current unit.
 getCurrentScoreValues = function () {
     var parms = getCurrentDeliveryParams();
     return [
-        Helpers.intVal(parms.correctscore),
-        Helpers.intVal(parms.incorrectscore)
+        _.intval(parms.correctscore),
+        _.intval(parms.incorrectscore)
     ];
 };
 
@@ -112,7 +112,7 @@ findQTypeSimpified = function () {
 };
 
 getTestType = function () {
-    return Helpers.trim(Session.get("testType")).toLowerCase();
+    return _.trim(Session.get("testType")).toLowerCase();
 };
 
 //get the question at this index - note that the cluster index will be mapped
@@ -160,7 +160,7 @@ getCurrentFalseResponses = function(whichAnswer) {
     //is using the "new" formatted false response per display/response pair.
     //Otherwise, we assume the "old" style and they get everything
     if (cluster.response.length === cluster.falseResponse.length) {
-        return Helpers.trim(cluster.falseResponse[whichAnswer]).split(';');
+        return _.trim(cluster.falseResponse[whichAnswer]).split(';');
     }
     else {
         return cluster.falseResponse;

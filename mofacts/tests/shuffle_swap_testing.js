@@ -1,5 +1,6 @@
 require("./dinky_test.js");
 
+require("../lib/globalHelpers.js");
 require("../common/Helpers.js");
 require("../client/lib/shuffle_swap.js");
 

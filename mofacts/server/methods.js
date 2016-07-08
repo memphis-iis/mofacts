@@ -71,7 +71,7 @@ function userProfileSave(id, profile) {
         throw new Meteor.Error("user-profile-save", "No records updated by save");
     }
     else {
-        throw new Meteor.Error("user-profile-save", "More than one record updated?! " + Helpers.display(numUpdate));
+        throw new Meteor.Error("user-profile-save", "More than one record updated?! " + _.display(numUpdate));
     }
 }
 

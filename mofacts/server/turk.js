@@ -68,7 +68,7 @@ following is true:
 
         //No spaces
         for (var key in req) {
-            req[key] = Helpers.trim(req[key]);
+            req[key] = _.trim(req[key]);
         }
 
         // Add HMAC signature for request from the fields as defined by AWS

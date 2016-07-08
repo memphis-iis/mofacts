@@ -20,15 +20,15 @@ function capFirst(string) {
 
 //Return true if the answer is a "branched answer"
 function answerIsBranched(answer) {
-    return Helpers.trim(answer).indexOf(';') >= 0;
+    return _.trim(answer).indexOf(';') >= 0;
 }
 
 // Perform string comparison - possibly with edit distance considered.
 // We return a "truthy" value if there is a match and 0 other wise. If the
 // match was exact, we return 1. If we matched on edit distance, we return 2
 function stringMatch(s1, s2, lfparameter) {
-    s1 = Helpers.trim(s1).toLowerCase();
-    s2 = Helpers.trim(s2).toLowerCase();
+    s1 = _.trim(s1).toLowerCase();
+    s2 = _.trim(s2).toLowerCase();
 
     if (s1.localeCompare(s2) === 0) {
         //Exact match!
@@ -66,7 +66,7 @@ function regExMatch(regExStr, userAnswer, lfparameter) {
     if (lfparameter && /^[\|A-Za-z0-9]+$/i.test(regExStr)) {
         // They have an edit distance parameter and the regex matching our
         // special condition - check it manually
-        var checks = Helpers.trim(regExStr).split('|');
+        var checks = _.trim(regExStr).split('|');
         for(var i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
@@ -90,16 +90,16 @@ function matchBranching(answer, userAnswer, lfparameter) {
     var isCorrect = false;
     var matchText = "";
 
-    var branches = Helpers.trim(answer).split(';');
+    var branches = _.trim(answer).split(';');
     for(var i = 0; i < branches.length; ++i) {
-        var flds = Helpers.trim(branches[i]).split('~');
+        var flds = _.trim(branches[i]).split('~');
         if (flds.length != 2)
             continue;
 
-        flds[0] = Helpers.trim(flds[0]).toLowerCase();
+        flds[0] = _.trim(flds[0]).toLowerCase();
         var matched = regExMatch(flds[0], userAnswer, lfparameter);
         if (matched !== 0) {
-            matchText = Helpers.trim(flds[1]);
+            matchText = _.trim(flds[1]);
             if (matched === 2) {
                 matchText = matchText + " (you were close enough)";
             }
@@ -115,7 +115,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
 function branchingCorrectText(answer) {
     var result = "";
 
-    var branches = Helpers.trim(answer).split(';');
+    var branches = _.trim(answer).split(';');
     if (branches.length > 0) {
         var flds = branches[0].split('~');
         if (flds.length == 2) {

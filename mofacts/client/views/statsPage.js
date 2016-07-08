@@ -91,8 +91,8 @@ function statsPageUpdateImpl() {
     var correct = 0;
 
     _.each(currentUserProgress.progressDataArray, function(item) {
-        var userResponse = Helpers.trim(item.userAnswer).toLowerCase();
-        var theAnswer    = Helpers.trim(item.answer    ).toLowerCase();
+        var userResponse = _.trim(item.userAnswer).toLowerCase();
+        var theAnswer    = _.trim(item.answer    ).toLowerCase();
 
         var isCorrect = null;
         if (typeof item.isCorrect !== "undefined") {

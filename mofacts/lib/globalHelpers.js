@@ -67,6 +67,14 @@ if (_ && _.mixin) {
             return _.keys(obj);
         },
 
+        safefirst: function(arr) {
+            var ret = _.first(arr);
+            if (typeof ret === "undefined") {
+                return null;
+            }
+            return ret;
+        },
+
         prop: function(obj, propname) {
             if (_.isArray(obj) && _.isNumber(propname)) {
                 return obj[propname];
@@ -119,6 +127,28 @@ if (_ && _.mixin) {
             }
             else {
                 return ss.replace(/^\s+|\s+$/gm, '');
+            }
+        },
+
+        //Given an object, convert it to a reasonable string for display:
+        // - If it doesn't evaluate and isn't False, return empty string
+        // - if it's an array join the entries together with a comma
+        // - else convert to a string
+        //Note that we recurse on array entries, so arrays of arrays will
+        //be "flattened"
+        display: function(s) {
+            if (!s && s !== false && s !== 0) {
+                return "";
+            }
+            else if (s && s.length && s.join) {
+                var dispvals = [];
+                for (var i = 0; i < s.length; ++i) {
+                    dispvals.push(_.display(s[i]));
+                }
+                return dispvals.join(",");
+            }
+            else {
+                return _.trim("" + s);
             }
         },
 

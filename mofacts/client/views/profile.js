@@ -209,8 +209,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     var userAgent = "[Could not read user agent string]";
     var prefLang = "[N/A]";
     try {
-        userAgent = Helpers.display(navigator.userAgent);
-        prefLang = Helpers.display(navigator.language);
+        userAgent = _.display(navigator.userAgent);
+        prefLang = _.display(navigator.language);
     }
     catch(err) {
         console.log("Error getting browser info", err);

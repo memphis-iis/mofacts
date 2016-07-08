@@ -9,7 +9,7 @@ redoCardImage = function() {
     if (wid > hgt) {
         //Landscape - assume that we want the image to fit entirely along
         //with the answer box on a fairly sane screen
-        hgt = Helpers.display(Math.floor(hgt * 0.45)) + "px";
+        hgt = _.display(Math.floor(hgt * 0.45)) + "px";
         wid = "auto";
     }
     else {

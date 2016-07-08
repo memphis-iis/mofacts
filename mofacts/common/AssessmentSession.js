@@ -85,8 +85,8 @@ AssessmentSession = {
             //Get initial info for this group
             var groupName = settings.groupNames[i];
             var group = settings.groups[i]; //group = array of strings
-            var numTemplates = Helpers.intVal(settings.numTemplatesList[i]);
-            var templateSize = Helpers.intVal(settings.templateSizes[i]);
+            var numTemplates = _.intval(settings.numTemplatesList[i]);
+            var templateSize = _.intval(settings.templateSizes[i]);
 
             //Generate template indices
             var indices = [];
@@ -106,7 +106,7 @@ AssessmentSession = {
                 for(firstPos = 0; firstPos < settings.initialPositions.length; ++firstPos) {
                     var entry = settings.initialPositions[firstPos];
                     //Note the 1-based assumption for initial position values
-                    if (groupName === entry[0] && Helpers.intVal(entry.substring(2)) == index + 1) {
+                    if (groupName === entry[0] && _.intval(entry.substring(2)) == index + 1) {
                         break; //FOUND
                     }
                 }
@@ -143,7 +143,7 @@ AssessmentSession = {
                     //}
 
                     if (type === "Z") {
-                        var stud = Math.floor(Math.random() * 10)
+                        var stud = Math.floor(Math.random() * 10);
                         if (stud === 0) {
                             type = "S";
                         } else
@@ -157,7 +157,7 @@ AssessmentSession = {
                         showHint = (parts[2].toUpperCase()[1] === "H");
                     }
 
-                    var location = Helpers.intVal(parts[3]);
+                    var location = _.intval(parts[3]);
 
                     var offStr = parts[0].toLowerCase(); //Selects stim from cluster w/ multiple stims
                     if (offStr === "m") {
@@ -175,7 +175,7 @@ AssessmentSession = {
                             offset = Helpers.randomChoice(settings.ranChoices);
                         }
                         else {
-                            offset = Helpers.intVal(offStr);
+                            offset = _.intval(offStr);
                         }
 
                         var condition = groupName + "-" + index;
@@ -254,7 +254,7 @@ AssessmentSession = {
             return settings;
         }
 
-        var rawAssess = Helpers.firstElement(unit.assessmentsession);
+        var rawAssess = _.safefirst(unit.assessmentsession);
         if (!rawAssess) {
             return settings;
         }
@@ -263,23 +263,23 @@ AssessmentSession = {
         //so just parse all that right now
         var assess = {};
         _.each(rawAssess, function(val, name) {
-            assess[name] = Helpers.firstElement(val);
+            assess[name] = _.safefirst(val);
         });
 
         //Interpret TDF string booleans
         var boolVal = function(src) {
-            return Helpers.display(src).toLowerCase() === "true";
+            return _.display(src).toLowerCase() === "true";
         };
 
         //Get the setspec settings first
-        settings.specType = Helpers.display(setspec.clustermodel);
+        settings.specType = _.display(setspec.clustermodel);
 
         //The "easy" "top-level" settings
         Helpers.extractDelimFields(assess.initialpositions, settings.initialPositions);
         Helpers.extractDelimFields(assess.permutefinalresult, settings.finalPermute);
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
-        settings.isButtonTrial = boolVal(Helpers.firstElement(unit.buttontrial));
+        settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
 
         //Unlike finalPermute, which is always a series of space-delimited
         //strings that represent rangeVals, ranChoices can be a single number N
@@ -291,7 +291,7 @@ AssessmentSession = {
         _.each(randomChoicesParts, function(item) {
             if (item.indexOf('-') < 0) {
                 //Single number - convert to range
-                var val = Helpers.intVal(item);
+                var val = _.intval(item);
                 if (!val) {
                     throw "Invalid randomchoices paramter: " + assess.randomchoices;
                 }
@@ -307,7 +307,7 @@ AssessmentSession = {
         //Note: since there could be 0-N group entries, we leave that as an array
         var by_group = {};
         _.each(assess.conditiontemplatesbygroup, function(val, name) {
-            by_group[name] = name === "group" ? val : Helpers.firstElement(val);
+            by_group[name] = name === "group" ? val : _.safefirst(val);
         });
 
         if (by_group) {
@@ -339,7 +339,7 @@ AssessmentSession = {
         for (var i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {
-                settings.clusterNumbers.push(Helpers.intVal(nums[j]));
+                settings.clusterNumbers.push(_.intval(nums[j]));
             }
         }
 

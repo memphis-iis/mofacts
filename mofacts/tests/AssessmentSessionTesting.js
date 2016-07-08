@@ -1,6 +1,7 @@
 require("./dinky_test.js");
 require("./sd_fixtures.js");
 
+require("../lib/globalHelpers.js");
 require("../common/Helpers.js");
 require("../common/AssessmentSession.js");
 

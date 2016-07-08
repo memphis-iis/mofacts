@@ -116,11 +116,11 @@ userLogGetTdfId = function(userid, experiment) {
     var filename = null;
     for(i = 0; i < entries.length; ++i) {
         rec = entries[i];
-        action = Helpers.trim(rec.action).toLowerCase();
+        action = _.trim(rec.action).toLowerCase();
 
         //Only need to see the tdf select event once to get the key
         if (action === "expcondition" || action === "condition-notify") {
-            filename = Helpers.display(rec.currentTdfName);
+            filename = _.display(rec.currentTdfName);
             if (!!filename) {
                 break;
             }
@@ -153,7 +153,7 @@ userLogCurrentScore = function(experiment) {
 
     for(i = 0; i < entries.length; ++i) {
         rec = entries[i];
-        action = Helpers.trim(rec.action).toLowerCase();
+        action = _.trim(rec.action).toLowerCase();
 
         //We will need the tdf
         if (!tdf && (action === "expcondition" || action === "condition-notify")) {
@@ -185,8 +185,8 @@ userLogCurrentScore = function(experiment) {
     //Helper for our param extraction below: we expect val to a single valued
     //array with a numeric parameter. If not we return def
     function getNumVal(val, def) {
-        val = Helpers.firstElement(val);
-        if (!!val || val === 0 || val === "0") return Helpers.intVal(val);
+        val = _.safefirst(val);
+        if (!!val || val === 0 || val === "0") return _.intval(val);
         else                                   return def;
     }
 
@@ -200,7 +200,7 @@ userLogCurrentScore = function(experiment) {
 
         var unit = null;
         if (!!unitIdx || unitIdx === 0) {
-            unit = tdf.tdfs.tutor.unit[Helpers.intVal(unitIdx)] || null;
+            unit = tdf.tdfs.tutor.unit[_.intval(unitIdx)] || null;
         }
         var deliveryparams = !!unit ? unit.deliveryparams : null;
         if (!deliveryparams && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
@@ -217,7 +217,7 @@ userLogCurrentScore = function(experiment) {
     var score = 0;
     for (i = 0; i < records.length; ++i) {
         rec = records[i];
-        action = Helpers.trim(rec.action).toLowerCase();
+        action = _.trim(rec.action).toLowerCase();
         if (action === "question") {
             if (!!rec.selType) {
                 setScoring(rec.currentUnit);
