@@ -224,7 +224,7 @@ Meteor.startup(function () {
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
             }
-            else if (typeof Meteor.users.findOne({username: newUserName}) !== "undefined") {
+            else if (!!Accounts.findUserByUsername(newUserName)) {
                 if (previousOK) {
                     return null; //User has already been created - nothing to do
                 }
@@ -264,7 +264,7 @@ Meteor.startup(function () {
                 return "You are not authorized to do that";
             }
 
-            var userId = _.prop(Meteor.users.findOne({username: userName}), "_id");
+            var userId = _.prop(Accounts.findUserByUsername(userName), "_id");
             if (!userId) {
                 return "Could not find a valid user";
             }
