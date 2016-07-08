@@ -13,7 +13,6 @@ Template.signUp.events({
         var formUsername = Helpers.trim($("#signUpUsername").val());
         var formPassword1 = Helpers.trim($("#password1").val());
         var formPassword2 = Helpers.trim($("#password2").val());
-        console.log(formUsername, formPassword1, formPassword2);
 
         //Hide previous errors
         $(".errcheck").hide();

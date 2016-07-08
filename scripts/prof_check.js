@@ -4,6 +4,7 @@ function pu(usr) {
     print("  " + JSON.stringify(usr, null, 2));
 }
 
+// TODO: this will need to change
 db.users.find({'username':'ppavlik'}).forEach(function(usr){
     print('Found ' + usr._id + ' ' + usr.username);
     pu(usr);

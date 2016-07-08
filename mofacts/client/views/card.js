@@ -495,10 +495,10 @@ function newQuestionHandler() {
     //
     // For fixed order, we just use the button labels we find per #2 above. For
     // random order, we take wrongButtonOptions random buttons from the wrong button
-    // labels, add in the correct answer, and shuffle the order of buttons. NOTE: the
-    // above implies that the correct answer must be in the button label list if you
-    // use fixed button order and wrongButtonOptions. See the Music TDF for an
-    // example.
+    // labels, add in the correct answer, and shuffle the order of buttons.
+    // IMPORTANT: the above implies that the correct answer must be in the button label
+    // list if you use fixed button order and wrongButtonOptions. See the Music
+    // TDF for an example.
     if (!getButtonTrial()) {
         //Not a button trial
         clearButtonList();
@@ -1440,11 +1440,11 @@ function processUserTimesLog() {
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
     _.each(getCurrentUserTimesLog(), function(entry, index, currentList) {
-        // NOTE: this won't really work since we're in a tight loop. If we really
+        // IMPORTANT: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
         // if you're unfamiliar). As a result, we just have a loading message
-        // NOTE: ALSO IMPORTANT - remember that you will need to integrate with
+        // IMPORTANT: remember that you will need to integrate with
         // Meteor's handling of the event loop (so base your async loop on
         // Meteor.setTimeout or something)
         // var progress = (index + 1.0) / currentList.length;
