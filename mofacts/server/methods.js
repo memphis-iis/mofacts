@@ -151,12 +151,15 @@ Meteor.startup(function () {
         Roles.addUsersToRoles(adminUserId, "admin");
     }
 
-    console.log("Admin User Found:", adminUser, "with ID:", adminUserId);
+    console.log("Admin User Found ID:", adminUserId, "with obj:", _.pick(adminUser, "_id", "username", "email"));
 
     // Get user in roles and make sure they are added
-    var roles = getConfigProperty("owner");
+    var roles = getConfigProperty("initRoles");
     var roleAdd = function(memberName, roleName) {
-        _.each(_.prop(roles, memberName) || [], function(username) {
+        var requested = _.prop(roles, memberName) || [];
+        console.log("Role", roleName, "- found", _.prop(requested, "length"));
+
+        _.each(requested, function(username) {
             var user = findUserByName(username);
             if (!user) {
                 console.log("Warning: user", username, "role", roleName, "request, but user not found");
@@ -214,7 +217,7 @@ Meteor.startup(function () {
 
     //Log this late so they're more prone to see it
     if (adminUserId) {
-        console.log("Admin user is", adminUser);
+        console.log("Admin user is", _.pick(adminUser, "_id", "username", "email"));
     }
     else {
         console.log("ADMIN USER is MISSING: a restart might be required");
