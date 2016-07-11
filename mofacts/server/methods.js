@@ -4,6 +4,9 @@
 //brackets instead of dot notation - that's because we prefer square brackets
 //for creating some MongoDB queries
 
+//TODO: post-oauth, we need to make sure that the Turk experiment workflow
+//      is still working as expected
+
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
@@ -140,6 +143,18 @@ SyncedCron.config({
 //Server-side startup logic
 
 Meteor.startup(function () {
+    // First thing we do is force our OAuth settings to be current
+    ServiceConfiguration.configurations.remove({"service": "google"});
+    console.log("Removed Google service config - rewriting now");
+
+    var google = getConfigProperty("google");
+    ServiceConfiguration.configurations.insert({
+        "service": "google",
+        "clientId": _.prop(google, "clientId"),
+        "secret": _.prop(google, "secret"),
+    });
+    console.log("Rewrote Google service config");
+
     // Figure out the "prime admin" (owner of repo TDF/stim files)
     // Note that we accept username or email and then find the ID
     var adminUser = findUserByName(getConfigProperty("owner"));
@@ -224,6 +239,17 @@ Meteor.startup(function () {
         console.log("Make sure you have a valid siteConfig");
         console.log("***IMPORTANT*** There will be no owner for system TDF's");
     }
+
+    //Make sure we create a default user profile record when a new Google user
+    //shows up. We still want the default hook's 'profile' behavior, AND we want
+    // our custom user profile collection to have a default record
+    Accounts.onCreateUser(function(options, user) {
+        userProfileSave(user._id, defaultUserProfile());
+        if (options.profile) {
+            user.profile = options.profile;
+        }
+        return user;
+    });
 
     //Set up our server-side methods
     Meteor.methods({

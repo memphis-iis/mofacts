@@ -54,15 +54,3 @@ getFullConfig = function() {
 getConfigProperty = function(name) {
     return _.prop(getFullConfig(), name);
 };
-
-// TODO: Install pacakges 'meteor add accounts-google', 'meteor add service-configuration'
-
-/* TODO: Need this on startup -
-    ServiceConfiguration.configurations.remove({'service': 'google'});
-    var google = getConfigProperty("google");
-    ServiceConfiguration.configurations.insert({
-        'service': 'google'
-        'clientId': _.prop(google, "clientId"),
-        'secret': _.prop(google, "secret"),
-    });
-*/

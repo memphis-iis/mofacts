@@ -1,4 +1,6 @@
 accounts-base@1.2.8
+accounts-google@1.0.10
+accounts-oauth@1.1.13
 accounts-password@1.1.12
 alanning:roles@1.2.15
 allow-deny@1.0.5
@@ -28,6 +30,7 @@ email@1.0.15
 fastclick@1.0.12
 fourseven:scss@3.8.0_1
 geojson-utils@1.0.9
+google@1.1.13
 html-tools@1.0.10
 htmljs@1.0.10
 http@1.1.8
@@ -58,6 +61,8 @@ mongo@1.1.9_1
 mongo-id@1.0.5
 npm-bcrypt@0.8.6_2
 npm-mongo@1.4.45
+oauth@1.1.11
+oauth2@1.1.10
 observe-sequence@1.0.12
 ordered-dict@1.0.8
 ovcharik:howler@1.1.26
