@@ -144,8 +144,14 @@ Meteor.startup(function () {
     // Note that we accept username or email and then find the ID
     var adminUser = findUserByName(getConfigProperty("owner"));
 
+    // Used below for ownership
+    var adminUserId = _.prop(adminUser, "_id") || "";
     // adminUser should be in an admin role
-    Roles.addUsersToRoles(adminUser._id, "admin");
+    if (adminUserId) {
+        Roles.addUsersToRoles(adminUserId, "admin");
+    }
+
+    console.log("Admin User Found:", adminUser, "with ID:", adminUserId);
 
     // Get user in roles and make sure they are added
     var roles = getConfigProperty("owner");
