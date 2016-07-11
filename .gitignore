@@ -11,3 +11,4 @@ mofacts/build
 /nbproject/
 .meteor
 build/
+mofacts/settings.json
