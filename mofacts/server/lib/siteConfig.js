@@ -19,6 +19,17 @@
 // These default value ARE ONLY GOOD FOR TESTING ON YOUR WORKSTATION
 // See above - if you don't replace them in production you are In Trouble
 var defaultValues = {
+    // The owner admin - this account is always an admin and "owns" the TDF/stim
+    // files that are added to the database from the repository. Note that this
+    // account will be added to the admins role (as below)
+    "owner": "ppavlik",
+
+    // Pre-specified role membership (handled on server startup)
+    "initRoles": {
+        "admins": ["ppavlik"],
+        "teachers": ["jackie", "chanda"],
+    },
+
     // Google creds needed for OAuth
     "google": {
         "clientId": "TODO",

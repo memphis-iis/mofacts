@@ -8,10 +8,6 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
 
-// On startup, this will be set to the first user in private/roles/admins.json
-// AFTER the list is sorted.
-var adminUserId = null;
-
 //Helper functions
 
 function getStimJSON(fileName) {
@@ -26,23 +22,6 @@ function getStimJSON(fileName) {
     return future.wait();
 }
 
-function getPresetUsersInRole(fileName) {
-    var future = new Future();
-    Assets.getText(fileName, function (err, data) {
-        if (err)
-            throw err;
-        if (!data) {
-            data = "[]"; //Always return at least an empty
-        }
-        var roles = JSON.parse(data);
-        if (!!roles && roles.sort) {
-            roles.sort();
-        }
-        future.return(roles);
-    });
-    return future.wait();
-}
-
 function defaultUserProfile() {
     return {
         have_aws_id: false,
@@ -53,6 +32,7 @@ function defaultUserProfile() {
     };
 }
 
+// Save the given user profile via "upsert" logic
 function userProfileSave(id, profile) {
     try {
         //Insure record matching ID is present while working around MongoDB 2.4 bug
@@ -75,6 +55,31 @@ function userProfileSave(id, profile) {
     }
 }
 
+// Return the user object matching the user. We use Meteor's provided search
+// function to attempt to locate the user. We will attempt to find the user
+// by username *and* by email.
+function findUserByName(username) {
+    if (!username || _.prop("username", "length") < 1) {
+        return null;
+    }
+
+    var funcs = [Accounts.findUserByUsername, Accounts.findUserByEmail];
+    if (username.indexOf('@') > 0) {
+        // Swap so we try email first
+        funcs = [Accounts.findUserByEmail, Accounts.findUserByUsername];
+    }
+
+    for (var i = 0; i < funcs.length; ++i) {
+        var user = funcs[i](username);
+        if (!!user) {
+            return user;
+        }
+    }
+
+    return null;
+}
+
+// Create a formatted TDF record given the specified parameters
 function createTdfRecord(fileName, tdfJson, ownerId, source) {
     return {
         'fileName': fileName,
@@ -84,6 +89,7 @@ function createTdfRecord(fileName, tdfJson, ownerId, source) {
     };
 }
 
+// Create a formatted Stim record given the specified parameters
 function createStimRecord(fileName, stimJson, ownerId, source) {
     return {
         'fileName': fileName,
@@ -134,31 +140,29 @@ SyncedCron.config({
 //Server-side startup logic
 
 Meteor.startup(function () {
-    // Get user in roles
-    var admins = getPresetUsersInRole("roles/admins.json");
-    var teachers = getPresetUsersInRole("roles/teachers.json");
+    // Figure out the "prime admin" (owner of repo TDF/stim files)
+    // Note that we accept username or email and then find the ID
+    var adminUser = findUserByName(getConfigProperty("owner"));
 
-    var adminUserName = "";
-    if (admins && admins.length) {
-        adminUserName = admins[0];
-    }
+    // adminUser should be in an admin role
+    Roles.addUsersToRoles(adminUser._id, "admin");
 
-    _.each(Meteor.users.find().fetch(), function (ele) {
-        var uname = "" + ele["username"];
-        if (!!uname) {
-            if (uname == adminUserName) {
-                adminUserId = ele._id;
+    // Get user in roles and make sure they are added
+    var roles = getConfigProperty("owner");
+    var roleAdd = function(memberName, roleName) {
+        _.each(_.prop(roles, memberName) || [], function(username) {
+            var user = findUserByName(username);
+            if (!user) {
+                console.log("Warning: user", username, "role", roleName, "request, but user not found");
+                return;
             }
-            if (_.indexOf(admins, uname, true) >= 0) {
-                Roles.addUsersToRoles(ele._id, "admin");
-                console.log(uname + " is in admin role");
-            }
-            if (_.indexOf(teachers, uname, true) >= 0) {
-                Roles.addUsersToRoles(ele._id, "teacher");
-                console.log(uname + " is in teacher role");
-            }
-        }
-    });
+            Roles.addUsersToRoles(user._id, roleName);
+            console.log("Added user", username, "to role", roleName);
+        });
+    };
+
+    roleAdd("admins", "admin");
+    roleAdd("teachers", "teacher");
 
     //Rewrite TDF and Stimuli documents if we have a file
     //You'll note our lack of upsert in the loops below - we don't want _id to
@@ -204,11 +208,11 @@ Meteor.startup(function () {
 
     //Log this late so they're more prone to see it
     if (adminUserId) {
-        console.log("Admin user is", adminUserName, adminUserId);
+        console.log("Admin user is", adminUser);
     }
     else {
         console.log("ADMIN USER is MISSING: a restart might be required");
-        console.log("(Was looking for admin user " + adminUserName + ")");
+        console.log("Make sure you have a valid siteConfig");
         console.log("***IMPORTANT*** There will be no owner for system TDF's");
     }
 
