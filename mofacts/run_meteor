@@ -18,5 +18,12 @@ sudo mount --bind $HOME/.meteor/packages packages
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
 
-echo "Running meteor"
-meteor $*
+# Figure command line
+CL=$*
+if [ ${#CL} -lt 1 ]; then
+    echo "Running meteor with --settings ./settings.json"
+    meteor --settings ./settings.json
+else
+    echo "Running meteor with your command line (did you remember --settings?)"
+    meteor $*
+fi

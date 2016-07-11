@@ -143,7 +143,10 @@ SyncedCron.config({
 //Server-side startup logic
 
 Meteor.startup(function () {
-    // First thing we do is force our OAuth settings to be current
+    // Let anyone looking know what config is in effect
+    console.log("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
+
+    // Force our OAuth settings to be current
     ServiceConfiguration.configurations.remove({"service": "google"});
     console.log("Removed Google service config - rewriting now");
 
@@ -244,6 +247,8 @@ Meteor.startup(function () {
     //shows up. We still want the default hook's 'profile' behavior, AND we want
     // our custom user profile collection to have a default record
     Accounts.onCreateUser(function(options, user) {
+        //TODO: while testing this stuff, we need to be deleting users (so user gets recreated)
+        //TODO: need to actually get username and email for user and store in created user
         userProfileSave(user._id, defaultUserProfile());
         if (options.profile) {
             user.profile = options.profile;
