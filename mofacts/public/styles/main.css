@@ -103,6 +103,19 @@ img {
     margin: auto;
 }
 
+.btn-social {
+    white-space: nowrap;
+}
+.btn-social img {
+    white-space: nowrap;
+    float:left;
+}
+.btn-social span {
+    margin-left: 0.6em;
+    white-space: nowrap;
+    float:left;
+}
+
 #signInButton {
     background: #118C4E;
 }

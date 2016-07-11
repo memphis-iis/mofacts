@@ -50,7 +50,8 @@ Router.route('/experiment/:target?/:xcond?', {
 Router.route('/signin', {
     name: "client.signin",
     action: function () {
-        this.render('signIn');
+        //this.render('signIn');
+        this.render('signInOauth');
     }
 });
 
@@ -64,7 +65,8 @@ Router.route('/signup', {
 Router.route('/', {
     name: "client.index",
     action: function () {
-        this.render('signIn');
+        //this.render('signIn');
+        this.render('signInOauth');
     }
 });
 
