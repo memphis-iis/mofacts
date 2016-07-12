@@ -247,12 +247,33 @@ Meteor.startup(function () {
     //shows up. We still want the default hook's 'profile' behavior, AND we want
     // our custom user profile collection to have a default record
     Accounts.onCreateUser(function(options, user) {
-        //TODO: while testing this stuff, we need to be deleting users (so user gets recreated)
-        //TODO: need to actually get username and email for user and store in created user
+        // Default profile save
         userProfileSave(user._id, defaultUserProfile());
+
+        // Default hook's behavior
         if (options.profile) {
             user.profile = options.profile;
         }
+
+        // Set username and an email address from the google service info
+        // We use the lowercase email for both username and email
+        var email = _.chain(user)
+            .prop("services")
+            .prop("google")
+            .prop("email").trim()
+            .value().toLowerCase();
+        if (!email) {
+            throw new Meteor.Error("No email found for your Google account");
+        }
+
+        user.username = email;
+        user.emails = [{
+            "address": email,
+            "verified": true
+        }];
+
+        console.log("Creating new user:", _.pick(user, "_id", "username", "emails", "profile"));
+
         return user;
     });
 
