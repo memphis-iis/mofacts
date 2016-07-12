@@ -1,49 +1,38 @@
-////////////////////////////////////////////////////////////////////////////
-// Template helpers
-
 Template.userAdmin.helpers({
-    //None currently
+    userRoleEditList: function() {
+        var userList = [];
+        Meteor.users.find(
+            {},
+            { fields: {username: 1}, sort: [['username', 'asc']] }
+        ).forEach(function(user) {
+            userList.push({
+                '_id': user._id,
+                'username': user.username,
+                'admin': Roles.userIsInRole(user, ['admin']),
+                'teacher': Roles.userIsInRole(user, ['teacher']),
+            });
+        });
+        return userList;
+    }
 });
 
-////////////////////////////////////////////////////////////////////////////
-// Template events
-
 Template.userAdmin.events({
-    // Admin/Teachers - save AWS profile data
-    'click #passchg': function(event) {
+    // Need admin and teacher buttons
+    'click .btn-user-change': function(event) {
         event.preventDefault();
 
-        try {
-            var userName = _.trim($("#passchg-user").val());
-            var newPassword = _.trim($("#passchg-pwd1").val());
-            var confirmPassword = _.trim($("#passchg-pwd2").val());
+        var btnTarget = $(event.currentTarget);
+        var userId = _.trim(btnTarget.data("userid"));
+        var roleName = _.trim(btnTarget.data("rolename"));
+        var roleAction = _.trim(btnTarget.data("roleaction"));
+        console.log("Action requested:", roleAction, "to", roleName, "for", userId);
 
-            if (!userName) throw "User name is required to change a password";
-            if (!newPassword) throw "Please supply a password";
-            if (!confirmPassword) throw "You must confirm the password";
-            if (newPassword !== confirmPassword) throw "The passwords must match";
-            if (newPassword.length < 6) throw "Please supply a password with at least 6 characters";
+        if (!userId || !roleName || !roleAction) {
+            console.log("Invalid parameters found!");
+            return;
+        }
 
-            Meteor.call("changeUserPassword", userName, newPassword, function(error, serverReturn) {
-                if (!!error) {
-                    console.log("Error saving changing password", error);
-                    alert("Your changes were not saved! " + error);
-                }
-                else if (!!serverReturn) {
-                    console.log("Server failure while updating password", serverReturn);
-                    alert("The password was not changed! The server said: " + serverReturn);
-                }
-                else {
-                    console.log("Password Changed");
-                    //Clear any controls that shouldn't be kept around
-                    $(".clearOnPwd").val("");
-                    alert("Password Changed");
-                }
-            });
-        }
-        catch(e) {
-            console.log("Failure changing password:", e);
-            alert(e);
-        }
-    },
+        //TODO: show modal
+        //TODO: call server-side method
+    }
 });

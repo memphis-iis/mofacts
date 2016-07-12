@@ -307,6 +307,11 @@ input:focus {
     border-left-width: 0;
 }
 
+.user-admin-table th,
+.user-admin-table td {
+    white-space: nowrap;
+}
+
 /* BEGIN CSS for charting */
 
 .graphs {

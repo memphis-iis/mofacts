@@ -1,7 +1,7 @@
 <!-- User Administration Template -->
 
 <template name="userAdmin">
-{{#if isInRole 'admin,teacher'}}
+{{#if isInRole 'admin'}}
 
     <br><br>
     <div class="row">
@@ -13,35 +13,73 @@
     </div>
 
     <div class="row collapse" id="userAdminCollapse">
-        <div class="col-md-6 form-horizontal">
-            <legend class="text-center">Change User Password</legend>
+        <div class="col-md-12">
+            <h3>User Administration</h3>
 
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="passchg-user">User Name</label>
-                <div class="col-md-8">
-                    <input class="form-control clearOnPwd" type="text" name="passchg-user" id="passchg-user" value="" placeholder="User name">
-                </div>
-            </div>
+            <table class="table table-striped table-bordered table-condensed user-admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Admin?</th>
+                        <th>Teacher?</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each userRoleEditList}}
+                    <tr>
+                        <td>{{username}}</td>
 
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="passchg-pwd1">Password</label>
-                <div class="col-md-8">
-                    <input class="form-control clearOnPwd" type="password" name="passchg-pwd1" id="passchg-pwd1" value="" placeholder="Password">
-                </div>
-            </div>
+                        <td>
+                            {{#if admin}}
+                                <span class="glyphicon glyphicon-ok"></span>
+                                Yes
+                                <button type="button"
+                                    class="btn btn-fix btn-primary btn-xs btn-user-change"
+                                    data-userid="{{_id}}"
+                                    data-rolename="admin"
+                                    data-roleaction="remove"
+                                ><span class="glyphicon glyphicon-minus"></span> Remove from Admins
+                                </button>
+                            {{else}}
+                                <span class="glyphicon glyphicon-remove"></span>
+                                No
+                                <button type="button"
+                                    class="btn btn-fix btn-danger btn-xs btn-user-change"
+                                    data-userid="{{_id}}"
+                                    data-rolename="admin"
+                                    data-roleaction="add"
+                                ><span class="glyphicon glyphicon-plus"></span> Add to Admins
+                                </button>
+                            {{/if}}
+                        </td>
 
-            <div class="form-group">
-                <label class="col-md-4 control-label" for="passchg-pwd2">Confirm Password</label>
-                <div class="col-md-8">
-                    <input class="form-control clearOnPwd" type="password" name="passchg-pwd2" id="passchg-pwd2" value="" placeholder="Repeat Password">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <button type='button' id='passchg' class='btn btn-fix'>
-                    Change Password
-                </button>
-            </div>
+                        <td>
+                            {{#if teacher}}
+                                <span class="glyphicon glyphicon-ok"></span>
+                                Yes
+                                <button type="button"
+                                    class="btn btn-fix btn-primary btn-xs btn-user-change"
+                                    data-userid="{{_id}}"
+                                    data-rolename="teacher"
+                                    data-roleaction="remove"
+                                ><span class="glyphicon glyphicon-minus"></span> Remove from Teachers
+                                </button>
+                            {{else}}
+                                <span class="glyphicon glyphicon-remove"></span>
+                                No
+                                <button type="button"
+                                    class="btn btn-fix btn-danger btn-xs btn-user-change"
+                                    data-userid="{{_id}}"
+                                    data-rolename="teacher"
+                                    data-roleaction="add"
+                                ><span class="glyphicon glyphicon-plus"></span> Add to Teachers
+                                </button>
+                            {{/if}}
+                        </td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
         </div>
     </div>
 
