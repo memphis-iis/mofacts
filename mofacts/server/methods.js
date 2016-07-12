@@ -325,32 +325,6 @@ Meteor.startup(function () {
             return null;
         },
 
-        //TODO: remove this
-        //Provide a way for admins to change passwords
-        //We return null on success or an error msg on failure
-        changeUserPassword: function(userName, newPassword) {
-            if (!userName) return "Username is required";
-            if (!newPassword) return "A new password is required";
-
-            if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-                return "You are not authorized to do that";
-            }
-
-            var userId = _.prop(Accounts.findUserByUsername(userName), "_id");
-            if (!userId) {
-                return "Could not find a valid user";
-            }
-
-            try {
-                Accounts.setPassword(userId, newPassword);
-                console.log("Admin user", _.prop(Meteor.user(), "username"), "changed password for user", userName, "mongo _id", userId);
-                return null; //Succeeded
-            }
-            catch(e) {
-                return "Could not change password: " + e;
-            }
-        },
-
         //We provide a separate server method for user profile info - this is
         //mainly since we don't want some of this data just flowing around
         //between client and server
