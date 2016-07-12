@@ -548,7 +548,11 @@ function newQuestionHandler() {
         var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
 
         if (buttonOrder === "fixed") {
-            // Currently nothing to do - the buttonChoices array is correct
+            // the buttonChoices array should be correct, but they correct answer
+            // may be missing (for instance, demographic questions).
+            if (_.indexOf(buttonChoices, correctAnswer) < 0) {
+                buttonChoices.unshift(correctAnswer);
+            }
         }
         else if (buttonOrder === "random") {
             // Randomized buttons: remove the correct answer, shuffle, keep only
