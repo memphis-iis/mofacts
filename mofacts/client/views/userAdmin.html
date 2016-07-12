@@ -1,11 +1,18 @@
-<!----------------------------------------------------------------------------
-User Administration Template
------------------------------------------------------------------------------>
+<!-- User Administration Template -->
+
 <template name="userAdmin">
 {{#if isInRole 'admin,teacher'}}
 
     <br><br>
     <div class="row">
+        <div class="col-md-offset-3 col-md-6">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#userAdminCollapse" aria-expanded="false" aria-controls="userAdminCollapse">
+                User Admin
+            </button>
+        </div>
+    </div>
+
+    <div class="row collapse" id="userAdminCollapse">
         <div class="col-md-6 form-horizontal">
             <legend class="text-center">Change User Password</legend>
 

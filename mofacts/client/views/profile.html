@@ -52,13 +52,12 @@
             <br><br>
             {{> contentUpload}}
             {{> userProfileEdit}}
+            {{#if isInRole 'admin'}}
+                {{> userAdmin}}
+            {{/if}}
         {{/if}}
 
-        {{#if isInRole 'admin'}}
-            <br><br>
-            {{> userAdmin}}
-        {{/if}}
-
+        <br><br>
         {{> about}}
     </div>
 </template>
