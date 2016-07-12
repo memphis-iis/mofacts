@@ -126,7 +126,13 @@ Meteor.publish(null, function () {
 });
 
 Meteor.publish('allUsers', function () {
-	return Meteor.users.find({}, {fields: {username: 1}});
+    var opts = {
+        fields: {username: 1}
+    };
+    if (Roles.userIsInRole(this.userId, ["admin"])) {
+        opts.fields.roles = 1;
+    }
+	return Meteor.users.find({}, opts);
 });
 
 
@@ -319,6 +325,7 @@ Meteor.startup(function () {
             return null;
         },
 
+        //TODO: remove this
         //Provide a way for admins to change passwords
         //We return null on success or an error msg on failure
         changeUserPassword: function(userName, newPassword) {

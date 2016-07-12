@@ -73,6 +73,9 @@ Router.route('/', {
 Router.route('/profile', {
     name: "client.profile",
     action: function () {
+        if (Roles.userIsInRole(Meteor.user(), ["admin"])) {
+            this.subscribe('allUsers').wait();
+        }
         this.render('profile');
     }
 });
