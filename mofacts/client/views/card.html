@@ -12,20 +12,23 @@
                 </button>
                 <a class="navbar-brand" href="#">MoFaCTS</a>
             </div>  <!-- close header -->
-            <div class="collapse navbar-collapse" id="navbarCollapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <p class="navbar-text">Score: <span class="badge">{{currentScore}}</span></p>
-                    </li>
-                    <li>
-                        <TABLE BORDER="0">
-                            <tr><td><s1>{{username}}</s1></td><td>&nbsp;</td>
-                                <td> <button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Home</button></td><td>&nbsp;</td>
-                                <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td><td>&nbsp;</td>
-                                <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td></tr>
-                        </table>
-                    </li>
-                </ul>
+
+            <div class="nav navbar-nav navbar-right">
+
+                <TABLE BORDER="0">
+                    <td><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
+                    <td>&nbsp;</td>
+                    <td style="line-height:50px;"><s1>{{username}}</s1></td>
+                    <td>&nbsp;</td>    <td>&nbsp;</td>
+                    {{#if isNormal}}
+                    <td><button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Practice</button></td>
+                    <td>&nbsp;</td>
+                    <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td>
+                    <td>&nbsp;</td>
+                    <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td>
+                    {{/if}} 
+                </table>
+
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
@@ -137,7 +140,7 @@
         <div class="row">
             <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
                 <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-                <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Home</button>
+                <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
             </div>
         </div>
 

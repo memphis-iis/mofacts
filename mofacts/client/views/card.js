@@ -367,7 +367,15 @@ Template.card.rendered = function() {
 };
 
 
+
 Template.card.helpers({
+      'isExperiment': function() {
+        return Session.get("loginMode") === "experiment";
+    },
+
+    'isNormal': function() {
+        return Session.get("loginMode") !== "experiment";
+    },
     'username': function () {
         if (!haveMeteorUser()) {
             leavePage(routeToSignin);
