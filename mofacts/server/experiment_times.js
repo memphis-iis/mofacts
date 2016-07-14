@@ -34,24 +34,14 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-// TODO: remove the "run as MongoDB script" functionality
 // TODO: remove the non-DataShop format code since it is unused
 // TODO: refactor code after above two changes
 
 (function () { //Begin IIFE pattern
 
-//Fake a console.log if we don't have a console but we do have a print function
-    if (typeof console === "undefined" && typeof print !== "undefined") {
-        console = {
-            log: function () {
-                print.apply(this, arguments);
-            }
-        };
-    }
-
-// Define an ordering for the fields and the column name we'll put in the
-// output file. Note that these names must match the fields used in populate
-// record.
+    // Define an ordering for the fields and the column name we'll put in the
+    // output file. Note that these names must match the fields used in populate
+    // record.
     var FIELDS = [
         "username",
         "selectedTdf",
@@ -136,52 +126,8 @@
         "Feedback Text"
     ];
 
-//We don't rely on any other files in we're run as a script, so we have some
-//helpers here
 
-    function trim(s) {
-        if (!s && s !== 0)
-            return "";
-
-        var ss = "" + s;
-        if (!ss || !ss.length || ss.length < 1) {
-            return "";
-        }
-
-        if (ss.trim) {
-            return ss.trim();
-        }
-        else {
-            return ss.replace(/^\s+|\s+$/gm, '');
-        }
-    }
-
-    function branchingCorrectText(answer) {
-        var result = "";
-
-        var branches = trim(answer).split(';');
-        if (branches.length > 0) {
-            var flds = branches[0].split('~');
-            if (flds.length == 2) {
-                result = flds[0];
-            }
-        }
-
-        result = result.split('|');
-        return result[0];
-    }
-
-//Return a displayable string for given value (note we don't do anything fancy)
-    function disp(val) {
-        if (!val && val !== false && val !== 0) {
-            return "";
-        }
-        else {
-            return ('' + val).trim();
-        }
-    }
-
-//String together all arguments using the disp function
+    //String together all arguments using the disp function
     function msg() {
         if (!arguments) {
             return "";
@@ -190,19 +136,19 @@
         //Remember, arguments looks like an array, but it is NOT an array
         var all = [];
         for (var i = 0; i < arguments.length; ++i) {
-            all.push(disp(arguments[i]));
+            all.push(_.display(arguments[i]));
         }
 
         return all.join(' ');
     }
 
-//Helper to parse a schedule condition - see note above about 0 and 1 based
-//indexes for why we do some of our manipulation below
+    //Helper to parse a schedule condition - see note above about 0 and 1 based
+    //indexes for why we do some of our manipulation below
     function parseSchedItemCondition(cond) {
         if (typeof cond === "undefined" || !cond)
             return "UNKNOWN";
 
-        var fields = ('' + cond).trim().split('-');
+        var fields = _.trim('' + cond).split('-');
         if (fields.length !== 2)
             return cond;
 
@@ -213,7 +159,7 @@
         return fields[0] + "_" + (num + 1).toString();
     }
 
-//Create our output record
+    //Create our output record
     function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
         // Return the default value if the given value isn't "truthy" BUT numeric
         // zero (0) is considered "truthy". Note that the default value is always
@@ -236,7 +182,7 @@
         //(recorded in lastinstruct), or none at all
         var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcondition;
         //Empty string becomes 0
-        xcond = trim(d(xcond, '0')) || '0';
+        xcond = _.trim(d(xcond, '0')) || '0';
 
         //We might append a warning message
         var note = "";
@@ -245,24 +191,9 @@
                     "QUESTION/ANSWER CLUSTER INDEX MISMATCH => q-clusterIndex:",
                     lastq.clusterIndex,
                     ", a-index:",
-                    disp(lasta.index),
+                    _.display(lasta.index),
                     " "
                     );
-        }
-        if (sched && sched.q && d(lastq.questionIndex, -1) !== d(lasta.questionIndex, -2)) {
-            //Currently we have some legacy data in the user time log where not
-            //every question/answer has a questionIndex for both question and
-            //answer. If the data has been completely reset recently, then we
-            //put this code back in.
-            /*
-             note += msg(
-             "QUESTION/ANSWER Q-INDEX MISMATCH => q-questionIndex:",
-             d(lastq.questionIndex, 'missing'),
-             ", a-questionIndex:",
-             d(lasta.questionIndex, 'missing'),
-             " "
-             );
-             */
         }
 
         //Grab the latency number. Note that if we don't have them (they were added
@@ -336,10 +267,10 @@
         //now store the unit name in the instruction log entry
         var unitName = null;
         if (!!lastinstruct && typeof lastinstruct.unitname !== "undefined") {
-            unitName = trim(lastinstruct.unitname);
+            unitName = _.trim(lastinstruct.unitname);
         }
         if (!unitName && !!sched && typeof sched.unitname !== "undefined") {
-            unitName = trim(sched.unitname);
+            unitName = _.trim(sched.unitname);
         }
 
         if (format === 'basic') {
@@ -391,7 +322,7 @@
                 outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
             }
 
-            var temp = trim(d(lastq.selectedAnswer, '')).split('~');
+            var temp = _.trim(d(lastq.selectedAnswer, '')).split('~');
             var corans = temp[0];
 
             //Track previous step names in the cross-call state so that we can
@@ -399,7 +330,7 @@
             if (typeof state.stepNameSeen === "undefined") {
                 state.stepNameSeen = {};
             }
-            var stepName = trim(d(lastq.selectedQuestion, ''));
+            var stepName = _.trim(d(lastq.selectedQuestion, ''));
             var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
             state.stepNameSeen[stepName] = stepCount;
             stepName = stepCount + " " + stepName;
@@ -444,7 +375,7 @@
                 "Tutor Response Subtype": '',
                 "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
                 "KC Category(Default)": '',
-                "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, branchingCorrectText(lastq.selectedAnswer)), ''),
+                "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, Answers.branchingCorrectText(lastq.selectedAnswer)), ''),
                 "KC Category(Cluster)": '',
                 "CF (Display Order)": d(lastq.questionIndex, -1),
                 "CF (Stim File Index)": d(lastq.clusterIndex, -1),
@@ -464,13 +395,13 @@
 
     }
 
-//Helper to transform our output record into a delimited record
+    //Helper to transform our output record into a delimited record
     function delimitedRecord(rec, format) {
         var field_src = format === 'basic' ? FIELDS : FIELDSDS;
 
         var vals = new Array(field_src.length);
         for (var i = 0; i < field_src.length; ++i) {
-            vals[i] = trim(rec[field_src[i]])
+            vals[i] = _.trim(rec[field_src[i]])
                 .replace(/\s+/gm, ' ')   //Norm ws and remove non-space ws
                 .slice(0, 255)           //Respect len limits for data shop
                 .replace(/\s+$/gm, '');  //Might have revealed embedded space at end
@@ -479,8 +410,8 @@
         return vals.join('\t');
     }
 
-//Iterate over a user times log cursor and call the callback function with a
-//record populated with current information in log
+    //Iterate over a user times log cursor and call the callback function with a
+    //record populated with current information in log
     function processUserLog(username, userTimesDoc, expName, format, callback) {
         var expKey = ('' + expName).replace(/\./g, "_");
         if (!(expKey in userTimesDoc)) {
@@ -521,7 +452,7 @@
             }
             previousRecords[uniqifier] = true;
 
-            var act = ('' + rec.action).trim().toLowerCase();
+            var act = _.trim('' + rec.action).toLowerCase();
 
             if (act === "expcondition" || act === "condition-notify") {
                 lastexpcond = rec;
@@ -545,7 +476,7 @@
                 //They might need the following question for inference
                 var nextq = null;
                 for (var j = i + 1; j < recs.length; ++j) {
-                    if (('' + recs[j].action).trim().toLowerCase() === "question") {
+                    if (_.trim('' + recs[j].action).toLowerCase() === "question") {
                         nextq = recs[j];
                         break;
                     }
@@ -581,91 +512,50 @@
         }
     }
 
-//If running on the server in Meteor, support a function that returns an
-//array of objects
-    if (typeof Meteor !== "undefined" && Meteor.isServer) {
-        createExperimentExport = function (expName, format) {
-            var header = {};
+    // Export our main function
+    createExperimentExport = function (expName, format) {
+        var header = {};
 
-            if (format === "basic") {
-                FIELDS.forEach(function (f) {
-                    header[f] = f;
-                });
-            }
-            else {
-                FIELDSDS.forEach(function (f) {
-                    var prefix = f.substr(0, 14);
+        if (format === "basic") {
+            FIELDS.forEach(function (f) {
+                header[f] = f;
+            });
+        }
+        else {
+            FIELDSDS.forEach(function (f) {
+                var prefix = f.substr(0, 14);
 
-                    var t;
-                    if (prefix === 'Condition Name') {
-                        t = 'Condition Name';
-                    }
-                    else if (prefix === 'Condition Type') {
-                        t = 'Condition Type';
-                    }
-                    else {
-                        t = f;
-                    }
-
-                    header[f] = t;
-                });
-            }
-
-            var results = [delimitedRecord(header, format)];
-
-            UserTimesLog.find({}).forEach(function (entry) {
-                var userRec = Meteor.users.findOne({_id: entry._id});
-                if (!userRec || !userRec.username) {
-                    console.log("Skipping output for ", entry._id);
-                    return;
+                var t;
+                if (prefix === 'Condition Name') {
+                    t = 'Condition Name';
+                }
+                else if (prefix === 'Condition Type') {
+                    t = 'Condition Type';
+                }
+                else {
+                    t = f;
                 }
 
-                var username = userRec.username;
-
-                processUserLog(username, entry, expName, format, function (rec) {
-                    results.push(delimitedRecord(rec, format));
-                });
+                header[f] = t;
             });
+        }
 
-            return results;
-        };
-    }
+        var results = [delimitedRecord(header, format)];
 
-//If not running under Meteor and we have the mongo console print function,
-//We run directly!
-    if (typeof Meteor === "undefined" && typeof print !== "undefined") {
-        (function () {
-            if (typeof experiment === "undefined") {
-                print("You must specify an experiment when running this as a mongo script");
+        UserTimesLog.find({}).forEach(function (entry) {
+            var userRec = Meteor.users.findOne({_id: entry._id});
+            if (!userRec || !userRec.username) {
+                console.log("Skipping output for ", entry._id);
                 return;
             }
 
-            if (typeof _ === "undefined") {
-                //We gave up once this script got complicated - now we manually load
-                //javascript into the mongo console... so you'll probably need to run
-                //this from a repo clone and not a Meteor bundle (of course, if you
-                //have a Meteor bundle, just use the web interface)
-                load("../../scripts/underscore.js");
-                load("../lib/globalHelpers.js");
-            }
+            var username = userRec.username;
 
-            var header = {};
-            var format = "datashop"; // Hardcode for mongo console for now
-
-            var field_src = (format === "basic") ? FIELDS : FIELDSDS;
-            field_src.forEach(function (f) {
-                header[f] = f;
+            processUserLog(username, entry, expName, format, function (rec) {
+                results.push(delimitedRecord(rec, format));
             });
+        });
 
-            print(delimitedRecord(header, format));
-
-            db.userTimesLog.find().forEach(function (entry) {
-                var username = db.users.findOne({_id: entry._id}).username;
-                processUserLog(username, entry, experiment, format, function (rec) {
-                    print(delimitedRecord(rec, format));
-                });
-            });
-        })();
-    }
-
+        return results;
+    };
 })(); //end IIFE

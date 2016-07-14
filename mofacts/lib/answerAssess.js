@@ -112,7 +112,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
 }
 
 //Return the text of the "correct" (the first) branch
-function branchingCorrectText(answer) {
+function _branchingCorrectText(answer) {
     var result = "";
 
     var branches = _.trim(answer).split(';');
@@ -128,11 +128,13 @@ function branchingCorrectText(answer) {
 }
 
 Answers = {
+    branchingCorrectText: _branchingCorrectText,
+
     //Given the "raw" answer text from a cluster (in the response tag), return
     //an answer suitable for display (including on a button). Note that this
     //may be an empty string (for instance, if it's a branched answer)
     getDisplayAnswerText: function(answer) {
-        return answerIsBranched(answer) ? branchingCorrectText(answer) : answer;
+        return answerIsBranched(answer) ? _branchingCorrectText(answer) : answer;
     },
 
     //Returns the close study question. For a branched response, we take the
@@ -143,7 +145,7 @@ Answers = {
 
         if (answerIsBranched(answer)) {
             //Branched = use first entry's text
-            answer = branchingCorrectText(answer);
+            answer = _branchingCorrectText(answer);
         }
 
         //Fill in the blank
