@@ -1,18 +1,11 @@
 /* experiment_times.js
  *
- * This script exports all user trial information in a tabular format for
- * a given experiment. It is written so that it can be used from within
- * a Meteor application (on the server-side) or via the Mongo command
- * shell.
+ * This script exports all user trial information in the DataShop tab-delimited
+ * format a given experiment in.
  *
  * To use in Meteor, call createExperimentExport to get back a (fairly large)
  * array you can use to send a file to the client
  *
- * To use in the Mongo console, run:
- *     mongo --quiet MoFaCT --eval "experiment='Music2.xml'" experiment_times.js
- * where MoFaCT is the database name on the local server. Please keep in mind
- * that you'll need to make some changes if you're using the mongo client and
- * are NOT running from the mofacts/server directory inside a git repo
  *
  * A note concerning indexes
  * ***************************
@@ -34,44 +27,11 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-// TODO: remove the non-DataShop format code since it is unused
-// TODO: refactor code after above two changes
-
 (function () { //Begin IIFE pattern
 
     // Define an ordering for the fields and the column name we'll put in the
     // output file. Note that these names must match the fields used in populate
     // record.
-    var FIELDS = [
-        "username",
-        "selectedTdf",
-        "unit",
-        "unitname",
-        "xcondition",
-        "questionIndex",
-        "clusterIndex",
-        "shufIndex",
-        "whichStim",
-        "questionValue",
-        "correctAnswer",
-        "stimDisplayedTime",
-        "isOverlearning",
-        "userAnswer",
-        "schedCondition",
-        "answerGivenTime",
-        "startLatency",
-        "endLatency",
-        "reviewLatency",
-        "howAnswered",
-        "answerCorrect",
-        "trialType",
-        "qtype",
-        "wasButtonTrial",
-        "buttonOrder",
-        "feedbackText",
-        "note",
-    ];
-
     var FIELDSDS = [
         //Needed*******************
         //Session ID
@@ -80,7 +40,7 @@
         //Time Zone == UTC
         //Tutor Response Type
         //Tutor Response Subtype
-        //POroblem View
+        //Problem View
 
         "Anon Student Id", //username
         "Session ID", //not sure yet
@@ -160,7 +120,7 @@
     }
 
     //Create our output record
-    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, format) {
+    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq) {
         // Return the default value if the given value isn't "truthy" BUT numeric
         // zero (0) is considered "truthy". Note that the default value is always
         // the last argument
@@ -273,135 +233,92 @@
             unitName = _.trim(sched.unitname);
         }
 
-        if (format === 'basic') {
-            //All done - put the record together
-            return {
-                //Unit is special: we take the larget from our various sources
-                unit: Math.max(
-                        d(lastq.currentUnit, -1),
-                        d(lastschedule.unitindex, -1),
-                        d(lastinstruct.currentUnit, -1)
-                    ),
-                username: d(username, ''),
-                selectedTdf: d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, ''),
-                unitname: d(unitName, ''),
-                xcondition: xcond,
-                questionIndex: d(lastq.questionIndex, -1),
-                clusterIndex: d(lastq.clusterIndex, -1),
-                shufIndex: d(lastq.shufIndex, d(lastq.clusterIndex, -1)),
-                whichStim: d(lastq.whichStim, -1),
-                questionValue: d(lastq.selectedQuestion, ''),
-                correctAnswer: d(lastq.selectedAnswer, ''),
-                stimDisplayedTime: d(lastq.clientSideTimeStamp, 0),
-                isOverlearning: d(lastq.showOverlearningText, false),
-                userAnswer: d(lasta.answer, ''),
-                schedCondition: d(schedCondition, ''),
-                answerGivenTime: d(lasta.clientSideTimeStamp, 0),
-                startLatency: d(startLatency, 0),
-                endLatency: d(endLatency, 0),
-                reviewLatency: d(reviewLatency, 0),
-                howAnswered: d(lasta.guiSource, ''),
-                answerCorrect: d(lasta.isCorrect, null),
-                trialType: d(lasta.ttype, ''),
-                qtype: d(lasta.qtype, ''),
-                wasButtonTrial: d(lasta.wasButtonTrial, false),
-                buttonOrder: d(lasta.buttonOrder, ''),
-                note: d(note, ''),
-                feedbackText: d(lasta.displayedSystemResponse, ''),
-            };
+        //used a lot below
+        var isStudy = lasta.ttype === "s";
+
+        if (isStudy) {
+            outcome = "STUDY";
         }
-        else
-        {
-            //used a lot below
-            var isStudy = lasta.ttype === "s";
-
-            if (isStudy) {
-                outcome = "STUDY";
-            }
-            else {
-                outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
-            }
-
-            var temp = _.trim(d(lastq.selectedAnswer, '')).split('~');
-            var corans = temp[0];
-
-            //Track previous step names in the cross-call state so that we can
-            //uniqify it (by user) by prepending a count
-            if (typeof state.stepNameSeen === "undefined") {
-                state.stepNameSeen = {};
-            }
-            var stepName = _.trim(d(lastq.selectedQuestion, ''));
-            var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
-            state.stepNameSeen[stepName] = stepCount;
-            stepName = stepCount + " " + stepName;
-
-            var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
-
-            var whichStim = d(lastq.whichStim, -1);
-            if (whichStim < 0) {
-                // For models, even if the q record is broken we might be able
-                // to find whichStim
-                whichStim = _.chain(lastq)
-                    .prop('currentCardInfo')
-                    .prop('whichStim').intval(-1)
-                    .value();
-            }
-
-            return {
-                "Anon Student Id": d(username, ''),
-                "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + tdfName, //hack
-                "Condition Namea": tdfName,
-                "Condition Typea": 'tdf file',
-                "Condition Nameb": xcond,
-                "Condition Typeb": 'xcondition',
-                "Condition Namec": d(schedCondition, ''),
-                "Condition Typec": 'schedule condition',
-                "Condition Named": d(lasta.guiSource, ''),
-                "Condition Typed": 'how answered',
-                "Condition Namee": d(lasta.wasButtonTrial, false),
-                "Condition Typee": 'button trial',
-                "Level (Unit)": Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1)),
-                "Level (Unitname)": d(unitName, ''),
-                "Problem Name": d(lastq.selectedQuestion, ''),
-                "Step Name": stepName,
-                "Time": d(lastq.clientSideTimeStamp, 0),
-                "Selection": '',
-                "Action": '',
-                "Input": d(lasta.answer, ''),
-                "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
-                "Student Response Type": isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
-                "Student Response Subtype": d(lasta.qtype, ''),
-                "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
-                "Tutor Response Subtype": '',
-                "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
-                "KC Category(Default)": '',
-                "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, Answers.branchingCorrectText(lastq.selectedAnswer)), ''),
-                "KC Category(Cluster)": '',
-                "CF (Display Order)": d(lastq.questionIndex, -1),
-                "CF (Stim File Index)": d(lastq.clusterIndex, -1),
-                "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
-                "CF (Stimulus Version)": whichStim,
-                "CF (Correct Answer)": corans,
-                "CF (Overlearning)": d(lastq.showOverlearningText, false),
-                "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
-                "CF (Start Latency)": d(startLatency, 0),
-                "CF (End Latency)": d(endLatency, 0),
-                "CF (Review Latency)": d(reviewLatency, 0),
-                "CF (Button Order)": d(lasta.buttonOrder, ''),
-                "CF (Note)": d(note, ''),
-                "Feedback Text": d(lasta.displayedSystemResponse, ''),
-            };
+        else {
+            outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
         }
 
+        var temp = _.trim(d(lastq.selectedAnswer, '')).split('~');
+        var corans = temp[0];
+
+        //Track previous step names in the cross-call state so that we can
+        //uniqify it (by user) by prepending a count
+        if (typeof state.stepNameSeen === "undefined") {
+            state.stepNameSeen = {};
+        }
+        var stepName = _.trim(d(lastq.selectedQuestion, ''));
+        var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
+        state.stepNameSeen[stepName] = stepCount;
+        stepName = stepCount + " " + stepName;
+
+        var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
+
+        var whichStim = d(lastq.whichStim, -1);
+        if (whichStim < 0) {
+            // For models, even if the q record is broken we might be able
+            // to find whichStim
+            whichStim = _.chain(lastq)
+                .prop('currentCardInfo')
+                .prop('whichStim').intval(-1)
+                .value();
+        }
+
+        return {
+            "Anon Student Id": d(username, ''),
+            "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + tdfName, //hack
+            "Condition Namea": tdfName,
+            "Condition Typea": 'tdf file',
+            "Condition Nameb": xcond,
+            "Condition Typeb": 'xcondition',
+            "Condition Namec": d(schedCondition, ''),
+            "Condition Typec": 'schedule condition',
+            "Condition Named": d(lasta.guiSource, ''),
+            "Condition Typed": 'how answered',
+            "Condition Namee": d(lasta.wasButtonTrial, false),
+            "Condition Typee": 'button trial',
+            "Level (Unit)": Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1)),
+            "Level (Unitname)": d(unitName, ''),
+            "Problem Name": d(lastq.selectedQuestion, ''),
+            "Step Name": stepName,
+            "Time": d(lastq.clientSideTimeStamp, 0),
+            "Selection": '',
+            "Action": '',
+            "Input": d(lasta.answer, ''),
+            "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
+            "Student Response Type": isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
+            "Student Response Subtype": d(lasta.qtype, ''),
+            "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
+            "Tutor Response Subtype": '',
+            "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
+            "KC Category(Default)": '',
+            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, Answers.branchingCorrectText(lastq.selectedAnswer)), ''),
+            "KC Category(Cluster)": '',
+            "CF (Display Order)": d(lastq.questionIndex, -1),
+            "CF (Stim File Index)": d(lastq.clusterIndex, -1),
+            "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
+            "CF (Stimulus Version)": whichStim,
+            "CF (Correct Answer)": corans,
+            "CF (Overlearning)": d(lastq.showOverlearningText, false),
+            "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
+            "CF (Start Latency)": d(startLatency, 0),
+            "CF (End Latency)": d(endLatency, 0),
+            "CF (Review Latency)": d(reviewLatency, 0),
+            "CF (Button Order)": d(lasta.buttonOrder, ''),
+            "CF (Note)": d(note, ''),
+            "Feedback Text": d(lasta.displayedSystemResponse, ''),
+        };
     }
 
     //Helper to transform our output record into a delimited record
-    function delimitedRecord(rec, format) {
-        var field_src = format === 'basic' ? FIELDS : FIELDSDS;
-
-        var vals = new Array(field_src.length);
-        for (var i = 0; i < field_src.length; ++i) {
-            vals[i] = _.trim(rec[field_src[i]])
+    function delimitedRecord(rec) {
+        var vals = new Array(FIELDSDS.length);
+        for (var i = 0; i < FIELDSDS.length; ++i) {
+            vals[i] = _.trim(rec[FIELDSDS[i]])
                 .replace(/\s+/gm, ' ')   //Norm ws and remove non-space ws
                 .slice(0, 255)           //Respect len limits for data shop
                 .replace(/\s+$/gm, '');  //Might have revealed embedded space at end
@@ -412,7 +329,7 @@
 
     //Iterate over a user times log cursor and call the callback function with a
     //record populated with current information in log
-    function processUserLog(username, userTimesDoc, expName, format, callback) {
+    function processUserLog(username, userTimesDoc, expName, callback) {
         var expKey = ('' + expName).replace(/\./g, "_");
         if (!(expKey in userTimesDoc)) {
             return;
@@ -492,18 +409,18 @@
                 //FINALLY have enough to populate the record
                 var populated = null;
                 try {
-                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, format);
+                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq);
                 }
                 catch (e) {
-                    console.log("There was an error populating the record - it will be skipped", e);
-                    console.log("There was an error populating the record - it will be skipped", e.stack);
-                    console.log(username,
-                            JSON.stringify(lastexpcond),
-                            JSON.stringify(lastschedule),
-                            JSON.stringify(lastinstruct),
-                            JSON.stringify(lastq),
-                            JSON.stringify(rec)
-                            );
+                    console.log("There was an error populating the record - it will be skipped", e, e.stack);
+                    console.log(
+                        username,
+                        JSON.stringify(lastexpcond),
+                        JSON.stringify(lastschedule),
+                        JSON.stringify(lastinstruct),
+                        JSON.stringify(lastq),
+                        JSON.stringify(rec)
+                    );
                 }
                 if (populated) {
                     callback(populated);
@@ -513,34 +430,27 @@
     }
 
     // Export our main function
-    createExperimentExport = function (expName, format) {
+    createExperimentExport = function (expName) {
         var header = {};
 
-        if (format === "basic") {
-            FIELDS.forEach(function (f) {
-                header[f] = f;
-            });
-        }
-        else {
-            FIELDSDS.forEach(function (f) {
-                var prefix = f.substr(0, 14);
+        FIELDSDS.forEach(function (f) {
+            var prefix = f.substr(0, 14);
 
-                var t;
-                if (prefix === 'Condition Name') {
-                    t = 'Condition Name';
-                }
-                else if (prefix === 'Condition Type') {
-                    t = 'Condition Type';
-                }
-                else {
-                    t = f;
-                }
+            var t;
+            if (prefix === 'Condition Name') {
+                t = 'Condition Name';
+            }
+            else if (prefix === 'Condition Type') {
+                t = 'Condition Type';
+            }
+            else {
+                t = f;
+            }
 
-                header[f] = t;
-            });
-        }
+            header[f] = t;
+        });
 
-        var results = [delimitedRecord(header, format)];
+        var results = [delimitedRecord(header)];
 
         UserTimesLog.find({}).forEach(function (entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
@@ -551,8 +461,8 @@
 
             var username = userRec.username;
 
-            processUserLog(username, entry, expName, format, function (rec) {
-                results.push(delimitedRecord(rec, format));
+            processUserLog(username, entry, expName, function (rec) {
+                results.push(delimitedRecord(rec));
             });
         });
 
