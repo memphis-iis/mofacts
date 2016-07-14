@@ -34,7 +34,7 @@ createUserTimeRecord = function(action, extendedData) {
         console.log("userTime", dataRec);
     }
 
-    if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], action)) {
+    if (_.contains(["instructions", "instructions-dup", "schedule", "question", "answer", "[timeout]"], action)) {
         Session.set("lastTimestamp", dataRec.clientSideTimeStamp);
     }
 

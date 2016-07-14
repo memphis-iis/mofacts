@@ -250,13 +250,20 @@ instructContinue = function (dest) {
         logAction = "instructions-dup";
     }
 
+    // Get the start time for instructions (set in router.js). After reading the
+    // value, we also reset it so that other code doesn't see a spurious start
+    // time for instructions.
+    var instructStart = _.intval(Session.get("instructionClientStart"));
+    Session.set("instructionClientStart", 0);
+
     //Record the fact that we just showed instruction. Also - we use a
     //call back to redirect to the card display screen to make sure that
     //everything has been properly logged on the server
     recordUserTime(logAction, {
         'currentUnit': currUnit,
         'unitname': unitName,
-        'xcondition': Session.get("experimentXCond")
+        'xcondition': Session.get("experimentXCond"),
+        'instructionClientStart': instructStart
     }, function(error, result) {
         //We know they'll need to resume now
         Session.set("needResume", true);

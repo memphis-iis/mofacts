@@ -108,10 +108,13 @@ Router.route('/choose', {
     }
 });
 
+// We track the start time for instructions, which means we need to track
+// them here at the instruction route level
+Session.set("instructionClientStart", 0);
 Router.route('/instructions', {
     name: "client.instructions",
     action: function () {
-        console.log("Instruction route proceeding");
+        Session.set("instructionClientStart", Date.now());
         this.render('instructions');
     },
     onAfterAction: function() {
