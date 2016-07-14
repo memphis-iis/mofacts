@@ -381,7 +381,7 @@
             <displayType>cloze</displayType>            
             <display>Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?</display>            
             <response>(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves.</response>        
-        </cluster>        
+        </cluster>   
         <cluster>
             <display>Age?</display>
             <response>18-25</response>
@@ -406,7 +406,7 @@
             <falseResponse>Graduate Degree</falseResponse>
         </cluster>
         <cluster>
-            <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12 grade anatomy, etc.
+            <display><![CDATA[Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select "Yes": nurse, EMT, student majoring in biology, teaching 12th grade anatomy, etc.
 <br><br> Examples of professions that would require you to select "No" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc.]]></display>
             <response>Yes</response>
             <falseResponse>No</falseResponse>
@@ -414,224 +414,224 @@
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-0.5</parameter>            
-            <display>The bottom chambers __________ called ventricles and can be thought of as discharging chambers.</display>            
-            <response>are</response>            
-            <parameter>-0.50001</parameter>            
-            <display>The bottom chambers are called ventricles and can be thought of as __________ chambers.</display>            
-            <response>discharging</response>        
+            <display>Therefore, the blood __________ carry blood in a circle.</display>            
+            <response>vessels</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
+            <parameter>-0.50001</parameter>            
+            <display>__________ from the heart flows through these capillaries, passing carbon dioxide into the tiny air sacs.</display>            
+            <response>Blood</response>            
             <parameter>-0.50002</parameter>            
-            <display>This allows the __________ to get large again, and blood can flow into the atria from the veins.</display>            
-            <response>heart</response>            
+            <display>Blood from the heart __________ through these capillaries, passing carbon dioxide into the tiny air sacs.</display>            
+            <response>flows</response>            
             <parameter>-0.50003</parameter>            
-            <display>This allows the heart to __________ large again, and blood can flow into the atria from the veins.</display>            
-            <response>get</response>            
+            <display>Blood from the heart flows through __________ capillaries, passing carbon dioxide into the tiny air sacs.</display>            
+            <response>these</response>            
             <parameter>-0.50004</parameter>            
-            <display>This allows the heart to get __________ again, and blood can flow into the atria from the veins.</display>            
-            <response>large</response>            
+            <display>Blood from the heart flows through these __________, passing carbon dioxide into the tiny air sacs.</display>            
+            <response>capillaries</response>            
             <parameter>-0.50005</parameter>            
-            <display>This allows the heart to get large again, and __________ can flow into the atria from the veins.</display>            
-            <response>blood</response>            
+            <display>Blood from the heart flows through these capillaries, __________ carbon dioxide into the tiny air sacs.</display>            
+            <response>passing</response>            
             <parameter>-0.50006</parameter>            
-            <display>This allows the heart to get large again, and blood __________ flow into the atria from the veins.</display>            
-            <response>can</response>            
+            <display>Blood from the heart flows through these capillaries, passing carbon dioxide into the __________ air sacs.</display>            
+            <response>tiny</response>            
             <parameter>-0.50007</parameter>            
-            <display>This allows the heart to get large again, and blood can __________ into the atria from the veins.</display>            
-            <response>flow</response>            
+            <display>Blood from the heart flows through these capillaries, passing carbon dioxide into the tiny __________ sacs.</display>            
+            <response>air</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
             <parameter>-0.50008</parameter>            
-            <display>This allows the heart to get large again, and blood can flow __________ the atria from the veins.</display>            
-            <response>into</response>        
+            <display>So there is always __________ traffic in the heart.</display>            
+            <response>one-way</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-0.50009</parameter>            
-            <display>The __________ is a double pump whose two parts work in unison.</display>            
-            <response>heart</response>            
+            <display>So there are __________ four chambers (spaces) inside the heart.</display>            
+            <response>actually</response>            
             <parameter>-0.5001</parameter>            
-            <display>The heart is a __________ pump whose two parts work in unison.</display>            
-            <response>double</response>            
+            <display>So there are actually four __________ (spaces) inside the heart.</display>            
+            <response>chambers</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
             <parameter>-0.500109999999999</parameter>            
-            <display>The heart is a double pump whose two __________ work in unison.</display>            
-            <response>parts</response>            
+            <display>Every __________ the heart beats, it goes'thump' against the chest wall.</display>            
+            <response>time</response>            
             <parameter>-0.500119999999999</parameter>            
+            <display>Every time the heart __________, it goes'thump' against the chest wall.</display>            
+            <response>beats</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500129999999999</parameter>            
+            <display>The veins that carry blood __________ from the body parts empty the blood into the right atrium of the heart.</display>            
+            <response>back</response>            
+            <parameter>-0.500139999999999</parameter>            
+            <display>The veins that carry blood back from the body parts empty the blood into the right __________ of the heart.</display>            
+            <response>atrium</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500149999999999</parameter>            
+            <display>The heart is a double __________ whose two parts work in unison.</display>            
+            <response>pump</response>            
+            <parameter>-0.500159999999999</parameter>            
+            <display>The heart is a double pump __________ two parts work in unison.</display>            
+            <response>whose</response>            
+            <parameter>-0.500169999999999</parameter>            
+            <display>The heart is a double pump whose two parts __________ in unison.</display>            
+            <response>work</response>            
+            <parameter>-0.500179999999999</parameter>            
             <display>The heart is a double pump whose two parts work in __________.</display>            
             <response>unison</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500129999999999</parameter>            
-            <display>These gases pass easily __________ and forth through the thin walls of the tiny capillaries.</display>            
-            <response>back</response>            
-            <parameter>-0.500139999999999</parameter>            
-            <display>These gases pass easily back and forth __________ the thin walls of the tiny capillaries.</display>            
-            <response>through</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500149999999999</parameter>            
-            <display>The tiniest blood vessels, called capillaries, __________ so small you would need a microscope to see them.</display>            
-            <response>are</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500159999999999</parameter>            
-            <display>The __________ that carry blood back from the body parts empty the blood into the right atrium of the heart.</display>            
-            <response>veins</response>            
-            <parameter>-0.500169999999999</parameter>            
-            <display>The veins __________ carry blood back from the body parts empty the blood into the right atrium of the heart.</display>            
-            <response>that</response>            
-            <parameter>-0.500179999999999</parameter>            
-            <display>The veins that carry __________ back from the body parts empty the blood into the right atrium of the heart.</display>            
-            <response>blood</response>            
             <parameter>-0.500189999999999</parameter>            
-            <display>The veins that carry blood back __________ the body parts empty the blood into the right atrium of the heart.</display>            
-            <response>from</response>            
-            <parameter>-0.500199999999999</parameter>            
-            <display>The veins that carry blood back from the body __________ empty the blood into the right atrium of the heart.</display>            
-            <response>parts</response>            
-            <parameter>-0.500209999999999</parameter>            
-            <display>The veins that carry blood back from the body parts empty the blood into the __________ atrium of the heart.</display>            
-            <response>right</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500219999999999</parameter>            
-            <display>The __________ flows smoothly in tubes called blood vessels.</display>            
-            <response>blood</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500229999999999</parameter>            
-            <display>These blood vessels carry blood to all parts of the __________.</display>            
-            <response>body</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500239999999999</parameter>            
-            <display>They __________ squeeze (contract) to send blood rushing out.</display>            
-            <response>can</response>            
-            <parameter>-0.500249999999999</parameter>            
-            <display>They can __________ (contract) to send blood rushing out.</display>            
-            <response>squeeze</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500259999999999</parameter>            
-            <display>It fits snugly __________ the two lungs.</display>            
-            <response>between</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500269999999999</parameter>            
-            <display>__________ top chamber is called an atrium (plural : atria) and can be thought of as receiving chambers.</display>            
-            <response>Each</response>            
-            <parameter>-0.500279999999999</parameter>            
-            <display>Each top chamber is called an atrium (plural : atria) and __________ be thought of as receiving chambers.</display>            
-            <response>can</response>            
-            <parameter>-0.500289999999999</parameter>            
-            <display>Each top chamber is called an atrium (plural : atria) and can be thought of as receiving __________.</display>            
-            <response>chambers</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500299999999999</parameter>            
-            <display>The pointed __________ at the bottom of the heart touches the front wall of the chest.</display>            
-            <response>tip</response>            
-            <parameter>-0.500309999999999</parameter>            
-            <display>The pointed tip at the bottom of the heart touches the front __________ of the chest.</display>            
-            <response>wall</response>            
-            <parameter>-0.500319999999999</parameter>            
-            <display>The pointed tip at the bottom of the heart touches the front wall of the __________.</display>            
-            <response>chest</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500329999999998</parameter>            
-            <display>But the vertical septum is __________, with no openings.</display>            
-            <response>solid</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500339999999998</parameter>            
-            <display>These __________ cells are like little ferry boats.</display>            
-            <response>tiny</response>            
-            <parameter>-0.500349999999998</parameter>            
-            <display>These tiny __________ are like little ferry boats.</display>            
-            <response>cells</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500359999999998</parameter>            
-            <display>But too much __________ dioxide could poison a cell.</display>            
-            <response>carbon</response>            
-            <parameter>-0.500369999999998</parameter>            
-            <display>But too much carbon dioxide could __________ a cell.</display>            
-            <response>poison</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500379999999998</parameter>            
-            <display>Capillaries join to form __________ blood vessels.</display>            
-            <response>larger</response>        
-        </cluster>        
-        <cluster>            
-            <displayType>Cloze</displayType>            
-            <parameter>-0.500389999999998</parameter>            
-            <display>__________ there the blood flows into the left ventricle, where it is once again pumped out into the body.</display>            
-            <response>From</response>            
-            <parameter>-0.500399999999998</parameter>            
             <display>From __________ the blood flows into the left ventricle, where it is once again pumped out into the body.</display>            
             <response>there</response>            
-            <parameter>-0.500409999999998</parameter>            
-            <display>From there the blood __________ into the left ventricle, where it is once again pumped out into the body.</display>            
-            <response>flows</response>            
-            <parameter>-0.500419999999998</parameter>            
-            <display>From there the blood flows into the left __________, where it is once again pumped out into the body.</display>            
-            <response>ventricle</response>            
-            <parameter>-0.500429999999998</parameter>            
-            <display>From there the blood flows into the left ventricle, where it is once again pumped out __________ the body.</display>            
+            <parameter>-0.500199999999999</parameter>            
+            <display>From there the blood flows __________ the left ventricle, where it is once again pumped out into the body.</display>            
             <response>into</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
+            <parameter>-0.500209999999999</parameter>            
+            <display>__________ can not flow back and forth between the left and right halves of the heart, because the septum that separates them is solid, keeping the two circles separate.</display>            
+            <response>Blood</response>            
+            <parameter>-0.500219999999999</parameter>            
+            <display>Blood __________ not flow back and forth between the left and right halves of the heart, because the septum that separates them is solid, keeping the two circles separate.</display>            
+            <response>can</response>            
+            <parameter>-0.500229999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and __________ halves of the heart, because the septum that separates them is solid, keeping the two circles separate.</display>            
+            <response>right</response>            
+            <parameter>-0.500239999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and right __________ of the heart, because the septum that separates them is solid, keeping the two circles separate.</display>            
+            <response>halves</response>            
+            <parameter>-0.500249999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and right halves of the __________, because the septum that separates them is solid, keeping the two circles separate.</display>            
+            <response>heart</response>            
+            <parameter>-0.500259999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and right halves of the heart, because the septum that __________ them is solid, keeping the two circles separate.</display>            
+            <response>separates</response>            
+            <parameter>-0.500269999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and right halves of the heart, because the septum that separates __________ is solid, keeping the two circles separate.</display>            
+            <response>them</response>            
+            <parameter>-0.500279999999999</parameter>            
+            <display>Blood can not flow back and forth between the left and right halves of the heart, because the septum that separates them is solid, keeping the two __________ separate.</display>            
+            <response>circles</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500289999999999</parameter>            
+            <display>__________, the circle begins again.</display>            
+            <response>Thus</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500299999999999</parameter>            
+            <display>The __________ blood vessels, called capillaries, are so small you would need a microscope to see them.</display>            
+            <response>tiniest</response>            
+            <parameter>-0.500309999999999</parameter>            
+            <display>The tiniest blood vessels, called __________, are so small you would need a microscope to see them.</display>            
+            <response>capillaries</response>            
+            <parameter>-0.500319999999999</parameter>            
+            <display>The tiniest blood vessels, called capillaries, are so small __________ would need a microscope to see them.</display>            
+            <response>you</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500329999999998</parameter>            
+            <display>The __________ system is actually made up of two circles.</display>            
+            <response>circulatory</response>            
+            <parameter>-0.500339999999998</parameter>            
+            <display>The circulatory system is actually __________ up of two circles.</display>            
+            <response>made</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500349999999998</parameter>            
+            <display>The contraction __________ with the atria, which push blood into the ventricles.</display>            
+            <response>starts</response>            
+            <parameter>-0.500359999999998</parameter>            
+            <display>The contraction starts __________ the atria, which push blood into the ventricles.</display>            
+            <response>with</response>            
+            <parameter>-0.500369999999998</parameter>            
+            <display>The contraction starts with the atria, which push blood __________ the ventricles.</display>            
+            <response>into</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500379999999998</parameter>            
+            <display>The pointed __________ at the bottom of the heart touches the front wall of the chest.</display>            
+            <response>tip</response>            
+            <parameter>-0.500389999999998</parameter>            
+            <display>The pointed tip at the bottom of the heart __________ the front wall of the chest.</display>            
+            <response>touches</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500399999999998</parameter>            
+            <display>Another septum in the heart is horizontal and separates the rounded __________ part of the heart from the cone-shaped bottom part.</display>            
+            <response>top</response>            
+            <parameter>-0.500409999999998</parameter>            
+            <display>Another septum in the heart is horizontal and separates the rounded top part of the heart from the cone-shaped bottom __________.</display>            
+            <response>part</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500419999999998</parameter>            
+            <display>It brings oxygen to the body cells and takes away their carbon __________.</display>            
+            <response>dioxide</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
+            <parameter>-0.500429999999998</parameter>            
+            <display>The contraction is the first part of the __________.</display>            
+            <response>heartbeat</response>        
+        </cluster>        
+        <cluster>            
+            <displayType>Cloze</displayType>            
             <parameter>-0.500439999999998</parameter>            
-            <display>The __________ is then pumped into the right ventricle, and then to the lungs.</display>            
-            <response>blood</response>            
+            <display>The right side receives the blood __________ veins and pumps it to the lungs.</display>            
+            <response>from</response>            
             <parameter>-0.500449999999998</parameter>            
-            <display>The blood is then pumped into the __________ ventricle, and then to the lungs.</display>            
-            <response>right</response>        
+            <display>The right side receives the blood from veins and __________ it to the lungs.</display>            
+            <response>pumps</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-0.500459999999998</parameter>            
-            <display>When you __________ out, you get rid of this carbon dioxide.</display>            
-            <response>breathe</response>            
+            <display>These gases __________ easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <response>pass</response>            
             <parameter>-0.500469999999998</parameter>            
-            <display>When you breathe __________, you get rid of this carbon dioxide.</display>            
-            <response>out</response>        
+            <display>These gases pass easily back and forth through the thin walls of the __________ capillaries.</display>            
+            <response>tiny</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-0.500479999999998</parameter>            
-            <display>The contraction is the __________ part of the heartbeat.</display>            
-            <response>first</response>        
+            <display>The valves __________ blood from flowing backward.</display>            
+            <response>keep</response>            
+            <parameter>-0.500489999999998</parameter>            
+            <display>The valves keep __________ from flowing backward.</display>            
+            <response>blood</response>            
+            <parameter>-0.500499999999998</parameter>            
+            <display>The valves keep blood __________ flowing backward.</display>            
+            <response>from</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500489999999998</parameter>            
-            <display>These __________, and every other component discussed in this text, are essential in maintaining a healthy heart and normal blood circulation.</display>            
-            <response>valves</response>            
-            <parameter>-0.500499999999998</parameter>            
-            <display>These valves, and every other component discussed in this __________, are essential in maintaining a healthy heart and normal blood circulation.</display>            
-            <response>text</response>            
             <parameter>-0.500509999999998</parameter>            
-            <display>These valves, and every other component discussed in this text, are essential in maintaining a __________ heart and normal blood circulation.</display>            
-            <response>healthy</response>            
+            <display>The blood then flows down into the right ventricle, which pumps it into the __________ and back to the heart, into the left atrium.</display>            
+            <response>lungs</response>            
             <parameter>-0.500519999999998</parameter>            
-            <display>These valves, and every other component discussed in this text, are essential in maintaining a healthy heart and normal __________ circulation.</display>            
-            <response>blood</response>        
+            <display>The blood then flows down into the right ventricle, which pumps it into the lungs and back to the heart, __________ the left atrium.</display>            
+            <response>into</response>        
         </cluster>    
     </clusters>
 </setspec>

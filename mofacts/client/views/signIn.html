@@ -9,7 +9,11 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                {{#if isNormal}}
                 <a class="navbar-brand" href="#">MoFaCTS</a>
+                {{else}}
+                <a class="navbar-brand" href="#">MoFaCTS Experiment</a>
+                {{/if}}
             </div>  <!-- close header -->
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="nav navbar-nav navbar-right">
@@ -20,6 +24,9 @@
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
+    <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
+        <legend>Sign In</legend>
+    </div>
 
     <div class="container">
         <div class="row">
@@ -28,29 +35,28 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-xs-offset-1 col-xs-6 col-sm-offset-1 col-sm-4 col-md-offset-1 col-md-2 col-lg-offset-1 col-lg-2">
-                {{#if isExperiment}}
-                    <div class="form-group">
-                        <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your ID">
-                    </div>
-                {{else}}
-                    <div class="form-group">
-                        <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">
-                        <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
-                    </div>
-                {{/if}}
-                <div class="form-group">
-                    <button type="button" id="signInButton" class="btn ">Sign In</button>
-                    <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
-                </div>
-                <br>
-            </div>
-        </div>
 
+        {{#if isExperiment}}
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your ID">
+        </div>
+        {{else}}
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">
+            <span class="help-inline danger errcheck" id="invalidLogin" hidden >Username password pair not found!</span>
+        </div>
+        <div class="form-group">
+            <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
+        </div>
+        {{/if}}
+        <div class="form-group">
+            <button type="button" id="signInButton" class="btn ">Sign In</button>
+            <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
+        </div>
+        <br>
+    </div>
+    {{#if isNormal}}
         {{> about}}
+    {{/if}}
     </div>
 </template>

@@ -268,6 +268,13 @@ instructContinue = function (dest) {
 // Template helpers
 
 Template.instructions.helpers({
+     isExperiment: function() {
+        return Session.get("loginMode") === "experiment";
+    },
+
+    isNormal: function() {
+        return Session.get("loginMode") !== "experiment";
+    },
     backgroundImage: function() {
         var currUnit = getCurrentTdfUnit();
         var img = "";

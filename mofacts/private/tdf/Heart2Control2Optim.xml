@@ -26,7 +26,7 @@
     </unit> 
     <unit> 
         <unitname>Heart Pretest</unitname> 
-        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer the each of the following 16 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 10 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
+        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 16 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
@@ -36,7 +36,7 @@
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus> 
-            <correctscore>0</correctscore> 
+            <correctscore>1</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
         <assessmentsession> 
@@ -74,7 +74,8 @@
     </unit> 
     <unit> 
         <unitname>Text Instuctions</unitname> 
-        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected additional reading review. Next, you will read a text about the Circulatory System. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to reread and study this text, after which you will continue to the next portion of the experiment. The same text is <b>all on one webpage</b>. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
+        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected additional reading review. <br><br> 
+Next, you will reread the text about the Circulatory System. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to reread and study this text, after which you will continue to the next portion of the experiment. The same text is <b>all on one webpage</b>. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
     </unit> 
     <unit> 
         <unitname>Text</unitname> 
@@ -93,7 +94,7 @@
     </unit> 
     <unit> 
         <unitname>Heart Posttest</unitname> 
-        <unitinstructions><![CDATA[This next to last portion is the posttest. <br><br>Please answer the each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 10 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
+        <unitinstructions><![CDATA[This next to last portion is the posttest. <br><br> <p>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
@@ -103,7 +104,7 @@
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback> 
             <timeuntilstimulus>500</timeuntilstimulus> 
-            <correctscore>0</correctscore> 
+            <correctscore>1</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
         <assessmentsession> 
