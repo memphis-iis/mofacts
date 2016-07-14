@@ -34,6 +34,10 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
+// TODO: remove the "run as MongoDB script" functionality
+// TODO: remove the non-DataShop format code since it is unused
+// TODO: refactor code after above two changes
+
 (function () { //Begin IIFE pattern
 
 //Fake a console.log if we don't have a console but we do have a print function
@@ -529,6 +533,8 @@
                 lastschedule = rec;
             }
             else if (act === "instructions") {
+                // TODO: we need to do something like populateRecord for instructions
+                //       (we're esp interested in instructionClientStart for duration of instruction period)
                 lastinstruct = rec;
                 lastq = null;
             }
