@@ -9,7 +9,11 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
+                {{#if isNormal}}
                 <a class="navbar-brand" href="#">MoFaCTS</a>
+                {{else}}
+                <a class="navbar-brand" href="#">MoFaCTS Experiment</a>
+                {{/if}}
             </div>  <!-- close header -->
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="nav navbar-nav navbar-right">
@@ -29,7 +33,7 @@
 
         {{#if isExperiment}}
         <div class="form-group">
-            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your ID">
+            <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your AMAZON TURK ID">
         </div>
         {{else}}
         <div class="form-group">
@@ -46,7 +50,9 @@
         </div>
         <br>
     </div>
-
+{{#if isNormal}}
+ 
+      
      <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
         <legend>Mobile Fact and Concept Training System (MoFaCTS):</legend>
        <ul class="dashed">
@@ -64,4 +70,6 @@
             <li><b>is explained</b> in this <a href="/ITS2016final.pdf">paper</a> to be presented at the 2016 Intelligent Tutoring Systems Conference.</li>
         </ul>
     </div>
+        
+        {{/if}}
 </template>

@@ -1,9 +1,9 @@
 <tutor> 
     <setspec> 
         <userselect>false</userselect>
-        <name>Heart2Control1</name> 
-        <lessonname>Heart-testing1</lessonname> 
-        <stimulusfile>HeartBaseStim.xml</stimulusfile> 
+        <name>Heart2Ran</name> 
+        <lessonname>Heart-testing5</lessonname> 
+        <stimulusfile>HeartHumStim.xml</stimulusfile> 
         <clustersize>1</clustersize> 
         <isModeled>false</isModeled> 
         <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters> 
@@ -73,8 +73,32 @@
 <br> <p>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. Valves also guard the openings from the atria into the ventricles. So there is always one-way traffic in the heart. The valves keep blood from flowing backward. These valves, and every other component discussed in this text, are essential in maintaining a healthy heart and normal blood circulation.]]> </unitinstructions> 
     </unit> 
     <unit> 
+        <unitname>Human Cloze</unitname> 
+        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected fill-in-the-blank review. <br><br> Next, you will be quizzed on fill-in-the-blank selections from the previous text. You have 12 seconds to begin answering, and if you get them wrong review will occur for 8 seconds. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to practice the fill-in-the blank items, after which you will continue to the next portion of the experiment. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
+    </unit> 
+    <unit>
+        <unitname>Random Optimal</unitname>
+        <learningsession>
+            <clusterlist>68-88</clusterlist>
+            <displayminseconds>30</displayminseconds>
+            <displaymaxseconds>60</displaymaxseconds>
+        </learningsession>
+        <deliveryparams>
+            <displayminseconds>30</displayminseconds>
+            <displaymaxseconds>60</displaymaxseconds>
+            <drill>15000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>10000</reviewstudy>
+            <correctprompt>750</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit> 
         <unitname>Heart Posttest</unitname> 
-        <unitinstructions><![CDATA[You were selected to have no additional practice. <br><br> <p>This next to last portion is the posttest. <br><br>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
+        <unitinstructions><![CDATA[This next to last portion is the posttest. <br><br>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
@@ -116,6 +140,7 @@ Please answer the following 4 quick demographic questions, which may be useful f
             <correctscore>0</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
+        <buttontrial>false</buttontrial> 
         <assessmentsession> 
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 

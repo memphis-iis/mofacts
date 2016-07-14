@@ -1,0 +1,44 @@
+<tutor>
+    <setspec>
+        <lessonname>Heart 2 Experiment (demo)</lessonname>
+        <experimentTarget>heart2</experimentTarget>
+        <userselect>false</userselect>
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Control1Optim.xml</condition>
+        <condition>Heart2Control2Optim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2MachOptim.xml</condition>
+        
+        <condition>Heart2Ran1Optim.xml</condition>
+        <condition>Heart2Ran2Optim.xml</condition>
+        <condition>Heart2Ran3Optim.xml</condition>
+        <condition>Heart2Ran4Optim.xml</condition>
+        <condition>Heart2Ran5Optim.xml</condition>
+        <condition>Heart2Ran6Optim.xml</condition>
+
+    </setspec>
+</tutor>
