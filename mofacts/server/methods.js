@@ -62,15 +62,11 @@ function userProfileSave(id, profile) {
 // function to attempt to locate the user. We will attempt to find the user
 // by username *and* by email.
 function findUserByName(username) {
-    if (!username || _.prop("username", "length") < 1) {
+    if (!username || _.prop(username, "length") < 1) {
         return null;
     }
 
     var funcs = [Accounts.findUserByUsername, Accounts.findUserByEmail];
-    if (username.indexOf('@') > 0) {
-        // Swap so we try email first
-        funcs = [Accounts.findUserByEmail, Accounts.findUserByUsername];
-    }
 
     for (var i = 0; i < funcs.length; ++i) {
         var user = funcs[i](username);
@@ -364,6 +360,54 @@ Meteor.startup(function () {
                 'saveResult': saveResult,
                 'acctBal': acctBal,
                 'error': errmsg
+            };
+        },
+
+        // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
+        // or remove) vs roleName
+        userAdminRoleChange: function(targetUserId, roleAction, roleName) {
+            var usr = Meteor.user();
+            if (!Roles.userIsInRole(usr, ["admin"])) {
+                throw "You are not authorized to do that";
+            }
+
+            targetUserId = _.trim(targetUserId);
+            roleAction = _.trim(roleAction).toLowerCase();
+            roleName = _.trim(roleName);
+
+            if (targetUserId.length < 1) {
+                throw "Invalid: blank user ID not allowed";
+            }
+            if (!_.contains(["add", "remove"], roleAction)) {
+                throw "Invalid: unknown requested action";
+            }
+            if (!_.contains(["admin", "teacher"], roleName)) {
+                throw "Invalid: unknown requested role";
+            }
+
+            var targetUser = Meteor.users.findOne({_id: targetUserId});
+            if (!targetUser) {
+                throw "Invalid: could not find that user";
+            }
+
+            var targetUsername = _.prop(targetUser, "username");
+
+            if (roleAction === "add") {
+                Roles.addUsersToRoles(targetUserId, [roleName]);
+            }
+            else if (roleAction === "remove") {
+                Roles.removeUsersFromRoles(targetUserId, [roleName]);
+            }
+            else {
+                throw "Serious logic error: please report this";
+            }
+
+            return {
+                'RESULT': 'SUCCESS',
+                'targetUserId': targetUserId,
+                'targetUsername': targetUsername,
+                'roleAction': roleAction,
+                'roleName': roleName
             };
         },
 
