@@ -314,7 +314,7 @@
         };
     }
 
-    function populatInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct) {
+    function populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct) {
         var instructBegin = _.chain(lastinstruct).prop("instructionClientStart").intval().value();
         var instructEnd = _.chain(lastinstruct).prop("clientSideTimeStamp").intval().value();
         var instructLatency = "";
@@ -445,7 +445,7 @@
                 // We now create a record from instruction display
                 populated = null;
                 try {
-                    populated = populatInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
+                    populated = populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
                 }
                 catch (e) {
                     console.log("There was an error populating the Instruction record - it will be skipped", e, e.stack);
