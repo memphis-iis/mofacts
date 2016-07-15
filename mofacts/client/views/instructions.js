@@ -228,10 +228,16 @@ instructContinue = function (dest) {
     //current unit, we should log a duplicate instead
     var logAction = "instructions";
     var currUnit = Session.get("currentUnitNumber");
-    var unitName = _.chain(getCurrentTdfFile().tdfs.tutor)
+    var unit = _.chain(getCurrentTdfFile().tdfs.tutor)
         .prop("unit")
         .prop(_.intval(currUnit))
-        .prop("unitname").trim().value();
+        .value();
+
+    var unitName = _.chain(unit).prop("unitname").trim().value();
+    var feedbackText = _.chain(unit).prop("unitinstructions").trim().value();
+    if (feedbackText.length < 1) {
+        feedbackText = _.chain(unit).prop("picture").trim().value();
+    }
 
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
     var expKey = userTimesExpKey(true);
@@ -263,7 +269,8 @@ instructContinue = function (dest) {
         'currentUnit': currUnit,
         'unitname': unitName,
         'xcondition': Session.get("experimentXCond"),
-        'instructionClientStart': instructStart
+        'instructionClientStart': instructStart,
+        'feedbackText': feedbackText
     }, function(error, result) {
         //We know they'll need to resume now
         Session.set("needResume", true);
@@ -282,6 +289,7 @@ Template.instructions.helpers({
     isNormal: function() {
         return Session.get("loginMode") !== "experiment";
     },
+
     backgroundImage: function() {
         var currUnit = getCurrentTdfUnit();
         var img = "";

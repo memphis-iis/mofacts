@@ -314,6 +314,62 @@
         };
     }
 
+    function populatInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct) {
+        var instructBegin = _.chain(lastinstruct).prop("instructionClientStart").intval().value();
+        var instructEnd = _.chain(lastinstruct).prop("clientSideTimeStamp").intval().value();
+        var instructLatency = "";
+        if (instructBegin > 0 && instructEnd > 0 && instructBegin <= instructEnd) {
+            instructLatency = instructEnd - instructBegin;
+        }
+
+        var tdfName = _.trim(lastexpcond.selectedTdf) || _.trim(lastexpcond.currentTdfName);
+
+        return {
+            "Anon Student Id": _.trim(username),
+            "Session ID": (new Date(_.intval(lastinstruct.clientSideTimeStamp))).toUTCString().substr(0, 16) + " " + tdfName, //hack
+            "Condition Namea": tdfName,
+            "Condition Typea": 'tdf file',
+            "Condition Nameb": _.trim(_.intval(lastxcond !== null ? lastxcond : lastinstruct.xcondition)),
+            "Condition Typeb": 'xcondition',
+            "Condition Namec": 'N/A',
+            "Condition Typec": 'schedule condition',
+            "Condition Named": 'N/A',
+            "Condition Typed": 'how answered',
+            "Condition Namee": false,
+            "Condition Typee": 'button trial',
+            "Level (Unit)": _.intval(lastinstruct.currentUnit, -1),
+            "Level (Unitname)": _.trim(lastinstruct.unitname),
+            "Problem Name": 'Instructions',
+            "Step Name": '',
+            "Time": _.intval(lastinstruct.clientSideTimeStamp),
+            "Selection": '',
+            "Action": '',
+            "Input": '',
+            "Outcome": '', //answerCorrect recoded as CORRECT or INCORRECT
+            "Student Response Type": "HINT_REQUEST", // or should be "ATTEMPT"?
+            "Student Response Subtype": '',
+            "Tutor Response Type": "HINT_MSG", // or should be "RESULT"?
+            "Tutor Response Subtype": '',
+            "KC(Default)": '',
+            "KC Category(Default)": '',
+            "KC(Cluster)": '',
+            "KC Category(Cluster)": '',
+            "CF (Display Order)": -1,
+            "CF (Stim File Index)": -1,
+            "CF (Set Shuffled Index)": -1,
+            "CF (Stimulus Version)": -1,
+            "CF (Correct Answer)": '',
+            "CF (Overlearning)": false,
+            "CF (Response Time)": 0,
+            "CF (Start Latency)": 0,
+            "CF (End Latency)": 0,
+            "CF (Review Latency)": instructLatency,
+            "CF (Button Order)": '',
+            "CF (Note)": '',
+            "Feedback Text": _.chain(lastinstruct).prop("feedbackText").trim().value()
+        };
+    }
+
     //Helper to transform our output record into a delimited record
     function delimitedRecord(rec) {
         var vals = new Array(FIELDSDS.length);
@@ -357,6 +413,8 @@
         //You should note that state is PER USER
         state = {};
 
+        var populated = null;
+
         for (var i = 0; i < recs.length; ++i) {
             var rec = recs[i];
             if (!rec || !rec.action || !rec.clientSideTimeStamp) {
@@ -381,10 +439,26 @@
                 lastschedule = rec;
             }
             else if (act === "instructions") {
-                // TODO: we need to do something like populateRecord for instructions
-                //       (we're esp interested in instructionClientStart for duration of instruction period)
                 lastinstruct = rec;
                 lastq = null;
+
+                // We now create a record from instruction display
+                populated = null;
+                try {
+                    populated = populatInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
+                }
+                catch (e) {
+                    console.log("There was an error populating the Instruction record - it will be skipped", e, e.stack);
+                    console.log(
+                        username,
+                        JSON.stringify(lastexpcond),
+                        JSON.stringify(lastinstruct),
+                        JSON.stringify(rec)
+                    );
+                }
+                if (populated) {
+                    callback(populated);
+                }
             }
             else if (act === "question") {
                 lastq = rec;
@@ -407,7 +481,7 @@
                 }
 
                 //FINALLY have enough to populate the record
-                var populated = null;
+                populated = null;
                 try {
                     populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq);
                 }
