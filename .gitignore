@@ -12,3 +12,4 @@ mofacts/build
 .meteor
 build/
 mofacts/settings.json
+.tags
