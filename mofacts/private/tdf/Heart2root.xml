@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Heart 2 Experiment (demo)</lessonname>
         <experimentTarget>heart2</experimentTarget>
-        <userselect>false</userselect>
+        <userselect>true</userselect>
         <condition>Heart2Control1Optim.xml</condition>
         <condition>Heart2Control2Optim.xml</condition>
         <condition>Heart2HumOptim.xml</condition>
