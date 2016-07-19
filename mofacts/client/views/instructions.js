@@ -50,7 +50,7 @@ function currLockOutMinutes() {
         lockoutminutes = _.intval(deliveryParams.lockoutminutes);
     }
 
-    console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
+    //console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
     return lockoutminutes;
 }
 
@@ -215,12 +215,10 @@ function lockoutPeriodicCheck() {
     }
 }
 
-// Called when users continues to next screen. If no dest is specified we use
-// "/card". If you are calling this function from a route, you almost certainly
-// want to pass a custom function (not a route string) in as dest.
+// Called when users continues to next screen.
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
 // must only reference visible from anywhere on the client
-instructContinue = function (dest) {
+instructContinue = function () {
     //On resume, seeing an "instructions" log event is seen as a breaking point
     //in the TDF session (since it's supposed to be the beginning of a new unit).
     //As a result, we only want to log an instruction record ONCE PER UNIT. In
@@ -252,7 +250,7 @@ instructContinue = function (dest) {
     });
     if (!!dup) {
         console.log("Found dup instruction", dup);
-        Meteor.call("debugLog", "Found dup instruction. User:", Meteor.userId(), "Entry:", dup);
+        Meteor.call("debugLog", "Found dup instruction. Entry:", displayify(dup));
         logAction = "instructions-dup";
     }
 
@@ -274,7 +272,7 @@ instructContinue = function (dest) {
     }, function(error, result) {
         //We know they'll need to resume now
         Session.set("needResume", true);
-        leavePage(dest || "/card");
+        leavePage("/card");
     });
 };
 
