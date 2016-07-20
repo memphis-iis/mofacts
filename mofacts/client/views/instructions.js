@@ -50,7 +50,7 @@ function currLockOutMinutes() {
         lockoutminutes = _.intval(deliveryParams.lockoutminutes);
     }
 
-    console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
+    //console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
     return lockoutminutes;
 }
 
@@ -215,12 +215,11 @@ function lockoutPeriodicCheck() {
     }
 }
 
-// Called when users continues to next screen. If no dest is specified we use
-// "/card". If you are calling this function from a route, you almost certainly
-// want to pass a custom function (not a route string) in as dest.
+// Called when users continues to next screen.
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
-// must only reference visible from anywhere on the client
-instructContinue = function (dest) {
+// must only reference visible from anywhere on the client AND we take great
+// pains to not modify anything reactive until this function has returned
+instructContinue = function () {
     //On resume, seeing an "instructions" log event is seen as a breaking point
     //in the TDF session (since it's supposed to be the beginning of a new unit).
     //As a result, we only want to log an instruction record ONCE PER UNIT. In
@@ -250,32 +249,37 @@ instructContinue = function (dest) {
             _.prop(rec, "currentUnit") === currUnit
         );
     });
-    if (!!dup) {
-        console.log("Found dup instruction", dup);
-        Meteor.call("debugLog", "Found dup instruction. User:", Meteor.userId(), "Entry:", dup);
-        logAction = "instructions-dup";
-    }
 
-    // Get the start time for instructions (set in router.js). After reading the
-    // value, we also reset it so that other code doesn't see a spurious start
-    // time for instructions.
-    var instructStart = _.intval(Session.get("instructionClientStart"));
-    Session.set("instructionClientStart", 0);
+    // Record the fact that we just showed instruction. Also - we use a call
+    // back to redirect to the card display screen to make sure that everything
+    // has been properly logged on the server. We do all this in an async
+    // timeout because we don't know if we've been called from a reactive func
+    // and we don't want to trigger any re-calculations
+    Meteor.setTimeout(function(){
+        // Get the start time for instructions (set in router.js). IMPORTANT: we
+        // wait until here to do this in case instructContinue was called from a
+        // reactive function
+        var instructStart = _.intval(Session.get("instructionClientStart"));
+        Session.set("instructionClientStart", 0);
 
-    //Record the fact that we just showed instruction. Also - we use a
-    //call back to redirect to the card display screen to make sure that
-    //everything has been properly logged on the server
-    recordUserTime(logAction, {
-        'currentUnit': currUnit,
-        'unitname': unitName,
-        'xcondition': Session.get("experimentXCond"),
-        'instructionClientStart': instructStart,
-        'feedbackText': feedbackText
-    }, function(error, result) {
-        //We know they'll need to resume now
-        Session.set("needResume", true);
-        leavePage(dest || "/card");
-    });
+        if (!!dup) {
+            console.log("Found dup instruction", dup);
+            Meteor.call("debugLog", "Found dup instruction. Entry:", displayify(dup));
+            logAction = "instructions-dup";
+        }
+
+        recordUserTime(logAction, {
+            'currentUnit': currUnit,
+            'unitname': unitName,
+            'xcondition': Session.get("experimentXCond"),
+            'instructionClientStart': instructStart,
+            'feedbackText': feedbackText
+        }, function(error, result) {
+            //We know they'll need to resume now
+            Session.set("needResume", true);
+            leavePage("/card");
+        });
+    }, 1);
 };
 
 ////////////////////////////////////////////////////////////////////////////

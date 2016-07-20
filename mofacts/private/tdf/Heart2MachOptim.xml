@@ -31,8 +31,8 @@
         <deliveryparams> 
             <purestudy>3000</purestudy> 
             <readyprompt>0</readyprompt> 
-            <reviewstudy>500</reviewstudy> 
-            <correctprompt>1000</correctprompt> 
+            <reviewstudy>12000</reviewstudy> 
+            <correctprompt>750</correctprompt> 
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus> 
@@ -59,8 +59,8 @@
     </unit> 
     <unit> 
         <unitname>Text</unitname> 
-        <instructionminseconds>30</instructionminseconds> 
-        <instructionmaxseconds>60</instructionmaxseconds> 
+        <instructionminseconds>300</instructionminseconds> 
+        <instructionmaxseconds>600</instructionmaxseconds> 
         <unitinstructions><![CDATA[<b>The Circulatory System <br><br> The Heart</b><br> <p>An adult's heart is about the size of a large orange and weighs a little less than a pound. It is hollow and can fill up with blood. The heart is in the middle of the chest. It fits snugly between the two lungs. The pointed tip at the bottom of the heart touches the front wall of the chest. Every time the heart beats, it goes 'thump' against the chest wall. <br> <p>The heart is a pump. Its walls are made of thick muscle. They can squeeze (contract) to send blood rushing out. The blood flows smoothly in tubes called blood vessels. First the blood flows into tubes called arteries. The arteries that leave the heart are thick tubes. But the arteries soon branch again and again, to form many smaller tubes. These blood vessels carry blood to all parts of the body. <br> <p>The farther from the heart, the more blood vessels there are. The tiniest blood vessels, called capillaries, are so small you would need a microscope to see them. Capillaries join to form larger blood vessels. These tubes carry blood back toward the heart. The bigger ones are called veins. The closer to the heart, the fewer the veins there are, and the larger they are. Therefore, the blood vessels carry blood in a circle. First moving away from the heart in the arteries, then traveling to various parts of the body in capillaries, and lastly going back to the heart through the veins.
 <br> <p>If you could see inside your heart you would see that a vertical wall of (solid) muscle divides it down the middle, into a left half and a right half. The muscular wall is called a septum. Another septum in the heart is horizontal and separates the rounded top part of the heart from the cone-shaped bottom part. So there are actually four chambers (spaces) inside the heart. Each top chamber is called an atrium (plural: atria) and can be thought of as "receiving" chambers. The bottom chambers are called ventricles and can be thought of as "discharging" chambers. Blood can flow from the atria down into the ventricles, because there are openings in the horizontal septum that separates them. But the vertical septum is solid, with no openings.
 <br><br>
@@ -73,23 +73,23 @@
 <br> <p>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. Valves also guard the openings from the atria into the ventricles. So there is always one-way traffic in the heart. The valves keep blood from flowing backward. These valves, and every other component discussed in this text, are essential in maintaining a healthy heart and normal blood circulation.]]> </unitinstructions> 
     </unit> 
     <unit> 
-        <unitname>Machine Cloze</unitname> 
-        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected fill-in-the-blank review. <br><br> Next, you will be quizzed on fill-in-the-blank selections from the previous text. You have 12 seconds to begin answering, and if you get them wrong review will occur for 8 seconds. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to practice the fill-in-the blank items, after which you will continue to the next portion of the experiment. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
+        <unitname>Machine Cloze Instructions</unitname> 
+        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected fill-in-the-blank review. <br><br> Next, you will be quizzed on fill-in-the-blank selections from the previous text. You have 15 seconds to begin answering, and if you get them wrong review will occur for 8 seconds. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to practice the fill-in-the blank items, after which you will continue to the next portion of the experiment. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
     </unit> 
     <unit>
-        <unitname>Random Optimal</unitname>
+        <unitname>Machine Cloze Optimal</unitname>
         <learningsession>
             <clusterlist>68-88</clusterlist>
-            <displayminseconds>30</displayminseconds>
-            <displaymaxseconds>60</displaymaxseconds>
+            <displayminseconds>300</displayminseconds>
+            <displaymaxseconds>1500</displaymaxseconds>
         </learningsession>
         <deliveryparams>
-            <displayminseconds>30</displayminseconds>
-            <displaymaxseconds>60</displaymaxseconds>
+            <displayminseconds>300</displayminseconds>
+            <displaymaxseconds>1500</displaymaxseconds>
             <drill>15000</drill>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>10000</reviewstudy>
+            <reviewstudy>8000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
@@ -103,8 +103,8 @@
         <deliveryparams> 
             <purestudy>3000</purestudy> 
             <readyprompt>0</readyprompt> 
-            <reviewstudy>500</reviewstudy> 
-            <correctprompt>1000</correctprompt> 
+            <reviewstudy>12000</reviewstudy> 
+            <correctprompt>750</correctprompt> 
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback> 
             <timeuntilstimulus>500</timeuntilstimulus> 
