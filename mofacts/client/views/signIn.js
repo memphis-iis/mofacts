@@ -90,7 +90,7 @@ function UserPasswordCheck() {
             //If there was a call failure or server returned error message,
             //then we can't proceed
             if (errorMsgs.length > 0) {
-                console.log("Experiment user login errors:", errorMsgs);
+                console.log("Experiment user login errors:", displayify(errorMsgs));
                 $("#serverErrors")
                     .html(errorMsgs.join("<br>"))
                     .show();
@@ -104,7 +104,7 @@ function UserPasswordCheck() {
 
             Meteor.loginWithPassword(newUsername, newPassword, function(error) {
                 if (typeof error !== 'undefined') {
-                    console.log("ERROR: The user was not logged in on experiment sign in?", newUsername);
+                    console.log("ERROR: The user was not logged in on experiment sign in?", newUsername, "Error:", error);
                     alert("It appears that you couldn't be logged in as " + newUsername);
                 }
                 else {

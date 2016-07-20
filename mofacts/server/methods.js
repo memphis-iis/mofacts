@@ -169,9 +169,11 @@ Meteor.startup(function () {
     // adminUser should be in an admin role
     if (adminUserId) {
         Roles.addUsersToRoles(adminUserId, "admin");
+        console.log("Admin User Found ID:", adminUserId, "with obj:", _.pick(adminUser, "_id", "username", "email"));
     }
-
-    console.log("Admin User Found ID:", adminUserId, "with obj:", _.pick(adminUser, "_id", "username", "email"));
+    else {
+        console.log("Admin user ID could not be found. adminUser=", displayify(adminUser || "null"));
+    }
 
     // Get user in roles and make sure they are added
     var roles = getConfigProperty("initRoles");
@@ -249,12 +251,22 @@ Meteor.startup(function () {
     //shows up. We still want the default hook's 'profile' behavior, AND we want
     // our custom user profile collection to have a default record
     Accounts.onCreateUser(function(options, user) {
+        // Little display helper
+        var dispUsr = function(u) {
+            return _.pick(u, "_id", "username", "emails", "profile");
+        };
+
         // Default profile save
         userProfileSave(user._id, defaultUserProfile());
 
         // Default hook's behavior
         if (options.profile) {
-            user.profile = options.profile;
+            user.profile = _.extend(user.profile || {}, options.profile);
+        }
+
+        if (_.prop(user.profile, "experiment")) {
+            console.log("Experiment participant user created:", dispUsr(user));
+            return user;
         }
 
         // Set username and an email address from the google service info
@@ -274,7 +286,9 @@ Meteor.startup(function () {
             "verified": true
         }];
 
-        console.log("Creating new user:", _.pick(user, "_id", "username", "emails", "profile"));
+        console.log("Creating new Google user:", dispUsr(user));
+
+        //TODO: if in initRoles, go ahead and add
 
         return user;
     });
@@ -306,10 +320,18 @@ Meteor.startup(function () {
                 return checks; //Nothing to create
             }
 
-            //Now we can actually create the user
-            //Note that on the server we just get back the ID and have nothing
-            //to do right now
-            var createdId = Accounts.createUser({username: newUserName, password: newUserPassword});
+            // Now we can actually create the user
+            // Note that on the server we just get back the ID and have nothing
+            // to do right now. Also note that this method is called for creating
+            // NON-google user accounts (which should generally just be experiment
+            // participants) - so we make sure to set an initial profile
+            var createdId = Accounts.createUser({
+                'username': newUserName,
+                'password': newUserPassword,
+                'profile': {
+                    'experiment': !!previousOK
+                }
+            });
             if (!createdId) {
                 return ["Unknown failure creating user account"];
             }

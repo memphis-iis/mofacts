@@ -24,9 +24,6 @@
             </div>  <!-- close navbar-collapse -->
         </div>  <!-- close container -->
     </nav>  <!-- close nav -->
-    <div class="col-xs-offset-1 col-xs-10 col-sm-offset-1 col-sm-10 col-md-offset-1 col-md-10 col-lg-offset-1 col-lg-10">
-        <legend>Sign In</legend>
-    </div>
 
     <div class="container">
         <div class="row">
@@ -34,7 +31,6 @@
                 <legend>Sign In</legend>
             </div>
         </div>
-
 
         {{#if isExperiment}}
         <div class="form-group">
@@ -49,11 +45,13 @@
             <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
         </div>
         {{/if}}
+
         <div class="form-group">
             <button type="button" id="signInButton" class="btn ">Sign In</button>
             <span class="help-inline danger errcheck" id="serverErrors" hidden ></span>
         </div>
         <br>
+
         {{#if isNormal}}
             {{> about}}
         {{/if}}

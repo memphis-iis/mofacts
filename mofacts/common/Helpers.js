@@ -7,7 +7,7 @@ Helpers = {
     //password. This is because we REALLY do want to use blanks passwords for
     //some users
     blankPassword: function(userName) {
-        return userName + "BlankPassword";
+        return (userName + "BlankPassword").toUpperCase();
     },
 
     //Extract space-delimited fields from src and push them to dest. Note that
