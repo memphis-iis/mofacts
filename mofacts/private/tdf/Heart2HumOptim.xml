@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <userselect>true</userselect> <!-- TODO: switch back to false -->
+        <userselect>false</userselect>
         <name>Heart2Ran</name>
         <lessonname>Heart-testing5</lessonname>
         <stimulusfile>HeartHumStim.xml</stimulusfile>
