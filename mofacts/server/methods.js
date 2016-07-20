@@ -4,8 +4,6 @@
 //brackets instead of dot notation - that's because we prefer square brackets
 //for creating some MongoDB queries
 
-//TODO: post-oauth, we need to make sure that the Turk experiment workflow
-//      is still working as expected
 
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
