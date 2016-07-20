@@ -101,6 +101,8 @@ Template.profile.rendered = function () {
     //Will be populated if we find an experimental target to jump to
     var foundExpTarget = null;
 
+    var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
+
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
@@ -140,6 +142,17 @@ Template.profile.rendered = function () {
             }
         }
 
+        // Show data download - note that this happens regardless of userselect
+        if (Meteor.userId() === tdfObject.owner || isAdmin) {
+            $("#expDataDownloadContainer").append(
+                $("<div></div>").append(
+                    $("<a class='exp-data-link' target='_blank'></a>")
+                        .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
+                        .text("Download: " + name + " (DataShop format)")
+                )
+            );
+        }
+
         //Note that we defer checking for userselect in case something above
         //(e.g. experimentTarget) auto-selects the TDF
         var userselectText = _.chain(setspec)
@@ -164,16 +177,6 @@ Template.profile.rendered = function () {
                 .data("tdffilename", tdfObject.fileName)
                 .html(name)
         );
-
-        if (Meteor.userId() === tdfObject.owner) {
-            $("#expDataDownloadContainer").append(
-                $("<div></div>").append(
-                    $("<a class='exp-data-link' target='_blank'></a>")
-                        .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                        .text("Download: " + name + " (DataShop format)")
-                )
-            );
-        }
     });
 
     //Did we find something to auto-jump to?
