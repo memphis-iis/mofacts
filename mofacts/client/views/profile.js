@@ -144,11 +144,16 @@ Template.profile.rendered = function () {
 
         // Show data download - note that this happens regardless of userselect
         if (Meteor.userId() === tdfObject.owner || isAdmin) {
+            var disp = name;
+            if (tdfObject.fileName != name) {
+                disp += " (" + tdfObject.fileName + ")";
+            }
+            
             $("#expDataDownloadContainer").append(
                 $("<div></div>").append(
                     $("<a class='exp-data-link' target='_blank'></a>")
                         .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                        .text("Download: " + name + " (DataShop format)")
+                        .text("Download: " + disp)
                 )
             );
         }
