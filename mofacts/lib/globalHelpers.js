@@ -196,8 +196,15 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 //Helpful wrapper around JSON.stringify, including timestamp field expansion
 displayify = function(obj) {
     // Strings and numbers are simple
-    if (typeof obj === "string" || typeof obj === "number") {
+    var type = typeof obj;
+    if (type === "string" || type === "number" || type === "boolean") {
         return obj;
+    }
+    else if (type === "symbol" && obj.toString) {
+        return obj.toString();
+    }
+    else if (type === "undefined" || obj === null) {
+        return "";
     }
 
     // Array: return with displayify run on each member

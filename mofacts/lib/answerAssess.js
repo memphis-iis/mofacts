@@ -23,12 +23,9 @@ function answerIsBranched(answer) {
     return _.trim(answer).indexOf(';') >= 0;
 }
 
-// Perform string comparison - possibly with edit distance considered.
-// We return a "truthy" value if there is a match and 0 other wise. If the
-// match was exact, we return 1. If we matched on edit distance, we return 2
-function stringMatch(s1, s2, lfparameter) {
-    s1 = _.trim(s1).toLowerCase();
-    s2 = _.trim(s2).toLowerCase();
+function simpleStringMatch(str1, str2, lfparameter) {
+    var s1 = _.trim(str1).toLowerCase();
+    var s2 = _.trim(str2).toLowerCase();
 
     if (s1.localeCompare(s2) === 0) {
         //Exact match!
@@ -55,6 +52,30 @@ function stringMatch(s1, s2, lfparameter) {
     }
 }
 
+// Perform string comparison - possibly with edit distance considered.
+// We return a "truthy" value if there is a match and 0 other wise. If the
+// match was exact, we return 1. If we matched on edit distance, we return 2.
+// We also support a |-only regex(-ish) format (which is also honored by our
+// regex search)
+function stringMatch(stimStr, userAnswer, lfparameter) {
+    if (/^[\|A-Za-z0-9]+$/i.test(stimStr)) {
+        // They have the regex matching our special condition - check it manually
+        var checks = _.trim(stimStr).split('|');
+        for(var i = 0; i < checks.length; ++i) {
+            if (checks[i].length < 1)
+                continue;  //No blank checks
+            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter);
+            if (matched !== 0) {
+                return matched; //Match!
+            }
+        }
+        return 0; //Nothing found
+    }
+    else {
+        return simpleStringMatch(stimStr, userAnswer, lfparameter);
+    }
+}
+
 // We perform regex matching, which is special in Mofacts. If the regex is
 // "complicated", then we just match. However, if the regex is nothing but
 // pipe-delimited (disjunction) strings that contain only letters, numbers,
@@ -70,7 +91,7 @@ function regExMatch(regExStr, userAnswer, lfparameter) {
         for(var i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
-            var matched = stringMatch(userAnswer, checks[i], lfparameter);
+            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter);
             if (matched !== 0) {
                 return matched; //Match!
             }
@@ -164,7 +185,13 @@ Answers = {
         }
         else {
             var isCorrect, matchText;
-            var match = stringMatch(userInput, answer, lfparameter);
+            var match = stringMatch(answer, userInput, lfparameter);
+
+            var dispAnswer = _.trim(answer);
+            if (dispAnswer.indexOf("|") >= 0) {
+                // Take first answer if it's a bar-delimited string
+                dispAnswer = _.trim(dispAnswer.split("|")[0]);
+            }
 
             if (match === 0) {
                 isCorrect = false;
@@ -176,7 +203,7 @@ Answers = {
             }
             else if (match === 2) {
                 isCorrect = true;
-                matchText = "Close enough to the correct answer '"+ answer + "'.";
+                matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
             }
             else {
                 console.log("MATCH ERROR: something fails in our comparison");
@@ -186,10 +213,10 @@ Answers = {
 
             if (!matchText) {
                 if (userInput === "") {
-                    matchText = "The correct answer is " + answer + ".";
+                    matchText = "The correct answer is " + dispAnswer + ".";
                 }
                 else {
-                    matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + answer + ".";
+                    matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
                 }
             }
 
