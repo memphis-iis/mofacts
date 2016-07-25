@@ -392,7 +392,7 @@ function modelUnitEngine() {
 //                1 + (100 + p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests)
             );
         }
-        
+
         p.intbs = p.meanSpacing * p.baseLevel;
 
         p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.327);
@@ -700,11 +700,24 @@ function modelUnitEngine() {
         },
 
         unitFinished: function() {
+            var session = _.chain(getCurrentTdfUnit()).prop("learningsession").first().value();
+            var minSecs = _.chain(session).prop("displayminseconds").first().intval(0).value();
+            var maxSecs = _.chain(session).prop("displaymaxseconds").first().intval(0).value();
+
+            if (minSecs > 0.0 || maxSecs > 0.0) {
+                // We ignore practice seconds if displayXXXseconds are specified:
+                // that means the unit will be over when the timer is exceeded
+                // or the user clicks a button. Either way, that's handled outside
+                // the engine
+                return false;
+            }
+
+            // If we're still here, check practice seconds
             var practiceSeconds = getCurrentDeliveryParams().practiceseconds;
             if (practiceSeconds < 1.0) {
                 //Less than a second is an error or a missing values
-                console.log("ERROR: no practice time found - will use 30 seconds");
-                practiceSeconds = 30.0;
+                console.log("No Practice Time Found and display timer: user must quit with Continue button");
+                return false;
             }
 
             var unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
