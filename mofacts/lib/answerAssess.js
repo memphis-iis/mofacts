@@ -58,7 +58,7 @@ function simpleStringMatch(str1, str2, lfparameter) {
 // We also support a |-only regex(-ish) format (which is also honored by our
 // regex search)
 function stringMatch(stimStr, userAnswer, lfparameter) {
-    if (/^[\|A-Za-z0-9]+$/i.test(stimStr)) {
+    if (/^[\|A-Za-z0-9 ]+$/i.test(stimStr)) {
         // They have the regex matching our special condition - check it manually
         var checks = _.trim(stimStr).split('|');
         for(var i = 0; i < checks.length; ++i) {
@@ -84,7 +84,7 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
 // ALSO notice that we use the same return values as stringMatch: 0 for no
 // match, 1 for exact match, 2 for edit distance match
 function regExMatch(regExStr, userAnswer, lfparameter) {
-    if (lfparameter && /^[\|A-Za-z0-9]+$/i.test(regExStr)) {
+    if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
         // They have an edit distance parameter and the regex matching our
         // special condition - check it manually
         var checks = _.trim(regExStr).split('|');
