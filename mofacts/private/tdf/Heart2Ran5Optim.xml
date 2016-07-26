@@ -84,8 +84,6 @@
             <displaymaxseconds>1500</displaymaxseconds>
         </learningsession>
         <deliveryparams>
-            <displayminseconds>300</displayminseconds>
-            <displaymaxseconds>1500</displaymaxseconds>
             <drill>15000</drill>
             <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
