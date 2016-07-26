@@ -95,6 +95,8 @@ Template.turkWorkflow.rendered = function () {
     var allTdfs = Tdfs.find({});
     var turkLogCount = 0; //Check all the valid TDF's
 
+    var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
+
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
         var setspec = _.chain(tdfObject)
@@ -113,17 +115,9 @@ Template.turkWorkflow.rendered = function () {
             return;
         }
 
-        //Only show for userselect == true (and always assume userselect is
-        //true unless we explcitily find false
-        var userselectText = _.chain(setspec)
-            .prop("userselect").first().trim()
-            .value().toLowerCase();
+        var expTarget = _.chain(setspec).prop("experimentTarget").first().trim().value();
 
-        var userselect = true;
-        if (userselectText === "false")
-            userselect = false;
-
-        if (userselect && Meteor.userId() === tdfObject.owner) {
+        if (expTarget.length > 0 && (isAdmin || Meteor.userId() === tdfObject.owner)) {
             $("#turkLogSelectContainer").append(
                 $("<button type='button' id='turk_"+tdfObject._id+"' name=turk_'"+name+"'></button>")
                     .addClass("btn btn-fix btn-sm btn-success btn-log-select")
