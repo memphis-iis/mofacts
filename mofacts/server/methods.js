@@ -286,7 +286,22 @@ Meteor.startup(function () {
 
         console.log("Creating new Google user:", dispUsr(user));
 
-        //TODO: if in initRoles, go ahead and add
+        // If the user is initRoles, go ahead and add them to the roles.
+        // Unfortunately, the user hasn't been created... so we need to actually
+        // cheat a little and manipulate the user record as if we were the roles
+        // code. IMPORTANT: a new version of alanning:roles could break this.
+        user.roles = [];
+        var roles = getConfigProperty("initRoles");
+        var addIfInit = function(initName, roleName) {
+            var initList = _.prop(roles, initName) || [];
+            if (_.contains(initList, user.username)) {
+                console.log("Adding", user.username, "to", roleName);
+                user.roles.push(roleName);
+            }
+        };
+
+        addIfInit("admins", "admin");
+        addIfInit("teachers", "teacher");
 
         return user;
     });
