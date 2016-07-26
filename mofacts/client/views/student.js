@@ -108,6 +108,9 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
     var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
 
     var itemIDList = _.chain(userData).first().prop(tdfname).safekeys().value();
+    //TODO: Session.get("currentStimName") is undefined
+    //      this is because the TDF selection logic doesn't know which condition
+    //      to use to get the correct stimulus file.
     var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
 
     // Get current items for associating the names with the IDs
