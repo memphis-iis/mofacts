@@ -3,17 +3,17 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-standard-app-packages
-accounts-password
+standard-app-packages@1.0.9
+accounts-password@1.2.12
 iron:router
 peerlibrary:xml2js
-underscore
+underscore@1.0.9
 ovcharik:howler
 
 alanning:roles
-http
+http@1.2.8
 percolate:synced-cron
 mfpierre:chartist-js
-standard-minifier-css
-standard-minifier-js
-tracker
+standard-minifier-css@1.1.8
+standard-minifier-js@1.1.8
+tracker@1.1.0

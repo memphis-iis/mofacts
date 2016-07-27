@@ -4,6 +4,8 @@
 # Make a symbolic link to the sync'ed directory for more "natural" work
 ln -s /vagrant $HOME/mofacts
 
+# We will need to be able to compile some binary packages for Meteor
+sudo apt-get install -y build-essential gcc g++ make automake
 
 # Install MongoDB
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
