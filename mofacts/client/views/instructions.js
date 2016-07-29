@@ -227,9 +227,10 @@ instructContinue = function () {
     //current unit, we should log a duplicate instead
     var logAction = "instructions";
     var currUnit = Session.get("currentUnitNumber");
-    var unit = _.chain(getCurrentTdfFile().tdfs.tutor)
-        .prop("unit")
-        .prop(_.intval(currUnit))
+    var unit = _.chain(getCurrentTdfFile())
+        .prop("tdfs")
+        .prop("tutor")
+        .prop("unit").prop(_.intval(currUnit))
         .value();
 
     var unitName = _.chain(unit).prop("unitname").trim().value();
