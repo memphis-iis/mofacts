@@ -108,10 +108,13 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
     var userData = UserMetrics.find({'_id': studentID}, userDataQuery).fetch();
 
     var itemIDList = _.chain(userData).first().prop(tdfname).safekeys().value();
-    //TODO: Session.get("currentStimName") is undefined
-    //      this is because the TDF selection logic doesn't know which condition
-    //      to use to get the correct stimulus file.
-    var cluster = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster;
+
+    var cluster = _.chain(Stimuli.findOne({fileName: getCurrentStimName()}))
+        .prop("stimuli")
+        .prop("setspec")
+        .prop("clusters").first()
+        .prop("cluster")
+        .value();
 
     // Get current items for associating the names with the IDs
     var itemStats = [];
@@ -136,7 +139,7 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
             'avgLatency': (_.isNaN(corTime/corCount) ? 0 : corTime/corCount).toFixed(1),
             'repetitions': totCount,
             'itemID': itemID,
-            'name': _.first(cluster[itemID].display),
+            'name': _.chain(cluster).prop(itemID).prop("display").first().value(),
         });
     });
 
