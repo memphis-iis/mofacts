@@ -58,7 +58,6 @@ Template.allItems.events({
 
 Template.allItems.rendered = function () {
     //this is called whenever the template is rendered.
-    var allTdfs = Tdfs.find({});
 
     $("#expDataDownloadContainer").html("");
 
@@ -81,8 +80,11 @@ Template.allItems.rendered = function () {
     //Will be populated if we find an experimental target to jump to
     var foundExpTarget = null;
 
+    //Display different for admins/teachers
+    var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]);
+
     //Check all the valid TDF's
-    allTdfs.forEach( function (tdfObject) {
+    Tdfs.find({}).forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
 
         var setspec = _.chain(tdfObject)
@@ -121,19 +123,31 @@ Template.allItems.rendered = function () {
             }
         }
 
-        //Note that we defer checking for userselect in case something above
-        //(e.g. experimentTarget) auto-selects the TDF
-        var userselectText = _.chain(setspec)
-            .prop("userselect").first().trim()
-            .value().toLowerCase();
+        if (isAdmin) {
+            //Admins see all TDF's, but we hide "root" TDF's
+            var conditionCount = _.chain(setspec).prop("condition").prop("length").intval().value();
+            if (conditionCount > 0) {
+                console.log("Skipping due to condition.length > 0 (root TDF) for", name);
+                return;
+            }
+        }
+        else {
+            //Non-admins (and non-teachers) can only see progress for user
+            //selectable TDF's (TDF's they could have clicked on)
+            //Note that we defer checking for userselect in case something above
+            //(e.g. experimentTarget) auto-selects the TDF
+            var userselectText = _.chain(setspec)
+                .prop("userselect").first().trim()
+                .value().toLowerCase();
 
-        var userselect = true;
-        if (userselectText === "false")
-            userselect = false;
+            var userselect = true;
+            if (userselectText === "false")
+                userselect = false;
 
-        if (!userselect) {
-            console.log("Skipping due to userselect=false for ", name);
-            return;
+            if (!userselect) {
+                console.log("Skipping due to userselect=false for", name);
+                return;
+            }
         }
 
         addButton(
@@ -145,16 +159,6 @@ Template.allItems.rendered = function () {
                 .data("tdffilename", tdfObject.fileName)
                 .html(name)
         );
-
-        if (Meteor.userId() === tdfObject.owner) {
-            $("#expDataDownloadContainer").append(
-                $("<div></div>").append(
-                    $("<a class='exp-data-link' target='_blank'></a>")
-                        .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                        .text("Download: " + name + " (DataShop format)")
-                )
-            );
-        }
     });
 
     //Did we find something to auto-jump to?
