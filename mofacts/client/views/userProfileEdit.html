@@ -4,14 +4,14 @@
     <br><br>
     <div class="row">
         <div class="col-md-offset-3 col-md-6">
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#userProfileCollase" aria-expanded="false" aria-controls="userProfileCollase">
-                User Profile Edit
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#userProfileAWSData" aria-expanded="false" aria-controls="userProfileAWSData">
+                AWS User Profile Data
             </button>
         </div>
     </div>
 
-    <div class="row collapse" id="userProfileCollase">
-        <div class="col-md-6 form-horizontal" id="profileContainer">
+    <div class="row collapse" id="userProfileAWSData">
+        <div class="col-md-offset-3 col-md-6 form-horizontal" id="profileContainer">
             <legend class="text-center">Profile Data</legend>
 
             <div class="form-group">
@@ -50,10 +50,21 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-6" id="downloadContainer">
+    <br><br>
+    <div class="row">
+        <div class="col-md-offset-3 col-md-6">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#userProfileDataDownload" aria-expanded="false" aria-controls="userProfileDataDownload">
+                Download User Log Data
+            </button>
+        </div>
+    </div>
+
+    <div class="row collapse" id="userProfileDataDownload">
+        <div class="col-md-12" id="downloadContainer">
             <legend class="text-center">Data Downloads</legend>
-            <div id="expDataDownloadContainer" class="col-lg-12"></div>
+            <div id="expDataDownloadContainer"></div>
         </div>
     </div>
 
