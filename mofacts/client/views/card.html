@@ -26,7 +26,7 @@
                     <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td>
                     <td>&nbsp;</td>
                     <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td>
-                    {{/if}} 
+                    {{/if}}
                 </table>
 
             </div>  <!-- close navbar-collapse -->
@@ -101,11 +101,13 @@
                 <div class="col-md-offset-4 col-md-4">
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
-                        {{#each buttonList}}
-                        <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton btn-responsive'>
-                            {{buttonValue}}
-                        </button></div>
-                        {{/each}}
+                        {{#if buttonTrial}}
+                            {{#each buttonList}}
+                            <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton btn-responsive'>
+                                {{buttonValue}}
+                            </button></div>
+                            {{/each}}
+                        {{/if}}
                     </div>
                 </div>
             </div> <!-- close row -->

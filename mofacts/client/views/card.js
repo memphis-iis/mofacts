@@ -82,6 +82,7 @@ function clearButtonList() {
     //keep it for the session. In truth, we just want a field to specify in
     //the query.
     buttonList.remove({'temp': 1});
+    buttonList.remove({'temp': 2});  // Also delete the temp record
 }
 
 var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
@@ -458,7 +459,7 @@ Template.card.helpers({
     },
 
     'buttonList': function() {
-        return buttonList.find({}, {sort: {idx: 1}});
+        return buttonList.find({'temp': 1}, {sort: {idx: 1}});
     },
 
     'currentScore': function() {
@@ -488,6 +489,10 @@ function newQuestionHandler() {
     var unitNumber = getCurrentUnitNumber();
     var file = getCurrentTdfFile();
     var currUnit = file.tdfs.tutor.unit[unitNumber];
+
+    // Change buttonTrial to neither true nor false to try and stop a spurious
+    // "update miss" in our templating
+    Session.set("buttonTrial", null);
 
     // Buttons are determined by 3 options: buttonorder, wrongButtonOptions,
     // wrongButtonCount:
@@ -592,6 +597,8 @@ function newQuestionHandler() {
                 buttonValue: val
             });
         });
+        // Insert a record that we'll never show
+        buttonList.insert({temp: 2, uniq: Date.now()});
     }
 
     //If this is a study-trial and we are displaying a cloze, then we should
