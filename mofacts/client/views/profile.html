@@ -39,7 +39,17 @@
             <br><br>
         {{/if}}
 
-        <div class="row" id="testButtonContainer">
+        {{#if isInRole 'admin,teacher'}}
+        <div class="row">
+            <div class="col-md-offset-3 col-md-6">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                    TDF Practice
+                </button>
+            </div>
+        </div>
+        {{/if}}
+
+        <div class="row collapse" id="testButtonContainer">
             <legend class="text-center">
                 Practice modules:
                 {{#if isInRole 'admin,teacher'}}
@@ -50,7 +60,6 @@
         </div>
 
         {{#if isInRole 'admin,teacher'}}
-            <br><br>
             {{> contentUpload}}
             {{> userProfileEdit}}
             {{#if isInRole 'admin'}}
