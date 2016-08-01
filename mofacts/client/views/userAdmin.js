@@ -14,12 +14,19 @@ Template.userAdmin.helpers({
             {},
             { fields: {username: 1}, sort: [['username', 'asc']] }
         ).forEach(function(user) {
-            userList.push({
-                '_id': user._id,
-                'username': user.username,
-                'admin': Roles.userIsInRole(user, ['admin']),
-                'teacher': Roles.userIsInRole(user, ['teacher']),
-            });
+            var username = _.chain(user).prop("username").trim().value();
+
+            // Only show users for admin work if the username is an email addr
+            // (and yes, we're using a HUGE shortcut here - this check is only
+            // for admin convenience, not security)
+            if (username.indexOf("@") > 0) {
+                userList.push({
+                    '_id': user._id,
+                    'username': username,
+                    'admin': Roles.userIsInRole(user, ['admin']),
+                    'teacher': Roles.userIsInRole(user, ['teacher']),
+                });
+            }
         });
         return userList;
     }
