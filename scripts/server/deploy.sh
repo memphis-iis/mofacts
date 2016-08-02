@@ -9,6 +9,7 @@ BUNDLE_POSTDEP=$BUNDLE_NAME.deployed
 EXEC_USER=www-data
 
 # parameters for meteor
+# IMPORTANT - we will set other env vars in the execute function below
 export MONGO_URL='mongodb://localhost:27017/MoFaCT'
 # export ROOT_URL='http://mofacts.optimallearning.org'
 export ROOT_URL='http://ec2-52-34-171-189.us-west-2.compute.amazonaws.com'
