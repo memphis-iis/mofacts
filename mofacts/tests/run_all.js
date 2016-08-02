@@ -9,6 +9,7 @@ require('./answer_assess_testing.js');
 require('./AssessmentSessionTesting.js');
 require('./global_help_testing.js');
 require('./shuffle_swap_testing.js');
+require('./client_cookie_testing.js');
 
 suspend_reporting = false;
 test_report();
