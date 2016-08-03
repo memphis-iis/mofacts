@@ -1651,7 +1651,7 @@ function processUserTimesLog() {
 
         else {
             recordTimestamp = false; //Don't use the timestamp for this one
-            console.log("Ignoring user times log entry with action", action);
+            //console.log("Ignoring user times log entry with action", action);
         }
 
         if (recordTimestamp && entry.clientSideTimeStamp) {
@@ -1676,7 +1676,14 @@ function processUserTimesLog() {
     else if (moduleCompleted) {
         //They are DONE!
         console.log("TDF already completed - leaving for profile page.");
-        leavePage("/profile");
+        if (Session.get("loginMode") === "experiment") {
+            // Experiment users don't *have* a normal page
+            leavePage(routeToSignin);
+        }
+        else {
+            // "Normal" user - they just go back to their root page
+            leavePage("/profile");
+        }
     }
     else {
         //We have an answer (or no questions at all) - run next question logic
