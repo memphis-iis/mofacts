@@ -503,9 +503,13 @@
         }
     }
 
-    // Export our main function
-    createExperimentExport = function (expName) {
+    // Exported main function: call recordAcceptor with each record generated
+    // for expName in datashop format. We do NOT terminate our records.
+    // We return the number of records written
+    createExperimentExport = function (expName, format, recordAcceptor) {
         var header = {};
+
+        // We currently just ignore format
 
         FIELDSDS.forEach(function (f) {
             var prefix = f.substr(0, 14);
@@ -524,7 +528,8 @@
             header[f] = t;
         });
 
-        var results = [delimitedRecord(header)];
+        recordAcceptor(delimitedRecord(header));
+        var recordCount = 1;
 
         UserTimesLog.find({}).forEach(function (entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
@@ -536,10 +541,11 @@
             var username = userRec.username;
 
             processUserLog(username, entry, expName, function (rec) {
-                results.push(delimitedRecord(rec));
+                recordCount++;
+                recordAcceptor(delimitedRecord(rec));
             });
         });
 
-        return results;
+        return recordCount;
     };
 })(); //end IIFE

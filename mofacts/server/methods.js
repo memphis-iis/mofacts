@@ -568,27 +568,33 @@ Router.route("experiment-data", {
     action: function () {
         var exp = this.params.expKey;
         var fmt = this.params.format;
+        var response = this.response;
 
         if (!exp) {
-            this.response.writeHead(404);
-            this.response.end("No experiment specified");
+            response.writeHead(404);
+            response.end("No experiment specified");
             return;
         }
 
-        var suffix = '';
-        if (fmt === 'basic') {
-            suffix = 'tsv';
-        } else {
-            suffix = 'txt';
+        if (fmt !== "datashop") {
+            response.writeHead(404);
+            response.end("Unknown format specified: only datashop currently supported");
+            return;
         }
 
-        console.log("Sending all experimental data for", exp);
+        var filename = fmt + exp + "-data.txt";
 
-        this.response.writeHead(200, {
+        response.writeHead(200, {
             "Content-Type": "text/tab-separated-values",
-            "Content-Disposition": "attachment; filename=" + fmt + exp + "-data."+suffix
+            "Content-Disposition": "attachment; filename=" + filename
         });
 
-        this.response.end(createExperimentExport(exp, fmt).join('\r\n'));
+        var recCount = createExperimentExport(exp, fmt, function(record) {
+            response.write(record);
+            response.write('\r\n');
+        });
+        response.end("");
+
+        console.log("Sent all  data for", exp, "as file", filename, "with record-count:", recCount);
     }
 });
