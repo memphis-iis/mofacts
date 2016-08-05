@@ -48,7 +48,15 @@ var defaultValues = {
                      "t1VEXwuLlzTbI8zu3fsHDSEk3apYUyFrR0hLbn4CIkIkG3Ejg5ZBqkJmKgtD" +
                      "U5OG4eLB1SHxx5C9pffpI2pi7p31of4nYGb5FnsxodGxrDlJI6j2ituf5iqD" +
                      "5GkWDW7QZZi3feiuUebJhsDfmlvlr73hDahAeTUH4p4g22QybcP5G2mV9blm" +
-                     "Zf0k837VTvUMsoBCOpurjDFyX9fpL1FFMpWZ4eXveH7I5Ck2h0wtmgCVpCJX"
+                     "Zf0k837VTvUMsoBCOpurjDFyX9fpL1FFMpWZ4eXveH7I5Ck2h0wtmgCVpCJX",
+
+    // CAREFUL: these are visible to anyone on the web. ALSO - you MUST set them
+    // in settings.json if you want them visible on the client.
+    "public": {
+         // This should ONLY be set to true on local workstations for testing in
+         // your own local settings.json file
+         "testLogin": false
+    }
 };
 
 getFullConfig = function() {
