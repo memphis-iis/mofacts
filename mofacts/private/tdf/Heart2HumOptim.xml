@@ -155,7 +155,7 @@ Please answer the following 4 quick demographic questions, which may be useful f
     </unit>
     <unit>
         <unitname>last</unitname>
-        <unitinstructions><![CDATA[You have now completed the experiment.<br><br> In order to receive payment, please enter the following password into the Amazon Mechanical Turk webpage: <b>truculent</b>
+        <unitinstructions><![CDATA[You have now completed the experiment.<br><br> In order to receive payment, please enter the following password into the Amazon Mechanical Turk webpage: <b>lawnmower</b>
 <br><br>We will check your completion and you will receive payment within 3 days. ]]></unitinstructions>
     </unit>
 </tutor>
