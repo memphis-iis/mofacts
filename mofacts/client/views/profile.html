@@ -20,7 +20,7 @@
             </div>  <!-- close header -->
 
             <div class="nav navbar-nav navbar-right">
-                <TABLE BORDER="0">
+                <table border="0">
                     <td style="line-height:50px;"><s1>{{username}}</s1></td>
                     <td>&nbsp;</td>    <td>&nbsp;</td>
                     <td><button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Practice</button></td>
@@ -34,32 +34,35 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
+        {{#unless isInRole 'admin,teacher'}}
+            <br>
+
+            <div class="row" id="testButtonContainer">
+                <legend class="text-center">
+                    Practice modules:
+                </legend>
+            </div>
+        {{/unless}}
+
         {{#if isInRole 'admin,teacher'}}
             {{> turkWorkflow}}
             <br><br>
-        {{/if}}
 
-        {{#if isInRole 'admin,teacher'}}
-        <div class="row">
-            <div class="col-md-offset-3 col-md-6">
-                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
-                    TDF Practice
-                </button>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                        TDF Practice
+                    </button>
+                </div>
             </div>
-        </div>
-        {{/if}}
-
-        <div class="row collapse" id="testButtonContainer">
-            <legend class="text-center">
-                Practice modules:
-                {{#if isInRole 'admin,teacher'}}
+            <div class="row collapse" id="testButtonContainer">
+                <legend class="text-center">
+                    Practice modules:
                     <br>
                     <input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?
-                {{/if}}
-            </legend>
-        </div>
+                </legend>
+            </div>
 
-        {{#if isInRole 'admin,teacher'}}
             {{> contentUpload}}
             {{> userProfileEdit}}
             {{#if isInRole 'admin'}}
