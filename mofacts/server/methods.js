@@ -318,11 +318,18 @@ Meteor.startup(function () {
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
             }
-            else if (!!Accounts.findUserByUsername(newUserName)) {
-                if (previousOK) {
-                    return null; //User has already been created - nothing to do
+            else {
+                var prevUser = Accounts.findUserByUsername(newUserName);
+                if (!!prevUser) {
+                    if (previousOK) {
+                        // Older accounts from turk users are having problems with
+                        // passwords - so when we detect them, we automatically
+                        // change the password
+                        Accounts.setPassword(prevUser._id, newUserPassword);
+                        return null; //User has already been created - nothing to do
+                    }
+                    checks.push("User is already in use");
                 }
-                checks.push("User is already in use");
             }
 
             if (!newUserPassword || newUserPassword.length < 6) {
