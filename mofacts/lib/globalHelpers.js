@@ -193,7 +193,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 
 // Useful function for display and debugging objects: returns an OK JSON
 // pretty-print textual representation of the object
-//Helpful wrapper around JSON.stringify, including timestamp field expansion
+// Helpful wrapper around JSON.stringify, including timestamp field expansion
 displayify = function(obj) {
     // Strings and numbers are simple
     var type = typeof obj;
@@ -207,14 +207,17 @@ displayify = function(obj) {
         return "";
     }
 
-    // Array: return with displayify run on each member
+    // Array: return with displayify run on each member and intelligently decide
+    // on how we space/break the display
     if (_.isArray(obj)) {
-        var dispArr = [];
-        for (var i = 0; i < obj.length; ++i) {
-            dispArr.push(displayify(obj[i])); //Recursion!
-        }
-        var spacing = (dispArr.length <= 3 || _.isNumber(obj[0])) ? 0 : 2;
-        return JSON.stringify(dispArr, null, spacing);
+        var multiLine = (obj.length > 3 && !_.isNumber(obj[0]));
+        return "[" + _.map(obj, function(val, idx) {
+            var txt = displayify(val) + ", ";   // Recursion!
+            if (multiLine) {
+                txt = "  " + txt + "\n";
+            }
+            return txt;
+        }).join("") + "]";
     }
 
     // Object - perform some special formatting on a copy
