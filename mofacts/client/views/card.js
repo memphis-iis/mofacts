@@ -69,6 +69,14 @@ Then no simulation will take place if either parameter is:
     * Missing
     * Invalid (not interpretable as a number)
     * Less than or equal to zero
+
+
+History Scrolling Overview
+----------------------------
+
+We provide scrollable history for units (it is turned off by default). To
+turn it on, you need to set <showhistory>true</showhistory> in the
+<deliveryparams> section of the unit where you want it on.
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -76,6 +84,8 @@ Then no simulation will take place if either parameter is:
 
 var engine = null; //The unit engine for display (i.e. model or schedule)
 var buttonList = new Mongo.Collection(null); //local-only - no database
+var scrollList = new Mongo.Collection(null); //local-only - no database
+Session.set("scrollListCount", 0);
 
 function clearButtonList() {
     //In theory, they could put something without temp defined and we would
@@ -83,6 +93,75 @@ function clearButtonList() {
     //the query.
     buttonList.remove({'temp': 1});
     buttonList.remove({'temp': 2});  // Also delete the temp record
+}
+
+function clearScrollList() {
+    scrollList.remove({'temp': 1});
+    Session.set("scrollListCount", 0);
+}
+
+// IMPORTANT: this function assumes that the current state reflects a properly
+// set up Session for the current question/answer information
+function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
+    // We only store scroll history if it has been turned on in the TDF
+    var params = getCurrentDeliveryParams();
+    if (!params.showhistory) {
+        return;
+    }
+
+    var isCorrect = null;
+    var historyUserAnswer = "";
+    var historyCorrectMsg = "";
+
+    var correctAndText;
+
+    var setspec = null;
+    if (!getButtonTrial()) {
+        setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+    }
+
+    if (getTestType() === "s") {
+        //Study trial
+        isCorrect = true;
+        historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
+        historyCorrectMsg = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+    }
+    else if (!!isTimeout) {
+        //Timeout
+        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
+        isCorrect = false;
+        historyUserAnswer = "You didn't answer in time.";
+        historyCorrectMsg = correctAndText[1];
+    }
+    else if (typeof simCorrect === "boolean") {
+        //Simulation! We know what they did
+        isCorrect = simCorrect;
+        historyUserAnswer = "Simulated answer where correct==" + simCorrect;
+        historyCorrectMsg = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+    }
+    else {
+        //"Regular" answers
+        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
+        isCorrect = correctAndText[0];
+        historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
+        historyCorrectMsg = correctAndText[1];
+    }
+
+    var currCount = _.intval(Session.get("scrollListCount"));
+
+    scrollList.insert({
+        'temp': 1,                       // Deleted when clearing
+        'justAdded': justAdded,          // All 1's set to 0 on next question
+        'idx': currCount,                // Our ordering field
+        'userAnswer': historyUserAnswer,
+        'answer': historyCorrectMsg,
+        'userCorrect': isCorrect
+    }, function(err, newId) {
+        if (!!err) {
+            console.log("ERROR inserting scroll list member:", displayify(err));
+        }
+        Session.set("scrollListCount", currCount + 1);
+    });
 }
 
 var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
@@ -462,6 +541,14 @@ Template.card.helpers({
         return buttonList.find({'temp': 1}, {sort: {idx: 1}});
     },
 
+    'haveScrollList': function() {
+        return _.intval(Session.get("scrollListCount")) > 0;
+    },
+
+    'scrollList': function() {
+        return scrollList.find({'temp': 1, 'justAdded': 0}, {sort: {idx: 1}});
+    },
+
     'currentScore': function() {
         return Session.get("currentScore");
     },
@@ -489,6 +576,18 @@ function newQuestionHandler() {
     var unitNumber = getCurrentUnitNumber();
     var file = getCurrentTdfFile();
     var currUnit = file.tdfs.tutor.unit[unitNumber];
+
+    // Whatever happens next, no scolling history is "justAdded"
+    scrollList.update(
+        {'justAdded': 1},           // Query
+        {'$set': {'justAdded': 0}}, // Operation
+        {'multi': true},            // Options
+        function(err, numrecs) {    // Callback
+            if (!!err) {
+                console.log("UDPATE ERROR:", displayify(err));
+            }
+        }
+    );
 
     // Change buttonTrial to neither true nor false to try and stop a spurious
     // "update miss" in our templating
@@ -774,23 +873,24 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
     //Now actually log the answer they gave (or the timeout)
     recordUserTime(isTimeout ? "[timeout]" : "answer", {
-        questionIndex: _.intval(Session.get("questionIndex"), -1),
-        index: _.intval(currCluster.clusterIndex, -1),
-        shufIndex: _.intval(currCluster.shufIndex, -1),
-        ttype: getTestType(),
-        qtype: findQTypeSimpified(),
-        guiSource: source,
-        answer: userAnswer,
-        isCorrect: isCorrect,
-        trialStartTimestamp: trialTimestamp,
-        clientSideTimeStamp: timestamp,
-        firstActionTimestamp: firstActionTimestamp,
-        startLatency: startLatency,
-        endLatency: endLatency,
-        wasButtonTrial: wasButtonTrial,
-        buttonOrder: buttonEntries,
-        inferredReviewLatency: reviewLatency,
-        displayedSystemResponse: $("#UserInteraction").text() || ""
+        'questionIndex': _.intval(Session.get("questionIndex"), -1),
+        'index': _.intval(currCluster.clusterIndex, -1),
+        'shufIndex': _.intval(currCluster.shufIndex, -1),
+        'ttype': getTestType(),
+        'qtype': findQTypeSimpified(),
+        'guiSource': source,
+        'answer': userAnswer,
+        'isCorrect': isCorrect,
+        'trialStartTimestamp': trialTimestamp,
+        'clientSideTimeStamp': timestamp,
+        'firstActionTimestamp': firstActionTimestamp,
+        'startLatency': startLatency,
+        'endLatency': endLatency,
+        'wasButtonTrial': wasButtonTrial,
+        'buttonOrder': buttonEntries,
+        'inferredReviewLatency': reviewLatency,
+        'wasSim': (source === "simulation") ? 1 : 0,
+        'displayedSystemResponse': $("#UserInteraction").text() || ""
     });
 
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
@@ -914,10 +1014,8 @@ function getButtonTrial() {
 //it is true or false we know this is part of a simulation call
 function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     var isCorrect = null;
-
     //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s") {
-        //Study -
         isCorrect = true;
         isTimeout = false;
     }
@@ -938,7 +1036,8 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
         setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     }
 
-    //How was their answer?
+    // How was their answer? (And note we only need to update historyUserAnswer
+    // if it's not a "standard" )
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
         correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
@@ -956,6 +1055,9 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
         correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
         handleAnswerState(correctAndText[0], correctAndText[1]);
     }
+
+    //Make sure to record what they just did (and set justAdded)
+    writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
 
     //Give unit engine a chance to update any necessary stats
     engine.cardAnswered(isCorrect);
@@ -1125,8 +1227,8 @@ function showUserInteraction(isGoodNews, news) {
     // Scroll to ensure correct view in on screen
     var offset = $("#feedbackTarget").offset().top - $(window).scrollTop();
     if(offset > window.innerHeight) {
-        // Not in view so scroll to it
-        $('html,body').animate({scrollTop: offset}, 100);
+        //Put bottom at bottom of visible area
+        $("#feedbackTarget").get(0).scrollIntoView(false);
     }
 }
 
@@ -1139,8 +1241,8 @@ function hideUserInteraction() {
     // Scroll to ensure correct view in on screen
     var offset = $("#stimulusTarget").offset().top - $(window).scrollTop();
     if(offset > window.innerHeight) {
-        // Not in view so scroll to it
-        $('html,body').animate({scrollTop: offset}, 100);
+        // Put top at top of visible area
+        $("#stimulusTarget").get(0).scrollIntoView(true);
     }
 }
 
@@ -1224,6 +1326,7 @@ function resumeFromUserTimesLog() {
     keypressTimestamp = 0;
     trialTimestamp = 0;
     unitStartTimestamp = Date.now();
+    clearScrollList();
 
     //Clear any previous session data about unit/question/answer
     Session.set("clusterMapping", undefined);
@@ -1495,6 +1598,8 @@ function processUserTimesLog() {
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
 
+                clearScrollList();
+
                 resetEngine(instructUnit);
             }
         }
@@ -1514,6 +1619,8 @@ function processUserTimesLog() {
                 Session.set("currentQuestion", undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
+
+                clearScrollList();
 
                 if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
                     //Completed
@@ -1572,6 +1679,7 @@ function processUserTimesLog() {
             Session.set("currentQuestion", undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
+            clearScrollList();
         }
 
         else if (action === "question") {
@@ -1641,6 +1749,12 @@ function processUserTimesLog() {
                 entry.answer,
                 wasCorrect
             );
+
+            var simCorrect = null;
+            if (_.chain(entry).prop("wasSim").intval() > 0) {
+                simCorrect = wasCorrect;
+            }
+            writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);
 
             //Notify unit engine about card answer
             engine.cardAnswered(wasCorrect, entry);

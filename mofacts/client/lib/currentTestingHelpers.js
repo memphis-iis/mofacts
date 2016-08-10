@@ -244,17 +244,18 @@ getCurrentDeliveryParams = function (currUnit) {
     //Note that we will only extract values that have a specified default
     //value here.
     var deliveryParams = {
-        purestudy: 0,
-        drill: 0,
-        reviewstudy: 0,
-        correctprompt: 0,
-        skipstudy: false,
-        lockoutminutes: 0,
-        fontsize: 3,
-        correctscore: 1,
-        incorrectscore: 0,
-        practiceseconds: 0,
-        autostopTimeoutThreshold: 0
+        'showhistory': false,
+        'purestudy': 0,
+        'drill': 0,
+        'reviewstudy': 0,
+        'correctprompt': 0,
+        'skipstudy': false,
+        'lockoutminutes': 0,
+        'fontsize': 3,
+        'correctscore': 1,
+        'incorrectscore': 0,
+        'practiceseconds': 0,
+        'autostopTimeoutThreshold': 0
     };
 
     //We've defined defaults - also define translatations for values
@@ -263,13 +264,14 @@ getCurrentDeliveryParams = function (currUnit) {
     };
 
     var xlations = {
-        purestudy: _.intval,
-        skipstudy: xlateBool,
-        reviewstudy: _.intval,
-        correctprompt: _.intval,
-        lockoutminutes: _.intval,
-        fontsize: _.intval,
-        practiceseconds: _.intval
+        'showhistory': xlateBool,
+        'purestudy': _.intval,
+        'skipstudy': xlateBool,
+        'reviewstudy': _.intval,
+        'correctprompt': _.intval,
+        'lockoutminutes': _.intval,
+        'fontsize': _.intval,
+        'practiceseconds': _.intval
     };
 
     var modified = false;
