@@ -1,14 +1,23 @@
 ////////////////////////////////////////////////////////////////////////////
+// Local collection for buttons
+
+var progressButtons = new Mongo.Collection(null);
+
+////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
 Template.allItems.helpers({
-    username: function () {
+    'username': function () {
         if (!haveMeteorUser()) {
             routeToSignin();
         }
         else {
             return Meteor.user().username;
         }
+    },
+
+    'progressButtons': function() {
+        return progressButtons.find({'temp': 1}, {'sort': {'name': 1}});
     }
 });
 
@@ -59,15 +68,7 @@ Template.allItems.events({
 Template.allItems.rendered = function () {
     //this is called whenever the template is rendered.
 
-    $("#expDataDownloadContainer").html("");
-
-    var addButton = function(btnObj) {
-        $("#testButtonContainer").append(
-            $("<div class='col-sm-3 col-md-3 col-lg-3 text-center'><br></div>").prepend(
-                btnObj
-            )
-        );
-    };
+    progressButtons.remove({'temp': 1});
 
     //In experiment mode, they may be forced to a single tdf
     var experimentTarget = null;
@@ -150,15 +151,14 @@ Template.allItems.rendered = function () {
             }
         }
 
-        addButton(
-            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
-                .addClass("btn btn-block stimButton")
-                .data("lessonname", name)
-                .data("stimulusfile", stimulusFile)
-                .data("tdfkey", tdfObject._id)
-                .data("tdffilename", tdfObject.fileName)
-                .html(name)
-        );
+        progressButtons.insert({
+            'temp': 1,
+            'name': name,
+            'lessonname': name,
+            'stimulusfile': stimulusFile,
+            'tdfkey': tdfObject._id,
+            'tdffilename': tdfObject.fileName
+        });
     });
 
     //Did we find something to auto-jump to?
