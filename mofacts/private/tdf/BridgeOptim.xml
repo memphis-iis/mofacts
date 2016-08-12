@@ -69,7 +69,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
             ]]></calculateProbability>
         </learningsession>
         <deliveryparams>
-            <showhistory>false</showhistory>
+            <showhistory>true</showhistory>
             <practiceseconds>1000000</practiceseconds>
             <drill>12000</drill>
             <purestudy>12000</purestudy>
