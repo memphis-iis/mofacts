@@ -370,7 +370,7 @@ Template.card.events({
     },
 
     'keypress #userAnswer' : function (e) {
-        handleUserInput( e , "keypress");
+        handleUserInput(e , "keypress");
     },
 
     'click .logoutLink' : function (event) {
@@ -889,15 +889,18 @@ function handleUserInput(e, source, simAnswerCorrect) {
         reviewLatency = _.intval(getCurrentDeliveryParams().reviewstudy);
     }
 
-    //Now actually log the answer they gave (or the timeout)
-    recordUserTime(isTimeout ? "[timeout]" : "answer", {
+    //Set up to log the answer they gave. We'll call the function below at the
+    //appropriate time
+    var reviewBegin = Date.now();
+    var answerLogAction = isTimeout ? "[timeout]" : "answer";
+    var answerLogRecord = {
         'questionIndex': _.intval(Session.get("questionIndex"), -1),
         'index': _.intval(currCluster.clusterIndex, -1),
         'shufIndex': _.intval(currCluster.shufIndex, -1),
-        'ttype': getTestType(),
-        'qtype': findQTypeSimpified(),
-        'guiSource': source,
-        'answer': userAnswer,
+        'ttype': _.trim(getTestType()),
+        'qtype':  _.trim(findQTypeSimpified()),
+        'guiSource':  _.trim(source),
+        'answer':  _.trim(userAnswer),
         'isCorrect': isCorrect,
         'trialStartTimestamp': trialTimestamp,
         'clientSideTimeStamp': timestamp,
@@ -906,10 +909,18 @@ function handleUserInput(e, source, simAnswerCorrect) {
         'endLatency': endLatency,
         'wasButtonTrial': wasButtonTrial,
         'buttonOrder': buttonEntries,
+        'reviewLatency': 0,  //TODO: populate this if we run after timeout (and so get a start time?)
         'inferredReviewLatency': reviewLatency,
         'wasSim': (source === "simulation") ? 1 : 0,
         'displayedSystemResponse': $("#UserInteraction").text() || ""
-    });
+    };
+    var writeAnswerLog = function() {
+        var realReviewLatency = Date.now() - reviewBegin;
+        if (realReviewLatency > 0) {
+            answerLogRecord.reviewLatency = realReviewLatency;
+        }
+        recordUserTime(answerLogAction, answerLogRecord);
+    };
 
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
     // is specified and we have seen that many (or more) timeouts in a row, then
@@ -984,9 +995,17 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //Stop previous timeout
     clearCardTimeout();
 
+    // TODO: need typing in our new box to reset timeout
+    //They can be forced to enter the correct answer
+    if (_.chain(deliveryParams).prop("forceCorrection").trim().value().toLowerCase === 'true') {
+        //TODO: actual display of retyping - and a way to early cancel the timeout:
+        //      grab timeout func, call clearCardTimeout, call saved func
+    }
+
     //Create the action we're about to call
     var resetAfterTimeout = function() {
         beginMainCardTimeout(timeout, function() {
+            writeAnswerLog();
             prepareCard();
             $("#userAnswer").val("");
             hideUserInteraction();
