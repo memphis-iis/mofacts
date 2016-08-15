@@ -173,7 +173,13 @@
             endLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
         }
 
-        var reviewLatency = lasta.inferredReviewLatency || 0;
+        // We attempt to get the "real" review latency, but we'll take the
+        // pre-timeout "inferred" latency instead. Note that we will also guess
+        // at inferred latency below if neither value is specified
+        var reviewLatency = Math.max(
+            _.chain(lasta).prop("reviewLatency").intval().value(),
+            _.chain(lasta).prop("inferredReviewLatency").intval().value()
+        );
 
         // We change the latency numbers based on the ttype
         var ttype = lasta.ttype;
