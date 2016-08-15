@@ -245,6 +245,7 @@ getCurrentDeliveryParams = function (currUnit) {
     //value here.
     var deliveryParams = {
         'showhistory': false,
+        'forceCorrection': false,
         'purestudy': 0,
         'drill': 0,
         'reviewstudy': 0,
@@ -265,6 +266,7 @@ getCurrentDeliveryParams = function (currUnit) {
 
     var xlations = {
         'showhistory': xlateBool,
+        'forceCorrection': xlateBool,
         'purestudy': _.intval,
         'skipstudy': xlateBool,
         'reviewstudy': _.intval,

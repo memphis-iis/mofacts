@@ -373,6 +373,28 @@ Template.card.events({
         handleUserInput(e , "keypress");
     },
 
+    'keypress #userForceCorrect': function(e) {
+        var key = e.keyCode || e.which;
+        if (key == 13) {
+            // Enter key - see if gave us the correct answer
+            var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
+            var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
+            if (entry === answer) {
+                var savedFunc = timeoutFunc;
+                clearCardTimeout();
+                savedFunc();
+            }
+            else {
+                $("#userForceCorrect").val("");
+                $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
+            }
+        }
+        else {
+            // "Normal" keypress - reset the timeout period
+            resetMainCardTimeout();
+        }
+    },
+
     'click .logoutLink' : function (event) {
         Meteor.logout( function (error) {
             event.preventDefault();
@@ -909,16 +931,19 @@ function handleUserInput(e, source, simAnswerCorrect) {
         'endLatency': endLatency,
         'wasButtonTrial': wasButtonTrial,
         'buttonOrder': buttonEntries,
-        'reviewLatency': 0,  //TODO: populate this if we run after timeout (and so get a start time?)
+        'reviewLatency': 0,
         'inferredReviewLatency': reviewLatency,
         'wasSim': (source === "simulation") ? 1 : 0,
-        'displayedSystemResponse': $("#UserInteraction").text() || ""
+        'displayedSystemResponse': $("#UserInteraction").text() || "",
+        'forceCorrectFeedback': ""
     };
     var writeAnswerLog = function() {
         var realReviewLatency = Date.now() - reviewBegin;
         if (realReviewLatency > 0) {
             answerLogRecord.reviewLatency = realReviewLatency;
         }
+        //TODO: need a column for this in experiment_times
+        answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
         recordUserTime(answerLogAction, answerLogRecord);
     };
 
@@ -950,10 +975,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //helpful and used on the stats page, but the user times log is the
     //"system of record"
     recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
-    //timeout for adding a small delay so the User may read
-    //the correctness of his/her answer
-    $("#UserInteraction").show();
 
     //Figure out timeout and reviewLatency
     var deliveryParams = getCurrentDeliveryParams();
@@ -994,13 +1015,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
     //Stop previous timeout
     clearCardTimeout();
-
-    // TODO: need typing in our new box to reset timeout
-    //They can be forced to enter the correct answer
-    if (_.chain(deliveryParams).prop("forceCorrection").trim().value().toLowerCase === 'true') {
-        //TODO: actual display of retyping - and a way to early cancel the timeout:
-        //      grab timeout func, call clearCardTimeout, call saved func
-    }
 
     //Create the action we're about to call
     var resetAfterTimeout = function() {
@@ -1252,8 +1266,8 @@ function setQuestionTimeout() {
     });
 }
 
-
 function showUserInteraction(isGoodNews, news) {
+    // We know we always do this regardless of settings
     $("#UserInteraction")
         .removeClass("alert-success alert-danger")
         .addClass("text-align alert")
@@ -1261,6 +1275,25 @@ function showUserInteraction(isGoodNews, news) {
         .text(news)
         .show();
 
+    // forceCorrection is now part of user interaction - we always clear the
+    // textbox, but only show it if:
+    // * They got the answer wrong somehow
+    // * forceCorrection is true in the current delivery params
+    // * we are NOT in a sim
+    var doForceCorrect = !isGoodNews && getCurrentDeliveryParams().forceCorrection && !Session.get("runSimulation");
+    Tracker.afterFlush(function() {
+        if (doForceCorrect) {
+            $("#forceCorrectionEntry").show();
+            $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
+            $("#userForceCorrect").val("").focus();
+        }
+        else {
+            $("#forceCorrectGuidance").text("");
+            $("#userForceCorrect").val("");
+        }
+    });
+
+    // When all done, we set up to scroll to the bottom of the display
     scrollElementIntoView(null, false);
 }
 
@@ -1269,6 +1302,10 @@ function hideUserInteraction() {
         .removeClass("text-align alert alert-success alert-danger")
         .html("")
         .hide();
+
+    // forceCorrection is now part of user interaction
+    $("#userForceCorrect").val("");    // text box - see inputF.html
+    $("#forceCorrectionEntry").hide();  // Container
 
     // Scroll to ensure correct view in on screen
     scrollElementIntoView("#stimulusTarget", true);

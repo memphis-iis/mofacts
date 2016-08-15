@@ -70,6 +70,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
         </learningsession>
         <deliveryparams>
             <showhistory>true</showhistory>
+            <forceCorrection>true</forceCorrection>
             <practiceseconds>1000000</practiceseconds>
             <drill>12000</drill>
             <purestudy>12000</purestudy>

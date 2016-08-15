@@ -81,6 +81,7 @@
         "CF (Start Latency)", //startLatency check first trial discrepancy********
         "CF (End Latency)", //endLatency
         "CF (Review Latency)", //reviewLatency
+        "CF (Review Entry)", //forceCorrectFeedback
         "CF (Button Order)", //CF buttonOrder
         "CF (Note)", //CF note
         "Feedback Text"
@@ -176,10 +177,10 @@
         // We attempt to get the "real" review latency, but we'll take the
         // pre-timeout "inferred" latency instead. Note that we will also guess
         // at inferred latency below if neither value is specified
-        var reviewLatency = Math.max(
-            _.chain(lasta).prop("reviewLatency").intval().value(),
-            _.chain(lasta).prop("inferredReviewLatency").intval().value()
-        );
+        var reviewLatency = _.chain(lasta).prop("reviewLatency").intval().value();
+        if (reviewLatency <= 0) {
+            reviewLatency = _.chain(lasta).prop("inferredReviewLatency").intval().value();
+        }
 
         // We change the latency numbers based on the ttype
         var ttype = lasta.ttype;
@@ -314,6 +315,7 @@
             "CF (Start Latency)": d(startLatency, 0),
             "CF (End Latency)": d(endLatency, 0),
             "CF (Review Latency)": d(reviewLatency, 0),
+            "CF (Review Entry)": d(lasta.forceCorrectFeedback, ''),
             "CF (Button Order)": d(lasta.buttonOrder, ''),
             "CF (Note)": d(note, ''),
             "Feedback Text": d(lasta.displayedSystemResponse, ''),

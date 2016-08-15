@@ -128,26 +128,24 @@
             </div> <!-- close row -->
         {{/if}}
 
-        <div class="row userInteractionContainer">
-            <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="UserInteraction" hidden></div>
+        <div class="userInteractionContainer">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="UserInteraction" hidden>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="forceCorrectionEntry" hidden>
+                    {{> inputForceCorrect}}
+                </div>
+            </div>
         </div>
 
         {{#if isInRole 'teacher'}}
         <div class="row">
             <div class="col-lg-12 visible-text text-center">
-                {{#if displayAnswer}}
-                <h5>
-                    Teacher Aid (Answer): {{displayAnswer}}
-                </h5>
-                {{/if}}
-                {{#if currentProgress}}
-                <h5>Current Progress: {{currentProgress}}</h5>
-                {{/if}}
-                {{#if rawAnswer}}
-                <h5>
-                    Teacher Aid (Raw Answer Text): {{rawAnswer}}
-                </h5>
-                {{/if}}
+                {{#if displayAnswer}}<h5>Teacher Aid (Answer): {{displayAnswer}}</h5>{{/if}}
+                {{#if currentProgress}}<h5>Current Progress: {{currentProgress}}</h5>{{/if}}
+                {{#if rawAnswer}}<h5>Teacher Aid (Raw Answer Text): {{rawAnswer}}</h5>{{/if}}
             </div>
         </div>
         {{/if}}
