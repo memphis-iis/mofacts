@@ -120,11 +120,13 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
         setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     }
 
+    var trueAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+
     if (getTestType() === "s") {
         //Study trial
         isCorrect = true;
         historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
-        historyCorrectMsg = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+        historyCorrectMsg = trueAnswer;
     }
     else if (!!isTimeout) {
         //Timeout
@@ -154,7 +156,9 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
         'justAdded': justAdded,          // All 1's set to 0 on next question
         'idx': currCount,                // Our ordering field
         'userAnswer': historyUserAnswer,
-        'answer': historyCorrectMsg,
+        'answer': trueAnswer,
+        'shownToUser': historyCorrectMsg,
+        'question': Session.get("currentQuestion"),
         'userCorrect': isCorrect
     }, function(err, newId) {
         if (!!err) {
@@ -162,6 +166,20 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
         }
         Session.set("scrollListCount", currCount + 1);
     });
+}
+
+function scrollElementIntoView(selector, scrollType) {
+    Meteor.setTimeout(function(){
+        Tracker.afterFlush(function(){
+            if (selector === null) {
+                window.scrollTo(0, !!scrollType ? 0 : document.body.scrollHeight);
+            }
+            else {
+                $(selector).get(0).scrollIntoView(!!scrollType ? true : false);
+            }
+            console.log("Scrolled for", selector, scrollType);
+        });
+    }, 1);
 }
 
 var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
@@ -1224,12 +1242,7 @@ function showUserInteraction(isGoodNews, news) {
         .text(news)
         .show();
 
-    // Scroll to ensure correct view in on screen
-    var offset = $("#feedbackTarget").offset().top - $(window).scrollTop();
-    if(offset > window.innerHeight) {
-        //Put bottom at bottom of visible area
-        $("#feedbackTarget").get(0).scrollIntoView(false);
-    }
+    scrollElementIntoView(null, false);
 }
 
 function hideUserInteraction() {
@@ -1239,11 +1252,7 @@ function hideUserInteraction() {
         .hide();
 
     // Scroll to ensure correct view in on screen
-    var offset = $("#stimulusTarget").offset().top - $(window).scrollTop();
-    if(offset > window.innerHeight) {
-        // Put top at top of visible area
-        $("#stimulusTarget").get(0).scrollIntoView(true);
-    }
+    scrollElementIntoView("#stimulusTarget", true);
 }
 
 function stopUserInput() {
@@ -1261,6 +1270,9 @@ function allowUserInput(textFocus) {
             //Nothing to do
         }
     }
+
+    // Force scrolling to bottom of screen for the input
+    scrollElementIntoView(null, false);
 }
 
 

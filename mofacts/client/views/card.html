@@ -34,15 +34,15 @@
     </nav>  <!-- close nav -->
 
 
-    <div class="container">
+    <div class="container" id="cardContainer">
         <div class="scrollHistoryContainer">
             {{#if haveScrollList}}
             {{#each scrollList}}
             <div class="row">
                 <div class="col-xs-12 col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
-                    <div class="panel {{#if userCorrect}}panel-success{{/if}} {{#unless userCorrect}}panel-danger{{/unless}}">
-                        <div class="panel-heading">{{userAnswer}}</div>
-                        <div class="panel-body">{{answer}}</div>
+                    <div class="panel">
+                        <div class="panel-heading bg-primary">{{question}}</div>
+                        <div class="panel-body {{#if userCorrect}}bg-success{{/if}} {{#unless userCorrect}}bg-danger{{/unless}}">{{answer}}</div>
                     </div>
                 </div>
             </div>
@@ -180,6 +180,8 @@
         </div>
 
     </div> <!-- close container -->
+
+    <div id="postCardContainer">&nbsp;</div>
 
 
     <!-- Use a fixed footer if we have something to show -->
