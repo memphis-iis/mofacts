@@ -25,9 +25,8 @@ fi
 cd packages
 
 echo "Manually getting scss"
+rm -fr meteor-scss
 git clone https://github.com/fourseven/meteor-scss.git
 
 echo "If everything worked, you should be able to run:"
 echo "./run_meteor update"
-#!/bin/bash
-
