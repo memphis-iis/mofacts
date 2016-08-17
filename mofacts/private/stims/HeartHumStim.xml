@@ -413,223 +413,223 @@
         </cluster>
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.5</parameter>            
+            <parameter>-2.0</parameter>            
             <display>The __________ to the heart, the fewer the veins there are, and the larger they are.</display>            
             <response>closer</response>            
-            <parameter>-0.50001</parameter>            
+            <parameter>-2.00001</parameter>            
             <display>The closer to the heart, the fewer the veins there are, and the larger they are.</display>            
             <response>fewer|less</response>            
-            <parameter>-0.50002</parameter>            
+            <parameter>-2.00002</parameter>            
             <display>The closer to the heart, the fewer the veins there are, and the __________ they are.</display>            
             <response>larger</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.50003</parameter>            
+            <parameter>-2.00003</parameter>            
             <display>First moving away from the heart in the __________, then traveling to various parts of the body in capillaries, and lastly going back to the heart through the veins.</display>            
             <response>arteries</response>            
-            <parameter>-0.50004</parameter>            
+            <parameter>-2.00004</parameter>            
             <display>First moving away from the heart in the arteries, then traveling to various parts of the body in __________, and lastly going back to the heart through the veins.</display>            
             <response>capillaries</response>            
-            <parameter>-0.50005</parameter>            
+            <parameter>-2.00005</parameter>            
             <display>First moving away from the heart in the arteries, then traveling to various parts of the body in capillaries, and lastly going back to the heart through the __________.</display>            
             <response>veins</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.50006</parameter>            
+            <parameter>-2.00006</parameter>            
             <display>Each __________ chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
             <response>top</response>            
-            <parameter>-0.50007</parameter>            
+            <parameter>-2.00007</parameter>            
             <display>Each top chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
             <response>atrium|atria</response>            
-            <parameter>-0.50008</parameter>            
+            <parameter>-2.00008</parameter>            
             <display>Each top chamber is called an atrium (plural: atria) and can be thought of as __________ chambers. </display>            
             <response>receiving</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.50009</parameter>            
+            <parameter>-2.00009</parameter>            
             <display>The __________ chambers are called ventricles and can be thought of as discharging chambers.</display>            
             <response>bottom</response>            
-            <parameter>-0.5001</parameter>            
+            <parameter>-2.0001</parameter>            
             <display>The bottom chambers are called __________ and can be thought of as discharging chambers.</display>            
             <response>ventricles</response>            
-            <parameter>-0.500109999999999</parameter>            
+            <parameter>-2.000109999999999</parameter>            
             <display>The bottom chambers are called ventricles and can be thought of as __________ chambers.</display>            
             <response>discharging</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500119999999999</parameter>            
+            <parameter>-2.000119999999999</parameter>            
             <display>Blood can flow from the __________ down into the ventricles, because there are openings in the horizontal septum that separates them. </display>            
             <response>atria</response>            
-            <parameter>-0.500129999999999</parameter>            
+            <parameter>-2.000129999999999</parameter>            
             <display>Blood can flow from the atria down into the __________, because there are openings in the horizontal septum that separates them. </display>            
             <response>ventricles</response>            
-            <parameter>-0.500139999999999</parameter>            
+            <parameter>-2.000139999999999</parameter>            
             <display>Blood can flow from the atria down into the ventricles, because there are openings in the horizontal septum that separates them. </display>            
             <response>openings|valves|holes</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500149999999999</parameter>            
+            <parameter>-2.000149999999999</parameter>            
             <display>But the __________ septum is solid, with no openings.</display>            
             <response>vertical</response>            
-            <parameter>-0.500159999999999</parameter>            
+            <parameter>-2.000159999999999</parameter>            
             <display>But the vertical septum is solid, with no openings.</display>            
             <response>septum|wall</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500169999999999</parameter>            
+            <parameter>-2.000169999999999</parameter>            
             <display>The __________ is actually made up of two circles. </display>            
             <response>circulatory system</response>            
-            <parameter>-0.500179999999999</parameter>            
+            <parameter>-2.000179999999999</parameter>            
             <display>The circulatory system is actually made up of two circles. </display>            
             <response>two|2</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500189999999999</parameter>            
+            <parameter>-2.000189999999999</parameter>            
             <display>The heart is a __________ pump whose two parts work in unison. </display>            
             <response>double</response>            
-            <parameter>-0.500199999999999</parameter>            
+            <parameter>-2.000199999999999</parameter>            
             <display>The heart is a double __________ whose two parts work in unison. </display>            
             <response>pump</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500209999999999</parameter>            
+            <parameter>-2.000209999999999</parameter>            
             <display>The __________ side receives the blood from veins and pumps it to the lungs.</display>            
             <response>right</response>            
-            <parameter>-0.500219999999999</parameter>            
+            <parameter>-2.000219999999999</parameter>            
             <display>The right side receives the blood from __________ and pumps it to the lungs.</display>            
             <response>veins</response>            
-            <parameter>-0.500229999999999</parameter>            
+            <parameter>-2.000229999999999</parameter>            
             <display>The right side receives the blood from veins and pumps it to the __________.</display>            
             <response>lungs</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500239999999999</parameter>            
+            <parameter>-2.000239999999999</parameter>            
             <display>The __________ side receives the blood from the lungs and pumps it to the rest of the body.</display>            
             <response>left</response>            
-            <parameter>-0.500249999999999</parameter>            
+            <parameter>-2.000249999999999</parameter>            
             <display>The left side receives the blood from the __________ and pumps it to the rest of the body.</display>            
             <response>lungs</response>            
-            <parameter>-0.500259999999999</parameter>            
+            <parameter>-2.000259999999999</parameter>            
             <display>The left side receives the blood from the lungs and pumps it to the rest of the body.</display>            
             <response>rest of the body|body|body parts|parts of the body</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500269999999999</parameter>            
+            <parameter>-2.000269999999999</parameter>            
             <display>The __________ that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
             <response>veins</response>            
-            <parameter>-0.500279999999999</parameter>            
+            <parameter>-2.000279999999999</parameter>            
             <display>The veins that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
             <response>body parts|body|rest of the body|parts of the body</response>            
-            <parameter>-0.500289999999999</parameter>            
+            <parameter>-2.000289999999999</parameter>            
             <display>The veins that carry blood back from the body parts empty the blood into the __________ of the heart. </display>            
             <response>right atrium</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500299999999999</parameter>            
+            <parameter>-2.000299999999999</parameter>            
             <display>The blood then flows down into the __________, which pumps it into the lungs and back to the heart, into the left atrium</display>            
             <response>right ventricle</response>            
-            <parameter>-0.500309999999999</parameter>            
+            <parameter>-2.000309999999999</parameter>            
             <display>The blood then flows down into the right ventricle, which pumps it into the __________ and back to the heart, into the left atrium</display>            
             <response>lungs</response>            
-            <parameter>-0.500319999999999</parameter>            
+            <parameter>-2.000319999999999</parameter>            
             <display>The blood then flows down into the right ventricle, which pumps it into the lungs and back to the heart, into the __________</display>            
             <response>left atrium</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500329999999998</parameter>            
+            <parameter>-2.000329999999998</parameter>            
             <display>It brings __________ to the body cells and takes away their carbon dioxide.</display>            
             <response>oxygen</response>            
-            <parameter>-0.500339999999998</parameter>            
+            <parameter>-2.000339999999998</parameter>            
             <display>It brings oxygen to the body cells and takes away their __________.</display>            
             <response>carbon dioxide</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500349999999998</parameter>            
+            <parameter>-2.000349999999998</parameter>            
             <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
             <response>thin walls|walls</response>            
-            <parameter>-0.500359999999998</parameter>            
+            <parameter>-2.000359999999998</parameter>            
             <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
             <response>tiny capillaries|capillaries</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500369999999998</parameter>            
+            <parameter>-2.000369999999998</parameter>            
             <display>As the blood flows through the __________ in the body, carrying its supply of oxygen, it also collects carbon dioxide.</display>            
             <response>capillaries</response>            
-            <parameter>-0.500379999999998</parameter>            
+            <parameter>-2.000379999999998</parameter>            
             <display>As the blood flows through the capillaries in the body, carrying its supply of __________, it also collects carbon dioxide.</display>            
             <response>oxygen</response>            
-            <parameter>-0.500389999999998</parameter>            
+            <parameter>-2.000389999999998</parameter>            
             <display>As the blood flows through the capillaries in the body, carrying its supply of oxygen, it also collects __________.</display>            
             <response>carbon dioxide</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500399999999998</parameter>            
+            <parameter>-2.000399999999998</parameter>            
             <display>Blood from the heart flows through these __________, passing carbon dioxide into the tiny air sacs.</display>            
             <response>capillaries</response>            
-            <parameter>-0.500409999999998</parameter>            
+            <parameter>-2.000409999999998</parameter>            
             <display>Blood from the heart flows through these capillaries, passing __________ into the tiny air sacs.</display>            
             <response>carbon dioxide</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500419999999998</parameter>            
+            <parameter>-2.000419999999998</parameter>            
             <display>The __________-rich blood is returned to the left atrium of the heart and pumped out to the body through the left ventricle.</display>            
             <response>oxygen</response>            
-            <parameter>-0.500429999999998</parameter>            
+            <parameter>-2.000429999999998</parameter>            
             <display>The oxygen-rich blood is returned to the __________ of the heart and pumped out to the body through the left ventricle.</display>            
             <response>left atrium</response>            
-            <parameter>-0.500439999999998</parameter>            
+            <parameter>-2.000439999999998</parameter>            
             <display>The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body through the __________.</display>            
             <response>left ventricle</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500449999999998</parameter>            
+            <parameter>-2.000449999999998</parameter>            
             <display>The contraction starts with the __________, which push blood into the ventricles. </display>            
             <response>atria</response>            
-            <parameter>-0.500459999999998</parameter>            
+            <parameter>-2.000459999999998</parameter>            
             <display>The contraction starts with the atria, which push blood into the __________. </display>            
             <response>ventricles</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500469999999998</parameter>            
+            <parameter>-2.000469999999998</parameter>            
             <display>The __________ is the first part of the heartbeat.</display>            
             <response>contraction</response>            
-            <parameter>-0.500479999999998</parameter>            
+            <parameter>-2.000479999999998</parameter>            
             <display>The contraction is the __________ part of the heartbeat.</display>            
             <response>first</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500489999999998</parameter>            
+            <parameter>-2.000489999999998</parameter>            
             <display>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. </display>            
             <response>backward|up</response>            
-            <parameter>-0.500499999999998</parameter>            
+            <parameter>-2.000499999999998</parameter>            
             <display>Blood cannot flow backward into the arteries because little trapdoors called __________ stop it. </display>            
             <response>valves</response>        
         </cluster>        
         <cluster>            
             <displayType>Cloze</displayType>            
-            <parameter>-0.500509999999998</parameter>            
+            <parameter>-2.000509999999998</parameter>            
             <display>Valves also guard the openings from the __________ into the ventricles. </display>            
             <response>atria</response>            
-            <parameter>-0.500519999999998</parameter>            
+            <parameter>-2.000519999999998</parameter>            
             <display>Valves also guard the openings from the atria into the __________. </display>            
             <response>ventricles</response>        
         </cluster>    

@@ -351,12 +351,12 @@ function modelUnitEngine() {
         //        0.447943182* p.intbs * Math.log(1 + p.questionStudyTrialCount) +
         //        0.500901271* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
         p.y = p.stimParameter +
-        0.65818* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
-        0.90442* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
-        0.67008* Math.log((2 + p.userCorrectResponses)/(2 + p.userTotalResponses-p.userCorrectResponses))+
-        3.57912* (p.recency)+
-        1.80520* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
-        0.20346* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
+        0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
+        0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
+        1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+
+        3.20689* (p.recency)+
+        4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
+        0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
         p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
         return p;
     }
@@ -416,22 +416,23 @@ function modelUnitEngine() {
         p.stimParameter = fastGetStimParameter(prob.cardIndex, prob.stimIndex);
 
         // Calculated metrics
-        p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 1),  0.327);
-//        p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.0630),  0.339);
+         p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
         p.meanSpacing = 0;
-        if (p.questionStudyTrialCount + p.questionTotalTests !== 0) {
-            p.meanSpacing = (
-                1 + Math.pow((100 + p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests), 0.310)
-//            p.meanSpacing = Math.log(
-//                1 + (100 + p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests)
-            );
+        
+        if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
+            p.meanspacing = 1;
+        } else {
+            if (p.questionStudyTrialCount + p.questionTotalTests > 1) {
+                p.meanSpacing = Math.max(
+                        1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294)
+                        );
+            }
         }
 
         p.intbs = p.meanSpacing * p.baseLevel;
 
-        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.327);
-//        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.339);
+        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
         // Calculate and store probability for stim
         return probFunction(p);
