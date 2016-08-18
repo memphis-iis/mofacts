@@ -417,7 +417,7 @@
             <display>The __________ to the heart, the fewer the veins there are, and the larger they are.</display>            
             <response>closer</response>            
             <parameter>-2.00001</parameter>            
-            <display>The closer to the heart, the fewer the veins there are, and the larger they are.</display>            
+            <display>The closer to the heart, the __________ the veins there are, and the larger they are.</display>            
             <response>fewer|less</response>            
             <parameter>-2.00002</parameter>            
             <display>The closer to the heart, the fewer the veins there are, and the __________ they are.</display>            
@@ -441,7 +441,7 @@
             <display>Each __________ chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
             <response>top</response>            
             <parameter>-2.00007</parameter>            
-            <display>Each top chamber is called an atrium (plural: atria) and can be thought of as receiving chambers. </display>            
+            <display>Each top chamber is called an __________ and can be thought of as receiving chambers. </display>            
             <response>atrium|atria</response>            
             <parameter>-2.00008</parameter>            
             <display>Each top chamber is called an atrium (plural: atria) and can be thought of as __________ chambers. </display>            
@@ -468,7 +468,7 @@
             <display>Blood can flow from the atria down into the __________, because there are openings in the horizontal septum that separates them. </display>            
             <response>ventricles</response>            
             <parameter>-2.000139999999999</parameter>            
-            <display>Blood can flow from the atria down into the ventricles, because there are openings in the horizontal septum that separates them. </display>            
+            <display>Blood can flow from the atria down into the ventricles, because there are __________ in the horizontal septum that separates them. </display>            
             <response>openings|valves|holes</response>        
         </cluster>        
         <cluster>            
@@ -477,7 +477,7 @@
             <display>But the __________ septum is solid, with no openings.</display>            
             <response>vertical</response>            
             <parameter>-2.000159999999999</parameter>            
-            <display>But the vertical septum is solid, with no openings.</display>            
+            <display>But the vertical __________ is solid, with no openings.</display>            
             <response>septum|wall</response>        
         </cluster>        
         <cluster>            
@@ -486,7 +486,7 @@
             <display>The __________ is actually made up of two circles. </display>            
             <response>circulatory system</response>            
             <parameter>-2.000179999999999</parameter>            
-            <display>The circulatory system is actually made up of two circles. </display>            
+            <display>The circulatory system is actually made up of __________ circles. </display>            
             <response>two|2</response>        
         </cluster>        
         <cluster>            
@@ -519,7 +519,7 @@
             <display>The left side receives the blood from the __________ and pumps it to the rest of the body.</display>            
             <response>lungs</response>            
             <parameter>-2.000259999999999</parameter>            
-            <display>The left side receives the blood from the lungs and pumps it to the rest of the body.</display>            
+            <display>The left side receives the blood from the lungs and pumps it to the __________.</display>            
             <response>rest of the body|body|body parts|parts of the body</response>        
         </cluster>        
         <cluster>            
@@ -528,7 +528,7 @@
             <display>The __________ that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
             <response>veins</response>            
             <parameter>-2.000279999999999</parameter>            
-            <display>The veins that carry blood back from the body parts empty the blood into the right atrium of the heart. </display>            
+            <display>The veins that carry blood back from the __________ empty the blood into the right atrium of the heart. </display>            
             <response>body parts|body|rest of the body|parts of the body</response>            
             <parameter>-2.000289999999999</parameter>            
             <display>The veins that carry blood back from the body parts empty the blood into the __________ of the heart. </display>            
@@ -558,10 +558,10 @@
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-2.000349999999998</parameter>            
-            <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <display>These gases pass easily back and forth through the __________ of the tiny capillaries.</display>            
             <response>thin walls|walls</response>            
             <parameter>-2.000359999999998</parameter>            
-            <display>These gases pass easily back and forth through the thin walls of the tiny capillaries.</display>            
+            <display>These gases pass easily back and forth through the thin walls of the __________.</display>            
             <response>tiny capillaries|capillaries</response>        
         </cluster>        
         <cluster>            
@@ -618,7 +618,7 @@
         <cluster>            
             <displayType>Cloze</displayType>            
             <parameter>-2.000489999999998</parameter>            
-            <display>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. </display>            
+            <display>Blood cannot flow __________ into the arteries because little trapdoors called valves stop it. </display>            
             <response>backward|up</response>            
             <parameter>-2.000499999999998</parameter>            
             <display>Blood cannot flow backward into the arteries because little trapdoors called __________ stop it. </display>            
