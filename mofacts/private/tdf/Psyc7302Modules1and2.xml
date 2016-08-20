@@ -1,50 +1,20 @@
 <tutor>
     <setspec>
-        <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Drill Practice for Bridge Play</lessonname>
+        <lessonname>Optimized Drill Practice for Psyc 7302</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Bridgestims.xml</stimulusfile>
+        <stimulusfile>Psyc7302Modules1and2stims.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
-        <shuffleclusters>0-70</shuffleclusters>
+        <shuffleclusters>0-11</shuffleclusters>
     </setspec>
+   
     <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[Demographic Survey<br><br>
-Please answer the following 3 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
-        <buttonorder>fixed</buttonorder>
-        <deliveryparams>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>3</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0            </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>                A_1 A_2 A_3         </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>71-73</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitinstructions>Here comes the optimized learning of the rules of bridge.</unitinstructions>
+        <unitinstructions>Here comes the optimized practice for the most important facts.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-70</clusterlist>
+            <clusterlist>0-11</clusterlist>
             <calculateProbability><![CDATA[
                 // An example of a custom probability routine. Note that we don't
                 // declare a function, but we MUST set p.probability and return p.
@@ -55,7 +25,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
                 p.CUSTOM_MSG = "In our custom function";
 
                 // Helpful to be able to see our y parameter for debugging
-         p.y = p.stimParameter +
+        p.y = p.stimParameter - 1.5 +
         0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
         0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
         1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+
@@ -71,7 +41,6 @@ Please answer the following 3 quick demographic questions, which may be useful f
         </learningsession>
         <deliveryparams>
             <showhistory>true</showhistory>
-            <forceCorrection>true</forceCorrection>
             <practiceseconds>1000000</practiceseconds>
             <drill>12000</drill>
             <purestudy>12000</purestudy>

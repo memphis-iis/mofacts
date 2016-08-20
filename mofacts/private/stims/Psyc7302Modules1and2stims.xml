@@ -1,0 +1,152 @@
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00010</parameter>
+            <display>__________ is drawing conclusions about a population.</display>
+            <response>Inference</response>
+            <parameter>-0.00011</parameter>
+            <display>Inference is drawing __________ about a population.</display>
+            <response>conclusions</response>
+            <parameter>-0.00012</parameter>
+            <display>Inference is drawing conclusions about a __________.</display>
+            <response>population</response>
+        </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00013</parameter>
+            <display>Probability is the __________ that an event will occur.</display>
+            <response>likelihood</response>
+            <parameter>-0.00014</parameter>
+            <display>__________ is the likelihood that an event will occur.</display>
+            <response>Probability</response>
+            <parameter>-0.00015</parameter>
+            <display>The probability of an event tells us how __________ it is that the event will occur.</display>
+            <response>likely</response>
+        </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00016</parameter>
+            <display>The probability that an event will occur is between __________ and 1.</display>
+            <response>zero|0</response>
+            <parameter>-0.00017</parameter>
+            <display>Probability is always between 0% and __________%. </display>
+            <response>one hundred|100</response>
+        </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00018</parameter>
+            <display>When P(A) = 0, the event will __________ occur.</display>
+            <response>never</response>
+            <parameter>-0.00019</parameter>
+            <display>When P(A) = __________, the event will never occur.</display>
+            <response>zero|0</response>
+            <parameter>-0.00020</parameter>
+            <display>When P(A) = __________, the event will occur for certain.</display>
+            <response>one|1</response>
+            <parameter>-0.00021</parameter>
+            <display>The closer P(A) is to 1, the __________ likely it is to occur.</display>
+            <response>more</response>
+        </cluster>
+       <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00022</parameter>
+            <display>__________ methods of determining probability use a series of trials to produce outcomes that could not be predicted in advance.</display>
+            <response>Empirical</response>
+            <parameter>-0.00023</parameter>
+            <display>Empirical methods of determining probability use a series of trials to produce outcomes that could not be __________ in advance.</display>
+            <response>predicted</response>
+       </cluster>
+       <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00024</parameter>
+            <display>We call the possible outcomes of a random experiment the __________.</display>
+            <response>sample space</response>
+            <parameter>-0.00025</parameter>
+            <display>We call the __________ of a random experiment the sample space..</display>
+            <response>possible outcomes</response>
+        </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00026</parameter>
+            <display>The probability that an event will not occur is referred to as the __________ of that event.</display>
+            <response>complement</response>
+            <parameter>-0.00027</parameter>
+            <display>The probability that an event will __________ is referred to as the complement of that event.</display>
+            <response>not occur</response>
+        </cluster>
+       <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00028</parameter>
+            <display>The complement of an event A is notated as P(__________).</display>
+            <response>not A</response>
+            <parameter>-0.00029</parameter>
+            <display>The __________ of an event A is notated as P(not A). </display>
+            <response>complement</response>
+            <parameter>-0.00030</parameter>
+            <display>P(not A) refers to the chance for all outcomes in the sample space S that are __________.</display>
+            <response>not A</response>
+            <parameter>-0.00031</parameter>
+            <display>P(not A) = 1 - __________, or the probability that an event does not occur is equal to 1 minus the probability the event does occur.</display>
+            <response>P(A)</response>
+        </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00032</parameter>
+            <display>When events cannot possibly occur together, they are called ___________. </display>
+            <response>disjoint|mutually exclusive</response>
+            <parameter>-0.00033</parameter>
+            <display>If two events are __________, they cannot be independent, since if A occurs we know that B will not occur, so B depends on A.</display>
+            <response>disjoint</response>
+            <parameter>-0.00034</parameter>
+            <display>If two events are disjoint, they cannot be __________, since if A occurs we know that B will not occur, so B depends on A.</display>
+            <response>independent</response>
+            <parameter>-0.00035</parameter>
+            <display>If two events are disjoint, they cannot be independent, since if A occurs we know that B will not occur, so B __________ on A.</display>
+            <response>depends</response>
+         </cluster>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00036</parameter>
+            <display>If two events are disjoint, P(A or B) = __________ + P(B).</display>
+            <response>P(A)</response>
+            <parameter>-0.00037</parameter>
+            <display>If two events are disjoint, P(A or B) = P(A)+ __________ .</display>
+            <response>P(B)</response>
+            <parameter>-0.00038</parameter>
+            <display>If A and B are ______, P(A or B) = P(A) + P(B).</display>
+            <response>disjoint</response>
+            <parameter>-0.00039</parameter>
+            <display>In probability terms, P(A or B) means P(A), P(B), or _____. </display>
+            <response>both</response>
+            <parameter>-0.00040</parameter>
+            <display>In probability terms, P(A ___ B) means P(A), P(B), or both. </display>
+            <response>or</response>
+            <parameter>-0.00041</parameter>
+            <display>P(A _____ B) refers to the probability that event A and event B both occur together. </display>
+            <response>and</response>
+            <parameter>-0.00042</parameter>
+            <display>For disjoint events, P(_____) will always be 0 because they cannot possibly occur together.</display>
+            <response>A and B</response>
+        </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00043</parameter>
+            <display>Events are considered to be __________ if one event occurring has no effect on the probability of a second event occurring.</display>
+            <response>independent</response>
+            <parameter>-0.00044</parameter>
+            <display>Events are considered to be independent if one event occurring has __________ on the probability of a second event occurring.</display>
+            <response>no effect</response>
+            <parameter>-0.00045</parameter>
+            <display>If events A and B are __________, P(A and B) = P(A) * P(B).</display>
+            <response>independent</response>
+        </cluster>
+        
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00046</parameter>
+            <display>To solve for P(A or B), we subtract __________ from P(A) + P(B). </display>
+            <response>P(A and B)</response>
+        </cluster>
+        </clusters>
+</setspec>
