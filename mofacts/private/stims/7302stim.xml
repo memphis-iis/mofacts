@@ -1,0 +1,85 @@
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/AlexanderJohnson.jpg</display>
+            <response>Alexander Johnson</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/AndrewVoss.jpg</display>
+            <response>Andrew Voss</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/DanielGabriel.jpg</display>
+            <response>Daniel Gabriel</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/EmilyRichardson.jpg</display>
+            <response>Emily Richardson</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/IqbalHossain.jpg</display>
+            <response>Iqbal Hossain</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/JaneJoyner.jpg</display>
+            <response>Jane Joyner</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/JenniferGarland.jpg</display>
+            <response>Jennifer Garland</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/KaitlynPeperone.jpg</display>
+            <response>Kaitlyn Peperone</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/KatherineSemenkovich.jpg</display>
+            <response>Katherine Semenkovich</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/LaurenDahlke.jpg</display>
+            <response>Lauren Dahlke</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/LaurenSchaefer.jpg</display>
+            <response>Lauren Schaefer</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/MargaretJorgensen.jpg</display>
+            <response>Margaret Jorgensen</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/MeganBurkhardt-Reed.jpg</display>
+            <response>Megan Burkhardt-Reed</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/NicoleMazzulo.jpg</display>
+            <response>Nicole Mazzulo</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/QianLi.jpg</display>
+            <response>Qian Li</response>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>images/students/RebeccaZakarian.jpg</display>
+            <response>Rebecca Zakarian</response>
+        </cluster>
+     
+    </clusters>
+</setspec>

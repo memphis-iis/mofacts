@@ -1,0 +1,65 @@
+<tutor>
+    <setspec>
+        <experimentTarget>7302</experimentTarget>        
+        <userselect>false</userselect>
+        <lessonname>Optimized Drill Practice of Stat Students</lessonname>
+        <stimulusfile>7302stim.xml</stimulusfile>
+        <shuffleclusters>0-15</shuffleclusters>
+        <lfparameter>0.80</lfparameter>
+        <simTimeout>1500</simTimeout>
+        <simCorrectProb>0.75</simCorrectProb>
+    </setspec>
+
+    <unit>
+        <unitname>Instructions</unitname>
+        <unitinstructions>Do your best to identify the students shown</unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Model Practice</unitname>
+        <unitinstructions></unitinstructions>
+        <instructionminseconds></instructionminseconds>
+        <instructionmaxseconds></instructionmaxseconds>
+        <learningsession>
+            <displayminseconds></displayminseconds>
+            <displaymaxseconds></displaymaxseconds>
+            <clusterlist>0-15</clusterlist> 
+            <calculateProbability><![CDATA[
+                // An example of a custom probability routine. Note that we don't
+                // declare a function, but we MUST set p.probability and return p.
+                // We are also allowed to parameters to p for output to the console
+                // (if we are logged in a teacher)
+
+                // A demonstration of a variable that will be shown in the console
+                p.CUSTOM_MSG = "In our custom function";
+
+                // Helpful to be able to see our y parameter for debugging
+         p.y = p.stimParameter -1.0+
+        0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
+        0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
+        1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+
+        3.20689* (p.recency)+
+        4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
+        0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
+      
+
+                // At a minimum we need to set p.probability and return p
+        p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
+        return p;
+            ]]></calculateProbability>
+        </learningsession>
+        <deliveryparams>
+            <autostopTimeoutThreshold></autostopTimeoutThreshold>
+            <purestudy>10000</purestudy>
+            <drill>10000</drill>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>10000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+            <practiceseconds>300</practiceseconds>
+           
+        </deliveryparams>
+    </unit>
+</tutor>
