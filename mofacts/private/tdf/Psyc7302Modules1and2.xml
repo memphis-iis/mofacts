@@ -40,7 +40,6 @@
             ]]></calculateProbability>
         </learningsession>
         <deliveryparams>
-            <showhistory>true</showhistory>
             <practiceseconds>1000000</practiceseconds>
             <drill>12000</drill>
             <purestudy>12000</purestudy>
