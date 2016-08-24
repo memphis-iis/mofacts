@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>Optimized Drill Practice for Psyc 7302</lessonname>
+        <lessonname>Optimized Practice for Psyc 7302: Modules 1 and 2</lessonname>
         <userselect>true</userselect>
         <stimulusfile>Psyc7302Modules1and2stims.xml</stimulusfile>
         <isModeled>false</isModeled>
