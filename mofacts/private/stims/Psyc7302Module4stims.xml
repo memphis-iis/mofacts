@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!-- was: no XML declaration present -->
+
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00010</parameter>
+            <display>A __________ variable assigns a unique numerical value to each outcome of a random experiment.</display>
+            <response>random</response>
+            <parameter>-0.00011</parameter>
+            <display>A random variable assigns a unique numerical value to each __________ of a random experiment.</display>
+            <response>outcome</response>
+            <parameter>-0.00012</parameter>
+            <display>A random variable associates exactly __________ possible numerical outcome to each trial of a random experiment.</display>
+            <response>one|1</response>
+            <parameter>-0.00013</parameter>
+            <display>A __________ associates exactly one possible numerical outcome to each trial of a random experiment.</display>
+            <response>random variable</response>
+        </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00014</parameter>
+            <display>__________ random variables exist if possible values are a distinct list.</display>
+            <response>Discrete</response>
+            <parameter>-0.00015</parameter>
+            <display>Discrete random variables exist if possible __________ are a distinct list.</display>
+            <response>values</response>
+            <parameter>-0.00016</parameter>
+            <display>__________ random variables can take any value within a certain interval.</display>
+            <response>Continuous</response>
+            <parameter>-0.00017</parameter>
+            <display>Continuous random variables can take any value within a certain __________.</display>
+            <response>interval</response>
+            <parameter>-0.00018</parameter>
+            <display>To distinguish between discrete and continuous random variables, we sometimes say that we __________ discrete variables and measure continuous variables.</display>
+            <response>count</response>
+            <parameter>-0.00019</parameter>
+            <display>To distinguish between discrete and continuous random variables, we sometimes say that we count discrete variables and __________ continuous variables.</display>
+            <response>measure</response>
+            <parameter>-0.00020</parameter>
+            <display>To distinguish between discrete and continuous random variables, we sometimes say that we count discrete variables and measure __________ variables.</display>
+            <response>continuous</response>
+            <parameter>-0.00021</parameter>
+            <display>To distinguish between discrete and continuous random variables, we sometimes say that we count __________ variables and measure continuous variables.</display>
+            <response>discrete</response>
+            <parameter>-0.00022</parameter>
+            <display>To notate __________ random variables, we write P(X=x).</display>
+            <response>discrete</response>
+            <parameter>-0.00023</parameter>
+            <display>To notate discrete random variables, we write P(__________).</display>
+            <response>X=x</response>
+        </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00024</parameter>
+            <display>The probability __________ of a random variable is the list of all possible values and probabilities.</display>
+            <response>distribution</response>
+            <parameter>-0.00025</parameter>
+            <display>The probability distribution of a random variable is the list of all possible values and __________.</display>
+            <response>probabilities</response>
+            <parameter>-0.00026</parameter>
+            <display>The probability distribution of a random variable must have probabilities between __________ and one.</display>
+            <response>zero|0</response>
+            <parameter>-0.00027</parameter>
+            <display>The probability distribution of a random variable must have probabilities between zero and __________.</display>
+            <response>one|1</response>
+            <parameter>-0.00028</parameter>
+            <display>The __________ of a random variable must have probabilities between zero and one.</display>
+            <response>probability distribution</response>
+            <parameter>-0.00029</parameter>
+            <display>The probability distribution of a random variable must have probabilities that __________ to one.</display>
+            <response>sum|add|total</response>
+            <parameter>-0.00030</parameter>
+            <display>The probability distribution of a random variable must have probabilities that sum to __________.</display>
+            <response>one|1</response>
+            <parameter>-0.00031</parameter>
+            <display>The probability distribution of a random variable must have __________ that sum to one.</display>
+            <response>probabilities</response>
+        </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00032</parameter>
+            <display><![CDATA[The __________ of a random variable is notated as μ<sub>X</sub>.  ]]></display>
+            <response>mean</response>
+            <parameter>-0.00033</parameter>
+            <display>The mean of a random variable is sometimes referred to as the __________ average.</display>
+            <response>weighted</response>
+            <parameter>-0.00034</parameter>
+            <display>The mean of a random variable is a weighted average that represents the __________ of its probability distribution. </display>
+            <response>center|middle</response>
+            <parameter>-0.00035</parameter>
+            <display>The __________ of a random variable is a weighted average that represents the center of its probability distribution. </display>
+            <response>mean</response>
+             <parameter>-0.00036</parameter>
+            <display>The mean of a random variable is a weighted average that represents the center of its __________. </display>
+            <response>probability distribution</response>
+            </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00037</parameter>
+            <display><![CDATA[Notated as <span class="nobr">σ<span class="supsub">2<br />X</span></span>, the __________ of a random variable is the squared standard deviation.]]></display>
+            <response>variance</response>
+            <parameter>-0.00038</parameter>
+            <display><![CDATA[Notated as <span class="nobr">σ<span class="supsub">2<br />X</span></span>, the variance of a random variable is the __________ standard deviation.]]></display>
+            <response>squared</response>
+            <parameter>-0.00039</parameter>
+            <display><![CDATA[Notated as <span class="nobr">σ<span class="supsub">2<br />X</span></span>, the variance of a random variable is the squared __________.]]></display>
+            <response>standard deviation</response>
+	    <parameter>-0.00040</parameter>
+            <display>When a variable has a larger standard deviation, we are __________ likely to find values farther away from the mean of that random variable.</display>
+            <response>more</response>
+            <parameter>-0.00041</parameter>
+            <display>When a variable has a __________ standard deviation, we are more likely to find values farther away from the mean of that random variable.</display>
+            <response>large|larger</response>
+            <parameter>-0.00042</parameter>
+            <display>When a variable has a smaller __________, we are less likely to find values farther away from the mean of that random variable. </display>
+            <response>standard deviation</response>
+            <parameter>-0.00043</parameter>
+            <display>When a variable has a smaller standard deviation, we are less likely to find values farther away from the __________ of that random variable. </display>
+            <response>mean</response>
+            <parameter>-0.00044</parameter>
+            <display>Values that fall within __________ standard deviations from the mean of a random variable are considered ordinary. </display>
+            <response>two|2</response>
+            <parameter>-0.00045</parameter>
+            <display>Values that fall within two __________ from the mean of a random variable are considered ordinary. </display>
+            <response>standard deviations</response>
+       </cluster>
+      <cluster>
+            <displayType>Cloze</displayType>
+            <parameter>-0.00046</parameter>
+            <display>When combining random variables, we can sum the __________ and variances as long as the variables are independent of one another. </display>
+            <response>means</response>
+            <parameter>-0.00047</parameter>
+            <display>When combining random variables, we can sum the means and __________ as long as the variables are independent of one another. </display>
+            <response>variances</response>
+            <parameter>-0.00048</parameter>
+            <display>When combining random variables, we can sum the means and variances as long as the variables are __________ of one another. </display>
+            <response>independent </response>
+        </cluster>
+    </clusters>
+</setspec>
