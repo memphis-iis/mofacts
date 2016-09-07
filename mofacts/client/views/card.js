@@ -675,8 +675,10 @@ function newQuestionHandler() {
         }
 
         var wrongButtonOptions = _.chain(currUnit).prop("wrongButtonOptions").first().trim().value();
+        var optionsFromStim = null;
         if (wrongButtonOptions) {
             buttonChoices = wrongButtonOptions.split(",");
+            optionsFromStim = false;
         }
         if (!buttonChoices || buttonChoices.length < 1) {
             buttonChoices = [];
@@ -684,12 +686,17 @@ function newQuestionHandler() {
                 _.each(getCurrentFalseResponses(currentQuest.whichStim), function(ele) {
                     buttonChoices.push(ele);
                 });
+                optionsFromStim = true;
             }
         }
         if (!buttonChoices || buttonChoices.length < 1) {
             //Whoops - they didn't specify any alternate choices
             console.log("A button trial requires some false responses");
-            throw new Error("Bad TDF or Stim file");
+            throw new Error("Bad TDF or Stim file - no answers found");
+        }
+        if (optionsFromStim === null) {
+            console.log("A button trial requires correct configuration");
+            throw new Error("Bad TDF or Stim file - could not determine answer location");
         }
 
         var wrongButtonCount = _.chain(currUnit).prop("wrongButtonOptions").first().intval().value();
@@ -700,7 +707,14 @@ function newQuestionHandler() {
         var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
 
         if (buttonOrder === "fixed") {
-            // the buttonChoices array should be correct
+            // the buttonChoices array should be correct UNLESS they didn't use
+            // wrongButtonOptions for this unit. In that case we are using the
+            // answers from the stim file, so we need to add the correct answer
+            if (optionsFromStim) {
+                // Correct answer goes first
+                buttonChoices.unshift(correctAnswer);
+                //TODO: need to test four setups: fixed/stim, fixed/tdf, random/stim, random/tdf
+            }
         }
         else if (buttonOrder === "random") {
             // Randomized buttons: remove the correct answer, shuffle, keep only
