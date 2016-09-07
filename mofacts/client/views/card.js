@@ -713,7 +713,6 @@ function newQuestionHandler() {
             if (optionsFromStim) {
                 // Correct answer goes first
                 buttonChoices.unshift(correctAnswer);
-                //TODO: need to test four setups: fixed/stim, fixed/tdf, random/stim, random/tdf
             }
         }
         else if (buttonOrder === "random") {
