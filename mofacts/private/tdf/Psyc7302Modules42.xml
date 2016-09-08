@@ -1,0 +1,58 @@
+<tutor>
+    <setspec>
+        <lessonname>Optimized Practice for Psyc 7302: Module 4, part 2</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>Psyc7302Module4stims2.xml</stimulusfile>
+        <isModeled>false</isModeled>
+        <lfparameter>.85</lfparameter>
+        <simTimeout>3500</simTimeout>
+        <simCorrectProb>0.85</simCorrectProb>
+        <shuffleclusters>0-4</shuffleclusters>
+    </setspec>
+   
+    <unit>
+        <unitinstructions>Here comes the optimized practice for the most important facts.</unitinstructions>
+        <unitname>Model Unit</unitname>
+        <learningsession>
+            <clusterlist>0-18</clusterlist>
+            <calculateProbability><![CDATA[
+                // An example of a custom probability routine. Note that we don't
+                // declare a function, but we MUST set p.probability and return p.
+                // We are also allowed to parameters to p for output to the console
+                // (if we are logged in a teacher)
+
+                // A demonstration of a variable that will be shown in the console
+                p.CUSTOM_MSG = "In our custom function";
+
+                // Helpful to be able to see our y parameter for debugging
+        p.y = p.stimParameter - 1.5 +
+        0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
+        0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
+        1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+
+        3.20689* (p.recency)+
+        4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
+        0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
+      
+
+                // At a minimum we need to set p.probability and return p
+        p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
+        return p;
+            ]]></calculateProbability>
+        </learningsession>
+        <deliveryparams>
+            <practiceseconds>1000000</practiceseconds>
+            <drill>12000</drill>
+            <purestudy>12000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>8000</reviewstudy>
+            <correctprompt>750</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions>You are all done.</unitinstructions>
+    </unit>
+</tutor>

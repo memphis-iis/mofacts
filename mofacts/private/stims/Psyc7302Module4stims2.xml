@@ -1,0 +1,242 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!-- was: no XML declaration present -->
+
+<setspec>
+    <clusters>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00010</parameter>	
+            <display>__________ random variables have a fixed number of independent trials, notated n.</display>	
+            <response>Binomial</response>	
+            <parameter>-0.00011</parameter>	
+            <display>Binomial random variables have a fixed number of __________ trials, notated n.</display>	
+            <response>independent</response>	
+            <parameter>-0.00012</parameter>	
+            <display>Binomial random variables have a fixed number of independent trials, notated __________.</display>	
+            <response>n</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00013</parameter>	
+            <display>Binomial random variables have a __________ probability of success for each trial, notated p.</display>	
+            <response>constant</response>	
+            <parameter>-0.00014</parameter>	
+            <display>Binomial random variables have a constant probability of __________ for each trial, notated p.</display>	
+            <response>success</response>	
+            <parameter>-0.00015</parameter>	
+            <display>Binomial random variables have a constant probability of success for each trial, notated __________.</display>	
+            <response>p</response>	
+            <parameter>-0.00016</parameter>	
+            <display>Binomial random variables have a constant __________ of success for each trial, notated p.</display>	
+            <response>probability</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00017</parameter>	
+            <display>Binomial random variables have __________ n and p.</display>	
+            <response>parameters</response>	
+            <parameter>-0.00018</parameter>	
+            <display>Binomial random variables have parameters __________ and p.</display>	
+            <response>n</response>	
+            <parameter>-0.00019</parameter>	
+            <display>Binomial random variables have parameters n and __________.</display>	
+            <response>p</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00020</parameter>	
+            <display>For binomial random variables, __________ notates the number of successful trials. </display>	
+            <response>k</response>	
+            <parameter>-0.00021</parameter>	
+            <display>For binomial random variables, k notates the number of __________ trials. </display>	
+            <response>successful</response>										
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00022</parameter>	
+            <display>To find the number of possible outcomes in the __________ of a binomial random variable with exactly k successes, we divide n! by k!(n-k)!</display>	
+            <response>sample space</response>	
+            <parameter>-0.00023</parameter>	
+            <display>To find the number of possible outcomes in the sample space of a binomial random variable with exactly k successes, we divide __________ by k!(n-k)!</display>	
+            <response>n!</response>	
+            <parameter>-0.00024</parameter>	
+            <display>To find the number of possible outcomes in the sample space of a binomial random variable with exactly k __________, we divide n! by k!(n-k)!</display>	
+            <response>successes</response>	
+            <parameter>-0.00025</parameter>	
+            <display>To find the number of possible __________ in the sample space of a binomial random variable with exactly k successes, we divide n! by k!(n-k)!</display>	
+            <response>outcomes</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00026</parameter>	
+            <display><![CDATA[The __________ of a binomial random variable (μ<sub>X</sub>) equals np, or the number of trials multiplied by the probability.]]></display>	
+            <response>mean</response>	
+            <parameter>-0.00027</parameter>	
+            <display><![CDATA[The mean of a binomial random variable (μ<sub>X</sub>) equals __________ or the number of trials multiplied by the probability.]]> </display>	
+            <response>np|n times p|n * p</response>	
+            <parameter>-0.00028</parameter>	
+            <display><![CDATA[The mean of a binomial random variable (μ<sub>X</sub>) equals np, or the number of trials multiplied by the __________.]]> </display>	
+            <response>probability</response>	
+            <parameter>-0.00029</parameter>	
+            <display><![CDATA[The mean of a binomial random variable (μ<sub>X</sub>) equals np, or the number of __________ multiplied by the probability.]]> </display>	
+            <response>trials</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00030</parameter>	
+            <display>The __________ of a binomial random variable equals np(1-p).</display>	
+            <response>variance</response>	
+            <parameter>-0.00031</parameter>	
+            <display>The variance of a binomial random variable equals __________(1-p).</display>	
+            <response>np</response>	
+            <parameter>-0.00032</parameter>	
+            <display>The variance of a binomial random variable equals np(__________).</display>	
+            <response>1-p</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00033</parameter>	
+            <display>A probability __________ is used to represent the probability distribution of continuous random variables. </display>	
+            <response>density curve</response>	
+            <parameter>-0.00034</parameter>	
+            <display>A probability density curve is used to represent the probability __________ of continuous random variables. </display>	
+            <response>distribution</response>	
+            <parameter>-0.00035</parameter>	
+            <display>A probability density curve is used to represent the probability distribution of __________ random variables. </display>	
+            <response>continuous</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00036</parameter>	
+            <display>The total __________ under a probability density curve will always equal 1. </display>	
+            <response>area</response>	
+            <parameter>-0.00037</parameter>	
+            <display>The total area under a probability density curve will always equal __________. </display>	
+            <response>one|1</response>										
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00038</parameter>	
+            <display>The __________ of a distribution of a continuous random variable is determined by its mean.</display>	
+            <response>center</response>	
+            <parameter>-0.00039</parameter>	
+            <display>The center of a distribution of a __________ random variable is determined by its mean.</display>	
+            <response>continuous</response>	
+            <parameter>-0.00040</parameter>	
+            <display>The center of a distribution of a continuous random variable is determined by its __________.</display>	
+            <response>mean</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00041</parameter>	
+            <display>The __________ of a distribution of a continuous random variable is determined by its standard deviation. </display>	
+            <response>spread</response>	
+            <parameter>-0.00042</parameter>	
+            <display>The spread of a __________ of a continuous random variable is determined by its standard deviation. </display>	
+            <response>distribution</response>	
+            <parameter>-0.00043</parameter>	
+            <display>The spread of a distribution of a continuous random variable is determined by its __________. </display>	
+            <response>standard deviation</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00044</parameter>	
+            <display>The __________ rule explains how the distribution of a normal random variable behaves relative to its mean and __________. </display>	
+            <response>standard deviation</response>	
+            <parameter>-0.00045</parameter>	
+            <display>The standard deviation rule explains how the distribution of a normal random variable behaves relative to its __________ and standard deviation. </display>	
+            <response>mean</response>	
+            <parameter>-0.00046</parameter>	
+            <display>The __________ rule explains how the distribution of a normal random variable behaves relative to its mean and __________. </display>	
+            <response>standard deviation</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00047</parameter>	
+            <display>__________% of a variable x will fall within one standard deviation of its mean.</display>	
+            <response>68</response>	
+            <parameter>-0.00048</parameter>	
+            <display>68% of a variable x will fall within __________ standard deviation of its mean.</display>	
+            <response>one|1</response>	
+            <parameter>-0.00049</parameter>	
+            <display>68% of a variable x will fall within one standard deviation of its __________.</display>	
+            <response>mean</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00050</parameter>	
+            <display>__________% of a variable x will fall within two standard deviations of its mean.</display>	
+            <response>95</response>	
+            <parameter>-0.00051</parameter>	
+            <display>95% of a variable x will fall within __________ standard deviations of its mean.</display>	
+            <response>two|2</response>	
+            <parameter>-0.00052</parameter>	
+            <display>95% of a variable x will fall within two __________ of its mean.</display>	
+            <response>standard deviations</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00053</parameter>	
+            <display>__________% of a variable x will fall within three standard deviations of its mean.</display>	
+            <response>99.7</response>	
+            <parameter>-0.00054</parameter>	
+            <display>99.7% of a variable x will fall within __________ standard deviations of its mean.</display>	
+            <response>three|3</response>	
+            <parameter>-0.00055</parameter>	
+            <display>99.7% of a variable x will fall within three standard deviations of its __________.</display>	
+            <response>mean</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00056</parameter>	
+            <display>A __________ is a standardized value that tells us how many standard deviations above or below the mean a value is.</display>	
+            <response>z score|z-score</response>	
+            <parameter>-0.00057</parameter>	
+            <display>A z score is a standardized value that tells us how many standard deviations __________ or below the mean a value is.</display>	
+            <response>above</response>	
+            <parameter>-0.00058</parameter>	
+            <display>A z score is a standardized value that tells us how many standard deviations above or below the __________ a value is.</display>	
+            <response>mean</response>	
+            <parameter>-0.00059</parameter>	
+            <display>A z score is a __________ value that tells us how many standard deviations above or below the mean a value is.</display>	
+            <response>standardized</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00060</parameter>	
+            <display>To calculate a z score, we subtract the __________ from the value x and divide value that by the standard deviation. </display>	
+            <response>mean</response>	
+            <parameter>-0.00061</parameter>	
+            <display>To calculate a __________, we subtract the mean from the value x and divide value that by the standard deviation. </display>	
+            <response>z score</response>	
+            <parameter>-0.00062</parameter>	
+            <display>To calculate a z score, we subtract the mean from the value x and divide value that by the __________. </display>	
+            <response>standard deviation</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00063</parameter>	
+            <display>__________ tables tell us the probability of a normal variable taking a value less than any z score. </display>	
+            <response>Normal</response>	
+            <parameter>-0.00064</parameter>	
+            <display>Normal tables tell us the probability of a normal variable taking a value __________ than any z score. </display>	
+            <response>less</response>	
+            <parameter>-0.00065</parameter>	
+            <display>Normal tables tell us the probability of a normal variable taking a value less than any __________. </display>	
+            <response>z score|z-score</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00066</parameter>	
+            <display>We can approximate the probabilities for a __________ random variable using n and p for a normal random variable with the same mean and standard deviation as long as the sample size n is large enough.</display>	
+            <response>binomial</response>	
+            <parameter>-0.00067</parameter>	
+            <display>We can approximate the probabilities for a binomial random variable using __________ for a normal random variable with the same mean and standard deviation as long as the sample size n is large enough.</display>	
+            <response>n and p|p and n</response>	
+            <parameter>-0.00068</parameter>	
+            <display>We can approximate the probabilities for a binomial random variable using n and p for a normal random variable with the same mean and standard deviation as long as the __________ n is large enough.</display>	
+            <response>sample size</response>							
+        </cluster>
+
+    </clusters>
+</setspec>
