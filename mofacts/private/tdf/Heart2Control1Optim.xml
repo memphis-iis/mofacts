@@ -1,16 +1,13 @@
 <tutor>
     <setspec>
-        <userselect>false</userselect>
-        
-        <experimentTarget>heart3</experimentTarget>
+        <userselect>false</userselect>        
         <name>Heart2Control1</name>
         <lessonname>Heart-testing1</lessonname>
         <stimulusfile>HeartBaseStim.xml</stimulusfile>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters>
-    </setspec>
-  
+    </setspec>  
     <unit>
         <unitname>Informed Consent</unitname>
         <unitinstructions><![CDATA[<p>The Mechanical Turk task you have selected is part of a research project that is described below. You will use you computer's web browser for this experiment, first to load the program, then to do the experiment, which take a variable amount of time (less than 1 hour, but in 2 sessions separated by at least 24 hours), depending on the condition you are selected for.
@@ -78,8 +75,8 @@
 <br><br> <b>The Heartbeat</b><br> <p>A heartbeat has two parts. First the heart muscle contracts. The contraction starts with the atria, which push blood into the ventricles. Then the walls of the ventricles squeeze together and force the blood out into the arteries. The contraction is the first part of the heartbeat. After that, the heart muscle relaxes, which is the second part of the heartbeat. This allows the heart to get large again, and blood can flow into the atria from the veins.
 <br> <p>Blood cannot flow backward into the arteries because little trapdoors called valves stop it. Valves also guard the openings from the atria into the ventricles. So there is always one-way traffic in the heart. The valves keep blood from flowing backward. These valves, and every other component discussed in this text, are essential in maintaining a healthy heart and normal blood circulation.]]> </unitinstructions>
     </unit>
-        <unit>
-        <turkemailsubject>Link for 3$ Bonus for Turk HIT</turkemailsubject>
+    <unit>
+        <turkemailsubject>Link for 2$ Bonus for Turk HIT</turkemailsubject>
         <turkemail><![CDATA[
 Dear Amazon Turk Worker,
 Recently you completed part 1 of a 2 part experiment called 'Learning about the Heart 1', which paid $3.00. Now we would appreciate it if you would please return do part 2. It is much less work than part 1, but we pay a $2.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.
@@ -94,7 +91,7 @@ Phil
 <br><br>
 We will check your completion and approve your assignment for the $3 payment. You will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $2 bonus for the 16 multiple choice items with 4 demographic questions.]]></unitinstructions>
         <unitname>Lockout unit</unitname>
-           <deliveryparams>
+        <deliveryparams>
             <lockoutminutes>2</lockoutminutes> 
         </deliveryparams>
        
@@ -131,27 +128,6 @@ We will check your completion and approve your assignment for the $3 payment. Yo
     <unit>
         <unitname>Demographics</unitname>
         <unitinstructions><![CDATA[Demographic Survey<br><br>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>4</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
-            </conditiontemplatesbygroup>
-            <initialpositions> A_1 A_2 A_3 A_4 </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>64-67</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions><![CDATA[You have now completed the experiment.<br><br> In order to receive payment, please enter the following password into the Amazon Mechanical Turk webpage: <b>chimes</b>
-<br><br>We will check your completion and you will receive payment within 3 days. ]]></unitinstructions>
-    </unit>
-</tutor>
-
 Please answer the following 4 quick demographic questions, which may be useful for us to understand the data we collect. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
         <buttonorder>fixed</buttonorder>
         <deliveryparams>
@@ -180,7 +156,6 @@ Please answer the following 4 quick demographic questions, which may be useful f
     </unit>
     <unit>
         <unitname>last</unitname>
-        <unitinstructions><![CDATA[You have now completed the experiment.<br><br> In order to receive payment, please enter the following password into the Amazon Mechanical Turk webpage: <b>chimes</b>
-<br><br>We will check your completion and you will receive payment within 3 days. ]]></unitinstructions>
+        <unitinstructions><![CDATA[You have now completed the experiment.<br><br>We will check your completion and you will receive the $2 bonus payment within 3 days. ]]></unitinstructions>
     </unit>
 </tutor>

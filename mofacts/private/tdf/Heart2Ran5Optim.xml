@@ -5,28 +5,32 @@
         <lessonname>Heart-testing3-5</lessonname> 
         <stimulusfile>HeartRan5Stim.xml</stimulusfile> 
         <clustersize>1</clustersize> 
-        <isModeled>false</isModeled><lfparameter>.85</lfparameter> 
+        <isModeled>false</isModeled>
+        <lfparameter>.85</lfparameter> 
         <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters> 
     </setspec> 
     <unit> 
         <unitname>Informed Consent</unitname> 
-        <unitinstructions><![CDATA[<p>The Mechanical Turk task you have selected is part of a research project that is described below. You will use you computer's web browser for this experiment, first to load the program, then to do the experiment, which take a variable amount of time (less than 1 hour), depending on the condition you are selected for.
-<p>The experiment is designed to compare various methods of learning written material to see what is more effective in comparison to review or no practice. You will be randomly selected for one of these methods or no method if you choose to participate. Whatever condition you are in, please follow the directions and try to do your best. Since correct responses will require no feedback, while incorrect responses will show review feedback, you will finish faster if you do your best. This task pays $5 upon completion.
+        <unitinstructions><![CDATA[<p>The Mechanical Turk task you have selected is part of a research project that is described below. You will use you computer's web browser for this experiment, first to load the program, then to do the experiment, which take a variable amount of time (less than 1 hour, but in 2 sessions separated by at least 24 hours), depending on the condition you are selected for.
+<p>The experiment is designed to compare various methods of learning written material to see what is more effective in comparison to review or no practice. You will be randomly selected for one of these methods or no method if you choose to participate. Whatever condition you are in, please follow the directions and try to do your best. Since correct responses will require no feedback, while incorrect responses will show review feedback, you will finish faster if you do your best. This task pays $3 upon completion for the first session and a $2 bonus for completing the final session.
 <p>If you should have any questions about this research study please feel free to contact Philip Pavlik at 901-678-2326. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2705.
 <p>All efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by University of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.
+<p>Note that Amazon.com has stated that the MTurk platform is NOT meant to support participant anonymity. MTurk worker IDs are linked to Amazon.com public profiles. Amazon.com may disclose worker information. Additionally, worker information may be available to others (who submit a request) for tax reporting purposes.
 <br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions> 
     </unit> 
     <unit> 
         <unitname>Instructions</unitname> 
-        <unitinstructions><![CDATA[There are 5 parts to this experiment. <br><br><p>First, you will take a brief multiple-choice pretest.
+        <unitinstructions><![CDATA[There are 6 parts to this experiment. <br><br><p>First, you will take a brief multiple-choice pretest.
 <p>Second, you will read a text about the circulatory system. 
-<p>Third, you will complete a practice condition, determined randomly. 
-<p>Fourth, you will take the posttest, which is very similar in to the pretest.
-<p>Fifth, there are 4 quick demographic questions. ]]></unitinstructions> 
+<p>Third, you will complete a practice condition, determined randomly. You will recieve $3 for the HIT
+            
+<p>Fourth, there will be a 1 day 'retention' interval, after which you will be sent the link to do session 2.
+<p>Fifth, you will take the posttest, which is very similar in to the pretest.
+<p>Sixth there are 4 quick demographic questions. You will be paied a $2 bonus for completion. ]]></unitinstructions>
     </unit> 
     <unit> 
         <unitname>Heart Pretest</unitname> 
-        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 16 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
+        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 8 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
@@ -43,14 +47,14 @@
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 
                 <clustersrepeated>1</clustersrepeated> 
-                <templatesrepeated>16</templatesrepeated> 
-                <group> 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 </group> 
+                <templatesrepeated>8</templatesrepeated>
+                <group> 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 </group>
             </conditiontemplatesbygroup> 
-            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 </initialpositions> 
+            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8</initialpositions>
             <randomizegroups>false</randomizegroups> 
-            <clusterlist> 0-0 1-1 4-4 5-5 8-8 9-9 12-12 13-13 16-16 17-17 20-20 21-21 24-24 25-25 28-28 29-29 </clusterlist> 
+            <clusterlist> 0-0 1-1 4-4 5-5 8-8 9-9 12-12 13-13</clusterlist>
             <assignrandomclusters>false</assignrandomclusters> 
-            <permutefinalresult>0-15</permutefinalresult> 
+            <permutefinalresult>0-7</permutefinalresult>
         </assessmentsession> 
     </unit> 
     <unit> 
@@ -94,9 +98,30 @@
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
+    <unit>
+        <turkemailsubject>Link for 2$ Bonus for Turk HIT</turkemailsubject>
+        <turkemail><![CDATA[
+Dear Amazon Turk Worker,
+Recently you completed part 1 of a 2 part experiment called 'Learning about the Heart 1', which paid $3.00. Now we would appreciate it if you would please return do part 2. It is much less work than part 1, but we pay a $2.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.
+Please avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. This next to last portion is the posttest.'
+Here is the link to finish: http://mofacts.optimallearning.org/experiment/heart2
+Thanks for your help,
+Phil
+        ]]></turkemail>
+        <unitinstructions><![CDATA[You have completed Session 1 of the experiment. 
+<br><br>
+<strong>Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response now. 
+<br><br>
+We will check your completion and approve your assignment for the $3 payment. You will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $2 bonus for the 16 multiple choice items with 4 demographic questions.]]></unitinstructions>
+        <unitname>Lockout unit</unitname>
+        <deliveryparams>
+            <lockoutminutes>2</lockoutminutes> 
+        </deliveryparams>
+       
+    </unit>
     <unit> 
         <unitname>Heart Posttest</unitname> 
-        <unitinstructions><![CDATA[This next to last portion is the posttest. <br><br>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
+        <unitinstructions><![CDATA[<p>Thanks for continuing. This next to last portion is the posttest. <br><br>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
@@ -138,7 +163,6 @@ Please answer the following 4 quick demographic questions, which may be useful f
             <correctscore>0</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
-        <buttontrial>false</buttontrial> 
         <assessmentsession> 
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 
@@ -155,7 +179,6 @@ Please answer the following 4 quick demographic questions, which may be useful f
     </unit> 
     <unit> 
         <unitname>last</unitname> 
-        <unitinstructions><![CDATA[You have now completed the experiment.<br><br> In order to receive payment, please enter the following password into the Amazon Mechanical Turk webpage: <b>lawnmower</b>
-<br><br>We will check your completion and you will receive payment within 3 days. ]]></unitinstructions> 
+        <unitinstructions><![CDATA[You have now completed the experiment.<br><br>We will check your completion and you will receive the $2 bonus payment within 3 days. ]]></unitinstructions>
     </unit>
 </tutor>
