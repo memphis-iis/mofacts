@@ -19,7 +19,7 @@
             <displayType>Cloze</displayType>
             <parameter>-0.00013</parameter>	
             <display>Binomial random variables have a __________ probability of success for each trial, notated p.</display>	
-            <response>constant</response>	
+            <response>constant|fixed</response>	
             <parameter>-0.00014</parameter>	
             <display>Binomial random variables have a constant probability of __________ for each trial, notated p.</display>	
             <response>success</response>	
@@ -49,7 +49,7 @@
             <response>k</response>	
             <parameter>-0.00021</parameter>	
             <display>For binomial random variables, k notates the number of __________ trials. </display>	
-            <response>successful</response>										
+            <response>successful|success</response>										
         </cluster>
         <cluster>	
             <displayType>Cloze</displayType>
@@ -73,7 +73,7 @@
             <response>mean</response>	
             <parameter>-0.00027</parameter>	
             <display><![CDATA[The mean of a binomial random variable (μ<sub>X</sub>) equals __________ or the number of trials multiplied by the probability.]]> </display>	
-            <response>np|n times p|n * p</response>	
+            <response>np|n times p|n\*p~Correct;.*~Incorrect. The correct answer is np.</response>	
             <parameter>-0.00028</parameter>	
             <display><![CDATA[The mean of a binomial random variable (μ<sub>X</sub>) equals np, or the number of trials multiplied by the __________.]]> </display>	
             <response>probability</response>	
@@ -153,37 +153,37 @@
         <cluster>	
             <displayType>Cloze</displayType>
             <parameter>-0.00047</parameter>	
-            <display>__________% of a variable x will fall within one standard deviation of its mean.</display>	
+            <display>__________% of a normal variable X will fall within one standard deviation of its mean.</display>	
             <response>68</response>	
             <parameter>-0.00048</parameter>	
-            <display>68% of a variable x will fall within __________ standard deviation of its mean.</display>	
+            <display>68% of a normal variable X will fall within __________ standard deviation of its mean.</display>	
             <response>one|1</response>	
             <parameter>-0.00049</parameter>	
-            <display>68% of a variable x will fall within one standard deviation of its __________.</display>	
+            <display>68% of a normal variable X will fall within one standard deviation of its __________.</display>	
             <response>mean</response>							
         </cluster>
         <cluster>	
             <displayType>Cloze</displayType>
             <parameter>-0.00050</parameter>	
-            <display>__________% of a variable x will fall within two standard deviations of its mean.</display>	
+            <display>__________% of a normal variable X will fall within two standard deviations of its mean.</display>	
             <response>95</response>	
             <parameter>-0.00051</parameter>	
-            <display>95% of a variable x will fall within __________ standard deviations of its mean.</display>	
+            <display>95% of a normal variable X will fall within __________ standard deviations of its mean.</display>	
             <response>two|2</response>	
             <parameter>-0.00052</parameter>	
-            <display>95% of a variable x will fall within two __________ of its mean.</display>	
+            <display>95% of a normal variable X will fall within two __________ of its mean.</display>	
             <response>standard deviations</response>							
         </cluster>
         <cluster>	
             <displayType>Cloze</displayType>
             <parameter>-0.00053</parameter>	
-            <display>__________% of a variable x will fall within three standard deviations of its mean.</display>	
+            <display>__________% of a normal variable X will fall within three standard deviations of its mean.</display>	
             <response>99.7</response>	
             <parameter>-0.00054</parameter>	
-            <display>99.7% of a variable x will fall within __________ standard deviations of its mean.</display>	
+            <display>99.7% of a normal variable X will fall within __________ standard deviations of its mean.</display>	
             <response>three|3</response>	
             <parameter>-0.00055</parameter>	
-            <display>99.7% of a variable x will fall within three standard deviations of its __________.</display>	
+            <display>99.7% of a normal variable X will fall within three standard deviations of its __________.</display>	
             <response>mean</response>							
         </cluster>
         <cluster>	
@@ -228,13 +228,13 @@
         <cluster>	
             <displayType>Cloze</displayType>
             <parameter>-0.00066</parameter>	
-            <display>We can approximate the probabilities for a __________ random variable using n and p for a normal random variable with the same mean and standard deviation as long as the sample size n is large enough.</display>	
+            <display>We can approximate the probabilities for a __________ random variable using a normal random variable with the same mean and standard deviation as long as the sample size is large enough.</display>	
             <response>binomial</response>	
             <parameter>-0.00067</parameter>	
-            <display>We can approximate the probabilities for a binomial random variable using __________ for a normal random variable with the same mean and standard deviation as long as the sample size n is large enough.</display>	
-            <response>n and p|p and n</response>	
+            <display>We can approximate the probabilities for a binomial random variable using a __________ random variable with the same mean and standard deviation as long as the sample size is large enough.</display>	
+            <response>normal</response>	
             <parameter>-0.00068</parameter>	
-            <display>We can approximate the probabilities for a binomial random variable using n and p for a normal random variable with the same mean and standard deviation as long as the __________ n is large enough.</display>	
+            <display>We can approximate the probabilities for a binomial random variable using a normal random variable with the same mean and standard deviation as long as the __________ is large enough.</display>	
             <response>sample size</response>							
         </cluster>
 
