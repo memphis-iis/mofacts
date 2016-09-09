@@ -1,0 +1,24 @@
+<setspec>
+    <clusters>
+        <cluster>
+            <displayType>Sound</displayType>
+            <!-- Notice that we let the system choose mp3 or wav (only mp3 available for this one) -->
+            <display>https://bart.binarydolphin.com/small</display>
+            <response>Music</response>
+            <falseResponse>Noise</falseResponse>
+        </cluster>
+        <cluster>
+            <displayType>Image</displayType>
+            <display>https://bart.binarydolphin.com/question.png</display>
+            <response>Correct</response>
+            <falseResponse>Incorrect</falseResponse>
+        </cluster>
+        <cluster>
+            <displayType>Video</displayType>
+            <!-- TODO: One day support multiple sources -->
+            <display>https://bart.binarydolphin.com/shortfriends.webm</display>
+            <response>Animals</response>
+            <falseResponse>Plants</falseResponse>
+        </cluster>
+    </clusters>
+</setspec>

@@ -82,6 +82,12 @@
                 {{#if imageCard}}
                 <img id="cardQuestionImg" src={{currentQuestion}}>
                 {{/if}}
+                {{#if videoCard}}
+                <video width="95%" autoplay>
+                    <source src="{{currentQuestion}}">
+                    Your browser does not support the video tag.
+                </video>
+                {{/if}}
             </div>
         </div>  <!-- close row -->
         {{/if}}

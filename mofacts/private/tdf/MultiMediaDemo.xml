@@ -1,0 +1,36 @@
+<tutor>
+    <setspec>
+        <name>Multimedia Demo</name>
+        <lessonname>Multimedia (demo)</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>MultiMediaStimDemo.xml</stimulusfile>
+    </setspec>
+    <unit>
+        <unitname>Introduction</unitname>
+        <picture>https://bart.binarydolphin.com/instruct.png</picture>
+    </unit>
+    <unit>
+        <unitname>Random Optimal</unitname>
+        <buttontrial>true</buttontrial>
+        <buttonorder>random</buttonorder>
+        <learningsession>
+            <clusterlist>0-2</clusterlist>
+            <displayminseconds>30</displayminseconds>
+            <displaymaxseconds>1500</displaymaxseconds>
+        </learningsession>
+        <deliveryparams>
+            <drill>15000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>5000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions>All done</unitinstructions>
+    </unit>
+</tutor>

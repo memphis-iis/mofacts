@@ -533,6 +533,10 @@ Template.card.helpers({
         return getQuestionType() === "image";
     },
 
+    'videoCard': function() {
+        return getQuestionType() === "video";
+    },
+
     'clozeCard': function() {
         return getQuestionType() === "cloze";
     },
@@ -804,8 +808,9 @@ function playCurrentQuestionSound(onEndCallback) {
     //Reset sound and play it
     currentQuestionSound = new Howl({
         urls: [
+            Session.get("currentQuestion") + '.ogg',
             Session.get("currentQuestion") + '.mp3',
-            Session.get("currentQuestion") + '.wav'
+            Session.get("currentQuestion") + '.wav',
         ],
 
         onplay: function() {
@@ -1046,19 +1051,20 @@ function handleUserInput(e, source, simAnswerCorrect) {
 }
 
 function getButtonTrial() {
-    //Default to false
-    var isButtonTrial = false;
+    //Default to value given in the unit
+    var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
+        .prop("buttontrial").first()
+        .trim().value().toLowerCase();
 
     var progress = getUserProgress();
 
-    var questInfo = engine.findCurrentCardInfo();
-    if (questInfo && questInfo.forceButtonTrial) {
+    if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
         //Did this question specifically override button trial?
         isButtonTrial = true;
     }
     else {
-        //An entire schedule can override a button trial
-        var schedButtonTrial = _.chain(getUserProgress())
+        // An entire schedule can override a button trial
+        var schedButtonTrial = _.chain(progress)
             .prop("currentSchedule")
             .prop("isButtonTrial").value();
         if (!!schedButtonTrial) {

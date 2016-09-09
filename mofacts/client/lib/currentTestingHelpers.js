@@ -106,6 +106,7 @@ findQTypeSimpified = function () {
     else if (QType === "image") QType = "I";    //I for Image
     else if (QType === "sound") QType = "A";    //A for Audio
     else if (QType === "cloze") QType = "C";    //C for Cloze
+    else if (QType === "video") QType = "V";    //V for video
     else                        QType = "NA";   //NA for Not Applicable
 
     return QType;
