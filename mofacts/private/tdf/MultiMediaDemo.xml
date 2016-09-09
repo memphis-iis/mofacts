@@ -2,7 +2,7 @@
     <setspec>
         <name>Multimedia Demo</name>
         <lessonname>Multimedia (demo)</lessonname>
-        <userselect>true</userselect>
+        <userselect>false</userselect>
         <stimulusfile>MultiMediaStimDemo.xml</stimulusfile>
     </setspec>
     <unit>
