@@ -18,16 +18,18 @@
 <p>Note that Amazon.com has stated that the MTurk platform is NOT meant to support participant anonymity. MTurk worker IDs are linked to Amazon.com public profiles. Amazon.com may disclose worker information. Additionally, worker information may be available to others (who submit a request) for tax reporting purposes.
 <br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions> 
     </unit> 
-    <unit> 
-        <unitname>Instructions</unitname> 
-        <unitinstructions><![CDATA[There are 6 parts to this experiment. <br><br><p>First, you will take a brief multiple-choice pretest.
-<p>Second, you will read a text about the circulatory system. 
-<p>Third, you will complete a practice condition, determined randomly. You will recieve $3 for the HIT
-            
+    <unit>
+        <unitname>Instructions</unitname>
+        <unitinstructions><![CDATA[<b>There are 6 parts to this experiment.</b> 
+<br><br><p>First, you will take a brief multiple-choice pretest.
+<p>Second, you will read a text about the circulatory system.
+<p>Third, you will complete a practice condition, determined randomly. 
+<p><b>You will recieve $3 for the HIT.</b>    
 <p>Fourth, there will be a 1 day 'retention' interval, after which you will be sent the link to do session 2.
-<p>Fifth, you will take the posttest, which is very similar in to the pretest.
-<p>Sixth there are 4 quick demographic questions. You will be paied a $2 bonus for completion. ]]></unitinstructions>
-    </unit> 
+<p>Fifth, you will take the posttest, which is very similar to the pretest.
+<p>Sixth there are 4 quick demographic questions. 
+<p><b>You will be paid a $2 bonus for completion.</b> ]]></unitinstructions>
+    </unit>
     <unit> 
         <unitname>Heart Pretest</unitname> 
         <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 8 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
@@ -110,12 +112,12 @@ Phil
         ]]></turkemail>
         <unitinstructions><![CDATA[You have completed Session 1 of the experiment. 
 <br><br>
-<strong>Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response now. 
+<strong>Please enter the code- chimes -into the Amazon Mechanical Turk website for this HIT and submit your response now. 
 <br><br>
 We will check your completion and approve your assignment for the $3 payment. You will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $2 bonus for the 16 multiple choice items with 4 demographic questions.]]></unitinstructions>
         <unitname>Lockout unit</unitname>
         <deliveryparams>
-            <lockoutminutes>2</lockoutminutes> 
+            <lockoutminutes>1440</lockoutminutes> 
         </deliveryparams>
        
     </unit>
