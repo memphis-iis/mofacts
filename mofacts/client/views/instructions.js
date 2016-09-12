@@ -43,14 +43,8 @@ function leavePage(dest) {
 
 //Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-    var deliveryParams = getCurrentDeliveryParams();
-    var lockoutminutes = 0;
-
-    if (deliveryParams && deliveryParams.lockoutminutes) {
-        lockoutminutes = _.intval(deliveryParams.lockoutminutes);
-    }
-
-    //console.log("LOCKOUT:", lockoutminutes, "DISPLAY:", displayify(getDisplayTimeouts()));
+    var lockoutminutes = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
+    console.log("LOCKOUT:", lockoutminutes, "min");  //TODO: remove this - we're flooding the console
     return lockoutminutes;
 }
 

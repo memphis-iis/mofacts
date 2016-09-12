@@ -172,7 +172,7 @@ Meteor.methods({
                         writeUserLogEntries(experiment, sendLogEntry, workerUserId);
                     }
 
-                    if (senderr !== null) {
+                    if (!!senderr) {
                         throw senderr;
                     }
                     return retval;
@@ -185,8 +185,8 @@ Meteor.methods({
         catch(e) {
             console.log("Failure scheduling turk message at later date:", e);
             errmsg = {
-                'msg': e.error,
-                'full': e
+                'msg': _.prop(e, 'error'),
+                'full': displayify(e)
             };
         }
         finally {

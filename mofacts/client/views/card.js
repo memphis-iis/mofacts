@@ -1883,9 +1883,29 @@ function processUserTimesLog() {
         }
     }
     else {
-        //We have an answer (or no questions at all) - run next question logic
-        //Note that this will also handle new units, instructions, and whether
-        //or not they are completed
+        // If we get this far and the unit engine thinks the unit is finished,
+        // we might need to stick with the instructions *IF AND ONLY IF* the
+        // lockout period hasn't finished (which prepareCard won't handle)
+        if (engine.unitFinished()) {
+            var lockoutMins = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
+            if (lockoutMins > 0) {
+                var lastTimestamp = _.intval(Session.get("lastTimestamp"));
+                if (lastTimestamp < 1) {
+                    lastTimestamp = Date.now();
+                }
+                var lockoutFreeTime = lastTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+                if (Date.now() < lockoutFreeTime) {
+                    console.log("RESUME FINISHED: showing lockout instructions");
+                    leavePage("/instructions");
+                    return;
+                }
+            }
+        }
+
+        // Stil here...
+        // We have an answer (or no questions at all) - run next question logic
+        // Note that this will also handle new units, instructions, and whether
+        // or not they are completed
         console.log("RESUME FINISHED: next-question logic to commence");
         prepareCard();
     }
