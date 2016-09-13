@@ -180,6 +180,7 @@ Please answer the following 4 quick demographic questions, which may be useful f
         </assessmentsession> 
     </unit> 
     <unit> 
+                <turkbonus>2.00</turkbonus>
         <unitname>last</unitname> 
         <unitinstructions><![CDATA[You have now completed the experiment.<br><br>We will check your completion and you will receive the $2 bonus payment within 3 days. ]]></unitinstructions>
     </unit>
