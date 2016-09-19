@@ -13,6 +13,7 @@
  * currentScore
  * currentStimName
  * currentUnitNumber
+ * currentUnitStartTime      - Mostly only for lock-outs
  * debugging                 - Generic debugging flag
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
@@ -43,6 +44,7 @@ sessionCleanUp = function() {
     Session.set("currentAnswer", undefined);
     Session.set("currentQuestion", undefined);
     Session.set("currentUnitNumber", 0);
+    Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);

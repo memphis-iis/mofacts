@@ -1177,6 +1177,7 @@ function unitIsFinished(reason) {
     Session.set("clusterIndex", undefined);
     var newUnit = unit + 1;
     Session.set("currentUnitNumber", newUnit);
+    Session.set("currentUnitStartTime", Date.now());
 
     var leaveTarget;
     if (newUnit < file.tdfs.tutor.unit.length) {
@@ -1607,6 +1608,7 @@ function processUserTimesLog() {
 
     //Default to first unit
     Session.set("currentUnitNumber", 0);
+    Session.set("currentUnitStartTime", Date.now());
 
     //We'll be tracking the last question so that we can match with the answer
     var lastQuestionEntry = null;
@@ -1640,6 +1642,10 @@ function processUserTimesLog() {
             engine = createEmptyUnit();
         }
     };
+
+    //The last unit we captured start time for - this way we always get the
+    //earliest time for our unit start
+    var startTimeMinUnit = -1;
 
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
@@ -1853,6 +1859,11 @@ function processUserTimesLog() {
 
         if (recordTimestamp && entry.clientSideTimeStamp) {
             Session.set("lastTimestamp", entry.clientSideTimeStamp);
+
+            if (Session.get("currentUnitNumber") > startTimeMinUnit) {
+                Session.set("currentUnitStartTime", Session.get("lastTimestamp"));
+                startTimeMinUnit = Session.get("currentUnitNumber");
+            }
         }
     });
 
@@ -1889,11 +1900,11 @@ function processUserTimesLog() {
         if (engine.unitFinished()) {
             var lockoutMins = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
             if (lockoutMins > 0) {
-                var lastTimestamp = _.intval(Session.get("lastTimestamp"));
-                if (lastTimestamp < 1) {
-                    lastTimestamp = Date.now();
+                var unitStartTimestamp = _.intval(Session.get("currentUnitStartTime"));
+                if (unitStartTimestamp < 1) {
+                    unitStartTimestamp = Date.now();
                 }
-                var lockoutFreeTime = lastTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+                var lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
                 if (Date.now() < lockoutFreeTime) {
                     console.log("RESUME FINISHED: showing lockout instructions");
                     leavePage("/instructions");

@@ -81,15 +81,15 @@ function setDispTimeoutText(txt) {
 // Called intermittently to see if we are still locked out
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
-        var lastTimestamp = Session.get("lastTimestamp");
-        if (!lastTimestamp) {
-            lastTimestamp = Date.now();
+        var unitStartTimestamp = Session.get("currentUnitStartTime");
+        if (!unitStartTimestamp) {
+            unitStartTimestamp = Date.now();
         }
 
         var lockoutMins = currLockOutMinutes();
         if (lockoutMins) {
             var lockoutMs = lockoutMins * (60 * 1000); //Minutes to millisecs
-            lockoutFreeTime = lastTimestamp + lockoutMs;
+            lockoutFreeTime = unitStartTimestamp + lockoutMs;
         }
     }
 
