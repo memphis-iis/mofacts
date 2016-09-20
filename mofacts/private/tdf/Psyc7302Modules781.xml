@@ -1,8 +1,8 @@
 <tutor>
     <setspec>
-        <lessonname>Optimized Practice for Psyc 7302: Module 4</lessonname>
+        <lessonname>Optimized Practice for Psyc 7302: Modules 7 and 8, part 1</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Psyc7302Module4stims.xml</stimulusfile>
+        <stimulusfile>Psyc7302Module78stims1.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
@@ -13,7 +13,7 @@
         <unitinstructions>Here comes the optimized practice for the most important facts.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-4</clusterlist>
+            <clusterlist>0-23</clusterlist>
             <calculateProbability><![CDATA[
                 // An example of a custom probability routine. Note that we don't
                 // declare a function, but we MUST set p.probability and return p.

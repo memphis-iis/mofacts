@@ -7,7 +7,6 @@
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
-        <shuffleclusters>0-11</shuffleclusters>
     </setspec>
    
     <unit>
