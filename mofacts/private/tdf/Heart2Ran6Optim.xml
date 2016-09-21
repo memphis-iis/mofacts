@@ -4,16 +4,16 @@
         <name>Heart2Ran</name> 
         <lessonname>Heart-testing3-6</lessonname> 
         <stimulusfile>HeartRan6Stim.xml</stimulusfile> 
-        <clustersize></clustersize> 
+        <clustersize>1</clustersize> 
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter> 
-        <swapclusters>0-3 4-7 8- 2-5 6-9 20-23 24-27 28-3 32-35 36-39 40-43 44-47 48-5 52-55 56-59 60-63</swapclusters> 
+        <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters> 
     </setspec> 
     <unit> 
         <unitname>Informed Consent</unitname> 
-        <unitinstructions><![CDATA[<p>The Mechanical Turk task you have selected is part of a research project that is described below. You will use you computer's web browser for this experiment, first to load the program, then to do the experiment, which take a variable amount of time (less than  hour, but in 2 sessions separated by at least 24 hours), depending on the condition you are selected for.
+        <unitinstructions><![CDATA[<p>The Mechanical Turk task you have selected is part of a research project that is described below. You will use you computer's web browser for this experiment, first to load the program, then to do the experiment, which take a variable amount of time (less than 1 hour, but in 2 sessions separated by at least 24 hours), depending on the condition you are selected for.
 <p>The experiment is designed to compare various methods of learning written material to see what is more effective in comparison to review or no practice. You will be randomly selected for one of these methods or no method if you choose to participate. Whatever condition you are in, please follow the directions and try to do your best. Since correct responses will require no feedback, while incorrect responses will show review feedback, you will finish faster if you do your best. This task pays $3 upon completion for the first session and a $2 bonus for completing the final session.
-<p>If you should have any questions about this research study please feel free to contact Philip Pavlik at 90-678-2326. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 90-678-2705.
+<p>If you should have any questions about this research study please feel free to contact Philip Pavlik at 901-678-2326. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2705.
 <p>All efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by University of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.
 <p>Note that Amazon.com has stated that the MTurk platform is NOT meant to support participant anonymity. MTurk worker IDs are linked to Amazon.com public profiles. Amazon.com may disclose worker information. Additionally, worker information may be available to others (who submit a request) for tax reporting purposes.
 <br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions> 
@@ -25,43 +25,43 @@
 <p>Second, you will read a text about the circulatory system.
 <p>Third, you will complete a practice condition, determined randomly. 
 <p><b>You will recieve $3 for the HIT.</b>    
-<p>Fourth, there will be a  day 'retention' interval, after which you will be sent the link to do session 2.
+<p>Fourth, there will be a 1 day 'retention' interval, after which you will be sent the link to do session 2.
 <p>Fifth, you will take the posttest, which is very similar to the pretest.
 <p>Sixth there are 4 quick demographic questions. 
 <p><b>You will be paid a $2 bonus for completion.</b> ]]></unitinstructions>
     </unit>
     <unit> 
         <unitname>Heart Pretest</unitname> 
-        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 8 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 2 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
+        <unitinstructions> <![CDATA[This first portion is the pretest. <br><br>Please answer each of the following 8 pretest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
             <readyprompt>0</readyprompt> 
-            <reviewstudy>2000</reviewstudy> 
+            <reviewstudy>12000</reviewstudy> 
             <correctprompt>750</correctprompt> 
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback>
             <timeuntilstimulus>500</timeuntilstimulus> 
-            <correctscore></correctscore> 
+            <correctscore>1</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
         <assessmentsession> 
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 
-                <clustersrepeated></clustersrepeated> 
+                <clustersrepeated>1</clustersrepeated> 
                 <templatesrepeated>8</templatesrepeated>
                 <group> 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 </group>
             </conditiontemplatesbygroup> 
-            <initialpositions> A_ A_2 A_3 A_4 A_5 A_6 A_7 A_8</initialpositions>
+            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8</initialpositions>
             <randomizegroups>false</randomizegroups> 
-            <clusterlist> 0-0 - 4-4 5-5 8-8 9-9 2-2 3-3</clusterlist>
+            <clusterlist> 0-0 1-1 4-4 5-5 8-8 9-9 12-12 13-13</clusterlist>
             <assignrandomclusters>false</assignrandomclusters> 
             <permutefinalresult>0-7</permutefinalresult>
         </assessmentsession> 
     </unit> 
     <unit> 
         <unitname>Text Instuctions</unitname> 
-        <unitinstructions><![CDATA[Next, you will read a text about the Circulatory System. You are asked to spend 5 minutes minimum and up to 0 minutes maximum to read this text, after which you will continue to the next portion of the experiment. The text is <b>all on one webpage</b>. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
+        <unitinstructions><![CDATA[Next, you will read a text about the Circulatory System. You are asked to spend 5 minutes minimum and up to 10 minutes maximum to read this text, after which you will continue to the next portion of the experiment. The text is <b>all on one webpage</b>. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
     </unit> 
     <unit> 
         <unitname>Text</unitname> 
@@ -80,23 +80,23 @@
     </unit> 
     <unit> 
         <unitname>Random Cloze</unitname> 
-        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected fill-in-the-blank review. <br><br> Next, you will be quizzed on fill-in-the-blank selections from the previous text. You have 5 seconds to begin answering, and if you get them wrong review will occur for 8 seconds. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to practice the fill-in-the blank items, after which you will continue to the next portion of the experiment. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
+        <unitinstructions><![CDATA[For your practice condition the computer has randomly selected fill-in-the-blank review. <br><br> Next, you will be quizzed on fill-in-the-blank selections from the previous text. You have 15 seconds to begin answering, and if you get them wrong review will occur for 8 seconds. You are asked to spend 5 minutes minimum and up to 25 minutes maximum to practice the fill-in-the blank items, after which you will continue to the next portion of the experiment. <br><br> Please do not take notes or search for answers online during any portion of the experiment.]]></unitinstructions> 
     </unit> 
     <unit>
         <unitname>Random Optimal</unitname>
         <learningsession>
             <clusterlist>68-88</clusterlist>
             <displayminseconds>300</displayminseconds>
-            <displaymaxseconds>500</displaymaxseconds>
+            <displaymaxseconds>1500</displaymaxseconds>
         </learningsession>
         <deliveryparams>
-            <drill>5000</drill>
-            <purestudy>0000</purestudy>
+            <drill>15000</drill>
+            <purestudy>10000</purestudy>
             <skipstudy>false</skipstudy>
             <reviewstudy>8000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
-            <correctscore></correctscore>
+            <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
@@ -104,17 +104,17 @@
         <turkemailsubject>Link for 2$ Bonus for Turk HIT</turkemailsubject>
         <turkemail><![CDATA[
 Dear Amazon Turk Worker,
-Recently you completed part  of a 2 part experiment called 'Learning about the Heart ', which paid $3.00. Now we would appreciate it if you would please return do part 2. It is much less work than part , but we pay a $2.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.
+Recently you completed part 1 of a 2 part experiment called 'Learning about the Heart 1', which paid $3.00. Now we would appreciate it if you would please return do part 2. It is much less work than part 1, but we pay a $2.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.
 Please avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. This next to last portion is the posttest.'
 Here is the link to finish: http://mofacts.optimallearning.org/experiment/heart2
 Thanks for your help,
 Phil
         ]]></turkemail>
-        <unitinstructions><![CDATA[You have completed Session  of the experiment. 
+        <unitinstructions><![CDATA[You have completed Session 1 of the experiment. 
 <br><br>
 <strong>Please enter the code- chimes -into the Amazon Mechanical Turk website for this HIT and submit your response now. 
 <br><br>
-We will check your completion and approve your assignment for the $3 payment. You will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $2 bonus for the 6 multiple choice items with 4 demographic questions.]]></unitinstructions>
+We will check your completion and approve your assignment for the $3 payment. You will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $2 bonus for the 16 multiple choice items with 4 demographic questions.]]></unitinstructions>
         <unitname>Lockout unit</unitname>
         <deliveryparams>
             <lockoutminutes>1440</lockoutminutes> 
@@ -123,31 +123,31 @@ We will check your completion and approve your assignment for the $3 payment. Yo
     </unit>
     <unit> 
         <unitname>Heart Posttest</unitname> 
-        <unitinstructions><![CDATA[<p>Thanks for continuing. This next to last portion is the posttest. <br><br>Please answer each of the following 6 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 2 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
+        <unitinstructions><![CDATA[<p>Thanks for continuing. This next to last portion is the posttest. <br><br>Please answer each of the following 16 posttest questions. You must select an answer within 25 seconds. If correct, the system advances, if incorrect there will be 12 seconds review of the correct answer, and the next question will appear. If you are unsure of an answer, please make your best guess. <br><br>Please do not take notes or search for answers online during any portion of the experiment. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions>
         <buttonorder>random</buttonorder> 
         <deliveryparams> 
             <purestudy>3000</purestudy> 
             <readyprompt>0</readyprompt> 
-            <reviewstudy>2000</reviewstudy> 
+            <reviewstudy>12000</reviewstudy> 
             <correctprompt>750</correctprompt> 
             <drill>25000</drill> 
             <timebeforefeedback>500</timebeforefeedback> 
             <timeuntilstimulus>500</timeuntilstimulus> 
-            <correctscore></correctscore> 
+            <correctscore>1</correctscore> 
             <incorrectscore>0</incorrectscore> 
         </deliveryparams> 
         <assessmentsession> 
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 
-                <clustersrepeated></clustersrepeated> 
-                <templatesrepeated>6</templatesrepeated> 
+                <clustersrepeated>1</clustersrepeated> 
+                <templatesrepeated>16</templatesrepeated> 
                 <group> 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 0,b,d,0 </group> 
             </conditiontemplatesbygroup> 
-            <initialpositions> A_ A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_0 A_ A_2 A_3 A_4 A_5 A_6 </initialpositions> 
+            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 </initialpositions> 
             <randomizegroups>false</randomizegroups> 
-            <clusterlist> 32-32 33-33 36-36 37-37 40-40 4-4 44-44 45-45 48-48 49-49 52-52 53-53 56-56 57-57 60-60 6-6 </clusterlist> 
+            <clusterlist> 32-32 33-33 36-36 37-37 40-40 41-41 44-44 45-45 48-48 49-49 52-52 53-53 56-56 57-57 60-60 61-61 </clusterlist> 
             <assignrandomclusters>false</assignrandomclusters> 
-            <permutefinalresult>0-5</permutefinalresult> 
+            <permutefinalresult>0-15</permutefinalresult> 
         </assessmentsession> 
     </unit> 
     <unit> 
@@ -156,10 +156,10 @@ We will check your completion and approve your assignment for the $3 payment. Yo
 Please answer the following 4 quick demographic questions, which may be useful for us to understand the data we collect. <br><br><p align="center">Click the Continue button to begin.]]></unitinstructions> 
         <buttonorder>fixed</buttonorder> 
         <deliveryparams> 
-            <drill>2000000</drill> 
-            <purestudy>6000</purestudy> 
+            <drill>12000000</drill> 
+            <purestudy>16000</purestudy> 
             <skipstudy>false</skipstudy> 
-            <reviewstudy>6000</reviewstudy> 
+            <reviewstudy>16000</reviewstudy> 
             <correctprompt>500</correctprompt> 
             <fontsize>3</fontsize> 
             <correctscore>0</correctscore> 
@@ -168,11 +168,11 @@ Please answer the following 4 quick demographic questions, which may be useful f
         <assessmentsession> 
             <conditiontemplatesbygroup> 
                 <groupnames>A</groupnames> 
-                <clustersrepeated></clustersrepeated> 
+                <clustersrepeated>1</clustersrepeated> 
                 <templatesrepeated>4</templatesrepeated> 
                 <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group> 
             </conditiontemplatesbygroup> 
-            <initialpositions> A_ A_2 A_3 A_4 </initialpositions> 
+            <initialpositions> A_1 A_2 A_3 A_4 </initialpositions> 
             <randomizegroups>false</randomizegroups> 
             <clusterlist>64-67</clusterlist> 
             <assignrandomclusters>false</assignrandomclusters> 
