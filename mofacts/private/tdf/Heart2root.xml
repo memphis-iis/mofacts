@@ -4,7 +4,8 @@
         <experimentTarget>heart2</experimentTarget>
         <userselect>false</userselect>
         <randomizedDelivery>1</randomizedDelivery>
-        <condition>Heart2HumOptim.xml</condition>
+        <condition>Heart2HumOptim.xml</condition>        
+        <condition>Heart2MachOptim.xml</condition>
         
         <condition>Heart2Control1Optim.xml</condition>
         <condition>Heart2Control2Optim.xml</condition>
