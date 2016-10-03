@@ -28,7 +28,7 @@ ecmascript-runtime@0.3.14
 ejson@1.0.12
 email@1.1.17
 fastclick@1.0.12
-fourseven:scss@3.8.1
+fourseven:scss@3.10.0
 geojson-utils@1.0.9
 google@1.1.14
 html-tools@1.0.11
