@@ -237,6 +237,28 @@ Meteor.methods({
                 'full': displayify(e)
             };
         }
+        finally {
+            //Always write an entry
+            var schedLogEntry = {
+                'action': 'turk-email-schedule',
+                'success': errmsg === null,
+                'result': resultMsg,
+                'errmsg': errmsg,
+                'turkId': turkid,
+                'tdfOwnerId': ownerId,
+                'schedDate': schedDate ? schedDate.toString() : "???",
+
+                //The following three properties are for recreating the sched
+                //call (although you'll need to create a Date from schedDateRaw
+                //and retrieve the owner profile with tdfOwnerId)
+                'schedDateRaw': schedDate ? schedDate.getTime() : 0,
+                'jobname': jobName,
+                'requestParams': requestParams
+            };
+
+            console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
+            writeUserLogEntries(experiment, schedLogEntry, workerUserId);
+        }
 
         if (errmsg !== null) {
             throw Meteor.Error("Message-Failure", errmsg.msg, errmsg.full);
