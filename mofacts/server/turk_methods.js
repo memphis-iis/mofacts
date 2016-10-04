@@ -37,6 +37,86 @@ function getTdfOwner(experiment, userId) {
 }
 
 
+// Send any scheduled messages in ScheduledTurkMessages
+sendScheduledTurkMessages = function() {
+    var now = Date.now();
+    var sendCount = 0;
+
+    console.log("Looking for ScheduledTurkMessages on or after", new Date(now));
+
+    while(true) {
+        // Find next email to send
+        var nextJob = ScheduledTurkMessages.findOne({
+            'sent': '',
+            'scheduled': {'$lte': now}
+        });
+        if (!nextJob) {
+            break;
+        }
+
+        //Send turk message
+        console.log("Running scheduled job", nextJob._id);
+        var senderr = null;
+        var retval = null;
+
+        try {
+            var ownerProfile = UserProfileData.findOne({_id: nextJob.ownerProfileId});
+            if (!ownerProfile) {
+                throw "Could not find current user profile";
+            }
+            if (!ownerProfile.have_aws_id || !ownerProfile.have_aws_secret) {
+                throw "Current user not set up for AWS/MTurk";
+            }
+
+            var ret = turk.notifyWorker(ownerProfile, nextJob.requestParams);
+            console.log("Completed scheduled job", nextJob._id);
+            retval = _.extend({'passedParams': nextJob.requestParams}, ret);
+        }
+        catch(e) {
+            console.log("Error - COULD NOT SEND TURK MESSAGE: ", e);
+            senderr = e;
+        }
+        finally {
+            var sendLogEntry = {
+                'action': 'turk-email-send',
+                'success': senderr === null,
+                'result': retval,
+                'errmsg': senderr,
+                'turkId': nextJob.requestParams.WorkerId,
+                'tdfOwnerId': nextJob.ownerId,
+                'schedDate': (new Date(nextJob.scheduled)).toString()
+            };
+
+            console.log("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
+            writeUserLogEntries(nextJob.experiment, sendLogEntry, nextJob.workerUserId);
+        }
+
+        // Mark the email sent, not matter what happened
+        var markedRecord = null;
+        try {
+            ScheduledTurkMessages.update(
+                {'_id': nextJob._id},
+                { '$set': {'sent': Date.now()} }
+            );
+            markedRecord = true;
+            sendCount++;
+            console.log("Finished requested email:", nextJob._id);
+        }
+        catch(e) {
+            console.log("FAILED TO MARK JOB DONE: ", nextJob._id, e);
+            markedRecord = false;
+        }
+
+        if (!!senderr || !markedRecord) {
+            break; //Nothing to do - we failed!
+        }
+    }
+
+    console.log("Total sent messages:", sendCount);
+    return {'sendCount': sendCount};
+};
+
+
 //Set up our server-side methods
 Meteor.methods({
     //Simple assignment debugging for turk
@@ -136,50 +216,18 @@ Meteor.methods({
             };
 
             console.log("Scheduling:", jobName, "at", schedDate);
-            SyncedCron.add({
-                name: jobName,
-
-                schedule: function(parser) {
-                    return parser.recur().on(schedDate).fullDate();
-                },
-
-                job: function() {
-                    console.log("Running scheduled job", jobName);
-                    var senderr = null;
-                    var retval = null;
-
-                    try {
-                        var ret = turk.notifyWorker(ownerProfile, requestParams);
-                        console.log("Completed scheduled job", jobName);
-                        retval = _.extend({'passedParams': requestParams}, ret);
-                    }
-                    catch(e) {
-                        console.log("Error finishing", jobname, e);
-                        senderr = e;
-                    }
-                    finally {
-                        var sendLogEntry = {
-                            'action': 'turk-email-send',
-                            'success': senderr === null,
-                            'result': retval,
-                            'errmsg': senderr,
-                            'turkId': turkid,
-                            'tdfOwnerId': ownerId,
-                            'schedDate': schedDate ? schedDate.toString() : "???"
-                        };
-
-                        console.log("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
-                        writeUserLogEntries(experiment, sendLogEntry, workerUserId);
-                    }
-
-                    if (!!senderr) {
-                        throw senderr;
-                    }
-                    return retval;
-                }
+            ScheduledTurkMessages.insert({
+                'sent': '',
+                'ownerId': ownerId,
+                'scheduled': schedDate.getTime(),
+                'ownerProfileId': ownerProfile._id,
+                'requestParams': requestParams,
+                'jobName': jobName,
+                'experiment': experiment,
+                'workerUserId': workerUserId
             });
 
-            console.log("Scheduled Message scheduled for:", SyncedCron.nextScheduledAtDate(jobName));
+            console.log("Scheduled Message scheduled for:", schedDate);
             resultMsg = "Message scheduled";
         }
         catch(e) {
@@ -188,28 +236,6 @@ Meteor.methods({
                 'msg': _.prop(e, 'error'),
                 'full': displayify(e)
             };
-        }
-        finally {
-            //Always write an entry
-            var schedLogEntry = {
-                'action': 'turk-email-schedule',
-                'success': errmsg === null,
-                'result': resultMsg,
-                'errmsg': errmsg,
-                'turkId': turkid,
-                'tdfOwnerId': ownerId,
-                'schedDate': schedDate ? schedDate.toString() : "???",
-
-                //The following three properties are for recreating the sched
-                //call (although you'll need to create a Date from schedDateRaw
-                //and retrieve the owner profile with tdfOwnerId)
-                'schedDateRaw': schedDate ? schedDate.getTime() : 0,
-                'jobname': jobName,
-                'requestParams': requestParams
-            };
-
-            console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
-            writeUserLogEntries(experiment, schedLogEntry, workerUserId);
         }
 
         if (errmsg !== null) {

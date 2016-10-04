@@ -563,8 +563,18 @@ Meteor.startup(function () {
         },
     });
 
+    //Create any helpful indexes for queries we run
+    ScheduledTurkMessages._ensureIndex({ "sent": 1, "scheduled": 1 });
+
     //Start up synched cron background jobs
     SyncedCron.start();
+
+    //Now check for messages to send every 5 minutes
+    SyncedCron.add({
+        name: 'Period Email Sent Check',
+        schedule: function(parser) { return parser.text('every 5 minutes'); },
+        job: function() { return sendScheduledTurkMessages(); }
+    });
 });
 
 //We use a special server-side route for our experimental data download
