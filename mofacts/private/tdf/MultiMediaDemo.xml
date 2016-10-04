@@ -3,12 +3,30 @@
         <name>Multimedia Demo</name>
         <lessonname>Multimedia (demo)</lessonname>
         <userselect>false</userselect>
+        <experimentTarget>multimedia</experimentTarget>
         <stimulusfile>MultiMediaStimDemo.xml</stimulusfile>
     </setspec>
     <unit>
         <unitname>Introduction</unitname>
         <picture>https://bart.binarydolphin.com/instruct.png</picture>
     </unit>
+    <!-- <unit>
+        <unitname>PreLock</unitname>
+        <unitinstructions>Before Lockout</unitinstructions>
+    </unit>
+    <unit>
+        <unitname>Lock</unitname>
+        <unitinstructions>During Lockout</unitinstructions>
+        <turkemailsubject>Lockout Testing: 3 min</turkemailsubject>
+        <turkemail>Some more lockout testing: using 3 minute lockout</turkemail>
+        <deliveryparams>
+            <lockoutminutes>3</lockoutminutes>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>PostLock</unitname>
+        <unitinstructions>After Lockout</unitinstructions>
+    </unit> -->
     <unit>
         <unitname>Random Optimal</unitname>
         <buttontrial>true</buttontrial>
