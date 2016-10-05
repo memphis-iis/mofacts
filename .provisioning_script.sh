@@ -2,41 +2,70 @@
 
 
 # Make a symbolic link to the sync'ed directory for more "natural" work
-ln -s /vagrant $HOME/mofacts
+ln -s /vagrant "$HOME/mofacts"
 
 # We will need to be able to compile some binary packages for Meteor
 sudo apt-get install -y build-essential gcc g++ make automake git
 
+
+###############################################################################
 # Install MongoDB
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-#echo "deb http://repo.mongodb.org/apt/ubuntu "$(lsb_release -sc)"/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+
+# # The current version of Mongo on optimallearning.org is 2.4.10, so we stick with that
+# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+# echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
+# sudo apt-get update
+# sudo apt-get install -y mongodb-10gen=2.4.10
+# echo "mongodb-10gen hold" | sudo dpkg --set-selections
+
+# Use MongoDB 3.2
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
 sudo apt-get update
-# The current version of Mongo on optimallearning.org is 2.4.10, so we stick with that
-sudo apt-get install -y mongodb-10gen=2.4.10
-echo "mongodb-10gen hold" | sudo dpkg --set-selections
+sudo apt-get install -y mongodb-org
+
+# Upgrading from 2.4 to 2.6
+# mongodump
+# sudo apt-mark unhold mongodb-10gen
+# sudo apt-get install -y mongodb-10gen- mongodb-org
+# Upgrading from 2.6 to 3.0
+# mongodump
+# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+# sudo rm /etc/apt/sources.list.d/mongodb.list
+# echo "deb http://repo.mongodb.org/apt/ubuntu precise/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
+# sudo apt-get update
+# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
+# sudo apt-get install -y mongodb-org
+# Upgrading from 3.0 to 3.2
+# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
+# sudo rm /etc/apt/sources.list.d/mongodb-org-3.0.list
+# echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+# sudo apt-get update
+# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
+# sudo apt-get install -y mongodb-org
 
 # Change mongo to listen on all addresses (which is fine since we're walled off)
 PDIR="$HOME/.provision"
-mkdir -p $PDIR
+mkdir -p "$PDIR"
 
 CFGSRC="/etc/mongodb.conf"
 CFGBASE="$PDIR/mongodb.conf"
 
-cp $CFGSRC $CFGBASE.old
-sed "s/bind_ip/#bind_ip/" < $CFGBASE.old > $CFGBASE.new
-sudo cp $CFGBASE.new $CFGSRC
+cp $CFGSRC "$CFGBASE.old"
+sed "s/bind_ip/#bind_ip/" < "$CFGBASE.old" > "$CFGBASE.new"
+sudo cp "$CFGBASE.new" $CFGSRC
 
 # Now restart the service since we've changed the config
 sudo service mongodb restart
+###############################################################################
 
 
 # Install meteor
-curl --progress-bar https://install.meteor.com/ | sh
+curl https://install.meteor.com/ | sh
 
 # In case we're running on a Windows host, we force the use of mounting instead
 # of symlinks for meteor packages
-cd $HOME/mofacts/mofacts
+cd "$HOME/mofacts/mofacts"
 
 sudo umount .meteor/local -f
 rm .meteor/local -rf
@@ -46,11 +75,11 @@ sudo umount packages -f
 rm packages -rf
 mkdir -p packages
 
-mkdir -p $HOME/.meteor/local
-sudo mount --bind $HOME/.meteor/local .meteor/local
+mkdir -p "$HOME/.meteor/local"
+sudo mount --bind "$HOME/.meteor/local" .meteor/local
 
-mkdir -p $HOME/.meteor/packages
-sudo mount --bind $HOME/.meteor/packages packages
+mkdir -p "$HOME/.meteor/packages"
+sudo mount --bind "$HOME/.meteor/packages" packages
 
 meteor update
 
@@ -98,7 +127,7 @@ SSHDBASE="$PDIR/sshd_config"
 # module that will print the motd file on login. If we don't set the sshd config
 # variable PrintMotd to no, our message would be displayed twice
 
-cp $SSHDSRC $SSHDBASE.old
-grep -v PrintMotd $SSHDBASE.old > $SSHDBASE.new
-printf "\n\nPrintMotd no\n" >> $SSHDBASE.new
-sudo cp $SSHDBASE.new $SSHDSRC
+cp "$SSHDSRC" "$SSHDBASE.old"
+grep -v PrintMotd "$SSHDBASE.old" > "$SSHDBASE.new"
+printf "\n\nPrintMotd no\n" >> "$SSHDBASE.new"
+sudo cp "$SSHDBASE.new" "$SSHDSRC"
