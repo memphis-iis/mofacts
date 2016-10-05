@@ -11,11 +11,19 @@ var endOfLine = Npm.require("os").EOL;
 
 //Helper functions
 
+serverConsole = function() {
+    var disp = [(new Date()).toString()];
+    for (var i = 0; i < arguments.length; ++i) {
+        disp.push(arguments[i]);
+    }
+    console.log.apply(this, disp);
+};
+
 function getStimJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err) {
-            console.log("Error reading Stim JSON", err);
+            serverConsole("Error reading Stim JSON", err);
             throw err;
         }
         future.return(xml2js.parseStringSync(data));
@@ -40,7 +48,7 @@ function userProfileSave(id, profile) {
         UserProfileData.update({_id: id}, {'$set': {'preUpdate': true}}, {upsert: true});
     }
     catch(e) {
-        console.log("Ignoring user profile upsert ", e);
+        serverConsole("Ignoring user profile upsert ", e);
     }
     var numUpdated = UserProfileData.update({_id: id}, profile);
     if (numUpdated == 1) {
@@ -144,11 +152,11 @@ SyncedCron.config({
 
 Meteor.startup(function () {
     // Let anyone looking know what config is in effect
-    console.log("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
+    serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 
     // Force our OAuth settings to be current
     ServiceConfiguration.configurations.remove({"service": "google"});
-    console.log("Removed Google service config - rewriting now");
+    serverConsole("Removed Google service config - rewriting now");
 
     var google = getConfigProperty("google");
     ServiceConfiguration.configurations.insert({
@@ -156,7 +164,7 @@ Meteor.startup(function () {
         "clientId": _.prop(google, "clientId"),
         "secret": _.prop(google, "secret"),
     });
-    console.log("Rewrote Google service config");
+    serverConsole("Rewrote Google service config");
 
     // Figure out the "prime admin" (owner of repo TDF/stim files)
     // Note that we accept username or email and then find the ID
@@ -167,26 +175,26 @@ Meteor.startup(function () {
     // adminUser should be in an admin role
     if (adminUserId) {
         Roles.addUsersToRoles(adminUserId, "admin");
-        console.log("Admin User Found ID:", adminUserId, "with obj:", _.pick(adminUser, "_id", "username", "email"));
+        serverConsole("Admin User Found ID:", adminUserId, "with obj:", _.pick(adminUser, "_id", "username", "email"));
     }
     else {
-        console.log("Admin user ID could not be found. adminUser=", displayify(adminUser || "null"));
+        serverConsole("Admin user ID could not be found. adminUser=", displayify(adminUser || "null"));
     }
 
     // Get user in roles and make sure they are added
     var roles = getConfigProperty("initRoles");
     var roleAdd = function(memberName, roleName) {
         var requested = _.prop(roles, memberName) || [];
-        console.log("Role", roleName, "- found", _.prop(requested, "length"));
+        serverConsole("Role", roleName, "- found", _.prop(requested, "length"));
 
         _.each(requested, function(username) {
             var user = findUserByName(username);
             if (!user) {
-                console.log("Warning: user", username, "role", roleName, "request, but user not found");
+                serverConsole("Warning: user", username, "role", roleName, "request, but user not found");
                 return;
             }
             Roles.addUsersToRoles(user._id, roleName);
-            console.log("Added user", username, "to role", roleName);
+            serverConsole("Added user", username, "to role", roleName);
         });
     };
 
@@ -203,7 +211,7 @@ Meteor.startup(function () {
     _.each(
         _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
         function (ele, idx, lst) {
-            console.log("Updating Stim in DB from ", ele);
+            serverConsole("Updating Stim in DB from ", ele);
             var json = getStimJSON('stims/' + ele);
             var rec = createStimRecord(ele, json, adminUserId, 'repo');
 
@@ -220,7 +228,7 @@ Meteor.startup(function () {
     _.each(
         _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
         function (ele, idx, lst) {
-            console.log("Updating TDF in DB from ", ele);
+            serverConsole("Updating TDF in DB from ", ele);
             var json = getStimJSON('tdf/' + ele);
 
             var rec = createTdfRecord(ele, json, adminUserId, 'repo');
@@ -237,12 +245,12 @@ Meteor.startup(function () {
 
     //Log this late so they're more prone to see it
     if (adminUserId) {
-        console.log("Admin user is", _.pick(adminUser, "_id", "username", "email"));
+        serverConsole("Admin user is", _.pick(adminUser, "_id", "username", "email"));
     }
     else {
-        console.log("ADMIN USER is MISSING: a restart might be required");
-        console.log("Make sure you have a valid siteConfig");
-        console.log("***IMPORTANT*** There will be no owner for system TDF's");
+        serverConsole("ADMIN USER is MISSING: a restart might be required");
+        serverConsole("Make sure you have a valid siteConfig");
+        serverConsole("***IMPORTANT*** There will be no owner for system TDF's");
     }
 
     //Make sure we create a default user profile record when a new Google user
@@ -263,7 +271,7 @@ Meteor.startup(function () {
         }
 
         if (_.prop(user.profile, "experiment")) {
-            console.log("Experiment participant user created:", dispUsr(user));
+            serverConsole("Experiment participant user created:", dispUsr(user));
             return user;
         }
 
@@ -284,7 +292,7 @@ Meteor.startup(function () {
             "verified": true
         }];
 
-        console.log("Creating new Google user:", dispUsr(user));
+        serverConsole("Creating new Google user:", dispUsr(user));
 
         // If the user is initRoles, go ahead and add them to the roles.
         // Unfortunately, the user hasn't been created... so we need to actually
@@ -295,7 +303,7 @@ Meteor.startup(function () {
         var addIfInit = function(initName, roleName) {
             var initList = _.prop(roles, initName) || [];
             if (_.contains(initList, user.username)) {
-                console.log("Adding", user.username, "to", roleName);
+                serverConsole("Adding", user.username, "to", roleName);
                 user.roles.push(roleName);
             }
         };
@@ -313,6 +321,7 @@ Meteor.startup(function () {
         //we silently skip duplicate users (this is mainly for experimental
         //participants who are created on the fly)
         signUpUser: function (newUserName, newUserPassword, previousOK) {
+            serverConsole("signUpUser", newUserName, "previousOK == ", previousOK);
             var checks = [];
 
             if (!newUserName) {
@@ -367,6 +376,8 @@ Meteor.startup(function () {
         //mainly since we don't want some of this data just flowing around
         //between client and server
         saveUserProfileData: function(profileData) {
+            serverConsole('saveUserProfileData', displayify(profileData));
+
             var saveResult, acctBal, result, errmsg;
             try {
                 data = _.extend(defaultUserProfile(), profileData);
@@ -408,6 +419,7 @@ Meteor.startup(function () {
         // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add
         // or remove) vs roleName
         userAdminRoleChange: function(targetUserId, roleAction, roleName) {
+            serverConsole("userAdminRoleChange", targetUserId, roleAction, roleName);
             var usr = Meteor.user();
             if (!Roles.userIsInRole(usr, ["admin"])) {
                 throw "You are not authorized to do that";
@@ -456,6 +468,7 @@ Meteor.startup(function () {
         //Allow file uploaded with name and contents. The type of file must be
         //specified - current allowed types are: 'stimuli', 'tdf'
         saveContentFile: function(type, filename, filecontents) {
+            serverConsole('saveContentFile', type, filename);
             var results = {
                 'result': null,
                 'errmsg': 'No action taken?',
@@ -545,6 +558,7 @@ Meteor.startup(function () {
 
         //Log one or more user records for the currently running experiment
         userTime: function (experiment, objectsToLog) {
+            // No serverConsole call - it's handled by writeUserLogEntries
             writeUserLogEntries(experiment, objectsToLog);
         },
 
@@ -559,7 +573,7 @@ Meteor.startup(function () {
                 usr = "[USER:" + usr + "]";
             }
 
-            console.log(usr + " " + logtxt);
+            serverConsole(usr + " " + logtxt);
         },
     });
 
@@ -612,6 +626,6 @@ Router.route("experiment-data", {
         });
         response.end("");
 
-        console.log("Sent all  data for", exp, "as file", filename, "with record-count:", recCount);
+        serverConsole("Sent all  data for", exp, "as file", filename, "with record-count:", recCount);
     }
 });

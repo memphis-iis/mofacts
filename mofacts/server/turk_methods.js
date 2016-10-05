@@ -10,7 +10,7 @@ function getTdfOwner(experiment, userId) {
     }
     if (!userId) {
         //No user currently logged in, so we can't figure out the current TDF
-        console.log("getTdfOwner for ", experiment, "failed - no current user found");
+        serverConsole("getTdfOwner for ", experiment, "failed - no current user found");
         return null;
     }
 
@@ -19,7 +19,7 @@ function getTdfOwner(experiment, userId) {
 
     //If no TDF ID then we can't continue
     if (!tdfId) {
-        console.log("getTdfOwner for ", experiment, "failed - no tdfId found");
+        serverConsole("getTdfOwner for ", experiment, "failed - no tdfId found");
         return null;
     }
 
@@ -30,8 +30,8 @@ function getTdfOwner(experiment, userId) {
         return tdf.owner;
     }
     else {
-        console.log("getTdfOwner for ", experiment, "failed - TDF doesn't contain owner");
-        console.log(tdfId, tdf);
+        serverConsole("getTdfOwner for ", experiment, "failed - TDF doesn't contain owner");
+        serverConsole(tdfId, tdf);
         return null;
     }
 }
@@ -42,7 +42,7 @@ sendScheduledTurkMessages = function() {
     var now = Date.now();
     var sendCount = 0;
 
-    console.log("Looking for ScheduledTurkMessages on or after", new Date(now));
+    serverConsole("Looking for ScheduledTurkMessages on or after", new Date(now));
 
     while(true) {
         // Find next email to send
@@ -55,7 +55,7 @@ sendScheduledTurkMessages = function() {
         }
 
         //Send turk message
-        console.log("Running scheduled job", nextJob._id);
+        serverConsole("Running scheduled job", nextJob._id);
         var senderr = null;
         var retval = null;
 
@@ -69,11 +69,11 @@ sendScheduledTurkMessages = function() {
             }
 
             var ret = turk.notifyWorker(ownerProfile, nextJob.requestParams);
-            console.log("Completed scheduled job", nextJob._id);
+            serverConsole("Completed scheduled job", nextJob._id);
             retval = _.extend({'passedParams': nextJob.requestParams}, ret);
         }
         catch(e) {
-            console.log("Error - COULD NOT SEND TURK MESSAGE: ", e);
+            serverConsole("Error - COULD NOT SEND TURK MESSAGE: ", e);
             senderr = e;
         }
         finally {
@@ -87,7 +87,7 @@ sendScheduledTurkMessages = function() {
                 'schedDate': (new Date(nextJob.scheduled)).toString()
             };
 
-            console.log("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
+            serverConsole("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
             writeUserLogEntries(nextJob.experiment, sendLogEntry, nextJob.workerUserId);
         }
 
@@ -100,10 +100,10 @@ sendScheduledTurkMessages = function() {
             );
             markedRecord = true;
             sendCount++;
-            console.log("Finished requested email:", nextJob._id);
+            serverConsole("Finished requested email:", nextJob._id);
         }
         catch(e) {
-            console.log("FAILED TO MARK JOB DONE: ", nextJob._id, e);
+            serverConsole("FAILED TO MARK JOB DONE: ", nextJob._id, e);
             markedRecord = false;
         }
 
@@ -112,7 +112,7 @@ sendScheduledTurkMessages = function() {
         }
     }
 
-    console.log("Total sent messages:", sendCount);
+    serverConsole("Total sent messages:", sendCount);
     return {'sendCount': sendCount};
 };
 
@@ -121,6 +121,7 @@ sendScheduledTurkMessages = function() {
 Meteor.methods({
     //Simple assignment debugging for turk
     turkGetAssignment: function(assignid) {
+        serverConsole('turkGetAssignment', assignid);
         try {
             var usr = Meteor.user();
             if (!Roles.userIsInRole(usr, ["admin", "teacher"])) {
@@ -144,6 +145,7 @@ Meteor.methods({
 
     //Simple message sending
     turkSendMessage: function(workerid, msgtext) {
+        serverConsole('turkSendMessage', workerid);
         try {
             var usr = Meteor.user();
             if (!Roles.userIsInRole(usr, ["admin", "teacher"])) {
@@ -165,13 +167,15 @@ Meteor.methods({
             });
         }
         catch(e) {
-            console.log("Error for turkSendMessage", e);
+            serverConsole("Error for turkSendMessage", e);
             return e;
         }
     },
 
     //Message sending for the end of a lockout
     turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
+        serverConsole('turkScheduleLockoutMessage', experiment, lockoutend, subject);
+
         var usr, turkid, ownerId, workerUserId;
         var schedDate;
         var jobName;
@@ -215,7 +219,7 @@ Meteor.methods({
                 'WorkerId': turkid
             };
 
-            console.log("Scheduling:", jobName, "at", schedDate);
+            serverConsole("Scheduling:", jobName, "at", schedDate);
             ScheduledTurkMessages.insert({
                 'sent': '',
                 'ownerId': ownerId,
@@ -227,11 +231,11 @@ Meteor.methods({
                 'workerUserId': workerUserId
             });
 
-            console.log("Scheduled Message scheduled for:", schedDate);
+            serverConsole("Scheduled Message scheduled for:", schedDate);
             resultMsg = "Message scheduled";
         }
         catch(e) {
-            console.log("Failure scheduling turk message at later date:", e);
+            serverConsole("Failure scheduling turk message at later date:", e);
             errmsg = {
                 'msg': _.prop(e, 'error'),
                 'full': displayify(e)
@@ -256,7 +260,7 @@ Meteor.methods({
                 'requestParams': requestParams
             };
 
-            console.log("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
+            serverConsole("About to log email sched entry for Turk", JSON.stringify(schedLogEntry, null, 2));
             writeUserLogEntries(experiment, schedLogEntry, workerUserId);
         }
 
@@ -273,6 +277,8 @@ Meteor.methods({
     //RETURNS: null on success or an error message on failure. Any results
     //are logged to the user times log
     turkPay: function(workerUserId, experiment, msg) {
+        serverConsole('turkPay', workerUserId, experiment);
+
         var errmsg = null; //Return null on success
 
         //Data we log
@@ -368,7 +374,7 @@ Meteor.methods({
             workPerformed.approvalDetails = approveResponse;
         }
         catch(e) {
-            console.log("Error processing Turk approval", e);
+            serverConsole("Error processing Turk approval", e);
             errmsg = "Exception caught while processing Turk approval: " + JSON.stringify(e, null, 2);
         }
         finally {
@@ -381,7 +387,7 @@ Meteor.methods({
                 'tdfOwnerId': ownerId
             }, workPerformed);
 
-            console.log("About to log entry for Turk", JSON.stringify(userLogEntry, null, 2));
+            serverConsole("About to log entry for Turk", JSON.stringify(userLogEntry, null, 2));
             writeUserLogEntries(experiment, userLogEntry, workerUserId);
         }
 
@@ -389,6 +395,8 @@ Meteor.methods({
     },
 
     turkBonus: function(workerUserId, experiment) {
+        serverConsole('turkBonus', workerUserId, experiment);
+
         var errmsg = null; // Return null on success
 
         //Data we log
@@ -452,7 +460,7 @@ Meteor.methods({
                         .prop("AssignmentId").trim()
                         .value();
                     if (!assignmentId) {
-                        console.log("Bad Assignment found for bonus", rec);
+                        serverConsole("Bad Assignment found for bonus", rec);
                         throw "No previous assignment ID was found for approval, so no bonus can be paid. Examine approval/pay details for more information";
                     }
                 }
@@ -507,7 +515,7 @@ Meteor.methods({
             workPerformed.bonusResponse = bonusResponse;
         }
         catch(e) {
-            console.log("Error processing Turk bonus", e);
+            serverConsole("Error processing Turk bonus", e);
             errmsg = "Exception caught while processing Turk bonus: " + JSON.stringify(e, null, 2);
         }
         finally {
@@ -521,7 +529,7 @@ Meteor.methods({
                 'selectedTdfUnitNum': unitnum
             }, workPerformed);
 
-            console.log("About to log entry for Turk ", experiment, JSON.stringify(userLogEntry, null, 2));
+            serverConsole("About to log entry for Turk ", experiment, JSON.stringify(userLogEntry, null, 2));
             writeUserLogEntries(experiment, userLogEntry, workerUserId);
         }
 
@@ -530,6 +538,8 @@ Meteor.methods({
 
     //Given an experiment name, return the current status of any turk activities
     turkUserLogStatus: function(experiment) {
+        serverConsole('turkUserLogStatus', experiment);
+        
         var expKey = ('' + experiment).replace(/\./g, "_");
         var records = [];
         var tdf = null;
@@ -606,7 +616,7 @@ Meteor.methods({
                     }
 
                     if (!ownerOK) {
-                        console.log("Could not verify owner for", experiment);
+                        serverConsole("Could not verify owner for", experiment);
                         return [];
                     }
                 }

@@ -456,8 +456,8 @@
                     populated = populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
                 }
                 catch (e) {
-                    console.log("There was an error populating the Instruction record - it will be skipped", e, e.stack);
-                    console.log(
+                    serverConsole("There was an error populating the Instruction record - it will be skipped", e, e.stack);
+                    serverConsole(
                         username,
                         JSON.stringify(lastexpcond),
                         JSON.stringify(lastinstruct),
@@ -494,8 +494,8 @@
                     populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq);
                 }
                 catch (e) {
-                    console.log("There was an error populating the record - it will be skipped", e, e.stack);
-                    console.log(
+                    serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
+                    serverConsole(
                         username,
                         JSON.stringify(lastexpcond),
                         JSON.stringify(lastschedule),
@@ -542,7 +542,7 @@
         UserTimesLog.find({}).forEach(function (entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
             if (!userRec || !userRec.username) {
-                console.log("Skipping output for ", entry._id);
+                serverConsole("Skipping output for ", entry._id);
                 return;
             }
 

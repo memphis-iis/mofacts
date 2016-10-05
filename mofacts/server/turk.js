@@ -75,7 +75,7 @@ following is true:
         var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
         req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
 
-        console.log("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
+        serverConsole("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
 
         // All done
         var response = HTTP.post(url, {
@@ -84,7 +84,7 @@ following is true:
 
         if (response.statusCode !== 200) {
             //Error!
-            console.log("Response failure:", response);
+            serverConsole("Response failure:", response);
             throw "Turk request '" + req.Operation + "' failed";
         }
 
@@ -93,10 +93,10 @@ following is true:
             response.json = xml2js.parseStringSync(response.content);
         }
         catch(e) {
-            console.log("JSON parse on returned contents failed", e);
+            serverConsole("JSON parse on returned contents failed", e);
         }
 
-        //console.log("TURK response:", JSON.stringify(response.json, null, 2));
+        //serverConsole("TURK response:", JSON.stringify(response.json, null, 2));
         return response;
     }
 
@@ -165,7 +165,7 @@ following is true:
                 var complete = fenum(val.NumberOfAssignmentsCompleted);
 
                 if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
-                    console.log("Something wrong with this HIT's stats - including for safety. val was", val);
+                    serverConsole("Something wrong with this HIT's stats - including for safety. val was", val);
                     hitlist.push(_.first(val.HITId));
                 }
                 else if (pend > 0 || avail > 0 || complete < max) {
@@ -176,7 +176,7 @@ following is true:
                 }
             });
 
-            console.log("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
+            serverConsole("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
 
             return hitlist;
         },
@@ -236,7 +236,7 @@ following is true:
                 .value().toLowerCase();
 
             if (isValid !== "true") {
-                console.log("Failed to approve assignment", response.json);
+                serverConsole("Failed to approve assignment", response.json);
                 throw {
                     'errmsg': 'Assignment Approval failed',
                     'response': response
@@ -278,7 +278,7 @@ following is true:
                 .value().toLowerCase();
 
             if (isValid !== "true") {
-                console.log("notifyWorker isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
+                serverConsole("notifyWorker isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
                 throw {
                     'errmsg': 'Worker Notification failed',
                     'response': response

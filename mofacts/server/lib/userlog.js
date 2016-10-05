@@ -43,6 +43,8 @@ writeUserLogEntries = function(experiment, objectsToLog, userId) {
     var allVals = {$each: valsToPush};
     action["$push"][experiment_key] = allVals;
 
+    serverConsole('writeUserLogEntries', experiment, userId, "Push Count = ", valsToPush.length);
+
     UserTimesLog.update( {_id: userId}, action, {upsert: true} );
     logUserMetrics(userId, experiment_key, valsToPush);
 };
@@ -69,7 +71,7 @@ function logUserMetrics(userId, experimentKey, valsToCheck) {
         UserMetrics.update({_id: userId}, {'$set': {'preUpdate': true}}, {upsert: true});
     }
     catch(e) {
-        console.log("Ignoring user metric upsert ", e);
+        serverConsole("Ignoring user metric upsert ", e);
     }
 
     var makeKey = function(idx, fieldName) {
