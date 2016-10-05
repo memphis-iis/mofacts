@@ -48,15 +48,15 @@ sudo apt-get install -y mongodb-org
 PDIR="$HOME/.provision"
 mkdir -p "$PDIR"
 
-CFGSRC="/etc/mongodb.conf"
-CFGBASE="$PDIR/mongodb.conf"
+CFGSRC="/etc/mongod.conf"
+CFGBASE="$PDIR/mongod.conf"
 
 cp $CFGSRC "$CFGBASE.old"
 sed "s/bind_ip/#bind_ip/" < "$CFGBASE.old" > "$CFGBASE.new"
 sudo cp "$CFGBASE.new" $CFGSRC
 
 # Now restart the service since we've changed the config
-sudo service mongodb restart
+sudo service mongod restart
 ###############################################################################
 
 
