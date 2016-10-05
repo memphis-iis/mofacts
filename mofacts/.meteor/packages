@@ -11,13 +11,13 @@ underscore@1.0.9
 ovcharik:howler
 
 alanning:roles
-http@1.2.9
+http@1.2.9_1
 percolate:synced-cron
 mfpierre:chartist-js
-standard-minifier-css@1.2.0
-standard-minifier-js@1.2.0
+standard-minifier-css@1.2.0_1
+standard-minifier-js@1.2.0_1
 tracker@1.1.0
 service-configuration@1.0.10
 accounts-google@1.0.10
 shell-server@0.2.1
-promise
+promise@0.8.4_1
