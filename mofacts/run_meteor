@@ -9,11 +9,11 @@ sudo umount packages -f
 rm packages -rf
 mkdir -p packages
 
-mkdir -p $HOME/.meteor/local
-sudo mount --bind $HOME/.meteor/local .meteor/local
+mkdir -p "$HOME/.meteor/local"
+sudo mount --bind "$HOME/.meteor/local" .meteor/local
 
-mkdir -p $HOME/.meteor/packages
-sudo mount --bind $HOME/.meteor/packages packages
+mkdir -p "$HOME/.meteor/packages"
+sudo mount --bind "$HOME/.meteor/packages" packages
 
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
@@ -25,5 +25,5 @@ if [ ${#CL} -lt 1 ]; then
     meteor --settings ./settings.json
 else
     echo "Running meteor with your command line (did you remember --settings?)"
-    meteor $*
+    meteor "$@"
 fi
