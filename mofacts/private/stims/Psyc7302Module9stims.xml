@@ -118,7 +118,7 @@
             <response>null value</response>	
             <parameter>-0.00039</parameter>	
             <display><![CDATA[If the null value of __________ is outside of the 95% confidence interval, we have significant evidence to reject H<sub>0</sub>.]]></display>	
-            <response>oustide</response>	
+            <response>0|zero</response>	
             <parameter>-0.00040</parameter>	
             <display><![CDATA[If the null value of 0 is outside of the 95% confidence interval, we have __________ evidence to reject H<sub>0</sub>.]]></display>	
             <response>significant</response>	
