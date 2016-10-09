@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='UTF-8' ?><!-- was: no XML declaration present --><setspec>
+    <clusters>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00010</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our __________ variable X is categorical.]]></display>	
+            <response>explanatory</response>	
+            <parameter>-0.00011</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our explanatory variable __________ is categorical.]]></display>	
+            <response>X</response>	
+            <parameter>-0.00012</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our explanatory variable X is __________.]]></display>	
+            <response>categorical</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00013</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our __________ variable Y is quantitative.]]></display>	
+            <response>response</response>	
+            <parameter>-0.00014</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our response variable __________ is quantitative.]]></display>	
+            <response>Y</response>	
+            <parameter>-0.00015</parameter>	
+            <display><![CDATA[In the case of C &#8594; Q, our response variable Y is __________.]]></display>	
+            <response>quantitative</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00016</parameter>	
+            <display>Samples are __________ when each observation in one sample is matched with an observation in the other sample.</display>	
+            <response>dependent</response>	
+            <parameter>-0.00017</parameter>	
+            <display>Samples are dependent when each observation in one sample is __________ with an observation in the other sample.</display>	
+            <response>matched</response>	
+            <parameter>-0.00018</parameter>	
+            <display>Samples are dependent when each __________ in one sample is matched with an __________ in the other sample.</display>	
+            <response>observation</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00019</parameter>	
+            <display>When comparing __________ independent sample means, we use a __________-sample t-test.</display>	
+            <response>two|2</response>	
+            <parameter>-0.00020</parameter>	
+            <display>When comparing two __________ sample means, we use a two-sample t-test.</display>	
+            <response>independent</response>	
+            <parameter>-0.00021</parameter>	
+            <display>When comparing two independent sample means, we use a __________ t-test.</display>	
+            <response>two-sample</response>	
+            <parameter>-0.00022</parameter>	
+            <display>When comparing two independent sample means, we use a two-sample __________.</display>	
+            <response>t-test</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00023</parameter>	
+            <display>A __________ t-test looks at the effect of a two-valued categorical explanatory variable on a quantitative response variable. </display>	
+            <response>two-sample</response>	
+            <parameter>-0.00024</parameter>	
+            <display>A two-sample t-test looks at the effect of a two-valued __________ explanatory variable on a quantitative response variable. </display>	
+            <response>categorical</response>	
+            <parameter>-0.00025</parameter>	
+            <display>A two-sample t-test looks at the effect of a two-valued categorical explanatory variable on a __________ response variable. </display>	
+            <response>quantitative</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00026</parameter>	
+            <display><![CDATA[The __________ hypothesis of a two-sample t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>.]]></display>	
+            <response>null</response>	
+            <parameter>-0.00027</parameter>	
+            <display><![CDATA[The null hypothesis of a __________ t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>.]]></display>	
+            <response>two-sample</response>	
+            <parameter>-0.00028</parameter>	
+            <display><![CDATA[The null hypothesis of a two-sample t-test states that the __________ between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>.]]></display>	
+            <response>difference</response>	
+            <parameter>-0.00029</parameter>	
+            <display><![CDATA[The null hypothesis of a two-sample t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is __________, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>.]]></display>	
+            <response>0|zero</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00030</parameter>	
+            <display>The __________ of a two-sample t-test is zero.</display>	
+            <response>null value</response>	
+            <parameter>-0.00031</parameter>	
+            <display>The null value of a two-sample t-test is __________.</display>	
+            <response>0|zero</response>										
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00032</parameter>	
+            <display><![CDATA[The __________ for a two-sample t-test measures the difference between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in standard errors.]]></display>	
+            <response>test statistic</response>	
+            <parameter>-0.00022</parameter>	
+            <display><![CDATA[The test statistic for a two-sample t-test measures the __________ between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in standard errors.]]></display>	
+            <response>difference</response>	
+            <parameter>-0.00034</parameter>	
+            <display><![CDATA[The test statistic for a two-sample t-test measures the difference between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in __________.]]></display>	
+            <response>standard errors</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00035</parameter>	
+            <display>By using a __________ confidence interval we can quantify the effect of the explanatory categorical variable on the quantitative response variable.</display>	
+            <response>0.95|95%</response>	
+            <parameter>-0.00036</parameter>	
+            <display>By using a 0.95 confidence interval we can __________ the effect of the explanatory categorical variable on the quantitative response variable.</display>	
+            <response>quantify</response>	
+            <parameter>-0.00037</parameter>	
+            <display>By using a 0.95 confidence interval we can quantify the __________ of the explanatory categorical variable on the quantitative response variable.</display>	
+            <response>effect</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00038</parameter>	
+            <display><![CDATA[If the __________ of 0 is outside of the 95% confidence interval, we have significant evidence to reject H<sub>0</sub>.]]></display>	
+            <response>null value</response>	
+            <parameter>-0.00039</parameter>	
+            <display><![CDATA[If the null value of __________ is outside of the 95% confidence interval, we have significant evidence to reject H<sub>0</sub>.]]></display>	
+            <response>oustide</response>	
+            <parameter>-0.00040</parameter>	
+            <display><![CDATA[If the null value of 0 is outside of the 95% confidence interval, we have __________ evidence to reject H<sub>0</sub>.]]></display>	
+            <response>significant</response>	
+            <parameter>-0.00041</parameter>	
+            <display><![CDATA[If the null value of 0 is outside of the 95% confidence interval, we have significant evidence to __________ H<sub>0</sub>.]]></display>	
+            <response>reject</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00042</parameter>	
+            <display><![CDATA[If the __________ of 0 is inside of the 95% confidence interval, we do not have enough evidence to reject H<sub>0</sub>.]]></display>	
+            <response>null value</response>	
+            <parameter>-0.00043</parameter>	
+            <display><![CDATA[If the null value of 0 is __________ of the 95% confidence interval, we do not have enough evidence to reject H<sub>0</sub>.]]></display>	
+            <response>inside</response>	
+            <parameter>-0.00044</parameter>	
+            <display><![CDATA[If the null value of 0 is inside of the 95% confidence interval, we do not have enough evidence to __________ H<sub>0</sub>.]]></display>	
+            <response>reject</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00045</parameter>	
+            <display>When comparing __________ pairs from dependent samples, we conduct a paired t-test.</display>	
+            <response>matched</response>	
+            <parameter>-0.00046</parameter>	
+            <display>When comparing matched pairs from __________ samples, we conduct a paired t-test.</display>	
+            <response>dependent</response>	
+            <parameter>-0.00047</parameter>	
+            <display>When comparing matched pairs from dependent samples, we conduct a __________ t-test.</display>	
+            <response>paired</response>	
+            <parameter>-0.00048</parameter>	
+            <display>When comparing matched pairs from dependent samples, we conduct a paired __________.</display>	
+            <response>t-test</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00049</parameter>	
+            <display>If two samples are __________ by subject, both samples have the same subject pool and have measured their subjects twice. </display>	
+            <response>paired</response>	
+            <parameter>-0.00050</parameter>	
+            <display>If two samples are paired by __________, both samples have the same __________ pool and have measured their __________s twice. </display>	
+            <response>subject</response>	
+            <parameter>-0.00051</parameter>	
+            <display>If two samples are paired by subject, both samples have the same subject pool and have measured their subjects __________. </display>	
+            <response>twice</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00052</parameter>	
+            <display>When comparing two means from __________ samples, we are making an inference about a single mean: the mean of differences.</display>	
+            <response>dependent</response>	
+            <parameter>-0.00053</parameter>	
+            <display>When comparing two means from dependent samples, we are making an inference about a __________ mean: the mean of differences.</display>	
+            <response>single</response>	
+            <parameter>-0.00054</parameter>	
+            <display>When comparing two means from dependent samples, we are making an inference about a single mean: the mean of __________.</display>	
+            <response>differences</response>	
+            <parameter>-0.00055</parameter>	
+            <display>When comparing two means from dependent samples, we are making an __________ about a single mean: the mean of differences.</display>	
+            <response>inference</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00056</parameter>	
+            <display>When comparing two means from __________ samples, we reduce the two samples to one by calculating the difference between the observations of each pair.</display>	
+            <response>dependent</response>	
+            <parameter>-0.00057</parameter>	
+            <display>When comparing two means from dependent samples, we reduce the two samples to __________ by calculating the difference between the observations of each pair.</display>	
+            <response>one|1</response>	
+            <parameter>-0.00058</parameter>	
+            <display>When comparing two means from dependent samples, we reduce the two samples to one by calculating the __________ between the observations of each pair.</display>	
+            <response>difference</response>	
+            <parameter>-0.00059</parameter>	
+            <display>When comparing two means from dependent samples, we reduce the two samples to one by calculating the difference between the __________ of each pair.</display>	
+            <response>observations</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00060</parameter>	
+            <display><![CDATA[The __________ hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals zero. ]]></display>	
+            <response>null</response>	
+            <parameter>-0.00061</parameter>	
+            <display><![CDATA[The null hypothesis for a __________ t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals zero. ]]></display>	
+            <response>paired</response>	
+            <parameter>-0.00062</parameter>	
+            <display><![CDATA[The null hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the __________ between the means equals zero. ]]></display>	
+            <response>difference</response>	
+            <parameter>-0.00063</parameter>	
+            <display><![CDATA[The null hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals __________. ]]></display>	
+            <response>zero|0</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00064</parameter>	
+            <display>__________, or analysis of variance, is used when we have more than two independent samples.</display>	
+            <response>ANOVA</response>	            	
+            <parameter>-0.00065</parameter>	
+            <display>ANOVA, or analysis of __________, is used when we have more than two independent samples.</display>	
+            <response>variance</response>	
+            <parameter>-0.00066</parameter>	
+            <display>ANOVA, or analysis of variance, is used when we have __________ than two independent samples.</display>	
+            <response>more</response>	
+            <parameter>-0.00067</parameter>	
+            <display>ANOVA, or analysis of variance, is used when we have more than two __________ samples.</display>	
+            <response>independent</response>	
+            <parameter>-0.00068</parameter>	
+            <display>ANOVA, or analysis of variance, is used when we have more than __________ independent samples.</display>	
+            <response>two</response>	
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00069</parameter>	
+            <display>The __________ hypothesis of an ANOVA F-test states that all means are equal.</display>	
+            <response>null</response>	
+            <parameter>-0.00070</parameter>	
+            <display>The null hypothesis of an __________ F-test states that all means are equal.</display>	
+            <response>ANOVA</response>	
+            <parameter>-0.00071</parameter>	
+            <display>The null hypothesis of an ANOVA F-test states that all __________ are equal.</display>	
+            <response>means</response>	
+            <parameter>-0.00072</parameter>	
+            <display>The null hypothesis of an ANOVA F-test states that all means are __________.</display>	
+            <response>equal</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00073</parameter>	
+            <display>The __________ hypothesis of an ANOVA F-test states that not all means are equal, but does not specify where the difference may be.</display>	
+            <response>alternative</response>	
+            <parameter>-0.00074</parameter>	
+            <display>The alternative hypothesis of an __________ F-test states that not all means are equal, but does not specify where the difference may be.</display>	
+            <response>ANOVA</response>	
+            <parameter>-0.00075</parameter>	
+            <display>The alternative hypothesis of an ANOVA F-test states that not all means are __________, but does not specify where the difference may be.</display>	
+            <response>equal</response>	
+            <parameter>-0.00076</parameter>	
+            <display>The alternative hypothesis of an ANOVA F-test states that not all means are equal, but does not specify where the __________ may be.</display>	
+            <response>difference</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00077</parameter>	
+            <display>__________ measures variation between the sample means.</display>	
+            <response>ANOVA</response>	
+            <parameter>-0.00078</parameter>	
+            <display>ANOVA measures __________ between the sample means.</display>	
+            <response>variation|variability</response>	
+            <parameter>-0.00079</parameter>	
+            <display>ANOVA measures variation between the sample __________.</display>	
+            <response>means</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00080</parameter>	
+            <display>The __________ test statistic of an ANOVA compares the variation among sample means to the variation within each sample.</display>	
+            <response>F</response>	
+            <parameter>-0.00081</parameter>	
+            <display>The F test statistic of an ANOVA compares the __________ among sample means to the __________ within each sample.</display>	
+            <response>variation|variability</response>	
+            <parameter>-0.00082</parameter>	
+            <display>The F __________ of an ANOVA compares the variation among sample means to the variation within each sample.</display>	
+            <response>test statistic</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00083</parameter>	
+            <display><![CDATA[The __________ F we have, the more evidence we have against H<sub>0</sub>.]]></display>	
+            <response>larger</response>	
+            <parameter>-0.00084</parameter>	
+            <display><![CDATA[The larger __________ we have, the more evidence we have against H<sub>0</sub>.]]></display>	
+            <response>F</response>	
+            <parameter>-0.00085</parameter>	
+            <display><![CDATA[The larger F we have, the __________ evidence we have against H<sub>0</sub>.]]></display>	
+            <response>more</response>	
+            <parameter>-0.00086</parameter>	
+            <display><![CDATA[The larger F we have, the more evidence we have __________ H<sub>0</sub>.]]></display>	
+            <response>against</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00087</parameter>	
+            <display>A large __________ value will occur when there is more variation among the sample means than there is within the samples themselves.</display>	
+            <response>F</response>	
+            
+            <parameter>-0.00088</parameter>		
+            <display>A large F value will occur when there is __________ variation among the sample means than there is within the samples themselves.</display>	
+            <response>more</response>	
+            <parameter>-0.00089</parameter>	
+            <display>A large F value will occur when there is more __________ among the sample means than there is within the samples themselves.</display>	
+                        <response>variation|variability</response>								
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00090</parameter>	
+            <display><![CDATA[We can only use an __________ when the populations have relatively equal &sigma;.]]></display>	
+            <response>F-test</response>	
+            <parameter>-0.00091</parameter>	
+            <display><![CDATA[We can only use an F-test when the __________ have relatively equal &sigma;.]]></display>	
+            <response>populations</response>	
+            <parameter>-0.00092</parameter>	
+            <display><![CDATA[We can only use an F-test when the populations have relatively __________ &sigma;.]]></display>	
+            <response>equal</response>							
+        </cluster>
+
+
+    </clusters>
+</setspec>
