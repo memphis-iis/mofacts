@@ -43,7 +43,9 @@ writeUserLogEntries = function(experiment, objectsToLog, userId) {
     var allVals = {$each: valsToPush};
     action["$push"][experiment_key] = allVals;
 
-    serverConsole('writeUserLogEntries', experiment, userId, "Push Count = ", valsToPush.length);
+    //TODO: it might be handy to log this, but it's a LOT - only enable for
+    //debug situations
+    //serverConsole('writeUserLogEntries', experiment, userId, "Push Count = ", valsToPush.length);
 
     UserTimesLog.update( {_id: userId}, action, {upsert: true} );
     logUserMetrics(userId, experiment_key, valsToPush);
