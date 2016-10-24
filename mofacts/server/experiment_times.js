@@ -229,15 +229,36 @@
             schedCondition = "N/A";
         }
 
+        var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
+
+        var unitNum = Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1));
+
         //We used to use the last schedule for unit name, but we don't always have
         //a schedule for the current unit (i.e. model-based units). Luckily we
         //now store the unit name in the instruction log entry
-        var unitName = null;
-        if (!!lastinstruct && typeof lastinstruct.unitname !== "undefined") {
-            unitName = _.trim(lastinstruct.unitname);
-        }
-        if (!unitName && !!sched && typeof sched.unitname !== "undefined") {
-            unitName = _.trim(sched.unitname);
+        // We have 3 sources for unit name: last instructions, last schedule,
+        // and directly looking it up
+        var unitName = _.trim(d(
+            _.prop(lastinstruct, 'unitname'),
+            _.prop(lastschedule, 'unitname'),
+            ''
+        ));
+        if (!unitName) {
+            serverConsole("Forced to lookup up unit name:", unitName);
+            var tdf = Tdfs.findOne({'fileName': tdfName});
+            unitName = _.chain(Tdfs.findOne({'fileName': tdfName}))
+                .prop('tdfs')
+                .prop('tutor')
+                .prop('unit')
+                .prop(_.intval(unitNum, -1))
+                .prop('unitname')
+                .trim()
+                .value();
+            // Cheat - store it in the instruction for the next Q/A pair
+            // This should be OK because instructions are cleared if they don't
+            // match the current unit index
+            lastinstruct.currentUnit = unitNum;
+            lastinstruct.unitname = unitName;
         }
 
         //used a lot below
@@ -263,8 +284,6 @@
         state.stepNameSeen[stepName] = stepCount;
         stepName = stepCount + " " + stepName;
 
-        var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
-
         var whichStim = d(lastq.whichStim, -1);
         if (whichStim < 0) {
             // For models, even if the q record is broken we might be able
@@ -288,7 +307,7 @@
             "Condition Typed": 'how answered',
             "Condition Namee": d(lasta.wasButtonTrial, false),
             "Condition Typee": 'button trial',
-            "Level (Unit)": Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1)),
+            "Level (Unit)": unitNum,
             "Level (Unitname)": d(unitName, ''),
             "Problem Name": d(lastq.selectedQuestion, ''),
             "Step Name": stepName,
@@ -481,11 +500,19 @@
                     }
                 }
 
-                //We might have carried a schedule over that we didn't need
-                var scheduleUnit = _.chain(lastschedule).prop("unitindex").intval(-1).value();
+                // The last question's unit determines the unit for this answer:
+                // Make sure that the schedule and instructions that we have
+                // match the current unit.
                 var questionUnit = _.chain(lastq).prop("currentUnit").intval(-1).value();
+
+                var scheduleUnit = _.chain(lastschedule).prop("unitindex").intval(-1).value();
                 if (scheduleUnit != questionUnit) {
                     lastschedule = {};
+                }
+
+                var instructUnit = _.chain(lastinstruct).prop("currentUnit").intval(-1).value();
+                if (instructUnit != questionUnit) {
+                    lastinstruct = {};
                 }
 
                 //FINALLY have enough to populate the record
