@@ -1,0 +1,177 @@
+<?xml version='1.0' encoding='UTF-8' ?><!-- was: no XML declaration present --><setspec>
+    <clusters>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00010</parameter>	
+            <display><![CDATA[In the case of C &#8594; C, both the __________ and explanatory variables are categorical.]]></display>	
+            <response>response</response>	
+            <parameter>-0.00011</parameter>	
+            <display><![CDATA[In the case of C &#8594; C, both the response and __________ variables are categorical.]]></display>	
+            <response>explanatory</response>	
+            <parameter>-0.00012</parameter>	
+            <display><![CDATA[In the case of C &#8594; C, both the response and explanatory variables are __________.]]></display>	
+            <response>categorical</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00013</parameter>	
+            <display><![CDATA[The &#967;<sup>2</sup> test for __________ examines data to see if there is enough evidence to conclude that two categorical variables are related in the population.]]></display>	
+            <response>independence</response>	
+            <parameter>-0.00014</parameter>	
+            <display><![CDATA[The &#967;<sup>2</sup> test for independence examines data to see if there is enough evidence to conclude that two __________ variables are related in the population.]]></display>	
+            <response>categorical</response>	
+            <parameter>-0.00015</parameter>	
+            <display><![CDATA[The &#967;<sup>2</sup> test for independence examines data to see if there is enough evidence to conclude that two categorical variables are related in the __________.]]></display>	
+            <response>population</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00016</parameter>	
+            <display><![CDATA[The __________ hypothesis for a &#967;<sup>2</sup> test for independence is that there is no relationship between the two categorical variables and that the variables are independent.]]></display>	
+            <response>null</response>	
+            <parameter>-0.00017</parameter>	
+            <display><![CDATA[The null hypothesis for a &#967;<sup>2</sup> test for independence is that there is __________ relationship between the two categorical variables and that the variables are independent.]]></display>	
+            <response>no</response>	
+            <parameter>-0.00018</parameter>	
+            <display><![CDATA[The null hypothesis for a &#967;<sup>2</sup> test for independence is that there is no relationship between the two categorical variables and that the variables are __________.]]></display>	
+            <response>independent</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00019</parameter>	
+            <display>By saying two categorical variables are __________, we mean that they exist in equal proportions in the population.</display>	
+            <response>independent</response>	
+            <parameter>-0.00020</parameter>	
+            <display>By saying two categorical variables are independent, we mean that they exist in __________ proportions in the population.</display>	
+            <response>equal</response>	
+            <parameter>-0.00021</parameter>	
+            <display>By saying two categorical variables are independent, we mean that they exist in equal __________ in the population.</display>	
+            <response>proportions</response>	
+            <parameter>-0.00022</parameter>	
+            <display>By saying two categorical variables are independent, we mean that they exist in equal proportions in the __________.</display>	
+            <response>population</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00023</parameter>	
+            <display><![CDATA[The __________ hypothesis for the &#967;<sup>2</sup> test for independence is that there is a relationship between the two categorical variables and that they are not independent.]]></display>	
+            <response>alternative</response>	
+            <parameter>-0.00024</parameter>	
+            <display><![CDATA[The alternative hypothesis for the &#967;<sup>2</sup> test for independence is that there is a __________ between the two categorical variables and that they are not independent.]]></display>	
+            <response>relationship</response>	
+            <parameter>-0.00025</parameter>	
+            <display><![CDATA[The alternative hypothesis for the &#967;<sup>2</sup> test for independence is that there is a relationship between the two categorical variables and that they are not __________.]]></display>	
+            <response>independent</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00026</parameter>	
+            <display><![CDATA[In a &#967;<sup>2</sup> test for independence, we have __________ sets of count data- the observed and the expected counts.]]></display>	
+            <response>two|2</response>	
+            <parameter>-0.00027</parameter>	
+            <display><![CDATA[In a &#967;<sup>2</sup> test for independence, we have two sets of __________ data- the observed and the expected __________s.]]></display>	
+            <response>count</response>	
+            <parameter>-0.00028</parameter>	
+            <display><![CDATA[In a &#967;<sup>2</sup> test for independence, we have two sets of count data- the __________ and the expected counts.]]></display>	
+            <response>observed</response>	
+            <parameter>-0.00029</parameter>	
+            <display><![CDATA[In a &#967;<sup>2</sup> test for independence, we have two sets of count data- the observed and the __________ counts.]]></display>	
+            <response>expected</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00030</parameter>	
+            <display>We use the two sets of count data to __________ how far away observed data is from the expected counts.</display>	
+            <response>measure</response>	
+            <parameter>-0.00031</parameter>	
+            <display>We use the two sets of count data to measure how far away __________ data is from the expected counts.</display>	
+            <response>observed</response>	
+            <parameter>-0.00032</parameter>	
+            <display>We use the two sets of count data to measure how far away observed data is from the __________ counts.</display>	
+            <response>expected</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00033</parameter>	
+            <display><![CDATA[A rule of thumb for &#967;<sup>2</sup> test of independence is that all __________ counts should be greater than 5.]]></display>	
+            <response>expected</response>	
+            <parameter>-0.00034</parameter>	
+            <display><![CDATA[A rule of thumb for &#967;<sup>2</sup> test of independence is that all expected counts should be __________ than 5.]]></display>	
+            <response>greater</response>	
+            <parameter>-0.00035</parameter>	
+            <display><![CDATA[A rule of thumb for &#967;<sup>2</sup> test of independence is that all expected counts should be greater than __________.]]></display>	
+            <response>five|5</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00036</parameter>	
+            <display><![CDATA[The __________ the test statistic &#967;<sup>2</sup>, the more evidence we have against the null hypothesis.]]></display>	
+            <response>larger</response>	
+            <parameter>-0.00037</parameter>	
+            <display><![CDATA[The larger the __________ &#967;<sup>2</sup>, the more evidence we have against the null hypothesis.]]></display>	
+            <response>test statistic</response>	
+            <parameter>-0.00038</parameter>	
+            <display><![CDATA[The larger the test statistic &#967;<sup>2</sup>, the more evidence we have __________ the null hypothesis.]]></display>	
+            <response>against</response>	
+            <parameter>-0.00039</parameter>	
+            <display><![CDATA[The larger the test statistic &#967;<sup>2</sup>, the more evidence we have against the __________ hypothesis.]]></display>	
+            <response>null</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00040</parameter>	
+            <display><![CDATA[In the Case Q &#8594; Q, we are inferring about two __________ variables and looking for a linear relationship.]]></display>	
+            <response>quantitative</response>	
+            <parameter>-0.00041</parameter>	
+            <display><![CDATA[In the Case Q &#8594; Q, we are inferring about two quantitative variables and looking for a __________ relationship.]]></display>	
+            <response>linear</response>										
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00042</parameter>	
+            <display>In a t-test for the __________, the null hypothesis is that there is no linear relationship between variables X and Y.</display>	
+            <response>slope</response>	
+            <parameter>-0.00043</parameter>	
+            <display>In a t-test for the slope, the __________ hypothesis is that there is no linear relationship between variables X and Y.</display>	
+            <response>null</response>	
+            <parameter>-0.00044</parameter>	
+            <display>In a t-test for the slope, the null hypothesis is that there is no __________ relationship between variables X and Y.</display>	
+            <response>linear</response>							
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00045</parameter>	
+            <display>In a t-test for the __________, the alternative hypothesis is that there is a linear relationship between variables X and Y.</display>	
+            <response>slope</response>	
+            <parameter>-0.00046</parameter>	
+            <display>In a t-test for the slope, the __________ hypothesis is that there is a linear relationship between variables X and Y.</display>	
+            <response>alternative</response>	
+            <parameter>-0.00047</parameter>	
+            <display>In a t-test for the slope, the alternative hypothesis is that there is a __________ relationship between variables X and Y.</display>	
+            <response>linear</response>	
+            <parameter>-0.00048</parameter>	
+            <display>In a t-test for the slope, the alternative hypothesis is that there is a linear __________ between variables X and Y.</display>	
+            <response>relationship</response>				
+        </cluster>
+        <cluster>	
+            <displayType>Cloze</displayType>
+            <parameter>-0.00049</parameter>	
+            <display>The __________ coefficient tells us about the strength and direction of a linear relationship.</display>	
+            <response>correlation</response>	
+             <parameter>-0.00050</parameter>		
+            <display>The correlation __________ tells us about the strength and direction of a linear relationship.</display>	
+            <response>coefficient</response>	
+            <parameter>-0.00051</parameter>	
+            <display>The correlation coefficient tells us about the __________ and direction of a linear relationship.</display>	
+            <response>strength</response>	
+            <parameter>-0.00052</parameter>	
+            <display>The correlation coefficient tells us about the strength and __________ of a linear relationship.</display>	
+            <response>direction</response>	
+            <parameter>-0.00053</parameter>	
+            <display>The correlation coefficient tells us about the strength and direction of a __________ relationship.</display>	
+            <response>linear </response>	
+        </cluster>
+
+
+    </clusters>
+</setspec>
