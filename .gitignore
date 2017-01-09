@@ -13,3 +13,4 @@ mofacts/build
 build/
 mofacts/settings.json
 .tags*
+mofacts/node_modules

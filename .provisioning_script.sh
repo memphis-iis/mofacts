@@ -82,6 +82,7 @@ mkdir -p "$HOME/.meteor/packages"
 sudo mount --bind "$HOME/.meteor/packages" packages
 
 meteor update
+meteor npm install --save babel-runtime
 
 
 # Remove Ubuntu's landscape stuff and clear login messages
