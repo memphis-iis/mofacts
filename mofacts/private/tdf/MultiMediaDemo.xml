@@ -9,6 +9,7 @@
     <unit>
         <unitname>Introduction</unitname>
         <picture>https://bart.binarydolphin.com/instruct.png</picture>
+        <unitinstructions>This is a testing TDF</unitinstructions>
     </unit>
     <!-- <unit>
         <unitname>PreLock</unitname>
@@ -32,7 +33,8 @@
         <buttontrial>true</buttontrial>
         <buttonorder>random</buttonorder>
         <learningsession>
-            <clusterlist>0-2</clusterlist>
+            <!-- <clusterlist>0-2</clusterlist> -->
+            <clusterlist>3-6</clusterlist>  <!-- simple multiple choice -->
             <displayminseconds>30</displayminseconds>
             <displaymaxseconds>1500</displaymaxseconds>
         </learningsession>

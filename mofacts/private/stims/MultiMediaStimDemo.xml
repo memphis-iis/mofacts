@@ -20,5 +20,35 @@
             <response>Animals</response>
             <falseResponse>Plants</falseResponse>
         </cluster>
+
+        <!-- Some multiple choice clusters for testing -->
+        <cluster>
+            <display>The answer is A</display>
+            <response>A~Well Done - A is correct;B~It is NOT B;C~It is NOT C;D~It is NOT D;.*~Wrong</response>
+            <falseResponse>B</falseResponse>
+            <falseResponse>C</falseResponse>
+            <falseResponse>D</falseResponse>
+        </cluster>
+        <cluster>
+            <display>The answer is B</display>
+            <response>B~Well Done - B is correct;A~It is NOT A;C~It is NOT C;D~It is NOT D;.*~Wrong</response>
+            <falseResponse>A</falseResponse>
+            <falseResponse>C</falseResponse>
+            <falseResponse>D</falseResponse>
+        </cluster>
+        <cluster>
+            <display>The answer is C</display>
+            <response>C~Well Done - C is correct;B~It is NOT B;A~It is NOT A;D~It is NOT D;.*~Wrong</response>
+            <falseResponse>A</falseResponse>
+            <falseResponse>B</falseResponse>
+            <falseResponse>D</falseResponse>
+        </cluster>
+        <cluster>
+            <display>The answer is D</display>
+            <response>D~Well Done - D is correct;B~It is NOT B;C~It is NOT C;A~It is NOT A;.*~Wrong</response>
+            <falseResponse>A</falseResponse>
+            <falseResponse>B</falseResponse>
+            <falseResponse>C</falseResponse>
+        </cluster>
     </clusters>
 </setspec>

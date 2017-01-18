@@ -110,6 +110,7 @@ function regExMatch(regExStr, userAnswer, lfparameter) {
 function matchBranching(answer, userAnswer, lfparameter) {
     var isCorrect = false;
     var matchText = "";
+    var userAnswerCheck = _.trim(userAnswer).toLowerCase();
 
     var branches = _.trim(answer).split(';');
     for(var i = 0; i < branches.length; ++i) {
@@ -118,7 +119,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
             continue;
 
         flds[0] = _.trim(flds[0]).toLowerCase();
-        var matched = regExMatch(flds[0], userAnswer, lfparameter);
+        var matched = regExMatch(flds[0], userAnswerCheck, lfparameter);
         if (matched !== 0) {
             matchText = _.trim(flds[1]);
             if (matched === 2) {
