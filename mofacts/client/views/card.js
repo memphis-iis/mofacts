@@ -646,8 +646,8 @@ function newQuestionHandler() {
     //    button labels will be taken from the current stim cluster.
     //
     // 3. wrongButtonCount - The number of WRONG buttons to display (so final
-    //    button is wrongButtonCount + 1 for the correct answer). This is ONLY    used
-    //    if buttonorder is random.
+    //    button is wrongButtonCount + 1 for the correct answer). This is ONLY
+    //    used if buttonorder is random.
     //
     // For fixed order, we just use the button labels we find per #2 above. For
     // random order, we take wrongButtonOptions random buttons from the wrong button
