@@ -1,0 +1,302 @@
+<tutor>
+    <setspec>
+        <name>Disorders</name>
+        <lessonname>Psychological Disorders Bm</lessonname>
+        <userselect>false</userselect>
+        <stimulusfile>Disorders2stimsfake.xml</stimulusfile>
+        <clustermodel>structuralpairs</clustermodel>
+        <clustersize>1</clustersize>
+        <shuffleclusters>0-5 6-11 12-17 18-23 24-29 30-35</shuffleclusters>
+        <swapclusters>0-5 6-11 12-17 18-23 24-29 30-35</swapclusters>
+
+    </setspec>
+
+    <unit>
+        <unitname>Instructions</unitname>
+        <unitinstructions><![CDATA[During this portion of the experiment, you will be presented with different case studies describing symptoms of one of 6 psychological disorders.<br><br>You will be asked to review a case study and the name of the disorder being described on each screen.<br><br> When you are ready to begin this portion of the experiment, please press the CONTINUE button below.]]>
+        </unitinstructions>
+    </unit>
+
+
+    <unit>
+        <unitname>Psychological Disorders Study Phase</unitname>
+        <unitinstructions><![CDATA[Study Phase<br><br> Read the following case studies and diagnoses.<br><br>Each slide will advance for you automatically after a set period of time.]]></unitinstructions>
+        <buttonorder>fixed</buttonorder>
+        <wrongButtonCount></wrongButtonCount> <!-- Default to len of wrongButtonOptions -->
+        <wrongButtonOptions>Obsessive Compulsive Disorder, Anxiety, Schizophrenia, Bipolar, Dissociative Identity Disorder, Depression</wrongButtonOptions>
+        <deliveryparams>
+            <fontsize>4</fontsize>
+            <purestudy>30000</purestudy>
+            <readyprompt>0</readyprompt>
+            <reviewstudy>3000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>10000</drill>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A B C D E F G H I J K L M N O P Q R</groupnames>
+                <clustersrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</clustersrepeated>
+                <templatesrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</templatesrepeated>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+                <group>0,f,s,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>G_1 H_1 I_1 J_1 M_1 P_1 A_1 B_1 C_1 K_1 N_1 Q_1 D_1 E_1 F_1 L_1 O_1 R_1</initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-2 6-8 12-14 18-20 24-26 30-32</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0 1-1 2-2 3-5 6-6 7-7 8-8 9-11 12-12 13-13 14-14 15-17</permutefinalresult>
+        </assessmentsession>
+    </unit>
+
+    <unit>
+        <unitname>Retention Interval Task</unitname>
+        <unitinstructions><![CDATA[You have completed the first part of this experiment.<br><br> For the next portion of the experiment you will be presented with a series of simple math problems.<br><br> On the following screens, type in your answer and press the enter button to submit your response.]]></unitinstructions>
+        <buttonorder>fixed</buttonorder> 
+        <deliveryparams>
+            <purestudy>30000</purestudy>
+            <readyprompt>200</readyprompt>
+            <reviewstudy>1000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>30000</drill>
+        </deliveryparams>	
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A B C D E F G H I J K L M N O</groupnames>                
+                <clustersrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </clustersrepeated>
+                <templatesrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 </templatesrepeated>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>               
+            </conditiontemplatesbygroup>
+            <initialpositions>A_1 B_1 C_1 D_1 E_1 F_1 G_1 H_1 I_1 J_1 K_1 L_1 M_1 N_1 O_1</initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>36-50</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0 1-1 2-2 3-3 4-4 5-5 6-6 7-7 8-8 9-9 10-10 11-11 12-12 13-13 14-14</permutefinalresult>
+        </assessmentsession>
+    </unit>
+    <unit>
+        <unitname>Post-Test</unitname>
+        <unitinstructions><![CDATA[For the following portion of the experiment, you will be given case studies of the psychological disorders you have previously studied in the beginning of this experiment.<br><br>In this section, each case study will be presented on screen and you will be asked to identify the appropriate diagnosis by clicking on the corresponding button.<br><br> If you identify the correct diagnosis you will receive feedback that it is correct, if the diagnosis is incorrect you will be given a review period to re read the case study and learn the correct disorder.]]></unitinstructions>
+        <buttonorder>fixed</buttonorder>
+        <wrongButtonCount></wrongButtonCount> <!-- Default to len of wrongButtonOptions -->
+        <wrongButtonOptions>Duv, Baj, Tem, Hix, Pliq, Wos</wrongButtonOptions>
+        <deliveryparams>
+            <fontsize>4</fontsize>
+            <purestudy>12000000</purestudy>
+            <readyprompt>200</readyprompt>
+            <reviewstudy>15000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <drill>12000000</drill>
+        </deliveryparams>
+        <buttontrial>true</buttontrial>		
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A B C D E F G H I J K L M N O P Q R</groupnames>                
+                <clustersrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</clustersrepeated>
+                <templatesrepeated>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</templatesrepeated>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+                <group>0,f,d,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>A_1 D_1 G_1 J_1 M_1 P_1 B_1 E_1 H_1 K_1 N_1 Q_1 C_1 F_1 I_1 L_1 O_1 R_1</initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>3-5 9-11 15-17 21-23 27-29 33-35</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-5 6-11 12-17</permutefinalresult>
+        </assessmentsession>
+    </unit>
+    <unit> 
+        <unitname>Association Check</unitname> 
+        <unitinstructions>On the following screens, please choose the answer that best applies to you. If you do not feel like any of the answers apply, please choose "Don't know".</unitinstructions> 
+        <buttonorder>fixed</buttonorder> 
+        <deliveryparams> 
+            <drill>120000</drill> 
+            <purestudy>16000</purestudy> 
+            <skipstudy>false</skipstudy> 
+            <reviewstudy>16000</reviewstudy> 
+            <correctprompt>500</correctprompt> 
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams> 
+        <assessmentsession> 
+            <conditiontemplatesbygroup> 
+                <groupnames>A</groupnames> 
+                <clustersrepeated>1</clustersrepeated> 
+                <templatesrepeated>6</templatesrepeated> 
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group> 
+            </conditiontemplatesbygroup> 
+            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 </initialpositions> 
+            <randomizegroups>false</randomizegroups> 
+            <clusterlist>51-56</clusterlist> 
+            <assignrandomclusters>false</assignrandomclusters> 
+            <permutefinalresult>0-0</permutefinalresult> 
+        </assessmentsession> 
+    </unit>
+    <unit>        
+        <unitname>Achievement Goals</unitname>        
+        <unitinstructions><![CDATA[On the following screens, please select the extent to which you agree or disagree with the following statements regarding your academic performance by choosing the corresponding button.]]></unitinstructions>        
+        <buttonorder>fixed</buttonorder>        
+        <deliveryparams>            
+            <drill>12000000</drill>            
+            <purestudy>16000</purestudy>            
+            <skipstudy>false</skipstudy>            
+            <reviewstudy>16000</reviewstudy>            
+            <correctprompt>500</correctprompt>        
+            <fontsize>3</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>                
+        <assessmentsession>            
+            <conditiontemplatesbygroup>                
+                <groupnames>A</groupnames>                
+                <clustersrepeated>1</clustersrepeated>                
+                <templatesrepeated>12</templatesrepeated>                
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>            
+            </conditiontemplatesbygroup>            
+            <initialpositions>A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12</initialpositions>            
+            <randomizegroups>false</randomizegroups>            
+            <clusterlist>57-68</clusterlist>            
+            <assignrandomclusters>false</assignrandomclusters>            
+            <permutefinalresult>0-0</permutefinalresult>        
+        </assessmentsession>    
+    </unit>
+    <unit>        
+        <unitname>Theories of Intelligence</unitname>        
+        <unitinstructions><![CDATA[On the following screens, please select the extent to which you agree or disagree with the following statements by clicking on the corresponding button.]]></unitinstructions>        
+        <buttonorder>fixed</buttonorder>        
+        <deliveryparams>            
+            <drill>12000000</drill>            
+            <purestudy>16000</purestudy>            
+            <skipstudy>false</skipstudy>            
+            <reviewstudy>16000</reviewstudy>            
+            <correctprompt>500</correctprompt>        
+            <fontsize>3</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>                
+        <assessmentsession>            
+            <conditiontemplatesbygroup>                
+                <groupnames>A</groupnames>                
+                <clustersrepeated>1</clustersrepeated>                
+                <templatesrepeated>8</templatesrepeated>                
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>            
+            </conditiontemplatesbygroup>            
+            <initialpositions>A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8</initialpositions>            
+            <randomizegroups>false</randomizegroups>            
+            <clusterlist>69-76</clusterlist>            
+            <assignrandomclusters>false</assignrandomclusters>            
+            <permutefinalresult>0-0</permutefinalresult>        
+        </assessmentsession>    
+    </unit>
+    <unit>
+        <unitname>Confidence Ratings</unitname>        
+        <unitinstructions><![CDATA[On the following screens, please select the extent to which you agree or disagree with each of the following statements regarding your performance during this experiment by choosing the corresponding button.]]></unitinstructions>        
+        <buttonorder>fixed</buttonorder>        
+        <deliveryparams>            
+            <drill>12000000</drill>            
+            <purestudy>16000</purestudy>            
+            <skipstudy>false</skipstudy>            
+            <reviewstudy>16000</reviewstudy>            
+            <correctprompt>500</correctprompt>        
+            <fontsize>3</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>                
+        <assessmentsession>            
+            <conditiontemplatesbygroup>                
+                <groupnames>A</groupnames>                
+                <clustersrepeated>1</clustersrepeated>                
+                <templatesrepeated>6</templatesrepeated>                
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>            
+            </conditiontemplatesbygroup>            
+            <initialpositions>A_1 A_2 A_3 A_4 A_5 A_6</initialpositions>            
+            <randomizegroups>false</randomizegroups>            
+            <clusterlist>77-82</clusterlist>            
+            <assignrandomclusters>false</assignrandomclusters>            
+            <permutefinalresult>0-0</permutefinalresult>        
+        </assessmentsession>    
+    </unit>  
+    <unit>        
+        <unitname>Demographics</unitname>        
+        <unitinstructions> Please answer the following 3 quick demographic questions, which may be useful for us to understand the data we collect.</unitinstructions>        
+        <buttonorder>fixed</buttonorder>        
+        <deliveryparams>            
+            <drill>12000000</drill>            
+            <purestudy>16000</purestudy>            
+            <skipstudy>false</skipstudy>            
+            <reviewstudy>16000</reviewstudy>            
+            <correctprompt>500</correctprompt>        
+            <fontsize>3</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>                
+        <assessmentsession>            
+            <conditiontemplatesbygroup>                
+                <groupnames>A</groupnames>                
+                <clustersrepeated>1</clustersrepeated>                
+                <templatesrepeated>4</templatesrepeated>                
+                <group>0,b,t,0 0,b,t,0 0,b,t,0</group>            
+            </conditiontemplatesbygroup>            
+            <initialpositions>A_1 A_2 A_3</initialpositions>            
+            <randomizegroups>false</randomizegroups>            
+            <clusterlist>83-85</clusterlist>            
+            <assignrandomclusters>false</assignrandomclusters>            
+            <permutefinalresult>0-0</permutefinalresult>        
+        </assessmentsession>    
+    </unit>  
+    
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions><![CDATA[The study you just participated in is examining the effects of the presentation of material on inductive learning and retention.<br><br> Your time and willingness to participate in this study is greatly appreciated. If you feel you may be experiencing adverse reactions due to this study please speak to with the researcher or contact Ms. Sadie Lisenby, Director of Counseling at 901.321.3527 or slisenby@cbu.edu.
+            <br><br>If you have any questions about this study or would like information on the results please contact Chanda Murphy at 901.321.3338 or cmurphy6@cbu.edu. Also please email Chanda Murphy if you would like access to the study program used in this experiment to further study the differences between the disorders.
+
+            <br><br>Thank you for your participation.]]></unitinstructions>
+    </unit>
+</tutor>

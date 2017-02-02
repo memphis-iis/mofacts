@@ -28,7 +28,7 @@
             <purestudy>10000</purestudy>
             <drill>10000</drill>
             <skipstudy>false</skipstudy>
-            <reviewstudy>1000</reviewstudy>
+            <reviewstudy>5000</reviewstudy>
             <correctprompt>500</correctprompt>
             <fontsize>3</fontsize>
             <correctscore>1</correctscore>
