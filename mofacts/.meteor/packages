@@ -20,4 +20,7 @@ service-configuration@1.0.11
 accounts-google@1.0.11
 shell-server@0.2.1
 promise@0.8.8
-iron:router@=1.0.12
+
+#iron:router@=1.0.12
+iron:router@1.1.1
+mizzao:bootstrap-3
