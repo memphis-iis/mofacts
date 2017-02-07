@@ -547,7 +547,6 @@
         <cluster>
             <display>What is your age?</display>
             <response>18-25</response>
-            <falseResponse>18-25</falseResponse>
             <falseResponse>26-34</falseResponse>
             <falseResponse>35-54</falseResponse>
             <falseResponse>55-64</falseResponse>
@@ -563,7 +562,6 @@
         <cluster>
             <display>What is your current academic standing?</display>
             <response>Freshman</response>
-            <falseResponse>Freshman</falseResponse>
             <falseResponse>Sophomore</falseResponse>
             <falseResponse>Junior</falseResponse>
             <falseResponse>Senior</falseResponse>

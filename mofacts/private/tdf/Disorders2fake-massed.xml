@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <name>Disorders</name>
-        <lessonname>Psychological Disorders Bm</lessonname>
+        <lessonname>Psychological Disorders Bm</lessonname><experimentTarget>disordersbm</experimentTarget>
         <userselect>false</userselect>
         <stimulusfile>Disorders2stimsfake.xml</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
