@@ -52,7 +52,10 @@ CFGSRC="/etc/mongod.conf"
 CFGBASE="$PDIR/mongod.conf"
 
 cp $CFGSRC "$CFGBASE.old"
-sed "s/bind_ip/#bind_ip/" < "$CFGBASE.old" > "$CFGBASE.new"
+cat "$CFGBASE.old" \
+ | sed "s/bind_ip: 127.0.0.1/bind_ip: 0.0.0.0/" \
+ | sed "s/bindIp: 127.0.0.1/bindIp: 0.0.0.0/" \
+ > "$CFGBASE.new"
 sudo cp "$CFGBASE.new" $CFGSRC
 
 # Now restart the service since we've changed the config
