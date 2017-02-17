@@ -1,0 +1,73 @@
+<tutor>
+    <setspec>
+        <name>Intro Practice</name>
+        <lessonname>Intro Explanatory</lessonname>
+        <userselect>false</userselect>
+        <experimentTarget>introexp</experimentTarget>
+        <stimulusfile>IntroExplanatorystims.xml</stimulusfile>
+    </setspec>
+    <unit>
+        <unitname>Informed Consent</unitname>
+        <unitinstructions><![CDATA[<p>The experiment is designed to compare various degrees of corrective feedback while studying for an upcoming exam. You have been randomly assigned to this condition. Whatever condition you are in, please try to do your best, as this is a useful study tool. 
+<p>If you should have any questions about this research study please feel free to contact your course instructor, or Kaitlyn Peperone at kpperone@memphis.edu. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2705.
+<p>All efforts, within the limits allowed by law, will be made to keep the personal information in your research record private but total privacy cannot be promised. We will deidentify your data after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by University of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.
+<br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Introduction</unitname>
+        <unitinstructions><![CDATA[<p>The questions you are about to see are representative of those you will see on the exam. You must complete 15 minutes worth of practice to receive extra credit. You may receive feedback on your answer after each question. It may be useful to you to take notes on the topics and/or feedback throughout the practice. <br><br> If you have any questions about the system, please contact your course instructor. <br><br>Please remember to email your course instructor the 4 digit sequence you used to log into the system.</p>]]></unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Explanatory</unitname>
+        <buttontrial>true</buttontrial>
+        <buttonorder>random</buttonorder>
+        <learningsession>
+            <!-- <clusterlist>0-2</clusterlist> -->
+            <clusterlist>0-49</clusterlist>  <!-- simple multiple choice -->
+            <displayminseconds>900</displayminseconds>
+            <displaymaxseconds>900</displaymaxseconds>
+        </learningsession>
+        <deliveryparams>
+            <drill>15000000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>30000</reviewstudy>
+            <correctprompt>6000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit> 
+    <unit>
+        <unitname>Continuation</unitname>
+        <unitinstructions><![CDATA[<p>You have completed the extra credit. Please continue practicing if you want. <br><br>Please remember to email your course instructor the 4 digit sequence you used to log into the system.</p>]]></unitinstructions>
+    </unit>
+
+    <unit>
+        <unitname>Explanatory-2</unitname>
+        <buttontrial>true</buttontrial>
+        <buttonorder>random</buttonorder>
+        <learningsession>
+            <!-- <clusterlist>0-2</clusterlist> -->
+            <clusterlist>0-49</clusterlist>  <!-- simple multiple choice -->
+            <displayminseconds>1000000</displayminseconds>
+            <displaymaxseconds>1000000</displaymaxseconds>
+        </learningsession>
+        <deliveryparams>
+            <drill>15000000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>30000</reviewstudy>
+            <correctprompt>6000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions>All done</unitinstructions>
+    </unit>
+</tutor>
