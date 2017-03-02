@@ -204,6 +204,8 @@ AssessmentSession = {
             finalQuests.push(obj);
         });
 
+        //TODO: add the new swapfinalresults command processing here
+
         _.each(settings.finalPermute, function(singlePerm) {
             var targetIndexes = Helpers.rangeVal(singlePerm);
             var randPerm = targetIndexes.slice(); //clone
