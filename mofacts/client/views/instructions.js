@@ -41,10 +41,19 @@ function leavePage(dest) {
 ////////////////////////////////////////////////////////////////////////////
 // Utility functions used below
 
+// Added because the LOCKOUT call overwhelms the console - so we throttle to one
+// call every 1000ms (1 second)
+var logLockout = _.throttle(
+    function (lockoutminutes) {
+        console.log("LOCKOUT:", lockoutminutes, "min");
+    },
+    250
+);
+
 //Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
     var lockoutminutes = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
-    console.log("LOCKOUT:", lockoutminutes, "min");  //TODO: remove this - we're flooding the console
+    logLockout(lockoutminutes);
     return lockoutminutes;
 }
 
