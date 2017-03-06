@@ -204,17 +204,26 @@ AssessmentSession = {
             finalQuests.push(obj);
         });
 
-        //TODO: add the new swapfinalresults command processing here
+        // Shuffle and swap final question mapping based on permutefinalresult
+        // and swapfinalresults
+        if (finalQuests.length > 0) {
+            var shuffles = settings.finalPermute || [""];
+            var swaps = settings.finalSwap || [""];
+            var mapping = _.range(finalQuests.length);
 
-        _.each(settings.finalPermute, function(singlePerm) {
-            var targetIndexes = Helpers.rangeVal(singlePerm);
-            var randPerm = targetIndexes.slice(); //clone
-            Helpers.shuffle(randPerm);
-
-            for(j = 0; j < targetIndexes.length; ++j) {
-                finalQuests[targetIndexes[j]] = quests[randPerm[j]];
+            while(shuffles.length > 0 || swaps.length > 0) {
+                mapping = createStimClusterMapping(
+                    finalQuests.length,
+                    shuffles.shift() || "",
+                    swaps.shift() || "",
+                    mapping
+                );
             }
-        });
+
+            for (j = 0; j < mapping.length; ++j) {
+                finalQuests[j] = quests[mapping[j]];
+            }
+        }
 
         //Note that our card.js code has some fancy permutation
         //logic, but that we don't currently use it from the assessment
@@ -246,6 +255,7 @@ AssessmentSession = {
             randomClusters: false,
             randomConditions: false,
             scheduleSize: 0,
+            finalSwap: [],
             finalPermute: [],
             clusterNumbers: [],
             ranChoices: [],
@@ -276,9 +286,12 @@ AssessmentSession = {
         //Get the setspec settings first
         settings.specType = _.display(setspec.clustermodel);
 
+        //We have a few parameters that we need in their "raw" states (as arrays)
+        settings.finalSwap = _.prop(rawAssess, "swapfinalresult");
+        settings.finalPermute = _.prop(rawAssess, "permutefinalresult");
+
         //The "easy" "top-level" settings
         Helpers.extractDelimFields(assess.initialpositions, settings.initialPositions);
-        Helpers.extractDelimFields(assess.permutefinalresult, settings.finalPermute);
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
         settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
