@@ -26,7 +26,10 @@ AssessmentSession = {
         catch(e) {
             if (console && console.log) {
                 console.log("Error creating a schedule from the assessment session in the TDF...");
-                console.log(e);
+                console.log("ERROR", displayify(e));
+                console.log("unitnumber", displayify(unitNumber));
+                console.log("setspec", displayify(setspec));
+                console.log("unit", displayify(unit));
             }
             return null;
         }
@@ -54,7 +57,7 @@ AssessmentSession = {
         //First get the setting we'll use
         var settings = AssessmentSession.loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
-        console.log(settings);
+        console.log(displayify(settings));
 
         //Shuffle clusters at start
         if (settings.randomClusters) {
@@ -220,6 +223,12 @@ AssessmentSession = {
                 );
             }
 
+            console.log("Question swap/shuffle mapping:", displayify(
+                _.map(mapping, function(val, idx) {
+                    return "q[" + idx + "].cluster==" + quests[idx].clusterIndex +
+                      " ==> q[" + val + "].cluster==" + quests[val].clusterIndex;
+                })
+            ));
             for (j = 0; j < mapping.length; ++j) {
                 finalQuests[j] = quests[mapping[j]];
             }
@@ -255,8 +264,8 @@ AssessmentSession = {
             randomClusters: false,
             randomConditions: false,
             scheduleSize: 0,
-            finalSwap: [],
-            finalPermute: [],
+            finalSwap: [""],
+            finalPermute: [""],
             clusterNumbers: [],
             ranChoices: [],
             isButtonTrial: false,
@@ -287,8 +296,8 @@ AssessmentSession = {
         settings.specType = _.display(setspec.clustermodel);
 
         //We have a few parameters that we need in their "raw" states (as arrays)
-        settings.finalSwap = _.prop(rawAssess, "swapfinalresult");
-        settings.finalPermute = _.prop(rawAssess, "permutefinalresult");
+        settings.finalSwap = _.prop(rawAssess, "swapfinalresult") || [""];
+        settings.finalPermute = _.prop(rawAssess, "permutefinalresult") || [""];
 
         //The "easy" "top-level" settings
         Helpers.extractDelimFields(assess.initialpositions, settings.initialPositions);

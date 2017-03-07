@@ -3,7 +3,9 @@ require("./sd_fixtures.js");
 
 require("../lib/globalHelpers.js");
 require("../common/Helpers.js");
+require("../client/lib/shuffle_swap.js");
 require("../common/AssessmentSession.js");
+
 
 test_suite("buttonTrials", function() {
     var tdffile = SDTDF();
@@ -12,6 +14,7 @@ test_suite("buttonTrials", function() {
     unit_test("ButtonTrialDefault", function(logger) {
         var unitIndex = 1;
         var unit = tdffile.tdfs.tutor.unit[unitIndex];
+        assert(unit);
         var sched = AssessmentSession.createSchedule(setspec, unitIndex, unit);
 
         assert.equal(unitIndex, sched.unitNumber);
@@ -32,6 +35,7 @@ test_suite("buttonTrials", function() {
     unit_test("ButtonTrialForcedOn", function(logger) {
         var unitIndex = 2;
         var unit = tdffile.tdfs.tutor.unit[unitIndex];
+        assert(unit);
         var sched = AssessmentSession.createSchedule(setspec, unitIndex, unit);
 
         assert.equal(unitIndex, sched.unitNumber);
@@ -51,7 +55,9 @@ test_suite("permutefinal", function() {
     var tdffile = SDTDF();
     var unitIndex = 1;
     var unit = tdffile.tdfs.tutor.unit[unitIndex];
+    assert(unit);
     var setspec = tdffile.tdfs.tutor.setspec[0];
+    assert(setspec);
 
     var q_in_order = function(q) {
         for(var i = 1; i < q.length; ++i) {
