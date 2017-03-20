@@ -1,0 +1,249 @@
+<tutor>
+    <setspec>
+       
+        <name>Intro Practice</name>
+        <lessonname>Intro Instructive 2</lessonname>
+        <userselect>false</userselect>
+        <experimentTarget>introins2</experimentTarget>
+        <stimulusfile>IntroCorrectivestims.xml</stimulusfile>
+    </setspec>  
+    <unit>
+        <unitname>Informed Consent</unitname>
+        <unitinstructions><![CDATA[<p>The experiment is designed to compare various degrees of corrective feedback while studying for an upcoming exam. You have been randomly assigned to this condition. Whatever condition you are in, please try to do your best, as this is a useful study tool. 
+<p>If you should have any questions about this research study please feel free to contact your course instructor, or Kaitlyn Peperone at kpperone@memphis.edu. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2705.
+<p>All efforts, within the limits allowed by law, will be made to keep the personal information in your research record private but total privacy cannot be promised. We will deidentify your data after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by University of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.
+<br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions>
+
+    </unit>
+   
+    <unit>
+        <unitname>Text Instuctions</unitname>
+        <unitinstructions><![CDATA[<p>The terms and facts you are about to see are representative of those you will tested on for the exam. You must review the terms and facts for a minimum of 15 minutes to receive extra credit. You may return to the review after the 15 minutes is up. You may find it useful to take notes on the topics throughout the 15 minutes. <br><br> If you have any questions about the system, please contact your course instructor. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
+    </unit>
+    <unit>
+        <unitname>Text</unitname>
+        <instructionminseconds>900</instructionminseconds>
+        <instructionmaxseconds>900</instructionmaxseconds>
+        <unitinstructions><![CDATA[A person’s in-group is often defined by his or her nationality, ethnicity, age, gender, income, religion, and political values. 
+<br><br>
+Social comparison occurs when we measure ourselves in comparison to others if something is difficult to measure objectively. 
+<br><br>
+The fundamental attribution error is the tendency we have to view internal causes, such as personality, as the reason for other people’s behaviors.
+<br><br>
+The actor-observer bias refers to the tendency to assign external causes to our own behaviors and internal causes to other people’s behavior.
+<br><br>
+If you wish to persuade an audience, only one side of the argument should be presented to a poorly informed audience. 
+<br><br>
+Cognitive dissonance occurs when contradicting or clashing thoughts cause discomfort.
+<br><br>
+A person is more likely to conform if he or she lives in a culture that emphasizes group cooperation.
+<br><br>
+The process of spontaneously changing your behavior to match that of others is called conformity. 
+<br><br>
+When using the door-in-the-face approach, you first ask for a larger favor than you actually want, in the hopes that the smaller favor you do want will seem more reasonable in comparison. 
+<br><br>
+If one person in a group begins to resist the orders of a legitimate authority, other people are more likely to disobey the authority as well.
+<br><br>
+The chances that a bystander will give help in an emergency is reduced when there are others nearby who could also help.
+<br><br>
+Stereotype threat refers to the risk people have to conform to a negative stereotype about a group they belong to. 
+<br><br>
+Group sanctions are threats of ridicule or rejection for nonconformity. 
+<br><br>
+The somatic nervous system is involved in controlling voluntary functions and movements of the body. 
+<br><br>
+The autonomic nervous system controls the involuntary physical changes that occur in the body, such as changes in heart rate, blood pressure, and perspiration.
+<br><br>
+Axon terminals are bulb-shaped parts at the end of the part of the neuron that sends information to other neurons.
+<br><br>
+Small gaps in the myelin result in nerve impulses jumping from gap to gap which causes the nerve impulses to move faster.
+<br><br>
+The action potential is an all or nothing event within a single neuron that is primarily an electrical process. 
+<br><br>
+Neuroplasticity refers to the fact that in response to experience, synaptic connections may grow stronger and new connections may form within the brain.
+<br><br>
+The cerebral cortex is highest functioning and largest brain area in humans, and is important in differentiating intelligence between humans and other animals. 
+<br><br>
+The right hemisphere of the brain deals with information by exploring overall patterns and general connections.
+<br><br>
+If a person suffers damage to their hippocampus, they will likely have difficulties forming new memories.
+<br><br>
+Although commonly thought to be true, it is a misconception that humans only use 10% of their brain.
+<br><br>
+A conceptual rule is a formal guideline for deciding whether objects or events belong to a category or class.
+<br><br>
+An ideal model used as a prime example of a particular concept is a prototype. 
+<br><br>
+The connotative meaning is the emotional or personal meaning of a word.
+<br><br>
+The linguistic relativity hypothesis says that the words we use not only reflect our thoughts but can also shape our thoughts.
+<br><br>
+The entity theory of intelligence is the theory that intelligence is unchangeable or set in stone. 
+<br><br>
+Cognitive load refers to the amount of mental effort one uses on a task.
+<br><br>
+Functional fixedness refers to the inability to see past conventions about uses or meanings.
+<br><br>
+Expert skills are based on learned heuristics and broad conceptual understanding.
+<br><br>
+The tendency to select wrong answers because they seem to match pre-existing mental categories is referred to as the representativeness heuristic.
+<br><br>
+Framing refers to the fact that decision making can be influenced by the way that a problem is stated or structured. 
+<br><br>
+Priming, framing and anchoring are all related to influencing how someone takes in, reads, and interprets new information.
+<br><br>
+The anchoring heuristic or bias is when we rely too heavily on the first piece of information offered when making decisions.
+<br><br>
+System 1, or experiential processing, is considered part of cognition, handles concept categorization, is not constrained by working memory capacity, and is a rapid, automatic form of processing. 
+<br><br>
+The notion that language is invented, proliferates, and dies, suggests that language is a living organism.
+<br><br>
+The ability of our minds to process information, such as text, automatically is best illustrated by the Stroop Task. 
+<br><br>
+When creating impressions, inaccurate impressions are often formed when negation is used.
+<br><br>
+Stimulus motives refer to the need for information, exploration,
+manipulation, and sensory input. 
+<br><br>
+Maslow’s basic needs were more likely to direct human activity until they were met.
+<br><br>
+Extrinsic motivation stems from obvious external rewards.
+<br><br>
+The sympathetic branch of the autonomic nervous system is also known as the fight-or-flight system.
+<br><br>
+Basic emotions, such as fear, are first processed in the sub cortex.
+<br><br>
+Complex emotions are often under the control of higher brain centers and are a form of reflective processing.
+<br><br>
+The parasympathetic branch of the autonomic nervous system is responsible for calming and restoring the body and conserving energy.
+<br><br>
+According to the Cannon-Bard theory of emotion, we experience emotion and physiological arousal and responses simultaneously. 
+<br><br>
+Schachter-Singer’s theory of emotion says that the specific emotion that an aroused person experiences depends on the cognitive factors present during physiological arousal.
+<br><br>
+Schachter-Singer’s cognitive theory states that we likely choose the appropriate label for the source of our arousal through a process called appraisal or labeling.
+<br><br>
+The facial feedback hypothesis states that sensations from facial expressions help define, and can cause, what emotion a person feels.]]> 
+
+
+
+</unitinstructions>
+    </unit>
+      <unit>
+        <unitname>Continuation</unitname>
+        <unitinstructions><![CDATA[<p>You have completed the extra credit. Please continue practicing if you want. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
+    </unit>
+    <unit>
+        <unitname>Text-2</unitname>
+        <instructionminseconds>1000000</instructionminseconds>
+        <instructionmaxseconds>1000000</instructionmaxseconds>
+        <unitinstructions><![CDATA[A person’s in-group is often defined by his or her nationality, ethnicity, age, gender, income, religion, and political values. 
+<br><br>
+Social comparison occurs when we measure ourselves in comparison to others if something is difficult to measure objectively. 
+<br><br>
+The fundamental attribution error is the tendency we have to view internal causes, such as personality, as the reason for other people’s behaviors.
+<br><br>
+The actor-observer bias refers to the tendency to assign external causes to our own behaviors and internal causes to other people’s behavior.
+<br><br>
+If you wish to persuade an audience, only one side of the argument should be presented to a poorly informed audience. 
+<br><br>
+Cognitive dissonance occurs when contradicting or clashing thoughts cause discomfort.
+<br><br>
+A person is more likely to conform if he or she lives in a culture that emphasizes group cooperation.
+<br><br>
+The process of spontaneously changing your behavior to match that of others is called conformity. 
+<br><br>
+When using the door-in-the-face approach, you first ask for a larger favor than you actually want, in the hopes that the smaller favor you do want will seem more reasonable in comparison. 
+<br><br>
+If one person in a group begins to resist the orders of a legitimate authority, other people are more likely to disobey the authority as well.
+<br><br>
+The chances that a bystander will give help in an emergency is reduced when there are others nearby who could also help.
+<br><br>
+Stereotype threat refers to the risk people have to conform to a negative stereotype about a group they belong to. 
+<br><br>
+Group sanctions are threats of ridicule or rejection for nonconformity. 
+<br><br>
+The somatic nervous system is involved in controlling voluntary functions and movements of the body. 
+<br><br>
+The autonomic nervous system controls the involuntary physical changes that occur in the body, such as changes in heart rate, blood pressure, and perspiration.
+<br><br>
+Axon terminals are bulb-shaped parts at the end of the part of the neuron that sends information to other neurons.
+<br><br>
+Small gaps in the myelin result in nerve impulses jumping from gap to gap which causes the nerve impulses to move faster.
+<br><br>
+The action potential is an all or nothing event within a single neuron that is primarily an electrical process. 
+<br><br>
+Neuroplasticity refers to the fact that in response to experience, synaptic connections may grow stronger and new connections may form within the brain.
+<br><br>
+The cerebral cortex is highest functioning and largest brain area in humans, and is important in differentiating intelligence between humans and other animals. 
+<br><br>
+The right hemisphere of the brain deals with information by exploring overall patterns and general connections.
+<br><br>
+If a person suffers damage to their hippocampus, they will likely have difficulties forming new memories.
+<br><br>
+Although commonly thought to be true, it is a misconception that humans only use 10% of their brain.
+<br><br>
+A conceptual rule is a formal guideline for deciding whether objects or events belong to a category or class.
+<br><br>
+An ideal model used as a prime example of a particular concept is a prototype. 
+<br><br>
+The connotative meaning is the emotional or personal meaning of a word.
+<br><br>
+The linguistic relativity hypothesis says that the words we use not only reflect our thoughts but can also shape our thoughts.
+<br><br>
+The entity theory of intelligence is the theory that intelligence is unchangeable or set in stone. 
+<br><br>
+Cognitive load refers to the amount of mental effort one uses on a task.
+<br><br>
+Functional fixedness refers to the inability to see past conventions about uses or meanings.
+<br><br>
+Expert skills are based on learned heuristics and broad conceptual understanding.
+<br><br>
+The tendency to select wrong answers because they seem to match pre-existing mental categories is referred to as the representativeness heuristic.
+<br><br>
+Framing refers to the fact that decision making can be influenced by the way that a problem is stated or structured. 
+<br><br>
+Priming, framing and anchoring are all related to influencing how someone takes in, reads, and interprets new information.
+<br><br>
+The anchoring heuristic or bias is when we rely too heavily on the first piece of information offered when making decisions.
+<br><br>
+System 1, or experiential processing, is considered part of cognition, handles concept categorization, is not constrained by working memory capacity, and is a rapid, automatic form of processing. 
+<br><br>
+The notion that language is invented, proliferates, and dies, suggests that language is a living organism.
+<br><br>
+The ability of our minds to process information, such as text, automatically is best illustrated by the Stroop Task. 
+<br><br>
+When creating impressions, inaccurate impressions are often formed when negation is used.
+<br><br>
+Stimulus motives refer to the need for information, exploration,
+manipulation, and sensory input. 
+<br><br>
+Maslow’s basic needs were more likely to direct human activity until they were met.
+<br><br>
+Extrinsic motivation stems from obvious external rewards.
+<br><br>
+The sympathetic branch of the autonomic nervous system is also known as the fight-or-flight system.
+<br><br>
+Basic emotions, such as fear, are first processed in the sub cortex.
+<br><br>
+Complex emotions are often under the control of higher brain centers and are a form of reflective processing.
+<br><br>
+The parasympathetic branch of the autonomic nervous system is responsible for calming and restoring the body and conserving energy.
+<br><br>
+According to the Cannon-Bard theory of emotion, we experience emotion and physiological arousal and responses simultaneously. 
+<br><br>
+Schachter-Singer’s theory of emotion says that the specific emotion that an aroused person experiences depends on the cognitive factors present during physiological arousal.
+<br><br>
+Schachter-Singer’s cognitive theory states that we likely choose the appropriate label for the source of our arousal through a process called appraisal or labeling.
+<br><br>
+The facial feedback hypothesis states that sensations from facial expressions help define, and can cause, what emotion a person feels.]]> 
+
+
+</unitinstructions>
+    </unit>
+    <unit>
+       
+        <unitname>last</unitname>
+        <unitinstructions><![CDATA[You have now completed the practice. ]]></unitinstructions>
+    </unit>
+</tutor>

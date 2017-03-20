@@ -1,0 +1,355 @@
+<setspec>
+    <clusters>
+        <cluster>
+<display>A person’s in-group is often defined by</display>
+<falseResponse>nationality and ethnicity.</falseResponse>
+<falseResponse>age, gender, education, and income.</falseResponse>
+<falseResponse>religion and political values.</falseResponse>
+<response>a combination of all of these social dimensions.~Well Done - a combination of all of these social dimensions is correct.;nationality and ethnicity.~Incorrect. The correct answer is a combination of all of these social dimensions.;age, gender, education, and income.~Incorrect. The correct answer is a combination of all of these social dimensions.;religion and political values.~Incorrect. The correct answer is a combination of all of these social dimensions.;.*~Wrong</response>
+</cluster>
+ <cluster>
+  <display>Eddie goes to his 20th class reunion. He wonders as he is about to enter the ballroom how he will measure up to his classmates. Are they more successful than he is? Are a lot of them divorced like he is? Eddie is illustrating</display>
+ <response>social comparison.~Well Done - social comparison is correct.;role exchange~Incorrect. The correct answer is social comparison.;role conflict~Incorrect. The correct answer is social comparison.;social networking~Incorrect. The correct answer is social comparison.;.*~Wrong</response>
+<falseResponse>role exchange.</falseResponse>
+<falseResponse>role conflict.</falseResponse>
+<falseResponse>social networking.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The tendency we have to view internal causes, such as personality, as the reason for other people’s behavior is known as</display>
+<falseResponse> social biasing.</falseResponse>
+ <response>the fundamental attribution error.~Well Done - the fundamental attribution error is correct.;social biasing~Incorrect. The correct answer is the fundamental attribution error.;groupthink~Incorrect. The correct answer is the fundamental attribution error.;social stereotyping~Incorrect. The correct answer is the fundamental attribution error.;.*~Wrong</response>
+ <falseResponse>groupthink.</falseResponse>
+<falseResponse>social stereotyping.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The actor-observer bias refers to the tendency to assign</display> 
+<falseResponse> external causes to both our own behavior and other people’s behavior.</falseResponse>
+<falseResponse> internal causes to both our own behavior and other people’s behavior.</falseResponse>
+ <falseResponse>internal causes to our own behavior and external causes to other people’s behavior.</falseResponse>
+<response> external causes to our own behavior and internal causes to other people’s behavior.~Well Done - external causes to our own behavior and internal causes to other people’s behavior is correct.;external causes to both our own behavior and other people’s behavior.~Incorrect. The correct answer is external causes to our own behavior and internal causes to other people’s behavior.;internal causes to both our own behavior and other people’s behavior.~Incorrect. The correct answer is external causes to our own behavior and internal causes to other people’s behavior.;internal causes to our own behavior and external causes to other people’s behavior.~Incorrect. The correct answer is external causes to our own behavior and internal causes to other people’s behavior.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Research suggests that if you wish to persuade an audience, only one side of the argument should</display>
+<response> be presented to a poorly informed audience.~Well Done - be presented to a poorly informed audience is correct.;be presented to a well-informed audience~Incorrect. The correct answer is be presented to a poorly informed audience.;be presented to every audience.~Incorrect. The correct answer is be presented to a poorly informed audience.;never be presented to an audience.~Incorrect. The correct answer is be presented to a poorly informed audience.;.*~Wrong</response>
+ <falseResponse>be presented to a well-informed audience.</falseResponse>
+ <falseResponse>be presented to every audience.</falseResponse>
+<falseResponse>never be presented to an audience.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Contradicting or clashing thoughts cause discomfort, according to the theory of</display>
+<falseResponse> persuasion.</falseResponse>
+ <response>cognitive dissonance.~Well Done - cognitive dissonance is correct.;persuasion.~Incorrect. The correct answer is cognitive dissonance.;frustration-aggression.~Incorrect. The correct answer is cognitive dissonance.;groupthink~Incorrect. The correct answer is cognitive dissonance.;.*~Wrong</response>
+<falseResponse> frustration-aggression.</falseResponse>
+<falseResponse> groupthink.</falseResponse>
+</cluster>
+ <cluster>
+ <display>A person is more likely to conform if he or she</display>
+ <falseResponse>has low needs for structure or certainty</falseResponse>
+<falseResponse> has a high degree of self-confidence.</falseResponse>
+<response> lives in a culture that emphasizes group cooperation.~Well Done - lives in a culture that emphasizes group cooperation is correct.;has low needs for structure or certainty~Incorrect. The correct answer is lives in a culture that emphasizes group cooperation.;has a high degree of self-confidence.~Incorrect. The correct answer is lives in a culture that emphasizes group cooperation.;is not concerned about the approval of others.~Incorrect. The correct answer is lives in a culture that emphasizes group cooperation.;.*~Wrong</response>
+<falseResponse> is not concerned about the approval of others.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The process of spontaneously changing your behavior to match that of others in a group is called</display>
+ <falseResponse>norming.</falseResponse>
+ <falseResponse>compliance.</falseResponse>
+<response> conformity.~Well Done - conformity is correct.;norming.~Incorrect. The correct answer is conformity.;compliance.~Incorrect. The correct answer is conformity.;obedience.~Incorrect. The correct answer is conformity.;.*~Wrong</response>
+ <falseResponse>obedience.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Tony asks his friend Clay how he was able to get his mom to give him $10 for the movies. Clay replies that you first ask for a loan of $25. When she refuses, you then ask if she could at least loan you $10. Clay has learned that which approach works his mom?</display>
+ <falseResponse>availability heuristic</falseResponse>
+ <falseResponse>lowball technique</falseResponse>
+ <response>door-in-the-face effect~Well Done - door-in-the-face effect is correct.;availability heuristic~Incorrect. The correct answer is door-in-the-face effect.;lowball technique~Incorrect. The correct answer is door-in-the-face effect.;foot-in-the-door effect~Incorrect. The correct answer is door-in-the-face effect.;.*~Wrong</response>
+ <falseResponse>foot-in-the-door effect</falseResponse>
+</cluster>
+ <cluster>
+ <display>If one person in a group begins to resist the orders of a legitimate authority, other people are more likely to</display>
+ <falseResponse>side with the authority and still obey the authority.</falseResponse>
+ <falseResponse>rebuke the person resisting for his or her behavior.</falseResponse>
+<response>disobey the authority.~Well Done - disobey the authority is correct.;side with the authority and still obey the authority.~Incorrect. The correct answer is disobey the authority.;rebuke the person resisting for his or her behavior.~Incorrect. The correct answer is disobey the authority.;still obey the authority, but only if the authority has higher status than the person resisting~Incorrect. The correct answer is disobey the authority.;.*~Wrong</response>
+ <falseResponse>still obey the authority, but only if the authority has higher status than the person resisting</falseResponse>
+</cluster>
+ <cluster>
+ <display>One thing that REDUCES the chances that a bystander will give help in an emergency is</display>
+ <falseResponse>heightened arousal.</falseResponse>
+ <falseResponse>empathic arousal.</falseResponse>
+ <response>others who could help.~Well Done - response is others who could help..;heightened arousal.~Incorrect. The correct answer is others who could help..;empathic arousal.~Incorrect. The correct answer is others who could help..;one’s similarity to the victim.~Incorrect. The correct answer is others who could help..;.*~Wrong</response>
+ <falseResponse>one’s similarity to the victim.</falseResponse>
+</cluster>
+ <cluster>
+ <display>In a study, a group of women scored lower on math and finance tests after they were reminded that “most women are not good at math.” This illustrates the concept of</display>  
+ <falseResponse>symbolic prejudice.</falseResponse>
+ <response>stereotype threat.~Well Done - stereotype threat is correct.;symbolic prejudice.~Incorrect. The correct answer is stereotype threat.;group prejudice.~Incorrect. The correct answer is stereotype threat.;dogmatism.~Incorrect. The correct answer is stereotype threat.;.*~Wrong</response>
+ <falseResponse>group prejudice.</falseResponse>
+ <falseResponse>dogmatism.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Threats of ridicule or rejection for nonconformity are referred to as</display>
+ <falseResponse>coercive unanimity.</falseResponse>
+<falseResponse> group authority.</falseResponse>
+<falseResponse> legitimate power.</falseResponse>
+ <response>group sanctions.~Well Done - group sanctions is correct.;coercive unanimity.~Incorrect. The correct answer is group sanctions.;group authority.~Incorrect. The correct answer is group sanctions.;legitimate power.~Incorrect. The correct answer is group sanctions.;.*~Wrong</response>
+</cluster>
+
+ <cluster>
+ <display>When you are playing a video game, your hand and eye movements are under the influence of the __________ nervous system.</display>
+ <falseResponse>sympathetic</falseResponse>
+<falseResponse> parasympathetic</falseResponse>
+ <falseResponse>autonomic</falseResponse>
+ <response>somatic~Well Done - somatic is correct.;parasympathetic~Incorrect. The correct answer is somatic.;sympathetic~Incorrect. The correct answer is somatic.;autonomic~Incorrect. The correct answer is somatic.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>The involuntary physical changes that occur in the body, such as increases and decreases in heart rate, blood pressure, and perspiration, are controlled by the </display>
+ <falseResponse>occipital lobe.</falseResponse>
+ <falseResponse>occipital lobe.</falseResponse>
+<falseResponse> somatic nervous system.</falseResponse>
+ <response>autonomic nervous system.~Well Done - autonomic nervous system is correct.;occipital lobe.~Incorrect. The correct answer is autonomic nervous system.;occipital lobe.~Incorrect. The correct answer is autonomic nervous system.;somatic nervous system.~Incorrect. The correct answer is autonomic nervous system.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>The part of the neuron that sends information to other neurons “branches out” into smaller fibers, which end in bulb-shaped parts known as</display>
+<falseResponse> myelin sheaths.</falseResponse>
+<falseResponse> ion channels.</falseResponse>
+<falseResponse> dendrite arcs.</falseResponse>
+ <response>axon terminals.~Well Done - axon terminals is correct.;myelin sheaths.~Incorrect. The correct answer is axon terminals.;ion channels.~Incorrect. The correct answer is axon terminals.;dendrite arcs.~Incorrect. The correct answer is axon terminals.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Small gaps in the myelin result in nerve impulses jumping from gap to gap which causes these nerve impulses to move</display>
+ <response>faster.~Well Done - faster is correct.;slower.~Incorrect. The correct answer is faster.;at a normal speed.~Incorrect. The correct answer is faster.;at a declining rate of speed.~Incorrect. The correct answer is faster.;.*~Wrong</response>
+ <falseResponse>slower.</falseResponse>
+ <falseResponse>at a normal speed.</falseResponse>
+ <falseResponse>at a declining rate of speed.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The action potential is an all or nothing event within single neurons that</display> 
+ <falseResponse>takes place within the synapse.</falseResponse>
+ <falseResponse>takes place at the dendrite receptor sites.</falseResponse>
+ <response>is primarily an electrical process.~Well Done - is primarily an electrical process is correct.;takes place within the synapse.~Incorrect. The correct answer is is primarily an electrical process.;takes place at the dendrite receptor sites.~Incorrect. The correct answer is is primarily an electrical process.;is primarily a chemical process.~Incorrect. The correct answer is is primarily an electrical process.;.*~Wrong</response>
+ <falseResponse>is primarily a chemical process.</falseResponse>
+</cluster>
+ <cluster>
+ <display>In response to experience, synaptic connections may grow stronger and new ones may form. These changes in the brain due to experience illustrate the brain’s</display>
+<response>neuroplasticity.~Well Done - neuroplasticity is correct.;resiliency.~Incorrect. The correct answer is neuroplasticity.;saltatory conduction.~Incorrect. The correct answer is neuroplasticity.;neurogenesis.~Incorrect. The correct answer is neuroplasticity.;.*~Wrong</response>
+ <falseResponse>resiliency.</falseResponse>
+ <falseResponse>saltatory conduction.</falseResponse>
+<falseResponse>neurogenesis.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The most obvious difference between the human brain and the brain of a fish would be in the</display>
+<falseResponse>hypothalamus.</falseResponse>
+ <falseResponse>thalamus.</falseResponse>
+ <falseResponse>cerebellum.</falseResponse>
+ <response>cerebral cortex.~Well Done - cerebral cortex is correct.;hypothalamus.~Incorrect. The correct answer is cerebral cortex.;thalamus.~Incorrect. The correct answer is cerebral cortex.;cerebellum.~Incorrect. The correct answer is cerebral cortex.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Which of the following best describes how the right hemisphere deals with information?</display>
+ <falseResponse>processes information sequentially</falseResponse>
+ <falseResponse>focuses on the small details</falseResponse>
+ <response>explores the overall pattern and general connections~Well Done - explores the overall pattern and general connections is correct.;processes information sequentially~Incorrect. The correct answer is explores the overall pattern and general connections.;focuses on the small details~Incorrect. The correct answer is explores the overall pattern and general connections.;coordinates the order and sequencing of complex movements~Incorrect. The correct answer is response.;.*~Wrong</response>
+ <falseResponse>coordinates the order and sequencing of complex movements</falseResponse>
+</cluster>
+ <cluster>
+ <display>Although Marcie remembers all aspects of her life before she experienced brain damage in a terrible fall, each morning she must reread details of her present life that are written in a diary because she is unable to adequately store new memories. The brain damage Marcie experienced was most likely to her</display>
+ <falseResponse>amygdala</falseResponse>
+ <falseResponse>pons</falseResponse>
+ <falseResponse>hypothalamus</falseResponse>
+ <response>hippocampus. ~Well Done - hippocampus is correct.;amygdala~Incorrect. The correct answer is hippocampus.;pons~Incorrect. The correct answer is hippocampus.;hypothalamus~Incorrect. The correct answer is hippocampus.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Which of the following is a common MISCONCEPTION (i.e., false belief) about the brain?</display>
+ <response>Humans only use about 10% of our brains.~Well Done - humans only use about 10% of our brains is correct.;The size of a human’s brain does not necessarily relate to amount of  intelligence.~Incorrect. The correct answer is humans only use about 10% of our brains.;A person can live with parts of the cerebral cortex removed~Incorrect. The correct answer is humans only use about 10% of our brains.;Reflexive arc signals bypass the brain.~Incorrect. The correct answer is humans only use about 10% of our brains.;.*~Wrong</response>
+ <falseResponse>The size of a human’s brain does not necessarily relate to amount of  intelligence.</falseResponse>
+ <falseResponse>A person can live with parts of the cerebral cortex removed.</falseResponse>
+ <falseResponse>Reflexive arc signals bypass the brain.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Which of the following is a formal guideline for deciding whether objects or events belong to a category or class?</display> 
+ <falseResponse>algorithm</falseResponse>
+ <response>conceptual rule~Well Done - conceptual rule is correct.;algorithm~Incorrect. The correct answer is conceptual rule.;connotative meaning~Incorrect. The correct answer is conceptual rule.;prototype model~Incorrect. The correct answer is conceptual rule.;.*~Wrong</response>
+ <falseResponse>connotative meaning</falseResponse>
+ <falseResponse>prototype model</falseResponse>
+</cluster>
+ <cluster>
+ <display>An ideal model used as a prime example of a particular concept is a(n)</display>
+ <falseResponse>algorithm.</falseResponse>
+ <falseResponse>heuristic.</falseResponse>
+ <response>prototype.~Well Done - prototype is correct.;algorithm.~Incorrect. The correct answer is prototype.;heuristic~Incorrect. The correct answer is prototype.;exemplar.~Incorrect. The correct answer is prototype.;.*~Wrong</response>
+ <falseResponse>exemplar.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Which of the following is the emotional or personal meaning of a word?</display>
+ <falseResponse>denotative meaning</falseResponse>
+ <falseResponse>prototypical meaning</falseResponse>
+ <response>connotative meaning~Well Done - connotative meaning is correct.;denotative meaning~Incorrect. The correct answer is connotative meaning.;prototypical meaning~Incorrect. The correct answer is connotative meaning.;linguistic meaning~Incorrect. The correct answer is connotative meaning.;.*~Wrong</response>
+ <falseResponse>linguistic meaning</falseResponse>
+</cluster>
+ <cluster>
+ <display>The idea that the words we use not only reflect our thoughts but can shape them as well is known as the</display>
+ <falseResponse>semantic differential.</falseResponse>
+ <falseResponse>connotative meaning.</falseResponse>
+ <falseResponse>transformational rule.</falseResponse>
+ <response>linguistic relativity hypothesis.~Well Done - linguistic relativity hypothesis is correct.;semantic differential.~Incorrect. The correct answer is linguistic relativity hypothesis.;connotative meaning.~Incorrect. The correct answer is linguistic relativity hypothesis.;transformational rule.~Incorrect. The correct answer is linguistic relativity hypothesis.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Which of the following is the theory that intelligence is unchangeable or “set in stone?”</display>
+ <response>Entity theory of intelligence~Well Done - Entity theory of intelligence is correct.;Incremental theory of intelligence~Incorrect. The correct answer is Entity theory of intelligence.;Dweck’s theory of Intelligence~Incorrect. The correct answer is Entity theory of intelligence.;Growth theory of intelligence~Incorrect. The correct answer is Entity theory of intelligence.;.*~Wrong</response>
+ <falseResponse>Incremental theory of intelligence</falseResponse>
+ <falseResponse>Dweck’s theory of Intelligence</falseResponse>
+ <falseResponse>Growth theory of intelligence</falseResponse>
+</cluster>
+ <cluster>
+ <display>Cognitive load refers to the…</display>
+ <falseResponse>capacity of long term memory</falseResponse>
+ <response>amount of mental effort one uses~Well Done - amount of mental effort one uses is correct.;capacity of long term memory~Incorrect. The correct answer is amount of mental effort one uses.;inability to see past known uses for an object~Incorrect. The correct answer is amount of mental effort one uses.;overuse of the cerebral cortex~Incorrect. The correct answer is amount of mental effort one uses.;.*~Wrong</response>
+ <falseResponse>inability to see past known uses for an object</falseResponse>
+ <falseResponse>overuse of the cerebral cortex</falseResponse>
+</cluster>
+ <cluster>
+ <display>Functional fixedness refers to the inability to see past… </display>
+ <falseResponse>heuristics or rules of thumb</falseResponse>
+ <response>conventions about uses or meanings~Well Done - conventions about uses or meanings is correct.;heuristics or rules of thumb~Incorrect. The correct answer is conventions about uses or meanings.;the connotative meanings~Incorrect. The correct answer is conventions about uses or meanings.;the availability bias~Incorrect. The correct answer is conventions about uses or meanings.;.*~Wrong</response>
+ <falseResponse>the connotative meanings</falseResponse>
+ <falseResponse>the availability bias</falseResponse>
+</cluster>
+ <cluster>
+ <display>Research has shown that expert skills are based on</display>
+ <response>learned heuristics and broad conceptual understanding.~Well Done - learned heuristics and broad conceptual understanding is correct.;rote memory and random search strategies.~Incorrect. The correct answer is learned heuristics and broad conceptual understanding.;algorithms and insight.~Incorrect. The correct answer is learned heuristics and broad conceptual understanding.;a general strengthening of the mind and exceptional memories.~Incorrect. The correct answer is learned heuristics and broad conceptual understanding.;.*~Wrong</response>
+ <falseResponse>rote memory and random search strategies.</falseResponse>
+ <falseResponse>algorithms and insight.</falseResponse>
+ <falseResponse>a general strengthening of the mind and exceptional memories.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The tendency to select wrong answers because they seem to match pre-existing mental categories is referred to as the</display>
+ <response>representativeness heuristic~Well Done - representativeness heuristic is correct.;base rate~Incorrect. The correct answer is representativeness heuristic.;framing heuristic~Incorrect. The correct answer is representativeness heuristic.;relational heuristic~Incorrect. The correct answer is representativeness heuristic.;.*~Wrong</response>
+ <falseResponse>base rate</falseResponse>
+ <falseResponse>framing heuristic</falseResponse>
+ <falseResponse>relational heuristic</falseResponse>
+</cluster>
+ <cluster>
+ <display>Decision making often can be influenced by the way that a problem is stated or structured, which is referred to as</display>
+ <falseResponse>the base rate.</falseResponse>
+ <response>framing.~Well Done - framing is correct.;the base rate.~Incorrect. The correct answer is framing.;the denotative meaning.~Incorrect. The correct answer is framing.;transformation.~Incorrect. The correct answer is framing.;.*~Wrong</response>
+ <falseResponse>the denotative meaning.</falseResponse>
+ <falseResponse>transformation.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Which of the following is NOT related to influencing how someone takes in, reads, or interprets new information?</display>
+ <falseResponse>priming</falseResponse>
+ <response>denotating~Well Done - denotating is correct.;priming~Incorrect. The correct answer is denotating.;framing~Incorrect. The correct answer is denotating.;anchoring~Incorrect. The correct answer is denotating.;.*~Wrong</response>
+ <falseResponse>framing</falseResponse>
+ <falseResponse>anchoring</falseResponse>
+</cluster>
+ <cluster>
+ <display>The anchoring heuristic (or bias) is best described as…</display>
+ <falseResponse>making a choice based on what option you feel most emotionally attached to.</falseResponse>
+<response>relying too heavily on the first piece of information offered when making decisions.~Well Done - relying too heavily on the first piece of information offered when making decisions is correct.;making a decision based on how representative an instance is of a category.~Incorrect. The correct answer is relying too heavily on the first piece of information offered when making decisions.;making a choice based on what option you feel most emotionally attached to.~Incorrect. The correct answer is response.;being unable to think of uses for an object beyond its conventional purpose.~Incorrect. The correct answer is relying too heavily on the first piece of information offered when making decisions.;.*~Wrong</response>
+ <falseResponse>making a decision based on how representative an instance is of a category.</falseResponse>
+ <falseResponse>being unable to think of uses for an object beyond its conventional purpose.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Which of the following is FALSE regarding experiential processing (i.e., System 1)?</display>
+ <response>It is NOT considered part of “cognition.”~Well Done - It is NOT considered part of “cognition.”is correct.;Concept categorization is done through System 1.~Incorrect. The correct answer is it is NOT considered part of “cognition.”.;It is not constrained by working memory capacity.~Incorrect. The correct answer is it is NOT considered part of “cognition.”.;It is a rapid, automatic form of processing.~Incorrect. The correct answer is it is NOT considered part of “cognition.”.;.*~Wrong</response>
+ <falseResponse>Concept categorization is done through System 1.</falseResponse>
+ <falseResponse>It is not constrained by working memory capacity.</falseResponse>
+ <falseResponse>It is a rapid, automatic form of processing.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The notion that language is invented, proliferates, and dies, suggests that language…</display>
+ <response>is a living organism.~Well Done - is a living organism is correct.;is processed automatically.~Incorrect. The correct answer is is a living organism.;should avoid use of negation.~Incorrect. The correct answer is is a living organism.;is connotative.~Incorrect. The correct answer is is a living organism.;.*~Wrong</response>
+ <falseResponse>is processed automatically.</falseResponse>
+ <falseResponse>should avoid use of negation.</falseResponse>
+ <falseResponse>is connotative.</falseResponse>
+</cluster>
+ <cluster>
+ <display>The ability of our minds to process information (e.g., text) automatically is best illustrated by which of the following tasks or tests?</display>
+ <falseResponse>Functional Fixedness Task</falseResponse>
+ <falseResponse>IQ test</falseResponse>
+ <falseResponse>Anagrams Test</falseResponse>
+ <response>Stroop Task~Well Done - Stroop Task is correct.;Functional Fixedness Task~Incorrect. The correct answer is Stroop Task.;IQ test~Incorrect. The correct answer is Stroop Task.;Anagrams Test~Incorrect. The correct answer is Stroop Task.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>Your professor asks everyone to describe themselves in three words. According to psychologists and linguists, which of the following would be more likely to leave an inaccurate impression in others?</display>
+ <falseResponse>optimistic, laid back, pro-choice</falseResponse>
+ <falseResponse>Catholic, spiritual, honest</falseResponse>
+ <response>southern, anti-abortion, anti-smoking~Well Done - southern, anti-abortion, anti-smoking is correct.;optimistic, laid back, pro-choice~Incorrect. The correct answer is southern, anti-abortion, anti-smoking.;Catholic, spiritual, honest~Incorrect. The correct answer is southern, anti-abortion, anti-smoking.;vegetarian, athletic, competitive~Incorrect. The correct answer is southern, anti-abortion, anti-smoking.;.*~Wrong</response>
+ <falseResponse>vegetarian, athletic, competitive</falseResponse>
+</cluster>
+ <cluster>
+ <display>The need for information, exploration, manipulation, and sensory input are closely related to</display>
+<falseResponse>acquired needs.</falseResponse>
+<falseResponse>deprivation incentives.</falseResponse>
+<falseResponse>biological motives.</falseResponse>
+<response>stimulus motives.~Well Done - stimulus motives is correct.;acquired needs.~Incorrect. The correct answer is stimulus motives.;deprivation incentives.~Incorrect. The correct answer is stimulus motives.;biological motives.~Incorrect. The correct answer is stimulus motives.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>When Maslow designated some needs as “basic needs,” he meant that they were</display>
+<falseResponse>less important to individual survival.</falseResponse>
+<falseResponse>less likely to lead to activities considered admirable in human cultures.</falseResponse>
+<response>more likely to direct human activity until they were met.~Well Done - more likely to direct human activity until they were met is correct.;less important to individual survival.~Incorrect. The correct answer is more likely to direct human activity until they were met.;less likely to lead to activities considered admirable in human cultures.~Incorrect. The correct answer is more likely to direct human activity until they were met.;more likely to be unconscious than conscious.~Incorrect. The correct answer is more likely to direct human activity until they were met.;.*~Wrong</response>
+<falseResponse>more likely to be unconscious than conscious.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Extrinsic motivation stems from</display>
+<response>obvious external rewards.~Well Done - obvious external rewards is correct.;intrinsic rewards.~Incorrect. The correct answer is obvious external rewards.;stimulus motives.~Incorrect. The correct answer is obvious external rewards.;meta-needs.~Incorrect. The correct answer is obvious external rewards.;.*~Wrong</response>
+<falseResponse>intrinsic rewards.</falseResponse>
+<falseResponse>stimulus motives.</falseResponse>
+<falseResponse>meta-needs.</falseResponse>
+</cluster>
+<cluster>
+ <display>Regarding the sympathetic branch of the autonomic nervous system, which of the following statements is TRUE?</display>
+<falseResponse>Its effects include muscular relaxation and decreased heart rate.</falseResponse>
+<response>It is also known as the “flight-or-fight” system.~Well Done - It is also known as the “flight-or-fight” system is correct.;Its effects include muscular relaxation and decreased heart rate.~Incorrect. The correct answer is it is also known as the “flight-or-fight” system.;It is slower to respond than the parasympathetic branch.~Incorrect. The correct answer is it is also known as the “flight-or-fight” system.;It acts to reverse emotional arousal after emergency situations.~Incorrect. The correct answer is it is also known as the “flight-or-fight” system.;.*~Wrong</response>
+<falseResponse>It is slower to respond than the parasympathetic branch.</falseResponse>
+<falseResponse>It acts to reverse emotional arousal after emergency situations.</falseResponse>
+</cluster>
+ <cluster>
+ <display>Basic emotions, such as fear, are likely first processed where in the brain? </display> 
+<falseResponse>Somatic Nervous System</falseResponse>
+<falseResponse>Frontal Lobes</falseResponse>
+<response>Subcortex~Well Done - Subcortex is correct.;Somatic Nervous System~Incorrect. The correct answer is Subcortex.;Frontal Lobes~Incorrect. The correct answer is Subcortex.;Left Hemisphere~Incorrect. The correct answer is Subcortex.;.*~Wrong</response>
+<falseResponse>Left Hemisphere</falseResponse>
+</cluster>
+ <cluster>
+ <display>Complex emotions are often under the control of higher brain centers and are, therefore, a form of __________ processing.</display> 
+<falseResponse>experiential</falseResponse>
+<response>reflective~Well Done - reflective is correct.;experiential~Incorrect. The correct answer is reflective.;inductive~Incorrect. The correct answer is reflective.;convergent~Incorrect. The correct answer is reflective.;.*~Wrong</response>
+<falseResponse>inductive</falseResponse>
+<falseResponse>convergent</falseResponse>
+</cluster>
+ <cluster>
+ <display>The part of the autonomic nervous system responsible for calming and restoring the body and conserving energy is the</display>
+<falseResponse>somatic nervous system.</falseResponse>
+<falseResponse>reticular activating system.</falseResponse>
+<response>parasympathetic branch.~Well Done - parasympathetic branch is correct.;somatic nervous system.~Incorrect. The correct answer is parasympathetic branch.;reticular activating system.~Incorrect. The correct answer is parasympathetic branch.;sympathetic branch.~Incorrect. The correct answer is parasympathetic branch.;.*~Wrong</response>
+<falseResponse>sympathetic branch.</falseResponse>
+</cluster>
+ <cluster>
+ <display>When Nicole’s car skidded out of control on the slippery highway, she experienced physiological arousal, reacted, and felt fear simultaneously. This illustrates which theory of emotion?</display>
+<falseResponse>attribution theory</falseResponse>
+<response>Cannon-Bard theory~Well Done - Cannon-Bard theory is correct.;attribution theory~Incorrect. The correct answer is Cannon-Bard theory.;James-Lange theory~Incorrect. The correct answer is Cannon-Bard theory.;Schachter-Singer’s cognitive theory~Incorrect. The correct answer is Cannon-Bard theory.;.*~Wrong</response>
+<falseResponse>James-Lange theory</falseResponse>
+<falseResponse>Schachter-Singer’s cognitive theory</falseResponse>
+</cluster>
+ <cluster>
+ <display>According to Schachter-Singer’s theory of emotion, the specific emotion that an aroused person experiences depends on the</display>
+<falseResponse>generation of activity in the cortex simultaneously with physiological arousal.</falseResponse>
+<falseResponse>specific pattern of physiological arousal.</falseResponse>
+<falseResponse>person’s temperament.</falseResponse>
+<response>cognitive factors present during physiological arousal.~Well Done - cognitive factors present during physiological arousal is correct.;generation of activity in the cortex simultaneously with physiological arousal.~Incorrect. The correct answer is cognitive factors present during physiological arousal.;specific pattern of physiological arousal.~Incorrect. The correct answer is cognitive factors present during physiological arousal.;person’s temperament.~Incorrect. The correct answer is cognitive factors present during physiological arousal.;.*~Wrong</response>
+</cluster>
+ <cluster>
+ <display>We likely choose the appropriate label for the source of our arousal through a process called appraisal or labeling, according to which theory of emotion?</display>
+<falseResponse>the common sense theory</falseResponse>
+<falseResponse>Cannon-Bard theory</falseResponse>
+<response>Schachter-Singer’s cognitive theory~Well Done - Schachter-Singer’s cognitive theory is correct.;the common sense theory~Incorrect. The correct answer is Schachter-Singer’s cognitive theory.;Cannon-Bard theory~Incorrect. The correct answer is Schachter-Singer’s cognitive theory.;James-Lange theory~Incorrect. The correct answer is Schachter-Singer’s cognitive theory.;.*~Wrong</response>
+<falseResponse>James-Lange theory</falseResponse>
+</cluster>
+ <cluster>
+  <display>Which of the following theories states that sensations from facial expressions help define, and can cause, what emotion a person feels?</display>
+<falseResponse>Fight or Flight theory</falseResponse>
+<falseResponse>Facial Attribution theory</falseResponse>
+<response>Facial Feedback hypothesis~Well Done - Facial Feedback hypothesis is correct.;Fight or Flight theory~Incorrect. The correct answer is Facial Feedback hypothesis.;Facial Attribution theory~Incorrect. The correct answer is Facial Feedback hypothesis.;Cannon-Bard hypothesis~Incorrect. The correct answer is Facial Feedback hypothesis.;.*~Wrong</response>
+<falseResponse>Cannon-Bard hypothesis</falseResponse>
+</cluster>
+    </clusters>
+</setspec>
