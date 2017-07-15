@@ -84,10 +84,10 @@ Please answer the following 5 quick demographic questions, which may be useful f
                 <group> 3,f,z,0 3,f,z,21  
                     r,f,z,0 r,f,z,18 </group> 
             </conditiontemplatesbygroup>
-            <initialpositions>H_1  G_1F_1E_1D_1D_2A_1A_1B_1B_1C_1C_1
-                G_2F_1E_1D_1D_2A_1A_1B_1B_1
-                H_1G_1E_1D_1D_2A_1A_1
-                G_2E_1D_1D_2A_1A_1
+            <initialpositions>H_1  G_1F_1E_1D_1D_2A_1 A_1 B_1 B_1C_1C_1
+                G_2F_1E_1D_1D_2A_1 A_1 B_1 B_1
+                H_1G_1E_1D_1D_2A_1 A_1
+                G_2E_1D_1D_2A_1 A_1
                 H_2G_1E_2D_1D_2A_2A_2B_2B_2
                 G_2F_2E_2D_1D_2A_2A_2B_2B_2
                 H_2G_1F_2E_2D_1D_2A_2A_2C_2C_2

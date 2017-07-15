@@ -84,14 +84,14 @@ Please answer the following 5 quick demographic questions, which may be useful f
                 <group> 2,f,z,0 2,f,z,21  
                     r,f,z,0 r,f,z,18 </group> 
             </conditiontemplatesbygroup>
-            <initialpositions>A_2  A_2D_2D_1E_2G_2
-                C_2C_2A_2A_2D_2D_1E_2F_2G_1H_2
-                B_2B_2A_2A_2D_2D_1E_2F_2G_2
-                B_2B_2A_2A_2D_2D_1E_2G_1H_2
-                A_1A_1D_2D_1E_1G_2
-                A_1A_1D_2D_1E_1G_1H_1
-                B_1B_1A_1A_1D_2D_1E_1F_1G_2
-                C_1C_1B_1B_1A_1A_1D_2D_1E_1F_1G_1H_1
+            <initialpositions>A_2  A_2	D_2	D_1	E_2	G_2						
+                C_2	C_2	A_2	A_2	D_2	D_1	E_2	F_2	G_1	H_2		
+                B_2	B_2	A_2	A_2	D_2	D_1	E_2	F_2	G_2			
+                B_2	B_2	A_2	A_2	D_2	D_1	E_2	G_1	H_2			
+                A_1	A_1	D_2	D_1	E_1	G_2						
+                A_1	A_1	D_2	D_1	E_1	G_1	H_1					
+                B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_2			
+                C_1	C_1	B_1	B_1	A_1	A_1	D_2	D_1	E_1	F_1	G_1	H_1
             </initialpositions> 
             <randomizegroups>false</randomizegroups> 
             <clusterlist>0-15</clusterlist> 
