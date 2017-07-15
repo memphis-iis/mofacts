@@ -1,0 +1,274 @@
+<setspec>
+    <clusters>
+  <cluster><display>Which of the following is NOT used to characterize psychopathology?</display>
+<falseResponse>The situation or context</falseResponse>
+<falseResponse>Personal discomfort</falseResponse>
+<falseResponse>Society or culture</falseResponse>
+<response>Personality~Well Done - Personality is correct.;The situation or context~Incorrect. The correct answer is personality.;Personal discomfort~Incorrect. The correct answer is personality.;Society or culture~Incorrect. The correct answer is personality.;.*~Wrong</response>
+</cluster>
+<cluster><display>Which of the following is NOT a term used in the Diagnostic and Statistical Manual for Mental Disorders?</display>
+<falseResponse>Bipolar</falseResponse>
+<response>Insanity~Well Done - Insanity is correct.;Bipolar~Incorrect. The correct answer is insanity.;Dissociative~Incorrect. The correct answer is insanity.;Delusions~Incorrect. The correct answer is insanity.;.*~Wrong</response>
+<falseResponse>Dissociative</falseResponse>
+<falseResponse>Delusions</falseResponse>
+</cluster>
+<cluster><display>Which of the following is NOT a symptom or characteristic of someone diagnosed with a psychotic disorder?</display>
+<falseResponse>imaginary sensations</falseResponse>
+<falseResponse>personality disorganization</falseResponse>
+<falseResponse>inability to control thoughts or actions</falseResponse>
+<response>long-lasting emotional extremes~Well done - Long-lasting emotional extremes is correct.; imaginary sensations~ Incorrect. The correct answer is long-lasting emotional extremes.;personality disorganization~Incorrect. The correct answer is long-lasting emotional extremes.;inability to control thoughts or actions~Incorrect. The correct answer is long-lasting emotional extremes.;.*~Wrong.</response></cluster>
+<cluster><display>The research involving pseudo-patients in a mental hospital suggests the importance of which of the following in the treatment of mental disorders?</display>
+<response>labels and expectations~Well Done - labels and expectations is correct.;immediate medical intervention~Incorrect. The correct answer is labels and expectations.;availability of effective medication~Incorrect. The correct answer is labels and expectations.;staff training and morale~Incorrect. The correct answer is labels and expectations.;.*~Wrong</response>
+<falseResponse>immediate medical intervention</falseResponse>
+<falseResponse>availability of effective medication</falseResponse>
+<falseResponse>staff training and morale</falseResponse>
+</cluster>
+<cluster><display>Which of the following is an example of a hallucination?</display>
+<falseResponse>Repeatedly locking and unlocking a door</falseResponse>
+<falseResponse>Refusing to shake hands to avoid germs</falseResponse>
+<response>Hearing voices coming from your mailbox~Well Done - Hearing voices coming from your mailbox is correct.;Repeatedly locking and unlocking a door~Incorrect. The correct answer is hearing voices coming from your mailbox.;Refusing to shake hands to avoid germs~Incorrect. The correct answer is hearing voices coming from your mailbox.;Believing there is a hidden message for you in the newspaper~Incorrect. The correct answer is hearing voices coming from your mailbox.;.*~Wrong</response>
+<falseResponse>Believing there is a hidden message for you in the newspaper</falseResponse>
+</cluster>
+<cluster><display>Flat affect is best described as,</display>
+<falseResponse>Garbled and chaotic speech</falseResponse>
+<falseResponse>Personality that is “all over the place”</falseResponse>
+<response>Lack of emotional expression~Well Done - Lack of emotional expression is correct.;Garbled and chaotic speech~Incorrect. The correct answer is lack of emotional expression.;Personality that is “all over the place”~Incorrect. The correct answer is lack of emotional expression.;False, irrational beliefs~Incorrect. The correct answer is lack of emotional expression.;.*~Wrong</response>
+<falseResponse>False, irrational beliefs</falseResponse>
+</cluster>
+<cluster><display>The Stress-Vulnerability Hypothesis refers to…</display>
+<response>One explanation for the development of psychotic disorders involving the interaction of genetics and environment~Well Done - One explanation for the development of psychotic disorders involving the interaction of genetics and environment is correct.;A theoretical treatment for psychotic disorders that focuses on ways to manage stress.~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment.;An explanation for post-traumatic stress disorder referring to the re-living of a traumatic event~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment.;A rationale for why some personalities are more susceptible to developing anxiety disorders~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment.;.*~Wrong</response>
+<falseResponse>A theoretical treatment for psychotic disorders that focuses on ways to manage stress.</falseResponse>
+<falseResponse>An explanation for post-traumatic stress disorder referring to the re-living of a traumatic event</falseResponse>
+<falseResponse>A rationale for why some personalities are more susceptible to developing anxiety disorders</falseResponse>
+</cluster>
+<cluster><display>Dysthymic and cyclothymic disorders are types of __________ disorders.</display>
+<response>moderate mood~Well Done - moderate mood is correct.;somatoform~Incorrect. The correct answer is moderate mood.;dissociative~Incorrect. The correct answer is moderate mood.;anxiety~Incorrect. The correct answer is moderate mood.;.*~Wrong</response>
+<falseResponse>somatoform</falseResponse> 
+<falseResponse>dissociative</falseResponse> 
+<falseResponse>anxiety</falseResponse>
+</cluster>
+<cluster><display>Which of the following is an example of a compulsion?</display>
+<falseResponse>Recurring/repetitive thoughts of death</falseResponse>
+<response>Washing your hands until they bleed~Well Done - Washing your hands until they bleed is correct.;Recurring/repetitive thoughts of death~Incorrect. The correct answer is washing your hands until they bleed.;The belief that you will die from touching doorknobs~Incorrect. The correct answer is washing your hands until they bleed.;Hearing voices that are not real~Incorrect. The correct answer is washing your hands until they bleed.;.*~Wrong</response>
+<falseResponse>The belief that you will die from touching doorknobs</falseResponse>
+<falseResponse>Hearing voices that are not real</falseResponse>
+</cluster>
+<cluster><display>Which of the following would NOT be classified as a hallucination?</display>
+<response>“The CIA sometimes take over my body to complete secret missions.”~Well Done - “The CIA sometimes take over my body to complete secret missions.” is correct.;“I often see George Washington at the post office.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.”;“My neighbors garden contains several species of nymph and fairy that I talk to.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.”;“I can’t sleep because I can hear the people in the wall talking all night.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.”;.*~Wrong</response>
+<falseResponse>“I often see George Washington at the post office.”</falseResponse>
+<falseResponse>“My neighbors garden contains several species of nymph and fairy that I talk to.”</falseResponse>
+<falseResponse>“I can’t sleep because I can hear the people in the wall talking all night.”</falseResponse>
+</cluster>
+<cluster><display>Which of the following is FALSE?</display>
+<falseResponse>Bipolar disorder involves extreme changes in mood.</falseResponse>
+<falseResponse>Schizophrenia involves hallucinating and having delusions.</falseResponse>
+<falseResponse>Therapy is not equally effective for all problems.</falseResponse>
+<response>The benefits from manic episodes usually offset the negative effects of depressive episodes.~Well Done - The benefits from manic episodes usually offset the negative effects of depressive episodes is correct.;Bipolar disorder involves extreme changes in mood.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes.;Schizophrenia involves hallucinating and having delusions.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes.;Therapy is not equally effective for all problems.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes.;.*~Wrong</response>
+</cluster>
+<cluster><display>Which of the following is an example of an anxiety disorder?</display>
+<falseResponse>Bipolar disorder</falseResponse>
+<falseResponse>Schizophrenia</falseResponse>
+<response>Obsessive Compulsive disorder~Well Done - Obsessive Compulsive disorder is correct.;Bipolar disorder~Incorrect. The correct answer is Obsessive Compulsive disorder.;Schizophrenia~Incorrect. The correct answer is Obsessive Compulsive disorder.;Anorexia~Incorrect. The correct answer is Obsessive Compulsive disorder.;.*~Wrong</response>
+<falseResponse>Anorexia</falseResponse>
+</cluster>
+<cluster><display>All of the following help explain why eating disorders (specifically Anorexia) can be dangerous except…</display>
+<falseResponse>Positive feedback from weight loss reinforces Anorexic behavior.</falseResponse>
+<falseResponse>With other addictions, you can avoid the problem substance, but you cannot avoid food.</falseResponse>
+<falseResponse>It can cause long-lasting changes to your set point, making it harder to gain weight back.</falseResponse>
+<response>Those with an eating disorder (Anorexia) have lost all control.~Well done - Those with an eating disorder (Anorexia) have lost all control is correct.;Positive feedback from weight loss reinforces Anorexic behavior.~Incorrect. The correct answer is those with an eating disorder have lost all control.;With other addictions, you can avoid the problem substance, but you cannot avoid food.~Incorrect. The correct answer is those with an eating disorder have lost all control.;It can cause long-lasting changes to your set point, making it harder to gain weight back.~Incorrect. The correct answer is those with an eating disorder have lost all control.;.*~Wrong</response></cluster>
+<cluster><display>Catastrophizing is a type of maladaptive thought pattern that is typically addressed in which of the following types of therapy?</display>
+<falseResponse>Electrical Stimulation Therapy</falseResponse>
+<response>Cognitive Restructuring~Well Done - Cognitive Restructuring is correct.;Electrical Stimulation Therapy~Incorrect. The correct answer is cognitive restructuring.;Systematic Desensitization~Incorrect. The correct answer is cognitive restructuring.;Behavioral Therapy~Incorrect. The correct answer is cognitive restructuring.;.*~Wrong</response>
+<falseResponse>Systematic Desensitization</falseResponse>
+<falseResponse>Behavioral Therapy</falseResponse>
+</cluster>
+<cluster><display>Any psychological technique used to facilitate positive changes in someone’s behaviors is called…</display>
+<falseResponse>psychopathology.</falseResponse>
+<response>psychotherapy.~Well Done - psychotherapy is correct.;psychopathology.~Incorrect. The correct answer is psychotherapy.;cognitive-behavioral therapy.~Incorrect. The correct answer is psychotherapy.;systematic desensitization.~Incorrect. The correct answer is psychotherapy.;.*~Wrong</response> 
+<falseResponse>cognitive-behavioral therapy.</falseResponse>
+<falseResponse>systematic desensitization.</falseResponse> 
+</cluster>
+<cluster><display>The use of drugs to alleviate the symptoms of emotional disturbances is called…</display>
+<falseResponse>psychopathology.</falseResponse>
+<falseResponse>cognitive-behavioral therapy.</falseResponse>
+<falseResponse>psychoanalysis.</falseResponse>
+<response>psychopharmacology.~Well Done - psychopharmacology is correct.;psychopathology.~Incorrect. The correct answer is psychopharmacology.;cognitive-behavioral therapy.~Incorrect. The correct answer is psychopharmacology.;psychoanalysis.~Incorrect. The correct answer is psychopharmacology.;.*~Wrong</response>
+</cluster>
+<cluster><display>What type of therapist might ask clients to keep a “thought journal” to record (and then work to reduce) maladaptive thoughts?</display>
+<falseResponse>Psychoanalytic</falseResponse>
+<falseResponse>Humanistic</falseResponse>
+<response>Cognitive~Well Done - Cognitive is correct.;Psychoanalytic~Incorrect. The correct answer is cognitive.;Humanistic~Incorrect. The correct answer is cognitive.;Psychiatrist~Incorrect. The correct answer is cognitive.;.*~Wrong</response>
+<falseResponse>Psychiatrist</falseResponse> 
+</cluster>
+<cluster><display>In which of the following therapies does a client gradually get closer and closer to a feared object or completing a task that normally makes them anxious?</display>
+<falseResponse>Psychotherapy</falseResponse>
+<falseResponse>Cognitive-behavioral therapy</falseResponse>
+<response>Systematic desensitization~Well Done - Systematic desensitization is correct.;Psychotherapy~Incorrect. The correct answer is systematic desensitization.;Cognitive-behavioral therapy~Incorrect. The correct answer is systematic desensitization.;Psychopharmacology~Incorrect. The correct answer is systematic desensitization.;.*~Wrong</response>
+<falseResponse>Psychopharmacology</falseResponse>
+</cluster>
+<cluster><display>Which of the following was NOT a Freudian technique used to discover unconscious feelings, thoughts, or conflicts?</display>
+<falseResponse>Free association</falseResponse>
+<falseResponse>Dream analysis</falseResponse>
+<falseResponse>Analyzing transference</falseResponse>
+<response>Systematic desensitization~Well Done - Systematic desensitization is correct.;Free association~Incorrect. The correct answer is systematic desensitization.;Dream analysis~Incorrect. The correct answer is systematic desensitization.;Analyzing transference~Incorrect. The correct answer is systematic desensitization.;.*~Wrong</response>
+</cluster>
+<cluster><display>According to psychoanalytic/psychodynamic theory, a client in a therapy session may treat the therapist similar to a family member who used to treat the client poorly. This is referred to as…</display>
+<falseResponse>therapeutic attachment</falseResponse>
+<falseResponse>resistance</falseResponse>
+<response>transference~Well Done - transference is correct.;therapeutic attachment~Incorrect. The correct answer is transference.;resistance~Incorrect. The correct answer is transference.;reflection~Incorrect. The correct answer is transference.;.*~Wrong</response>
+<falseResponse>reflection</falseResponse>
+</cluster>
+<cluster><display>Which of the following is NOT true of the technique of reflection?</display>
+<falseResponse>It involves a therapist rephrasing what a client has said.</falseResponse>
+<response>It only takes place in directive therapies.~Well Done - It only takes place in directive therapies is correct.;It involves a therapist rephrasing what a client has said.~Incorrect. The correct answer is it only takes place in directive therapies.;It is a component of some non-directive therapies.~Incorrect. The correct answer is it only takes place in directive therapies.;It offers clients a different perspective from which to view their thoughts.~Incorrect. The correct answer is it only takes place in directive therapies.;.*~Wrong</response>
+<falseResponse>It is a component of some non-directive therapies.</falseResponse>
+<falseResponse>It offers clients a different perspective from which to view their thoughts.</falseResponse>
+</cluster>
+<cluster><display>Which of the following is a treatment that has been especially effective in treating depression?</display>
+<falseResponse>Systematic desensitization</falseResponse>
+<response>Cognitive restructuring~Well Done - Cognitive restructuring is correct.;Systematic desensitization~Incorrect. The correct answer is cognitive restructuring.;Dream analysis~Incorrect. The correct answer is cognitive restructuring.;Reflection~Incorrect. The correct answer is cognitive restructuring.;.*~Wrong</response>
+<falseResponse>Dream analysis</falseResponse>
+<falseResponse>Reflection</falseResponse>
+</cluster>
+<cluster><display>Which of the following is NOT true of self-actualizers according to Maslow?</display>
+<falseResponse>Being accepting of your own flaws</falseResponse>
+<falseResponse>Creating deep and loving bonds</falseResponse>
+<response>Dependent on friends and loved ones~Well Done - Dependent on friends and loved ones is correct.;Being accepting of your own flaws~Incorrect. The correct answer is dependent on friends and loved ones.;Creating deep and loving bonds~Incorrect. The correct answer is dependent on friends and loved ones.;Comfort with solitude~Incorrect. The correct answer is dependent on friends and loved ones.;.*~Wrong</response>
+<falseResponse>Comfort with solitude</falseResponse>
+</cluster>
+<cluster><display>Which of the following theories considers personality to be flexible and ever-changing?</display>
+<falseResponse>Psychoanalytic</falseResponse>
+<response>Humanistic~Well Done - Humanistic is correct.;Psychoanalytic~Incorrect. The correct answer is Humanistic.;Cognitive~Incorrect. The correct answer is Humanistic.;Trait~Incorrect. The correct answer is Humanistic.;.*~Wrong</response>
+<falseResponse>Cognitive</falseResponse>
+<falseResponse>Trait</falseResponse>
+</cluster>
+<cluster><display>Unique and enduring behavior patterns refers to…</display>
+<falseResponse>Development</falseResponse>
+<response>Personality~Well Done - Personality is correct.;Development~Incorrect. The correct answer is personality.;Self-actualization~Incorrect. The correct answer is personality.;Psychopathology~Incorrect. The correct answer is personality.;.*~Wrong</response>
+<falseResponse>Self-actualization</falseResponse>
+<falseResponse>Psychopathology</falseResponse>
+</cluster>
+<cluster><display>Freud’s Stages of Psychosexual Development, in order, are:</display>
+<falseResponse>anal, oral, genital, phallic, sexual.</falseResponse>
+<response>oral, anal, phallic, latency, genital.~Well Done - oral, anal, phallic, latency, genital is correct.;anal, oral, genital, phallic, sexual.~Incorrect. The correct answer is oral, anal, phallic, latency, genital.;genital, orifice, vaginal, pubic, latency.~Incorrect. The correct answer is oral, anal, phallic, latency, genital.;oral, gratification, anal, latency, genital.~Incorrect. The correct answer is oral, anal, phallic, latency, genital.;.*~Wrong</response>
+<falseResponse>genital, orifice, vaginal, pubic, latency.</falseResponse>
+<falseResponse>oral, gratification, anal, latency, genital.</falseResponse>
+</cluster>
+<cluster><display>Which of the following theories of personality views human nature as inherently bad/negative?</display>
+<falseResponse>Trait theory</falseResponse>
+<response>Psychoanalytic theory~Well Done - Psychoanalytic theory is correct.;Trait theory~Incorrect. The correct answer is Psychoanalytic theory.;Humanistic theory~Incorrect. The correct answer is Psychoanalytic theory.;Behaviorist theory~Incorrect. The correct answer is Psychoanalytic theory.;.*~Wrong</response>
+<falseResponse>Humanistic theory</falseResponse>
+<falseResponse>Behaviorist theory</falseResponse>
+</cluster>
+<cluster><display>In the five-factor theory of personality, the dimension of neuroticism measures whether a person is…</display>
+<response>Anxious and unhappy or even-tempered and calm~Well Done - Anxious and unhappy or even-tempered and calm is correct.;Suspicious and irritable or trusting and soft-hearted~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm.;Disorganized and negligent or hard-working and well-organized~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm.;Conventional and down to earth or imaginative and curious~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm.;.*~Wrong</response>
+<falseResponse>Suspicious and irritable or trusting and soft-hearted</falseResponse>
+<falseResponse>Disorganized and negligent or hard-working and well-organized</falseResponse>
+<falseResponse>Conventional and down to earth or imaginative and curious</falseResponse>
+</cluster>
+<cluster><display>In the Freudian view of personality, while the ID is completely unconscious, the ego and superego are both…</display>
+<falseResponse>Completely conscious</falseResponse>
+<falseResponse>Completely preconscious</falseResponse>
+<falseResponse>Partly conscious and preconscious</falseResponse>
+<response>Partly in all three levels of consciousness~Well Done - Partly in all three levels of consciousness is correct.;Completely conscious~Incorrect. The correct answer is partly in all three levels of consciousness.;Completely preconscious~Incorrect. The correct answer is partly in all three levels of consciousness.;Partly conscious and preconscious~Incorrect. The correct answer is partly in all three levels of consciousness.;.*~Wrong</response>
+</cluster>
+<cluster><display>Which of the following is NOT one of the negative aspects of Freud’s psychoanalytic theory?</display>
+<falseResponse>His view of women</falseResponse>
+<falseResponse>An overemphasis of sex</falseResponse>
+<response>Identification of positive human attributes~Well Done - Identification of positive human attributes is correct.;His view of women~Incorrect. The correct answer is identification of positive human attributes.;An overemphasis of sex~Incorrect. The correct answer is identification of positive human attributes.;Its inability to be verify scientifically~Incorrect. The correct answer is identification of positive human attributes.;.*~Wrong</response>
+<falseResponse>Its inability to be verify scientifically</falseResponse>
+</cluster>
+<cluster><display>What are the three entities included in Rogers’ (humanistic) theory of personality?</display>
+<response>ideal self, self-image, and true self.~Well Done - ideal self, self-image, and true self is correct.;id, ego, and superego.~Incorrect. The correct answer is ideal self, self-image, and true self.;the needs for safety, esteem, and self-actualization.~Incorrect. The correct answer is ideal self, self-image, and true self.;psychological situation, expectancy, and reinforcement value.~Incorrect. The correct answer is ideal self, self-image, and true self.;.*~Wrong</response>
+<falseResponse>id, ego, and superego.</falseResponse>
+<falseResponse>the needs for safety, esteem, and self-actualization.</falseResponse>
+<falseResponse>psychological situation, expectancy, and reinforcement value.</falseResponse>
+</cluster>
+<cluster><display>Which of the following is NOT a component of our lives that that can influence our cognition/ thoughts according to our discussions this semester?</display>
+<falseResponse>Culture</falseResponse>
+<response>Congruence~Well Done - Congruence is correct.;Culture~Incorrect. The correct answer is congruence.;Gender~Incorrect. The correct answer is congruence.;Language~Incorrect. The correct answer is congruence.;.*~Wrong</response>
+<falseResponse>Gender</falseResponse>
+<falseResponse>Language</falseResponse>
+</cluster>
+<cluster><display>Which of the Big Five personality traits influences one’s work ethic?</display>
+<response>conscientiousness~Well Done - conscientiousness is correct.;extraversion~Incorrect. The correct answer is conscientiousness.;agreeableness~Incorrect. The correct answer is conscientiousness.;neuroticism~Incorrect. The correct answer is conscientiousness.;.*~Wrong</response>
+<falseResponse>extraversion</falseResponse>
+<falseResponse>agreeableness</falseResponse>
+<falseResponse>neuroticism</falseResponse>
+</cluster>
+
+
+<cluster><display>According to Freud (psychoanalytic theory), which of the following components is self-serving and guided by innate urges?</display>
+<response>Id~Well Done - Id is correct.;Ego~Incorrect. The correct answer is Id.;Superego~Incorrect. The correct answer is Id.;Unconscious~Incorrect. The correct answer is Id.;.*~Wrong</response>
+<falseResponse>Ego</falseResponse>
+<falseResponse>Superego</falseResponse>
+<falseResponse>Unconscious</falseResponse>
+</cluster>
+<cluster><display>According to Freud (psychoanalytic theory), which of the following components is guided by the Reality Principle and thus is in charge of making thoughtful, executive decisions?</display>
+<falseResponse>Id</falseResponse>
+<response>Ego~Well Done - Ego is correct.;Id~Incorrect. The correct answer is Ego.;Superego~Incorrect. The correct answer is Ego.;Unconscious~Incorrect. The correct answer is Ego.;.*~Wrong</response>
+<falseResponse>Superego</falseResponse>
+<falseResponse>Unconscious</falseResponse>
+</cluster>
+<cluster><display>According to Freud (psychoanalytic theory), which of the following components is a moral censor for our thoughts and actions?</display>
+<falseResponse>Id</falseResponse>
+<falseResponse>Ego</falseResponse>
+<response>Superego~Well Done - Superego is correct.;Id~Incorrect. The correct answer is Superego.;Ego~Incorrect. The correct answer is Superego.;Unconscious~Incorrect. The correct answer is Superego.;.*~Wrong</response>
+<falseResponse>Unconscious</falseResponse>
+</cluster>
+<cluster><display>Which of the following is TRUE regarding the role of “nature” in human development?</display>
+<falseResponse>Nature is most important because it precedes the effects of experience.</falseResponse>
+<falseResponse>Nature is not as important because most behaviors of interest to psychologists are learned.</falseResponse>
+<falseResponse>Nature is more important because its effects are less flexible.</falseResponse>
+<response>Nature is no more important than nurture as both interact to play critical roles~Well Done - Nature is no more important than nurture as both interact to play critical roles is correct.;Nature is most important because it precedes the effects of experience.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles.;Nature is not as important because most behaviors of interest to psychologists are learned.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles.;Nature is more important because its effects are less flexible.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles.;.*~Wrong</response>
+</cluster>
+<cluster><display>Physical growth and development in humans tend to happen...</display>
+<response>in the same order~Well Done - in the same order is correct.;at the same rate~Incorrect. The correct answer is in the same order.;from the same genetics~Incorrect. The correct answer is in the same order.;on a strict timeline~Incorrect. The correct answer is in the same order.;.*~Wrong</response>
+<falseResponse>at the same rate</falseResponse>
+<falseResponse>from the same genetics</falseResponse>
+<falseResponse>on a strict timeline</falseResponse>
+</cluster>
+<cluster><display>Power assertion and withdrawal of love are approaches to discipline that may be used by which type of parents?</display>
+<response>Authoritarian~Well Done - Authoritarian is correct.;Authoritative~Incorrect. The correct answer is authoritarian.;Passive~Incorrect. The correct answer is authoritarian.;Permissive~Incorrect. The correct answer is authoritarian.;.*~Wrong</response>
+<falseResponse>Authoritative</falseResponse>
+<falseResponse>Passive</falseResponse>
+<falseResponse>Permissive</falseResponse>
+</cluster>
+<cluster><display>In which parental style is there a healthy and effective balance between the rights of parents and their children?</display>
+<falseResponse>authoritarian</falseResponse>
+<falseResponse>overly permissive</falseResponse>
+<response>authoritative~Well Done - authoritative is correct.;authoritarian~Incorrect. The correct answer is authoritative.;overly permissive~Incorrect. The correct answer is authoritative.;ambivalent~Incorrect. The correct answer is authoritative.;.*~Wrong</response>
+<falseResponse>ambivalent</falseResponse>
+</cluster>
+<cluster><display>The understanding that objects continue to exist even when they are out of sight is called</display>
+<falseResponse>concrete permanence.</falseResponse>
+<response>object permanence.~Well Done - object permanence is correct.;concrete permanence.~Incorrect. The correct answer is object permanence.;concrete objectivity.~Incorrect. The correct answer is object permanence.;permanent conservation.~Incorrect. The correct answer is object permanence.;.*~Wrong</response>
+<falseResponse>concrete objectivity.</falseResponse>
+<falseResponse>permanent conservation.</falseResponse>
+</cluster>
+<cluster><display>The inability to take another person’s perspective is called</display>
+<falseResponse>Object permanence</falseResponse>
+<response>Egocentric thought~Well Done - Egocentric thought is correct.;Object permanence~Incorrect. The correct answer is egocentric thought.;Abstract thought~Incorrect. The correct answer is egocentric thought.;Conservation~Incorrect. The correct answer is egocentric thought.;.*~Wrong</response>
+<falseResponse>Abstract thought</falseResponse>
+<falseResponse>Conservation</falseResponse>
+</cluster>
+<cluster><display>According to Piaget’s cognitive development theory, in which stage does a child tend to think of more creative or abstract answers to hypothetical questions?</display>
+<falseResponse>Sensorimotor</falseResponse>
+<falseResponse>Preoperational</falseResponse>
+<falseResponse>Concrete operational</falseResponse>
+<response>Formal operational~Well Done - Formal operational is correct.;Sensorimotor~Incorrect. The correct answer is formal operational.;Preoperational~Incorrect. The correct answer is formal operational.;Concrete operational~Incorrect. The correct answer is formal operational.;.*~Wrong</response>
+</cluster>
+<cluster><display>According to Erikson, the major conflict in the first year of life is that between</display>
+<response>trust versus mistrust.~Well Done - trust versus mistrust is correct.;initiative versus guilt.~Incorrect. The correct answer is trust versus mistrust.;autonomy versus shame and doubt.~Incorrect. The correct answer is trust versus mistrust.;relatedness versus isolation.~Incorrect. The correct answer is trust versus mistrust.;.*~Wrong</response>
+<falseResponse>initiative versus guilt.</falseResponse>
+<falseResponse>autonomy versus shame and doubt.</falseResponse>
+<falseResponse>relatedness versus isolation.</falseResponse>
+</cluster>
+<cluster><display>According to Erikson, failure to develop a consistent identity results in</display>
+<falseResponse>isolation.</falseResponse>
+<falseResponse>inferiority.</falseResponse>
+<response>role confusion.~Well Done - role confusion is correct.;isolation.~Incorrect. The correct answer is role confusion.;inferiority.~Incorrect. The correct answer is role confusion.;stagnation.~Incorrect. The correct answer is role confusion.;.*~Wrong</response>
+<falseResponse>stagnation.</falseResponse>
+</cluster>      
+    </clusters>
+</setspec>
