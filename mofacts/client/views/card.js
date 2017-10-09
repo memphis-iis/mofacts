@@ -484,20 +484,6 @@ Template.card.rendered = function() {
         Session.set("needResume", false); //Turn this off to keep from re-resuming
         resumeFromUserTimesLog();
     }
-
-    // The following is to initialize Web Audio
-     try {
-       window.AudioContext = window.AudioContext || window.webkitAudioContext;
-       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-       window.URL = window.URL || window.webkitURL;
-       audioContext = new AudioContext();
-     } catch (e) {
-       console.log("Error initializing Web Audio browser");
-     }
-     if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-                                     console.log("No live audio input in this browser");
-                                 });
-     else console.log("No web audio support in this browser");
 };
 
 
@@ -1341,111 +1327,13 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
-
-//
-// var speech = require('google-speech-api');
-// var opts = {
-//   file: 'speech.mp3',
-//   key: 'AIzaSyBQn1H9TFlmAVz2A8_50cA4p_4rRfWawWI'
-// };
-//
-recorder = null;
-callbackManager = null;
-audioContext = null;
-
 // import '@google-cloud/speech' from '@google-cloud/speech';
 // import fs from 'fs';
 
 //const Speech = require('google-speech-api');
 //const fs = require('fs').default;
 
-buffer = [];
 
-processData = function(data){
-  console.log("looking for user answer");
-  // import Speech from '@google-cloud/speech';
-  // import fs from 'fs';
-  var userAnswer = document.getElementById("userAnswer");
-  var speechData = btoa(data);
-
-  if(speechData!="MA==")
-  {
-    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
-    var request = {
-      "config": {
-        "encoding": "OGG_OPUS",
-        "sampleRateHertz": 16000,
-        "languageCode" : "en-US",
-        "maxAlternatives" : 1,
-        "profanityFilter" : false,
-        "speechContexts" : [
-          {
-            "phrases" : ['rho','epsilon','gamma'],
-          }
-        ]
-      },
-      "audio": {
-        "content": speechData
-      }
-    }
-
-    console.log("Request:" + JSON.stringify(request));
-
-    HTTP.call("POST",speechURL,{"data":request},
-    function(err,response){
-      console.log(JSON.stringify(response));
-      if(!!response['data'])
-      {
-          console.log(Object.keys(response['data']));
-      }else{
-        console.log("no data in data");
-      }
-
-      //console.log(JSON.stringify(response['data']['results']));
-      //console.log(JSON.stringify(response['data']['results']['alternatives']));
-      //console.log(JSON.stringify(response['data']['results']['alternatives'][0]));
-      //console.log(response['data']['results']['alternatives'][0]['transcript']);
-    });
-  }else {
-    console.log("No data to send");
-  }
-
-  //let blob = new Blob(data,{type:'audio/x-mpeg-3'});
-  //source = URL.createObjectURL(blob);
-  //console.log("url:" + source);
-
-  // const config = {
-  //   encoding: 'LINEAR16',
-  //   sampleRateHertz: 16000,
-  //   languageCode: 'en-US'
-  // };
-  //
-  // // Detects speech in the audio file
-  // speechClient.recognize(request)
-  //   .then((results) => {
-  //     const transcription = results[0].results[0].alternatives[0].transcript;
-  //     console.log(`Transcription: ${transcription}`);
-  //   })
-  //   .catch((err) => {
-  //     console.error('ERROR:', err);
-  //   });
-
-  userAnswer.value = "test";
-  console.log(data);
-};
-
-function startUserMedia(stream) {
-  var input = audioContext.createMediaStreamSource(stream);
-  // Firefox hack https://support.mozilla.org/en-US/questions/984179
-  window.firefox_audio_hack = input;
-  var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
-  recorder = new AudioRecorder(input, audioRecorderConfig);
-  // If a recognizer is ready, we pass it to the recorder
-  recorder.consumers = [processData];
-  //if (recognizer) recorder.consumers = [recognizer];
-  //isRecorderReady = true;
-  console.log("Audio recorder ready");
-};
 
 function startRecording(){
   //mediaRecorder.start();
