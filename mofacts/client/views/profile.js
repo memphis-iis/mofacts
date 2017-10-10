@@ -240,6 +240,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     // The following is to initialize Web Audio
      try {
        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+       window.AudioContext.sampleRate = 16000;
        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
        window.URL = window.URL || window.webkitURL;
        audioContext = new AudioContext();
@@ -268,9 +269,9 @@ function startUserMedia(stream) {
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
   var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
-  recorder = new AudioRecorder(input, audioRecorderConfig);
+  recorder = new Recorder(input, audioRecorderConfig);
   // If a recognizer is ready, we pass it to the recorder
-  recorder.consumers = [processData];
+  //recorder.consumers = [processData];
   //if (recognizer) recorder.consumers = [recognizer];
   //isRecorderReady = true;
   console.log("Audio recorder ready");
@@ -286,54 +287,10 @@ processData = function(data){
   // import Speech from '@google-cloud/speech';
   // import fs from 'fs';
   var userAnswer = document.getElementById("userAnswer");
-  /*
-  // var speechData = btoa(data);
-  //
-  // if(speechData!="MA==")
-  // {
-  //   var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
-  //   var request = {
-  //     "config": {
-  //       "encoding": "OGG_OPUS",
-  //       "sampleRateHertz": 16000,
-  //       "languageCode" : "en-US",
-  //       "maxAlternatives" : 1,
-  //       "profanityFilter" : false,
-  //       "speechContexts" : [
-  //         {
-  //           "phrases" : ['rho','epsilon','gamma'],
-  //         }
-  //       ]
-  //     },
-  //     "audio": {
-  //       "content": speechData
-  //     }
-  //   }
-  //
-  //   console.log("Request:" + JSON.stringify(request));
-  //
-  //   HTTP.call("POST",speechURL,{"data":request},
-  //   function(err,response){
-  //     console.log(JSON.stringify(response));
-  //     if(!!response['data'])
-  //     {
-  //         console.log(Object.keys(response['data']));
-  //     }else{
-  //       console.log("no data in data");
-  //     }
-  //
-  //     //console.log(JSON.stringify(response['data']['results']));
-  //     //console.log(JSON.stringify(response['data']['results']['alternatives']));
-  //     //console.log(JSON.stringify(response['data']['results']['alternatives'][0]));
-  //     //console.log(response['data']['results']['alternatives'][0]['transcript']);
-  //   });
-  // }else {
-  //   console.log("No data to send");
-  // }
-  */
-  let blob = new Blob(data,{type:'audio/wav'});
-  source = URL.createObjectURL(blob);
-  console.log("url:" + source);
+
+  // let blob = new Blob(data,{type:'audio/x-mpeg-3'});
+  // source = URL.createObjectURL(blob);
+  // console.log("url:" + source);
 
   // const config = {
   //   encoding: 'LINEAR16',
@@ -352,6 +309,7 @@ processData = function(data){
   //   });
 
   recorder.stop();
+  recorder.exportWAV();
   userAnswer.value = "test";
   console.log(data);
 };

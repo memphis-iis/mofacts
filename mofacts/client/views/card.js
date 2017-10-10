@@ -1337,17 +1337,82 @@ function hideUserInteraction() {
 
 function startRecording(){
   //mediaRecorder.start();
-  if (recorder && recorder.start(0)){
+  if (recorder){
+    recorder.record();
     console.log("RECORDING START");
     //displayRecording(true);
-    Session.set('recording',true);
+    //Session.set('recording',true);
+  }else{
+    console.log("NO RECORDER");
   }
 }
 
+processWAV = function(data){
+  //let blob = new Blob(data,{type:'audio/x-wav'});
+  // source = URL.createObjectURL(data);
+  // console.log("url:" + source);
+
+  // source = URL.createObjectURL(data);
+  // var download = document.getElementById('downloadLink');
+  // download.href = source;
+  // download.innerText = "Download Ready";
+  // console.log("url:" + source);
+  console.log("data:" + JSON.stringify(data));
+  console.log("data unstringified: " + data);
+  var speechData = data;
+  //var speechData = btoa(data);
+
+  if(speechData!="MA==")
+  {
+    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
+    var request = {
+      "config": {
+        "encoding": "LINEAR16",
+        "sampleRateHertz": 44100,//16000,
+        "languageCode" : "en-US",
+        "maxAlternatives" : 1,
+        "profanityFilter" : false
+      },
+      "audio": {
+        "content": speechData
+      }
+    }
+
+    //"speechContexts" : [
+    //   {
+    //     "phrases" : ['rho','epsilon','gamma'],
+    //   }
+    // ]
+
+    console.log("Request:" + JSON.stringify(request));
+
+    HTTP.call("POST",speechURL,{"data":request},
+    function(err,response){
+      console.log(JSON.stringify(response));
+      if(!!response['data'])
+      {
+          console.log(Object.keys(response['data']));
+      }else{
+        console.log("no data in data");
+      }
+
+      //console.log(JSON.stringify(response['data']['results']));
+      //console.log(JSON.stringify(response['data']['results']['alternatives']));
+      //console.log(JSON.stringify(response['data']['results']['alternatives'][0]));
+      //console.log(response['data']['results']['alternatives'][0]['transcript']);
+    });
+  }else {
+    console.log("No data to send");
+  }
+
+}
+
 function stopRecording(){
-  if(recorder && Session.get('recording'))
+  if(recorder )//&& Session.get('recording'))
   {
     recorder.stop();
+    //recorder.exportMonoWAV(processWAV);
+    recorder.exportLinear16(processWAV);
     //displayRecording(false);
     console.log("RECORDING END");
   }
