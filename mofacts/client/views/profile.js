@@ -77,6 +77,9 @@ Template.profile.events({
 });
 
 Template.profile.rendered = function () {
+    //Restore toggle state
+    document.getElementById('audioToggle').checked = Session.get("audioToggled");
+
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 
@@ -235,8 +238,11 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
         selectedHow: how
     });
 
+   //Record state to restore when we return to this page
+   Session.set("audioToggled",document.getElementById('audioToggle').checked);
 
-
+   if(document.getElementById('audioToggle').checked)
+   {
     // The following is to initialize Web Audio
      try {
        window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -251,11 +257,12 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
                                      console.log("No live audio input in this browser");
                                  });
      else console.log("No web audio support in this browser");
-
-    // //Go directly to the card session - which will decide whether or
-    // //not to show instruction
-    // Session.set("needResume", true);
-    // Router.go("/card");
+   }else {
+     //Go directly to the card session - which will decide whether or
+     //not to show instruction
+     Session.set("needResume", true);
+     Router.go("/card");
+   }
 }
 
 //START SPEECH RECOGNITION CODE
@@ -270,6 +277,24 @@ function startUserMedia(stream) {
   window.firefox_audio_hack = input;
   var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
   recorder = new Recorder(input, audioRecorderConfig);
+  var options = {
+    source: input,
+    voice_stop: function() {
+      console.log("VOICE STOP");
+      recorder.stop();
+      Session.set('recording',false);
+      recorder.exportToProcessCallback();
+    },
+    voice_start: function() {
+      console.log("VOICE START");
+      //recorder.record();
+      //Session.set('recording',true);
+    }
+  }
+
+  var vad = new VAD(options);
+
+  Session.set("sampleRate", input.context.sampleRate);
   // If a recognizer is ready, we pass it to the recorder
   //recorder.consumers = [processData];
   //if (recognizer) recorder.consumers = [recognizer];

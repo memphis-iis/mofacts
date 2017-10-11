@@ -242,6 +242,7 @@ function beginMainCardTimeout(delay, func) {
 
 //Reset the previously set timeout counter
 function resetMainCardTimeout() {
+    console.log("RESETTING MAIN CARD TIMEOUT");
     var savedFunc = timeoutFunc;
     var savedDelay = timeoutDelay;
     clearCardTimeout();
@@ -353,7 +354,15 @@ function varLenDisplayTimeout() {
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
+window.onpopstate = function(event){
+  console.log("back button pressed?" + document.location.pathname);
+  if(document.location.pathname == "/profile"){
+    leavePage("/profile");
+  }
+}
+
 function leavePage(dest) {
+    stopRecording();
     clearCardTimeout();
     clearPlayingSound();
     if (typeof dest === "function") {
@@ -1327,100 +1336,113 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
-// import '@google-cloud/speech' from '@google-cloud/speech';
-// import fs from 'fs';
+processWAV = function(data){
+  resetMainCardTimeout();
+  document.getElementById('userAnswer').value = "waiting for transcription";
+  var sampleRate = Session.get("sampleRate");
+  recorder.clear(); //TODO: is this the right place to clear/does this work?
 
-//const Speech = require('google-speech-api');
-//const fs = require('fs').default;
+  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
+  var request = {
+    "config": {
+      "encoding": "LINEAR16",
+      "sampleRateHertz": sampleRate,
+      "languageCode" : "en-US",
+      "maxAlternatives" : 1,
+      "profanityFilter" : false,
+      "speechContexts" : [
+        {
+          "phrases" : ['alif','dal','kha'],
+        }
+      ]
+    },
+    "audio": {
+      "content": data
+    }
+  }
 
+  //console.log("Request:" + JSON.stringify(request));
 
+  HTTP.call("POST",speechURL,{"data":request}, function(err,response){
+      console.log(JSON.stringify(response));
+      if(!!response['data'])
+      {
+          var transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
+          //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
+          console.log("transcript: " + transcript);
+          document.getElementById('userAnswer').value = transcript;
+          simulateEnterKeyPress();
+      }else{
+        console.log("no data in data");
+      }
+    });
+}
+
+function simulateEnterKeyPress(){
+    var $textBox = $("#userAnswer");
+
+    var press = jQuery.Event("keypress");
+    press.altGraphKey = false;
+    press.altKey = false;
+    press.bubbles = true;
+    press.cancelBubble = false;
+    press.cancelable = true;
+    press.charCode = 13;
+    press.clipboardData = undefined;
+    press.ctrlKey = false;
+    press.currentTarget = $textBox[0];
+    press.defaultPrevented = false;
+    press.detail = 0;
+    press.eventPhase = 2;
+    press.keyCode = 13;
+    press.keyIdentifier = "";
+    press.keyLocation = 0;
+    press.layerX = 0;
+    press.layerY = 0;
+    press.metaKey = false;
+    press.pageX = 0;
+    press.pageY = 0;
+    press.returnValue = true;
+    press.shiftKey = false;
+    press.srcElement = $textBox[0];
+    press.target = $textBox[0];
+    press.type = "keypress";
+    press.view = Window;
+    press.which = 13;
+
+    $textBox.trigger(press);
+    console.log("SIMULATED ENTER KEY PRESS");
+}
 
 function startRecording(){
   //mediaRecorder.start();
   if (recorder){
+    recorder.setProcessCallback(processWAV);
     recorder.record();
     console.log("RECORDING START");
     //displayRecording(true);
-    //Session.set('recording',true);
+    Session.set('recording',true);
   }else{
     console.log("NO RECORDER");
   }
 }
 
-processWAV = function(data){
-  //let blob = new Blob(data,{type:'audio/x-wav'});
-  // source = URL.createObjectURL(data);
-  // console.log("url:" + source);
-
-  // source = URL.createObjectURL(data);
-  // var download = document.getElementById('downloadLink');
-  // download.href = source;
-  // download.innerText = "Download Ready";
-  // console.log("url:" + source);
-  console.log("data:" + JSON.stringify(data));
-  console.log("data unstringified: " + data);
-  var speechData = data;
-  //var speechData = btoa(data);
-
-  if(speechData!="MA==")
-  {
-    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
-    var request = {
-      "config": {
-        "encoding": "LINEAR16",
-        "sampleRateHertz": 44100,//16000,
-        "languageCode" : "en-US",
-        "maxAlternatives" : 1,
-        "profanityFilter" : false
-      },
-      "audio": {
-        "content": speechData
-      }
-    }
-
-    //"speechContexts" : [
-    //   {
-    //     "phrases" : ['rho','epsilon','gamma'],
-    //   }
-    // ]
-
-    console.log("Request:" + JSON.stringify(request));
-
-    HTTP.call("POST",speechURL,{"data":request},
-    function(err,response){
-      console.log(JSON.stringify(response));
-      if(!!response['data'])
-      {
-          console.log(Object.keys(response['data']));
-      }else{
-        console.log("no data in data");
-      }
-
-      //console.log(JSON.stringify(response['data']['results']));
-      //console.log(JSON.stringify(response['data']['results']['alternatives']));
-      //console.log(JSON.stringify(response['data']['results']['alternatives'][0]));
-      //console.log(response['data']['results']['alternatives'][0]['transcript']);
-    });
-  }else {
-    console.log("No data to send");
-  }
-
-}
-
 function stopRecording(){
-  if(recorder )//&& Session.get('recording'))
+  if(recorder && Session.get('recording'))
   {
+    console.log("resetting timeout and stopping recording");
+    resetMainCardTimeout();
     recorder.stop();
-    //recorder.exportMonoWAV(processWAV);
+    Session.set('recording',false);
     recorder.exportLinear16(processWAV);
+    //setQuestionTimeout();
     //displayRecording(false);
     console.log("RECORDING END");
   }
-  //mediaRecorder.stop();
 }
 
 function stopUserInput() {
-  stopRecording();
+    stopRecording();
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
 }
 

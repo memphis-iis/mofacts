@@ -188,6 +188,5 @@ function _arrayBufferToBase64( buffer ) {
     for (var i = 0; i < len; i++) {
         binary += String.fromCharCode( bytes[ i ] );
     }
-    console.log('binary: ' + binary);
     return btoa( binary );
 }

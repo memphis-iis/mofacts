@@ -34,6 +34,13 @@
     </nav>  <!-- close nav -->
 
     <div class="container">
+      <div class="row" id="toggleSwitchContainer">
+            <label class="switch text-center">
+              <input name="audioToggle" id="audioToggle" type="checkbox">
+              <span class="slider round"></span>
+            </label>
+            <p class="text-left"> Enable audio input </p>
+      </div>
         {{#unless isInRole 'admin,teacher'}}
             <br>
 
