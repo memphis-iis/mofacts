@@ -243,6 +243,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 
    if(document.getElementById('audioToggle').checked)
    {
+     console.log("audio toggle checked, initializing audio");
     // The following is to initialize Web Audio
      try {
        window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -258,6 +259,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
                                  });
      else console.log("No web audio support in this browser");
    }else {
+     console.log("audio toggle not checked");
      //Go directly to the card session - which will decide whether or
      //not to show instruction
      Session.set("needResume", true);
@@ -272,6 +274,7 @@ callbackManager = null;
 audioContext = null;
 
 function startUserMedia(stream) {
+  console.log("START USER MEDIA");
   var input = audioContext.createMediaStreamSource(stream);
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;

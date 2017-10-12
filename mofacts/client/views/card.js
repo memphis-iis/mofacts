@@ -362,12 +362,14 @@ window.onpopstate = function(event){
 }
 
 function leavePage(dest) {
-    stopRecording();
-    if(window.audioContext && dest != "/card"){
+    console.log("leave page, going to: " + dest);
+
+    if(window.audioContext && !(dest == "/card" || dest == "/instructions")){
       console.log("closing audio context");
+      stopRecording();
       window.audioContext.close();
     }else{
-      console.log("leave page going to: " + dest);
+      console.log("NOT closing audio context");
     }
     clearCardTimeout();
     clearPlayingSound();
