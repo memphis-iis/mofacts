@@ -82,6 +82,35 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
+getAllStimAnswers = function() {
+  // if(!!cachedAllAnswers){
+  //   return cachedAllAnswers;
+  // }
+
+  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
+  var allAnswers = [];
+
+  //console.log("getting all stim answers");
+
+  for(clusterIndex in clusters){
+    //console.log("cluster:" + JSON.stringify(clusters[clusterIndex]));
+    for(responseIndex in clusters[clusterIndex].response){
+      //console.log("response:" + JSON.stringify(clusters[clusterIndex].response[responseIndex]));
+          allAnswers.push(clusters[clusterIndex].response[responseIndex]);
+    }
+  }
+
+  //cachedAllAnswers = allAnswers;
+
+  // _.each(clusters,function(cluster){
+  //   _.each(cluster.response,function(response){
+  //       allAnswers.push(response);
+  //   });
+  // });
+
+  return allAnswers;
+}
+
 //Return the current question type
 getQuestionType = function () {
     var type = "text"; //Default type

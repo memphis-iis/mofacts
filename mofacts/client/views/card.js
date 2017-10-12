@@ -241,7 +241,7 @@ function beginMainCardTimeout(delay, func) {
 }
 
 //Reset the previously set timeout counter
-function resetMainCardTimeout() {
+resetMainCardTimeout = function() {
     console.log("RESETTING MAIN CARD TIMEOUT");
     var savedFunc = timeoutFunc;
     var savedDelay = timeoutDelay;
@@ -363,6 +363,12 @@ window.onpopstate = function(event){
 
 function leavePage(dest) {
     stopRecording();
+    if(window.audioContext && dest != "/card"){
+      console.log("closing audio context");
+      window.audioContext.close();
+    }else{
+      console.log("leave page going to: " + dest);
+    }
     clearCardTimeout();
     clearPlayingSound();
     if (typeof dest === "function") {
@@ -1338,44 +1344,51 @@ function hideUserInteraction() {
 
 processWAV = function(data){
   resetMainCardTimeout();
-  document.getElementById('userAnswer').value = "waiting for transcription";
-  var sampleRate = Session.get("sampleRate");
   recorder.clear(); //TODO: is this the right place to clear/does this work?
+  var userAnswer = document.getElementById('userAnswer');
 
-  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
-  var request = {
-    "config": {
-      "encoding": "LINEAR16",
-      "sampleRateHertz": sampleRate,
-      "languageCode" : "en-US",
-      "maxAlternatives" : 1,
-      "profanityFilter" : false,
-      "speechContexts" : [
-        {
-          "phrases" : ['alif','dal','kha'],
-        }
-      ]
-    },
-    "audio": {
-      "content": data
-    }
-  }
+  if(userAnswer){
+    userAnswer.value = "waiting for transcription";
+    var sampleRate = Session.get("sampleRate");
 
-  //console.log("Request:" + JSON.stringify(request));
-
-  HTTP.call("POST",speechURL,{"data":request}, function(err,response){
-      console.log(JSON.stringify(response));
-      if(!!response['data'])
-      {
-          var transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
-          //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
-          console.log("transcript: " + transcript);
-          document.getElementById('userAnswer').value = transcript;
-          simulateEnterKeyPress();
-      }else{
-        console.log("no data in data");
+    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
+    var request = {
+      "config": {
+        "encoding": "LINEAR16",
+        "sampleRateHertz": sampleRate,
+        "languageCode" : "en-US",
+        "maxAlternatives" : 1,
+        "profanityFilter" : false,
+        "speechContexts" : [
+          {
+            "phrases" : getAllStimAnswers(),
+          }
+        ]
+      },
+      "audio": {
+        "content": data
       }
-    });
+    }
+
+    console.log("Request:" + JSON.stringify(request));
+
+    HTTP.call("POST",speechURL,{"data":request}, function(err,response){
+        console.log(JSON.stringify(response));
+        var transcript = '';
+        if(!!response['data']['results'])
+        {
+          transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
+            //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
+        }else{
+          console.log("NO TRANSCRIPT/SILENCE");
+        }
+        console.log("transcript: " + transcript);
+        userAnswer.value = transcript;
+        simulateEnterKeyPress();
+      });
+  }else{
+    console.log("processwav userAnswer not defined");
+  }
 }
 
 function simulateEnterKeyPress(){
@@ -1415,7 +1428,6 @@ function simulateEnterKeyPress(){
 }
 
 function startRecording(){
-  //mediaRecorder.start();
   if (recorder){
     recorder.setProcessCallback(processWAV);
     recorder.record();

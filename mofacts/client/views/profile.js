@@ -280,13 +280,32 @@ function startUserMedia(stream) {
   var options = {
     source: input,
     voice_stop: function() {
+      if(!Session.get('recording')){
+        console.log("NOT RECORDING, VOICE STOP");
+        return;
+      }
       console.log("VOICE STOP");
       recorder.stop();
       Session.set('recording',false);
       recorder.exportToProcessCallback();
     },
     voice_start: function() {
+      if(!Session.get('recording')){
+        console.log("NOT RECORDING, VOICE START");
+        return;
+      }
       console.log("VOICE START");
+      if(resetMainCardTimeout){
+        if(Session.get('recording')){
+          console.log("voice_start resetMainCardTimeout");
+          resetMainCardTimeout();
+        }else {
+          console.log("NOT RECORDING");
+        }
+      }else{
+        console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
+      }
+      //For multiple transcriptions:
       //recorder.record();
       //Session.set('recording',true);
     }
@@ -295,48 +314,12 @@ function startUserMedia(stream) {
   var vad = new VAD(options);
 
   Session.set("sampleRate", input.context.sampleRate);
-  // If a recognizer is ready, we pass it to the recorder
-  //recorder.consumers = [processData];
-  //if (recognizer) recorder.consumers = [recognizer];
-  //isRecorderReady = true;
   console.log("Audio recorder ready");
 
   //Go directly to the card session - which will decide whether or
   //not to show instruction
   Session.set("needResume", true);
   Router.go("/card");
-};
-
-processData = function(data){
-  console.log("looking for user answer");
-  // import Speech from '@google-cloud/speech';
-  // import fs from 'fs';
-  var userAnswer = document.getElementById("userAnswer");
-
-  // let blob = new Blob(data,{type:'audio/x-mpeg-3'});
-  // source = URL.createObjectURL(blob);
-  // console.log("url:" + source);
-
-  // const config = {
-  //   encoding: 'LINEAR16',
-  //   sampleRateHertz: 16000,
-  //   languageCode: 'en-US'
-  // };
-  //
-  // // Detects speech in the audio file
-  // speechClient.recognize(request)
-  //   .then((results) => {
-  //     const transcription = results[0].results[0].alternatives[0].transcript;
-  //     console.log(`Transcription: ${transcription}`);
-  //   })
-  //   .catch((err) => {
-  //     console.error('ERROR:', err);
-  //   });
-
-  recorder.stop();
-  recorder.exportWAV();
-  userAnswer.value = "test";
-  console.log(data);
 };
 
 //END SPEECH RECOGNITION CODE
