@@ -83,22 +83,33 @@ getStimCluster = function (index, cachedStimuli) {
 };
 
 getAllStimAnswers = function() {
+  var currentClusterIndex = getCurrentClusterIndex();
   // if(!!cachedAllAnswers){
   //   return cachedAllAnswers;
   // }
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
   var allAnswers = [];
-
-  //console.log("getting all stim answers");
+  var exclusionList = ["18-25","Male","Less than High School"];
 
   for(clusterIndex in clusters){
-    //console.log("cluster:" + JSON.stringify(clusters[clusterIndex]));
+    //Grab the response phrases we want to exclude if this is the current cluster
+    if(clusterIndex == currentClusterIndex){
+      if(!!clusters[clusterIndex].speechHintExclusionList){
+          exclusionList = exclusionList.concat(("" + clusters[clusterIndex].speechHintExclusionList).split(','));
+          //console.log("EXCLUSION LIST FOUND:" + exclusionList);
+      }
+    }
     for(responseIndex in clusters[clusterIndex].response){
-      //console.log("response:" + JSON.stringify(clusters[clusterIndex].response[responseIndex]));
-          allAnswers.push(clusters[clusterIndex].response[responseIndex]);
+      var answer = clusters[clusterIndex].response[responseIndex];
+          allAnswers.push(answer);
     }
   }
+
+  //Remove the optional phrase hint exclusions
+  allAnswers = allAnswers.filter( function (el){
+    return exclusionList.indexOf(el) < 0;
+  });
 
   //cachedAllAnswers = allAnswers;
 

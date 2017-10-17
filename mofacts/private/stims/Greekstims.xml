@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='UTF-8' ?> 
+<?xml version='1.0' encoding='UTF-8' ?>
 <!-- was: no XML declaration present -->
 <setspec>
     <clusters>
@@ -16,11 +16,13 @@
             <parameter>-0.9978</parameter>
             <display>Β</display>
             <response>beta</response>
+            <speechHintExclusionList>zeta,eta,theta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.99775</parameter>
             <display>β</display>
             <response>beta</response>
+            <speechHintExclusionList>zeta,eta,theta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.9979</parameter>
@@ -66,21 +68,25 @@
             <parameter>-0.9983</parameter>
             <display>Η</display>
             <response>eta</response>
+            <speechHintExclusionList>zeta,beta,theta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.99825</parameter>
             <display>η</display>
             <response>eta</response>
+            <speechHintExclusionList>zeta,beta,theta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.9984</parameter>
             <display>Θ</display>
             <response>theta</response>
+            <speechHintExclusionList>zeta,beta,eta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.99835</parameter>
             <display>θ</display>
             <response>theta</response>
+            <speechHintExclusionList>zeta,beta,eta</speechHintExclusionList>
         </cluster>
         <cluster>
             <parameter>-0.9985</parameter>
