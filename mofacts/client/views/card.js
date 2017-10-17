@@ -1345,8 +1345,8 @@ function hideUserInteraction() {
 }
 
 processWAV = function(data){
-  resetMainCardTimeout();
-  recorder.clear(); //TODO: is this the right place to clear/does this work?
+  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
+  recorder.clear();
   var userAnswer = document.getElementById('userAnswer');
 
   if(userAnswer){
@@ -1370,7 +1370,7 @@ processWAV = function(data){
         "profanityFilter" : false,
         "speechContexts" : [
           {
-            "phrases" : ["test"],//getAllStimAnswers(),
+            "phrases" : getAllStimAnswers(),
           }
         ]
       },
@@ -1381,6 +1381,7 @@ processWAV = function(data){
 
     console.log("Request:" + JSON.stringify(request));
 
+    //Make the actual call to the google speech api with the audio data for transcription
     HTTP.call("POST",speechURL,{"data":request}, function(err,response){
         console.log(JSON.stringify(response));
         var transcript = '';
@@ -1393,14 +1394,14 @@ processWAV = function(data){
         }
         console.log("transcript: " + transcript);
         userAnswer.value = transcript;
-        simulateEnterKeyPress();
+        simulateUserAnswerEnterKeyPress();
       });
   }else{
     console.log("processwav userAnswer not defined");
   }
 }
 
-function simulateEnterKeyPress(){
+function simulateUserAnswerEnterKeyPress(){
     var $textBox = $("#userAnswer");
 
     var press = jQuery.Event("keypress");
@@ -1438,6 +1439,8 @@ function simulateEnterKeyPress(){
 
 function startRecording(){
   if (recorder){
+    //Set up the process callback so that when we detect speech end we have the
+    //closure containing the userAnswer input as well as the function to process
     recorder.setProcessCallback(processWAV);
     recorder.record();
     console.log("RECORDING START");
@@ -1451,11 +1454,12 @@ function startRecording(){
 function stopRecording(){
   if(recorder && Session.get('recording'))
   {
-    console.log("resetting timeout and stopping recording");
-    resetMainCardTimeout();
+    //console.log("resetting timeout and stopping recording");
+    //resetMainCardTimeout();
     recorder.stop();
     Session.set('recording',false);
-    recorder.exportLinear16(processWAV);
+    recorder.clear();
+    //recorder.exportLinear16(processWAV);
     //setQuestionTimeout();
     //displayRecording(false);
     console.log("RECORDING END");

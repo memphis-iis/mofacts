@@ -447,3 +447,11 @@ input:checked + .slider:before {
 }
 
 /* End Toggle CSS */
+
+.invisible {
+  display: none;
+}
+
+#voiceSensitivityRange{
+  width: 30%;
+}

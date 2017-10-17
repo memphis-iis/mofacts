@@ -77,8 +77,25 @@ Template.profile.events({
 });
 
 Template.profile.rendered = function () {
+    //Set up input sensitivity range to display/hide when audio input is enabled/disabled
+    var audioToggle = document.getElementById('audioToggle');
+
+    $('#audioToggle').change(function()
+    {
+      console.log(audioToggle.checked);
+      if(audioToggle.checked){
+        $('#voiceSensitivityGroup').removeClass('invisible');
+      }else{
+        $('#voiceSensitivityGroup').addClass('invisible');
+      }
+    });
     //Restore toggle state
-    document.getElementById('audioToggle').checked = Session.get("audioToggled");
+    audioToggle.checked = Session.get("audioToggled");
+    if(audioToggle.checked){
+      $('#voiceSensitivityGroup').removeClass('invisible');
+    }else{
+      $('#voiceSensitivityGroup').addClass('invisible');
+    }
 
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
@@ -199,8 +216,6 @@ Template.profile.rendered = function () {
     }
 };
 
-
-
 //Actual logic for selecting and starting a TDF
 function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
@@ -241,10 +256,10 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
    //Record state to restore when we return to this page
    Session.set("audioToggled",document.getElementById('audioToggle').checked);
 
+   //If user has enabled audio input, initialize web audio (this takes a bit)
    if(document.getElementById('audioToggle').checked)
    {
      console.log("audio toggle checked, initializing audio");
-    // The following is to initialize Web Audio
      try {
        window.AudioContext = window.AudioContext || window.webkitAudioContext;
        window.AudioContext.sampleRate = 16000;
@@ -280,9 +295,10 @@ function startUserMedia(stream) {
   window.firefox_audio_hack = input;
   var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
   recorder = new Recorder(input, audioRecorderConfig);
+
+  //Set up options for voice activity detection code (vad.js)
   var energyOffsetExp = 60 - ((document.getElementById("voiceSensitivityRange").value) * 60 / 100);
   var energyOffset = parseFloat("1e+" + energyOffsetExp);
-  console.log("energyOffset:" + energyOffset);
   var options = {
     source: input,
     energy_offset: energyOffset,
@@ -320,11 +336,12 @@ function startUserMedia(stream) {
 
   var vad = new VAD(options);
 
+  //Capture the sampling rate for later use in google speech api as input
   Session.set("sampleRate", input.context.sampleRate);
   console.log("Audio recorder ready");
 
-  //Go directly to the card session - which will decide whether or
-  //not to show instruction
+  //After web audio is initialized we then go to the practice set the user chose
+  //synchronously
   Session.set("needResume", true);
   Router.go("/card");
 };

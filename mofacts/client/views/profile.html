@@ -35,13 +35,15 @@
 
     <div class="container">
       <div class="row" id="toggleSwitchContainer">
-            <label class="switch text-center">
-              <input name="audioToggle" id="audioToggle" type="checkbox">
-              <span class="slider round"></span>
-            </label>
-            <p class="text-left"> Enable audio input </p>
-
+          <label class="switch text-center">
+            <input name="audioToggle" id="audioToggle" type="checkbox">
+            <span class="slider round"></span>
+          </label>
+          <p class="text-left"> Enable audio input </p>
+          <div id='voiceSensitivityGroup' class='invisible'>
             <input type="range" id="voiceSensitivityRange" value="0">
+            <p class="text-left"> Audio input sensitivity </p>
+          </div>
       </div>
         {{#unless isInRole 'admin,teacher'}}
             <br>
