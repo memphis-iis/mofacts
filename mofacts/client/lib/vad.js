@@ -37,13 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
       voice_stop: function() {},
       voice_start: function() {},
       smoothingTimeConstant: 0.99,
-      energy_offset: 1e-8, // The initial offset.
-      energy_threshold_ratio_pos: 2, // Signal must be twice the offset
-      energy_threshold_ratio_neg: 0.5, // Signal must be half the offset
+      energy_offset: 1e+60, //1e-8// The initial offset.
+      energy_threshold_ratio_pos: 2, //2// Signal must be twice the offset
+      energy_threshold_ratio_neg: 0.5, //0.5// Signal must be half the offset
       energy_integration: 1, // Size of integration change compared to the signal per second.
       filter: [
-        {f: 200, v:0}, // 0 -> 200 is 0
-        {f: 2000, v:1} // 200 -> 2k is 1
+        {f: 500, v:0}, // 0 -> 200 is 0
+        {f: 5000, v:1} // 200 -> 2k is 1
       ],
       source: null,
       context: null
@@ -55,6 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
         this.options[option] = options[option];
       }
     }
+
+    console.log("options: " + JSON.stringify(this.options));
 
     // Require source
    if(!this.options.source)
@@ -74,7 +76,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
       ' | sampleRate: ' + this.options.context.sampleRate +
       ' | hertzPerBin: ' + this.hertzPerBin +
       ' | iterationFrequency: ' + this.iterationFrequency +
-      ' | iterationPeriod: ' + this.iterationPeriod
+      ' | iterationPeriod: ' + this.iterationPeriod +
+      ' | energy_offset: ' + this.options.energy_offset
     );
 
     this.setFilter = function(shape) {

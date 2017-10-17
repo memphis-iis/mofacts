@@ -1352,18 +1352,25 @@ processWAV = function(data){
   if(userAnswer){
     userAnswer.value = "waiting for transcription";
     var sampleRate = Session.get("sampleRate");
+    var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+    var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
+    if(!speechRecognitionLanguage){
+      speechRecognitionLanguage = "en-US";
+    }else{
+      speechRecognitionLanguage = speechRecognitionLanguage[0];
+    }
 
     var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
     var request = {
       "config": {
         "encoding": "LINEAR16",
         "sampleRateHertz": sampleRate,
-        "languageCode" : "en-US",
+        "languageCode" : speechRecognitionLanguage,
         "maxAlternatives" : 1,
         "profanityFilter" : false,
         "speechContexts" : [
           {
-            "phrases" : getAllStimAnswers(),
+            "phrases" : ["test"],//getAllStimAnswers(),
           }
         ]
       },

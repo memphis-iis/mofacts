@@ -280,8 +280,12 @@ function startUserMedia(stream) {
   window.firefox_audio_hack = input;
   var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
   recorder = new Recorder(input, audioRecorderConfig);
+  var energyOffsetExp = 60 - ((document.getElementById("voiceSensitivityRange").value) * 60 / 100);
+  var energyOffset = parseFloat("1e+" + energyOffsetExp);
+  console.log("energyOffset:" + energyOffset);
   var options = {
     source: input,
+    energy_offset: energyOffset,
     voice_stop: function() {
       if(!Session.get('recording')){
         console.log("NOT RECORDING, VOICE STOP");
