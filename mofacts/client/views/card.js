@@ -404,6 +404,7 @@ Template.card.events({
             else {
                 $("#userForceCorrect").val("");
                 $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
+                startRecording();
             }
         }
         else {
@@ -1319,6 +1320,7 @@ function showUserInteraction(isGoodNews, news) {
             $("#forceCorrectionEntry").show();
             $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
             $("#userForceCorrect").val("").focus();
+            startRecording();
         }
         else {
             $("#forceCorrectGuidance").text("");
@@ -1344,65 +1346,10 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
-processWAV = function(data){
-  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
-  recorder.clear();
-  var userAnswer = document.getElementById('userAnswer');
-
-  if(userAnswer){
-    userAnswer.value = "waiting for transcription";
-    var sampleRate = Session.get("sampleRate");
-    var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-    var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
-    if(!speechRecognitionLanguage){
-      speechRecognitionLanguage = "en-US";
-    }else{
-      speechRecognitionLanguage = speechRecognitionLanguage[0];
-    }
-
-    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
-    var request = {
-      "config": {
-        "encoding": "LINEAR16",
-        "sampleRateHertz": sampleRate,
-        "languageCode" : speechRecognitionLanguage,
-        "maxAlternatives" : 1,
-        "profanityFilter" : false,
-        "speechContexts" : [
-          {
-            "phrases" : getAllStimAnswers(),
-          }
-        ]
-      },
-      "audio": {
-        "content": data
-      }
-    }
-
-    console.log("Request:" + JSON.stringify(request));
-
-    //Make the actual call to the google speech api with the audio data for transcription
-    HTTP.call("POST",speechURL,{"data":request}, function(err,response){
-        console.log(JSON.stringify(response));
-        var transcript = '';
-        if(!!response['data']['results'])
-        {
-          transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
-            //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
-        }else{
-          console.log("NO TRANSCRIPT/SILENCE");
-        }
-        console.log("transcript: " + transcript);
-        userAnswer.value = transcript;
-        simulateUserAnswerEnterKeyPress();
-      });
-  }else{
-    console.log("processwav userAnswer not defined");
-  }
-}
-
-function simulateUserAnswerEnterKeyPress(){
-    var $textBox = $("#userAnswer");
+simulateUserAnswerEnterKeyPress = function(){
+    //Simulate enter key press on the correct input box if the user is being
+    //forced to enter the correct answer in userForceCorrect
+    var $textBox = $("#forceCorrectionEntry").is(":visible") ? $("#userForceCorrect") : $("#userAnswer");
 
     var press = jQuery.Event("keypress");
     press.altGraphKey = false;
@@ -1439,13 +1386,9 @@ function simulateUserAnswerEnterKeyPress(){
 
 function startRecording(){
   if (recorder){
-    //Set up the process callback so that when we detect speech end we have the
-    //closure containing the userAnswer input as well as the function to process
-    recorder.setProcessCallback(processWAV);
+    Session.set('recording',true);
     recorder.record();
     console.log("RECORDING START");
-    //displayRecording(true);
-    Session.set('recording',true);
   }else{
     console.log("NO RECORDER");
   }
@@ -1454,14 +1397,9 @@ function startRecording(){
 function stopRecording(){
   if(recorder && Session.get('recording'))
   {
-    //console.log("resetting timeout and stopping recording");
-    //resetMainCardTimeout();
     recorder.stop();
     Session.set('recording',false);
     recorder.clear();
-    //recorder.exportLinear16(processWAV);
-    //setQuestionTimeout();
-    //displayRecording(false);
     console.log("RECORDING END");
   }
 }
@@ -1472,7 +1410,6 @@ function stopUserInput() {
 }
 
 function allowUserInput(textFocus) {
-
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
     startRecording();
 

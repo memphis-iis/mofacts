@@ -284,6 +284,63 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 
 //START SPEECH RECOGNITION CODE
 
+processLINEAR16 = function(data){
+  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
+  recorder.clear();
+  var userAnswer = document.getElementById('userForceCorrect') || document.getElementById('userAnswer');
+
+  if(userAnswer){
+    userAnswer.value = "waiting for transcription";
+    var sampleRate = Session.get("sampleRate");
+    var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+    var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
+    if(!speechRecognitionLanguage){
+      speechRecognitionLanguage = "en-US";
+    }else{
+      speechRecognitionLanguage = speechRecognitionLanguage[0];
+    }
+
+    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
+    var request = {
+      "config": {
+        "encoding": "LINEAR16",
+        "sampleRateHertz": sampleRate,
+        "languageCode" : speechRecognitionLanguage,
+        "maxAlternatives" : 1,
+        "profanityFilter" : false,
+        "speechContexts" : [
+          {
+            "phrases" : getAllStimAnswers(),
+          }
+        ]
+      },
+      "audio": {
+        "content": data
+      }
+    }
+
+    console.log("Request:" + JSON.stringify(request));
+
+    //Make the actual call to the google speech api with the audio data for transcription
+    HTTP.call("POST",speechURL,{"data":request}, function(err,response){
+        console.log(JSON.stringify(response));
+        var transcript = '';
+        if(!!response['data']['results'])
+        {
+          transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
+            //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
+        }else{
+          console.log("NO TRANSCRIPT/SILENCE");
+        }
+        console.log("transcript: " + transcript);
+        userAnswer.value = transcript;
+        simulateUserAnswerEnterKeyPress();
+      });
+  }else{
+    console.log("processwav userAnswer not defined");
+  }
+}
+
 recorder = null;
 callbackManager = null;
 audioContext = null;
@@ -293,8 +350,14 @@ function startUserMedia(stream) {
   var input = audioContext.createMediaStreamSource(stream);
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
+  //Capture the sampling rate for later use in google speech api as input
+  Session.set("sampleRate", input.context.sampleRate);
   var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
   recorder = new Recorder(input, audioRecorderConfig);
+
+  //Set up the process callback so that when we detect speech end we have the
+  //function to process the audio data
+  recorder.setProcessCallback(processLINEAR16);
 
   //Set up options for voice activity detection code (vad.js)
   var energyOffsetExp = 60 - ((document.getElementById("voiceSensitivityRange").value) * 60 / 100);
@@ -336,8 +399,6 @@ function startUserMedia(stream) {
 
   var vad = new VAD(options);
 
-  //Capture the sampling rate for later use in google speech api as input
-  Session.set("sampleRate", input.context.sampleRate);
   console.log("Audio recorder ready");
 
   //After web audio is initialized we then go to the practice set the user chose

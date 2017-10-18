@@ -56,8 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
       }
     }
 
-    console.log("options: " + JSON.stringify(this.options));
-
     // Require source
    if(!this.options.source)
      throw new Error("The options must specify a MediaStreamAudioSourceNode.");
@@ -119,6 +117,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
     // Setup local storage of the Linear FFT data
     this.floatFrequencyDataLinear = new Float32Array(this.floatFrequencyData.length);
 
+    //console.log("connecting vad to source");
     // Connect this.analyser
     this.options.source.connect(this.analyser);
 
@@ -254,5 +253,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
   };
 
   window.VAD = VAD;
-
 })(window);

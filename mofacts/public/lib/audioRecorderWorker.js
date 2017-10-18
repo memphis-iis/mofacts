@@ -46,7 +46,6 @@ this.onmessage = function(e){
 
 function init(config){
   sampleRate = config.sampleRate;
-  console.log("INIT, samplerate: " + sampleRate);
 }
 
 function record(inputBuffer){
@@ -162,20 +161,13 @@ function encodeWAV(samples, mono){
 
 function encodeLINEAR16(){
   var bufferL = mergeBuffers(recBuffersL, recLength);
-  //var dataview = encodeWAV(bufferL, true);
-  //var audioBlob = dataview;//new Blob([dataview], { type: type });
-
-  //this.postMessage(audioBlob);
-
 
   var buffer = new ArrayBuffer(bufferL.length *2);
   var view = new DataView(buffer);
 
   floatTo16BitPCM(view,0,bufferL);
 
-  //var audioBlob = new Blob([view], { type: "Audio/L16" });
-  //this.postMessage(audioBlob);
-
+  //Google speech api expects base64 encoded data rather than raw audio data
   var base64 = _arrayBufferToBase64(view.buffer);
 
   this.postMessage(base64);

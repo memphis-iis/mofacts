@@ -34,7 +34,6 @@ DEALINGS IN THE SOFTWARE.
       }
     });
 
-      console.log("sample rate: " + this.context.sampleRate);
     var recording = false,
     currCallback;
     processCallback = null;
@@ -42,8 +41,10 @@ DEALINGS IN THE SOFTWARE.
 
     this.node.onaudioprocess = function(e){
       if (!recording){
+        //console.log("audio recorder, not recording");
         return;
       }
+      //console.log("audio recorder, posting data to worker");
       worker.postMessage({
         command: 'record',
         buffer: [
@@ -51,54 +52,7 @@ DEALINGS IN THE SOFTWARE.
           e.inputBuffer.getChannelData(1)
         ]
       });
-      //startSilenceDetection();
-
-      // recording = false;
-      // console.log("ending recording after first sample");
     }
-
-    // var startSilenceDetection = function() {
-    //   analyser.fftSize = 2048;
-    //   var bufferLength = analyser.fftSize;
-    //   var dataArray = new Uint8Array(bufferLength);
-    //
-    //   analyser.getByteTimeDomainData(dataArray);
-    //
-    //   if (typeof visualizationCallback === 'function') {
-    //     visualizationCallback(dataArray, bufferLength);
-    //   }
-    //
-    //   var curr_value_time = (dataArray[0] / 128) - 1.0;
-    //
-    //   if (curr_value_time > 0.01 || curr_value_time < -0.01) {
-    //     start = Date.now();
-    //     console.log("start silence time");
-    //   }else if(curr_value_time < 0.0015 && curr_value_time > -0.0015){
-    //     speechStart = Date.now();
-    //     console.log("start speech time");
-    //   }
-    //   var newtime = Date.now();
-    //   var elapsedTime = newtime - start;
-    //   var elapsedSpeechTime = newtime - speechStart;
-    //   if (elapsedTime > 3000) {
-    //     console.log("silence of 3 seconds detected");
-    //     if(!wasSilent){
-    //       if(processCallback){
-    //         console.log("SILENCE DETECTED, PROCESSING SPEECH NOW");
-    //         processCallback();
-    //         this.stop();
-    //       }else{
-    //         console.log("NO SILENCE CALLBACK SETUP");
-    //       }
-    //     }else{
-    //       console.log("");
-    //     }
-    //     wasSilent = true;
-    //   }else if(elapsedSpeechTime > 1000){
-    //     console.log("speech of 1 second detected");
-    //     wasSilent = false;
-    //   }
-    // };
 
     this.configure = function(cfg){
       for (var prop in cfg){
@@ -168,15 +122,6 @@ DEALINGS IN THE SOFTWARE.
       var blob = e.data;
       currCallback(blob);
     }
-
-    // var analyser = source.context.createAnalyser();
-    // analyser.minDecibels = -90;
-    // analyser.maxDecibels = -10;
-    // analyser.smoothingTimeConstant = 0.85;
-    //
-    // source.connect(analyser);
-    // analyser.connect(this.node);
-    // this.node.connect(source.context.destination);
 
     source.connect(this.node);
     this.node.connect(this.context.destination);   // if the script node is not connected to an output the "onaudioprocess" event is not triggered in chrome.

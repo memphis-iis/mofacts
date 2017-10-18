@@ -84,9 +84,6 @@ getStimCluster = function (index, cachedStimuli) {
 
 getAllStimAnswers = function() {
   var currentClusterIndex = getCurrentClusterIndex();
-  // if(!!cachedAllAnswers){
-  //   return cachedAllAnswers;
-  // }
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
   var allAnswers = [];
@@ -97,7 +94,6 @@ getAllStimAnswers = function() {
     if(clusterIndex == currentClusterIndex){
       if(!!clusters[clusterIndex].speechHintExclusionList){
           exclusionList = exclusionList.concat(("" + clusters[clusterIndex].speechHintExclusionList).split(','));
-          //console.log("EXCLUSION LIST FOUND:" + exclusionList);
       }
     }
     for(responseIndex in clusters[clusterIndex].response){
@@ -110,14 +106,6 @@ getAllStimAnswers = function() {
   allAnswers = allAnswers.filter( function (el){
     return exclusionList.indexOf(el) < 0;
   });
-
-  //cachedAllAnswers = allAnswers;
-
-  // _.each(clusters,function(cluster){
-  //   _.each(cluster.response,function(response){
-  //       allAnswers.push(response);
-  //   });
-  // });
 
   return allAnswers;
 }
