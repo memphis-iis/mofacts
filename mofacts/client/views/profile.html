@@ -40,9 +40,33 @@
             <span class="slider round"></span>
           </label>
           <p class="text-left"> Enable audio input </p>
-          <div id='voiceSensitivityGroup' class='invisible'>
+          <div id='audioEnabledGroup' class='invisible'>
             <input type="range" id="voiceSensitivityRange" value="0">
             <p class="text-left"> Audio input sensitivity </p>
+            <button id='setupApiKey'>Set up API Key</button>
+          </div>
+          <div id='speechApiModal' class="modal fade">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    <span class="sr-only">Close</span>
+                  </button>
+                  <h4 class="modal-title">Google Speech API Key Setup</h4>
+                </div>
+                <div class="modal-body">
+                  <p>If you haven't already please enable the Google Speech API
+                    and generate a Google Speech API key by following the instructions
+                    <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
+                  <label>Google Speech API Key:</label>
+                  <input type="text" id='speechApiKey'>
+                </div>
+                <div class="modal-footer">
+                  <button id='speechApiSubmit' type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
           </div>
       </div>
         {{#unless isInRole 'admin,teacher'}}

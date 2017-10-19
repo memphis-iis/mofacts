@@ -4,6 +4,7 @@
 /* *****************************************************************
  * All of our currently known session variables
  * *****************************************************************
+ * audioToggled
  * clusterIndex
  * clusterMapping            - For an entire experiment
  * currentAnswer
@@ -22,7 +23,9 @@
  * loginMode                 - untouched in sessionCleanUp
  * needResume
  * questionIndex
+ * recording
  * runSimulation
+ * sampleRate
  * showOverlearningText
  * statsAnswerDetails        - Used by stats page template
  * statsCorrect              - Used by stats page template
@@ -36,6 +39,7 @@
 //Handle an entire session - note that we current don't limit this to the
 //client... but maybe we should?
 sessionCleanUp = function() {
+    Session.set("audioToggled",false);
     Session.set("buttonTrial", false);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);
@@ -49,6 +53,8 @@ sessionCleanUp = function() {
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
+    Session.set("recording",false);
+    Session.set("sampleRate", undefined);
     Session.set("showOverlearningText", undefined);
     Session.set("statsAnswerDetails", undefined);
     Session.set("statsRendered", false);

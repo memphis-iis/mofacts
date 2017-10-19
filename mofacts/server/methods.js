@@ -56,7 +56,7 @@ function userProfileSave(id, profile) {
     }
 
     // WHOOOPS! If we're still here something has gone horribly wrong
-    if (numUpdate < 1) {
+    if (numUpdated < 1) {
         throw new Meteor.Error("user-profile-save", "No records updated by save");
     }
     else {
@@ -414,6 +414,44 @@ Meteor.startup(function () {
                 'acctBal': acctBal,
                 'error': errmsg
             };
+        },
+
+        getUserSpeechAPIKey: function(){
+          var speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+          serverConsole("speech api key:" + speechAPIKey['key']);
+          serverConsole("decrypted:" + decryptUserData(speechAPIKey['key']));
+          return decryptUserData(speechAPIKey['key']);
+        },
+
+        saveUserSpeechAPIKey: function(key) {
+          key = encryptUserData(key);
+          serverConsole("key:" + key);
+          var result = true;
+          var error = "";
+          var userID = Meteor.userId();
+          try {
+              //Insure record matching ID is present while working around MongoDB 2.4 bug
+              GoogleSpeechAPIKeys.update({_id: userID}, {'$set': {'preUpdate': true}}, {upsert: true});
+          }
+          catch(e) {
+              serverConsole("Ignoring user speech api key upsert ", e);
+          }
+          var numUpdated = GoogleSpeechAPIKeys.update({_id: userID}, {key:key});
+
+          // WHOOOPS! If we're still here something has gone horribly wrong
+          if (numUpdated < 1) {
+              result = false;
+              error = "No records updated by save";
+          }
+          else if (numUpdated > 1) {
+              result = false;
+              error = "More than one record updated?! " + _.display(numUpdate);
+          }
+
+          return{
+            'result': result,
+            'error': error
+          }
         },
 
         // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add

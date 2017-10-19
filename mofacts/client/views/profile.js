@@ -73,29 +73,57 @@ Template.profile.events({
         var checked = template.$("#simulation").prop('checked');
         Session.set("runSimulation", checked);
         console.log("runSimulation", Session.get("runSimulation"));
+    },
+
+    'click #setupApiKey' : function(e){
+      e.preventDefault();
+      $('#speechApiModal').modal('show');//{backdrop: "static"}
+      Meteor.call('getUserSpeechAPIKey', function(error,key){
+        console.log("key: " + key);
+        $('#speechApiKey').val(key);
+      });
+    },
+
+    'click #speechApiSubmit' : function(e){
+      var key = $('#speechApiKey').val();
+      console.log("speech api key: " + key);
+      Meteor.call("saveUserSpeechAPIKey", key, function(error, serverReturn) {
+          $('#speechApiModal').modal('hide');
+
+          if (!!error) {
+              console.log("Error saving speech api key", error);
+              alert("Your changes were not saved! " + error);
+          }
+          else {
+              console.log("Profile saved:", serverReturn);
+              //Clear any controls that shouldn't be kept around
+              $(".clearOnSave").val("");
+              alert("Your profile changes have been saved");
+          }
+      });
     }
 });
 
 Template.profile.rendered = function () {
+    $('#speechApiModal').on('shown.bs.modal', function () {
+      $('#speechApiKey').focus();
+    })
+
     //Set up input sensitivity range to display/hide when audio input is enabled/disabled
     var audioToggle = document.getElementById('audioToggle');
 
-    $('#audioToggle').change(function()
+    var showHideAudioEnabledGroup = function()
     {
-      console.log(audioToggle.checked);
       if(audioToggle.checked){
-        $('#voiceSensitivityGroup').removeClass('invisible');
+        $('#audioEnabledGroup').removeClass('invisible');
       }else{
-        $('#voiceSensitivityGroup').addClass('invisible');
+        $('#audioEnabledGroup').addClass('invisible');
       }
-    });
+    };
+    $('#audioToggle').change(showHideAudioEnabledGroup);
     //Restore toggle state
     audioToggle.checked = Session.get("audioToggled");
-    if(audioToggle.checked){
-      $('#voiceSensitivityGroup').removeClass('invisible');
-    }else{
-      $('#voiceSensitivityGroup').addClass('invisible');
-    }
+    showHideAudioEnabledGroup();
 
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
@@ -259,20 +287,30 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
    //If user has enabled audio input, initialize web audio (this takes a bit)
    if(document.getElementById('audioToggle').checked)
    {
-     console.log("audio toggle checked, initializing audio");
-     try {
-       window.AudioContext = window.AudioContext || window.webkitAudioContext;
-       window.AudioContext.sampleRate = 16000;
-       navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-       window.URL = window.URL || window.webkitURL;
-       audioContext = new AudioContext();
-     } catch (e) {
-       console.log("Error initializing Web Audio browser");
-     }
-     if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-                                     console.log("No live audio input in this browser");
-                                 });
-     else console.log("No web audio support in this browser");
+     Meteor.call('getUserSpeechAPIKey', function(error,key){
+       console.log("key: " + key);
+       speechAPIKey = key;
+       if(!speechAPIKey)
+       {
+         console.log("speech api key not found, showing modal for user to input");
+         $('#speechApiModal').modal('show');
+       }else {
+         console.log("audio toggle checked, initializing audio");
+         try {
+           window.AudioContext = window.AudioContext || window.webkitAudioContext;
+           window.AudioContext.sampleRate = 16000;
+           navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+           window.URL = window.URL || window.webkitURL;
+           audioContext = new AudioContext();
+         } catch (e) {
+           console.log("Error initializing Web Audio browser");
+         }
+         if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
+                                         console.log("No live audio input in this browser");
+                                     });
+         else console.log("No web audio support in this browser");
+       }
+     });
    }else {
      console.log("audio toggle not checked");
      //Go directly to the card session - which will decide whether or
@@ -284,10 +322,12 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
 
 //START SPEECH RECOGNITION CODE
 
+speechAPIKey = null;
+
 processLINEAR16 = function(data){
   resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
   recorder.clear();
-  var userAnswer = document.getElementById('userForceCorrect') || document.getElementById('userAnswer');
+  var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
 
   if(userAnswer){
     userAnswer.value = "waiting for transcription";
@@ -300,7 +340,7 @@ processLINEAR16 = function(data){
       speechRecognitionLanguage = speechRecognitionLanguage[0];
     }
 
-    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=";
+    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
     var request = {
       "config": {
         "encoding": "LINEAR16",
