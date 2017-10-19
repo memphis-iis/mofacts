@@ -19,6 +19,7 @@
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
  * ignoreClusterMapping      - see unitEngine.js and currentTestingHelpers.js
+ * ignoreOutOfGrammarResponses - speech input, only transcribe if recognized word in answer set
  * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
  * needResume
@@ -50,6 +51,7 @@ sessionCleanUp = function() {
     Session.set("currentUnitNumber", 0);
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
+    Session.set("ignoreOutOfGrammarResponses",false);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
