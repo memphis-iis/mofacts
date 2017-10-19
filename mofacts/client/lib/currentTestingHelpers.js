@@ -82,7 +82,7 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
-getAllStimAnswers = function() {
+getAllStimAnswers = function(removeExcludedPhraseHints) {
   var currentClusterIndex = getCurrentClusterIndex();
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
@@ -102,10 +102,12 @@ getAllStimAnswers = function() {
     }
   }
 
-  //Remove the optional phrase hint exclusions
-  allAnswers = allAnswers.filter( function (el){
-    return exclusionList.indexOf(el) < 0;
-  });
+  if(removeExcludedPhraseHints){
+    //Remove the optional phrase hint exclusions
+    allAnswers = allAnswers.filter( function (el){
+      return exclusionList.indexOf(el) < 0;
+    });
+  }
 
   return allAnswers;
 }

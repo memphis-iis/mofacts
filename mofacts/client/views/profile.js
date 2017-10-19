@@ -65,6 +65,7 @@ Template.profile.events({
             target.data("lessonname"),
             target.data("stimulusfile"),
             target.data("tdffilename"),
+            target.data("ignoreOutOfGrammarResponses"),
             "User button click"
         );
     },
@@ -173,6 +174,11 @@ Template.profile.rendered = function () {
 
         var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
 
+        var ignoreOutOfGrammarResponses = _.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value();
+        if(!ignoreOutOfGrammarResponses){
+          ignoreOutOfGrammarResponses = false;
+        }
+
         //Check to see if we have found a selected experiment target
         if (experimentTarget && !foundExpTarget) {
             var tdfExperimentTarget = _.chain(setspec)
@@ -185,6 +191,7 @@ Template.profile.rendered = function () {
                     lessonName: name,
                     stimulusfile: stimulusFile,
                     tdffilename: tdfObject.fileName,
+                    ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
                     how: "Auto-selected by experiment target " + experimentTarget
                 };
             }
@@ -228,6 +235,7 @@ Template.profile.rendered = function () {
                 .data("stimulusfile", stimulusFile)
                 .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
+                .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                 .html(name)
         );
     });
@@ -239,13 +247,14 @@ Template.profile.rendered = function () {
             foundExpTarget.lessonName,
             foundExpTarget.stimulusfile,
             foundExpTarget.tdffilename,
+            foundExpTarget.ignoreOutOfGrammarResponses,
             foundExpTarget.how
         );
     }
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     //make sure session variables are cleared from previous tests
@@ -258,6 +267,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     Session.set("currentRootTdfName", tdffilename);
     Session.set("currentTdfName", tdffilename);
     Session.set("currentStimName", stimulusfile);
+    Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
 
     //Get some basic info about the current user's environment
     var userAgent = "[Could not read user agent string]";
@@ -287,6 +297,9 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
    //If user has enabled audio input, initialize web audio (this takes a bit)
    if(document.getElementById('audioToggle').checked)
    {
+     //Check if the user has a speech api key defined, if not show the modal form
+     //for them to input one.  If so, actually continue initializing web audio
+     //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        console.log("key: " + key);
        speechAPIKey = key;
@@ -350,7 +363,7 @@ processLINEAR16 = function(data){
         "profanityFilter" : false,
         "speechContexts" : [
           {
-            "phrases" : getAllStimAnswers(),
+            "phrases" : getAllStimAnswers(true),
           }
         ]
       },
@@ -365,16 +378,38 @@ processLINEAR16 = function(data){
     HTTP.call("POST",speechURL,{"data":request}, function(err,response){
         console.log(JSON.stringify(response));
         var transcript = '';
+        var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
+        var ignoredOrSilent = false;
         if(!!response['data']['results'])
         {
           transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
-            //var confidence = response['data']['results'][0]['alternatives'][0]['confidence'];
+          console.log("transcript: " + transcript);
+          if(ignoreOutOfGrammarResponses)
+          {
+            grammar = getAllStimAnswers(false);
+            //Answer not in grammar, ignore and reset/re-record
+            if(grammar.indexOf(transcript) == -1)
+            {
+              console.log("ANSWER OUT OF GRAMMAR, IGNORING");
+              transcript = "";
+              ignoredOrSilent = true;
+            }
+          }
         }else{
           console.log("NO TRANSCRIPT/SILENCE");
+          ignoredOrSilent = true;
         }
-        console.log("transcript: " + transcript);
+
         userAnswer.value = transcript;
-        simulateUserAnswerEnterKeyPress();
+        if(ignoredOrSilent){
+          //Reset recording var so we can try again since we didn't get anything good
+          Session.set('recording',true);
+          recorder.record();
+        }else{
+          //Only simulate enter key press if we picked up transcribable/in grammar
+          //audio for better UX
+          simulateUserAnswerEnterKeyPress();
+        }
       });
   }else{
     console.log("processwav userAnswer not defined");

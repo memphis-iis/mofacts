@@ -355,14 +355,14 @@ function varLenDisplayTimeout() {
 // Events
 
 window.onpopstate = function(event){
-  console.log("back button pressed?" + document.location.pathname);
+  //console.log("back button pressed?" + document.location.pathname);
   if(document.location.pathname == "/profile"){
     leavePage("/profile");
   }
 }
 
 function leavePage(dest) {
-    console.log("leave page, going to: " + dest);
+    //console.log("leave page, going to: " + dest);
 
     if(window.audioContext && !(dest == "/card" || dest == "/instructions")){
       console.log("closing audio context");
