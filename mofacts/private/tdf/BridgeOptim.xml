@@ -9,6 +9,7 @@
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
         <shuffleclusters>0-70</shuffleclusters>
+        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>
@@ -62,7 +63,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
         3.20689* (p.recency)+
         4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
         0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
-      
+
 
                 // At a minimum we need to set p.probability and return p
         p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability

@@ -66,6 +66,7 @@ Template.profile.events({
             target.data("stimulusfile"),
             target.data("tdffilename"),
             target.data("ignoreOutOfGrammarResponses"),
+            target.data("enableAudioPromptAndFeedback"),
             "User button click"
         );
     },
@@ -179,6 +180,11 @@ Template.profile.rendered = function () {
           ignoreOutOfGrammarResponses = false;
         }
 
+        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
+        if(!enableAudioPromptAndFeedback){
+          enableAudioPromptAndFeedback = false;
+        }
+
         //Check to see if we have found a selected experiment target
         if (experimentTarget && !foundExpTarget) {
             var tdfExperimentTarget = _.chain(setspec)
@@ -192,6 +198,7 @@ Template.profile.rendered = function () {
                     stimulusfile: stimulusFile,
                     tdffilename: tdfObject.fileName,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
+                    enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget
                 };
             }
@@ -236,6 +243,7 @@ Template.profile.rendered = function () {
                 .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
                 .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
+                .data("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback)
                 .html(name)
         );
     });
@@ -248,13 +256,14 @@ Template.profile.rendered = function () {
             foundExpTarget.stimulusfile,
             foundExpTarget.tdffilename,
             foundExpTarget.ignoreOutOfGrammarResponses,
+            foundExpTarget.enableAudioPromptAndFeedback,
             foundExpTarget.how
         );
     }
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, enableAudioPromptAndFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     //make sure session variables are cleared from previous tests
@@ -268,6 +277,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     Session.set("currentTdfName", tdffilename);
     Session.set("currentStimName", stimulusfile);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
+    Session.set("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback);
 
     //Get some basic info about the current user's environment
     var userAgent = "[Could not read user agent string]";

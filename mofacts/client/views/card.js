@@ -801,6 +801,8 @@ function newQuestionHandler() {
         });
     }
     else {
+        console.log("current question: " + Session.get("currentQuestion"));
+        speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),resetMainCardTimeout);
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
     }
@@ -1309,6 +1311,8 @@ function showUserInteraction(isGoodNews, news) {
         .text(news)
         .show();
 
+    speakMessageIfAudioPromptFeedbackEnabled(news);
+
     // forceCorrection is now part of user interaction - we always clear the
     // textbox, but only show it if:
     // * They got the answer wrong somehow
@@ -1319,6 +1323,7 @@ function showUserInteraction(isGoodNews, news) {
         if (doForceCorrect) {
             $("#forceCorrectionEntry").show();
             $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
+            speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue");
             $("#userForceCorrect").val("").focus();
             startRecording();
         }
@@ -1344,6 +1349,23 @@ function hideUserInteraction() {
 
     // Scroll to ensure correct view in on screen
     scrollElementIntoView("#stimulusTarget", true);
+}
+
+function speakMessageIfAudioPromptFeedbackEnabled(msg,onEndCallback){
+  var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
+  if(enableAudioPromptAndFeedback){
+    var synth = window.speechSynthesis;
+    var message = new SpeechSynthesisUtterance(msg);
+    message.onend = onEndCallback;
+    synth.speak(message);
+    console.log("providing audio feedback");
+  }else{
+    console.log("audio feedback disabled");
+    if(!!onEndCallback)
+    {
+        onEndCallback();
+    }
+  }
 }
 
 simulateUserAnswerEnterKeyPress = function(){

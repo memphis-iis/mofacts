@@ -16,6 +16,7 @@
  * currentUnitNumber
  * currentUnitStartTime      - Mostly only for lock-outs
  * debugging                 - Generic debugging flag
+ * enableAudioPromptAndFeedback
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
  * ignoreClusterMapping      - see unitEngine.js and currentTestingHelpers.js
@@ -51,6 +52,7 @@ sessionCleanUp = function() {
     Session.set("currentUnitNumber", 0);
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
+    Session.set("enableAudioPromptAndFeedback",false);
     Session.set("ignoreOutOfGrammarResponses",false);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
