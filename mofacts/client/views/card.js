@@ -1371,6 +1371,9 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
   if(enableAudioPromptAndFeedback){
     var synth = window.speechSynthesis;
+    //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
+    //UNDERSCORE...speech from literal reading of text
+    msg = msg.replace(/_+/g,'blank')
     var message = new SpeechSynthesisUtterance(msg);
     synth.speak(message);
     console.log("providing audio feedback");
@@ -1381,6 +1384,9 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
     console.log("RESTARTING ");
     beginMainCardTimeout(savedDelay, savedFunc);
   }
+}
+
+function replaceUnderscoresWithBlank(msg){
 }
 
 simulateUserAnswerEnterKeyPress = function(){
