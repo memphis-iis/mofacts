@@ -35,15 +35,28 @@
 
     <div class="container">
       <div class="row" id="toggleSwitchContainer">
-          <label class="switch text-center">
-            <input name="audioToggle" id="audioToggle" type="checkbox">
-            <span class="slider round"></span>
-          </label>
-          <p class="text-left"> Enable audio input </p>
-          <div id='audioEnabledGroup' class='invisible'>
-            <input type="range" id="voiceSensitivityRange" value="0">
-            <p class="text-left"> Audio input sensitivity </p>
+          <div class="flow">
+            <label class="switch text-center">
+              <input name="audioToggle" id="audioToggle" type="checkbox">
+              <span class="slider round"></span>
+            </label>
+            <p class="text-left"> Enable audio input </p>
+          </div>
+          <div class="audioEnabledGroup invisible flow">
+            <input type="range" style="width:200px" id="voiceSensitivityRange" value="0">
+            <p> Audio input sensitivity </p>
+          </div>
+          <div class="audioEnabledGroup invisible flow">
+            {{#if speechApiKeyIsSetup}}
+              <p style="color:green">Speech api key is setup</p>
+            {{else}}
+              <p style="color:red">Speech api key is not setup</p>
+            {{/if}}
             <button id='setupApiKey'>Set up API Key</button>
+          </div>
+          <div class="flow">
+            <input type="range" style="width:200px" id="speakingRateRange" value="0">
+            <p> Audio prompt speaking rate </p>
           </div>
           <div id='speechApiModal' class="modal fade">
             <div class="modal-dialog" role="document">
@@ -63,7 +76,8 @@
                   <input type="text" id='speechApiKey'>
                 </div>
                 <div class="modal-footer">
-                  <button id='speechApiSubmit' type="button" class="btn btn-primary">Save changes</button>
+                  <button id='speechApiSubmit' type="button" class="btn-primary flow">Save changes</button>
+                  <button id='speechApiDelete' type="button" class="btn-danger flow">Delete API Key</button>
                 </div>
               </div>
             </div>

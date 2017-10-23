@@ -13,6 +13,10 @@ Template.profile.helpers({
 
     simulationChecked: function() {
         return Session.get("runSimulation");
+    },
+
+    speechApiKeyIsSetup: function(){
+      return Session.get("speechAPIKeyIsSetup");
     }
 });
 
@@ -82,15 +86,20 @@ Template.profile.events({
       e.preventDefault();
       $('#speechApiModal').modal('show');//{backdrop: "static"}
       Meteor.call('getUserSpeechAPIKey', function(error,key){
-        console.log("key: " + key);
         $('#speechApiKey').val(key);
       });
     },
 
     'click #speechApiSubmit' : function(e){
       var key = $('#speechApiKey').val();
-      console.log("speech api key: " + key);
       Meteor.call("saveUserSpeechAPIKey", key, function(error, serverReturn) {
+          Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
+            if(err){
+              console.log("Error getting whether speech api key is setup");
+            }else {
+              Session.set('speechAPIKeyIsSetup',data);
+            }
+          })
           $('#speechApiModal').modal('hide');
 
           if (!!error) {
@@ -104,6 +113,26 @@ Template.profile.events({
               alert("Your profile changes have been saved");
           }
       });
+    },
+
+    'click #speechApiDelete' : function(e){
+      Meteor.call("deleteUserSpeechAPIKey",function(error){
+        Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
+          if(err){
+            console.log("Error getting whether speech api key is setup");
+          }else {
+            Session.set('speechAPIKeyIsSetup',data);
+          }
+        })
+        $('#speechApiModal').modal('hide');
+        if(!!error){
+          console.log("Error deleting speech api key", error);
+          alert("Your changes were not saved! " + error);
+        }else{
+          console.log("User speech api key deleted");
+          alert("Your profile changes have been saved");
+        }
+      })
     }
 });
 
@@ -112,15 +141,23 @@ Template.profile.rendered = function () {
       $('#speechApiKey').focus();
     })
 
+    Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
+      if(err){
+        console.log("Error getting whether speech api key is setup");
+      }else {
+        Session.set('speechApiKeyIsSetup',data);
+      }
+    })
+
     //Set up input sensitivity range to display/hide when audio input is enabled/disabled
     var audioToggle = document.getElementById('audioToggle');
 
     var showHideAudioEnabledGroup = function()
     {
       if(audioToggle.checked){
-        $('#audioEnabledGroup').removeClass('invisible');
+        $('.audioEnabledGroup').removeClass('invisible');
       }else{
-        $('#audioEnabledGroup').addClass('invisible');
+        $('.audioEnabledGroup').addClass('invisible');
       }
     };
     $('#audioToggle').change(showHideAudioEnabledGroup);
@@ -321,9 +358,11 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      //for them to input one.  If so, actually continue initializing web audio
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
-       console.log("key: " + key);
        speechAPIKey = key;
-       if(!speechAPIKey)
+       //If the user hasn't set up a speech api key check to see if one is
+       //provided in the tdf file, if not prompt the user
+       //to input one and don't continue to the practice set
+       if(!speechAPIKey && !getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey)
        {
          console.log("speech api key not found, showing modal for user to input");
          $('#speechApiModal').modal('show');
@@ -373,7 +412,6 @@ processLINEAR16 = function(data){
       speechRecognitionLanguage = speechRecognitionLanguage[0];
     }
 
-    var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
     var request = {
       "config": {
         "encoding": "LINEAR16",
@@ -395,52 +433,62 @@ processLINEAR16 = function(data){
     console.log("Request:" + JSON.stringify(request));
 
     //Make the actual call to the google speech api with the audio data for transcription
-    HTTP.call("POST",speechURL,{"data":request}, function(err,response){
-        console.log(JSON.stringify(response));
-        var transcript = '';
-        var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
-        var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
-        var ignoredOrSilent = false;
-        if(!!response['data']['results'])
-        {
-          transcript = response['data']['results'][0]['alternatives'][0]['transcript'];
-          console.log("transcript: " + transcript);
-          if(ignoreOutOfGrammarResponses)
-          {
-            grammar = getAllStimAnswers(false);
-            //Answer not in grammar, ignore and reset/re-record
-            if(grammar.indexOf(transcript) == -1)
-            {
-              console.log("ANSWER OUT OF GRAMMAR, IGNORING");
-              transcript = speechOutOfGrammarFeedback;
-              ignoredOrSilent = true;
-            }
-          }
-        }else{
-          console.log("NO TRANSCRIPT/SILENCE");
-          transcript = "Silence detected";
-          ignoredOrSilent = true;
-        }
-
-        userAnswer.value = transcript;
-        if(ignoredOrSilent){
-          //Reset recording var so we can try again since we didn't get anything good
-          Session.set('recording',true);
-          recorder.record();
-          //If answer is out of grammar or we pick up silence wait 5 seconds for
-          //user to read feedback then clear the answer value
-          setTimeout(function(){
-            userAnswer.value = "";
-          }, 5000);
-        }else{
-          //Only simulate enter key press if we picked up transcribable/in grammar
-          //audio for better UX
-          simulateUserAnswerEnterKeyPress();
-        }
-      });
+    if(!!speechAPIKey){
+      makeGoogleSpeechAPICall(request, speechAPIKey);
+    //If we don't have a user provided speech api key load up the key from the tdf file
+    }else{
+      makeGoogleSpeechAPICall(request,getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey);
+    }
   }else{
     console.log("processwav userAnswer not defined");
   }
+}
+
+makeGoogleSpeechAPICall = function(request,speechAPIKey){
+  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
+  HTTP.call("POST",speechURL,{"data":request}, function(err,response){
+      console.log(JSON.stringify(response));
+      var transcript = '';
+      var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
+      var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
+      var ignoredOrSilent = false;
+      if(!!response['data']['results'])
+      {
+        transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
+        console.log("transcript: " + transcript);
+        if(ignoreOutOfGrammarResponses)
+        {
+          grammar = getAllStimAnswers(false);
+          //Answer not in grammar, ignore and reset/re-record
+          if(grammar.indexOf(transcript) == -1)
+          {
+            console.log("ANSWER OUT OF GRAMMAR, IGNORING");
+            transcript = speechOutOfGrammarFeedback;
+            ignoredOrSilent = true;
+          }
+        }
+      }else{
+        console.log("NO TRANSCRIPT/SILENCE");
+        transcript = "Silence detected";
+        ignoredOrSilent = true;
+      }
+
+      userAnswer.value = transcript;
+      if(ignoredOrSilent){
+        //Reset recording var so we can try again since we didn't get anything good
+        Session.set('recording',true);
+        recorder.record();
+        //If answer is out of grammar or we pick up silence wait 5 seconds for
+        //user to read feedback then clear the answer value
+        setTimeout(function(){
+          userAnswer.value = "";
+        }, 5000);
+      }else{
+        //Only simulate enter key press if we picked up transcribable/in grammar
+        //audio for better UX
+        simulateUserAnswerEnterKeyPress();
+      }
+    });
 }
 
 recorder = null;

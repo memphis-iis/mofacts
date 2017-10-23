@@ -418,9 +418,18 @@ Meteor.startup(function () {
 
         getUserSpeechAPIKey: function(){
           var speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
-          serverConsole("speech api key:" + speechAPIKey['key']);
-          serverConsole("decrypted:" + decryptUserData(speechAPIKey['key']));
-          return decryptUserData(speechAPIKey['key']);
+          if(!!speechAPIKey){
+            serverConsole("speech api key:" + speechAPIKey['key']);
+            serverConsole("decrypted:" + decryptUserData(speechAPIKey['key']));
+            return decryptUserData(speechAPIKey['key']);
+          }else{
+            return null;
+          }
+        },
+
+        isUserSpeechAPIKeySetup: function(){
+          var speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
+          return !!speechAPIKey;
         },
 
         saveUserSpeechAPIKey: function(key) {
@@ -452,6 +461,11 @@ Meteor.startup(function () {
             'result': result,
             'error': error
           }
+        },
+
+        deleteUserSpeechAPIKey: function(){
+          var userID = Meteor.userId();
+          GoogleSpeechAPIKeys.remove(userID);
         },
 
         // ONLY FOR ADMINS: for the given targetUserId, perform roleAction (add

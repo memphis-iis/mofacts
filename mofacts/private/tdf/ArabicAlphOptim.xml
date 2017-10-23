@@ -11,6 +11,7 @@
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+        <speechAPIKey></speechAPIKey>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

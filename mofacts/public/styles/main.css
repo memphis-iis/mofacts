@@ -452,6 +452,7 @@ input:checked + .slider:before {
   display: none;
 }
 
-#voiceSensitivityRange{
-  width: 30%;
+.flow {
+  display: inline-block;
+  padding-right: 2%;
 }
