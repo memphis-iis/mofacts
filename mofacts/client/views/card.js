@@ -359,6 +359,10 @@ window.onpopstate = function(event){
   if(document.location.pathname == "/profile"){
     leavePage("/profile");
   }
+  if(window.speechSynthesis.speaking){
+    window.speechSynthesis.pause();
+    window.speechSynthesis.cancel();
+  }
 }
 
 function leavePage(dest) {
@@ -404,6 +408,7 @@ Template.card.events({
             else {
                 $("#userForceCorrect").val("");
                 $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
+                speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'");
                 startRecording();
             }
         }
@@ -794,15 +799,20 @@ function newQuestionHandler() {
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
-    if(getQuestionType() === "sound") {
+    var questionType = getQuestionType();
+
+    if(questionType === "sound") {
         //We don't allow user input until the sound is finished playing
         playCurrentQuestionSound(function() {
             allowUserInput(textFocus);
         });
     }
     else {
-        console.log("current question: " + Session.get("currentQuestion"));
-        speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),resetMainCardTimeout);
+        //console.log("current question: " + Session.get("currentQuestion"));
+        //Only speak the prompt if the question type makes sense
+        if(questionType === "text" || questionType === "cloze"){
+          speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true);
+        }
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
     }
@@ -1351,20 +1361,25 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
-function speakMessageIfAudioPromptFeedbackEnabled(msg,onEndCallback){
+function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
+  var savedFunc = timeoutFunc;
+  var savedDelay = timeoutDelay;
+  if(resetTimeout){
+    console.log("RESETTING TIMEOUT WHILE READING");
+    clearCardTimeout();
+  }
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
   if(enableAudioPromptAndFeedback){
     var synth = window.speechSynthesis;
     var message = new SpeechSynthesisUtterance(msg);
-    message.onend = onEndCallback;
     synth.speak(message);
     console.log("providing audio feedback");
   }else{
     console.log("audio feedback disabled");
-    if(!!onEndCallback)
-    {
-        onEndCallback();
-    }
+  }
+  if(resetTimeout){
+    console.log("RESTARTING ");
+    beginMainCardTimeout(savedDelay, savedFunc);
   }
 }
 
