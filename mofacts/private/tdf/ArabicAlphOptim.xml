@@ -10,6 +10,7 @@
         <simCorrectProb>0.85</simCorrectProb>
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

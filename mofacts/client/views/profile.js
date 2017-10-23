@@ -67,6 +67,7 @@ Template.profile.events({
             target.data("tdffilename"),
             target.data("ignoreOutOfGrammarResponses"),
             target.data("enableAudioPromptAndFeedback"),
+            target.data("speechOutOfGrammarFeedback"),
             "User button click"
         );
     },
@@ -185,6 +186,11 @@ Template.profile.rendered = function () {
           enableAudioPromptAndFeedback = false;
         }
 
+        var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
+        if(!speechOutOfGrammarFeedback){
+          speechOutOfGrammarFeedback = "Response not in answer set"
+        }
+
         //Check to see if we have found a selected experiment target
         if (experimentTarget && !foundExpTarget) {
             var tdfExperimentTarget = _.chain(setspec)
@@ -199,6 +205,7 @@ Template.profile.rendered = function () {
                     tdffilename: tdfObject.fileName,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
                     enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
+                    speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget
                 };
             }
@@ -244,6 +251,7 @@ Template.profile.rendered = function () {
                 .data("tdffilename", tdfObject.fileName)
                 .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                 .data("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback)
+                .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
                 .html(name)
         );
     });
@@ -257,13 +265,14 @@ Template.profile.rendered = function () {
             foundExpTarget.tdffilename,
             foundExpTarget.ignoreOutOfGrammarResponses,
             foundExpTarget.enableAudioPromptAndFeedback,
+            foundExpTarget.speechOutOfGrammarFeedback,
             foundExpTarget.how
         );
     }
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, enableAudioPromptAndFeedback,how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, enableAudioPromptAndFeedback,speechOutOfGrammarFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     //make sure session variables are cleared from previous tests
@@ -278,6 +287,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     Session.set("currentStimName", stimulusfile);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback);
+    Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
 
     //Get some basic info about the current user's environment
     var userAgent = "[Could not read user agent string]";
@@ -389,6 +399,7 @@ processLINEAR16 = function(data){
         console.log(JSON.stringify(response));
         var transcript = '';
         var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
+        var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
         var ignoredOrSilent = false;
         if(!!response['data']['results'])
         {
@@ -401,12 +412,13 @@ processLINEAR16 = function(data){
             if(grammar.indexOf(transcript) == -1)
             {
               console.log("ANSWER OUT OF GRAMMAR, IGNORING");
-              transcript = "";
+              transcript = speechOutOfGrammarFeedback;
               ignoredOrSilent = true;
             }
           }
         }else{
           console.log("NO TRANSCRIPT/SILENCE");
+          transcript = "Silence detected";
           ignoredOrSilent = true;
         }
 
@@ -415,6 +427,11 @@ processLINEAR16 = function(data){
           //Reset recording var so we can try again since we didn't get anything good
           Session.set('recording',true);
           recorder.record();
+          //If answer is out of grammar or we pick up silence wait 5 seconds for
+          //user to read feedback then clear the answer value
+          setTimeout(function(){
+            userAnswer.value = "";
+          }, 5000);
         }else{
           //Only simulate enter key press if we picked up transcribable/in grammar
           //audio for better UX
