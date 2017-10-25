@@ -419,8 +419,6 @@ Meteor.startup(function () {
         getUserSpeechAPIKey: function(){
           var speechAPIKey = GoogleSpeechAPIKeys.findOne({_id: Meteor.userId()});
           if(!!speechAPIKey){
-            serverConsole("speech api key:" + speechAPIKey['key']);
-            serverConsole("decrypted:" + decryptUserData(speechAPIKey['key']));
             return decryptUserData(speechAPIKey['key']);
           }else{
             return null;

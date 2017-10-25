@@ -12,6 +12,7 @@
         <enableAudioPromptAndFeedback>false</enableAudioPromptAndFeedback>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <speechAPIKey></speechAPIKey>
+        <audioInputSensitivity>15</audioInputSensitivity>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

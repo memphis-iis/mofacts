@@ -337,39 +337,36 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         selectedHow: how
     });
 
+   var audioEnabled =
+      getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled ||
+      document.getElementById('audioToggle').checked;
    //Record state to restore when we return to this page
    Session.set("audioToggled",document.getElementById('audioToggle').checked);
+   Session.set("audioEnabled", audioEnabled);
 
-   //If user has enabled audio input, initialize web audio (this takes a bit)
-   if(document.getElementById('audioToggle').checked)
+   //If user has enabled audio input, set up some session variables for use by
+   //card.js to tailor input experience
+   if(Session.get("audioEnabled"))
    {
+     var audioInputSensitivity =
+      getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity ||
+      document.getElementById("audioInputSensitivity").value;
+     Session.set("audioInputSensitivity",audioInputSensitivity);
      //Check if the user has a speech api key defined, if not show the modal form
      //for them to input one.  If so, actually continue initializing web audio
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       //If the user hasn't set up a speech api key check to see if one is
-       //provided in the tdf file, if not prompt the user
-       //to input one and don't continue to the practice set
        if(!speechAPIKey && !getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey)
        {
          console.log("speech api key not found, showing modal for user to input");
          $('#speechAPIModal').modal('show');
        }else {
-         console.log("audio toggle checked, initializing audio");
-         try {
-           window.AudioContext = window.AudioContext || window.webkitAudioContext;
-           window.AudioContext.sampleRate = 16000;
-           navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-           window.URL = window.URL || window.webkitURL;
-           audioContext = new AudioContext();
-         } catch (e) {
-           console.log("Error initializing Web Audio browser");
-         }
-         if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-                                         console.log("No live audio input in this browser");
-                                     });
-         else console.log("No web audio support in this browser");
+         console.log("audio toggle checked and key present, navigating to card and initializing audio input");
+         //Go directly to the card session - which will decide whether or
+         //not to show instruction
+         Session.set("needResume", true);
+         Router.go("/card");
        }
      });
    }else {
@@ -381,8 +378,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    }
 }
 
-//START SPEECH RECOGNITION CODE
-
+//We'll use this in card.js if audio input is enabled and user has provided a
+//speech API key
 speechAPIKey = null;
 
 checkAndSetSpeechAPIKeyIsSetup = function(){
@@ -394,166 +391,3 @@ checkAndSetSpeechAPIKeyIsSetup = function(){
     }
   })
 }
-
-processLINEAR16 = function(data){
-  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
-  recorder.clear();
-  var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
-
-  if(userAnswer){
-    userAnswer.value = "waiting for transcription";
-    var sampleRate = Session.get("sampleRate");
-    var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-    var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
-    if(!speechRecognitionLanguage){
-      speechRecognitionLanguage = "en-US";
-    }else{
-      speechRecognitionLanguage = speechRecognitionLanguage[0];
-    }
-
-    var request = {
-      "config": {
-        "encoding": "LINEAR16",
-        "sampleRateHertz": sampleRate,
-        "languageCode" : speechRecognitionLanguage,
-        "maxAlternatives" : 1,
-        "profanityFilter" : false,
-        "speechContexts" : [
-          {
-            "phrases" : getAllStimAnswers(true),
-          }
-        ]
-      },
-      "audio": {
-        "content": data
-      }
-    }
-
-    console.log("Request:" + JSON.stringify(request));
-
-    //Make the actual call to the google speech api with the audio data for transcription
-    if(!!speechAPIKey){
-      makeGoogleSpeechAPICall(request, speechAPIKey);
-    //If we don't have a user provided speech api key load up the key from the tdf file
-    //NOTE: we shouldn't be able to get here if there is no key in the tdf file
-    }else{
-      makeGoogleSpeechAPICall(request,getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey);
-    }
-  }else{
-    console.log("processwav userAnswer not defined");
-  }
-}
-
-makeGoogleSpeechAPICall = function(request,speechAPIKey){
-  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
-  HTTP.call("POST",speechURL,{"data":request}, function(err,response){
-      console.log(JSON.stringify(response));
-      var transcript = '';
-      var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
-      var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
-      var ignoredOrSilent = false;
-      if(!!response['data']['results'])
-      {
-        transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-        console.log("transcript: " + transcript);
-        if(ignoreOutOfGrammarResponses)
-        {
-          grammar = getAllStimAnswers(false);
-          //Answer not in grammar, ignore and reset/re-record
-          if(grammar.indexOf(transcript) == -1)
-          {
-            console.log("ANSWER OUT OF GRAMMAR, IGNORING");
-            transcript = speechOutOfGrammarFeedback;
-            ignoredOrSilent = true;
-          }
-        }
-      }else{
-        console.log("NO TRANSCRIPT/SILENCE");
-        transcript = "Silence detected";
-        ignoredOrSilent = true;
-      }
-
-      userAnswer.value = transcript;
-      if(ignoredOrSilent){
-        //Reset recording var so we can try again since we didn't get anything good
-        Session.set('recording',true);
-        recorder.record();
-        //If answer is out of grammar or we pick up silence wait 5 seconds for
-        //user to read feedback then clear the answer value
-        setTimeout(function(){
-          userAnswer.value = "";
-        }, 5000);
-      }else{
-        //Only simulate enter key press if we picked up transcribable/in grammar
-        //audio for better UX
-        simulateUserAnswerEnterKeyPress();
-      }
-    });
-}
-
-recorder = null;
-callbackManager = null;
-audioContext = null;
-
-function startUserMedia(stream) {
-  console.log("START USER MEDIA");
-  var input = audioContext.createMediaStreamSource(stream);
-  // Firefox hack https://support.mozilla.org/en-US/questions/984179
-  window.firefox_audio_hack = input;
-  //Capture the sampling rate for later use in google speech api as input
-  Session.set("sampleRate", input.context.sampleRate);
-  var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
-  recorder = new Recorder(input, audioRecorderConfig);
-
-  //Set up the process callback so that when we detect speech end we have the
-  //function to process the audio data
-  recorder.setProcessCallback(processLINEAR16);
-
-  //Set up options for voice activity detection code (vad.js)
-  var energyOffsetExp = 60 - ((document.getElementById("voiceSensitivityRange").value) * 60 / 100);
-  var energyOffset = parseFloat("1e+" + energyOffsetExp);
-  var options = {
-    source: input,
-    energy_offset: energyOffset,
-    voice_stop: function() {
-      if(!Session.get('recording')){
-        console.log("NOT RECORDING, VOICE STOP");
-        return;
-      }
-      console.log("VOICE STOP");
-      recorder.stop();
-      Session.set('recording',false);
-      recorder.exportToProcessCallback();
-    },
-    voice_start: function() {
-      if(!Session.get('recording')){
-        console.log("NOT RECORDING, VOICE START");
-        return;
-      }
-      console.log("VOICE START");
-      if(resetMainCardTimeout){
-        if(Session.get('recording')){
-          console.log("voice_start resetMainCardTimeout");
-          resetMainCardTimeout();
-        }else {
-          console.log("NOT RECORDING");
-        }
-      }else{
-        console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
-      }
-      //For multiple transcriptions:
-      //recorder.record();
-      //Session.set('recording',true);
-    }
-  }
-  var vad = new VAD(options);
-
-  console.log("Audio recorder ready");
-
-  //After web audio is initialized we then go to the practice set the user chose
-  //synchronously
-  Session.set("needResume", true);
-  Router.go("/card");
-};
-
-//END SPEECH RECOGNITION CODE

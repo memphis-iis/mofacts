@@ -4,7 +4,10 @@
 /* *****************************************************************
  * All of our currently known session variables
  * *****************************************************************
- * audioToggled
+ * audioEnabled              - Did user enable audio input
+ * audioInputSensitivity     - Value from ? to ? for tuning audio input sensitivity (how loud to talk to trigger voice start)
+ * audioToggled              - var to hold audioEnabled toggle state when navigating back to profile, don't reset here as that defeats the purpose
+ * buttonTrial
  * clusterIndex
  * clusterMapping            - For an entire experiment
  * currentAnswer
@@ -29,6 +32,8 @@
  * runSimulation
  * sampleRate
  * showOverlearningText
+ * speechAPIKeyIsSetup       - Indicates if we have a *user* provided speech api key (there may be one provided in the tdf file)
+ * speechOutOfGrammarFeedback - If ignoring out of grammar responses, what should we display when transcription is ignored?
  * statsAnswerDetails        - Used by stats page template
  * statsCorrect              - Used by stats page template
  * statsPercentage           - Used by stats page template
@@ -41,7 +46,8 @@
 //Handle an entire session - note that we current don't limit this to the
 //client... but maybe we should?
 sessionCleanUp = function() {
-    Session.set("audioToggled",false);
+    Session.set("audioEnabled",false);
+    Session.set("audioInputSensitivity",undefined);
     Session.set("buttonTrial", false);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);
@@ -60,6 +66,7 @@ sessionCleanUp = function() {
     Session.set("recording",false);
     Session.set("sampleRate", undefined);
     Session.set("showOverlearningText", undefined);
+    Session.set("speechOutOfGrammarFeedback",undefined);
     Session.set("statsAnswerDetails", undefined);
     Session.set("statsRendered", false);
     Session.set("statsCorrect", undefined);

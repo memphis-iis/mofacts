@@ -354,20 +354,20 @@ function varLenDisplayTimeout() {
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
+//Catch page navigation events (like pressing back button) so we can call our cleanup method
 window.onpopstate = function(event){
   //console.log("back button pressed?" + document.location.pathname);
-  if(document.location.pathname == "/profile"){
-    leavePage("/profile");
-  }
-  if(window.speechSynthesis.speaking){
-    window.speechSynthesis.pause();
-    window.speechSynthesis.cancel();
-  }
+  leavePage(document.location.pathname);
 }
 
+//Clean up things if we navigate away from this page
 function leavePage(dest) {
     //console.log("leave page, going to: " + dest);
 
+    if(window.speechSynthesis.speaking){
+      window.speechSynthesis.pause();
+      window.speechSynthesis.cancel();
+    }
     if(window.audioContext && !(dest == "/card" || dest == "/instructions")){
       console.log("closing audio context");
       stopRecording();
@@ -484,32 +484,27 @@ Template.card.events({
 // Template helpers and meteor events
 
 Template.card.rendered = function() {
+    var audioInputEnabled = Session.get("audioEnabled");
     //Only set this to true (and therefore bypass the timeout for the first question)
     //if we're using audio input
-    firstQuestion = Session.get("audioToggled");
-
-    if(Session.get("debugging")) {
-        console.log('cards template rendered');
-    }
-
-    //Reset resizing for card images (see also index.js)
-    $("#cardQuestionImg").load(function(evt) {
-        redoCardImage();
-    });
-
-    //Always hide the final instructions box
-    $("#finalInstructionsDlg").modal('hide');
-
-    //the card loads frequently, but we only want to set this the first time
-    if(Session.get("needResume")) {
-        Session.set("buttonTrial", false);
-        clearButtonList();
-
-        console.log("cards template rendered => Performing resume");
-        Session.set("showOverlearningText", false);
-
-        Session.set("needResume", false); //Turn this off to keep from re-resuming
-        resumeFromUserTimesLog();
+    firstQuestion = audioInputEnabled;
+    //If user has enabled audio input, initialize web audio (this takes a bit)
+    if(audioInputEnabled){
+      try {
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        window.AudioContext.sampleRate = 16000;
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        window.URL = window.URL || window.webkitURL;
+        audioContext = new AudioContext();
+      } catch (e) {
+        console.log("Error initializing Web Audio browser");
+      }
+      if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
+                                      console.log("No live audio input in this browser");
+                                  });
+      else console.log("No web audio support in this browser");
+    }else{
+      cardStart();
     }
 };
 
@@ -638,6 +633,31 @@ Template.card.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
+function cardStart(){
+  if(Session.get("debugging")) {
+      console.log('cards template rendered');
+  }
+
+  //Reset resizing for card images (see also index.js)
+  $("#cardQuestionImg").load(function(evt) {
+      redoCardImage();
+  });
+
+  //Always hide the final instructions box
+  $("#finalInstructionsDlg").modal('hide');
+
+  //the card loads frequently, but we only want to set this the first time
+  if(Session.get("needResume")) {
+      Session.set("buttonTrial", false);
+      clearButtonList();
+
+      console.log("cards template rendered => Performing resume");
+      Session.set("showOverlearningText", false);
+
+      Session.set("needResume", false); //Turn this off to keep from re-resuming
+      resumeFromUserTimesLog();
+  }
+}
 
 function newQuestionHandler() {
     console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
@@ -1373,6 +1393,9 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
+// BEGIN WEB AUDIO section
+
+//Audio prompt/feedback (web audio speech synthesis)
 function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
   var savedFunc = timeoutFunc;
   var savedDelay = timeoutDelay;
@@ -1397,6 +1420,169 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
     beginMainCardTimeout(savedDelay, savedFunc);
   }
 }
+
+//Speech recognition function to process audio data
+processLINEAR16 = function(data){
+  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
+  recorder.clear();
+  var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
+
+  if(userAnswer){
+    userAnswer.value = "waiting for transcription";
+    var sampleRate = Session.get("sampleRate");
+    var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+    var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
+    if(!speechRecognitionLanguage){
+      speechRecognitionLanguage = "en-US";
+    }else{
+      speechRecognitionLanguage = speechRecognitionLanguage[0];
+    }
+
+    var request = {
+      "config": {
+        "encoding": "LINEAR16",
+        "sampleRateHertz": sampleRate,
+        "languageCode" : speechRecognitionLanguage,
+        "maxAlternatives" : 1,
+        "profanityFilter" : false,
+        "speechContexts" : [
+          {
+            "phrases" : getAllStimAnswers(true),
+          }
+        ]
+      },
+      "audio": {
+        "content": data
+      }
+    }
+
+    console.log("Request:" + JSON.stringify(request));
+
+    //Make the actual call to the google speech api with the audio data for transcription
+    if(!!speechAPIKey){
+      makeGoogleSpeechAPICall(request, speechAPIKey);
+    //If we don't have a user provided speech api key load up the key from the tdf file
+    //NOTE: we shouldn't be able to get here if there is no key in the tdf file
+    }else{
+      makeGoogleSpeechAPICall(request,getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey);
+    }
+  }else{
+    console.log("processwav userAnswer not defined");
+  }
+}
+
+makeGoogleSpeechAPICall = function(request,speechAPIKey){
+  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
+  HTTP.call("POST",speechURL,{"data":request}, function(err,response){
+      console.log(JSON.stringify(response));
+      var transcript = '';
+      var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
+      var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
+      var ignoredOrSilent = false;
+      if(!!response['data']['results'])
+      {
+        transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
+        console.log("transcript: " + transcript);
+        if(ignoreOutOfGrammarResponses)
+        {
+          grammar = getAllStimAnswers(false);
+          //Answer not in grammar, ignore and reset/re-record
+          if(grammar.indexOf(transcript) == -1)
+          {
+            console.log("ANSWER OUT OF GRAMMAR, IGNORING");
+            transcript = speechOutOfGrammarFeedback;
+            ignoredOrSilent = true;
+          }
+        }
+      }else{
+        console.log("NO TRANSCRIPT/SILENCE");
+        transcript = "Silence detected";
+        ignoredOrSilent = true;
+      }
+
+      userAnswer.value = transcript;
+      if(ignoredOrSilent){
+        //Reset recording var so we can try again since we didn't get anything good
+        Session.set('recording',true);
+        recorder.record();
+        //If answer is out of grammar or we pick up silence wait 5 seconds for
+        //user to read feedback then clear the answer value
+        setTimeout(function(){
+          userAnswer.value = "";
+        }, 5000);
+      }else{
+        //Only simulate enter key press if we picked up transcribable/in grammar
+        //audio for better UX
+        simulateUserAnswerEnterKeyPress();
+      }
+    });
+}
+
+recorder = null;
+callbackManager = null;
+audioContext = null;
+
+function startUserMedia(stream) {
+  console.log("START USER MEDIA");
+  var input = audioContext.createMediaStreamSource(stream);
+  // Firefox hack https://support.mozilla.org/en-US/questions/984179
+  window.firefox_audio_hack = input;
+  //Capture the sampling rate for later use in google speech api as input
+  Session.set("sampleRate", input.context.sampleRate);
+  var audioRecorderConfig = {errorCallback: function(x) {console.log("Error from recorder: " + x);}};
+  recorder = new Recorder(input, audioRecorderConfig);
+
+  //Set up the process callback so that when we detect speech end we have the
+  //function to process the audio data
+  recorder.setProcessCallback(processLINEAR16);
+
+  //Set up options for voice activity detection code (vad.js)
+  var energyOffsetExp = 60 - Session.get("audioInputSensitivity");
+  var energyOffset = parseFloat("1e+" + energyOffsetExp);
+  var options = {
+    source: input,
+    energy_offset: energyOffset,
+    voice_stop: function() {
+      if(!Session.get('recording')){
+        console.log("NOT RECORDING, VOICE STOP");
+        return;
+      }
+      console.log("VOICE STOP");
+      recorder.stop();
+      Session.set('recording',false);
+      recorder.exportToProcessCallback();
+    },
+    voice_start: function() {
+      if(!Session.get('recording')){
+        console.log("NOT RECORDING, VOICE START");
+        return;
+      }
+      console.log("VOICE START");
+      if(resetMainCardTimeout){
+        if(Session.get('recording')){
+          console.log("voice_start resetMainCardTimeout");
+          resetMainCardTimeout();
+        }else {
+          console.log("NOT RECORDING");
+        }
+      }else{
+        console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
+      }
+      //For multiple transcriptions:
+      //recorder.record();
+      //Session.set('recording',true);
+    }
+  }
+  var vad = new VAD(options);
+
+  console.log("Audio recorder ready");
+
+  //If we're doing audio input wait until we've started initializing things to
+  //to load up the page so we have a chance of vad.js being loaded in time
+  cardStart();
+};
+
+// END WEB AUDIO SECTION
 
 simulateUserAnswerEnterKeyPress = function(){
     //Simulate enter key press on the correct input box if the user is being
