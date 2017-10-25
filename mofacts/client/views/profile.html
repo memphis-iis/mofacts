@@ -42,23 +42,23 @@
             </label>
             <p class="text-left"> Enable audio input </p>
           </div>
-          <div class="audioEnabledGroup invisible flow">
-            <input type="range" style="width:200px" id="voiceSensitivityRange" value="0">
+          <div class="audioEnabledGroup invisible">
+            <input type="range" style="width:200px" id="voiceSensitivityRange" value="20" step="1" min="0" max="60">
             <p> Audio input sensitivity </p>
           </div>
-          <div class="audioEnabledGroup invisible flow">
-            {{#if speechApiKeyIsSetup}}
+          <div class="audioEnabledGroup invisible">
+            {{#if speechAPIKeyIsSetup}}
               <p style="color:green">Speech api key is setup</p>
             {{else}}
               <p style="color:red">Speech api key is not setup</p>
             {{/if}}
-            <button id='setupApiKey'>Set up API Key</button>
+            <button id='setupAPIKey'>Set up API Key</button>
           </div>
           <div class="flow">
-            <input type="range" style="width:200px" id="speakingRateRange" value="0">
+            <input type="range" style="width:200px" id="speakingRateRange" value="1" step="0.1" min="0" max="2">
             <p> Audio prompt speaking rate </p>
           </div>
-          <div id='speechApiModal' class="modal fade">
+          <div id='speechAPIModal' class="modal fade">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
                 <div class="modal-header">
@@ -73,11 +73,11 @@
                     and generate a Google Speech API key by following the instructions
                     <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
                   <label>Google Speech API Key:</label>
-                  <input type="text" id='speechApiKey'>
+                  <input type="text" id='speechAPIKey'>
                 </div>
                 <div class="modal-footer">
-                  <button id='speechApiSubmit' type="button" class="btn-primary flow">Save changes</button>
-                  <button id='speechApiDelete' type="button" class="btn-danger flow">Delete API Key</button>
+                  <button id='speechAPISubmit' type="button" class="btn-primary flow">Save changes</button>
+                  <button id='speechAPIDelete' type="button" class="btn-danger flow">Delete API Key</button>
                 </div>
               </div>
             </div>

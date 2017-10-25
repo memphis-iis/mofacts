@@ -15,7 +15,7 @@ Template.profile.helpers({
         return Session.get("runSimulation");
     },
 
-    speechApiKeyIsSetup: function(){
+    speechAPIKeyIsSetup: function(){
       return Session.get("speechAPIKeyIsSetup");
     }
 });
@@ -82,25 +82,22 @@ Template.profile.events({
         console.log("runSimulation", Session.get("runSimulation"));
     },
 
-    'click #setupApiKey' : function(e){
+    'click #setupAPIKey' : function(e){
       e.preventDefault();
-      $('#speechApiModal').modal('show');//{backdrop: "static"}
+      $('#speechAPIModal').modal('show');//{backdrop: "static"}
       Meteor.call('getUserSpeechAPIKey', function(error,key){
-        $('#speechApiKey').val(key);
+        $('#speechAPIKey').val(key);
       });
     },
 
-    'click #speechApiSubmit' : function(e){
-      var key = $('#speechApiKey').val();
+    'click #speechAPISubmit' : function(e){
+      var key = $('#speechAPIKey').val();
       Meteor.call("saveUserSpeechAPIKey", key, function(error, serverReturn) {
-          Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
-            if(err){
-              console.log("Error getting whether speech api key is setup");
-            }else {
-              Session.set('speechAPIKeyIsSetup',data);
-            }
-          })
-          $('#speechApiModal').modal('hide');
+          //Make sure to update our reactive session variable so the api key is
+          //setup indicator updates
+          checkAndSetSpeechAPIKeyIsSetup();
+
+          $('#speechAPIModal').modal('hide');
 
           if (!!error) {
               console.log("Error saving speech api key", error);
@@ -115,16 +112,12 @@ Template.profile.events({
       });
     },
 
-    'click #speechApiDelete' : function(e){
+    'click #speechAPIDelete' : function(e){
       Meteor.call("deleteUserSpeechAPIKey",function(error){
-        Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
-          if(err){
-            console.log("Error getting whether speech api key is setup");
-          }else {
-            Session.set('speechAPIKeyIsSetup',data);
-          }
-        })
-        $('#speechApiModal').modal('hide');
+        //Make sure to update our reactive session variable so the api key is
+        //setup indicator updates
+        checkAndSetSpeechAPIKeyIsSetup();
+        $('#speechAPIModal').modal('hide');
         if(!!error){
           console.log("Error deleting speech api key", error);
           alert("Your changes were not saved! " + error);
@@ -137,17 +130,11 @@ Template.profile.events({
 });
 
 Template.profile.rendered = function () {
-    $('#speechApiModal').on('shown.bs.modal', function () {
-      $('#speechApiKey').focus();
+    $('#speechAPIModal').on('shown.bs.modal', function () {
+      $('#speechAPIKey').focus();
     })
 
-    Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
-      if(err){
-        console.log("Error getting whether speech api key is setup");
-      }else {
-        Session.set('speechApiKeyIsSetup',data);
-      }
-    })
+    checkAndSetSpeechAPIKeyIsSetup();
 
     //Set up input sensitivity range to display/hide when audio input is enabled/disabled
     var audioToggle = document.getElementById('audioToggle');
@@ -155,9 +142,11 @@ Template.profile.rendered = function () {
     var showHideAudioEnabledGroup = function()
     {
       if(audioToggle.checked){
-        $('.audioEnabledGroup').removeClass('invisible');
+          $('.audioEnabledGroup').removeClass('invisible');
+          $('.audioEnabledGroup').addClass('flow');
       }else{
         $('.audioEnabledGroup').addClass('invisible');
+        $('.audioEnabledGroup').removeClass('flow');
       }
     };
     $('#audioToggle').change(showHideAudioEnabledGroup);
@@ -365,7 +354,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
        if(!speechAPIKey && !getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey)
        {
          console.log("speech api key not found, showing modal for user to input");
-         $('#speechApiModal').modal('show');
+         $('#speechAPIModal').modal('show');
        }else {
          console.log("audio toggle checked, initializing audio");
          try {
@@ -395,6 +384,16 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
 //START SPEECH RECOGNITION CODE
 
 speechAPIKey = null;
+
+checkAndSetSpeechAPIKeyIsSetup = function(){
+  Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
+    if(err){
+      console.log("Error getting whether speech api key is setup");
+    }else {
+      Session.set('speechAPIKeyIsSetup',data);
+    }
+  })
+}
 
 processLINEAR16 = function(data){
   resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
@@ -436,6 +435,7 @@ processLINEAR16 = function(data){
     if(!!speechAPIKey){
       makeGoogleSpeechAPICall(request, speechAPIKey);
     //If we don't have a user provided speech api key load up the key from the tdf file
+    //NOTE: we shouldn't be able to get here if there is no key in the tdf file
     }else{
       makeGoogleSpeechAPICall(request,getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey);
     }
@@ -546,7 +546,6 @@ function startUserMedia(stream) {
       //Session.set('recording',true);
     }
   }
-
   var vad = new VAD(options);
 
   console.log("Audio recorder ready");

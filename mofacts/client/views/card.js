@@ -484,6 +484,10 @@ Template.card.events({
 // Template helpers and meteor events
 
 Template.card.rendered = function() {
+    //Only set this to true (and therefore bypass the timeout for the first question)
+    //if we're using audio input
+    firstQuestion = Session.get("audioToggled");
+
     if(Session.get("debugging")) {
         console.log('cards template rendered');
     }
@@ -1308,7 +1312,15 @@ function setQuestionTimeout() {
 
     beginMainCardTimeout(delayMs, function() {
         stopUserInput();
-        handleUserInput({}, "timeout");
+        //Hacky solution to VAD.js taking ~15 seconds to load see NOTEONVAD.JS
+        //below (I suggest ctrl + F)
+        if(!firstQuestion){
+          console.log("not first question, timing out");
+          handleUserInput({}, "timeout");
+        }else{
+          firstQuestion = false;
+          console.log("first question, not timing out");
+        }
     });
 }
 
@@ -1381,12 +1393,9 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
     console.log("audio feedback disabled");
   }
   if(resetTimeout){
-    console.log("RESTARTING ");
+    console.log("RESTARTING TIMEOUT AFTER READING");
     beginMainCardTimeout(savedDelay, savedFunc);
   }
-}
-
-function replaceUnderscoresWithBlank(msg){
 }
 
 simulateUserAnswerEnterKeyPress = function(){
@@ -1437,11 +1446,21 @@ function startRecording(){
   }
 }
 
+var firstQuestion = null;
+
 function stopRecording(){
   if(recorder && Session.get('recording'))
   {
     recorder.stop();
     Session.set('recording',false);
+
+    //NOTEONVAD.JS Hacky solution to VAD.js taking ~15 seconds to load. We've already been recording
+    //we just can't yet detect voice start/stop depending on how fast the user
+    //navigates to the first question, so if this is the first question default
+    //to trying to process the audio at question end rather than voice stop
+    if(firstQuestion){
+      recorder.exportToProcessCallback();
+    }
     recorder.clear();
     console.log("RECORDING END");
   }

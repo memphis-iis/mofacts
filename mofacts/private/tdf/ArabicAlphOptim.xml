@@ -9,7 +9,7 @@
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <enableAudioPromptAndFeedback>false</enableAudioPromptAndFeedback>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <speechAPIKey></speechAPIKey>
     </setspec>

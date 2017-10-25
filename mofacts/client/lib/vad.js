@@ -32,8 +32,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
   var VAD = function(options) {
     // Default options
     this.options = {
-      fftSize: 512,
-      bufferLen: 512,
+      fftSize: 512, //512
+      bufferLen: 512, //512
       voice_stop: function() {},
       voice_start: function() {},
       smoothingTimeConstant: 0.99,
@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
       energy_threshold_ratio_neg: 0.5, //0.5// Signal must be half the offset
       energy_integration: 1, // Size of integration change compared to the signal per second.
       filter: [
-        {f: 500, v:0}, // 0 -> 200 is 0
-        {f: 5000, v:1} // 200 -> 2k is 1
+        {f: 200, v:0}, // 0 -> 200 is 0
+        {f: 2000, v:1} // 200 -> 2k is 1
       ],
       source: null,
       context: null
@@ -101,11 +101,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
     this.energy_threshold_pos = this.energy_offset * this.options.energy_threshold_ratio_pos;
     this.energy_threshold_neg = this.energy_offset * this.options.energy_threshold_ratio_neg;
 
-    this.voiceTrend = 0;
-    this.voiceTrendMax = 10;
-    this.voiceTrendMin = -10;
-    this.voiceTrendStart = 5;
-    this.voiceTrendEnd = -5;
+    this.voiceTrend = 0;//0
+    this.voiceTrendMax = 10;//10
+    this.voiceTrendMin = -10;//-10
+    this.voiceTrendStart = 5;//5
+    this.voiceTrendEnd = -5;//-5
 
     // Create analyser
     this.analyser = this.options.context.createAnalyser();
@@ -125,7 +125,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
     this.scriptProcessorNode = this.options.context.createScriptProcessor(this.options.bufferLen, 1, 1);
 
     // Connect scriptProcessorNode (Theretically, not required)
-    this.scriptProcessorNode.connect(this.options.context.destination);
+    //this.scriptProcessorNode.connect(this.options.context.destination);
 
     // Create callback to update/analyze floatFrequencyData
     var self = this;
@@ -141,7 +141,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
     // log stuff
     this.logging = false;
     this.log_i = 0;
-    this.log_limit = 100;
+    this.log_limit = 5;
 
     this.triggerLog = function(limit) {
       this.logging = true;
