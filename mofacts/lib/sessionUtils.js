@@ -6,6 +6,7 @@
  * *****************************************************************
  * audioEnabled              - Did user enable audio input
  * audioInputSensitivity     - Value from ? to ? for tuning audio input sensitivity (how loud to talk to trigger voice start)
+ * audioPromptSpeakingRate   - Value from 0.1 to 2. Acts as percentage relative to 1, i.e. 2 is twice as fast as normal, 0.5 is half as fast
  * audioToggled              - var to hold audioEnabled toggle state when navigating back to profile, don't reset here as that defeats the purpose
  * buttonTrial
  * clusterIndex
@@ -48,6 +49,7 @@
 sessionCleanUp = function() {
     Session.set("audioEnabled",false);
     Session.set("audioInputSensitivity",undefined);
+    Session.set("audioPromptSpeakingRate",1);
     Session.set("buttonTrial", false);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);

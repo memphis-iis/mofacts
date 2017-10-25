@@ -344,6 +344,11 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    Session.set("audioToggled",document.getElementById('audioToggle').checked);
    Session.set("audioEnabled", audioEnabled);
 
+   var audioPromptSpeakingRate =
+     getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate ||
+     document.getElementById("audioPromptSpeakingRate").value;
+   Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+
    //If user has enabled audio input, set up some session variables for use by
    //card.js to tailor input experience
    if(Session.get("audioEnabled"))

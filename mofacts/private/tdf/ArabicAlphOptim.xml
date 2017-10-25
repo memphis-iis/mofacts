@@ -13,6 +13,8 @@
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <speechAPIKey></speechAPIKey>
         <audioInputSensitivity>15</audioInputSensitivity>
+        <audioInputEnabled>true</audioInputEnabled>
+        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

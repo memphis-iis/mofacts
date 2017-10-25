@@ -484,11 +484,22 @@ Template.card.events({
 // Template helpers and meteor events
 
 Template.card.rendered = function() {
+   //If this is an experiment make sure we have our session variables set up for
+   //audio input and prompt/feedback
+   if(Template.instance().isExperiment){
+     var audioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled || false;
+     Session.set("audioEnabled", audioEnabled);
+     var audioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity || 20;
+     Session.set("audioInputSensitivity",audioInputSensitivity);
+     var audioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
+     Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+   }
     var audioInputEnabled = Session.get("audioEnabled");
     //Only set this to true (and therefore bypass the timeout for the first question)
     //if we're using audio input
     firstQuestion = audioInputEnabled;
     //If user has enabled audio input, initialize web audio (this takes a bit)
+    //(this will eventually call cardStart at the end of startUserMedia)
     if(audioInputEnabled){
       try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1408,8 +1419,9 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
     var synth = window.speechSynthesis;
     //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
     //UNDERSCORE...speech from literal reading of text
-    msg = msg.replace(/_+/g,'blank')
+    msg = msg.replace(/_+/g,'blank');
     var message = new SpeechSynthesisUtterance(msg);
+    message.rate = Session.get("audioPromptSpeakingRate");
     synth.speak(message);
     console.log("providing audio feedback");
   }else{
