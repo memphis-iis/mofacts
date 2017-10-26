@@ -638,6 +638,10 @@ Template.card.helpers({
     'inResume': function() {
         return Session.get("inResume");
     },
+
+    'audioEnabled' : function(){
+      return Session.get("audioEnabled");
+    }
 });
 
 
@@ -668,6 +672,10 @@ function cardStart(){
       Session.set("needResume", false); //Turn this off to keep from re-resuming
       resumeFromUserTimesLog();
   }
+}
+
+function nextChar(c) {
+    return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
 function newQuestionHandler() {
@@ -798,14 +806,17 @@ function newQuestionHandler() {
 
         clearButtonList();
         Session.set("buttonTrial", true);
+        var curChar = 'a'
 
         _.each(buttonChoices, function(val, idx) {
             buttonList.insert({
                 temp: 1,         //Deleted when clearing
                 idx: idx,        //Will be ordered by array index
+                verbalChoice: curChar,
                 buttonName: val, //Currently, name and value are the same
                 buttonValue: val
             });
+            curChar = nextChar(curChar);
         });
         // Insert a record that we'll never show
         buttonList.insert({temp: 2, uniq: Date.now()});
@@ -1439,8 +1450,7 @@ processLINEAR16 = function(data){
   recorder.clear();
   var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
 
-  if(userAnswer){
-    userAnswer.value = "waiting for transcription";
+  if(userAnswer || getButtonTrial()){
     var sampleRate = Session.get("sampleRate");
     var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
@@ -1448,6 +1458,19 @@ processLINEAR16 = function(data){
       speechRecognitionLanguage = "en-US";
     }else{
       speechRecognitionLanguage = speechRecognitionLanguage[0];
+    }
+
+    var phraseHints = [];
+    if(getButtonTrial()){
+      var curChar = 'a';
+      phraseHints.push(curChar);
+      for(i=1;i<26;i++){
+        curChar = nextChar(curChar);
+        phraseHints.push(curChar);
+      }
+    }else{
+      userAnswer.value = "waiting for transcription";
+      phraseHints = getAllStimAnswers(true);
     }
 
     var request = {
@@ -1459,7 +1482,7 @@ processLINEAR16 = function(data){
         "profanityFilter" : false,
         "speechContexts" : [
           {
-            "phrases" : getAllStimAnswers(true),
+            "phrases" : phraseHints,
           }
         ]
       },
@@ -1512,20 +1535,35 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey){
         ignoredOrSilent = true;
       }
 
-      userAnswer.value = transcript;
+      if(getButtonTrial()){
+        userAnswer = $("[verbalChoice='" + transcript + "']");
+        if(!userAnswer){
+          console.log("Choice couldn't be found");
+          ignoredOrSilent = true;
+        }
+      }else{
+        userAnswer.value = transcript;
+      }
       if(ignoredOrSilent){
         //Reset recording var so we can try again since we didn't get anything good
         Session.set('recording',true);
         recorder.record();
         //If answer is out of grammar or we pick up silence wait 5 seconds for
         //user to read feedback then clear the answer value
-        setTimeout(function(){
-          userAnswer.value = "";
-        }, 5000);
+        if(!getButtonTrial()){
+          setTimeout(function(){
+            userAnswer.value = "";
+          }, 5000);
+        }
       }else{
         //Only simulate enter key press if we picked up transcribable/in grammar
         //audio for better UX
-        simulateUserAnswerEnterKeyPress();
+        if(getButtonTrial()){
+            console.log("Simulating click on user's answer choice button");
+            userAnswer.click();
+        }else{
+            simulateUserAnswerEnterKeyPress();
+        }
       }
     });
 }

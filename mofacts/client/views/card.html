@@ -119,15 +119,28 @@
             {{/unless}}
 
             <div class="row">
+                {{#if buttonTrial}}
+                  {{#if audioEnabled}}
+                    <p class="text-center">Please speak the letter next to the correct option for audio input</p>
+                  {{/if}}
+                {{/if}}
                 <div class="col-md-offset-4 col-md-4">
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
-                            {{#each buttonList}}
-                            <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton btn-responsive'>
-                                {{buttonValue}}
-                            </button></div>
-                            {{/each}}
+                          <table>
+                              {{#each buttonList}}
+                                <tr>
+                                  {{#if audioEnabled}}
+                                    <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                    <td>&nbsp;</td>
+                                  {{/if}}
+                                    <td><button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                      {{buttonValue}}
+                                    </button></td>
+                                </tr>
+                              {{/each}}
+                          </table>
                         {{/if}}
                     </div>
                 </div>

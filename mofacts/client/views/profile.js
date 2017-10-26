@@ -150,9 +150,14 @@ Template.profile.rendered = function () {
       }
     };
     $('#audioToggle').change(showHideAudioEnabledGroup);
-    //Restore toggle state
-    audioToggle.checked = Session.get("audioToggled");
+    //Restore toggle/speaking rate values from prior page loads
+    audioToggle.checked = Session.get("audioEnabledView");
     showHideAudioEnabledGroup();
+
+    var audioPromptSpeakingRateView = Session.get("audioPromptSpeakingRateView");
+    if(!!audioPromptSpeakingRateView){
+      document.getElementById("audioPromptSpeakingRate").value = audioPromptSpeakingRateView;
+    }
 
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
@@ -341,8 +346,9 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
       getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled ||
       document.getElementById('audioToggle').checked;
    //Record state to restore when we return to this page
-   Session.set("audioToggled",document.getElementById('audioToggle').checked);
+   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
    Session.set("audioEnabled", audioEnabled);
+   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
 
    var audioPromptSpeakingRate =
      getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate ||
@@ -367,7 +373,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
          console.log("speech api key not found, showing modal for user to input");
          $('#speechAPIModal').modal('show');
        }else {
-         console.log("audio toggle checked and key present, navigating to card and initializing audio input");
+         console.log("audio input enabled and key present, navigating to card and initializing audio input");
          //Go directly to the card session - which will decide whether or
          //not to show instruction
          Session.set("needResume", true);

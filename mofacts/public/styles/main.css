@@ -456,3 +456,9 @@ input:checked + .slider:before {
   display: inline-block;
   padding-right: 2%;
 }
+
+.btnPaddedAndMinWidth{
+  padding-left: 2%;
+  padding-right: 2%;
+  min-width: 100px;
+}

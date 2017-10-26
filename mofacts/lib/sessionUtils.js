@@ -4,9 +4,11 @@
 /* *****************************************************************
  * All of our currently known session variables
  * *****************************************************************
- * audioEnabled              - Did user enable audio input
+ * audioEnabled              - Did either the user or the tdf enable audio input for the current practice set?
+ * audioEnabledView          - Did user enable audio input? Used to restore value on profile refresh after navigating away
  * audioInputSensitivity     - Value from ? to ? for tuning audio input sensitivity (how loud to talk to trigger voice start)
  * audioPromptSpeakingRate   - Value from 0.1 to 2. Acts as percentage relative to 1, i.e. 2 is twice as fast as normal, 0.5 is half as fast
+ * audioPromptSpeakingRateView - Used to restore value on profile refresh after navigating away
  * audioToggled              - var to hold audioEnabled toggle state when navigating back to profile, don't reset here as that defeats the purpose
  * buttonTrial
  * clusterIndex
