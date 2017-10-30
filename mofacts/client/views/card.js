@@ -495,10 +495,7 @@ Template.card.rendered = function() {
      Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
    }
     var audioInputEnabled = Session.get("audioEnabled");
-    //Only set this to true (and therefore bypass the timeout for the first question)
-    //if we're using audio input
-    firstQuestion = audioInputEnabled;
-    //If user has enabled audio input, initialize web audio (this takes a bit)
+    //If user has enabled audio input initialize web audio (this takes a bit)
     //(this will eventually call cardStart at the end of startUserMedia)
     if(audioInputEnabled){
       try {
@@ -1354,15 +1351,7 @@ function setQuestionTimeout() {
 
     beginMainCardTimeout(delayMs, function() {
         stopUserInput();
-        //Hacky solution to VAD.js taking ~15 seconds to load see NOTEONVAD.JS
-        //below (I suggest ctrl + F)
-        if(!firstQuestion){
-          console.log("not first question, timing out");
-          handleUserInput({}, "timeout");
-        }else{
-          firstQuestion = false;
-          console.log("first question, not timing out");
-        }
+        handleUserInput({}, "timeout");
     });
 }
 
@@ -1493,20 +1482,30 @@ processLINEAR16 = function(data){
 
     console.log("Request:" + JSON.stringify(request));
 
-    //Make the actual call to the google speech api with the audio data for transcription
-    if(!!speechAPIKey){
-      makeGoogleSpeechAPICall(request, speechAPIKey);
-    //If we don't have a user provided speech api key load up the key from the tdf file
-    //NOTE: we shouldn't be able to get here if there is no key in the tdf file
+    var tdfSpeechAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey;
+    var answerGrammar;
+    if(getButtonTrial()){
+      answerGrammar = phraseHints;
     }else{
-      makeGoogleSpeechAPICall(request,getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey);
+      answerGrammar = getAllStimAnswers(false);
+    }
+
+    //Make the actual call to the google speech api with the audio data for transcription
+    if(tdfSpeechAPIKey && tdfSpeechAPIKey != ""){
+      console.log("tdf key detected");
+      makeGoogleSpeechAPICall(request, tdfSpeechAPIKey,answerGrammar);
+    //If we don't have a tdf provided speech api key load up the user key
+    //NOTE: we shouldn't be able to get here if there is no user key
+    }else{
+      console.log("no tdf key, using user provided key");
+      makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar);
     }
   }else{
     console.log("processwav userAnswer not defined");
   }
 }
 
-makeGoogleSpeechAPICall = function(request,speechAPIKey){
+makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
   var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
   HTTP.call("POST",speechURL,{"data":request}, function(err,response){
       console.log(JSON.stringify(response));
@@ -1520,9 +1519,8 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey){
         console.log("transcript: " + transcript);
         if(ignoreOutOfGrammarResponses)
         {
-          grammar = getAllStimAnswers(false);
           //Answer not in grammar, ignore and reset/re-record
-          if(grammar.indexOf(transcript) == -1)
+          if(answerGrammar.indexOf(transcript) == -1)
           {
             console.log("ANSWER OUT OF GRAMMAR, IGNORING");
             transcript = speechOutOfGrammarFeedback;
@@ -1536,12 +1534,15 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey){
       }
 
       if(getButtonTrial()){
+        console.log("button trial, setting user answer to verbalChoice");
         userAnswer = $("[verbalChoice='" + transcript + "']");
         if(!userAnswer){
           console.log("Choice couldn't be found");
           ignoredOrSilent = true;
         }
       }else{
+        userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
+        console.log("regular trial, transcribing user response to user answer box");
         userAnswer.value = transcript;
       }
       if(ignoredOrSilent){
@@ -1682,21 +1683,12 @@ function startRecording(){
   }
 }
 
-var firstQuestion = null;
-
 function stopRecording(){
   if(recorder && Session.get('recording'))
   {
     recorder.stop();
     Session.set('recording',false);
 
-    //NOTEONVAD.JS Hacky solution to VAD.js taking ~15 seconds to load. We've already been recording
-    //we just can't yet detect voice start/stop depending on how fast the user
-    //navigates to the first question, so if this is the first question default
-    //to trying to process the audio at question end rather than voice stop
-    if(firstQuestion){
-      recorder.exportToProcessCallback();
-    }
     recorder.clear();
     console.log("RECORDING END");
   }

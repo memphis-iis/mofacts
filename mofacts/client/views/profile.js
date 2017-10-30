@@ -150,6 +150,11 @@ Template.profile.rendered = function () {
       }
     };
     $('#audioToggle').change(showHideAudioEnabledGroup);
+
+    $('#audioInputSensitivity').change(function() {
+        console.log("audioInputSensitivity change firing: " + document.getElementById("audioInputSensitivity").value);
+        $('#audioInputSensitivityLabel').text(document.getElementById("audioInputSensitivity").value);
+    });
     //Restore toggle/speaking rate values from prior page loads
     audioToggle.checked = Session.get("audioEnabledView");
     showHideAudioEnabledGroup();
@@ -363,12 +368,13 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
       getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity ||
       document.getElementById("audioInputSensitivity").value;
      Session.set("audioInputSensitivity",audioInputSensitivity);
-     //Check if the user has a speech api key defined, if not show the modal form
+     //Check if the tdf or user has a speech api key defined, if not show the modal form
      //for them to input one.  If so, actually continue initializing web audio
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       if(!speechAPIKey && !getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey)
+       var tdfKeyPresent = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey && getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey != "";
+       if(!speechAPIKey && !tdfKeyPresent)
        {
          console.log("speech api key not found, showing modal for user to input");
          $('#speechAPIModal').modal('show');

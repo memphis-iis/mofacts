@@ -44,7 +44,10 @@
           </div>
           <div class="audioEnabledGroup invisible">
             <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
-            <p> Audio input sensitivity </p>
+            <div>
+              <p class='flow'> Audio input sensitivity:</p>
+              <p class='flow' id="audioInputSensitivityLabel">20</p>
+            </div>
           </div>
           <div class="audioEnabledGroup invisible">
             {{#if speechAPIKeyIsSetup}}
