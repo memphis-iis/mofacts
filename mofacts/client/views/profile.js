@@ -70,7 +70,6 @@ Template.profile.events({
             target.data("stimulusfile"),
             target.data("tdffilename"),
             target.data("ignoreOutOfGrammarResponses"),
-            target.data("enableAudioPromptAndFeedback"),
             target.data("speechOutOfGrammarFeedback"),
             "User button click"
         );
@@ -151,17 +150,45 @@ Template.profile.rendered = function () {
     };
     $('#audioToggle').change(showHideAudioEnabledGroup);
 
+
+    var audioPromptFeedbackToggle = document.getElementById('audioPromptFeedbackToggle');
+    var showHideAudioPromptFeedbackGroup = function()
+    {
+      if(audioPromptFeedbackToggle.checked){
+          $('.audioPromptFeedbackGroup').removeClass('invisible');
+          $('.audioPromptFeedbackGroup').addClass('flow');
+      }else{
+        $('.audioPromptFeedbackGroup').addClass('invisible');
+        $('.audioPromptFeedbackGroup').removeClass('flow');
+      }
+    };
+    $('#audioPromptFeedbackToggle').change(showHideAudioPromptFeedbackGroup);
+
     $('#audioInputSensitivity').change(function() {
-        console.log("audioInputSensitivity change firing: " + document.getElementById("audioInputSensitivity").value);
         $('#audioInputSensitivityLabel').text(document.getElementById("audioInputSensitivity").value);
     });
-    //Restore toggle/speaking rate values from prior page loads
-    audioToggle.checked = Session.get("audioEnabledView");
-    showHideAudioEnabledGroup();
 
+    $('#audioPromptSpeakingRate').change(function() {
+        $('#audioPromptSpeakingRateLabel').text(document.getElementById("audioPromptSpeakingRate").value);
+    });
+
+    //Restore toggle values from prior page loads
+    audioToggle.checked = Session.get("audioEnabledView");
+    audioPromptFeedbackToggle.checked = Session.get("audioPromptFeedbackView");
+    showHideAudioEnabledGroup();
+    showHideAudioPromptFeedbackGroup();
+
+    //Restore range/label values from prior page loads
     var audioPromptSpeakingRateView = Session.get("audioPromptSpeakingRateView");
     if(!!audioPromptSpeakingRateView){
       document.getElementById("audioPromptSpeakingRate").value = audioPromptSpeakingRateView;
+      document.getElementById("audioPromptSpeakingRateLabel").innerHTML = audioPromptSpeakingRateView;
+    }
+
+    var audioInputSensitivityView = Session.get("audioInputSensitivityView");
+    if(!!audioInputSensitivityView){
+      document.getElementById("audioInputSensitivity").value = audioInputSensitivityView;
+      document.getElementById("audioInputSensitivityLabel").innerHTML = audioInputSensitivityView;
     }
 
     //this is called whenever the template is rendered.
@@ -217,11 +244,6 @@ Template.profile.rendered = function () {
           ignoreOutOfGrammarResponses = false;
         }
 
-        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
-        if(!enableAudioPromptAndFeedback){
-          enableAudioPromptAndFeedback = false;
-        }
-
         var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
         if(!speechOutOfGrammarFeedback){
           speechOutOfGrammarFeedback = "Response not in answer set"
@@ -240,7 +262,6 @@ Template.profile.rendered = function () {
                     stimulusfile: stimulusFile,
                     tdffilename: tdfObject.fileName,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
-                    enableAudioPromptAndFeedback: enableAudioPromptAndFeedback,
                     speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget
                 };
@@ -286,7 +307,6 @@ Template.profile.rendered = function () {
                 .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
                 .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
-                .data("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback)
                 .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
                 .html(name)
         );
@@ -300,7 +320,6 @@ Template.profile.rendered = function () {
             foundExpTarget.stimulusfile,
             foundExpTarget.tdffilename,
             foundExpTarget.ignoreOutOfGrammarResponses,
-            foundExpTarget.enableAudioPromptAndFeedback,
             foundExpTarget.speechOutOfGrammarFeedback,
             foundExpTarget.how
         );
@@ -308,7 +327,7 @@ Template.profile.rendered = function () {
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, enableAudioPromptAndFeedback,speechOutOfGrammarFeedback,how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     //make sure session variables are cleared from previous tests
@@ -322,7 +341,6 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     Session.set("currentTdfName", tdffilename);
     Session.set("currentStimName", stimulusfile);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
-    Session.set("enableAudioPromptAndFeedback",enableAudioPromptAndFeedback);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
 
     //Get some basic info about the current user's environment
@@ -347,6 +365,20 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         selectedHow: how
     });
 
+    //If we're in experiment mode and the tdf file defines whether audio prompt is enabled
+    //forcibly use that, otherwise go with whatever the user set the audio prompt toggle to
+    var userAudioPromptFeedbackToggled = document.getElementById('audioPromptFeedbackToggle').checked;
+    var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
+    var audioPromptFeedbackEnabled = getTDFValueIfPresentAndExperiment(tdfAudioPromptFeedbackEnabled,userAudioPromptFeedbackToggled);
+    Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
+
+    if(Session.get("enableAudioPromptAndFeedback")){
+         var tdfAudioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate;
+         var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
+         var audioPromptSpeakingRate = getTDFValueIfPresentAndExperiment(tdfAudioPromptSpeakingRate,userAudioPromptSpeakingRate);
+         Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+    }
+
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = document.getElementById('audioToggle').checked;
@@ -354,14 +386,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    var audioEnabled = getTDFValueIfPresentAndExperiment(tdfAudioEnabled,userAudioToggled);
    Session.set("audioEnabled", audioEnabled);
 
-   var tdfAudioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate;
-   var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
-   var audioPromptSpeakingRate = getTDFValueIfPresentAndExperiment(tdfAudioPromptSpeakingRate,userAudioPromptSpeakingRate);
-   Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
-
-   //Record state to restore when we return to this page
-   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
-   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
+   var continueToCard = true;
 
    if(Session.get("audioEnabled"))
    {
@@ -380,16 +405,22 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
        {
          console.log("speech api key not found, showing modal for user to input");
          $('#speechAPIModal').modal('show');
+         continueToCard = false;
        }else {
          console.log("audio input enabled and key present, navigating to card and initializing audio input");
-         //Go directly to the card session - which will decide whether or
-         //not to show instruction
-         Session.set("needResume", true);
-         Router.go("/card");
        }
      });
    }else {
-     console.log("audio toggle not checked");
+     console.log("audio toggle not checked, navigating to card");
+   }
+
+   //Record state to restore when we return to this page
+   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
+   Session.set("audioPromptFeedbackView",document.getElementById('audioPromptFeedbackToggle').checked);
+   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
+   Session.set("audioInputSensitivityView",document.getElementById("audioInputSensitivity").value);
+
+   if(continueToCard){
      //Go directly to the card session - which will decide whether or
      //not to show instruction
      Session.set("needResume", true);

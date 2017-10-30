@@ -368,7 +368,7 @@ function leavePage(dest) {
       window.speechSynthesis.pause();
       window.speechSynthesis.cancel();
     }
-    if(window.audioContext && !(dest == "/card" || dest == "/instructions")){
+    if(window.audioContext && !(dest == "/card" || dest == "/instructions" || dest == "/voice")){
       console.log("closing audio context");
       stopRecording();
       window.audioContext.close();
@@ -487,7 +487,7 @@ Template.card.rendered = function() {
     var audioInputEnabled = Session.get("audioEnabled");
     //If user has enabled audio input initialize web audio (this takes a bit)
     //(this will eventually call cardStart at the end of startUserMedia)
-    if(audioInputEnabled){
+    if(audioInputEnabled && !Session.get("VADInitialized")){
       try {
         window.AudioContext = window.AudioContext || window.webkitAudioContext;
         window.AudioContext.sampleRate = 16000;
@@ -1584,6 +1584,16 @@ function startUserMedia(stream) {
     source: input,
     energy_offset: energyOffset,
     voice_stop: function() {
+      //This will hopefully only be fired once while we're still on the voice.html interstitial,
+      //once VAD.js loads we should navigate back to card to start the practice set
+      if(!Session.get("VADInitialized")){
+        console.log("VAD previously not initialized, now initialized");
+        Session.set("VADInitialized",true);
+        $("#voiceDetected").value = "Voice detected, refreshing now...";
+        Session.set("needResume", true);
+        Router.go("/card");
+        return;
+      }
       if(!Session.get('recording')){
         console.log("NOT RECORDING, VOICE STOP");
         return;
@@ -1615,12 +1625,13 @@ function startUserMedia(stream) {
     }
   }
   var vad = new VAD(options);
+  Session.set("VADInitialized",false);
 
   console.log("Audio recorder ready");
 
-  //If we're doing audio input wait until we've started initializing things to
-  //to load up the page so we have a chance of vad.js being loaded in time
-  cardStart();
+  //Navigate to the voice interstitial which gives VAD.js time to load so we're
+  //ready to transcribe when we finally come back to the practice set
+  Router.go("/voice");
 };
 
 // END WEB AUDIO SECTION
