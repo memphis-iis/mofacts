@@ -49,9 +49,9 @@
 //Handle an entire session - note that we current don't limit this to the
 //client... but maybe we should?
 sessionCleanUp = function() {
-    Session.set("audioEnabled",false);
+    Session.set("audioEnabled",undefined);
     Session.set("audioInputSensitivity",undefined);
-    Session.set("audioPromptSpeakingRate",1);
+    Session.set("audioPromptSpeakingRate",undefined);
     Session.set("buttonTrial", false);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);

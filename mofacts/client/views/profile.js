@@ -347,27 +347,29 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         selectedHow: how
     });
 
-   var audioEnabled =
-      getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled ||
-      document.getElementById('audioToggle').checked;
-   //Record state to restore when we return to this page
-   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
+   //If we're in experiment mode and the tdf file defines whether audio input is enabled
+   //forcibly use that, otherwise go with whatever the user set the audio input toggle to
+   var userAudioToggled = document.getElementById('audioToggle').checked;
+   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled;
+   var audioEnabled = getTDFValueIfPresentAndExperiment(tdfAudioEnabled,userAudioToggled);
    Session.set("audioEnabled", audioEnabled);
-   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
 
-   var audioPromptSpeakingRate =
-     getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate ||
-     document.getElementById("audioPromptSpeakingRate").value;
+   var tdfAudioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate;
+   var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
+   var audioPromptSpeakingRate = getTDFValueIfPresentAndExperiment(tdfAudioPromptSpeakingRate,userAudioPromptSpeakingRate);
    Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
 
-   //If user has enabled audio input, set up some session variables for use by
-   //card.js to tailor input experience
+   //Record state to restore when we return to this page
+   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
+   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
+
    if(Session.get("audioEnabled"))
    {
-     var audioInputSensitivity =
-      getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity ||
-      document.getElementById("audioInputSensitivity").value;
+     var tdfAudioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity;
+     var userAudioInputSensitivity = document.getElementById("audioInputSensitivity").value;
+     var audioInputSensitivity = getTDFValueIfPresentAndExperiment(tdfAudioInputSensitivity,userAudioInputSensitivity);
      Session.set("audioInputSensitivity",audioInputSensitivity);
+
      //Check if the tdf or user has a speech api key defined, if not show the modal form
      //for them to input one.  If so, actually continue initializing web audio
      //and going to the practice set
@@ -393,6 +395,14 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      Session.set("needResume", true);
      Router.go("/card");
    }
+}
+
+getTDFValueIfPresentAndExperiment = function(tdfHolder,alternativeValue){
+  if(Session.get("loginMode") === "experiment" && tdfHolder && tdfHolder != ""){
+    return tdfHolder;
+  }else{
+    return alternativeValue;
+  }
 }
 
 //We'll use this in card.js if audio input is enabled and user has provided a

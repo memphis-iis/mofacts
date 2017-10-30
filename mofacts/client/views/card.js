@@ -484,16 +484,6 @@ Template.card.events({
 // Template helpers and meteor events
 
 Template.card.rendered = function() {
-   //If this is an experiment make sure we have our session variables set up for
-   //audio input and prompt/feedback
-   if(Template.instance().isExperiment){
-     var audioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled || false;
-     Session.set("audioEnabled", audioEnabled);
-     var audioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity || 20;
-     Session.set("audioInputSensitivity",audioInputSensitivity);
-     var audioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
-     Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
-   }
     var audioInputEnabled = Session.get("audioEnabled");
     //If user has enabled audio input initialize web audio (this takes a bit)
     //(this will eventually call cardStart at the end of startUserMedia)
