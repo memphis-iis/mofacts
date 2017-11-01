@@ -9,7 +9,7 @@
   <style>
     body {
         /* Handle fixed navbars at top and bottom of page */
-        padding-top: 60px;
+        /*padding-top: 60px;*/
         padding-bottom: 60px;
     }
   </style>
@@ -23,5 +23,46 @@
 </body>
 
 <template name="DefaultLayout">
-    {{> yield}}
+  <nav class="navbar navbar-inverse" role="navigation">
+      <div class="container">
+          <div class="navbar-header">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+                  <span class="sr-only">Toggle navigation</span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="#">MoFaCTS
+                {{#if isLoggedIn}}
+                  {{#if isInRole 'admin,teacher'}}
+                      {{#if isInRole 'admin'}} Administrator {{/if}}
+                      {{#if isInRole 'teacher'}} Teacher {{/if}}
+                  {{else}}
+                      Student
+                  {{/if}}
+                {{/if}}
+              </a>
+          </div>  <!-- close header -->
+
+          {{#if isLoggedIn}}
+          <div class="nav navbar-nav navbar-right">
+              <TABLE BORDER="0">
+                  {{#if inPracticeModule}}
+                  <td><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
+                  <td>&nbsp;</td>
+                  {{/if}}
+                  <td style="line-height:50px;"><s1>{{username}}</s1></td>
+                  <td>&nbsp;</td>    <td>&nbsp;</td>
+                  <td><button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Practice</button></td>
+                  <td>&nbsp;</td>
+                  <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td>
+                  <td>&nbsp;</td>
+                  <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td>
+              </table>
+          </div>  <!-- close navbar-collapse -->
+          {{/if}}
+      </div>  <!-- close container -->
+  </nav>  <!-- close nav -->
+  <!-- main page content -->
+  {{> yield}}
 </template>

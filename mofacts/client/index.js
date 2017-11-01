@@ -33,3 +33,21 @@ Meteor.startup(function() {
         redoCardImage();
     });
 });
+
+//Global template helpers
+Template.registerHelper('isLoggedIn', function (){
+  return haveMeteorUser();
+});
+
+Template.registerHelper('inPracticeModule', function(){
+  var curLocation = Router.current().location.get().path;
+  if(curLocation == "/card" || curLocation == "/instructions"){
+    return true;
+  }else{
+    return false;
+  }
+});
+
+Template.registerHelper('currentScore', function() {
+    return Session.get("currentScore");
+});

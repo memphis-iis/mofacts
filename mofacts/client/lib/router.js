@@ -93,10 +93,6 @@ routeToSignin = function() {
     }
 };
 
-Router.configure({
-    layoutTemplate: 'DefaultLayout'
-});
-
 Router.route('/experiment/:target?/:xcond?', {
     name: "client.experiment",
     action: function() {

@@ -8,12 +8,12 @@
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
-        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
-        <enableAudioPromptAndFeedback>false</enableAudioPromptAndFeedback>
-        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <speechAPIKey></speechAPIKey>
-        <audioInputSensitivity>15</audioInputSensitivity>
         <audioInputEnabled>true</audioInputEnabled>
+        <audioInputSensitivity>15</audioInputSensitivity>
+        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
+        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
         <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
     </setspec>
     <unit>
