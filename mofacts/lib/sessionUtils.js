@@ -45,6 +45,7 @@
  * statsTotal                - Used by stats page template
  * statsUserTimeLogView      - User by stats page template
  * testType
+ * VADInitialized            - Indicates whether we've already initialized the voice activity detection code which gives up our voice start/stop events
  * */
 
 //Handle an entire session - note that we current don't limit this to the
@@ -80,6 +81,7 @@ sessionCleanUp = function() {
     Session.set("statsPercentage", undefined);
     Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
+    Session.set("VADInitialized",false);
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {
