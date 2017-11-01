@@ -125,7 +125,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.*/
     this.scriptProcessorNode = this.options.context.createScriptProcessor(this.options.bufferLen, 1, 1);
 
     // Connect scriptProcessorNode (Theretically, not required)
-    //this.scriptProcessorNode.connect(this.options.context.destination);
+    this.scriptProcessorNode.connect(this.options.context.destination);
 
     // Create callback to update/analyze floatFrequencyData
     var self = this;
