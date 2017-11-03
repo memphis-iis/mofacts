@@ -34,6 +34,31 @@ Meteor.startup(function() {
     });
 });
 
+Template.body.events({
+  'click .homeLink' : function (event) {
+      event.preventDefault();
+      Router.go("/profile");
+  },
+
+  'click .allItemsLink' : function (event) {
+      event.preventDefault();
+      Router.go("/allItems");
+  },
+
+  'click .logoutLink' : function (event) {
+      event.preventDefault();
+      Meteor.logout( function (error) {
+          if (typeof error !== "undefined") {
+              //something happened during logout
+              console.log("User:", Meteor.user(), "Error:", error);
+          }
+          else {
+              routeToSignin();
+          }
+      });
+  }
+});
+
 //Global template helpers
 Template.registerHelper('isLoggedIn', function (){
   return haveMeteorUser();
@@ -50,4 +75,8 @@ Template.registerHelper('inPracticeModule', function(){
 
 Template.registerHelper('currentScore', function() {
     return Session.get("currentScore");
+});
+
+Template.registerHelper('isNormal', function() {
+    return Session.get("loginMode") !== "experiment";
 });

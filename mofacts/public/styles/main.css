@@ -38,9 +38,13 @@ s1 {
         line-height: 1;
         border-radius: 3px;
     }
-    #textQuestion {
-        font-size: 80%;
+    .user-admin-table th,
+    .user-admin-table td {
+        white-space: normal;
     }
+    /*#textQuestion {
+        font-size: 80%;
+    }*/
 }
 
 @media (min-width: 769px) and (max-width: 992px) {
@@ -53,6 +57,10 @@ s1 {
         font-size: 90%;
         line-height: 1.2;
     }
+    .user-admin-table th,
+    .user-admin-table td {
+        white-space: nowrap;
+    }
 }
 
 @media (min-width: 993px) {
@@ -63,6 +71,10 @@ s1 {
     .btn-responsive {
         padding: inherit;
         line-height: inherit;
+    }
+    .user-admin-table th,
+    .user-admin-table td {
+        white-space: nowrap;
     }
 }
 
@@ -319,11 +331,6 @@ input:focus {
     border-left-width: 0;
 }
 
-.user-admin-table th,
-.user-admin-table td {
-    white-space: nowrap;
-}
-
 /* BEGIN CSS for charting */
 
 .graphs {
@@ -461,4 +468,28 @@ input:checked + .slider:before {
   padding-left: 2%;
   padding-right: 2%;
   min-width: 100px;
+}
+
+.padLeftAndRight{
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.marginLeftAndRight{
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+.marginBottom{
+  margin-bottom: 10px;
+}
+
+#multipleChoiceTable{
+  margin: auto;
+  width: 50%;
+  float: none;
+}
+
+.responsiveTable{
+  overflow-x:auto;
 }

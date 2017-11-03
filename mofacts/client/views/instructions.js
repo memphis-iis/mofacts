@@ -354,26 +354,5 @@ Template.instructions.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
         instructContinue();
-    },
-
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
-            }
-            leavePage(routeToSignin); //Not much else to do now
-        });
-    },
-
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        leavePage("/profile");
     }
 });

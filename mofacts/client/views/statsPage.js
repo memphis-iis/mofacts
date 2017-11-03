@@ -6,21 +6,6 @@ Template.statsPage.events({
     'click #continueButton' : function (event) {
         event.preventDefault();
         Router.go("/profile");
-    },
-
-    'click .logoutLink' : function (event) {
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                console.log("Error Logging out [" + Meteor.user() + "] " + error);
-            }
-            event.preventDefault();
-            routeToSignin();
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        Router.go("/profile");
     }
 });
 

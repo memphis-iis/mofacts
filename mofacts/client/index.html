@@ -25,7 +25,7 @@
   <nav class="navbar navbar-inverse" role="navigation">
       <div class="container">
           <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarRight">
                   <span class="sr-only">Toggle navigation</span>
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
@@ -44,7 +44,7 @@
           </div>  <!-- close header -->
 
           {{#if isLoggedIn}}
-          <div class="nav navbar-nav navbar-right">
+          <div id="navbarRight" class="nav navbar-nav navbar-right">
               <TABLE BORDER="0">
                   {{#if inPracticeModule}}
                   <td><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
@@ -52,11 +52,13 @@
                   {{/if}}
                   <td style="line-height:50px;"><s1>{{username}}</s1></td>
                   <td>&nbsp;</td>    <td>&nbsp;</td>
+                  {{#if isNormal}}
                   <td><button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Practice</button></td>
                   <td>&nbsp;</td>
                   <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td>
                   <td>&nbsp;</td>
                   <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td>
+                  {{/if}}
               </table>
           </div>  <!-- close navbar-collapse -->
           {{/if}}

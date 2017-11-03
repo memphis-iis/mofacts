@@ -418,29 +418,6 @@ Template.card.events({
         }
     },
 
-    'click .logoutLink' : function (event) {
-        Meteor.logout( function (error) {
-            event.preventDefault();
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:" + Meteor.user() +" ERROR:" + error);
-            }
-            else {
-                leavePage(routeToSignin);
-            }
-        });
-    },
-
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        leavePage("/allItems");
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        leavePage("/profile");
-    },
-
     'click .statsPageLink' : function (event) {
         event.preventDefault();
         leavePage(statsPageUpdate); //In statsPage.js

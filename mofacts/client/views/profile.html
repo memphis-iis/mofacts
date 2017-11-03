@@ -1,7 +1,7 @@
 <!-- MAIN profile template -->
 <template name="profile">
     <div class="container">
-      <div class="row" id="toggleSwitchContainer">
+      <div class="padLeftAndRight row" id="toggleSwitchContainer">
           <div>
             <div class="flow">
               <label class="switch text-center">
@@ -11,7 +11,7 @@
               <p class="text-left">Enable audio input</p>
             </div>
             <div class="audioEnabledGroup invisible">
-              <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
+              <input type="range" style="width:250px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
               <div>
                 <p class='flow'>Audio input sensitivity:</p>
                 <p class='flow' id="audioInputSensitivityLabel">20</p>
@@ -23,7 +23,7 @@
               {{else}}
                 <p style="color:red">Speech api key is not setup</p>
               {{/if}}
-              <button id='setupAPIKey'>Set up API Key</button>
+              <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
             </div>
           </div>
           <div>

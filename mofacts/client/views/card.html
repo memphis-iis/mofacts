@@ -36,8 +36,7 @@
 
         {{#if trial}}
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info {{fontSizeClass}}"
-                id="textQuestion" >
+            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion" >
                 {{#if textOrClozeCard}}
                 {{{currentQuestion}}}
                 {{/if}}
@@ -86,14 +85,14 @@
             <div class="row">
                 {{#if buttonTrial}}
                   {{#if audioEnabled}}
-                    <p class="text-center">Please speak the letter next to the correct option for audio input</p>
+                    <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
                   {{/if}}
                 {{/if}}
                 <div class="col-md-offset-4 col-md-4">
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
-                          <table>
+                          <table id="multipleChoiceTable">
                               {{#each buttonList}}
                                 <tr>
                                   {{#if audioEnabled}}
@@ -114,7 +113,7 @@
 
         <div class="userInteractionContainer">
             <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="UserInteraction" hidden>
+                <div class="marginLeftAndRight {{fontSizeClass}}" id="UserInteraction" hidden>
                 </div>
             </div>
             <div class="row">
