@@ -466,18 +466,46 @@ Template.card.rendered = function() {
     //(this will eventually call cardStart at the end of startUserMedia)
     if(audioInputEnabled && !Session.get("VADInitialized")){
       try {
-        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-        window.AudioContext.sampleRate = 16000;
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        window.AudioContext = window.webkitAudioContext || window.AudioContext;
         window.URL = window.URL || window.webkitURL;
         audioContext = new AudioContext();
+
+        // Older browsers might not implement mediaDevices at all, so we set an empty object first
+        if (navigator.mediaDevices === undefined) {
+          console.log("media devices undefined");
+          navigator.mediaDevices = {};
+        }
+
+        // Some browsers partially implement mediaDevices. We can't just assign an object
+        // with getUserMedia as it would overwrite existing properties.
+        // Here, we will just add the getUserMedia property if it's missing.
+        if (navigator.mediaDevices.getUserMedia === undefined) {
+          navigator.mediaDevices.getUserMedia = function(constraints) {
+            // First get ahold of the legacy getUserMedia, if present
+            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.getUserMedia;
+
+            // Some browsers just don't implement it - return a rejected promise with an error
+            // to keep a consistent interface
+            if (!getUserMedia) {
+              return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+            }
+
+            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+            return new Promise(function(resolve, reject) {
+              getUserMedia.call(navigator, constraints, resolve, reject);
+            });
+          }
+        }
+
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false})
+        .then(startUserMedia)
+        .catch(function(err) {
+          console.log("Error getting user media: " + err.name + ": " + err.message);
+        });
+
       } catch (e) {
         console.log("Error initializing Web Audio browser");
       }
-      if (navigator.getUserMedia) navigator.getUserMedia({audio: true}, startUserMedia, function(e) {
-                                      console.log("No live audio input in this browser");
-                                  });
-      else console.log("No web audio support in this browser");
     }else{
       cardStart();
     }
@@ -1411,6 +1439,7 @@ processLINEAR16 = function(data){
     var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if(!speechRecognitionLanguage){
+      console.log("no speechRecognitionLanguage in set spec, defaulting to en-US");
       speechRecognitionLanguage = "en-US";
     }else{
       speechRecognitionLanguage = speechRecognitionLanguage[0];

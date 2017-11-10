@@ -15,7 +15,7 @@ DEALINGS IN THE SOFTWARE.
 
 var recLength = 0,
   recBuffersL = [],
-  recBuffersR = [],
+  //recBuffersR = [],
   sampleRate;
 
 this.onmessage = function(e){
@@ -50,24 +50,24 @@ function init(config){
 
 function record(inputBuffer){
   recBuffersL.push(inputBuffer[0]);
-  recBuffersR.push(inputBuffer[1]);
+  //recBuffersR.push(inputBuffer[1]);
   recLength += inputBuffer[0].length;
 }
 
-function exportWAV(type){
-  var bufferL = mergeBuffers(recBuffersL, recLength);
-  var bufferR = mergeBuffers(recBuffersR, recLength);
-  var interleaved = interleave(bufferL, bufferR);
-  var dataview = encodeWAV(interleaved);
-  var audioBlob = new Blob([dataview], { type: type });
-
-  this.postMessage(audioBlob);
-}
+// function exportWAV(type){
+//   var bufferL = mergeBuffers(recBuffersL, recLength);
+//   var bufferR = mergeBuffers(recBuffersR, recLength);
+//   var interleaved = interleave(bufferL, bufferR);
+//   var dataview = encodeWAV(interleaved);
+//   var audioBlob = new Blob([dataview], { type: type });
+//
+//   this.postMessage(audioBlob);
+// }
 
 function exportMonoWAV(type){
   var bufferL = mergeBuffers(recBuffersL, recLength);
   var dataview = encodeWAV(bufferL, true);
-  var audioBlob = dataview;//new Blob([dataview], { type: type });
+  var audioBlob = dataview;
 
   this.postMessage(audioBlob);
 }
@@ -75,14 +75,14 @@ function exportMonoWAV(type){
 function getBuffers() {
   var buffers = [];
   buffers.push( mergeBuffers(recBuffersL, recLength) );
-  buffers.push( mergeBuffers(recBuffersR, recLength) );
+  //buffers.push( mergeBuffers(recBuffersR, recLength) );
   this.postMessage(buffers);
 }
 
 function clear(){
   recLength = 0;
   recBuffersL = [];
-  recBuffersR = [];
+  //recBuffersR = [];
 }
 
 function mergeBuffers(recBuffers, recLength){
