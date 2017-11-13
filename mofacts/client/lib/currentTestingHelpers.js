@@ -279,6 +279,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'forceCorrection': false,
         'purestudy': 0,
         'drill': 0,
+        'initialview': 0,
         'reviewstudy': 0,
         'correctprompt': 0,
         'skipstudy': false,

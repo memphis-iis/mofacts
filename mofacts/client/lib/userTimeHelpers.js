@@ -71,6 +71,7 @@ recordUserTimeQuestion = function(extendedData) {
         questionIndex:        Session.get("questionIndex"),
         currentUnit:          Session.get("currentUnitNumber"),
         selectedQuestion:     Session.get("currentQuestion"),
+        selectedQuestionPart2:Session.get("currentQuestionPart2"),
         selectedAnswer:       Session.get("currentAnswer"),
         showOverlearningText: Session.get("showOverlearningText"),
         testType:             Session.get("testType"),

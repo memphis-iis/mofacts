@@ -62,6 +62,7 @@ sessionCleanUp = function() {
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("currentQuestion", undefined);
+    Session.set("currentQuestionPart2",undefined);
     Session.set("currentUnitNumber", 0);
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);

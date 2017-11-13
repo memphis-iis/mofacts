@@ -23,7 +23,7 @@ All timeouts are specified in milliseconds and should be at least one (1).
 There are two settings that correspond to what most people think of as the
 "trial timeout". That is the amount of time that may elapse from the beginning
 of a trial before the user runs out of time to answer (see the function
-setQuestionTimeout):
+startQuestionTimeout):
 
 purestudy - The amount of time a "study" trial is displayed
 
@@ -463,7 +463,8 @@ Template.card.events({
 Template.card.rendered = function() {
     var audioInputEnabled = Session.get("audioEnabled");
     //If user has enabled audio input initialize web audio (this takes a bit)
-    //(this will eventually call cardStart at the end of startUserMedia)
+    //(this will eventually call cardStart after we redirect through the voice
+    //interstitial and get back here again)
     if(audioInputEnabled && !Session.get("VADInitialized")){
       try {
         window.AudioContext = window.webkitAudioContext || window.AudioContext;
@@ -640,7 +641,7 @@ Template.card.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
-function cardStart(){
+cardStart = function(){
   if(Session.get("debugging")) {
       console.log('cards template rendered');
   }
@@ -825,34 +826,11 @@ function newQuestionHandler() {
         ));
     }
 
-    setQuestionTimeout();
+    startQuestionTimeout(textFocus);
     checkSimulation();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
-    }
-
-    //No user input (re-enabled below) and reset keypress timestamp.
-    stopUserInput();
-    keypressTimestamp = 0;
-    trialTimestamp = Date.now();
-
-    var questionType = getQuestionType();
-
-    if(questionType === "sound") {
-        //We don't allow user input until the sound is finished playing
-        playCurrentQuestionSound(function() {
-            allowUserInput(textFocus);
-        });
-    }
-    else {
-        //console.log("current question: " + Session.get("currentQuestion"));
-        //Only speak the prompt if the question type makes sense
-        if(questionType === "text" || questionType === "cloze"){
-          speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true);
-        }
-        //Not a sound - can unlock now for data entry now
-        allowUserInput(textFocus);
     }
 }
 
@@ -1314,7 +1292,7 @@ function failNoDeliveryParams(customMsg) {
     throw new Error("The current TDF is malformed");
 }
 
-function setQuestionTimeout() {
+function startQuestionTimeout(textFocus) {
     clearCardTimeout(); //No previous timeout now
 
     var delayMs = 0;
@@ -1329,7 +1307,7 @@ function setQuestionTimeout() {
         return;
     }
 
-    console.log("setQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
+    console.log("startQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
 
     if (getTestType() === "s") {
         //Study
@@ -1344,10 +1322,52 @@ function setQuestionTimeout() {
         failNoDeliveryParams("Could not find appropriate question timeout");
     }
 
-    beginMainCardTimeout(delayMs, function() {
-        stopUserInput();
-        handleUserInput({}, "timeout");
-    });
+    var beginQuestionAndInitiateUserInput = function(){
+      keypressTimestamp = 0;
+      trialTimestamp = Date.now();
+
+      var questionType = getQuestionType();
+
+      if(questionType === "sound") {
+          //We don't allow user input until the sound is finished playing
+          playCurrentQuestionSound(function() {
+              allowUserInput(textFocus);
+          });
+      }
+      else {
+          //console.log("current question: " + Session.get("currentQuestion"));
+          //Only speak the prompt if the question type makes sense
+          if(questionType === "text" || questionType === "cloze"){
+            speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true);
+          }
+          //Not a sound - can unlock now for data entry now
+          allowUserInput(textFocus);
+      }
+
+      beginMainCardTimeout(delayMs, function() {
+          stopUserInput();
+          handleUserInput({}, "timeout");
+      });
+    }
+
+    //No user input (re-enabled below) and reset keypress timestamp.
+    stopUserInput();
+
+    var currentQuestionPart2 = Session.get("currentQuestionPart2");
+    if(!!currentQuestionPart2){
+      console.log("two part question detected, delaying for <initialview> ms then continuing with question");
+      var initialviewTimeDelay = deliveryParams.initialview;
+      setTimeout(function(){
+        console.log("after timeout");
+        Session.set("currentQuestion",currentQuestionPart2);
+        Session.set("currentQuestionPart2",undefined);
+        redoCardImage();
+        beginQuestionAndInitiateUserInput();
+      },initialviewTimeDelay);
+    }else{
+      console.log("one part question detected, continuing with question");
+      beginQuestionAndInitiateUserInput();
+    }
 }
 
 function showUserInteraction(isGoodNews, news) {
@@ -1702,25 +1722,63 @@ function stopRecording(){
 }
 
 function stopUserInput() {
+    console.log("stop user input");
     stopRecording();
-    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+
+
+    //Handle this being called before the page finishes loading by setting up
+    //polling check to recheck until page has loaded, then disable
+    var count = 0;
+    if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+      var intervalVar;
+      intervalVar = setInterval(function(){
+        count += 1;
+        if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+          console.log("finally loaded");
+          $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",true);
+          clearInterval(intervalVar);
+        }
+      },500);
+    }else{
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+    }
 }
 
 function allowUserInput(textFocus) {
-    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-    startRecording();
+    console.log("allow user input");
+    var enableUserInput = function(){
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+      startRecording();
 
-    if (typeof textFocus !== "undefined" && !!textFocus) {
-        try {
-            $("#userAnswer").focus();
-        }
-        catch(e) {
-            //Nothing to do
-        }
+      if (typeof textFocus !== "undefined" && !!textFocus) {
+          try {
+              $("#userAnswer").focus();
+          }
+          catch(e) {
+              //Nothing to do
+          }
+      }
+
+      // Force scrolling to bottom of screen for the input
+      scrollElementIntoView(null, false);
     }
 
-    // Force scrolling to bottom of screen for the input
-    scrollElementIntoView(null, false);
+    //Handle this being called before the page finishes loading by setting up a
+    //polling check to recheck until page has loaded, then enable
+    var count = 0;
+    if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+      var intervalVar;
+      intervalVar = setInterval(function(){
+        count += 1;
+        if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+          console.log("finally loaded");
+          enableUserInput();
+          clearInterval(intervalVar);
+        }
+      },500);
+    }else{
+      enableUserInput();
+    }
 }
 
 
@@ -1794,6 +1852,7 @@ function resumeFromUserTimesLog() {
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentQuestion", undefined);
+    Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
     Session.set("lastTimestamp", 0);
@@ -2169,6 +2228,7 @@ function processUserTimesLog() {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentQuestion",      entry.selectedQuestion);
+            Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);

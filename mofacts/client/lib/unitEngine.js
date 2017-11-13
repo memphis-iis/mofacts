@@ -419,7 +419,7 @@ function modelUnitEngine() {
          p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
         p.meanSpacing = 0;
-        
+
         if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
             p.meanspacing = 1;
         } else {
@@ -535,6 +535,18 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
             Session.set("currentQuestion", fastGetStimQuestion(cardIndex, whichStim));
+            var currentQuestion = Session.get("currentQuestion");
+            //If we have a dual prompt question populate the spare data field
+            if(currentQuestion.indexOf("|") != -1){
+
+              var prompts = currentQuestion.split("|");
+              Session.set("currentQuestion",prompts[0]);
+              Session.set("currentQuestionPart2",prompts[1]);
+              console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
+            }else{
+              console.log("one part question detected");
+              Session.set("currentQuestionPart2",undefined);
+            }
             Session.set("currentAnswer", fastGetStimAnswer(cardIndex, whichStim));
             Session.set("testType", "d");
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
@@ -814,6 +826,18 @@ function scheduleUnitEngine() {
             //increment the session's question index number
             setCurrentClusterIndex(questInfo.clusterIndex);
             Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
+            var currentQuestion = Session.get("currentQuestion");
+            //If we have a dual prompt question populate the spare data field
+            if(currentQuestion.indexOf("|") != -1){
+
+              var prompts = currentQuestion.split("|");
+              Session.set("currentQuestion",prompts[0]);
+              Session.set("currentQuestionPart2",prompts[1]);
+              console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
+            }else{
+              console.log("one part question detected");
+              Session.set("currentQuestionPart2",undefined);
+            }
             Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
