@@ -377,6 +377,8 @@ function leavePage(dest) {
     }
     clearCardTimeout();
     clearPlayingSound();
+    clearTimeout(allowInputInterval);
+    clearTimeout(stopInputInterval);
     if (typeof dest === "function") {
         dest();
     }
@@ -1721,6 +1723,8 @@ function stopRecording(){
   }
 }
 
+var stopInputInterval;
+
 function stopUserInput() {
     console.log("stop user input");
     stopRecording();
@@ -1730,19 +1734,20 @@ function stopUserInput() {
     //polling check to recheck until page has loaded, then disable
     var count = 0;
     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-      var intervalVar;
-      intervalVar = setInterval(function(){
+      stopInputInterval = setInterval(function(){
         count += 1;
         if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
           console.log("finally loaded");
           $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",true);
-          clearInterval(intervalVar);
+          clearInterval(stopInputInterval);
         }
       },500);
     }else{
         $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
     }
 }
+
+var allowInputInterval;
 
 function allowUserInput(textFocus) {
     console.log("allow user input");
@@ -1767,13 +1772,12 @@ function allowUserInput(textFocus) {
     //polling check to recheck until page has loaded, then enable
     var count = 0;
     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-      var intervalVar;
-      intervalVar = setInterval(function(){
+      allowInputInterval = setInterval(function(){
         count += 1;
         if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
           console.log("finally loaded");
           enableUserInput();
-          clearInterval(intervalVar);
+          clearInterval(allowInputInterval);
         }
       },500);
     }else{
