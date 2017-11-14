@@ -353,7 +353,15 @@ function varLenDisplayTimeout() {
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
+//Capture leaving page events (back button) so we can cleanup things
+window.onpopstate = function(event){
+  leavePage(document.location.pathname);
+}
+
 function leavePage(dest) {
+    sessionCleanUp();
+    clearTimeout(allowInputInterval);
+    clearTimeout(stopInputInterval);
     clearCardTimeout();
     clearPlayingSound();
     if (typeof dest === "function") {
@@ -764,27 +772,11 @@ function newQuestionHandler() {
         ));
     }
 
-    setQuestionTimeout();
+    startQuestionTimeout(textFocus);
     checkSimulation();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
-    }
-
-    //No user input (re-enabled below) and reset keypress timestamp.
-    stopUserInput();
-    keypressTimestamp = 0;
-    trialTimestamp = Date.now();
-
-    if(getQuestionType() === "sound") {
-        //We don't allow user input until the sound is finished playing
-        playCurrentQuestionSound(function() {
-            allowUserInput(textFocus);
-        });
-    }
-    else {
-        //Not a sound - can unlock now for data entry now
-        allowUserInput(textFocus);
     }
 }
 
@@ -1246,40 +1238,76 @@ function failNoDeliveryParams(customMsg) {
     throw new Error("The current TDF is malformed");
 }
 
-function setQuestionTimeout() {
-    clearCardTimeout(); //No previous timeout now
+function startQuestionTimeout(textFocus) {
+  clearCardTimeout(); //No previous timeout now
 
-    var delayMs = 0;
+  var delayMs = 0;
 
-    //If this is scheduled TDF and the current test is a study, use the timeout
-    //for purestudy for the current unit. Otherwise use the top-level setspec
-    //timeout in seconds
+  //If this is scheduled TDF and the current test is a study, use the timeout
+  //for purestudy for the current unit. Otherwise use the top-level setspec
+  //timeout in seconds
 
-    var deliveryParams = getCurrentDeliveryParams();
-    if (!deliveryParams) {
-        failNoDeliveryParams();
-        return;
-    }
+  var deliveryParams = getCurrentDeliveryParams();
+  if (!deliveryParams) {
+      failNoDeliveryParams();
+      return;
+  }
 
-    console.log("setQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
+  console.log("startQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
 
-    if (getTestType() === "s") {
-        //Study
-        delayMs = _.intval(deliveryParams.purestudy);
+  if (getTestType() === "s") {
+      //Study
+      delayMs = _.intval(deliveryParams.purestudy);
+  }
+  else {
+      //Not study - must be drill or test
+      delayMs = _.intval(deliveryParams.drill);
+  }
+
+  if (delayMs < 1) {
+      failNoDeliveryParams("Could not find appropriate question timeout");
+  }
+
+  var beginQuestionAndInitiateUserInput = function(){
+    keypressTimestamp = 0;
+    trialTimestamp = Date.now();
+
+    var questionType = getQuestionType();
+
+    if(questionType === "sound") {
+        //We don't allow user input until the sound is finished playing
+        playCurrentQuestionSound(function() {
+            allowUserInput(textFocus);
+        });
     }
     else {
-        //Not study - must be drill or test
-        delayMs = _.intval(deliveryParams.drill);
-    }
-
-    if (delayMs < 1) {
-        failNoDeliveryParams("Could not find appropriate question timeout");
+        allowUserInput(textFocus);
     }
 
     beginMainCardTimeout(delayMs, function() {
         stopUserInput();
         handleUserInput({}, "timeout");
     });
+  }
+
+  //No user input (re-enabled below) and reset keypress timestamp.
+  stopUserInput();
+
+  var currentQuestionPart2 = Session.get("currentQuestionPart2");
+  if(!!currentQuestionPart2){
+    console.log("two part question detected, delaying for <initialview> ms then continuing with question");
+    var initialviewTimeDelay = deliveryParams.initialview;
+    setTimeout(function(){
+      console.log("after timeout");
+      Session.set("currentQuestion",currentQuestionPart2);
+      Session.set("currentQuestionPart2",undefined);
+      redoCardImage();
+      beginQuestionAndInitiateUserInput();
+    },initialviewTimeDelay);
+  }else{
+    console.log("one part question detected, continuing with question");
+    beginQuestionAndInitiateUserInput();
+  }
 }
 
 function showUserInteraction(isGoodNews, news) {
@@ -1327,11 +1355,31 @@ function hideUserInteraction() {
     scrollElementIntoView("#stimulusTarget", true);
 }
 
+var stopInputInterval;
 function stopUserInput() {
+    console.log("stop user input");
+
+   //Handle this being called before the page finishes loading by setting up
+  //polling check to recheck until page has loaded, then disable
+  var count = 0;
+  if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+    stopInputInterval = setInterval(function(){
+      count += 1;
+      if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+        console.log("finally loaded");
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",true);
+        clearInterval(stopInputInterval);
+      }
+    },500);
+  }else{
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+  }
 }
 
+var allowInputInterval;
 function allowUserInput(textFocus) {
+  console.log("allow user input");
+  var enableUserInput = function(){
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
 
     if (typeof textFocus !== "undefined" && !!textFocus) {
@@ -1345,6 +1393,23 @@ function allowUserInput(textFocus) {
 
     // Force scrolling to bottom of screen for the input
     scrollElementIntoView(null, false);
+  }
+
+  //Handle this being called before the page finishes loading by setting up a
+  //polling check to recheck until page has loaded, then enable
+  var count = 0;
+  if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+    allowInputInterval = setInterval(function(){
+      count += 1;
+      if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+        console.log("finally loaded");
+        enableUserInput();
+        clearInterval(allowInputInterval);
+      }
+    },500);
+  }else{
+    enableUserInput();
+  }
 }
 
 
@@ -1684,6 +1749,7 @@ function processUserTimesLog() {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentQuestion", undefined);
+                Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
 
@@ -1706,6 +1772,7 @@ function processUserTimesLog() {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentQuestion", undefined);
+                Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
 
@@ -1766,6 +1833,7 @@ function processUserTimesLog() {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentQuestion", undefined);
+            Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
             clearScrollList();
@@ -1793,6 +1861,7 @@ function processUserTimesLog() {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentQuestion",      entry.selectedQuestion);
+            Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
