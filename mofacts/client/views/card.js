@@ -359,7 +359,6 @@ window.onpopstate = function(event){
 }
 
 function leavePage(dest) {
-    sessionCleanUp();
     clearTimeout(allowInputInterval);
     clearTimeout(stopInputInterval);
     clearCardTimeout();
