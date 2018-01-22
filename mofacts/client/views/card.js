@@ -1310,7 +1310,7 @@ function showUserInteraction(isGoodNews, news) {
     });
 
     // When all done, we set up to scroll to the bottom of the display
-    scrollElementIntoView(null, false);
+    //scrollElementIntoView(null, false);
 }
 
 function hideUserInteraction() {
@@ -1324,7 +1324,7 @@ function hideUserInteraction() {
     $("#forceCorrectionEntry").hide();  // Container
 
     // Scroll to ensure correct view in on screen
-    scrollElementIntoView("#stimulusTarget", true);
+    //scrollElementIntoView("#stimulusTarget", true);
 }
 
 function stopUserInput() {
