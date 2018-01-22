@@ -322,7 +322,7 @@
             "Tutor Response Subtype": '',
             "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
             "KC Category(Default)": '',
-            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, Answers.branchingCorrectText(lastq.selectedAnswer)), ''),
+            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, corans), ''),
             "KC Category(Cluster)": '',
             "CF (Display Order)": d(lastq.questionIndex, -1),
             "CF (Stim File Index)": d(lastq.clusterIndex, -1),

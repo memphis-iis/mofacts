@@ -41,8 +41,8 @@ correctprompt - If a user gets a drill trial correct, the amount of time
 Note that if the trial is "test", feedback is show for neither correct nor
 incorrect responses.
 
-Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
-timebeforefeedback are not currently implemented.
+Some TDF's contain legacy timeouts. For instance,
+timebeforefeedback is not currently implemented.
 
 
 Simulation Overview
@@ -763,8 +763,6 @@ function newQuestionHandler() {
             Session.get("currentAnswer")
         ));
     }
-
-    setQuestionTimeout();
     checkSimulation();
 
     if (Session.get("showOverlearningText")) {
@@ -775,17 +773,23 @@ function newQuestionHandler() {
     stopUserInput();
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
-
-    if(getQuestionType() === "sound") {
-        //We don't allow user input until the sound is finished playing
-        playCurrentQuestionSound(function() {
-            allowUserInput(textFocus);
-        });
-    }
-    else {
-        //Not a sound - can unlock now for data entry now
-        allowUserInput(textFocus);
-    }
+    var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
+    
+    setTimeout(function(){
+      //Make sure we don't accidentally trigger a timeout if the timeuntilstimulus
+      //is longer than the allowed time to answer
+      setQuestionTimeout();
+      if(getQuestionType() === "sound") {
+          //We don't allow user input until the sound is finished playing
+          playCurrentQuestionSound(function() {
+              allowUserInput(textFocus);
+          });
+      }
+      else {
+          //Not a sound - can unlock now for data entry now
+          allowUserInput(textFocus);
+      }
+    },timeuntilstimulus);
 }
 
 //Stop previous sound

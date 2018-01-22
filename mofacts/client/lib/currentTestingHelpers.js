@@ -257,7 +257,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'correctscore': 1,
         'incorrectscore': 0,
         'practiceseconds': 0,
-        'autostopTimeoutThreshold': 0
+        'autostopTimeoutThreshold': 0,
+        'timeuntilstimulus' : 0
     };
 
     //We've defined defaults - also define translatations for values
@@ -274,7 +275,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'correctprompt': _.intval,
         'lockoutminutes': _.intval,
         'fontsize': _.intval,
-        'practiceseconds': _.intval
+        'practiceseconds': _.intval,
+        'timeuntilstimulus': _.intval
     };
 
     var modified = false;
