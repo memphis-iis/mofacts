@@ -8,7 +8,7 @@
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
-        <shuffleclusters>0-21</shuffleclusters>
+        <shuffleclusters>0-20</shuffleclusters>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>
@@ -35,7 +35,7 @@ Please answer the following 5 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>22-26</clusterlist>
+            <clusterlist>21-25</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
@@ -44,7 +44,40 @@ Please answer the following 5 quick demographic questions, which may be useful f
         <unitinstructions>Here comes the optimized learning of the heart function reading.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-21</clusterlist>
+            <clusterlist>0-20</clusterlist>
+            <calculateProbability><![CDATA[
+               
+                // A demonstration of a variable that will be shown in the console
+                p.CUSTOM_MSG = "In our custom function";
+
+                // Calculated metrics
+                p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.037),  0.31);
+
+                p.meanSpacing = 0;
+
+                if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
+                    p.meanspacing = 3;
+                } else {
+                    if (p.questionStudyTrialCount + p.questionTotalTests > 1) {
+                        p.meanSpacing = Math.max(
+                                1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.31)
+                                );
+                    }}
+
+                p.intbs = p.meanSpacing * p.baseLevel;
+
+                // Helpful to be able to see our y parameter for debugging
+                p.y = p.stimParameter -.0324+
+                .3744*(p.stimSuccessCount- p.stimFailureCount)+
+                .00299* (p.userCorrectResponses- (p.userTotalResponses-p.userCorrectResponses))+
+                1.63* p.intbs * Math.log(1+p.stimSuccessCount + p.stimFailureCount)+
+                1.77* p.baseLevel * Math.log(1 +p.questionTotalTests ) +
+                .283* p.baseLevel * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
+
+         // At a minimum we need to set p.probability and return p
+                p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
+                return p;
+            ]]></calculateProbability>
         </learningsession>
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>
