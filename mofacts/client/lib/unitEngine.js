@@ -350,6 +350,26 @@ function modelUnitEngine() {
         //        2.244795778* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
         //        0.447943182* p.intbs * Math.log(1 + p.questionStudyTrialCount) +
         //        0.500901271* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
+
+        // Calculated metrics
+        p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
+
+        p.meanSpacing = 0;
+
+        if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
+            p.meanspacing = 1;
+        } else {
+            if (p.questionStudyTrialCount + p.questionTotalTests > 1) {
+                p.meanSpacing = Math.max(
+                        1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294)
+                        );
+            }
+        }
+
+        p.intbs = p.meanSpacing * p.baseLevel;
+
+        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
+
         p.y = p.stimParameter +
         0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
         0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+

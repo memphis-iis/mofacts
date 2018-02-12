@@ -41,8 +41,8 @@ correctprompt - If a user gets a drill trial correct, the amount of time
 Note that if the trial is "test", feedback is show for neither correct nor
 incorrect responses.
 
-Some TDF's contain legacy timeouts. For instance, timeuntilstimulus and
-timebeforefeedback are not currently implemented.
+Some TDF's contain legacy timeouts. For instance,
+timebeforefeedback is not currently implemented.
 
 
 Simulation Overview
@@ -1337,7 +1337,7 @@ function showUserInteraction(isGoodNews, news) {
     });
 
     // When all done, we set up to scroll to the bottom of the display
-    scrollElementIntoView(null, false);
+    //scrollElementIntoView(null, false);
 }
 
 function hideUserInteraction() {
@@ -1351,7 +1351,7 @@ function hideUserInteraction() {
     $("#forceCorrectionEntry").hide();  // Container
 
     // Scroll to ensure correct view in on screen
-    scrollElementIntoView("#stimulusTarget", true);
+    //scrollElementIntoView("#stimulusTarget", true);
 }
 
 var stopInputInterval;
