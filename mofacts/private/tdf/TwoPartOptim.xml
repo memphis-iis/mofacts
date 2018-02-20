@@ -8,6 +8,7 @@
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
+        <prestimulusDisplay>Loading...</prestimulusDisplay>
     </setspec>
     <unit>
         <unitinstructions>Here comes the optimized learning of two part test.</unitinstructions>
@@ -26,6 +27,7 @@
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
+            <timeuntilstimulus>5000</timeuntilstimulus>
         </deliveryparams>
     </unit>
     <unit>

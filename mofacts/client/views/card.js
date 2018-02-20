@@ -1268,6 +1268,7 @@ function startQuestionTimeout(textFocus) {
   }
 
   var beginQuestionAndInitiateUserInput = function(){
+    console.log("beginQuestionAndInitiateUserInput");
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
@@ -1284,6 +1285,7 @@ function startQuestionTimeout(textFocus) {
     }
 
     beginMainCardTimeout(delayMs, function() {
+      console.log("stopping input after " + delayMs + " ms");
         stopUserInput();
         handleUserInput({}, "timeout");
     });
@@ -1292,21 +1294,32 @@ function startQuestionTimeout(textFocus) {
   //No user input (re-enabled below) and reset keypress timestamp.
   stopUserInput();
 
-  var currentQuestionPart2 = Session.get("currentQuestionPart2");
-  if(!!currentQuestionPart2){
-    console.log("two part question detected, delaying for <initialview> ms then continuing with question");
-    var initialviewTimeDelay = deliveryParams.initialview;
-    setTimeout(function(){
-      console.log("after timeout");
-      Session.set("currentQuestion",currentQuestionPart2);
-      Session.set("currentQuestionPart2",undefined);
-      redoCardImage();
+  var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
+
+  var curQuestionTemp = Session.get("currentQuestion");
+  var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
+  Session.set("currentQuestion",prestimulusDisplay);
+
+  console.log("delaying for " + timeuntilstimulus + " ms then starting question");
+  setTimeout(function(){
+    Session.set("currentQuestion",curQuestionTemp);
+    console.log("past timeuntilstimulus, start question logic");
+    var currentQuestionPart2 = Session.get("currentQuestionPart2");
+    if(!!currentQuestionPart2){
+      var initialviewTimeDelay = deliveryParams.initialview;
+      console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
+      setTimeout(function(){
+        console.log("after timeout");
+        Session.set("currentQuestion",currentQuestionPart2);
+        Session.set("currentQuestionPart2",undefined);
+        redoCardImage();
+        beginQuestionAndInitiateUserInput();
+      },initialviewTimeDelay);
+    }else{
+      console.log("one part question detected, continuing with question");
       beginQuestionAndInitiateUserInput();
-    },initialviewTimeDelay);
-  }else{
-    console.log("one part question detected, continuing with question");
-    beginQuestionAndInitiateUserInput();
-  }
+    }
+  },timeuntilstimulus);
 }
 
 function showUserInteraction(isGoodNews, news) {
@@ -1354,10 +1367,15 @@ function hideUserInteraction() {
     //scrollElementIntoView("#stimulusTarget", true);
 }
 
+//This records the synchronous state of whether input should be enabled or disabled
+//without this we get into the situation where either stopUserInput fails because
+//the DOM hasn't fully updated yet or worse allowUserInput fails because the DOM
+//loads before it and stopUserInput is erroneously executed afterwards due to timing issues
+var inputDisabled = undefined;
 var stopInputInterval;
 function stopUserInput() {
-    console.log("stop user input");
-
+  console.log("stop user input");
+  inputDisabled = true;
    //Handle this being called before the page finishes loading by setting up
   //polling check to recheck until page has loaded, then disable
   var count = 0;
@@ -1365,8 +1383,14 @@ function stopUserInput() {
     stopInputInterval = setInterval(function(){
       count += 1;
       if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-        console.log("finally loaded");
-        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",true);
+        console.log("stop input finally loaded, inputDisabled: " + inputDisabled);
+        if(typeof inputDisabled != "undefined"){
+          //Use inputDisabled variable so that successive calls of stop and allow
+          //are resolved synchronously i.e. whoever last set the inputDisabled variable
+          //should win
+          $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+          inputDisabled = undefined;
+        }
         clearInterval(stopInputInterval);
       }
     },500);
@@ -1378,8 +1402,17 @@ function stopUserInput() {
 var allowInputInterval;
 function allowUserInput(textFocus) {
   console.log("allow user input");
+  inputDisabled = false;
   var enableUserInput = function(){
-    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+    if(typeof inputDisabled != "undefined"){
+      //Use inputDisabled variable so that successive calls of stop and allow
+      //are resolved synchronously i.e. whoever last set the inputDisabled variable
+      //should win
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+      inputDisabled = undefined;
+    }else{
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+    }
 
     if (typeof textFocus !== "undefined" && !!textFocus) {
         try {
@@ -1401,7 +1434,7 @@ function allowUserInput(textFocus) {
     allowInputInterval = setInterval(function(){
       count += 1;
       if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-        console.log("finally loaded");
+        console.log("allow input finally loaded, inputDisabled: " + inputDisabled);
         enableUserInput();
         clearInterval(allowInputInterval);
       }
