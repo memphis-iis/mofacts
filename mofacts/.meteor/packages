@@ -7,7 +7,7 @@ standard-app-packages@1.0.9
 accounts-password@1.5.0
 peerlibrary:xml2js
 underscore@1.0.10
-bojicas:howler2
+ovcharik:howler
 
 alanning:roles
 http@1.4.0

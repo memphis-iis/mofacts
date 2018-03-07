@@ -798,7 +798,7 @@ function playCurrentQuestionSound(onEndCallback) {
 
     //Reset sound and play it
     currentQuestionSound = new Howl({
-        src: [
+        urls: [
             Session.get("currentQuestion") + '.ogg',
             Session.get("currentQuestion") + '.mp3',
             Session.get("currentQuestion") + '.wav',
