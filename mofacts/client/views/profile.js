@@ -172,12 +172,18 @@ Template.profile.rendered = function () {
 
     $("#expDataDownloadContainer").html("");
 
-    var addButton = function(btnObj) {
-        $("#testButtonContainer").append(
-            $("<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>").prepend(
-                btnObj
-            )
-        );
+    var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
+      console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
+      var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
+      if(audioInputEnabled){
+        container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
+      }
+      container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
+      if(enableAudioPromptAndFeedback){
+        container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>')
+      }
+      container = $(container).prepend(btnObj);
+      $("#testButtonContainer").append(container);
     };
 
     //In experiment mode, they may be forced to a single tdf
@@ -275,8 +281,18 @@ Template.profile.rendered = function () {
             return;
         }
 
+        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value();
+        if(!audioInputEnabled){
+          audioInputEnabled = false;
+        }
+
+        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
+        if(!enableAudioPromptAndFeedback){
+          enableAudioPromptAndFeedback = false;
+        }
+
         addButton(
-            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
+            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
                 .addClass("btn btn-block btn-responsive stimButton")
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
@@ -284,7 +300,7 @@ Template.profile.rendered = function () {
                 .data("tdffilename", tdfObject.fileName)
                 .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                 .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
-                .html(name)
+                .html(name),audioInputEnabled,enableAudioPromptAndFeedback
         );
     });
 
