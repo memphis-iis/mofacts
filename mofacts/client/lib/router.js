@@ -93,10 +93,6 @@ routeToSignin = function() {
     }
 };
 
-Router.configure({
-    layoutTemplate: 'DefaultLayout'
-});
-
 Router.route('/experiment/:target?/:xcond?', {
     name: "client.experiment",
     action: function() {
@@ -265,5 +261,14 @@ Router.route('/allItems',  {
     action:  function () {
         Session.set("clusterMapping", "");
         this.render('allItems');
+    }
+});
+
+//Voice interstitial to delay the user until voice input can recognize voice start
+//and voice stop with VAD.js
+Router.route('/voice', {
+    name: "client.voice",
+    action: function () {
+        this.render('voice');
     }
 });

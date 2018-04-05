@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: no XML declaration present -->
+<setspec>
+    <clusters>
+        <cluster>
+            <parameter>-1.49888999999999</parameter>
+            <display>妈 (mā)</display>
+            <response>妈</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.49889999999999</parameter>
+            <display>麻 (má)</display>
+            <response>麻</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.49890999999999</parameter>
+            <display>马 (mǎ)</display>
+            <response>马</response>
+        </cluster>
+        <cluster>
+            <parameter>-1.49891999999999</parameter>
+            <display>骂 (mà)</display>
+            <response>骂</response>
+        </cluster>
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+    </clusters>
+</setspec>

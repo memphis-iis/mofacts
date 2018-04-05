@@ -82,6 +82,36 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
+getAllStimAnswers = function(removeExcludedPhraseHints) {
+  var currentClusterIndex = getCurrentClusterIndex();
+
+  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
+  var allAnswers = [];
+  var exclusionList = ["18-25","Male","Less than High School"];
+
+  for(clusterIndex in clusters){
+    //Grab the response phrases we want to exclude if this is the current cluster
+    if(clusterIndex == currentClusterIndex){
+      if(!!clusters[clusterIndex].speechHintExclusionList){
+          exclusionList = exclusionList.concat(("" + clusters[clusterIndex].speechHintExclusionList).split(','));
+      }
+    }
+    for(responseIndex in clusters[clusterIndex].response){
+      var answer = clusters[clusterIndex].response[responseIndex];
+          allAnswers.push(answer);
+    }
+  }
+
+  if(removeExcludedPhraseHints){
+    //Remove the optional phrase hint exclusions
+    allAnswers = allAnswers.filter( function (el){
+      return exclusionList.indexOf(el) < 0;
+    });
+  }
+
+  return allAnswers;
+}
+
 //Return the current question type
 getQuestionType = function () {
     var type = "text"; //Default type
@@ -250,6 +280,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'purestudy': 0,
         'initialview': 0,
         'drill': 0,
+        'initialview': 0,
         'reviewstudy': 0,
         'correctprompt': 0,
         'skipstudy': false,

@@ -25,29 +25,6 @@ Template.allItems.helpers({
 // Template Events
 
 Template.allItems.events({
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
-            }
-            else {
-                routeToSignin();
-            }
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        Router.go("/profile");
-    },
-
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
-
     // Start a TDF
     'click .stimButton' : function (event) {
         event.preventDefault();

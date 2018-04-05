@@ -1,13 +1,14 @@
 <tutor>
     <setspec>
-        <lessonname>Optimized Drill Practice of Greek letter names</lessonname>
+        <name>Internal Testing with SVO and Models</name>
+        <lessonname>Optimized Drill Practice of Chinese Tones</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Greekstims.xml</stimulusfile>
+        <stimulusfile>ChineseToneStims.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>
         <simCorrectProb>0.85</simCorrectProb>
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <speechRecognitionLanguage>cmn-Hans-CN</speechRecognitionLanguage>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>
@@ -34,16 +35,16 @@ Please answer the following 3 quick demographic questions, which may be useful f
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>48-50</clusterlist>
+            <clusterlist>4-6</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
     </unit>
     <unit>
-        <unitinstructions>Here comes the optimized learning of Greek letter names.</unitinstructions>
+        <unitinstructions>Here comes the optimized learning of Chinese Tones.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
-            <clusterlist>0-47</clusterlist>
+            <clusterlist>0-3</clusterlist>
         </learningsession>
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>

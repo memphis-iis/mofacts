@@ -33,3 +33,50 @@ Meteor.startup(function() {
         redoCardImage();
     });
 });
+
+Template.body.events({
+  'click .homeLink' : function (event) {
+      event.preventDefault();
+      Router.go("/profile");
+  },
+
+  'click .allItemsLink' : function (event) {
+      event.preventDefault();
+      Router.go("/allItems");
+  },
+
+  'click .logoutLink' : function (event) {
+      event.preventDefault();
+      Meteor.logout( function (error) {
+          if (typeof error !== "undefined") {
+              //something happened during logout
+              console.log("User:", Meteor.user(), "Error:", error);
+          }
+          else {
+              routeToSignin();
+          }
+      });
+  }
+});
+
+//Global template helpers
+Template.registerHelper('isLoggedIn', function (){
+  return haveMeteorUser();
+});
+
+Template.registerHelper('inPracticeModule', function(){
+  var curLocation = Router.current().location.get().path;
+  if(curLocation == "/card" || curLocation == "/instructions"){
+    return true;
+  }else{
+    return false;
+  }
+});
+
+Template.registerHelper('currentScore', function() {
+    return Session.get("currentScore");
+});
+
+Template.registerHelper('isNormal', function() {
+    return Session.get("loginMode") !== "experiment";
+});

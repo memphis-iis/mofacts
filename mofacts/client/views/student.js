@@ -206,29 +206,6 @@ Template.student.events({
         drawChart();
     },
 
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
-            }
-            else {
-                routeToSignin();
-            }
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        Router.go("/profile");
-    },
-
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
     'click .allStudentsLink' : function (event) {
         event.preventDefault();
         Router.go("/allStudents");
@@ -327,7 +304,7 @@ var drawChart = function () {
         $(".legend").show();
     }
 
-    drawCondLine('#reptitionLatency', latencyEmpty, 'latency', {
+    drawCondLine('#repetitionLatency', latencyEmpty, 'latency', {
         labels: studentDataLatRes,
         series: latencySeries
     }, {
@@ -336,7 +313,7 @@ var drawChart = function () {
         }
     });
 
-    drawCondLine('#reptitionCorrectness', correctEmpty, 'correctness', {
+    drawCondLine('#repetitionCorrectness', correctEmpty, 'correctness', {
         labels: studentDataCorRes,
         series: correctSeries
     }, {

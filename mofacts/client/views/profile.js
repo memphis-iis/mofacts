@@ -13,6 +13,10 @@ Template.profile.helpers({
 
     simulationChecked: function() {
         return Session.get("runSimulation");
+    },
+
+    speechAPIKeyIsSetup: function(){
+      return Session.get("speechAPIKeyIsSetup");
     }
 });
 
@@ -20,34 +24,10 @@ Template.profile.helpers({
 // Template Events
 
 Template.profile.events({
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout( function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:", Meteor.user(), "Error:", error);
-            }
-            else {
-                routeToSignin();
-            }
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        Router.go("/profile");
-    },
-
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
     'click .allStudentsLink' : function (event) {
         event.preventDefault();
         Router.go("/allStudents");
     },
-
 
     'click .adminLink' : function (event) {
         event.preventDefault();
@@ -65,6 +45,8 @@ Template.profile.events({
             target.data("lessonname"),
             target.data("stimulusfile"),
             target.data("tdffilename"),
+            target.data("ignoreOutOfGrammarResponses"),
+            target.data("speechOutOfGrammarFeedback"),
             "User button click"
         );
     },
@@ -73,21 +55,135 @@ Template.profile.events({
         var checked = template.$("#simulation").prop('checked');
         Session.set("runSimulation", checked);
         console.log("runSimulation", Session.get("runSimulation"));
+    },
+
+    'click #setupAPIKey' : function(e){
+      e.preventDefault();
+      $('#speechAPIModal').modal('show');//{backdrop: "static"}
+      Meteor.call('getUserSpeechAPIKey', function(error,key){
+        $('#speechAPIKey').val(key);
+      });
+    },
+
+    'click #speechAPISubmit' : function(e){
+      var key = $('#speechAPIKey').val();
+      Meteor.call("saveUserSpeechAPIKey", key, function(error, serverReturn) {
+          //Make sure to update our reactive session variable so the api key is
+          //setup indicator updates
+          checkAndSetSpeechAPIKeyIsSetup();
+
+          $('#speechAPIModal').modal('hide');
+
+          if (!!error) {
+              console.log("Error saving speech api key", error);
+              alert("Your changes were not saved! " + error);
+          }
+          else {
+              console.log("Profile saved:", serverReturn);
+              //Clear any controls that shouldn't be kept around
+              $(".clearOnSave").val("");
+              alert("Your profile changes have been saved");
+          }
+      });
+    },
+
+    'click #speechAPIDelete' : function(e){
+      Meteor.call("deleteUserSpeechAPIKey",function(error){
+        //Make sure to update our reactive session variable so the api key is
+        //setup indicator updates
+        checkAndSetSpeechAPIKeyIsSetup();
+        $('#speechAPIModal').modal('hide');
+        if(!!error){
+          console.log("Error deleting speech api key", error);
+          alert("Your changes were not saved! " + error);
+        }else{
+          console.log("User speech api key deleted");
+          alert("Your profile changes have been saved");
+        }
+      })
     }
 });
 
 Template.profile.rendered = function () {
+    $('#speechAPIModal').on('shown.bs.modal', function () {
+      $('#speechAPIKey').focus();
+    })
+
+    checkAndSetSpeechAPIKeyIsSetup();
+
+    //Set up input sensitivity range to display/hide when audio input is enabled/disabled
+    var audioToggle = document.getElementById('audioToggle');
+
+    var showHideAudioEnabledGroup = function()
+    {
+      if(audioToggle.checked){
+          $('.audioEnabledGroup').removeClass('invisible');
+          $('.audioEnabledGroup').addClass('flow');
+      }else{
+        $('.audioEnabledGroup').addClass('invisible');
+        $('.audioEnabledGroup').removeClass('flow');
+      }
+    };
+    $('#audioToggle').change(showHideAudioEnabledGroup);
+
+
+    var audioPromptFeedbackToggle = document.getElementById('audioPromptFeedbackToggle');
+    var showHideAudioPromptFeedbackGroup = function()
+    {
+      if(audioPromptFeedbackToggle.checked){
+          $('.audioPromptFeedbackGroup').removeClass('invisible');
+          $('.audioPromptFeedbackGroup').addClass('flow');
+      }else{
+        $('.audioPromptFeedbackGroup').addClass('invisible');
+        $('.audioPromptFeedbackGroup').removeClass('flow');
+      }
+    };
+    $('#audioPromptFeedbackToggle').change(showHideAudioPromptFeedbackGroup);
+
+    $('#audioInputSensitivity').change(function() {
+        $('#audioInputSensitivityLabel').text(document.getElementById("audioInputSensitivity").value);
+    });
+
+    $('#audioPromptSpeakingRate').change(function() {
+        $('#audioPromptSpeakingRateLabel').text(document.getElementById("audioPromptSpeakingRate").value);
+    });
+
+    //Restore toggle values from prior page loads
+    audioToggle.checked = Session.get("audioEnabledView");
+    audioPromptFeedbackToggle.checked = Session.get("audioPromptFeedbackView");
+    showHideAudioEnabledGroup();
+    showHideAudioPromptFeedbackGroup();
+
+    //Restore range/label values from prior page loads
+    var audioPromptSpeakingRateView = Session.get("audioPromptSpeakingRateView");
+    if(!!audioPromptSpeakingRateView){
+      document.getElementById("audioPromptSpeakingRate").value = audioPromptSpeakingRateView;
+      document.getElementById("audioPromptSpeakingRateLabel").innerHTML = audioPromptSpeakingRateView;
+    }
+
+    var audioInputSensitivityView = Session.get("audioInputSensitivityView");
+    if(!!audioInputSensitivityView){
+      document.getElementById("audioInputSensitivity").value = audioInputSensitivityView;
+      document.getElementById("audioInputSensitivityLabel").innerHTML = audioInputSensitivityView;
+    }
+
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 
     $("#expDataDownloadContainer").html("");
 
-    var addButton = function(btnObj) {
-        $("#testButtonContainer").append(
-            $("<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>").prepend(
-                btnObj
-            )
-        );
+    var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
+      console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
+      var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
+      if(audioInputEnabled){
+        container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
+      }
+      container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
+      if(enableAudioPromptAndFeedback){
+        container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>')
+      }
+      container = $(container).prepend(btnObj);
+      $("#testButtonContainer").append(container);
     };
 
     //In experiment mode, they may be forced to a single tdf
@@ -125,6 +221,16 @@ Template.profile.rendered = function () {
 
         var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
 
+        var ignoreOutOfGrammarResponses = _.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value();
+        if(!ignoreOutOfGrammarResponses){
+          ignoreOutOfGrammarResponses = false;
+        }
+
+        var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
+        if(!speechOutOfGrammarFeedback){
+          speechOutOfGrammarFeedback = "Response not in answer set"
+        }
+
         //Check to see if we have found a selected experiment target
         if (experimentTarget && !foundExpTarget) {
             var tdfExperimentTarget = _.chain(setspec)
@@ -137,6 +243,8 @@ Template.profile.rendered = function () {
                     lessonName: name,
                     stimulusfile: stimulusFile,
                     tdffilename: tdfObject.fileName,
+                    ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
+                    speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget
                 };
             }
@@ -148,7 +256,7 @@ Template.profile.rendered = function () {
             if (tdfObject.fileName != name) {
                 disp += " (" + tdfObject.fileName + ")";
             }
-            
+
             $("#expDataDownloadContainer").append(
                 $("<div></div>").append(
                     $("<a class='exp-data-link' target='_blank'></a>")
@@ -173,14 +281,26 @@ Template.profile.rendered = function () {
             return;
         }
 
+        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value();
+        if(!audioInputEnabled){
+          audioInputEnabled = false;
+        }
+
+        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
+        if(!enableAudioPromptAndFeedback){
+          enableAudioPromptAndFeedback = false;
+        }
+
         addButton(
-            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'></button>")
+            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
                 .addClass("btn btn-block btn-responsive stimButton")
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
                 .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
-                .html(name)
+                .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
+                .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
+                .html(name),audioInputEnabled,enableAudioPromptAndFeedback
         );
     });
 
@@ -191,15 +311,15 @@ Template.profile.rendered = function () {
             foundExpTarget.lessonName,
             foundExpTarget.stimulusfile,
             foundExpTarget.tdffilename,
+            foundExpTarget.ignoreOutOfGrammarResponses,
+            foundExpTarget.speechOutOfGrammarFeedback,
             foundExpTarget.how
         );
     }
 };
 
-
-
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     //make sure session variables are cleared from previous tests
@@ -212,6 +332,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
     Session.set("currentRootTdfName", tdffilename);
     Session.set("currentTdfName", tdffilename);
     Session.set("currentStimName", stimulusfile);
+    Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
+    Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
 
     //Get some basic info about the current user's environment
     var userAgent = "[Could not read user agent string]";
@@ -235,8 +357,87 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, how) {
         selectedHow: how
     });
 
-    //Go directly to the card session - which will decide whether or
-    //not to show instruction
-    Session.set("needResume", true);
-    Router.go("/card");
+    //If we're in experiment mode and the tdf file defines whether audio prompt is enabled
+    //forcibly use that, otherwise go with whatever the user set the audio prompt toggle to
+    var userAudioPromptFeedbackToggled = document.getElementById('audioPromptFeedbackToggle').checked;
+    var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
+    var audioPromptFeedbackEnabled = getTDFValueIfPresentAndExperiment(tdfAudioPromptFeedbackEnabled,userAudioPromptFeedbackToggled);
+    Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
+
+    if(Session.get("enableAudioPromptAndFeedback")){
+         var tdfAudioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate;
+         var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
+         var audioPromptSpeakingRate = getTDFValueIfPresentAndExperiment(tdfAudioPromptSpeakingRate,userAudioPromptSpeakingRate);
+         Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+    }
+
+   //If we're in experiment mode and the tdf file defines whether audio input is enabled
+   //forcibly use that, otherwise go with whatever the user set the audio input toggle to
+   var userAudioToggled = document.getElementById('audioToggle').checked;
+   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled;
+   var audioEnabled = getTDFValueIfPresentAndExperiment(tdfAudioEnabled,userAudioToggled);
+   Session.set("audioEnabled", audioEnabled);
+
+   var continueToCard = true;
+
+   if(Session.get("audioEnabled"))
+   {
+     var tdfAudioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity;
+     var userAudioInputSensitivity = document.getElementById("audioInputSensitivity").value;
+     var audioInputSensitivity = getTDFValueIfPresentAndExperiment(tdfAudioInputSensitivity,userAudioInputSensitivity);
+     Session.set("audioInputSensitivity",audioInputSensitivity);
+
+     //Check if the tdf or user has a speech api key defined, if not show the modal form
+     //for them to input one.  If so, actually continue initializing web audio
+     //and going to the practice set
+     Meteor.call('getUserSpeechAPIKey', function(error,key){
+       speechAPIKey = key;
+       var tdfKeyPresent = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey && getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey != "";
+       if(!speechAPIKey && !tdfKeyPresent)
+       {
+         console.log("speech api key not found, showing modal for user to input");
+         $('#speechAPIModal').modal('show');
+         continueToCard = false;
+       }else {
+         console.log("audio input enabled and key present, navigating to card and initializing audio input");
+       }
+     });
+   }else {
+     console.log("audio toggle not checked, navigating to card");
+   }
+
+   //Record state to restore when we return to this page
+   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
+   Session.set("audioPromptFeedbackView",document.getElementById('audioPromptFeedbackToggle').checked);
+   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
+   Session.set("audioInputSensitivityView",document.getElementById("audioInputSensitivity").value);
+
+   if(continueToCard){
+     //Go directly to the card session - which will decide whether or
+     //not to show instruction
+     Session.set("needResume", true);
+     Router.go("/card");
+   }
+}
+
+getTDFValueIfPresentAndExperiment = function(tdfHolder,alternativeValue){
+  if(Session.get("loginMode") === "experiment" && tdfHolder && tdfHolder != ""){
+    return tdfHolder;
+  }else{
+    return alternativeValue;
+  }
+}
+
+//We'll use this in card.js if audio input is enabled and user has provided a
+//speech API key
+speechAPIKey = null;
+
+checkAndSetSpeechAPIKeyIsSetup = function(){
+  Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
+    if(err){
+      console.log("Error getting whether speech api key is setup");
+    }else {
+      Session.set('speechAPIKeyIsSetup',data);
+    }
+  })
 }

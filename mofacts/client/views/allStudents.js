@@ -52,29 +52,6 @@ Template.allStudents.helpers({
 // Template Events
 
 Template.allStudents.events({
-    'click .logoutLink' : function (event) {
-        event.preventDefault();
-        Meteor.logout(function (error) {
-            if (typeof error !== "undefined") {
-                //something happened during logout
-                console.log("User:" + Meteor.user() +" ERROR:" + error);
-            }
-            else {
-                routeToSignin();
-            }
-        });
-    },
-
-    'click .homeLink' : function (event) {
-        event.preventDefault();
-        Router.go("/profile");
-    },
-
-    'click .allItemsLink' : function (event) {
-        event.preventDefault();
-        Router.go("/allItems");
-    },
-
     'click .adminLink' : function (event) {
         event.preventDefault();
         Router.go("/admin");

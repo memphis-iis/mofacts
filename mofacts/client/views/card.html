@@ -1,39 +1,4 @@
-
 <template name="card">
-
-    <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbarCollapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">MoFaCTS</a>
-            </div>  <!-- close header -->
-
-            <div class="nav navbar-nav navbar-right">
-
-                <TABLE BORDER="0">
-                    <td><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
-                    <td>&nbsp;</td>
-                    <td style="line-height:50px;"><s1>{{username}}</s1></td>
-                    <td>&nbsp;</td>    <td>&nbsp;</td>
-                    {{#if isNormal}}
-                    <td><button type="button" id="signInButton" class="homeLink button btn  navbar-btn">Practice</button></td>
-                    <td>&nbsp;</td>
-                    <td><button type="button" id="signUpButton" class="allItemsLink button btn  navbar-btn">Progress</button></td>
-                    <td>&nbsp;</td>
-                    <td><button type="button" id="signUpButton" class="logoutLink button btn  navbar-btn">Logout</button></td>
-                    {{/if}}
-                </table>
-
-            </div>  <!-- close navbar-collapse -->
-        </div>  <!-- close container -->
-    </nav>  <!-- close nav -->
-
-
     <div class="container" id="cardContainer">
         <div class="scrollHistoryContainer">
             {{#if haveScrollList}}
@@ -71,8 +36,7 @@
 
         {{#if trial}}
         <div class="row">
-            <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 alert alert-info {{fontSizeClass}}"
-                id="textQuestion" >
+            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion" >
                 {{#if textOrClozeCard}}
                 {{{currentQuestion}}}
                 {{/if}}
@@ -119,15 +83,28 @@
             {{/unless}}
 
             <div class="row">
+                {{#if buttonTrial}}
+                  {{#if audioEnabled}}
+                    <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                  {{/if}}
+                {{/if}}
                 <div class="col-md-offset-4 col-md-4">
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
-                            {{#each buttonList}}
-                            <div><button type='button' name='{{buttonName}}' class='btn btn-block multipleChoiceButton btn-responsive'>
-                                {{buttonValue}}
-                            </button></div>
-                            {{/each}}
+                          <table id="multipleChoiceTable">
+                              {{#each buttonList}}
+                                <tr>
+                                  {{#if audioEnabled}}
+                                    <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                    <td>&nbsp;</td>
+                                  {{/if}}
+                                    <td><button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                      {{buttonValue}}
+                                    </button></td>
+                                </tr>
+                              {{/each}}
+                          </table>
                         {{/if}}
                     </div>
                 </div>
@@ -136,7 +113,7 @@
 
         <div class="userInteractionContainer">
             <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="UserInteraction" hidden>
+                <div class="marginLeftAndRight {{fontSizeClass}}" id="UserInteraction" hidden>
                 </div>
             </div>
             <div class="row">
