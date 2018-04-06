@@ -10,6 +10,7 @@ Template.signInOauth.helpers({
 
 Template.signInOauth.events({
     'click #signInButton' : function (event) {
+        $("#signInButton").prop('disabled', true);
         event.preventDefault();
         console.log("Google Login Proceeding");
 
@@ -20,6 +21,7 @@ Template.signInOauth.events({
 
         Meteor.loginWithGoogle(options, function(err) {
             if(err) {
+                $("#signInButton").prop('disabled', false);
                 //error handling
                 console.log("Could not log in with Google", err);
                 throw new Meteor.Error(Accounts.LoginCancelledError.numericError, 'Error');
@@ -37,12 +39,14 @@ Template.signInOauth.events({
     },
 
     'click #testSignInButton': function(event) {
+        $("#testSignInButton").prop('disabled', true);
         event.preventDefault();
         console.log("TEST Login");
 
         // Just a sanity check
         if (!testUserEnabled()) {
             console.log("TEST Login REJECTED");
+            $("#testSignInButton").prop('disabled', false);
             return;
         }
 
@@ -50,6 +54,7 @@ Template.signInOauth.events({
         if (!testUserName) {
             console.log("No TEST user name specified");
             alert("No TEST user name specified");
+            $("#testSignInButton").prop('disabled', false);
             return;
         }
 
@@ -74,6 +79,7 @@ Template.signInOauth.events({
                 var errorText = displayify(errorMsgs);
                 console.log("Experiment user login errors:", errorText);
                 alert("Experiment user login errors:", errorText);
+                $("#testSignInButton").prop('disabled', false);
                 return;
             }
 
@@ -86,6 +92,7 @@ Template.signInOauth.events({
                 if (typeof error !== 'undefined') {
                     console.log("ERROR: The user was not logged in on TEST sign in?", testUserName, "Error:", error);
                     alert("It appears that you couldn't be logged in as " + testUserName);
+                    $("#testSignInButton").prop('disabled', false);
                 }
                 else {
                     if (Session.get("debugging")) {

@@ -146,17 +146,25 @@ Router.route('/', {
 Router.route('/profile', {
     name: "client.profile",
     action: function () {
-        if (Roles.userIsInRole(Meteor.user(), ["admin"])) {
-            this.subscribe('allUsers').wait();
+        if(Meteor.user()){
+          if (Roles.userIsInRole(Meteor.user(), ["admin"])) {
+              this.subscribe('allUsers').wait();
+          }
+          this.render('profile');
+        }else{
+          this.redirect('/');
         }
-        this.render('profile');
     }
 });
 
 Router.route('/card', {
     name: "client.card",
     action: function () {
+      if(Meteor.user()){
         this.render('card');
+      }else{
+        this.redirect('/');
+      }
     }
 });
 

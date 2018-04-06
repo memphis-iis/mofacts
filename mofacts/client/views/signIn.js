@@ -4,6 +4,7 @@
 Template.signIn.events({
     'click #signInButton' : function (event) {
         event.preventDefault();
+        $("#signInButton").prop("disabled",true);
         UserPasswordCheck();
     },
 
@@ -24,6 +25,7 @@ Template.signIn.events({
         var key = event.keyCode || event.which;
         if (key == 13) {
             event.preventDefault();
+            $("#signInButton").prop("disabled",true);
             UserPasswordCheck();
         }
     }
@@ -94,6 +96,7 @@ function UserPasswordCheck() {
                 $("#serverErrors")
                     .html(errorMsgs.join("<br>"))
                     .show();
+                $("#signInButton").prop("disabled",false);
                 return;
             }
 
@@ -106,6 +109,7 @@ function UserPasswordCheck() {
                 if (typeof error !== 'undefined') {
                     console.log("ERROR: The user was not logged in on experiment sign in?", newUsername, "Error:", error);
                     alert("It appears that you couldn't be logged in as " + newUsername);
+                    $("#signInButton").prop("disabled",false);
                 }
                 else {
                     signinNotify();
@@ -123,6 +127,7 @@ function UserPasswordCheck() {
             console.log("Login error: " + error);
             $("#invalidLogin").show();
             $("#serverErrors").html(error).show();
+            $("#signInButton").prop("disabled",false);
         }
         else {
             if (newPassword === Helpers.blankPassword(newUsername)) {
@@ -132,6 +137,7 @@ function UserPasswordCheck() {
                 //them the "correct" way to use the system.
                 console.log("Detected non-experimental login for turk ID", newUsername);
                 alert("This login page is not for Mechanical Turk workers. Please use the link provided with your HIT");
+                $("#signInButton").prop("disabled",false);
                 return;
             }
 

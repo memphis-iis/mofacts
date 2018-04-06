@@ -1545,7 +1545,12 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
       var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
       var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
       var ignoredOrSilent = false;
-      if(!!response['data']['results'])
+      if(response['statusCode'] != 200){
+        var content = JSON.parse(response.content);
+        alert("Error with speech api call: " + content['error']['message']);
+        transcript = "";
+        ignoredOrSilent = true;
+      }else if(!!response['data']['results'])
       {
         transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
         console.log("transcript: " + transcript);
