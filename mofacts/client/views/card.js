@@ -362,8 +362,6 @@ window.onpopstate = function(event){
 
 //Clean up things if we navigate away from this page
 function leavePage(dest) {
-    //console.log("leave page, going to: " + dest);
-
     if(window.speechSynthesis.speaking){
       window.speechSynthesis.pause();
       window.speechSynthesis.cancel();
@@ -464,56 +462,16 @@ Template.card.events({
 
 Template.card.rendered = function() {
     var audioInputEnabled = Session.get("audioEnabled");
+    var audioInputDetectionInitialized = Session.get("VADInitialized");
     //If user has enabled audio input initialize web audio (this takes a bit)
     //(this will eventually call cardStart after we redirect through the voice
     //interstitial and get back here again)
-    if(audioInputEnabled && !Session.get("VADInitialized")){
-      try {
-        window.AudioContext = window.webkitAudioContext || window.AudioContext;
-        window.URL = window.URL || window.webkitURL;
-        audioContext = new AudioContext();
-
-        // Older browsers might not implement mediaDevices at all, so we set an empty object first
-        if (navigator.mediaDevices === undefined) {
-          console.log("media devices undefined");
-          navigator.mediaDevices = {};
-        }
-
-        // Some browsers partially implement mediaDevices. We can't just assign an object
-        // with getUserMedia as it would overwrite existing properties.
-        // Here, we will just add the getUserMedia property if it's missing.
-        if (navigator.mediaDevices.getUserMedia === undefined) {
-          navigator.mediaDevices.getUserMedia = function(constraints) {
-            // First get ahold of the legacy getUserMedia, if present
-            var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.getUserMedia;
-
-            // Some browsers just don't implement it - return a rejected promise with an error
-            // to keep a consistent interface
-            if (!getUserMedia) {
-              return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
-            }
-
-            // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-            return new Promise(function(resolve, reject) {
-              getUserMedia.call(navigator, constraints, resolve, reject);
-            });
-          }
-        }
-
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false})
-        .then(startUserMedia)
-        .catch(function(err) {
-          console.log("Error getting user media: " + err.name + ": " + err.message);
-        });
-
-      } catch (e) {
-        console.log("Error initializing Web Audio browser");
-      }
+    if(audioInputEnabled && !audioInputDetectionInitialized){
+      initializeAudio();
     }else{
       cardStart();
     }
 };
-
 
 Template.card.helpers({
     'isExperiment': function() {
@@ -642,6 +600,50 @@ Template.card.helpers({
 
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
+
+var initializeAudio = function(){
+  try {
+    window.AudioContext = window.webkitAudioContext || window.AudioContext;
+    window.URL = window.URL || window.webkitURL;
+    audioContext = new AudioContext();
+
+    // Older browsers might not implement mediaDevices at all, so we set an empty object first
+    if (navigator.mediaDevices === undefined) {
+      console.log("media devices undefined");
+      navigator.mediaDevices = {};
+    }
+
+    // Some browsers partially implement mediaDevices. We can't just assign an object
+    // with getUserMedia as it would overwrite existing properties.
+    // Here, we will just add the getUserMedia property if it's missing.
+    if (navigator.mediaDevices.getUserMedia === undefined) {
+      navigator.mediaDevices.getUserMedia = function(constraints) {
+        // First get ahold of the legacy getUserMedia, if present
+        var getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.getUserMedia;
+
+        // Some browsers just don't implement it - return a rejected promise with an error
+        // to keep a consistent interface
+        if (!getUserMedia) {
+          return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+        }
+
+        // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+        return new Promise(function(resolve, reject) {
+          getUserMedia.call(navigator, constraints, resolve, reject);
+        });
+      }
+    }
+
+    navigator.mediaDevices.getUserMedia({ audio: true, video: false})
+    .then(startUserMedia)
+    .catch(function(err) {
+      console.log("Error getting user media: " + err.name + ": " + err.message);
+    });
+
+  } catch (e) {
+    console.log("Error initializing Web Audio browser");
+  }
+}
 
 cardStart = function(){
   if(Session.get("debugging")) {
@@ -1324,13 +1326,13 @@ function startQuestionTimeout(textFocus) {
       failNoDeliveryParams("Could not find appropriate question timeout");
   }
 
+  //Define the function we will call to actually start user input
   var beginQuestionAndInitiateUserInput = function(){
     console.log("beginQuestionAndInitiateUserInput");
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
     var questionType = getQuestionType();
-
     if(questionType === "sound") {
         //We don't allow user input until the sound is finished playing
         playCurrentQuestionSound(function() {
@@ -1338,7 +1340,6 @@ function startQuestionTimeout(textFocus) {
         });
     }
     else {
-        //console.log("current question: " + Session.get("currentQuestion"));
         //Only speak the prompt if the question type makes sense
         if(questionType === "text" || questionType === "cloze"){
           speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true);
@@ -1347,19 +1348,19 @@ function startQuestionTimeout(textFocus) {
         allowUserInput(textFocus);
     }
 
-      beginMainCardTimeout(delayMs, function() {
-        console.log("stopping input after " + delayMs + " ms");
-          stopUserInput();
-          handleUserInput({}, "timeout");
-      });
-    }
+    beginMainCardTimeout(delayMs, function() {
+      console.log("stopping input after " + delayMs + " ms");
+        stopUserInput();
+        handleUserInput({}, "timeout");
+    });
+  }
 
-    //No user input (re-enabled below) and reset keypress timestamp.
-    stopUserInput();
+  //No user input (re-enabled below) and reset keypress timestamp.
+  stopUserInput();
 
-
+  //Swap out the current question with a pre question display as defined in the tdf file
+  //then delay for the specified amount of time before setting back to the current question
   var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
-
   var curQuestionTemp = Session.get("currentQuestion");
   var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
   Session.set("currentQuestion",prestimulusDisplay);
@@ -1368,6 +1369,8 @@ function startQuestionTimeout(textFocus) {
   setTimeout(function(){
     Session.set("currentQuestion",curQuestionTemp);
     console.log("past timeuntilstimulus, start question logic");
+
+    //Handle two part questions
     var currentQuestionPart2 = Session.get("currentQuestionPart2");
     if(!!currentQuestionPart2){
       var initialviewTimeDelay = deliveryParams.initialview;
@@ -1418,6 +1421,8 @@ function showUserInteraction(isGoodNews, news) {
     });
 
     // When all done, we set up to scroll to the bottom of the display
+    // Edit: commented out per request from Phil, leaving in commented in case we ever
+    // decide to put it back in
     //scrollElementIntoView(null, false);
 }
 
@@ -1432,6 +1437,8 @@ function hideUserInteraction() {
     $("#forceCorrectionEntry").hide();  // Container
 
     // Scroll to ensure correct view in on screen
+    // Edit: commented out per request from Phil, leaving in commented in case we ever
+    // decide to put it back in
     //scrollElementIntoView("#stimulusTarget", true);
 }
 
@@ -1464,7 +1471,8 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
   }
 }
 
-//Speech recognition function to process audio data
+//Speech recognition function to process audio data, this is called by the web worker
+//started with the recorder object when enough data is received to fill up the buffer
 processLINEAR16 = function(data){
   resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
   recorder.clear();
@@ -1494,34 +1502,19 @@ processLINEAR16 = function(data){
       phraseHints = getAllStimAnswers(true);
     }
 
-    var request = {
-      "config": {
-        "encoding": "LINEAR16",
-        "sampleRateHertz": sampleRate,
-        "languageCode" : speechRecognitionLanguage,
-        "maxAlternatives" : 1,
-        "profanityFilter" : false,
-        "speechContexts" : [
-          {
-            "phrases" : phraseHints,
-          }
-        ]
-      },
-      "audio": {
-        "content": data
-      }
-    }
+    var request = generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data);
 
-    console.log("Request:" + JSON.stringify(request));
-
-    var tdfSpeechAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey;
     var answerGrammar;
     if(getButtonTrial()){
       answerGrammar = phraseHints;
     }else{
+      //We call getAllStimAnswers again but not excluding phrase hints that
+      //may confuse the speech api so that we can check if what the api returns
+      //is within the realm of reasonable responses before transcribing it
       answerGrammar = getAllStimAnswers(false);
     }
 
+    var tdfSpeechAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey;
     //Make the actual call to the google speech api with the audio data for transcription
     if(tdfSpeechAPIKey && tdfSpeechAPIKey != ""){
       console.log("tdf key detected");
@@ -1533,8 +1526,32 @@ processLINEAR16 = function(data){
       makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar);
     }
   }else{
-    console.log("processwav userAnswer not defined");
+    console.log("processLINEAR16 userAnswer not defined");
   }
+}
+
+generateRequestJSON = function(sampleRate,speechRecognitionLanguage,phraseHints,data){
+  var request = {
+    "config": {
+      "encoding": "LINEAR16",
+      "sampleRateHertz": sampleRate,
+      "languageCode" : speechRecognitionLanguage,
+      "maxAlternatives" : 1,
+      "profanityFilter" : false,
+      "speechContexts" : [
+        {
+          "phrases" : phraseHints,
+        }
+      ]
+    },
+    "audio": {
+      "content": data
+    }
+  }
+
+  console.log("Request:" + JSON.stringify(request));
+
+  return request;
 }
 
 makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
@@ -1545,6 +1562,9 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
       var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
       var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
       var ignoredOrSilent = false;
+
+      //If we get back an error status make sure to inform the user so they at
+      //least have a hint at what went wrong
       if(response['statusCode'] != 200){
         var content = JSON.parse(response.content);
         alert("Error with speech api call: " + content['error']['message']);
@@ -1610,6 +1630,7 @@ recorder = null;
 callbackManager = null;
 audioContext = null;
 
+//The callback used in initializeAudio when an audio data stream becomes available
 function startUserMedia(stream) {
   console.log("START USER MEDIA");
   var input = audioContext.createMediaStreamSource(stream);
@@ -1630,6 +1651,8 @@ function startUserMedia(stream) {
   var options = {
     source: input,
     energy_offset: energyOffset,
+    //On voice stop we want to send off the recorded audio (via the process callback)
+    //to the google speech api for processing (it only takes up to 15 second clips at a time)
     voice_stop: function() {
       //This will hopefully only be fired once while we're still on the voice.html interstitial,
       //once VAD.js loads we should navigate back to card to start the practice set
@@ -1640,35 +1663,36 @@ function startUserMedia(stream) {
         Session.set("needResume", true);
         Router.go("/card");
         return;
-      }
-      if(!Session.get('recording')){
+      }else if(!Session.get('recording')){
         console.log("NOT RECORDING, VOICE STOP");
         return;
+      }else{
+        console.log("VOICE STOP");
+        recorder.stop();
+        Session.set('recording',false);
+        recorder.exportToProcessCallback();
       }
-      console.log("VOICE STOP");
-      recorder.stop();
-      Session.set('recording',false);
-      recorder.exportToProcessCallback();
     },
     voice_start: function() {
       if(!Session.get('recording')){
         console.log("NOT RECORDING, VOICE START");
         return;
-      }
-      console.log("VOICE START");
-      if(resetMainCardTimeout){
-        if(Session.get('recording')){
-          console.log("voice_start resetMainCardTimeout");
-          resetMainCardTimeout();
-        }else {
-          console.log("NOT RECORDING");
-        }
       }else{
-        console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
+        console.log("VOICE START");
+        if(resetMainCardTimeout){
+          if(Session.get('recording')){
+            console.log("voice_start resetMainCardTimeout");
+            resetMainCardTimeout();
+          }else {
+            console.log("NOT RECORDING");
+          }
+        }else{
+          console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
+        }
+        //For multiple transcriptions:
+        //recorder.record();
+        //Session.set('recording',true);
       }
-      //For multiple transcriptions:
-      //recorder.record();
-      //Session.set('recording',true);
     }
   }
   var vad = new VAD(options);
@@ -1681,8 +1705,31 @@ function startUserMedia(stream) {
   Router.go("/voice");
 };
 
+function startRecording(){
+  if (recorder){
+    Session.set('recording',true);
+    recorder.record();
+    console.log("RECORDING START");
+  }else{
+    console.log("NO RECORDER");
+  }
+}
+
+function stopRecording(){
+  if(recorder && Session.get('recording'))
+  {
+    recorder.stop();
+    Session.set('recording',false);
+
+    recorder.clear();
+    console.log("RECORDING END");
+  }
+}
+
 // END WEB AUDIO SECTION
 
+//This is used after audio transcription to make use of existing keyboard functionality
+//to enter answers
 simulateUserAnswerEnterKeyPress = function(){
     //Simulate enter key press on the correct input box if the user is being
     //forced to enter the correct answer in userForceCorrect
@@ -1719,27 +1766,6 @@ simulateUserAnswerEnterKeyPress = function(){
 
     $textBox.trigger(press);
     console.log("SIMULATED ENTER KEY PRESS");
-}
-
-function startRecording(){
-  if (recorder){
-    Session.set('recording',true);
-    recorder.record();
-    console.log("RECORDING START");
-  }else{
-    console.log("NO RECORDER");
-  }
-}
-
-function stopRecording(){
-  if(recorder && Session.get('recording'))
-  {
-    recorder.stop();
-    Session.set('recording',false);
-
-    recorder.clear();
-    console.log("RECORDING END");
-  }
 }
 
 //This records the synchronous state of whether input should be enabled or disabled
