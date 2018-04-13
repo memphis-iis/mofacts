@@ -82,7 +82,31 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
-getAllStimAnswers = function(removeExcludedPhraseHints) {
+curStimIsSoundDisplayType = function(){
+  if(!!Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType){
+    console.log("displayType: " + Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType[0]);
+    return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType[0] === "Sound";
+  }
+}
+
+getAllStimQuestions = function(){
+  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
+  var allQuestions = [];
+  var exclusionList = ["18-25","Male","Less than High School"];
+
+  for(clusterIndex in clusters){
+    for(displayIndex in clusters[clusterIndex].display){
+      var question = clusters[clusterIndex].display[displayIndex];
+      if(exclusionList.indexOf(question) == -1){
+        allQuestions.push(question);
+      }
+    }
+  }
+
+  return allQuestions;
+}
+
+getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   var currentClusterIndex = getCurrentClusterIndex();
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster

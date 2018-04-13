@@ -460,6 +460,9 @@ Template.card.events({
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers and meteor events
 
+var soundsDict = {};
+var onEndCallbackDict = {};
+
 Template.card.rendered = function() {
     var audioInputEnabled = Session.get("audioEnabled");
     var audioInputDetectionInitialized = Session.get("VADInitialized");
@@ -469,6 +472,14 @@ Template.card.rendered = function() {
     if(audioInputEnabled && !audioInputDetectionInitialized){
       initializeAudio();
     }else{
+      //Pre-load sounds to be played into soundsDict to avoid audio lag issues
+      if(curStimIsSoundDisplayType()){
+        console.log("Sound type questions detected, pre-loading sounds");
+        preloadAudioFiles();
+      }else{
+        console.log("Non sound type detected");
+      }
+
       cardStart();
     }
 };
@@ -642,6 +653,44 @@ var initializeAudio = function(){
 
   } catch (e) {
     console.log("Error initializing Web Audio browser");
+  }
+}
+
+var preloadAudioFiles = function(){
+  var allQuestions = getAllStimQuestions();
+  for(var index in allQuestions){
+    var question = allQuestions[index];
+    soundsDict[question] = new Howl({
+        preload: true,
+
+        src: [
+            question + '.ogg',
+            question + '.mp3',
+            question + '.wav',
+        ],
+
+        //Must do an Immediately Invoked Function Expression otherwise question
+        //is captured as a closure and will change to the last value in the loop
+        //by the time we call this
+        onplay: (function(question) {
+            if (soundsDict[question]) {
+                soundsDict[question].isCurrentlyPlaying = true;
+            }
+            console.log("Sound played");
+        })(question),
+
+        onend: (function(question) {
+          return function(){
+              if (soundsDict[question]) {
+                  soundsDict[question].isCurrentlyPlaying = false;
+              }
+              if (!!onEndCallbackDict[question]) {
+                  onEndCallbackDict[question]();
+              }
+              console.log("Sound completed");
+          }
+        })(question),
+    });
   }
 }
 
@@ -855,31 +904,12 @@ function playCurrentQuestionSound(onEndCallback) {
     //We currently only play one sound at a time
     clearPlayingSound();
 
+    var currentQuestion = Session.get("currentQuestion");
+    console.log("current question: " + currentQuestion);
+
     //Reset sound and play it
-    currentQuestionSound = new Howl({
-        src: [
-            Session.get("currentQuestion") + '.ogg',
-            Session.get("currentQuestion") + '.mp3',
-            Session.get("currentQuestion") + '.wav',
-        ],
-
-        onplay: function() {
-            if (currentQuestionSound) {
-                currentQuestionSound.isCurrentlyPlaying = true;
-            }
-            console.log("Sound played");
-        },
-
-        onend: function() {
-            if (currentQuestionSound) {
-                currentQuestionSound.isCurrentlyPlaying = false;
-            }
-            if (!!onEndCallback) {
-                onEndCallback();
-            }
-            console.log("Sound completed");
-        },
-    });
+    currentQuestionSound = soundsDict[currentQuestion];
+    onEndCallbackDict[currentQuestion] = onEndCallback;
 
     //In case our caller checks before the sound has a chance to load, we
     //mark the howler instance as playing
@@ -1329,6 +1359,16 @@ function startQuestionTimeout(textFocus) {
   //Define the function we will call to actually start user input
   var beginQuestionAndInitiateUserInput = function(){
     console.log("beginQuestionAndInitiateUserInput");
+
+    var startMainCardTimeout = function(){
+      console.log("start main card timeout");
+      beginMainCardTimeout(delayMs, function() {
+        console.log("stopping input after " + delayMs + " ms");
+          stopUserInput();
+          handleUserInput({}, "timeout");
+      });
+    }
+
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
@@ -1337,6 +1377,7 @@ function startQuestionTimeout(textFocus) {
         //We don't allow user input until the sound is finished playing
         playCurrentQuestionSound(function() {
             allowUserInput(textFocus);
+            startMainCardTimeout();
         });
     }
     else {
@@ -1346,13 +1387,8 @@ function startQuestionTimeout(textFocus) {
         }
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
+        startMainCardTimeout();
     }
-
-    beginMainCardTimeout(delayMs, function() {
-      console.log("stopping input after " + delayMs + " ms");
-        stopUserInput();
-        handleUserInput({}, "timeout");
-    });
   }
 
   //No user input (re-enabled below) and reset keypress timestamp.
@@ -1499,7 +1535,7 @@ processLINEAR16 = function(data){
       }
     }else{
       userAnswer.value = "waiting for transcription";
-      phraseHints = getAllStimAnswers(true);
+      phraseHints = getAllCurrentStimAnswers(true);
     }
 
     var request = generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data);
@@ -1508,10 +1544,10 @@ processLINEAR16 = function(data){
     if(getButtonTrial()){
       answerGrammar = phraseHints;
     }else{
-      //We call getAllStimAnswers again but not excluding phrase hints that
+      //We call getAllCurrentStimAnswers again but not excluding phrase hints that
       //may confuse the speech api so that we can check if what the api returns
       //is within the realm of reasonable responses before transcribing it
-      answerGrammar = getAllStimAnswers(false);
+      answerGrammar = getAllCurrentStimAnswers(false);
     }
 
     var tdfSpeechAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey;
@@ -1781,24 +1817,24 @@ function stopUserInput() {
    //Handle this being called before the page finishes loading by setting up
   //polling check to recheck until page has loaded, then disable
   var count = 0;
-  if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-    stopInputInterval = setInterval(function(){
-      count += 1;
-      if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-        console.log("stop input finally loaded, inputDisabled: " + inputDisabled);
-        if(typeof inputDisabled != "undefined"){
-          //Use inputDisabled variable so that successive calls of stop and allow
-          //are resolved synchronously i.e. whoever last set the inputDisabled variable
-          //should win
-          $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
-          inputDisabled = undefined;
-        }
-        clearInterval(stopInputInterval);
-      }
-    },500);
-  }else{
+  // if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+  //   stopInputInterval = setInterval(function(){
+  //     count += 1;
+  //     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+  //       console.log("stop input finally loaded, inputDisabled: " + inputDisabled);
+  //       if(typeof inputDisabled != "undefined"){
+  //         //Use inputDisabled variable so that successive calls of stop and allow
+  //         //are resolved synchronously i.e. whoever last set the inputDisabled variable
+  //         //should win
+  //         $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+  //         inputDisabled = undefined;
+  //       }
+  //       clearInterval(stopInputInterval);
+  //     }
+  //   },500);
+  // }else{
     $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
-  }
+  // }
 }
 
 var allowInputInterval;
@@ -1823,18 +1859,18 @@ function allowUserInput(textFocus) {
   //Handle this being called before the page finishes loading by setting up a
   //polling check to recheck until page has loaded, then enable
   var count = 0;
-  if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-    allowInputInterval = setInterval(function(){
-      count += 1;
-      if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-        console.log("allow input finally loaded, inputDisabled: " + inputDisabled);
-        enableUserInput();
-        clearInterval(allowInputInterval);
-      }
-    },500);
-  }else{
+  // if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
+  //   allowInputInterval = setInterval(function(){
+  //     count += 1;
+  //     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
+  //       console.log("allow input finally loaded, inputDisabled: " + inputDisabled);
+  //       enableUserInput();
+  //       clearInterval(allowInputInterval);
+  //     }
+  //   },500);
+  // }else{
     enableUserInput();
-  }
+  // }
 }
 
 
