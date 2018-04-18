@@ -662,10 +662,9 @@ var preloadAudioFiles = function(){
     var question = allQuestions[index];
     soundsDict[question] = new Howl({
         preload: true,
-
         src: [
-            question + '.ogg',
             question + '.mp3',
+            question + '.ogg',
             question + '.wav',
         ],
 
