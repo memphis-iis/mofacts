@@ -663,9 +663,9 @@ var preloadAudioFiles = function(){
     soundsDict[question] = new Howl({
         preload: true,
         src: [
+            question + '.wav',
             question + '.mp3',
             question + '.ogg',
-            question + '.wav',
         ],
 
         //Must do an Immediately Invoked Function Expression otherwise question

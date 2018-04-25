@@ -175,6 +175,13 @@ Router.route('/admin', {
     }
 });
 
+Router.route('/soundTest', {
+    name: "client.soundTest",
+    action: function () {
+        this.render('soundTest');
+    }
+});
+
 //Sends the user to the choose page where the user can choose
 //between viewing all of the items or all of the students for the system.
 Router.route('/choose', {

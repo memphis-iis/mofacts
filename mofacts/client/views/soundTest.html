@@ -1,0 +1,15 @@
+<template name="soundTest">
+    <div class="container" id="cardContainer">
+        <div class="row">
+            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion" >
+                <img src="images/speaker.png" class="sound-img">
+            </div>
+            <div>
+              <textarea id='curSoundFile'></textarea>
+              <button onclick='preloadAudioFiles()'>Load</button>
+              <p>&nbsp;&nbsp;&nbsp;&nbsp;</p>
+              <button onclick='playSound()'>Play</button>
+            </div>
+        </div>
+    </div>
+</template>
