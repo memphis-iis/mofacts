@@ -771,6 +771,7 @@ function newQuestionHandler() {
         clearButtonList();
         Session.set("buttonTrial", false);
         textFocus = true; //Need the text box focused
+
         $("#textEntryRow").show();
     }
     else {
@@ -1838,6 +1839,7 @@ function stopUserInput() {
 
 var allowInputInterval;
 function allowUserInput(textFocus) {
+
   console.log("allow user input");
   inputDisabled = false;
   var enableUserInput = function(){
@@ -1853,6 +1855,15 @@ function allowUserInput(textFocus) {
     }
     // Force scrolling to bottom of screen for the input
     scrollElementIntoView(null, false);
+    
+    if (typeof textFocus !== "undefined" && !!textFocus) {
+      try {
+          $("#userAnswer").focus();
+      }
+      catch(e) {
+          //Nothing to do
+      }
+    }
   }
 
   //Handle this being called before the page finishes loading by setting up a
