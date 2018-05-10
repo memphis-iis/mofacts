@@ -486,7 +486,6 @@ input:checked + .slider:before {
 
 #multipleChoiceTable{
   margin: auto;
-  width: 50%;
   float: none;
 }
 
