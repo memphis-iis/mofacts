@@ -9,7 +9,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.49",
-    "babel-runtime": "^6.26.0"
+    "babel-runtime": "^6.26.0",
+    "core-js": "^2.5.7"
   },
   "devDependencies": {},
   "scripts": {
