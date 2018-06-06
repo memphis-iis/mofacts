@@ -84,7 +84,7 @@ sudo mount --bind "$HOME/.meteor/local" .meteor/local
 mkdir -p "$HOME/.meteor/packages"
 sudo mount --bind "$HOME/.meteor/packages" packages
 
-meteor update
+#meteor update
 meteor npm install --save babel-runtime
 
 
