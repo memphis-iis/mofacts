@@ -1,0 +1,1145 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!-- was: no XML declaration present -->
+<setspec>
+    <clusters>
+  <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T1_400ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T1_400ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T1_800ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T1_800ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T1_1200ms__vowel</display>
+            <response>tone 1</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T1_1200ms__vowel_changeGender</display>
+            <response>tone 1</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T2_400ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T2_400ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T2_800ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T2_800ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T2_1200ms__vowel</display>
+            <response>tone 2</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T2_1200ms__vowel_changeGender</display>
+            <response>tone 2</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T3_400ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T3_400ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T3_800ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T3_800ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T3_1200ms__vowel</display>
+            <response>tone 3</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T3_1200ms__vowel_changeGender</display>
+            <response>tone 3</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ma/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ma/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ma/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ma/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ma/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ma/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4ya/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4ya/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0ya/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0ya/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8ya/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8ya/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T4_400ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T4_400ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T4_800ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T4_800ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>
+<cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.4mo/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster>
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.4mo/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+       <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.0mo/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+ <cluster>
+             <displayType>Sound</displayType>
+<display>sounds/toneresource/1.0mo/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>
+            <display>sounds/toneresource/1.8mo/T4_1200ms__vowel</display>
+            <response>tone 4</response>
+        </cluster> 
+        <cluster>
+             <displayType>Sound</displayType>            
+             <display>sounds/toneresource/1.8mo/T4_1200ms__vowel_changeGender</display>
+            <response>tone 4</response>
+        </cluster>   
+         <cluster>
+            <display>How many missing sounds or delayed sounds did you hear in the experiment?</display>
+            <response>0</response>
+            <falseResponse>1-4</falseResponse>
+            <falseResponse>5-10</falseResponse>
+            <falseResponse>10-20</falseResponse>
+            <falseResponse>20 and over</falseResponse>
+        </cluster>         
+          <cluster>
+            <display>Did you have any technical problems? After you input the answer, click the Enter button to go on.</display>
+            <response>alpha</response>
+        </cluster>
+        <cluster>
+            <display>Did you wear your headphone when you did the experiment?</display>
+            <response>Yes</response>
+            <falseResponse>No</falseResponse>         
+        </cluster>
+        <cluster>
+            <display>Age?</display>
+            <response>18-25</response>
+            <falseResponse>26-34</falseResponse>
+            <falseResponse>35-54</falseResponse>
+            <falseResponse>55-64</falseResponse>
+            <falseResponse>65 and over</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Gender?</display>
+            <response>Male</response>
+            <falseResponse>Female</falseResponse>
+            <falseResponse>Other</falseResponse>
+            <falseResponse>Prefer not to answer</falseResponse>
+        </cluster>
+        <cluster>
+            <display>Which is the highest level of education you have completed?</display>
+            <response>Less than High School</response>
+            <falseResponse>High School or GED</falseResponse>
+            <falseResponse>Some College</falseResponse>
+            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
+            <falseResponse>Graduate Degree</falseResponse>
+        </cluster>
+        <cluster>
+            <display>What's your native language? After you input the answer, click the Enter button to go on.</display>
+            <response>alpha</response>
+        </cluster> 
+        <cluster>
+            <display>How many years have you received the musical training?</display>
+            <response>0</response>
+            <falseResponse>1</falseResponse>
+            <falseResponse>2-5</falseResponse>
+            <falseResponse>5 and more</falseResponse>                
+        </cluster>  
+        <cluster>
+            <display>How many years have you studied tonal language?</display>
+            <response>0</response>
+            <falseResponse>1</falseResponse>
+            <falseResponse>2-5</falseResponse>
+            <falseResponse>5 and more</falseResponse>
+            <falseResponse>My native language is a kind of tonal language.</falseResponse>                
+        </cluster>       
+    </clusters>
+</setspec>
