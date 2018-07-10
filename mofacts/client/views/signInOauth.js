@@ -2,11 +2,24 @@ function testUserEnabled() {
     return _.chain(Meteor.settings).prop("public").prop("testLogin").value();
 }
 
+var waitOnConfig = function(){
+  if(!Accounts.loginServicesConfigured()){
+    console.log('+++++ Config not loaded! Waiting... +++++');
+    $('#signInButtonOAuth').hide();
+    setTimeout(waitOnConfig, 250);
+  } else {
+    console.log('Config loaded, good to go');
+    $('#signInButtonOAuth').show();
+  }
+};
+
 Template.signInOauth.helpers({
     'showTestLogin': function() {
         return testUserEnabled();
     }
 });
+
+Template.signInOauth.onRendered(waitOnConfig);
 
 Template.signInOauth.events({
     'click #signInButton' : function (event) {

@@ -552,17 +552,17 @@ Template.card.helpers({
     },
 
     'drill': function() {
-        return getTestType() === "d";
+      return getTestType() === "d" || getTestType() === "m" || getTestType() === "n";
     },
 
     'trial': function() {
         var type = getTestType();
-        return type === "d" || type === "s" || type === "t";
+        return type === "d" || type === "s" || type === "t" || type === "m" || type === "n";
     },
 
     'testordrill': function() {
         var type = getTestType();
-        return type === "d" || type === "t";
+        return type === "d" || type === "t" || type === "m" || type === "n";
     },
 
     'fontSizeClass': function() {
@@ -1008,7 +1008,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //Set up to log the answer they gave. We'll call the function below at the
     //appropriate time
     var reviewBegin = Date.now();
-    var answerLogAction = isTimeout ? "[timeout]" : "answer";
+  var answerLogAction = isTimeout ? "[timeout]" : "answer";
+  var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
     var answerLogRecord = {
         'questionIndex': _.intval(Session.get("questionIndex"), -1),
         'index': _.intval(currCluster.clusterIndex, -1),
@@ -1086,7 +1087,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
         //how they did (that's what drills are for)
         timeout = 1;
     }
-    else if (getTestType() === "d") {
+  else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
         //Drill - the timeout depends on how they did
         if (isCorrect) {
             timeout = _.intval(deliveryParams.correctprompt);
@@ -1167,7 +1168,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     }
 
     //Helpers for correctness logic below
-    var isDrill = (getTestType() === "d");
+  var isDrill = (getTestType() === "d" || getTestType() === "m" || getTestType() === "n");
     var handleAnswerState = function(goodNews, msg) {
         isCorrect = goodNews;
         if (isDrill) {
@@ -1397,6 +1398,8 @@ function startQuestionTimeout(textFocus) {
   //Swap out the current question with a pre question display as defined in the tdf file
   //then delay for the specified amount of time before setting back to the current question
   var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
+  console.log('++++ CURRENT QUESTION ++++');
+  console.log(Session.get('currentQuestion'));
   var curQuestionTemp = Session.get("currentQuestion");
   var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
   Session.set("currentQuestion",prestimulusDisplay);
@@ -1440,13 +1443,22 @@ function showUserInteraction(isGoodNews, news) {
     // textbox, but only show it if:
     // * They got the answer wrong somehow
     // * forceCorrection is true in the current delivery params
+    // * the trial params are specified to enable forceCorrection
     // * we are NOT in a sim
-    var doForceCorrect = !isGoodNews && getCurrentDeliveryParams().forceCorrection && !Session.get("runSimulation");
+
+    var isForceCorrectTrial = getTestType() === "m" || getTestType() === "n";
+    var doForceCorrect = (!isGoodNews && (getCurrentDeliveryParams().forceCorrection || isForceCorrectTrial) && !Session.get("runSimulation"));
     Tracker.afterFlush(function() {
         if (doForceCorrect) {
             $("#forceCorrectionEntry").show();
+          if(getTestType() === "n"){
+            var prompt = getCurrentDeliveryParams().forcecorrectprompt;
+            $("#forceCorrectGuidance").text(prompt);
+            speakMessageIfAudioPromptFeedbackEnabled(prompt);
+          } else {
             $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
             speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue");
+          }
             $("#userForceCorrect").val("").focus();
             startRecording();
         }

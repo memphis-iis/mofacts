@@ -314,7 +314,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'incorrectscore': 0,
         'practiceseconds': 0,
         'autostopTimeoutThreshold': 0,
-        'timeuntilstimulus' : 0
+        'timeuntilstimulus' : 0,
+        'forcecorrectprompt':''
     };
 
     //We've defined defaults - also define translatations for values
@@ -365,15 +366,15 @@ getCurrentDeliveryParams = function (currUnit) {
         var found = sourceDelParams[xcondIndex];
 
         //If found del params, then use any values we find
-        if (found) {
-            for(fieldName in deliveryParams) {
-                var fieldVal = _.first(found[fieldName]);
-                if (fieldVal) {
-                    deliveryParams[fieldName] = fieldVal;
-                    modified = true;
-                }
-            }
+      if (found) {
+        for(fieldName in deliveryParams) {
+          var fieldVal = _.first(found[fieldName]);
+          if (fieldVal) {
+            deliveryParams[fieldName] = fieldVal;
+            modified = true;
+          }
         }
+      }
     }
 
     //If we changed anything from the default, we should make sure
