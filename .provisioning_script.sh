@@ -64,7 +64,7 @@ sudo service mongod restart
 
 
 # Install meteor
-curl https://install.meteor.com/ | sh
+curl https://install.meteor.com/?release=1.6.1.1 | sh
 
 # In case we're running on a Windows host, we force the use of mounting instead
 # of symlinks for meteor packages
@@ -84,7 +84,7 @@ sudo mount --bind "$HOME/.meteor/local" .meteor/local
 mkdir -p "$HOME/.meteor/packages"
 sudo mount --bind "$HOME/.meteor/packages" packages
 
-meteor update
+#meteor update
 meteor npm install --save babel-runtime
 
 
