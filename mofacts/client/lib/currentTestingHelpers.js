@@ -315,7 +315,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'practiceseconds': 0,
         'autostopTimeoutThreshold': 0,
         'timeuntilstimulus' : 0,
-        'forcecorrectprompt':''
+        'forcecorrectprompt':'',
+        'forcecorrecttimeout':0
     };
 
     //We've defined defaults - also define translatations for values

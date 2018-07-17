@@ -399,7 +399,18 @@ Template.card.events({
         if (key == 13) {
             // Enter key - see if gave us the correct answer
             var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
-            var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
+          var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
+          if (getTestType() === 'n') {
+            if (entry.length < 4) {
+              var oldPrompt = $("#forceCorrectGuidance").text();
+              $("#userForceCorrect").val("");
+              $("#forceCorrectGuidance").text(oldPrompt + " (4 character minimum)");
+            } else {
+              var savedFunc = timeoutFunc;
+              clearCardTimeout();
+              savedFunc();
+            }
+          } else {
             if (entry === answer) {
                 var savedFunc = timeoutFunc;
                 clearCardTimeout();
@@ -411,6 +422,7 @@ Template.card.events({
                 speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'");
                 startRecording();
             }
+          }
         }
         else {
             // "Normal" keypress - reset the timeout period
@@ -1009,7 +1021,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //appropriate time
     var reviewBegin = Date.now();
   var answerLogAction = isTimeout ? "[timeout]" : "answer";
-  var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
+  // var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
     var answerLogRecord = {
         'questionIndex': _.intval(Session.get("questionIndex"), -1),
         'index': _.intval(currCluster.clusterIndex, -1),
@@ -1452,9 +1464,12 @@ function showUserInteraction(isGoodNews, news) {
         if (doForceCorrect) {
             $("#forceCorrectionEntry").show();
           if(getTestType() === "n"){
+            var forceCorrectDelay = getCurrentDeliveryParams().forcecorrecttimeout;
             var prompt = getCurrentDeliveryParams().forcecorrectprompt;
             $("#forceCorrectGuidance").text(prompt);
             speakMessageIfAudioPromptFeedbackEnabled(prompt);
+            var savedFunc = timeoutFunc;
+            beginMainCardTimeout(forceCorrectDelay, savedFunc);
           } else {
             $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
             speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue");
