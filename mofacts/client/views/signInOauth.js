@@ -22,7 +22,7 @@ Template.signInOauth.helpers({
 Template.signInOauth.onRendered(waitOnConfig);
 
 Template.signInOauth.events({
-    'click #signInButton' : function (event) {
+    'click #signInButtonOAuth' : function (event) {
         $("#signInButton").prop('disabled', true);
         event.preventDefault();
         console.log("Google Login Proceeding");
