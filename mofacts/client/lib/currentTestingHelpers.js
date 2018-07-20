@@ -153,6 +153,22 @@ getQuestionType = function () {
     return ("" + type).toLowerCase();
 };
 
+getResponseType = function () {
+  var type = "text"; //Default type
+
+  //If we get called too soon, we just use the first cluster
+  var clusterIndex = getCurrentClusterIndex();
+  if (!clusterIndex && clusterIndex !== 0)
+      clusterIndex = 0;
+
+  var cluster = getStimCluster(clusterIndex);
+  if (cluster.responseType && cluster.responseType.length) {
+      type = cluster.responseType[0];
+  }
+
+  return ("" + type).toLowerCase();
+}
+
 findQTypeSimpified = function () {
     var QType = getQuestionType();
 

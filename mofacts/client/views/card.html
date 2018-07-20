@@ -93,17 +93,37 @@
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
                           <table id="multipleChoiceTable">
-                              {{#each buttonList}}
-                                <tr>
-                                  {{#if audioEnabled}}
-                                    <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                    <td>&nbsp;</td>
-                                  {{/if}}
-                                    <td><button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                      {{buttonValue}}
-                                    </button></td>
-                                </tr>
-                              {{/each}}
+                              {{#if imageResponse}}
+                                {{#each buttonListImageRows}}
+                                  <tr>
+                                    {{#each this}}
+                                      {{#if audioEnabled}}
+                                        <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                        <td>&nbsp;</td>
+                                      {{/if}}
+                                      <td class="td-img">
+                                        <button style="background: url({{buttonValue}});background-size:100%;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
+                                        </button>
+                                      </td>
+                                    {{/each}}
+                                  </tr>
+                                {{/each}}
+                              {{else}}
+                                {{#each buttonList}}
+                                  <tr>
+                                    {{#if audioEnabled}}
+                                      <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                      <td>&nbsp;</td>
+                                    {{/if}}
+                                      <td>
+                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                          {{buttonValue}}
+                                        </button>
+                                      </td>
+                                  </tr>
+                                {{/each}}
+                              {{/if}}
+
                           </table>
                         {{/if}}
                     </div>

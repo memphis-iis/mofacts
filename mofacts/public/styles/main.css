@@ -27,6 +27,16 @@ s1 {
     color: white;
     font-family: 'Lato', sans-serif;
 }
+
+.btn-alt{
+  color: white;
+  border-radius: 0;
+  border: none;
+  font-family: 'Lato', sans-serif;
+  font-size: 16px;
+  white-space: normal;
+}
+
 @media (max-width: 768px) {
     .sound-img {
         width: 32px;
@@ -37,6 +47,13 @@ s1 {
         font-size: 80%;
         line-height: 1;
         border-radius: 3px;
+    }
+    .btn-image{
+      width: 150px;
+      height:75px;
+    }
+    .td-img{
+      padding-right: 25px;
     }
     .user-admin-table th,
     .user-admin-table td {
@@ -57,6 +74,13 @@ s1 {
         font-size: 90%;
         line-height: 1.2;
     }
+    .btn-image{
+      width: 300px;
+      height:150px;
+    }
+    .td-img{
+      padding-right: 25px;
+    }
     .user-admin-table th,
     .user-admin-table td {
         white-space: nowrap;
@@ -71,6 +95,13 @@ s1 {
     .btn-responsive {
         padding: inherit;
         line-height: inherit;
+    }
+    .btn-image{
+      width: 300px;
+      height:150px;
+    }
+    .td-img{
+      padding-right: 25px;
     }
     .user-admin-table th,
     .user-admin-table td {
