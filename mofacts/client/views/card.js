@@ -555,6 +555,11 @@ Template.card.helpers({
         return qt === "text" || qt === "cloze";
     },
 
+    'imageResponse' : function() {
+      var rt = getResponseType();
+      return rt === "image";
+    },
+
     'test': function() {
         return getTestType() === "t";
     },
@@ -592,6 +597,23 @@ Template.card.helpers({
 
     'buttonList': function() {
         return buttonList.find({'temp': 1}, {sort: {idx: 1}});
+    },
+
+    'buttonListImageRows': function(){
+      var items = buttonList.find({'temp': 1}, {sort: {idx: 1}}).fetch();
+      var arr1 = [];
+      var arr2 = [];
+      for(var i = 0; i< items.length; i++){
+        if(i % 2 == 0){
+          arr1.push(items[i]);
+        }else{
+          arr2.push(items[i]);
+        }
+      }
+      var ret = [arr1,arr2];
+      window.ret = ret;
+      window.items = items;
+      return ret;
     },
 
     'haveScrollList': function() {
@@ -1882,7 +1904,7 @@ function allowUserInput(textFocus) {
     }
     // Force scrolling to bottom of screen for the input
     scrollElementIntoView(null, false);
-    
+
     if (typeof textFocus !== "undefined" && !!textFocus) {
       try {
           $("#userAnswer").focus();
