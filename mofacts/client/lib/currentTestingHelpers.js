@@ -205,7 +205,7 @@ getCurrentStimParameter = function(whichParameter) {
 
 //Return the list of false responses corresponding to the current question/answer
 getCurrentFalseResponses = function(whichAnswer) {
-    var cluster = getStimCluster(getCurrentClusterIndex());
+  var cluster = getStimCluster(getCurrentClusterIndex());
 
     if (!cluster || !cluster.falseResponse || cluster.falseResponse.length < 1) {
         return []; //No false responses
@@ -214,12 +214,27 @@ getCurrentFalseResponses = function(whichAnswer) {
     //If we have the same number of response and falseResponse, then the stim file
     //is using the "new" formatted false response per display/response pair.
     //Otherwise, we assume the "old" style and they get everything
-    if (cluster.response.length === cluster.falseResponse.length) {
-        return _.trim(cluster.falseResponse[whichAnswer]).split(';');
-    }
-    else {
-        return cluster.falseResponse;
-    }
+    //Additionally, if the stim file uses false response feedback, map across the false response (array of dicts)
+    //to get the false response values out.
+  if (cluster.response.length === cluster.falseResponse.length) {
+    return _.trim(cluster.falseResponse[whichAnswer]).split(';');
+  }
+  else if (!!cluster.falseResponse[0]['feedback']) {
+    return _.map(cluster.falseResponse, function(response){ return response['value']; });
+  }
+  else {
+    return cluster.falseResponse;
+  }
+};
+
+getFeedbackForFalseResponse = function(whichAnswer) {
+  var cluster = getStimCluster(getCurrentClusterIndex());
+  if(!cluster.falseResponse[0]['feedback']){
+    return null;
+  } else {
+    var response = _.filter(cluster.falseResponse, function(res){ return res['value'] == whichAnswer; })[0];
+    return response['feedback'];
+  }
 };
 
 getCurrentStimName = function () {
