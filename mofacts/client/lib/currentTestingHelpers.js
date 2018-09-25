@@ -245,6 +245,9 @@ getCurrentFalseResponses = function(whichAnswer) {
 
 getFeedbackForFalseResponse = function(whichAnswer) {
   var cluster = getStimCluster(getCurrentClusterIndex());
+  if(!cluster.falseResponse){
+    return null;
+  }
   if(!cluster.falseResponse[0]['feedback']){
     return null;
   } else {
