@@ -10,6 +10,7 @@ Template.signUp.events({
     'click #signUpButton' : function (event) {
         event.preventDefault();
 
+        var formEmail = _.trim($("#signUpEmail").val());
         var formUsername = _.trim($("#signUpUsername").val());
         var formPassword1 = _.trim($("#password1").val());
         var formPassword2 = _.trim($("#password2").val());
@@ -40,7 +41,7 @@ Template.signUp.events({
             return;
         }
 
-        Meteor.call("signUpUser", formUsername, formPassword1, function(error, result) {
+        Meteor.call("signUpUser", formEmail, formUsername, formPassword1, function(error, result) {
             var errorMsgs = [];
 
             if (typeof error !== "undefined") {

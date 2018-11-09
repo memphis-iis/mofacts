@@ -283,14 +283,16 @@ Meteor.startup(function () {
             .prop("email").trim()
             .value().toLowerCase();
         if (!email) {
-            throw new Meteor.Error("No email found for your Google account");
+            //throw new Meteor.Error("No email found for your Google account");
         }
 
-        user.username = email;
-        user.emails = [{
-            "address": email,
-            "verified": true
-        }];
+        if(!!email){
+          user.username = email;
+          user.emails = [{
+              "address": email,
+              "verified": true
+          }];
+        }
 
         serverConsole("Creating new Google user:", dispUsr(user));
 
@@ -320,9 +322,13 @@ Meteor.startup(function () {
         //an array of error messages on failure. If previous OK is true, then
         //we silently skip duplicate users (this is mainly for experimental
         //participants who are created on the fly)
-        signUpUser: function (newUserName, newUserPassword, previousOK) {
+        signUpUser: function (newEmail, newUserName, newUserPassword, previousOK) {
             serverConsole("signUpUser", newUserName, "previousOK == ", previousOK);
             var checks = [];
+
+            if(!newEmail){
+              checks.push("Must provide an email address");
+            }
 
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
@@ -355,6 +361,7 @@ Meteor.startup(function () {
             // NON-google user accounts (which should generally just be experiment
             // participants) - so we make sure to set an initial profile
             var createdId = Accounts.createUser({
+                'email':newEmail,
                 'username': newUserName,
                 'password': newUserPassword,
                 'profile': {

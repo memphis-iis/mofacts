@@ -120,7 +120,7 @@ Router.route('/signin', {
     name: "client.signin",
     action: function () {
         //this.render('signIn');
-        this.render('signInOauth');
+        this.render('signIn');
     }
 });
 

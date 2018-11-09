@@ -22,8 +22,11 @@ shell-server@0.3.1
 promise@0.10.1
 
 #iron:router@=1.0.12
-iron:router@1.1.1
+#iron:router@1.1.1
+iron:router
 mizzao:bootstrap-3
 google-config-ui
 dynamic-import
 fourseven:scss@=4.9.0
+check
+random
