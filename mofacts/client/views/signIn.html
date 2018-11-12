@@ -12,6 +12,11 @@
                 <div class="form-group">
                     <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Your Amazon TURK ID or Assigned Student ID">
                 </div>
+                  {{#if experimentPasswordRequired}}
+                    <div class="form-group">
+                        <input class="form-control accept-enter-key" type="password" id="password" value="" placeholder="Password">
+                    </div>
+                  {{/if}}
                 {{else}}
                 <div class="form-group">
                     <input class="form-control accept-enter-key" type="text" id="signInUsername" value="" placeholder="Username">

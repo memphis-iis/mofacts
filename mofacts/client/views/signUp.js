@@ -10,7 +10,6 @@ Template.signUp.events({
     'click #signUpButton' : function (event) {
         event.preventDefault();
 
-        var formEmail = _.trim($("#signUpEmail").val());
         var formUsername = _.trim($("#signUpUsername").val());
         var formPassword1 = _.trim($("#password1").val());
         var formPassword2 = _.trim($("#password2").val());
@@ -41,7 +40,7 @@ Template.signUp.events({
             return;
         }
 
-        Meteor.call("signUpUser", formEmail, formUsername, formPassword1, function(error, result) {
+        Meteor.call("signUpUser", formUsername, formPassword1, function(error, result) {
             var errorMsgs = [];
 
             if (typeof error !== "undefined") {
@@ -74,7 +73,7 @@ Template.signUp.events({
                     //nothing that we can do? We'll just fall thru for now since
                     //we don't have a good way to fix this
                     console.log("ERROR: The user was not logged in on account creation?", formUsername);
-                    alert("It appears that you couldn't be logged in as " + formUserName);
+                    alert("It appears that you couldn't be logged in as " + formUsername);
                 }
                 else {
                     if (Session.get("debugging")) {

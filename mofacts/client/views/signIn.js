@@ -39,6 +39,10 @@ Template.signIn.helpers({
         return Session.get("loginMode") === "experiment";
     },
 
+    experimentPasswordRequired: function(){
+      return Session.get("experimentPasswordRequired");
+    },
+
     isNormal: function() {
         return Session.get("loginMode") !== "experiment";
     }
@@ -62,63 +66,80 @@ function UserPasswordCheck() {
     $(".errcheck").hide();
 
     var experiment = Session.get("loginMode") === "experiment";
+    var experimentPasswordRequired = Session.get("experimentPasswordRequired");
     var newUsername = _.trim($("#signInUsername").val());
-    var newPassword = _.trim(experiment ? "" : $("#password").val());
+    var newPassword = _.trim(experiment && !experimentPasswordRequired ? "" : $("#password").val());
 
     if (!!newUsername & newPassword === "") {
         newPassword = Helpers.blankPassword(newUsername);
     }
 
     if (experiment) {
-        //Experiment mode - we create a user if one isn't already there. We
+        if(experimentPasswordRequired){
+          sessionCleanUp();
+          console.log("username:" + newUsername + ",password:" + newPassword);
+          Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+              if (typeof error !== 'undefined') {
+                  console.log("ERROR: The user was not logged in on experiment sign in?", newUsername, "Error:", error);
+                  alert("It appears that you couldn't be logged in as " + newUsername);
+                  $("#signInButton").prop("disabled",false);
+              }
+              else {
+                  signinNotify();
+              }
+          });
 
-        //Experimental ID's are assumed to be upper case
-        newUsername = newUsername.toUpperCase();
+          return;
+        }else{
+                //Experimental ID's are assumed to be upper case
+          newUsername = newUsername.toUpperCase();
 
-        //Call sign up - specifying that a duplicate user is OK
-        Meteor.call("signUpUser", newUsername, newPassword, true, function(error, result) {
-            var errorMsgs = [];
+          //Experiment mode - we create a user if one isn't already there. We
+          //Call sign up - specifying that a duplicate user is OK
+          Meteor.call("signUpUser", newUsername, newPassword, true, function(error, result) {
+              var errorMsgs = [];
 
-            if (typeof error !== "undefined") {
-                errorMsgs.push(error);
-            }
+              if (typeof error !== "undefined") {
+                  errorMsgs.push(error);
+              }
 
-            if (!!result && result.length) {
-                _.each(result, function(msg) {
-                    errorMsgs.push(msg);
-                });
-            }
+              if (!!result && result.length) {
+                  _.each(result, function(msg) {
+                      errorMsgs.push(msg);
+                  });
+              }
 
-            //If there was a call failure or server returned error message,
-            //then we can't proceed
-            if (errorMsgs.length > 0) {
-                console.log("Experiment user login errors:", displayify(errorMsgs));
-                $("#serverErrors")
-                    .html(errorMsgs.join("<br>"))
-                    .show();
-                $("#signInButton").prop("disabled",false);
-                return;
-            }
+              //If there was a call failure or server returned error message,
+              //then we can't proceed
+              if (errorMsgs.length > 0) {
+                  console.log("Experiment user login errors:", displayify(errorMsgs));
+                  $("#serverErrors")
+                      .html(errorMsgs.join("<br>"))
+                      .show();
+                  $("#signInButton").prop("disabled",false);
+                  return;
+              }
 
-            //Everything was OK if we make it here - now we init the session,
-            //login, and proceed to the profile screen
+              //Everything was OK if we make it here - now we init the session,
+              //login, and proceed to the profile screen
 
-            sessionCleanUp();
+              sessionCleanUp();
 
-            Meteor.loginWithPassword(newUsername, newPassword, function(error) {
-                if (typeof error !== 'undefined') {
-                    console.log("ERROR: The user was not logged in on experiment sign in?", newUsername, "Error:", error);
-                    alert("It appears that you couldn't be logged in as " + newUsername);
-                    $("#signInButton").prop("disabled",false);
-                }
-                else {
-                    signinNotify();
-                }
-            });
-        });
+              Meteor.loginWithPassword(newUsername, newPassword, function(error) {
+                  if (typeof error !== 'undefined') {
+                      console.log("ERROR: The user was not logged in on experiment sign in?", newUsername, "Error:", error);
+                      alert("It appears that you couldn't be logged in as " + newUsername);
+                      $("#signInButton").prop("disabled",false);
+                  }
+                  else {
+                      signinNotify();
+                  }
+              });
+          });
 
-        //No more processing
-        return;
+          //No more processing
+          return;
+        }
     }
 
     //If we're here, we're NOT in experimental mode

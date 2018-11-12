@@ -7,8 +7,20 @@ Router.route('/login',function(){
     this.response.setHeader( 'Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS' );
     this.response.end( 'Set OPTIONS.' );
   } else {
-    //console.log(JSON.stringify(this.params));
     API.handleRequest( this, 'login', this.request.method );
+  }
+}, { where: 'server'});
+
+Router.route('/translate',function(){
+  serverConsole("translate route");
+  this.response.setHeader( 'Access-Control-Allow-Origin', '*' );
+
+  if ( this.request.method === "OPTIONS" ) {
+    this.response.setHeader( 'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept' );
+    this.response.setHeader( 'Access-Control-Allow-Methods', 'POST, PUT, GET, DELETE, OPTIONS' );
+    this.response.end( 'Set OPTIONS.' );
+  } else {
+    API.handleRequest( this, 'translate', this.request.method );
   }
 }, { where: 'server'});
 
@@ -26,8 +38,11 @@ API = {
         var curUser = correctPassword.userId;
         var tokenID = Random.hexString( 32 );
         var expires = new Date();
-        expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000)); //One week in milliseconds
+        var oneWeek = 7 * 24 * 60 * 60 * 1000;
+        expires.setTime(expires.getTime() + oneWeek);
+        expires = expires.getTime() / 1000;
         var authToken = {"tokenID":tokenID,"expires":expires};
+        console.log("authToken1: " + JSON.stringify(authToken));
         Meteor.users.update({_id:curUser}, {$set: {"authToken":authToken}});
         console.log("curUser: " + curUser);
         var tdfs = Tdfs.find({"owner":curUser}).fetch();//
@@ -46,13 +61,11 @@ API = {
         }
         API.utility.response(context,200,response);
       }
-      console.log("correctPassword:" + JSON.stringify(correctPassword));
     }
   },
   handleRequest: function( context, resource, method ) {
     if(resource==="login"){
       var getRequestContents = API.utility.getRequestContents(context.request);
-      console.log("getRequestContents: " + JSON.stringify(getRequestContents));
       API.login(context,getRequestContents.username,getRequestContents.password);
     }else{
       var connection = API.connection( context.request );
@@ -72,7 +85,7 @@ API = {
       delete getRequestContents.authToken;
       return { owner: validUser, data: getRequestContents };
     } else {
-      return { error: 401, message: "Invalid password." };
+      return { error: 401, message: "Invalid auth token." };
     }
   },
   utility: {
@@ -93,29 +106,21 @@ API = {
     }
   },
   authentication: function( authToken ) {
-    //hash the authToken?
     var curDateTime = new Date();
-    var getUser = Users.find({"authToken.tokenID":authToken,"authToken.expires":{$lt: curDateTime}});
+    curDateTime = curDateTime.getTime() / 1000;
+    var getUser = Meteor.users.findOne({"authToken.tokenID":authToken,"authToken.expires":{"$gt": curDateTime}});
     if ( getUser ) {
-      return getUser.owner;
+      console.log("getUser:" + JSON.stringify(getUser));
+      return getUser._id;
     } else {
       return false;
     }
   },
   methods:{
-    tdfs: {
+    translate: {
       POST: function(context, connection){
-        var listOfTDFS = [];
-        //get the current username's id
-        var curUserID = Meteor.user()._id;
-        //check to see which tdfs they Control (owner == username._id)
-        var myTdfs = Tdfs.find({"owner":curUserID});
-        for(var index in myTdfs){
-          var tdf = myTdfs[index];
-          var tdfname = tdf.fileName;
-          var targetLang = "en-US";
-          listOfTDFS.append({"TDFTargetLang":targetLang,"TDFName":tdfname});
-        }
+        console.log("connection.data:" + JSON.stringify(connection.data));
+        //var translateURL = "https://translate.google.com/#auto/" + targetlang + "/" + wordToTranslate;
         API.utility.response(context,200,listOfTDFS);
       }
     }

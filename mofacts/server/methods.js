@@ -322,13 +322,9 @@ Meteor.startup(function () {
         //an array of error messages on failure. If previous OK is true, then
         //we silently skip duplicate users (this is mainly for experimental
         //participants who are created on the fly)
-        signUpUser: function (newEmail, newUserName, newUserPassword, previousOK) {
+        signUpUser: function (newUserName, newUserPassword, previousOK) {
             serverConsole("signUpUser", newUserName, "previousOK == ", previousOK);
             var checks = [];
-
-            if(!newEmail){
-              checks.push("Must provide an email address");
-            }
 
             if (!newUserName) {
                 checks.push("Blank user names aren't allowed");
@@ -361,7 +357,7 @@ Meteor.startup(function () {
             // NON-google user accounts (which should generally just be experiment
             // participants) - so we make sure to set an initial profile
             var createdId = Accounts.createUser({
-                'email':newEmail,
+                'email': newUserName,
                 'username': newUserName,
                 'password': newUserPassword,
                 'profile': {
@@ -375,7 +371,7 @@ Meteor.startup(function () {
             //Now we need to create a default user profile record
             userProfileSave(createdId, defaultUserProfile());
 
-            //Remeber we return a LIST of errors, so this is success
+            //Remember we return a LIST of errors, so this is success
             return null;
         },
 

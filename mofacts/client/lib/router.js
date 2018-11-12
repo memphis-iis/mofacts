@@ -108,6 +108,11 @@ Router.route('/experiment/:target?/:xcond?', {
         Cookie.set("isExperiment", "1", 21);  // 21 days
         Cookie.set("experimentTarget", target, 21);
         Cookie.set("experimentXCond", xcond, 21);
+        
+        var tdf = Tdfs.findOne({"tdfs.tutor.setspec.experimentTarget":target});
+        if(!!tdf){
+          Session.set("experimentPasswordRequired",tdf.tdfs.tutor.setspec[0].experimentPasswordRequired);
+        }
 
         console.log("EXPERIMENT target:", target, "xcond", xcond);
 
