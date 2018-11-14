@@ -37,10 +37,10 @@ API = {
         console.log("Correct password!");
         var curUser = correctPassword.userId;
         var tokenID = Random.hexString( 32 );
-        var expires = new Date();
+        var expiresDate = new Date();
         var oneWeek = 7 * 24 * 60 * 60 * 1000;
-        expires.setTime(expires.getTime() + oneWeek);
-        expires = expires.getTime() / 1000;
+        expiresDate.setTime(expiresDate.getTime() + oneWeek);
+        var expires = expiresDate.getTime();
         var authToken = {"tokenID":tokenID,"expires":expires};
         console.log("authToken1: " + JSON.stringify(authToken));
         Meteor.users.update({_id:curUser}, {$set: {"authToken":authToken}});
@@ -107,7 +107,7 @@ API = {
   },
   authentication: function( authToken ) {
     var curDateTime = new Date();
-    curDateTime = curDateTime.getTime() / 1000;
+    curDateTime = curDateTime.getTime();
     var getUser = Meteor.users.findOne({"authToken.tokenID":authToken,"authToken.expires":{"$gt": curDateTime}});
     if ( getUser ) {
       console.log("getUser:" + JSON.stringify(getUser));

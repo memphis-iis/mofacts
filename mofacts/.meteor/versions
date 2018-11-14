@@ -36,6 +36,7 @@ fourseven:scss@4.9.0
 geojson-utils@1.0.10
 google-config-ui@1.0.0
 google-oauth@1.2.5
+harrison:papa-parse@1.1.7
 html-tools@1.0.11
 htmljs@1.0.11
 http@1.4.1

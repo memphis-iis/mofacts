@@ -338,8 +338,9 @@ Meteor.startup(function () {
                         // change the password
                         Accounts.setPassword(prevUser._id, newUserPassword);
                         return null; //User has already been created - nothing to do
+                    }else{
+                      checks.push("User is already in use");
                     }
-                    checks.push("User is already in use");
                 }
             }
 
@@ -516,6 +517,26 @@ Meteor.startup(function () {
                 'roleAction': roleAction,
                 'roleName': roleName
             };
+        },
+
+        saveUsersFile: function(filename,filecontents){
+          console.log("saveUsersFile: " + filename);
+          var allErrors = [];
+          var rows = Papa.parse(filecontents).data;
+          var headerRow = rows[0];
+          rows = rows.slice(1);
+          for(var index in rows){
+            var row = rows[index];
+            var username = row[0];
+            var password = row[1];
+            Meteor.call('signUpUser',username,password,true,function(error,result){
+              if(!!error){
+                allErrors.push({username:error});
+              }
+            });
+          }
+          console.log("allErrors: " + JSON.stringify(allErrors));
+          return allErrors;
         },
 
         //Allow file uploaded with name and contents. The type of file must be
