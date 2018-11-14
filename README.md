@@ -172,3 +172,17 @@ $ vagrant destroy
 
 This is a low risk activity, since you can always run `vagrant up` to recreate
 the virtual machine for you.
+
+## Caveats
+
+* Older versions of Firefox that don't support HTML5 Web Audio are not compatible with MoFaCTs. This incompatibility 
+  is usually indicated by a "speechSynthesis is not defined or supported" error in the console.
+  
+* Server deployments should be performed as the root user, e.g. `sudo ./deploy.sh`. Failing to do this will cause a build
+  error relating to the _fibers_ package.
+  
+* MoFaCTs runs on Node 8.x. Older versions of Node will throw a libstdc++.so.6 at build time.
+
+* MoFaCTs must be built for Linux 64-bit architecture (`os.linux.x86_64`) _without_ Node being installed on the 
+  vagrant host machine. With Node host conflicts or the wrong architecture specified, a `unexpected token { const pause ...` 
+  error can be seen at build time.

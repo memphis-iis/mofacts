@@ -9,6 +9,9 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
 
+// Open file stream for active user log
+var activeUserLogStream = fs.createWriteStream("activeUserLog.csv", {flags: 'a'});
+
 //Helper functions
 
 serverConsole = function() {
@@ -39,6 +42,15 @@ function defaultUserProfile() {
         aws_secret_key: '',
         use_sandbox: true
     };
+}
+
+// Append a row to CSV file that serves as a log of online users
+function logNumOnlineUsers() {
+  var now = (new Date()).toString();
+  var numUsers = Meteor.call('numOnlineUsers');
+  var rowToWrite = now + ',' + numUsers + '\n';
+  activeUserLogStream.write(rowToWrite);
+  serverConsole('Logged ' + numUsers + ' active users.');
 }
 
 // Save the given user profile via "upsert" logic
@@ -151,6 +163,8 @@ SyncedCron.config({
 //Server-side startup logic
 
 Meteor.startup(function () {
+
+  
     // Let anyone looking know what config is in effect
     serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 
@@ -649,6 +663,11 @@ Meteor.startup(function () {
 
             serverConsole(usr + " " + logtxt);
         },
+      
+      numOnlineUsers: function () {
+        return Meteor.users.find({'status.online':true}).count();
+      },
+      
     });
 
     //Create any helpful indexes for queries we run
@@ -663,6 +682,12 @@ Meteor.startup(function () {
         schedule: function(parser) { return parser.text('every 5 minutes'); },
         job: function() { return sendScheduledTurkMessages(); }
     });
+
+  SyncedCron.add({
+    name: 'Log Number Online Users',
+    schedule: function(parser) { return parser.text('every 5 minutes'); },
+    job: function() { return logNumOnlineUsers(); }
+  });
 });
 
 //We use a special server-side route for our experimental data download

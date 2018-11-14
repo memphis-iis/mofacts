@@ -242,7 +242,7 @@ function beginMainCardTimeout(delay, func) {
 
 //Reset the previously set timeout counter
 resetMainCardTimeout = function() {
-    console.log("RESETTING MAIN CARD TIMEOUT");
+    console.log("-RESETTING MAIN CARD TIMEOUT-");
     var savedFunc = timeoutFunc;
     var savedDelay = timeoutDelay;
     clearCardTimeout();

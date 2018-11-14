@@ -216,9 +216,13 @@ Answers = {
                 if (userInput === "") {
                     matchText = "The correct answer is " + dispAnswer + ".";
                 }
-                else {
-                    matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
+              else {
+                if(!getFeedbackForFalseResponse(userInput)){
+                  matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
+                } else {
+                  matchText = isCorrect ? "Correct" : getFeedbackForFalseResponse(userInput);
                 }
+              }
             }
 
             return [isCorrect, matchText];
