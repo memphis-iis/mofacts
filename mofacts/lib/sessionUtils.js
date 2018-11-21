@@ -24,8 +24,10 @@
  * currentUnitStartTime      - Mostly only for lock-outs
  * debugging                 - Generic debugging flag
  * enableAudioPromptAndFeedback
+ * experimentPasswordRequired - If enabled we'll prompt for a password in the experiment page
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
+ * filter                    - filter for user admin page
  * ignoreClusterMapping      - see unitEngine.js and currentTestingHelpers.js
  * ignoreOutOfGrammarResponses - speech input, only transcribe if recognized word in answer set
  * lastTimestamp             - set only by resume logic in card
@@ -67,6 +69,8 @@ sessionCleanUp = function() {
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
     Session.set("enableAudioPromptAndFeedback",false);
+    Session.set("experimentPasswordRequired",false);
+    Session.set("filter","@gmail.com");
     Session.set("ignoreOutOfGrammarResponses",false);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);

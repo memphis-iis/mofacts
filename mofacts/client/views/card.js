@@ -242,7 +242,7 @@ function beginMainCardTimeout(delay, func) {
 
 //Reset the previously set timeout counter
 resetMainCardTimeout = function() {
-    console.log("-RESETTING MAIN CARD TIMEOUT-");
+    console.log("RESETTING MAIN CARD TIMEOUT");
     var savedFunc = timeoutFunc;
     var savedDelay = timeoutDelay;
     clearCardTimeout();
@@ -473,9 +473,11 @@ Template.card.events({
 // Template helpers and meteor events
 
 var soundsDict = {};
+var imagesDict = {};
 var onEndCallbackDict = {};
 
 Template.card.rendered = function() {
+  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     var audioInputEnabled = Session.get("audioEnabled");
     var audioInputDetectionInitialized = Session.get("VADInitialized");
     //If user has enabled audio input initialize web audio (this takes a bit)
@@ -490,6 +492,13 @@ Template.card.rendered = function() {
         preloadAudioFiles();
       }else{
         console.log("Non sound type detected");
+      }
+      var curStimImageSrcs = getCurStimImageSrcs();
+      if(curStimImageSrcs.length > 0){
+        console.log("image type questions detected, pre-loading images");
+        preloadImages(curStimImageSrcs);
+      }else{
+        console.log("Non image type detected");
       }
 
       cardStart();
@@ -516,6 +525,15 @@ Template.card.helpers({
 
     'currentQuestion': function() {
         return Session.get("currentQuestion");
+    },
+
+    'curImageSrc': function(){
+      var curQuestion = Session.get("currentQuestion");
+      if(!!curQuestion){
+        return imagesDict[curQuestion].src;
+      }else{
+        return "";
+      }
     },
 
     'displayAnswer': function() {
@@ -725,6 +743,21 @@ var preloadAudioFiles = function(){
         })(question),
     });
   }
+}
+
+var preloadImages = function(curStimImageSrcs){
+  console.log("curStimImageSrcs: " + JSON.stringify(curStimImageSrcs));
+  imagesDict = {};
+  var img;
+  for(var index in curStimImageSrcs){
+    var src = curStimImageSrcs[index];
+    img = new Image();
+    img.src = src;
+    console.log("img:" + img);
+    imagesDict[src] = img;
+  }
+  console.log("imagesDict: " + JSON.stringify(imagesDict));
+  console.log("img.src:" + img.src);
 }
 
 cardStart = function(){

@@ -2,13 +2,36 @@
     <setspec>
         <lessonname>Images</lessonname>
         <stimulusfile>Imagestims.xml</stimulusfile>
-        <shuffleclusters>0-1 2-2</shuffleclusters>
-        <swapclusters>0-1 2-2</swapclusters>
+        <!--<shuffleclusters>0-1 2-2</shuffleclusters>
+        <swapclusters>0-1 2-2</swapclusters>-->
         <lfparameter>0.80</lfparameter>
-        <isModeled>true</isModeled>
+        <isModeled>false</isModeled>
         <experimentTarget>imgtest</experimentTarget>
         <userselect>false</userselect>
     </setspec>
+    <unit>
+        <unitname>Introduction</unitname>
+        <unitinstructions>This is a testing TDF</unitinstructions>
+    </unit>
+    <unit>
+        <unitname>Random Optimal</unitname>
+        <learningsession>
+            <!-- <clusterlist>0-2</clusterlist> -->
+            <clusterlist>0-14</clusterlist>  <!-- simple multiple choice -->
+            <displayminseconds>30</displayminseconds>
+            <displaymaxseconds>50</displaymaxseconds>
+        </learningsession>
+        <deliveryparams>
+            <drill>15000</drill>
+            <purestudy>10000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>5000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
     <unit>
         <deliveryparams>
             <purestudy>10000</purestudy>

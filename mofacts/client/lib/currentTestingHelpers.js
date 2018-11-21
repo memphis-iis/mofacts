@@ -89,6 +89,24 @@ curStimIsSoundDisplayType = function(){
   }
 }
 
+getCurStimImageSrcs = function(){
+  var imageSrcs = [];
+  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters;
+  for(var index in clusters){
+    var clusterCollection = clusters[index];
+    for(var clusterIndex in clusterCollection){
+      var cluster = clusterCollection[clusterIndex];
+      for(var dtIndex in cluster){
+        var displayType = cluster[dtIndex];
+        if(!!displayType.displayType && displayType.displayType[0] === "Image"){
+          imageSrcs.push(displayType.display[0]);
+        }
+      }
+    }
+  }
+  return imageSrcs;
+}
+
 getAllStimQuestions = function(){
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
   var allQuestions = [];
