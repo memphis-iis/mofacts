@@ -77,6 +77,7 @@ function UserPasswordCheck() {
     if (experiment) {
         if(experimentPasswordRequired){
           sessionCleanUp();
+          Session.set('experimentPasswordRequired',true);
           console.log("username:" + newUsername + ",password:" + newPassword);
           Meteor.loginWithPassword(newUsername, newPassword, function(error) {
               if (typeof error !== 'undefined') {
