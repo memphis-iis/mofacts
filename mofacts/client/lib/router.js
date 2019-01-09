@@ -65,6 +65,7 @@ Session.set("clusterMapping", "");
 
 
 routeToSignin = function() {
+    console.log("routeToSignin");
     // If the isExperiment cookie is set we always for experiment mode. This
     // handles an experimental participant refreshing the browser
     var expCookie = _.chain(Cookie.get("isExperiment")).trim().intval().value();
@@ -75,6 +76,7 @@ routeToSignin = function() {
     }
 
     if (Session.get("loginMode") === "experiment") {
+        console.log("loginMode === experiment");
         var routeParts = ['/experiment'];
 
         var target = Session.get("experimentTarget");
@@ -89,6 +91,7 @@ routeToSignin = function() {
         Router.go(routeParts.join('/'));
     }
     else {
+        console.log("else, signin");
         Router.go("/signin");
     }
 };
@@ -108,22 +111,24 @@ Router.route('/experiment/:target?/:xcond?', {
         Cookie.set("isExperiment", "1", 21);  // 21 days
         Cookie.set("experimentTarget", target, 21);
         Cookie.set("experimentXCond", xcond, 21);
-        
+
         var tdf = Tdfs.findOne({"tdfs.tutor.setspec.experimentTarget":target});
         if(!!tdf){
+          console.log("tdf found");
           Session.set("experimentPasswordRequired",tdf.tdfs.tutor.setspec[0].experimentPasswordRequired);
+
+          console.log("EXPERIMENT target:", target, "xcond", xcond);
+
+          Session.set("clusterMapping", "");
+          this.render('signIn');
         }
-
-        console.log("EXPERIMENT target:", target, "xcond", xcond);
-
-        Session.set("clusterMapping", "");
-        this.render('signIn');
     }
 });
 
 Router.route('/signin', {
     name: "client.signin",
     action: function () {
+        console.log("SIGNIN ROUTE");
         //this.render('signIn');
         this.render('signIn');
     }
