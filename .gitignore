@@ -2,7 +2,7 @@
 *.txt
 .project
 .settings
-mofacts/build
+mofacts/build/*.tar.gz
 .pyc
 .test_results
 .test*.sh
