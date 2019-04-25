@@ -60,6 +60,13 @@ Date.secsIntervalString = function(elapsedSecs) {
 // _.chain(o).prop('bad start').prop('z') == null
 if (_ && _.mixin) {
     _.mixin({
+        split: function(str,delimiter){
+          if(!str){
+            str = "";
+          }
+          return str.split(delimiter);
+        },
+
         safekeys: function(obj) {
             if (_.isString(obj) || !_.isObject(obj)) {
                 return [];

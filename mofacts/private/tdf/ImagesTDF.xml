@@ -8,6 +8,7 @@
         <isModeled>false</isModeled>
         <experimentTarget>imgtest</experimentTarget>
         <userselect>false</userselect>
+        <experimentPasswordRequired>true</experimentPasswordRequired>
     </setspec>
     <unit>
         <unitname>Introduction</unitname>

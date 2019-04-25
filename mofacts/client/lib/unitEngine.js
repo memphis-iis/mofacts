@@ -184,10 +184,13 @@ function emptyUnitEngine() {
 
 
 function modelUnitEngine() {
+    console.log('model unit engine created!!!');
     //Checked against practice seconds. Notice that we capture this on unit
     //creation, so if they leave in the middle of practice and come back to
     //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
+
+    var unitMode = getCurrentDeliveryParams().unitMode;
 
     //We cache the stimuli found since it shouldn't change during the unit
     var cachedStimuli = null;
@@ -197,14 +200,16 @@ function modelUnitEngine() {
         }
         return getStimCluster(index, cachedStimuli);
     }
-    //And we use the caching to implement our our gets for question, answer, and parameter
-    function fastGetStimParameter(clusterIndex, whichParameter) {
-        return _.chain(fastGetStimCluster(clusterIndex))
+
+    function getStimParameterArray(clusterIndex,whichParameter){
+      return _.chain(fastGetStimCluster(clusterIndex))
             .prop("parameter")
             .prop(_.intval(whichParameter))
-            .floatval()
+            .split(',')
+            .map(x => _.floatval(x))
             .value();
     }
+
     function fastGetStimQuestion(index, whichQuestion) {
         return fastGetStimCluster(index).display[whichQuestion];
     }
@@ -225,7 +230,7 @@ function modelUnitEngine() {
         console.log("MODEL UNIT card selection => ",
             "cluster-idx:", clusterIndex,
             "whichStim:", whichStim,
-            "parameter", fastGetStimParameter(clusterIndex, whichStim)
+            "parameter", getStimParameterArray(clusterIndex, whichStim)
         );
     }
 
@@ -278,12 +283,13 @@ function modelUnitEngine() {
             var cluster = fastGetStimCluster(i);
             var numStims = _.chain(cluster).prop("display").prop("length").intval().value();
             for (j = 0; j < numStims; ++j) {
+                var parameter = getStimParameterArray(i,j); //Note this may be a single element array for older stims or a 3 digit array for newer ones
                 // Per-stim counts
                 card.stims.push({
                     stimSuccessCount: 0,
                     stimFailureCount: 0,
                     hasBeenIntroduced: false,
-                    parameter: fastGetStimParameter(i, j)
+                    parameter: parameter
                 });
 
                 initProbs.push({
@@ -433,7 +439,7 @@ function modelUnitEngine() {
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
-        p.stimParameter = fastGetStimParameter(prob.cardIndex, prob.stimIndex);
+        p.stimParameter = getStimParameterArray(prob.cardIndex,prob.stimIndex)[0];
 
         // Calculated metrics
          p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
@@ -518,9 +524,72 @@ function modelUnitEngine() {
         return indexToReturn;
     }
 
+    function findMinProbDistCard(cards,probs){
+      var currentMin = 1.00001; //Magic number to indicate greater than highest possible distance to start
+      var indexToReturn = 0;
+
+      for (var i = probs.length - 1; i >= 0; --i) {
+          var prob = probs[i];
+          var card = cards[prob.cardIndex];
+          var parameters = card.stims[prob.stimIndex].parameter;
+          var optimalProb = parameters[2];
+          if(!optimalProb){
+            console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            optimalProb = 0.90;
+          }
+          console.log("!!!parameters: " + JSON.stringify(parameters) + ", optimalProb: " + optimalProb);
+
+          if (card.canUse && card.trialsSinceLastSeen > 2) {
+              var dist = Math.abs(prob.probability - optimalProb)
+              // Note that we are checking stim probability
+              if (dist < currentMin) {
+                  currentMin = dist;
+                  indexToReturn = i;
+              }
+          }
+      }
+
+      return indexToReturn;
+    }
+
+    function findMaxProbCardThresholdCeilingPerCard(cards,probs){
+      var currentDistFromThresholdCeiling = 1.00001;
+      var indexToReturn = 0;
+
+      for (var i = probs.length - 1; i >= 0; --i) {
+          var prob = probs[i];
+          var card = cards[prob.cardIndex];
+          var parameters = card.stims[prob.stimIndex].parameter;
+
+          var thresholdCeiling = parameters[1];
+          if(!thresholdCeiling){
+            console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            thresholdCeiling = 0.90;
+          }
+          console.log("!!!parameters: " + JSON.stringify(parameters) + ", thresholdCeiling: " + thresholdCeiling + ", card: " + JSON.stringify(card));
+
+          if (card.canUse && card.trialsSinceLastSeen > 2) {
+              var dist = Math.abs(prob.probability - thresholdCeiling);
+              // Note that we are checking stim probability
+              if (dist < currentDistFromThresholdCeiling && prob.probability < thresholdCeiling) {
+                  currentDistFromThresholdCeiling = dist;
+                  indexToReturn = i;
+              }
+          }
+      }
+
+      return indexToReturn;
+    }
+
     //Our actual implementation
     return {
         unitType: "model",
+
+        unitMode: (function(){
+          var unitMode = getCurrentDeliveryParams().unitMode;
+          console.log("UNIT MODE: " + unitMode);
+          return unitMode;
+        })(),
 
         initImpl: function() {
             //We don't want cluster mapping for model-based optmization
@@ -540,9 +609,27 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var probs = cardProbabilities.probs;
 
-            newProbIndex = findMaxProbCard(cards, probs, 0.90);
-            if (newProbIndex === -1) {
-                newProbIndex = findMinProbCard(cards, probs);
+            console.log("selectNextCard unitMode: " + this.unitMode);
+
+            switch(this.unitMode){
+              case 'thresholdCeiling':
+                newProbIndex = findMaxProbCardThresholdCeilingPerCard(cards, probs);
+                break;
+              case 'distance':
+                newProbIndex = findMinProbDistCard(cards,probs);
+                break;
+              case 'highest':
+                newProbIndex = findMaxProbCard(cards, probs, 1.00001); //Magic number to indicate there is no real ceiling (probs should max out at 1.0)
+                if (newProbIndex === -1) {
+                    newProbIndex = findMinProbCard(cards, probs);
+                }
+                break;
+              default:
+                newProbIndex = findMaxProbCard(cards, probs, 0.90);
+                if (newProbIndex === -1) {
+                    newProbIndex = findMinProbCard(cards, probs);
+                }
+                break;
             }
 
             // Found! Update everything and grab a reference to the card
