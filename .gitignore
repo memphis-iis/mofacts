@@ -2,7 +2,7 @@
 *.txt
 .project
 .settings
-mofacts/build
+mofacts/build/*.tar.gz
 .pyc
 .test_results
 .test*.sh
@@ -10,8 +10,10 @@ mofacts/build
 /nbproject/private/
 /nbproject/
 .meteor
-build/
+build/*.tar.gz
 mofacts/settings.json
 .tags*
 mofacts/node_modules
+docker-out/
 \#*\#
+*~
