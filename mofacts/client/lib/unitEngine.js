@@ -190,7 +190,10 @@ function modelUnitEngine() {
     //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
 
-    var unitMode = getCurrentDeliveryParams().unitMode;
+    var unitMode = _.chain(getCurrentTdfUnit())
+        .prop("learningsession").first()
+        .prop("unitMode").trim().value();
+        //getCurrentDeliveryParams().unitMode;
 
     //We cache the stimuli found since it shouldn't change during the unit
     var cachedStimuli = null;
@@ -554,7 +557,12 @@ function modelUnitEngine() {
 
     function findMaxProbCardThresholdCeilingPerCard(cards,probs){
       var currentDistFromThresholdCeiling = 1.00001;
-      var indexToReturn = 0;
+      var indexToReturn = -1;
+
+      var currentDistOverThresholdCeiling = 1.00001;
+      var indexToReturnOverThresholdCeiling = 0;
+
+      //TODO: take one closest to own threshold instead of first
 
       for (var i = probs.length - 1; i >= 0; --i) {
           var prob = probs[i];
@@ -574,8 +582,16 @@ function modelUnitEngine() {
               if (dist < currentDistFromThresholdCeiling && prob.probability < thresholdCeiling) {
                   currentDistFromThresholdCeiling = dist;
                   indexToReturn = i;
+              }else if(dist < currentDistOverThresholdCeiling){
+                currentDistOverThresholdCeiling = dist;
+                indexToReturnOverThresholdCeiling = i;
               }
           }
+
+      }
+
+      if(indexToReturn == -1){
+        indexToReturn = indexToReturnOverThresholdCeiling;
       }
 
       return indexToReturn;
@@ -586,7 +602,10 @@ function modelUnitEngine() {
         unitType: "model",
 
         unitMode: (function(){
-          var unitMode = getCurrentDeliveryParams().unitMode;
+          var unitMode = _.chain(getCurrentTdfUnit())
+              .prop("learningsession").first()
+              .prop("unitMode").trim().value();
+              //getCurrentDeliveryParams().unitMode;
           console.log("UNIT MODE: " + unitMode);
           return unitMode;
         })(),

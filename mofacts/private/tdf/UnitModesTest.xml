@@ -21,6 +21,7 @@
         <unitname>Model Unit</unitname>
         <learningsession>
             <clusterlist>0-1</clusterlist>
+            <unitMode>distance</unitMode>
         </learningsession>
         <deliveryparams>
             <practiceseconds>1000000</practiceseconds>
@@ -32,7 +33,6 @@
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <unitMode>distance</unitMode>
         </deliveryparams>
     </unit>
     <unit>
