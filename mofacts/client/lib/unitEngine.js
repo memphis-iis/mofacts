@@ -250,7 +250,6 @@ function modelUnitEngine() {
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
         }
-
         cardProbabilities = initVals;
     }
 
@@ -292,7 +291,9 @@ function modelUnitEngine() {
                     stimSuccessCount: 0,
                     stimFailureCount: 0,
                     hasBeenIntroduced: false,
-                    parameter: parameter
+                    parameter: parameter,
+                    outcomeHistory: [],
+                    previousCalculatedProbabilities: []
                 });
 
                 initProbs.push({
@@ -444,6 +445,14 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.stimParameter = getStimParameterArray(prob.cardIndex,prob.stimIndex)[0];
 
+        p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
+        p.stimOutcomeHistory = stim.outcomeHistory;
+
+        p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
+        console.log("stim.outcomeHistory: " + JSON.stringify(p.stimOutcomeHistory));
+        console.log("overallOutcomeHistory: " + JSON.stringify(p.overallOutcomeHistory));
+        console.log("previousCalculatedProbabilities: " + JSON.stringify(p.stimPreviousCalculatedProbabilities));
+
         // Calculated metrics
          p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
@@ -464,7 +473,10 @@ function modelUnitEngine() {
         p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
         // Calculate and store probability for stim
-        return probFunction(p);
+        var parms = probFunction(p);
+        var currentCardProbability = parms.probability;
+        stim.previousCalculatedProbabilities.push(currentCardProbability);
+        return parms;
     }
 
     // Calculate current card probabilities for every card - see selectNextCard
@@ -836,6 +848,9 @@ function modelUnitEngine() {
                 if (stim >= 0 && stim < card.stims.length) {
                     if (wasCorrect) card.stims[stim].stimSuccessCount += 1;
                     else            card.stims[stim].stimFailureCount += 1;
+
+                    //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+                    card.stims[stim].outcomeHistory.push(wasCorrect ? 1 : 0);
                 }
             }
 

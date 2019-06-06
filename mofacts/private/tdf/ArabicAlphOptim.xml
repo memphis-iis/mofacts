@@ -37,7 +37,7 @@ Please answer the following 3 quick demographic questions, which may be useful f
                 <groupnames>A</groupnames>
                 <clustersrepeated>1</clustersrepeated>
                 <templatesrepeated>3</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0                </group>
+                <group>0,b,i,0 0,b,i,0 0,b,i,0                </group>
             </conditiontemplatesbygroup>
             <initialpositions>                A_1 A_2 A_3            </initialpositions>
             <randomizegroups>false</randomizegroups>

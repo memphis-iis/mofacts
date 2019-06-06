@@ -164,7 +164,7 @@ SyncedCron.config({
 
 Meteor.startup(function () {
 
-  
+
     // Let anyone looking know what config is in effect
     serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 
@@ -663,11 +663,11 @@ Meteor.startup(function () {
 
             serverConsole(usr + " " + logtxt);
         },
-      
+
       numOnlineUsers: function () {
         return Meteor.users.find({'status.online':true}).count();
       },
-      
+
     });
 
     //Create any helpful indexes for queries we run

@@ -587,17 +587,17 @@ Template.card.helpers({
     },
 
     'drill': function() {
-      return getTestType() === "d" || getTestType() === "m" || getTestType() === "n";
+      return getTestType() === "d" || getTestType() === "m" || getTestType() === "n" || getTestType() === "i";
     },
 
     'trial': function() {
         var type = getTestType();
-        return type === "d" || type === "s" || type === "t" || type === "m" || type === "n";
+        return type === "d" || type === "s" || type === "t" || type === "m" || type === "n" || type === "i";
     },
 
     'testordrill': function() {
         var type = getTestType();
-        return type === "d" || type === "t" || type === "m" || type === "n";
+        return type === "d" || type === "t" || type === "m" || type === "n" || type === "i";
     },
 
     'fontSizeClass': function() {
@@ -1149,12 +1149,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
         //timeout for our logic below so just use the minimum
         timeout = 1;
     }
-    else if (getTestType() === "t") {
-        //A test - we don't have timeouts since they don't get feedback about
+    else if (getTestType() === "t" || getTestType() === "i") {
+        //A test or instruction unit - we don't have timeouts since they don't get feedback about
         //how they did (that's what drills are for)
         timeout = 1;
     }
-  else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
+    else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
         //Drill - the timeout depends on how they did
         if (isCorrect) {
             timeout = _.intval(deliveryParams.correctprompt);
@@ -1350,6 +1350,7 @@ function unitIsFinished(reason) {
 function recordProgress(question, answer, userAnswer, isCorrect) {
     var uid = Meteor.userId();
     if (!uid) {
+        console.log("NO USER ID!!!");
         return;
     }
 
@@ -1368,9 +1369,16 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
         isCorrect: isCorrect,
     });
 
+    //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+    //Ignore instruction type questions for overallOutcomeHistory
+    if(Session.get("testType") != "i"){
+      prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    }
+
     // Note that we track the score in the user progress object, but we
     // copy it to the Session object for template updates
     scoring = getCurrentScoreValues();  // in format [correct, incorrect]
+
     var oldScore = _.intval(prog.currentScore);
     var newScore = oldScore + (isCorrect ? scoring[0] : -scoring[1]);
     prog.currentScore = newScore;
@@ -2221,6 +2229,7 @@ function processUserTimesLog() {
 
     //Before the below options, reset current test data
     initUserProgress({
+        overallOutcomeHistory: [],
         progressDataArray: [],
         currentSchedule: {}
     });

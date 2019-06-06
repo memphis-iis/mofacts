@@ -178,6 +178,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         var initVals = {
             currentTestMode: "NONE",
             currentScore: 0,
+            overallOutcomeHistory: [],
             progressDataArray: []
         };
 

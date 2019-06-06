@@ -130,7 +130,7 @@ AssessmentSession = {
                     //"parts" is a comma-delimited entry with 4 components:
                     // 0 - the offset (whichStim) - can be numeric or "r" for random
                     // 1 - legacy was f/b, now "b" forces a button trial
-                    // 2 - trial type (t, d, s)
+                    // 2 - trial type (t, d, s, m, n, i)
                     // 3 - location (added to qidx)
                     var groupEntry = group[index * templateSize + k];
                     var parts = groupEntry.split(",");
