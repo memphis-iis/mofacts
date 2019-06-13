@@ -278,7 +278,9 @@ function modelUnitEngine() {
                 stims: [],
                 practiceTimes: [],
                 otherPracticeTimeSinceFirst: 0,
-                otherPracticeTimeSinceLast: 0
+                otherPracticeTimeSinceLast: 0,
+                outcomeHistory: [],
+                previousCalculatedProbabilities: []
             };
 
             // We keep per-stim and re-response-text results as well
@@ -445,13 +447,24 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.stimParameter = getStimParameterArray(prob.cardIndex,prob.stimIndex)[0];
 
+        p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
+        p.clusterOutcomeHistory = card.outcomeHistory;
+
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
         p.stimOutcomeHistory = stim.outcomeHistory;
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
+
+        console.log("cardIndex: " + prob.cardIndex + ", stimIndex: " + prob.stimIndex);
+        console.log("stimResponseText: " + p.stimResponseText);
+
+        console.log("clusterPreviousCalculatedProbabilities: " + JSON.stringify(p.clusterPreviousCalculatedProbabilities));
+        console.log("clusterOutcomeHistory: " + JSON.stringify(p.clusterOutcomeHistory));
+
         console.log("stim.outcomeHistory: " + JSON.stringify(p.stimOutcomeHistory));
+        console.log("stimPreviousCalculatedProbabilities: " + JSON.stringify(p.stimPreviousCalculatedProbabilities));
+
         console.log("overallOutcomeHistory: " + JSON.stringify(p.overallOutcomeHistory));
-        console.log("previousCalculatedProbabilities: " + JSON.stringify(p.stimPreviousCalculatedProbabilities));
 
         // Calculated metrics
          p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
@@ -472,11 +485,7 @@ function modelUnitEngine() {
 
         p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
-        // Calculate and store probability for stim
-        var parms = probFunction(p);
-        var currentCardProbability = parms.probability;
-        stim.previousCalculatedProbabilities.push(currentCardProbability);
-        return parms;
+        return probFunction(p);
     }
 
     // Calculate current card probabilities for every card - see selectNextCard
@@ -640,6 +649,9 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var probs = cardProbabilities.probs;
 
+            console.log("!!!cards: " + JSON.stringify(cards));
+            console.log("!!!probs: " + JSON.stringify(probs));
+
             console.log("selectNextCard unitMode: " + this.unitMode);
 
             switch(this.unitMode){
@@ -663,11 +675,17 @@ function modelUnitEngine() {
                 break;
             }
 
-            // Found! Update everything and grab a reference to the card
+            // Found! Update everything and grab a reference to the card and stim
             var prob = probs[newProbIndex];
             var cardIndex = prob.cardIndex;
             var card = cards[cardIndex];
             var whichStim = prob.stimIndex;
+            var stim = card.stims[whichStim];
+
+            // Store calculated probability for selected stim/cluster
+            var currentStimProbability = prob.probability;
+            stim.previousCalculatedProbabilities.push(currentStimProbability);
+            card.previousCalculatedProbabilities.push(currentStimProbability);
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
@@ -843,6 +861,8 @@ function modelUnitEngine() {
             if (card) {
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
+
+                card.outcomeHistory.push(wasCorrect ? 1 : 0);
 
                 var stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
