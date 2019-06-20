@@ -295,7 +295,11 @@ function modelUnitEngine() {
                     hasBeenIntroduced: false,
                     parameter: parameter,
                     outcomeHistory: [],
-                    previousCalculatedProbabilities: []
+                    previousCalculatedProbabilities: [],
+                    lastShownTimestamp: 0,
+                    firstShownTimestamp: 0,
+                    otherPracticeTimeSinceFirst: 0,
+                    otherPracticeTimeSinceLast: 0
                 });
 
                 initProbs.push({
@@ -439,6 +443,10 @@ function modelUnitEngine() {
         p.questionSecsPracticingOthers = secs(card.otherPracticeTimeSinceFirst);
 
         // Stimulus/cluster-version metrics
+        p.stimSecsSinceLastShown = elapsed(stim.lastShownTimestamp);
+        p.stimSecsSinceFirstShown = elapsed(stim.firstShownTimestamp);
+        p.stimSecsPracticingOthers = secs(stim.otherPracticeTimeSinceFirst);
+
         p.stimSuccessCount = stim.stimSuccessCount;
         p.stimFailureCount = stim.stimFailureCount;
         p.stimResponseText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex));
@@ -715,6 +723,11 @@ function modelUnitEngine() {
                 card.firstShownTimestamp = card.lastShownTimestamp;
             }
 
+            stim.lastShownTimestamp = Date.now();
+            if(stim.firstShownTimestamp < 1 && stim.lastTimestamp > 0) {
+              stim.firstShownTimestamp = stim.lastShownTimestamp;
+            }
+
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
 
@@ -741,7 +754,10 @@ function modelUnitEngine() {
                     'Card Last Seen:', elapsedStr(card.lastShownTimestamp),
                     'Total time in practice:', secsStr(_.sum(card.practiceTimes)),
                     'Previous Practice Times:', displayify(_.map(card.practiceTimes, secsStr)),
-                    'Total time in other practice:', secs(card.otherPracticeTimeSinceFirst)
+                    'Total time in other practice:', secs(card.otherPracticeTimeSinceFirst),
+                    'Stim First Seen:', elapsedStr(stim.firstShownTimestamp),
+                    'Stim Last Seen:',elapsedStr(stim.lastShownTimestamp),
+                    'Stim Total time in other practice:', secs(stim.otherPracticeTimeSinceFirst)
                 );
 
                 // Display response and current response stats
@@ -821,6 +837,7 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
             var card = _.prop(cards, cluster.clusterIndex);
+            var stim = card.stims[currentCardInfo.whichStim];
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
@@ -833,10 +850,23 @@ function modelUnitEngine() {
                     card.practiceTimes.push(practice);
                     card.otherPracticeTimeSinceLast = 0;
                     _.each(cards, function(otherCard, index) {
-                        if (index != cluster.clusterIndex && otherCard.firstShownTimestamp > 0) {
+                      if(otherCard.firstShownTimestamp > 0){
+                        if (index != cluster.clusterIndex) {
                             otherCard.otherPracticeTimeSinceFirst += practice;
                             otherCard.otherPracticeTimeSinceLast += practice;
+                            _.each(otherCard.stims, function(otherStim, index){
+                              otherStim.otherPracticeTimeSinceFirst += practice;
+                              otherStim.otherPracticeTimeSinceLast += practice;
+                            });
+                        }else{
+                          _.each(otherCard.stims, function(otherStim, index){
+                            if(index != currentCardInfo.whichStim){
+                              otherStim.otherPracticeTimeSinceFirst += practice;
+                              otherStim.otherPracticeTimeSinceLast += practice;
+                            }
+                          });
                         }
+                      }
                     });
                 }
             }
