@@ -234,7 +234,13 @@ function clearCardTimeout() {
 //Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
 function beginMainCardTimeout(delay, func) {
     clearCardTimeout();
-    timeoutFunc = func;
+    timeoutFunc = function(){
+      if(document.location.pathname != "/card"){
+        leavePage(function(){console.log("cleaning up page after nav away from card")});
+      }else{
+        func();
+      }
+    };
     timeoutDelay = delay;
     timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
     varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
@@ -362,6 +368,7 @@ window.onpopstate = function(event){
 
 //Clean up things if we navigate away from this page
 function leavePage(dest) {
+    console.log("leaving page for dest: " + dest);
     if(window.speechSynthesis.speaking){
       window.speechSynthesis.pause();
       window.speechSynthesis.cancel();

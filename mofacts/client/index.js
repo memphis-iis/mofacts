@@ -25,6 +25,17 @@ redoCardImage = function() {
 };
 
 Meteor.startup(function() {
+    console.logs = [];
+    console.defaultLog = console.log.bind(console);
+    console.log = function() {
+      console.defaultLog.apply(console,arguments);
+      //TODO: uncomment this when log rotation is set up
+      // try{
+      //   Meteor.call('serverLog',JSON.stringify({"datetime":Date().toString(),"page":document.location.pathname,"value":Array.from(arguments)}));
+      // }catch{
+      //   console.defaultLog("couldn't stringify and convert to array: ", arguments);
+      // }
+    }
     Session.set("debugging", true);
     sessionCleanUp();
 

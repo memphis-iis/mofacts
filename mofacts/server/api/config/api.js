@@ -30,11 +30,11 @@ API = {
     if(user){
       var correctPassword = Accounts._checkPassword(user,password);
       if(!!correctPassword.error){
-        console.log("incorrect password!");
+        serverConsole("incorrect password!");
         var response = {"error":"Incorrect password"};
         API.utility.response(context,401,response);
       }else{
-        console.log("Correct password!");
+        serverConsole("Correct password!");
         var curUser = correctPassword.userId;
         var tokenID = Random.hexString( 32 );
         var expiresDate = new Date();
@@ -42,11 +42,11 @@ API = {
         expiresDate.setTime(expiresDate.getTime() + oneWeek);
         var expires = expiresDate.getTime();
         var authToken = {"tokenID":tokenID,"expires":expires};
-        console.log("authToken1: " + JSON.stringify(authToken));
+        serverConsole("authToken1: " + JSON.stringify(authToken));
         Meteor.users.update({_id:curUser}, {$set: {"authToken":authToken}});
-        console.log("curUser: " + curUser);
+        serverConsole("curUser: " + curUser);
         var tdfs = Tdfs.find({"owner":curUser}).fetch();//
-        console.log("tdfs: " + JSON.stringify(tdfs[0]));
+        serverConsole("tdfs: " + JSON.stringify(tdfs[0]));
         var tdfFileNames = [];
         for(var index in tdfs){
           var tdf = tdfs[index];
@@ -110,7 +110,7 @@ API = {
     curDateTime = curDateTime.getTime();
     var getUser = Meteor.users.findOne({"authToken.tokenID":authToken,"authToken.expires":{"$gt": curDateTime}});
     if ( getUser ) {
-      console.log("getUser:" + JSON.stringify(getUser));
+      serverConsole("getUser:" + JSON.stringify(getUser));
       return getUser._id;
     } else {
       return false;
@@ -119,7 +119,7 @@ API = {
   methods:{
     translate: {
       POST: function(context, connection){
-        console.log("connection.data:" + JSON.stringify(connection.data));
+        serverConsole("connection.data:" + JSON.stringify(connection.data));
         //var translateURL = "https://translate.google.com/#auto/" + targetlang + "/" + wordToTranslate;
         API.utility.response(context,200,listOfTDFS);
       }

@@ -463,17 +463,6 @@ function modelUnitEngine() {
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
 
-        console.log("cardIndex: " + prob.cardIndex + ", stimIndex: " + prob.stimIndex);
-        console.log("stimResponseText: " + p.stimResponseText);
-
-        console.log("clusterPreviousCalculatedProbabilities: " + JSON.stringify(p.clusterPreviousCalculatedProbabilities));
-        console.log("clusterOutcomeHistory: " + JSON.stringify(p.clusterOutcomeHistory));
-
-        console.log("stim.outcomeHistory: " + JSON.stringify(p.stimOutcomeHistory));
-        console.log("stimPreviousCalculatedProbabilities: " + JSON.stringify(p.stimPreviousCalculatedProbabilities));
-
-        console.log("overallOutcomeHistory: " + JSON.stringify(p.overallOutcomeHistory));
-
         // Calculated metrics
          p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
@@ -656,9 +645,6 @@ function modelUnitEngine() {
             var numItemsPracticed = cardProbabilities.numQuestionsAnswered;
             var cards = cardProbabilities.cards;
             var probs = cardProbabilities.probs;
-
-            console.log("!!!cards: " + JSON.stringify(cards));
-            console.log("!!!probs: " + JSON.stringify(probs));
 
             console.log("selectNextCard unitMode: " + this.unitMode);
 

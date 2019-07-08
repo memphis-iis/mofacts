@@ -332,6 +332,13 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        serverLog: function(data){
+          if(Meteor.user()){
+            logData = "User:" + Meteor.user()._id + ', log:' + data;
+            console.log(logData);
+          }
+        },
+
         //Functionality to create a new user ID: return null on success. Return
         //an array of error messages on failure. If previous OK is true, then
         //we silently skip duplicate users (this is mainly for experimental
@@ -534,7 +541,7 @@ Meteor.startup(function () {
         },
 
         saveUsersFile: function(filename,filecontents){
-          console.log("saveUsersFile: " + filename);
+          serverConsole("saveUsersFile: " + filename);
           var allErrors = [];
           var rows = Papa.parse(filecontents).data;
           var headerRow = rows[0];
@@ -549,7 +556,7 @@ Meteor.startup(function () {
               }
             });
           }
-          console.log("allErrors: " + JSON.stringify(allErrors));
+          serverConsole("allErrors: " + JSON.stringify(allErrors));
           return allErrors;
         },
 
