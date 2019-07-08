@@ -354,6 +354,37 @@ function modelUnitEngine() {
         return t < 1 ? 0 : secs(Date.now() - t);
     }
 
+    function mul(m1, m2) {
+        var result = 0;
+        var len = m1.length;
+        for (var i = 0; i < len; i++) {
+            result += m1[i] * m2[i];
+        }
+        return result;
+        }
+
+    function propdec(outcomes, decay) {
+        if (outcomes) { var w = outcomes.unshift(1);
+        return mul(outcomes,
+            [...Array(w).keys()].reverse()
+            .map(function (value, index) { return Math.pow(decay,value) }))/
+            [...Array(w+1).keys()].reverse()
+            .map(function (value, index) { return Math.pow(decay,value) })
+            .reduce((a, b) => a + b, 0);}
+            return .5;
+    }
+
+    function baselevel(age,interference,d,f) {
+        return 1 / Math.pow(1 + interference + ((age - interference) * f),  d)
+    }
+    
+    function quaddiffcor (probs){
+        return probs.reduce((a, b) => a + b, 0)-mul(probs,probs)
+    }
+    function linediffincor (probs){
+        return probs.reduce((a, b) => a + b, 0)
+    }
+
     // This is the final probability calculation used below if one isn't given
     // in the unit's learningsession/calculateProbability tag
     function defaultProbFunction(p) {
@@ -553,7 +584,7 @@ function modelUnitEngine() {
           var prob = probs[i];
           var card = cards[prob.cardIndex];
           var parameters = card.stims[prob.stimIndex].parameter;
-          var optimalProb = parameters[2];
+          var optimalProb = parameters[1];
           if(!optimalProb){
             console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
