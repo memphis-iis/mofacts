@@ -354,37 +354,6 @@ function modelUnitEngine() {
         return t < 1 ? 0 : secs(Date.now() - t);
     }
 
-    function mul(m1, m2) {
-        var result = 0;
-        var len = m1.length;
-        for (var i = 0; i < len; i++) {
-            result += m1[i] * m2[i];
-        }
-        return result;
-        }
-
-    function propdec(outcomes, decay) {
-        if (outcomes) { var w = outcomes.unshift(1);
-        return mul(outcomes,
-            [...Array(w).keys()].reverse()
-            .map(function (value, index) { return Math.pow(decay,value) }))/
-            [...Array(w+1).keys()].reverse()
-            .map(function (value, index) { return Math.pow(decay,value) })
-            .reduce((a, b) => a + b, 0);}
-            return .5;
-    }
-
-    function baselevel(age,interference,d,f) {
-        return 1 / Math.pow(1 + interference + ((age - interference) * f),  d)
-    }
-    
-    function quaddiffcor (probs){
-        return probs.reduce((a, b) => a + b, 0)-mul(probs,probs)
-    }
-    function linediffincor (probs){
-        return probs.reduce((a, b) => a + b, 0)
-    }
-
     // This is the final probability calculation used below if one isn't given
     // in the unit's learningsession/calculateProbability tag
     function defaultProbFunction(p) {
@@ -417,7 +386,7 @@ function modelUnitEngine() {
 
         p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
-        p.y = p.stimParameter +
+        p.y = p.stimParameters[0] +
         0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
         0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
         1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+
@@ -484,7 +453,7 @@ function modelUnitEngine() {
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
-        p.stimParameter = getStimParameterArray(prob.cardIndex,prob.stimIndex)[0];
+        p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
         p.clusterOutcomeHistory = card.outcomeHistory;
@@ -495,23 +464,7 @@ function modelUnitEngine() {
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
 
         // Calculated metrics
-         p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
-        p.meanSpacing = 0;
-
-        if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
-            p.meanspacing = 1;
-        } else {
-            if (p.questionStudyTrialCount + p.questionTotalTests > 1) {
-                p.meanSpacing = Math.max(
-                        1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294)
-                        );
-            }
-        }
-
-        p.intbs = p.meanSpacing * p.baseLevel;
-
-        p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
         return probFunction(p);
     }
