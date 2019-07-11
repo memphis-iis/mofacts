@@ -173,6 +173,31 @@ $ vagrant destroy
 This is a low risk activity, since you can always run `vagrant up` to recreate
 the virtual machine for you.
 
+## FAQs
+
+###Question
+
+I'm encountering the following error when trying to run meteor:
+````
+vagrant@vagrant-ubuntu-trusty-64:~/mofacts/mofacts$ ./run_meteor
+-bash: ./run_meteor: /bin/bash^M: bad interpreter: No such file or directory
+````
+
+###Solution
+
+This is an error due to the run_meteor file's line endings being converted to windows line endings and not linux line endings.  To fix it simply run the following commands inside the vagrant vm:
+
+````
+sudo apt-get install dos2unix
+dos2unix run_meteor
+````
+
+Then simply run meteor as normal with 
+
+````
+./run_meteor
+````
+
 ## Caveats
 
 * Older versions of Firefox that don't support HTML5 Web Audio are not compatible with MoFaCTs. This incompatibility 
