@@ -129,7 +129,6 @@ Router.route('/signin', {
     name: "client.signin",
     action: function () {
         console.log("SIGNIN ROUTE");
-        //this.render('signIn');
         this.render('signIn');
     }
 });
@@ -189,6 +188,13 @@ Router.route('/soundTest', {
     name: "client.soundTest",
     action: function () {
         this.render('soundTest');
+    }
+});
+
+Router.route('/classEdit', {
+    name: "client.classEdit",
+    action: function () {
+        this.render('classEdit');
     }
 });
 
