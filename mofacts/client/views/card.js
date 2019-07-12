@@ -493,21 +493,6 @@ Template.card.rendered = function() {
     if(audioInputEnabled && !audioInputDetectionInitialized){
       initializeAudio();
     }else{
-      //Pre-load sounds to be played into soundsDict to avoid audio lag issues
-      if(curStimIsSoundDisplayType()){
-        console.log("Sound type questions detected, pre-loading sounds");
-        preloadAudioFiles();
-      }else{
-        console.log("Non sound type detected");
-      }
-      var curStimImageSrcs = getCurStimImageSrcs();
-      if(curStimImageSrcs.length > 0){
-        console.log("image type questions detected, pre-loading images");
-        preloadImages(curStimImageSrcs);
-      }else{
-        console.log("Non image type detected");
-      }
-
       cardStart();
     }
 };
@@ -2126,6 +2111,21 @@ function resumeFromUserTimesLog() {
         console.log("No Experimental condition is required: continuing");
         conditionAction = "condition-notify";
         conditionData.note = "No exp condition necessary";
+    }
+    
+    //Pre-load sounds to be played into soundsDict to avoid audio lag issues
+    if(curStimIsSoundDisplayType()){
+      console.log("Sound type questions detected, pre-loading sounds");
+      preloadAudioFiles();
+    }else{
+      console.log("Non sound type detected");
+    }
+    var curStimImageSrcs = getCurStimImageSrcs();
+    if(curStimImageSrcs.length > 0){
+      console.log("image type questions detected, pre-loading images");
+      preloadImages(curStimImageSrcs);
+    }else{
+      console.log("Non image type detected");
     }
 
     //Add some session data to the log message we're sending
