@@ -102,6 +102,9 @@
             {{#if isInRole 'admin'}}
                 {{> userAdmin}}
             {{/if}}
+            {{#if isInRole 'admin, teacher'}}
+                {{> classEdit}}
+            {{/if}}
         {{/if}}
 
         <br><br>

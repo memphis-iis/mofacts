@@ -133,10 +133,15 @@ Meteor.publish(null, function () {
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find({})
+        UserMetrics.find({}),
+        Classes.find({})
     ];
 
     return defaultData;
+});
+
+Meteor.publish('classes',function(){
+  return Classes.find({instructor:this.userId});
 });
 
 Meteor.publish('allUsers', function () {
@@ -332,6 +337,21 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        addClass: function(myClass){
+          console.log("add myClass:" + JSON.stringify(myClass));
+          return Classes.insert(myClass);
+        },
+
+        editClass:function(myClass){
+          console.log("edit myClass:" + JSON.stringify(myClass));
+          Classes.update({"_id":myClass._id},myClass,{upsert: true});
+          return myClass._id;
+        },
+
+        deleteClass: function(myClass){
+          Classes.remove({"instructor":this.userId,"name":myClass.name});
+        },
+
         serverLog: function(data){
           if(Meteor.user()){
             logData = "User:" + Meteor.user()._id + ', log:' + data;

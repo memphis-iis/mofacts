@@ -64,7 +64,7 @@ Template.body.events({
               console.log("User:", Meteor.user(), "Error:", error);
           }
           else {
-              routeToSignin();
+              Router.go("/signInOauth");
           }
       });
   }
