@@ -198,6 +198,13 @@ Router.route('/classEdit', {
     }
 });
 
+Router.route('/teacherReporting',{
+    name: "client.teacherReporting",
+    action: function () {
+        this.render('teacherReporting');
+    }
+})
+
 //Sends the user to the choose page where the user can choose
 //between viewing all of the items or all of the students for the system.
 Router.route('/choose', {

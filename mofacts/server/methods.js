@@ -140,6 +140,10 @@ Meteor.publish(null, function () {
     return defaultData;
 });
 
+Meteor.publish('tdfs', function(){
+  return Tdfs.find({});
+})
+
 Meteor.publish('classes',function(){
   return Classes.find({instructor:this.userId});
 });
@@ -153,7 +157,6 @@ Meteor.publish('allUsers', function () {
     }
 	return Meteor.users.find({}, opts);
 });
-
 
 //Config for scheduled jobs - the start command is at the end of
 //Meteor.startup below
@@ -337,6 +340,14 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        usernameToIDMap:function(){
+          usernameToIDMap = {};
+          Meteor.users.find({}).forEach(function(user){
+            usernameToIDMap[user.username] = user._id;
+          })
+          return usernameToIDMap;
+        },
+
         addClass: function(myClass){
           console.log("add myClass:" + JSON.stringify(myClass));
           return Classes.insert(myClass);

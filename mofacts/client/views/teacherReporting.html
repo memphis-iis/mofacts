@@ -1,0 +1,47 @@
+<template name="teacherReporting">
+{{#if isInRole 'admin, teacher'}}
+  <br /><br />
+  <div class="row">
+      <div class="col-md-offset-3 col-md-6">
+          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#teacherReportingCollapse" aria-expanded="false" aria-controls="teacherReportingCollapse">
+              Teacher Reporting
+          </button>
+      </div>
+  </div>
+
+  <div class="row collapse" id="teacherReportingCollapse">
+    <legend class="text-center">Teacher Reporting</legend>
+    <div>
+      <div>
+        <select id="tdf-select">
+            <option selected="selected" value="" disabled="true">Select a tdf</option>
+            {{#each tdfs}}
+              <option value="{{this.fileName}}">{{this.fileName}}</option>
+            {{/each}}
+        </select>
+      </div>
+      <ul class="nav nav-tabs">
+        {{#each classes}}
+          <li><a data-toggle="tab" href="#{{replaceSpacesWithUnderscores this.name}}" class="myNavTab">{{this.name}}</a></li>
+        {{/each}}
+      </ul>
+      <div class="tab-content">
+        {{#each classes}}
+          <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade">
+            <table>
+              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th></tr>
+              {{#each studentInCurClass in getCurClassStudents this.name}}
+                <tr>
+                  <td>{{studentInCurClass.username}}</td>
+                  <td>{{studentInCurClass.percentCorrect}}</td>
+                  <td>{{studentInCurClass.count}}</td>
+                </tr>
+              {{/each}}
+            </table>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+{{/if}}
+</template>

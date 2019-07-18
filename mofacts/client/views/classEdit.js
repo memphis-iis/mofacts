@@ -2,7 +2,7 @@ Session.set("classes",[]);
 
 var isNewClass = true;
 
-classSelectedSetup = function(curClassName){
+function classSelectedSetup(curClassName){
     //$("#newClassName").prop('disabled',true);
     $("#newClassName").val(curClassName);
     $("#deleteClass").prop('disabled',false);
@@ -22,7 +22,7 @@ function noClassSelectedSetup(){
   isNewClass = true;
 }
 
-search = function(key, prop, array){
+function search(key, prop, array){
   for(var i=0;i<array.length;i++){
     if(array[i][prop] === key){
       return array[i];

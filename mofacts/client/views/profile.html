@@ -105,6 +105,9 @@
             {{#if isInRole 'admin, teacher'}}
                 {{> classEdit}}
             {{/if}}
+            {{#if isInRole 'admin, teacher'}}
+                {{> teacherReporting}}
+            {{/if}}
         {{/if}}
 
         <br><br>
