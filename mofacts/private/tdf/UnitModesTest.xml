@@ -2,7 +2,7 @@
     <setspec>
         <name>Unit Mode Testing</name>
         <lessonname>Optimized Drill Practice of Unit Mode Testing</lessonname>
-        <userselect>true</userselect>
+        <userselect>false</userselect>
         <stimulusfile>UnitModesTest.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>

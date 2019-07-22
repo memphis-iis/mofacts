@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>Optimized Drill Practice of World Countries: Custom Model</lessonname>
+        <lessonname>Optimized Drill Practice of World Countries: Version 2</lessonname>
         <stimulusfile>Worldstim.xml</stimulusfile>
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
