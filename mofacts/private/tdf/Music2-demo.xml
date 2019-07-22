@@ -5,7 +5,7 @@
     <setspec>
         <name>Music Intervals</name>
         <lessonname>Music Intervals Experiment (demo)</lessonname>
-        <userselect>true</userselect>
+        <userselect>false</userselect>
         <stimulusfile>Music2stim-demo.xml</stimulusfile>
     </setspec>
     <unit>

@@ -33,7 +33,7 @@
             <fontsize>3</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <practiceseconds>300</practiceseconds>
+            <practiceseconds>1000000</practiceseconds>
             <finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
         </deliveryparams>
     </unit>

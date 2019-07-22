@@ -23,7 +23,7 @@
             <displaymaxseconds></displaymaxseconds>
             <clusterlist>0-175</clusterlist>
             <calculateProbability><![CDATA[
-               
+
                 // A demonstration of a variable that will be shown in the console
                 p.CUSTOM_MSG = "In our custom function";
 
@@ -44,7 +44,7 @@
                 p.intbs = p.meanSpacing * p.baseLevel;
 
                 // Helpful to be able to see our y parameter for debugging
-                p.y = p.stimParameter -.0324+
+                p.y = p.stimParameters[0] -.0324+
                 .3744*(p.stimSuccessCount- p.stimFailureCount)+
                 .00299* (p.userCorrectResponses- (p.userTotalResponses-p.userCorrectResponses))+
                 1.63* p.intbs * Math.log(1+p.stimSuccessCount + p.stimFailureCount)+
@@ -66,7 +66,7 @@
             <fontsize>3</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <practiceseconds>300</practiceseconds>
+            <practiceseconds>1000000</practiceseconds>
             <finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
         </deliveryparams>
     </unit>

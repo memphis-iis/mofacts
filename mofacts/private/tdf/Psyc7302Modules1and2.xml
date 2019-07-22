@@ -43,7 +43,7 @@
                 p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);
 
                 // Helpful to be able to see our y parameter for debugging
-                p.y = p.stimParameter - 1.5 +
+                p.y = p.stimParameters[0] - 1.5 +
                 0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+
                 0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+
                 1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+

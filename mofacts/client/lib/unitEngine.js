@@ -544,8 +544,10 @@ function modelUnitEngine() {
           }
           console.log("!!!parameters: " + JSON.stringify(parameters) + ", optimalProb: " + optimalProb);
 
-          if (card.canUse && card.trialsSinceLastSeen > 2) {
+          if (card.canUse && card.trialsSinceLastSeen > 1) {
               var dist = Math.abs(prob.probability - optimalProb)
+
+            //  console.log(dist)
               // Note that we are checking stim probability
               if (dist < currentMin) {
                   currentMin = dist;

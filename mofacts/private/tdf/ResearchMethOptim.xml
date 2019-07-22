@@ -46,7 +46,7 @@ Please answer the following 4 quick demographic questions, which may be useful f
             <clusterlist>0-317</clusterlist>
         </learningsession>
         <deliveryparams>
-            <practiceseconds>1800</practiceseconds>
+            <practiceseconds>1000000</practiceseconds>
             <drill>12000</drill>
             <purestudy>12000</purestudy>
             <skipstudy>false</skipstudy>

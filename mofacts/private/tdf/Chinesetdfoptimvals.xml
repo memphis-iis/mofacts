@@ -1,8 +1,8 @@
 <tutor>
     <setspec>
         <name>Cat Optim Test</name>
-        <lessonname>Optimtest</lessonname>
-        <userselect>true</userselect>
+        <lessonname>Optimized Drill Practice of Chinese Tones</lessonname>
+        <userselect>false</userselect>
         <stimulusfile>Chinesestimsoptimvals.xml</stimulusfile>
     </setspec>
 
