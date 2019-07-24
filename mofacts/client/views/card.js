@@ -237,8 +237,10 @@ function beginMainCardTimeout(delay, func) {
     timeoutFunc = function(){
       if(document.location.pathname != "/card"){
         leavePage(function(){console.log("cleaning up page after nav away from card")});
+      }else if (typeof func === "function") {
+          func();
       }else{
-        func();
+        console.log("function!!!: " + JSON.stringify(func));
       }
     };
     timeoutDelay = delay;
@@ -1915,7 +1917,12 @@ function stopUserInput() {
   //     }
   //   },500);
   // }else{
-    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+
+    //Need a delay here so we can wait for the DOM to load before manipulating it
+    setTimeout(function(){
+        console.log('after delay, stopping user input');
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+    },200);
   // }
 }
 
@@ -2112,7 +2119,7 @@ function resumeFromUserTimesLog() {
         conditionAction = "condition-notify";
         conditionData.note = "No exp condition necessary";
     }
-    
+
     //Pre-load sounds to be played into soundsDict to avoid audio lag issues
     if(curStimIsSoundDisplayType()){
       console.log("Sound type questions detected, pre-loading sounds");
