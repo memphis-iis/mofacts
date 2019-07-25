@@ -703,15 +703,16 @@ var initializeAudio = function(){
 }
 
 var preloadAudioFiles = function(){
+  var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+  var soundExtension = setSpec.soundExtension || ".wav";
+  console.log("sound extension!!!: " + soundExtension);
   var allQuestions = getAllStimQuestions();
   for(var index in allQuestions){
     var question = allQuestions[index];
     soundsDict[question] = new Howl({
         preload: true,
         src: [
-            question + '.wav',
-            question + '.mp3',
-            question + '.ogg',
+            question + soundExtension
         ],
 
         //Must do an Immediately Invoked Function Expression otherwise question
@@ -1933,26 +1934,31 @@ function allowUserInput(textFocus) {
   inputDisabled = false;
   var enableUserInput = function(){
     startRecording();
-    if(typeof inputDisabled != "undefined"){
-      //Use inputDisabled variable so that successive calls of stop and allow
-      //are resolved synchronously i.e. whoever last set the inputDisabled variable
-      //should win
-      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
-      inputDisabled = undefined;
-    }else{
-      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-    }
-    // Force scrolling to bottom of screen for the input
-    scrollElementIntoView(null, false);
 
-    if (typeof textFocus !== "undefined" && !!textFocus) {
-      try {
-          $("#userAnswer").focus();
+    //Need timeout here so that the disable input timeout doesn't fire after this
+    setTimeout(function(){
+      if(typeof inputDisabled != "undefined"){
+        //Use inputDisabled variable so that successive calls of stop and allow
+        //are resolved synchronously i.e. whoever last set the inputDisabled variable
+        //should win
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+        inputDisabled = undefined;
+      }else{
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
       }
-      catch(e) {
-          //Nothing to do
+      // Force scrolling to bottom of screen for the input
+      scrollElementIntoView(null, false);
+
+      if (typeof textFocus !== "undefined" && !!textFocus) {
+        try {
+            $("#userAnswer").focus();
+        }
+        catch(e) {
+            //Nothing to do
+        }
       }
-    }
+    },200);
+
   }
 
   //Handle this being called before the page finishes loading by setting up a
