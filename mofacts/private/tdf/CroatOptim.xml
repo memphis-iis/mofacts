@@ -2,7 +2,7 @@
     <setspec>
         <name>Internal Testing with SVO and Models</name>
         <lessonname>Optimized Drill Practice of Croatian Phrases</lessonname>
-        <userselect>false</userselect>
+        <userselect>true</userselect>
         <stimulusfile>Croatstims.xml</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>

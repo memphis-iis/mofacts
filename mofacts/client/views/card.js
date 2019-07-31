@@ -1250,7 +1250,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
         correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
-        handleAnswerState(false, "Sorry - time ran out. " + correctAndText[1]);
+        handleAnswerState(false, "Time expired. " + correctAndText[1]);
     }
     else if (isCorrect) {
         //We've already marked this as a correct answer
