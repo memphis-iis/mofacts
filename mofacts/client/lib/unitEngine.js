@@ -471,7 +471,7 @@ function modelUnitEngine() {
 
     // Calculate current card probabilities for every card - see selectNextCard
     // the actual card/stim (cluster/version) selection
-    function calculateCardProbabilities() {
+    calculateCardProbabilities = function() {
         // We use a "flat" probability structure - this is faster than a loop
         // over our nested data structure, but it also gives us more readable
         // code when we're setting something per stimulus
@@ -603,6 +603,11 @@ function modelUnitEngine() {
 
     //Our actual implementation
     return {
+        getCardProbs: function(){
+          calculateCardProbabilities();
+          return cardProbabilities.probs;
+        },
+
         unitType: "model",
 
         unitMode: (function(){

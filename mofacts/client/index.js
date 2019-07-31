@@ -53,7 +53,10 @@ Template.body.events({
 
   'click .allItemsLink' : function (event) {
       event.preventDefault();
-      Router.go("/allItems");
+      //Clear out studentUsername in case we are a teacher/admin who previously
+      //navigated to this page for a particular student and want to see our own progress
+      Session.set("studentUsername",null);
+      Router.go("/studentReporting");
   },
 
   'click .logoutLink' : function (event) {

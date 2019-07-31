@@ -11,8 +11,9 @@
 
   <div class="row collapse" id="teacherReportingCollapse">
     <legend class="text-center">Teacher Reporting</legend>
-    <div>
+    <div id="mainContent">
       <div>
+        <h3>Select Chapter</h3>
         <select id="tdf-select">
             <option selected="selected" value="" disabled="true">Select a tdf</option>
             {{#each tdfs}}
@@ -20,6 +21,7 @@
             {{/each}}
         </select>
       </div>
+      <h3>Class Data</h3>
       <ul class="nav nav-tabs">
         {{#each classes}}
           <li><a data-toggle="tab" href="#{{replaceSpacesWithUnderscores this.name}}" class="myNavTab">{{this.name}}</a></li>
@@ -28,11 +30,11 @@
       <div class="tab-content">
         {{#each classes}}
           <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade">
-            <table>
+            <table border="1">
               <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th></tr>
               {{#each studentInCurClass in getCurClassStudents this.name}}
                 <tr>
-                  <td>{{studentInCurClass.username}}</td>
+                  <td><a onclick="navigateToStudentReporting('{{studentInCurClass.username}}')">{{studentInCurClass.username}}</a></td>
                   <td>{{studentInCurClass.percentCorrect}}</td>
                   <td>{{studentInCurClass.count}}</td>
                 </tr>

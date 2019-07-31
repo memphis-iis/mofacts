@@ -1,0 +1,50 @@
+<template name="studentReporting">
+  {{#if isInRole 'admin, teacher'}}
+    <legend class="text-center">Student Reporting - {{studentUsername}}</legend>
+  {{else}}
+    <legend class="text-center">Student Reporting - {{currentUser.username}}</legend>
+  {{/if}}
+  <div>
+    <div>
+      <h3>Select Chapter</h3>
+      <select id="tdf-select">
+          <option selected="selected" value="" disabled="true">Select a tdf</option>
+          {{#each tdfs}}
+            <option value="{{this.fileName}}">{{this.fileName}}</option>
+          {{/each}}
+      </select>
+    </div>
+    <div>
+      <h3>Progress Data</h3>
+      <table border="1">
+        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th></tr>
+          <tr>
+            <td>{{curStudentPerformance.percentCorrect}}</td>
+            <td>{{curStudentPerformance.count}}</td>
+          </tr>
+      </table>
+    </div>
+    <div>
+      <h3>Progress Charts</h3>
+      <div>
+        <div class="graphs">
+         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
+        </div>
+        <div class="graphs">
+         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="stimProbsChart"></div>
+        </div>
+      </div>
+      <!-- <div class="legend">
+         <svg height="10" width="35">
+            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
+            Sorry, your browser does not support inline SVG.
+         </svg> -
+         {{#if isInRole 'admin, teacher'}}
+           <b>{{studentUsername}}</b>
+         {{else}}
+           <b>{{currentUser.username}}</b>
+         {{/if}}
+      </div> -->
+    </div>
+  </div>
+</template>
