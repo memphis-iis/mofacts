@@ -48,22 +48,35 @@ getStudentPerformance = function(studentUsername,studentID,curTdf){
   var tdfQueryName = curTdf.replace(".","_");
   var count = 0;
   var numCorrect = 0;
+  var totalTime = 0;
   UserMetrics.find({_id:studentID}).forEach(function(entry){
-    var tdfEntry = entry[tdfQueryName];
-    for(var key in tdfEntry){
-      var item = tdfEntry[key];
-      count += item.questionCount;
-      numCorrect += item.correctAnswerCount;
+    var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+    for(var index in tdfEntries){
+      var key = tdfEntries[index];
+      var tdf = entry[key];
+      for(var index in tdf){
+        var stim = tdf[index];
+        count += stim.questionCount || 0;
+        numCorrect += stim.correctAnswerCount || 0;
+        var answerTimes = stim.answerTimes;
+        for(var index in answerTimes){
+          var time = answerTimes[index];
+          totalTime += time / 1000; //Covert to seconds from milliseconds
+        }
+      }
     }
   });
   var percentCorrect = "N/A";
   if(count != 0){
     percentCorrect = (numCorrect / count).toFixed(4)*100  + "%";
   }
+  totalTime = totalTime.toFixed(2);
   var studentObj = {
     "username":studentUsername,
     "count":count,
-    "percentCorrect":percentCorrect
+    "percentCorrect":percentCorrect,
+    "numCorrect":numCorrect,
+    "totalTime":totalTime
   }
   return studentObj;
 }

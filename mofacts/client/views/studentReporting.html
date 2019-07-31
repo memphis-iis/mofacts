@@ -8,7 +8,8 @@
     <div>
       <h3>Select Chapter</h3>
       <select id="tdf-select">
-          <option selected="selected" value="" disabled="true">Select a tdf</option>
+          <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
+          <option value="xml">All</option>
           {{#each tdfs}}
             <option value="{{this.fileName}}">{{this.fileName}}</option>
           {{/each}}
@@ -17,10 +18,11 @@
     <div>
       <h3>Progress Data</h3>
       <table border="1">
-        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th></tr>
+        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (seconds)</th></tr>
           <tr>
             <td>{{curStudentPerformance.percentCorrect}}</td>
             <td>{{curStudentPerformance.count}}</td>
+            <td>{{curStudentPerformance.totalTime}}</td>
           </tr>
       </table>
     </div>
@@ -34,17 +36,6 @@
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="stimProbsChart"></div>
         </div>
       </div>
-      <!-- <div class="legend">
-         <svg height="10" width="35">
-            <line x1="10" y1="5" x2="35" y2="5" style="stroke:#C40233;stroke-width:5" />
-            Sorry, your browser does not support inline SVG.
-         </svg> -
-         {{#if isInRole 'admin, teacher'}}
-           <b>{{studentUsername}}</b>
-         {{else}}
-           <b>{{currentUser.username}}</b>
-         {{/if}}
-      </div> -->
     </div>
   </div>
 </template>

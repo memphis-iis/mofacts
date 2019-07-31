@@ -46,20 +46,29 @@ Meteor.startup(function() {
 });
 
 Template.body.events({
-  'click .homeLink' : function (event) {
+  'click #homeButton' : function (event) {
       event.preventDefault();
       Router.go("/profile");
   },
 
-  'click .allItemsLink' : function (event) {
+  'click #progressButton' : function (event) {
       event.preventDefault();
       //Clear out studentUsername in case we are a teacher/admin who previously
       //navigated to this page for a particular student and want to see our own progress
       Session.set("studentUsername",null);
       Router.go("/studentReporting");
+
+      //If we have no tdf selected from a prior navigation clear out the data
+      if(!curTdf){
+        Session.set("curStudentPerformance",{});
+      //Otherwise populate the data with the new information (for the current user
+      //and not the user from teacherReporting)
+      }else{
+        Session.set("curStudentPerformance",getStudentPerformance(Meteor.user().username,translateUsernameToID(Meteor.user().username),curTdf));
+      }
   },
 
-  'click .logoutLink' : function (event) {
+  'click #logoutButton' : function (event) {
       event.preventDefault();
       Meteor.logout( function (error) {
           if (typeof error !== "undefined") {

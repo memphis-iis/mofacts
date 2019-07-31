@@ -1,5 +1,6 @@
 Session.set("tdfs",[]);
 Session.set("classes",[]);
+Session.set("curClassStudentTotals",null);
 
 curTdf = "";
 curClassName = "";
@@ -7,25 +8,32 @@ curClassName = "";
 navigateToStudentReporting = function(studentUsername){
   console.log("navigateToStudentReporting: " + studentUsername);
   Session.set("studentUsername",studentUsername);
-  try{
-      Router.go("/studentReporting");
-  }catch(e){
-    console.log("error: " + e);
-  }
-  console.log("shouldn't see this");
+  Session.set("curStudentPerformance",{});
+  Router.go("/studentReporting");
 }
 
-getCurClassStudents = function(curClassName){
+getCurClassStudents = function(curClassName,currentTdf){
   var classes = Session.get("classes");
   var curClass = search(curClassName,"name",classes);
+  studentTotals = {
+    numCorrect: 0,
+    count: 0,
+    totalTime: 0
+  }
   var students = [];
   if(!!curClass){
     curClass.students.forEach(function(studentUsername){
       var studentID = translateUsernameToID(studentUsername);
-      students.push(getStudentPerformance(studentUsername,studentID,curTdf));
+      var studentPerformance = getStudentPerformance(studentUsername,studentID,currentTdf);
+      studentTotals.count += studentPerformance.count;
+      studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+      studentTotals.numCorrect += studentPerformance.numCorrect;
+      students.push(studentPerformance);
     })
   }
+  studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count).toFixed(4) * 100 + "%";
   Session.set("curClassStudents",students);
+  Session.set("curClassStudentTotals",studentTotals);
 }
 
 Template.teacherReporting.helpers({
@@ -44,6 +52,10 @@ Template.teacherReporting.helpers({
 
   replaceSpacesWithUnderscores: function(string){
     return string.replace(" ","_");
+  },
+
+  curClassStudentTotals: function(){
+    return Session.get("curClassStudentTotals");
   }
 });
 
@@ -64,18 +76,18 @@ Template.teacherReporting.events({
     }
     curTdf = $(event.currentTarget).val();
     if(!!curClassName){
-      getCurClassStudents(curClassName);
+      getCurClassStudents(curClassName,curTdf);
     }
   },
   "click .nav-tabs": function(event, template){
-    if(curTdf === ""){
+    if(curTdf === "invalid"){
       alert("Please select a tdf");
     }else{
       //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
       setTimeout(function(){
         //Need to strip newlines because chrome appends them for some reason
         curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-        getCurClassStudents(curClassName);
+        getCurClassStudents(curClassName,curTdf);
       },200);
     }
   }

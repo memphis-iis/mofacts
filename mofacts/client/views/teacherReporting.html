@@ -15,7 +15,8 @@
       <div>
         <h3>Select Chapter</h3>
         <select id="tdf-select">
-            <option selected="selected" value="" disabled="true">Select a tdf</option>
+            <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
+            <option value="">All</option>
             {{#each tdfs}}
               <option value="{{this.fileName}}">{{this.fileName}}</option>
             {{/each}}
@@ -31,14 +32,21 @@
         {{#each classes}}
           <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade">
             <table border="1">
-              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th></tr>
+              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (seconds)</th></tr>
               {{#each studentInCurClass in getCurClassStudents this.name}}
                 <tr>
                   <td><a onclick="navigateToStudentReporting('{{studentInCurClass.username}}')">{{studentInCurClass.username}}</a></td>
                   <td>{{studentInCurClass.percentCorrect}}</td>
                   <td>{{studentInCurClass.count}}</td>
+                  <td>{{studentInCurClass.totalTime}}</td>
                 </tr>
               {{/each}}
+              <tr>
+                <td>Total</td>
+                <td>{{curClassStudentTotals.percentCorrect}}</td>
+                <td>{{curClassStudentTotals.count}}</td>
+                <td>{{curClassStudentTotals.totalTime}}</td>
+              </tr>
             </table>
           </div>
         {{/each}}

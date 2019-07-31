@@ -5,6 +5,10 @@ curTdf = "";
 loadedLabels = false;
 
 getStimProbs = function(){
+  if(Session.get("currentStimName") === null){
+    return [];
+  }
+
   var tempModelUnitEngine = createModelUnit();
   var stimProbs = [];
   var cardProbs = tempModelUnitEngine.getCardProbs();
@@ -25,11 +29,13 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
     countAndNumCorrectPerTrialNum[i] = {"count":0,"numCorrect":0};
   }
 
+  var tdfQueryName = curTdf;
+
   UserMetrics.find({"_id":Meteor.user()._id}).forEach(function(entry){
     test = entry;
     for(var tdf in entry){
       //Make sure we filter out keys that aren't tdfs
-      if(tdf.indexOf(curTdf) != -1){
+      if(tdf.indexOf(tdfQueryName) != -1){
         var currentData = entry[tdf];
         for(var kc in currentData){
           if(!!currentData[kc] && currentData[kc].answerCorrect){
@@ -81,6 +87,13 @@ Meteor.subscribe('tdfs',function () {
   Session.set("tdfs",getAllTdfs());
 });
 
+Template.studentReporting.onRendered(function(){
+  console.log("rendered!!!");
+  if($("#tdf-select").val() !== "invalid" && $("#tdf-select").val() !== null){
+    updateDataAndCharts($("#tdf-select").val());
+  }
+});
+
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
     if(!loadedLabels){
@@ -92,29 +105,34 @@ Template.studentReporting.events({
 
       loadedLabels = true;
     }
-    var myNavTabs = $(".myNavTab");
-    for(var i=0;i<myNavTabs.length;i++){
-      myNavTabs[i].setAttribute('data-toggle','tab')
-    }
     curTdf = $(event.currentTarget).val().replace(".","_");
-    Session.set("currentTdfName",$(event.currentTarget).val());
-    Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
-
-    var studentUsername = "";
-    var studentID = "";
-    if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
-      studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
-      studentID = translateUsernameToID(studentUsername);
-    }else{
-      studentUsername = Meteor.user().username;
-      studentID = Meteor.user()._id;
-    }
-
-    Session.set("curStudentPerformance",getStudentPerformance(studentUsername,studentID,curTdf));
-
-    drawCharts();
+    updateDataAndCharts($(event.currentTarget).val());
   }
 });
+
+updateDataAndCharts = function(curTdfName){
+  console.log("curTdfName: " + curTdfName);
+  Session.set("currentTdfName",curTdfName);
+  if(curTdf === "xml" || !curTdf){
+    Session.set("currentStimName",null);
+  }else{
+    Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+  }
+
+  var studentUsername = "";
+  var studentID = "";
+  if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
+    studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
+    studentID = translateUsernameToID(studentUsername);
+  }else{
+    studentUsername = Meteor.user().username;
+    studentID = Meteor.user()._id;
+  }
+
+  Session.set("curStudentPerformance",getStudentPerformance(studentUsername,studentID,curTdf));
+
+  drawCharts();
+}
 
 safeSeries = function(series) {
     if (!series || series.length < 1)
@@ -143,11 +161,11 @@ drawCharts = function () {
         }
         if (series.length < 1) {
             $(target)
-                .removeClass("show-axis")
+                .removeClass("show-axis-labels")
                 .html("<div class='nodata'>No " + dataDescrip + " data available</div>");
         }
         else {
-            $(target).addClass("show-axis");
+            $(target).addClass("show-axis-labels");
             // Note that we provide some default values that can be overridden
             var chartData = {
                 'labels': labels,
@@ -172,11 +190,11 @@ drawCharts = function () {
         }
         if (series.length < 1) {
             $(target)
-                .removeClass("show-axis")
+                .removeClass("show-axis-labels")
                 .html("<div class='nodata'>No " + dataDescrip + " data available</div>");
         }
         else {
-            $(target).addClass("show-axis");
+            $(target).addClass("show-axis-labels");
             // Note that we provide some default values that can be overridden
             var chartData = {
                 'labels': labels,
@@ -188,7 +206,6 @@ drawCharts = function () {
                 fullWidth: true
             }, chartConfig);
 
-            console.log("fullConfig:" + JSON.stringify(fullConfig));
             new Chartist.Bar(target, chartData, fullConfig);
         }
     };
