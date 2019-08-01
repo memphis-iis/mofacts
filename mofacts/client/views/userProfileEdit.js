@@ -35,35 +35,37 @@ Template.userProfileEdit.rendered = function () {
 };
 
 Template.userProfileEdit.events({
-    // Admin/Teachers - save AWS profile data
-    'click #saveProfile': function(event) {
-        event.preventDefault();
+  // Admin/Teachers - save AWS profile data
+  'click #saveProfile': function(event) {
+    event.preventDefault();
 
-        var data = {
-            aws_id: $("#profileAWSID").val(),
-            aws_secret_key: $("#profileAWSSecret").val(),
-            use_sandbox: $("#profileUseSandbox").prop("checked")
-        };
+    var data = {
+      aws_id: $("#profileAWSID").val(),
+      aws_secret_key: $("#profileAWSSecret").val(),
+      use_sandbox: $("#profileUseSandbox").prop("checked")
+    };
 
-        $('#profileWorkModal').modal('show');
+    $('#profileWorkModal').modal('show');
 
-        Meteor.call("saveUserProfileData", data, function(error, serverReturn) {
-            $('#profileWorkModal').modal('hide');
+    Meteor.call("saveUserProfileData", data, function(error, serverReturn) {
+      $('#profileWorkModal').modal('hide');
+      console.log(serverReturn);
+      
+      if (!!error) {
+        console.log("Error saving user profile", error);
+        alert("Your changes were not saved! " + error);
+      }
 
-            if (!!error) {
-                console.log("Error saving user profile", error);
-                alert("Your changes were not saved! " + error);
-            }
-            else if (!serverReturn || !serverReturn.result) {
-                console.log("Server failure while saving profile", serverReturn);
-                alert("Your changes were not saved! The server said: " + JSON.stringify(serverReturn, null, 2));
-            }
-            else {
-                console.log("Profile saved:", serverReturn);
-                //Clear any controls that shouldn't be kept around
-                $(".clearOnSave").val("");
-                alert("Your profile changes have been saved: save details follow\n\n" + JSON.stringify(serverReturn, null, 2));
-            }
-        });
-    },
+      else if (!serverReturn || !serverReturn.result) {
+        console.log("Server failure while saving profile", serverReturn);
+        alert("Your changes were not saved! The server said: " + JSON.stringify(serverReturn, null, 2));
+      }
+      else {
+        console.log("Profile saved:", serverReturn);
+        //Clear any controls that shouldn't be kept around
+        $(".clearOnSave").val("");
+        alert("Your profile changes have been saved: save details follow\n\n" + JSON.stringify(serverReturn, null, 2));
+      }
+    });
+  },
 });

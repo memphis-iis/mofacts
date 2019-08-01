@@ -431,45 +431,47 @@ Meteor.startup(function () {
         //We provide a separate server method for user profile info - this is
         //mainly since we don't want some of this data just flowing around
         //between client and server
-        saveUserProfileData: function(profileData) {
-            serverConsole('saveUserProfileData', displayify(profileData));
+        saveUserProfileData: async function(profileData) {
+          serverConsole('saveUserProfileData', displayify(profileData));
 
-            var saveResult, acctBal, result, errmsg;
-            try {
-                data = _.extend(defaultUserProfile(), profileData);
+          var saveResult, result, errmsg, acctBal;
+          try {
+            data = _.extend(defaultUserProfile(), profileData);
 
-                //Check length BEFORE any kind of encryption
-                data.have_aws_id = data.aws_id.length > 0;
-                data.have_aws_secret = data.aws_secret_key.length > 0;
+            //Check length BEFORE any kind of encryption
+            data.have_aws_id = data.aws_id.length > 0;
+            data.have_aws_secret = data.aws_secret_key.length > 0;
 
-                data.aws_id = encryptUserData(data.aws_id);
-                data.aws_secret_key = encryptUserData(data.aws_secret_key);
+            data.aws_id = encryptUserData(data.aws_id);
+            data.aws_secret_key = encryptUserData(data.aws_secret_key);
 
-                saveResult = userProfileSave(Meteor.userId(), data);
+            saveResult = userProfileSave(Meteor.userId(), data);
 
-                //We test by reading the profile back and checking their
-                //account balance
-                acctBal = turk.getAccountBalance(
-                    UserProfileData.findOne({_id: Meteor.user()._id})
-                );
-                if (!acctBal) {
-                    throw "There was an error reading your account balance";
-                }
-
-                result = true;
-                errmsg = "";
+            //We test by reading the profile back and checking their
+            //account balance
+            var res = await turk.getAccountBalance(
+              UserProfileData.findOne({_id: Meteor.user()._id})
+            );
+            
+            if (!res) {
+              throw "There was an error reading your account balance";
             }
-            catch(e) {
-                result = false;
-                errmsg = e;
-            }
-
+            
+            result = true;
+            acctBal = res.AvailableBalance;
+            errmsg = "";
             return {
-                'result': result,
-                'saveResult': saveResult,
-                'acctBal': acctBal,
-                'error': errmsg
-            };
+              'result':result,
+              'saveResult':saveResult,
+              'acctBal':acctBal,
+              'error':errmsg
+            }
+          }
+          catch(e) {
+            result = false;
+            console.log(e)
+            errmsg = e;
+          }
         },
 
         getUserSpeechAPIKey: function(){

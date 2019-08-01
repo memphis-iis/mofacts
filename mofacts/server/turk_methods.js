@@ -38,7 +38,7 @@ function getTdfOwner(experiment, userId) {
 
 
 // Send any scheduled messages in ScheduledTurkMessages
-sendScheduledTurkMessages = function() {
+sendScheduledTurkMessages = async function() {
     var now = Date.now();
     var sendCount = 0;
 
@@ -68,7 +68,7 @@ sendScheduledTurkMessages = function() {
                 throw "Current user not set up for AWS/MTurk";
             }
 
-            var ret = turk.notifyWorker(ownerProfile, nextJob.requestParams);
+            var ret = await turk.notifyWorker(ownerProfile, nextJob.requestParams);
             serverConsole("Completed scheduled job", nextJob._id);
             retval = _.extend({'passedParams': nextJob.requestParams}, ret);
         }
@@ -120,7 +120,7 @@ sendScheduledTurkMessages = function() {
 //Set up our server-side methods
 Meteor.methods({
     //Simple assignment debugging for turk
-    turkGetAssignment: function(assignid) {
+    turkGetAssignment: async function(assignid) {
         serverConsole('turkGetAssignment', assignid);
         try {
             var usr = Meteor.user();
@@ -135,8 +135,8 @@ Meteor.methods({
             if (!profile.have_aws_id || !profile.have_aws_secret) {
                 return "Current user not set up for AWS/MTurk";
             }
-
-            return turk.getAssignment(profile, {'AssignmentId': assignid});
+            var res = await turk.getAssignment(profile, {'AssignmentId': assignid});
+            return res;
         }
         catch(e) {
             return e;
@@ -144,7 +144,7 @@ Meteor.methods({
     },
 
     //Simple message sending
-    turkSendMessage: function(workerid, msgtext) {
+    turkSendMessage: async function(workerid, msgtext) {
         serverConsole('turkSendMessage', workerid);
         try {
             var usr = Meteor.user();
@@ -159,12 +159,12 @@ Meteor.methods({
             if (!profile.have_aws_id || !profile.have_aws_secret) {
                 return "Current user not set up for AWS/MTurk";
             }
-
-            return turk.notifyWorker(profile, {
+            var res = await turk.notifyWorker(profile, {
                 'Subject': "Message from " + usr.username + " Profile Page",
                 'MessageText': msgtext,
                 'WorkerId': workerid
             });
+            return res;
         }
         catch(e) {
             serverConsole("Error for turkSendMessage", e);
@@ -276,7 +276,7 @@ Meteor.methods({
     //HIT/assignment.
     //RETURNS: null on success or an error message on failure. Any results
     //are logged to the user times log
-    turkPay: function(workerUserId, experiment, msg) {
+    turkPay: async function(workerUserId, experiment, msg) {
         serverConsole('turkPay', workerUserId, experiment);
 
         var errmsg = null; //Return null on success
@@ -321,7 +321,7 @@ Meteor.methods({
             var tdf = Tdfs.findOne({_id: tdfId});
 
             // Get available HITs
-            hitlist = turk.getAvailableHITs(ownerProfile, {});
+            hitlist = await turk.getAvailableHITs(ownerProfile, {});
             if (hitlist && hitlist.length) {
                 workPerformed.findHITs = "HITs found: " + hitlist.length;
                 workPerformed.hitdetails = hitlist;
@@ -336,9 +336,7 @@ Meteor.methods({
             var assignment = null;
             for(var i = 0; i < hitlist.length; ++i) {
                 hit = hitlist[i];
-                var assignList = turk.getAssignmentsForHIT(ownerProfile, {
-                    'HITId': hit
-                });
+                var assignList = await turk.getAssignmentsForHIT(ownerProfile, hit);
                 if (!assignList)
                     assignList = [];
 
@@ -366,7 +364,7 @@ Meteor.methods({
                 throw "Can not continue - no assignment";
             }
 
-            var approveResponse = turk.approveAssignment(ownerProfile, {
+            var approveResponse = await turk.approveAssignment(ownerProfile, {
                 'AssignmentId': assignment.AssignmentId,
                 'RequesterFeedback': msg || "Thanks for your participation"
             });
@@ -394,7 +392,7 @@ Meteor.methods({
         return errmsg;
     },
 
-    turkBonus: function(workerUserId, experiment) {
+    turkBonus: async function(workerUserId, experiment) {
         serverConsole('turkBonus', workerUserId, experiment);
 
         var errmsg = null; // Return null on success
@@ -506,7 +504,7 @@ Meteor.methods({
             }
 
             //Actually send request - note that we always force USD currently
-            var bonusResponse = turk.grantBonus(ownerProfile, bonusAmt, {
+            var bonusResponse = await turk.grantBonus(ownerProfile, bonusAmt, {
                 'WorkerId': turkid,
                 'AssignmentId': assignmentId,
                 'Reason': 'Additional unit completion. Thank you!'

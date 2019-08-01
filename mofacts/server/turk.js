@@ -37,285 +37,226 @@ following is true:
 ******************************************************************************
 **/
 
+
+
 (function() {
-    var TURK_URL = "https://mechanicalturk.amazonaws.com";
-    var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
+  // var TURK_URL = "https://mechanicalturk.amazonaws.com";
+  // var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
+  var AWS = Npm.require("aws-sdk")
+  // var TURK_URL = "https://mturk-requester.us-east-1.amazonaws.com";
+  // var SANDBOX_URL = "https://mturk-requester-sandbox.us-east-1.amazonaws.com";
 
-    function validateField(fld, err) {
-        if (!fld) {
-            throw err;
-        }
+  
+  function validateField(fld, err) {
+    if (!fld) {
+      throw err;
+    }
+  }
+
+  function validateUser(userProfile) {
+    validateField(userProfile.have_aws_id, "AWS request user has no ID");
+    validateField(userProfile.aws_id, "AWS request user ID is invalid");
+    validateField(userProfile.have_aws_secret, "AWS request user has secret key");
+    validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+  }
+
+  function getClient(userProfile){
+    validateUser(userProfile);
+    return new AWS.MTurk({
+      accessKeyId: decryptUserData(userProfile.aws_id),
+      secretAccessKey: decryptUserData(userProfile.aws_secret_key),
+      region: 'us-east-1'
+    });
+  }
+
+  function createTurkRequest(userProfile, requestParams) {
+    // Validate userProfile
+    validateField(userProfile.have_aws_id, "AWS request user has no ID");
+    validateField(userProfile.aws_id, "AWS request user ID is invalid");
+    validateField(userProfile.have_aws_secret, "AWS request user has secret key");
+    validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+
+    // Base url from userProfile use_sandbox
+    var url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
+
+    // Actual request data from default + requestParams
+    var req = _.extend({
+      'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
+      'Service': 'AWSMechanicalTurkRequester',
+      'Timestamp': new Date(Date.now()).toISOString(),
+      'Operation': '',
+      'Signature': '',
+    }, requestParams);
+
+    //No spaces
+    for (var key in req) {
+      req[key] = _.trim(req[key]);
     }
 
-    function createTurkRequest(userProfile, requestParams) {
-        // Validate userProfile
-        validateField(userProfile.have_aws_id, "AWS request user has no ID");
-        validateField(userProfile.aws_id, "AWS request user ID is invalid");
-        validateField(userProfile.have_aws_secret, "AWS request user has secret key");
-        validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+    // Add HMAC signature for request from the fields as defined by AWS
+    var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
+    req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
 
-        // Base url from userProfile use_sandbox
-        var url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
+    serverConsole("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
 
-        // Actual request data from default + requestParams
-        var req = _.extend({
-            'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
-            'Service': 'AWSMechanicalTurkRequester',
-            'Timestamp': new Date(Date.now()).toISOString(),
-            'Operation': '',
-            'Signature': '',
-        }, requestParams);
+    // All done
+    var response = HTTP.post(url, {
+      'params': req
+    });
 
-        //No spaces
-        for (var key in req) {
-            req[key] = _.trim(req[key]);
-        }
-
-        // Add HMAC signature for request from the fields as defined by AWS
-        var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
-        req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
-
-        serverConsole("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
-
-        // All done
-        var response = HTTP.post(url, {
-            'params': req
-        });
-
-        if (response.statusCode !== 200) {
-            //Error!
-            serverConsole("Response failure:", response);
-            throw "Turk request '" + req.Operation + "' failed";
-        }
-
-        //Add parsed JSON to the response
-        try {
-            response.json = xml2js.parseStringSync(response.content);
-        }
-        catch(e) {
-            serverConsole("JSON parse on returned contents failed", e);
-        }
-
-        //serverConsole("TURK response:", JSON.stringify(response.json, null, 2));
-        return response;
+    if (response.statusCode !== 200) {
+      //Error!
+      serverConsole("Response failure:", response);
+      throw "Turk request '" + req.Operation + "' failed";
     }
+
+    //Add parsed JSON to the response
+    try {
+      response.json = xml2js.parseStringSync(response.content);
+    }
+    catch(e) {
+      serverConsole("JSON parse on returned contents failed", e);
+    }
+
+    //serverConsole("TURK response:", JSON.stringify(response.json, null, 2));
+    return response;
+  }
 
     turk = {
-        getAccountBalance: function(userProfile) {
-            var req = {
-                'Operation': 'GetAccountBalance'
-            };
+      getAccountBalance: function(userProfile) {
+        var req = {};
+        validateUser(userProfile);
+        
+        var client = getClient(userProfile);
 
-            var response = createTurkRequest(userProfile, req);
+        var res = client.getAccountBalance(req).promise();
+        
+        return res;
+      },
+      
+      //Required parameters: none
+      //Optional parameters: SortProperty, SortDirection
+      getAvailableHITs: function(userProfile) {
+        var req = {
+          'MaxResults' : 99
+        };
 
-            var result = _.chain(response.json)
-                .prop("GetAccountBalanceResponse")
-                .prop("GetAccountBalanceResult").first()
-                .value();
+        var client = getClient(userProfile);
 
-            var isValid = _.chain(result)
-                .prop("Request").first()
-                .prop("IsValid").first().trim()
-                .value().toLowerCase();
+        var hitlist = [];
+        var rejected = 0;
+        
+        return client.listHITs(req).promise().then(function(data) {
+          data.HITs.forEach(function(hit) {
+            var max = hit.MaxAssignments;
+            var pend = hit.NumberOfAssignmentsPending;
+            var avail = hit.NumberOfAssignmentsAvailable;
+            var complete = hit.NumberOfAssignmentsCompleted;
 
-            if (isValid !== "true") {
-                throw {
-                    'errmsg': 'Could not get Account Balance',
-                    'response': response
-                };
+            if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
+              serverConsole("Something wrong with this HIT's stats - including for safety. hit was", hit);
+              hitlist.push(hit.HITId);
             }
-
-            return _.chain(result)
-                .prop("AvailableBalance").first()
-                .prop("FormattedPrice").first()
-                .value();
-        },
-
-        //Required parameters: none
-        //Optional parameters: SortProperty, SortDirection
-        getAvailableHITs: function(userProfile, requestParams) {
-            var req = _.extend({
-                'Operation': 'SearchHITs',
-                'SortProperty': 'CreationTime',
-                'SortDirection': 'Descending',
-                'PageSize': 99
-            }, requestParams);
-
-            var response = createTurkRequest(userProfile, req);
-
-            var hitCursor = _.chain(response.json)
-                .prop("SearchHITsResponse")
-                .prop("SearchHITsResult").first()
-                .prop("HIT")
-                .value() || [];
-
-            //Little helper for our loop - note default of -1 instead of 0
-            var fenum = function(n) {
-                return _.chain(n).first().floatval(-1).value();
-            };
-
-            var hitlist = [];
-            var rejected = 0;
-            hitCursor.forEach(function(val) {
-                //Only report HITs with something that we can approve
-                //See top of this module for the details
-                var max = fenum(val.MaxAssignments);
-                var pend = fenum(val.NumberOfAssignmentsPending);
-                var avail = fenum(val.NumberOfAssignmentsAvailable);
-                var complete = fenum(val.NumberOfAssignmentsCompleted);
-
-                if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
-                    serverConsole("Something wrong with this HIT's stats - including for safety. val was", val);
-                    hitlist.push(_.first(val.HITId));
-                }
-                else if (pend > 0 || avail > 0 || complete < max) {
-                    hitlist.push(_.first(val.HITId));
-                }
-                else {
-                    rejected += 1;
-                }
-            });
-
-            serverConsole("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
-
-            return hitlist;
-        },
-
-        //Required parameters: HITId
-        //Optional parameters: AssignmentStatus
-        getAssignmentsForHIT: function(userProfile, requestParams) {
-            var req = _.extend({
-                'Operation': 'GetAssignmentsForHIT',
-                'HITId': '',
-                'AssignmentStatus': 'Submitted',
-                'PageSize': 99
-            }, requestParams);
-
-            var response = createTurkRequest(userProfile, req);
-
-            var assignCursor = _.chain(response.json)
-                .prop("GetAssignmentsForHITResponse")
-                .prop("GetAssignmentsForHITResult").first()
-                .prop("Assignment")
-                .value() || [];
-
-            var assignlist = [];
-            assignCursor.forEach(function(val) {
-                assignlist.push({
-                    "AssignmentId": _.first(val.AssignmentId),
-                    "WorkerId": _.first(val.WorkerId),
-                    "HITId": _.first(val.HITId),
-                    "AssignmentStatus": _.first(val.AssignmentStatus),
-                    "AutoApprovalTime": _.first(val.AutoApprovalTime),
-                    "AcceptTime": _.first(val.AcceptTime),
-                    "SubmitTime": _.first(val.SubmitTime),
-                    "Answer": _.first(val.Answer),
-                });
-            });
-
-            return assignlist;
-        },
-
-        //Required parameters: AssignmentId
-        //Optional parameters: RequesterFeedback
-        approveAssignment: function(userProfile, requestParams) {
-            var req = _.extend({
-                'Operation': 'ApproveAssignment',
-                'ResponseGroup': 'Request', // Ask for everything back
-                'AssignmentId': '',
-                'RequesterFeedback': ''
-            }, requestParams);
-
-            var response = createTurkRequest(userProfile, req);
-
-            var isValid = _.chain(response.json)
-                .prop("ApproveAssignmentResponse")
-                .prop("ApproveAssignmentResult").first()
-                .prop("Request").first()
-                .prop("IsValid").first().trim()
-                .value().toLowerCase();
-
-            if (isValid !== "true") {
-                serverConsole("Failed to approve assignment", response.json);
-                throw {
-                    'errmsg': 'Assignment Approval failed',
-                    'response': response
-                };
+            else if (pend > 0 || avail > 0 || complete < max) {
+              hitlist.push(hit.HITId);
             }
-
-            return response.json;
-        },
-
-        //Required parameters: AssignmentId
-        //Pretty raw - currently only used for tracking/debugging on profile
-        //page of our admins.
-        getAssignment: function(userProfile, requestParams) {
-            var req = _.extend({
-                'Operation': 'GetAssignment',
-                'AssignmentId': ''
-            }, requestParams);
-
-            var response = createTurkRequest(userProfile, req);
-            return response.json;
-        },
-
-        //Required parameters: Subject, MessageText, WorkerId
-        notifyWorker: function(userProfile, requestParams) {
-            var req = _.extend({
-                'Operation': 'NotifyWorkers',
-                'Subject': '',
-                'MessageText': '',
-                'WorkerId': ''
-            }, requestParams);
-
-            var response = createTurkRequest(userProfile, req);
-
-            var isValid = _.chain(response.json)
-                .prop("NotifyWorkersResponse")
-                .prop("NotifyWorkersResult").first()
-                .prop("Request").first()
-                .prop("IsValid").first().trim()
-                .value().toLowerCase();
-
-            if (isValid !== "true") {
-                serverConsole("notifyWorker isValid=", isValid, "ServerRet:", JSON.stringify(response.json, null, 2));
-                throw {
-                    'errmsg': 'Worker Notification failed',
-                    'response': response
-                };
+            else {
+              rejected +=1
             }
+          });
+          serverConsole("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
+          return hitlist;
+        });
+      },
+      
+      //Required parameters: HITId
+      //Optional parameters: AssignmentStatus
+      getAssignmentsForHIT: function(userProfile, hitId) {
+        var req = {'HITId':hitId};
 
-            return response.json;
-        },
+        var client = getClient(userProfile);
 
-        //Required parameters: WorkerId, AssignmentId, Reason
-        grantBonus: function(userProfile, amount, requestParams) {
-            var req = _.extend({
-                'Operation': 'GrantBonus',
-                'WorkerId': '',
-                'AssignmentId': '',
-                'BonusAmount.1.Amount': amount,
-                'BonusAmount.1.CurrencyCode': 'USD',
-                'Reason': ''
-            }, requestParams);
+        client.listAssignmentsForHIT(req).promise().then(function(res) {
+          var assignlist = [];
+          res.Assignments.forEach(function(assignment) {
+            assignlist.push(assignment);
+          });
+          return assignlist;
+        });
+      },
+      
+      //Required parameters: AssignmentId
+      //Optional parameters: RequesterFeedback
+      approveAssignment: function(userProfile, requestParams) {
+        var req = _.extend({
+          'AssignmentId': '',
+          'RequesterFeedback': ''
+        }, requestParams);
 
-            var response = createTurkRequest(userProfile, req);
+        var client = getClient(userProfile);
 
-            var isValid = _.chain(response.json)
-                .prop("GrantBonusResponse")
-                .prop("GrantBonusResult").first()
-                .prop("Request").first()
-                .prop("IsValid").first().trim()
-                .value().toLowerCase();
+        return client.approveAssignment(req).promise().then(function(res){
+          return {'Successful':'true'} // MTurk has stopped sending response details back for this operation, so we'll just put something here
+        }, function(err){
+          throw {
+            'errmsg': 'Assignment Approval failed',
+            'response': err
+          }
+        });
+      },
 
-            if (isValid !== "true") {
-                throw {
-                    'errmsg': 'Bonus Granting failed',
-                    'response': response
-                };
-            }
+      //Required parameters: AssignmentId
+      //Pretty raw - currently only used for tracking/debugging on profile
+      //page of our admins.
+      getAssignment: function(userProfile, requestParams) {
+        var req = _.extend({}, requestParams);
 
-            return response.json;
-        }
+        var client = getClient(userProfile);
+
+        return client.getAssignment(req).promise();
+      },
+      
+      //Required parameters: Subject, MessageText, WorkerId
+      notifyWorker: function(userProfile, requestParams) {
+        var req = {
+          'Subject': requestParams.Subject,
+          'MessageText': requestParams.MessageText,
+          'WorkerIds': [requestParams.WorkerId]
+        };
+
+        client = getClient(userProfile);
+
+        return client.notifyWorkers(req).promise.then(function(res){
+          return {'Successful':'true'} // see approveAssignment
+        }, function(err){
+          throw {
+            'errmsg': 'Worker Notification failed',
+            'response': err
+          }
+        });
+      },
+
+      //Required parameters: WorkerId, AssignmentId, Reason
+      grantBonus: function(userProfile, amount, requestParams) {
+        var req = _.extend({
+          'BonusAmount': amount,
+          'WorkerId': '',
+          'AssignmentId': '',
+          'Reason': ''
+        });
+
+        var client = getClient(userProfile);
+
+        client.sendBonus(req).promise().then(function(res){
+          return {'Successful':'true'}
+        }, function(err){
+          throw{
+            'errmsg': 'Bonus Granting failed',
+            'response': err
+          };
+        });
+      },
+
+
     };
 })();
