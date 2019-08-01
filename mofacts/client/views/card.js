@@ -237,8 +237,10 @@ function beginMainCardTimeout(delay, func) {
     timeoutFunc = function(){
       if(document.location.pathname != "/card"){
         leavePage(function(){console.log("cleaning up page after nav away from card")});
+      }else if (typeof func === "function") {
+          func();
       }else{
-        func();
+        console.log("function!!!: " + JSON.stringify(func));
       }
     };
     timeoutDelay = delay;
@@ -701,15 +703,16 @@ var initializeAudio = function(){
 }
 
 var preloadAudioFiles = function(){
+  var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+  var soundExtension = setSpec.soundExtension || ".wav";
+  console.log("sound extension!!!: " + soundExtension);
   var allQuestions = getAllStimQuestions();
   for(var index in allQuestions){
     var question = allQuestions[index];
     soundsDict[question] = new Howl({
         preload: true,
         src: [
-            question + '.wav',
-            question + '.mp3',
-            question + '.ogg',
+            question + soundExtension
         ],
 
         //Must do an Immediately Invoked Function Expression otherwise question
@@ -1247,7 +1250,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
         correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
-        handleAnswerState(false, "Sorry - time ran out. " + correctAndText[1]);
+        handleAnswerState(false, "Time expired. " + correctAndText[1]);
     }
     else if (isCorrect) {
         //We've already marked this as a correct answer
@@ -1915,7 +1918,12 @@ function stopUserInput() {
   //     }
   //   },500);
   // }else{
-    $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+
+    //Need a delay here so we can wait for the DOM to load before manipulating it
+    setTimeout(function(){
+        console.log('after delay, stopping user input');
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+    },200);
   // }
 }
 
@@ -1926,26 +1934,31 @@ function allowUserInput(textFocus) {
   inputDisabled = false;
   var enableUserInput = function(){
     startRecording();
-    if(typeof inputDisabled != "undefined"){
-      //Use inputDisabled variable so that successive calls of stop and allow
-      //are resolved synchronously i.e. whoever last set the inputDisabled variable
-      //should win
-      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
-      inputDisabled = undefined;
-    }else{
-      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-    }
-    // Force scrolling to bottom of screen for the input
-    scrollElementIntoView(null, false);
 
-    if (typeof textFocus !== "undefined" && !!textFocus) {
-      try {
-          $("#userAnswer").focus();
+    //Need timeout here so that the disable input timeout doesn't fire after this
+    setTimeout(function(){
+      if(typeof inputDisabled != "undefined"){
+        //Use inputDisabled variable so that successive calls of stop and allow
+        //are resolved synchronously i.e. whoever last set the inputDisabled variable
+        //should win
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+        inputDisabled = undefined;
+      }else{
+        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
       }
-      catch(e) {
-          //Nothing to do
+      // Force scrolling to bottom of screen for the input
+      scrollElementIntoView(null, false);
+
+      if (typeof textFocus !== "undefined" && !!textFocus) {
+        try {
+            $("#userAnswer").focus();
+        }
+        catch(e) {
+            //Nothing to do
+        }
       }
-    }
+    },200);
+
   }
 
   //Handle this being called before the page finishes loading by setting up a
@@ -2112,7 +2125,7 @@ function resumeFromUserTimesLog() {
         conditionAction = "condition-notify";
         conditionData.note = "No exp condition necessary";
     }
-    
+
     //Pre-load sounds to be played into soundsDict to avoid audio lag issues
     if(curStimIsSoundDisplayType()){
       console.log("Sound type questions detected, pre-loading sounds");

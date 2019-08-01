@@ -1,82 +1,39 @@
 Session.set("tdfs",[]);
 Session.set("classes",[]);
+Session.set("curClassStudentTotals",null);
 
 curTdf = "";
-usernameToIDMap = {};
 curClassName = "";
 
-getCurClassStudents = function(curClassName){
+navigateToStudentReporting = function(studentUsername){
+  console.log("navigateToStudentReporting: " + studentUsername);
+  Session.set("studentUsername",studentUsername);
+  Session.set("curStudentPerformance",{});
+  Router.go("/studentReporting");
+}
+
+getCurClassStudents = function(curClassName,currentTdf){
   var classes = Session.get("classes");
   var curClass = search(curClassName,"name",classes);
+  studentTotals = {
+    numCorrect: 0,
+    count: 0,
+    totalTime: 0
+  }
   var students = [];
   if(!!curClass){
     curClass.students.forEach(function(studentUsername){
-      students.push(getStudentPerformance(studentUsername));
+      var studentID = translateUsernameToID(studentUsername);
+      var studentPerformance = getStudentPerformance(studentUsername,studentID,currentTdf);
+      studentTotals.count += studentPerformance.count;
+      studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+      studentTotals.numCorrect += studentPerformance.numCorrect;
+      students.push(studentPerformance);
     })
   }
+  studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count).toFixed(4) * 100 + "%";
   Session.set("curClassStudents",students);
-}
-
-getStudentPerformance = function(studentUsername){
-  var studentID = translateUsernameToID(studentUsername);
-  var tdfQueryName = curTdf.replace(".","_");
-  var count = 0;
-  var numCorrect = 0;
-  UserMetrics.find({_id:studentID}).forEach(function(entry){
-    var tdfEntry = entry[tdfQueryName];
-    for(var key in tdfEntry){
-      var item = tdfEntry[key];
-      count += item.questionCount;
-      numCorrect += item.correctAnswerCount;
-    }
-  });
-  var percentCorrect = "N/A";
-  if(count != 0){
-    percentCorrect = (numCorrect / count).toFixed(4)*100  + "%";
-  }
-  var studentObj = {
-    "username":studentUsername,
-    "count":count,
-    "percentCorrect":percentCorrect
-  }
-  return studentObj;
-}
-
-translateUsernameToID = function(username){
-  if(username.indexOf("@") == -1){
-    username = username.toUpperCase();
-  }
-  return usernameToIDMap[username];
-}
-
-function search(key, prop, array){
-  for(var i=0;i<array.length;i++){
-    if(array[i][prop] === key){
-      return array[i];
-    }
-  }
-}
-
-function getAllTdfsforCurrentTeacher(){
-  myTdfs = [];
-  Tdfs.find({}).forEach(function(entry){
-    myTdfs.push(entry);
-  });
-  return myTdfs;
-}
-
-function getAllClassesForCurrentTeacher(){
-  var curClasses = [];
-  if (Roles.userIsInRole(Meteor.user(), ["admin"])){
-    Classes.find({}).forEach(function(entry){
-      curClasses.push(entry);
-    });
-  }else{
-    Classes.find({instructor:Meteor.userId()}).forEach(function(entry){
-      curClasses.push(entry);
-    });
-  }
-  return curClasses;
+  Session.set("curClassStudentTotals",studentTotals);
 }
 
 Template.teacherReporting.helpers({
@@ -95,23 +52,20 @@ Template.teacherReporting.helpers({
 
   replaceSpacesWithUnderscores: function(string){
     return string.replace(" ","_");
+  },
+
+  curClassStudentTotals: function(){
+    return Session.get("curClassStudentTotals");
   }
 });
 
 Meteor.subscribe('tdfs',function () {
-  Session.set("tdfs",getAllTdfsforCurrentTeacher());
+  Session.set("tdfs",getAllTdfs());
 });
 
 Meteor.subscribe('classes',function(){
   var classes = getAllClassesForCurrentTeacher();
   Session.set("classes",classes);
-  Meteor.call('usernameToIDMap',function(err,res){
-    if(!!err){
-      console.log("ERROR getting usernameToIDMap: " + err);
-    }else{
-      usernameToIDMap = res;
-    }
-  });
 });
 
 Template.teacherReporting.events({
@@ -121,19 +75,19 @@ Template.teacherReporting.events({
       myNavTabs[i].setAttribute('data-toggle','tab')
     }
     curTdf = $(event.currentTarget).val();
-    console.log("change tdf-select, curTdf: " + curTdf);
     if(!!curClassName){
-      getCurClassStudents(curClassName);
+      getCurClassStudents(curClassName,curTdf);
     }
   },
   "click .nav-tabs": function(event, template){
-    if(curTdf === ""){
+    if(curTdf === "invalid"){
       alert("Please select a tdf");
     }else{
       //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
       setTimeout(function(){
-        curClassName = $(".nav-tabs > .active")[0].innerText;
-        getCurClassStudents(curClassName);
+        //Need to strip newlines because chrome appends them for some reason
+        curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
+        getCurClassStudents(curClassName,curTdf);
       },200);
     }
   }

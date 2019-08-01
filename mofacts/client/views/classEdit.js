@@ -22,31 +22,9 @@ function noClassSelectedSetup(){
   isNewClass = true;
 }
 
-function search(key, prop, array){
-  for(var i=0;i<array.length;i++){
-    if(array[i][prop] === key){
-      return array[i];
-    }
-  }
-}
-
 Meteor.subscribe("classes",function(){
   Session.set("classes",getAllClassesForCurrentTeacher());
 });
-
-function getAllClassesForCurrentTeacher(){
-  var curClasses = [];
-  if (Roles.userIsInRole(Meteor.user(), ["admin"])){
-    Classes.find({}).forEach(function(entry){
-      curClasses.push(entry);
-    });
-  }else{
-    Classes.find({instructor:Meteor.userId()}).forEach(function(entry){
-      curClasses.push(entry);
-    });
-  }
-  return curClasses;
-}
 
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers

@@ -83,10 +83,12 @@ getStimCluster = function (index, cachedStimuli) {
 };
 
 curStimIsSoundDisplayType = function(){
-  if(!!Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType){
-    console.log("displayType: " + Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType[0]);
-    return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster[0].displayType[0] === "Sound";
-  }
+  var foundSoundDisplayType = false;
+  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.cluster.displayType":"Sound"}).forEach(function(entry){
+    foundSoundDisplayType = true;
+  });
+
+  return foundSoundDisplayType;
 }
 
 getCurStimImageSrcs = function(){

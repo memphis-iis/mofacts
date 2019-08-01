@@ -1,0 +1,45 @@
+.thWide {
+  width: 50%;
+  padding-right: 5px;
+}
+
+.graphs {
+  width: 50%;
+  margin-left: 10px;
+}
+
+svg:not(:root){
+  overflow: visible;
+}
+
+svg.ct-chart-line{
+  margin-left: 2.5%
+}
+
+line.ct-bar:nth-child(2n+1) {
+	stroke: lightpink;
+}
+
+.show-axis-labels[data-x-axis-label]::before {
+   content: attr(data-x-axis-label);
+   position: absolute;
+   width: 100%;
+   text-align: center;
+   left: 0;
+   bottom: 0;
+   font-size: 1.45rem;
+   color: #000;
+   font-weight: bolder;
+}
+
+.show-axis-labels[data-y-axis-label]::after {
+   content: attr(data-y-axis-label);
+   position: absolute;
+   top: 40%;
+   left: -6.25rem;
+   font-size: 1.45rem;
+   color: #000;
+   text-align: center;
+   transform: rotate(-90deg)translateY(50%);
+   font-weight: bolder;
+}

@@ -133,8 +133,7 @@ Meteor.publish(null, function () {
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find({}),
-        Classes.find({})
+        UserMetrics.find({})
     ];
 
     return defaultData;

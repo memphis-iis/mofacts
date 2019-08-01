@@ -203,7 +203,14 @@ Router.route('/teacherReporting',{
     action: function () {
         this.render('teacherReporting');
     }
-})
+});
+
+Router.route('/studentReporting',{
+    name: "client.studentReporting",
+    action: function () {
+        this.render('studentReporting');
+    }
+});
 
 //Sends the user to the choose page where the user can choose
 //between viewing all of the items or all of the students for the system.
