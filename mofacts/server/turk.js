@@ -226,7 +226,7 @@ following is true:
 
         client = getClient(userProfile);
 
-        return client.notifyWorkers(req).promise.then(function(res){
+        return client.notifyWorkers(req).promise().then(function(res){
           return {'Successful':'true'} // see approveAssignment
         }, function(err){
           throw {
