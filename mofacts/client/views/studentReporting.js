@@ -3,24 +3,49 @@ Session.set("curStudentPerformance",{});
 
 curTdf = "";
 loadedLabels = false;
+const numTrialsForKCLearningCurve = 5;
 
 getStimProbs = function(){
+  //We've selected the "All" tdf option
   if(Session.get("currentStimName") === null){
-    return [];
-  }
+    var allTdfProbs = [];
+    Tdfs.find({}).forEach(function(curTdf){
+      console.log(curTdf);
+      Session.set("currentTdfName",curTdf.fileName);
+      if(!!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
+        Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+        var tempModelUnitEngine = createModelUnit();
+        var totalStimProb = 0;
+        var cardProbs = tempModelUnitEngine.getCardProbs();
+        for(var i=0;i<cardProbs.length;i++){
+          if(!!cardProbs[i].probability){
+            totalStimProb += cardProbs[i].probability;
+          }
+        }
 
-  var tempModelUnitEngine = createModelUnit();
-  var stimProbs = [];
-  var cardProbs = tempModelUnitEngine.getCardProbs();
-  for(var i=0;i<cardProbs.length;i++){
-      stimProbs.push(cardProbs[i].probability);
-  }
+        var avgStimProbForTdf = totalStimProb / cardProbs.length;
+        console.log(avgStimProbForTdf);
+        allTdfProbs.push(avgStimProbForTdf);
+      }else{
+        allTdfProbs.push(0);
+      }
+    });
+    Session.set("currentStimName",null);
+    Session.set("currentTdfName",null);
+    return allTdfProbs;
+  }else{
+    var tempModelUnitEngine = createModelUnit();
+    var stimProbs = [];
+    var cardProbs = tempModelUnitEngine.getCardProbs();
+    for(var i=0;i<cardProbs.length;i++){
+        stimProbs.push(cardProbs[i].probability);
+    }
 
-  return stimProbs;
+    return stimProbs;
+  }
 }
 
 getAvgCorrectnessAcrossKCsLearningCurve = function(){
-  var numTrialsForKCLearningCurve = 10;
   var avgCorrectnessAcrossKCsLearningCurve = [];
 
   var countAndNumCorrectPerTrialNum = {};
@@ -150,7 +175,19 @@ drawCharts = function () {
     probSeries = safeSeries(getStimProbs());
 
     var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
-    itemDataProbRes = _.range(1, probSeries.length+1);
+    var itemDataProbRes = [];
+
+    //"All" selected, so we should put labels of each tdf on the chart instead
+    //of just numbers
+    if(Session.get("currentTdfName") === null){
+        Tdfs.find({}).forEach(function(tdf){
+          itemDataProbRes.push(tdf.fileName.replace('-',''));
+        })
+        $("#stimProbsChart").css("margin-left", "20%");
+    }else{
+        itemDataProbRes = _.range(1, probSeries.length+1);
+        $("#stimProbsChart").css("margin-left", "0%");
+    }
 
     // Now actually create the charts - but only if we can find the proper
     // elements and there is data to display
@@ -194,7 +231,7 @@ drawCharts = function () {
                 .html("<div class='nodata'>No " + dataDescrip + " data available</div>");
         }
         else {
-            $(target).addClass("show-axis-labels");
+            $(target).addClass("show-axis-labels").html("");
             // Note that we provide some default values that can be overridden
             var chartData = {
                 'labels': labels,
