@@ -37,6 +37,7 @@ following is true:
 ******************************************************************************
 **/
 
+import {Promise} from 'meteor/promise';
 
 
 (function() {
