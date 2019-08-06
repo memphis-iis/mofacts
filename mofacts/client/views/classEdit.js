@@ -1,6 +1,7 @@
 Session.set("classes",[]);
 
 var isNewClass = true;
+const lengthOfNewGeneratedIDs = 6;
 
 function classSelectedSetup(curClassName){
     //$("#newClassName").prop('disabled',true);
@@ -20,6 +21,10 @@ function noClassSelectedSetup(){
   $("#deleteClass").prop('disabled',true);
   $("#classStudents").val("");
   isNewClass = true;
+}
+
+genID = function(length){
+  return Math.random().toString(36).substring(2, (2+length));
 }
 
 Meteor.subscribe("classes",function(){
@@ -49,6 +54,30 @@ Template.classEdit.events({
     }else{
       //Creating a new class with name from $textBox
       noClassSelectedSetup();
+    }
+  },
+
+  "click #generateIDs": function(event, template){
+    var numIDsToGen = parseInt($("#numIDs").val());
+    if(isNaN(numIDsToGen)){
+      alert("Please enter a numeric value");
+    }else{
+      var newIDs = [];
+      var idMap = {};
+      for(var id in Object.keys(usernameToIDMap)){
+        idMap[id] = true;
+      }
+      for(var i=0;i<numIDsToGen;i++){
+        var newID = genID(lengthOfNewGeneratedIDs);
+        while(idMap[newID]){
+          newID = genID(lengthOfNewGeneratedIDs);
+        }
+        newIDs.push(newID);
+        idMap[newID] = true;
+      }
+      var students = $("#classStudents").val().trim().split('\n').filter(x => x !== "");
+      students = students.concat(newIDs);
+      $("#classStudents").val(students.map(x => x + '\n').join(''));
     }
   },
 

@@ -21,9 +21,11 @@
               </select>
             </div>
             <div>
+              <label>Class name</label>
               <input class="form-control" type="text" placeholder="Enter classname here" id="newClassName" />
             </div>
             <div>
+              <label>Student Login IDs (one per line)</label>
               <textarea class="form-control" rows=15 cols=20 id="classStudents" placeholder="Enter login IDs here"></textarea>
             </div>
             <div>
@@ -32,6 +34,13 @@
               </button>
               <button type='button' id='saveClass' class='btn btn-fix'>
                   Save Class
+              </button>
+            </div>
+            <div>
+              <label>Generate random user ids</label>
+              <input type="text" placeholder="Num IDs to generate" id="numIDs" />
+              <button type='button' id='generateIDs' class='btn btn-fix'>
+                Generate IDs
               </button>
             </div>
         </div>
