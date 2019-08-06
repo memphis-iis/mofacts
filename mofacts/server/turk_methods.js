@@ -88,7 +88,9 @@ sendScheduledTurkMessages = async function() {
             };
 
             serverConsole("About to log entry for Turk", JSON.stringify(sendLogEntry, null, 2));
+          Meteor.bindEnvironment(function(){
             writeUserLogEntries(nextJob.experiment, sendLogEntry, nextJob.workerUserId);
+          });
         }
 
         // Mark the email sent, not matter what happened
@@ -641,5 +643,12 @@ Meteor.methods({
         });
 
         return records;
-    }
+    },
+  // DEBUG
+  turkTest: async function(ownerProfile, hit) {
+    serverConsole("Method hit");
+    var assignList = await turk.getAssignmentsForHIT(ownerProfile, hit);
+    serverConsole("Got there??");
+    serverConsole(assignList);
+  }
 });

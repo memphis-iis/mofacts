@@ -49,11 +49,14 @@ following is true:
   
   function validateField(fld, err) {
     if (!fld) {
+      serverConsole("Validation err:")
+      serverConsole(err)
       throw err;
     }
   }
 
   function validateUser(userProfile) {
+    serverConsole(userProfile);
     validateField(userProfile.have_aws_id, "AWS request user has no ID");
     validateField(userProfile.aws_id, "AWS request user ID is invalid");
     validateField(userProfile.have_aws_secret, "AWS request user has secret key");
@@ -176,7 +179,7 @@ following is true:
 
         var client = getClient(userProfile);
 
-        client.listAssignmentsForHIT(req).promise().then(function(res) {
+        return client.listAssignmentsForHIT(req).promise().then(function(res) {
           var assignlist = [];
           res.Assignments.forEach(function(assignment) {
             assignlist.push(assignment);
