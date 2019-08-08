@@ -198,6 +198,13 @@ Router.route('/classEdit', {
     }
 });
 
+Router.route('/tdfAssignmentEdit',{
+    name: "client.tdfAssignmentEdit",
+    action: function () {
+        this.render('tdfAssignmentEdit');
+    }
+})
+
 Router.route('/teacherReporting',{
     name: "client.teacherReporting",
     action: function () {
