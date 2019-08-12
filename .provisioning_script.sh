@@ -25,6 +25,8 @@ echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
+sudo apt-get install dos2unix
+
 # Upgrading from 2.4 to 2.6
 # mongodump
 # sudo apt-mark unhold mongodb-10gen
@@ -70,6 +72,8 @@ curl https://install.meteor.com/?release=1.6.1.1 | sh
 # In case we're running on a Windows host, we force the use of mounting instead
 # of symlinks for meteor packages
 cd "$HOME/mofacts/mofacts"
+
+dos2unix run_meteor
 
 sudo umount .meteor/local -f
 rm .meteor/local -rf
