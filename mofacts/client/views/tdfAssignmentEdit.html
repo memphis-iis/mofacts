@@ -1,47 +1,60 @@
 <template name="tdfAssignmentEdit">
 {{#if isInRole 'admin, teacher'}}
-  <h1 class="text-center">Add/edit Chapter Assignments</h1>
-  <legend class="text-center">Select Class to Add/Edit Assignment</legend>
-  <div class="text-center">
-    <select id="class-select">
-        <option selected="selected" value="invalid" disabled="true">Select a class</option>
-        {{#each classes}}
-          <option value="{{this.name}}">{{this.name}}</option>
-        {{/each}}
-    </select>
+  <br><br>
+  <div class="row">
+      <div class="col-md-offset-3 col-md-6">
+          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#tdfAssignmentEditCollapse" aria-expanded="false" aria-controls="userAdminCollapse">
+              Assign chapters to classes
+          </button>
+      </div>
   </div>
-  <legend class="text-center">Select chapters to assign to class</legend>
-  <div>
-    <div class="col-md-3">
-    </div>
-    <div class="col-md-2">
-      <h3 class="text-center">Available Chapters</h3>
-      <select size="20" class="center" id="notSelectedTdfs" multiple>
-        {{#each tdfsNotSelected}}
-          <option value="{{this}}">{{this}}</option>
-        {{/each}}
-      </select>
-    </div>
-    <div class="col-md-2 text-center pad-top">
-      <h3 class="text-center">Select Chapter(s)</h3>
-      <button id="selectTdf">-&gt;</button>
-      <br /><br /><br /><br />
-      <h3 class="text-center">Unselect Chapter(s)</h3>
-      <button id="unselectTdf">&lt;-</button>
-    </div>
-    <div class="col-md-2">
-      <h3 class="text-center">Selected Chapters</h3>
-      <select size="20" class="center" id="selectedTdfs" multiple>
-          {{#each tdfsSelected}}
-            <option value="{{this}}">{{this}}</option>
+
+  <div class="row collapse" id="tdfAssignmentEditCollapse">
+    <h1 class="text-center">Add/edit Chapter Assignments</h1>
+    <legend class="text-center">Select Class to Add/Edit Assignment</legend>
+    <div class="text-center">
+      <select id="class-select">
+          <option selected="selected" value="invalid" disabled="true">Select a class</option>
+          {{#each classes}}
+            <option value="{{this.name}}">{{this.name}}</option>
           {{/each}}
       </select>
     </div>
-    <div class="col-md-3">
+    <legend class="text-center">Select chapters to assign to class</legend>
+    <div>
+      <div class="col-md-2">
+      </div>
+      <div class="col-md-3">
+        <h3 class="text-center">Available Chapters</h3>
+        <select size="20" class="center" id="notSelectedTdfs" multiple>
+          {{#each tdfsNotSelected}}
+            <option value="{{this}}">{{this}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="col-md-2 text-center pad-top">
+        <h3 class="text-center">Select Chapter(s)</h3>
+        <button id="selectTdf">-&gt;</button>
+        <br /><br /><br /><br />
+        <h3 class="text-center">Unselect Chapter(s)</h3>
+        <button id="unselectTdf">&lt;-</button>
+      </div>
+      <div class="col-md-3">
+        <h3 class="text-center">Selected Chapters</h3>
+        <select size="20" class="center" id="selectedTdfs" multiple>
+            {{#each tdfsSelected}}
+              <option value="{{this}}">{{this}}</option>
+            {{/each}}
+        </select>
+      </div>
+      <div class="col-md-2">
+      </div>
     </div>
-  </div>
-  <div>
-    <button id="saveAssignment" class="btn-mat">Save Assignment</button>
+    <div class="col-md-5"></div>
+    <div class="col-md-2">
+      <button id="saveAssignment" class="btn-mat">Save Assignment</button>
+    </div>
+    <div class="col-md-5"></div>
   </div>
 {{/if}}
 </template>

@@ -456,9 +456,6 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
 
-        console.log("p.stimResponseText: " + p.stimResponseText);
-        console.log("p.responseOutcomeHistory: " + JSON.stringify(p.responseOutcomeHistory));
-
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));

@@ -106,6 +106,9 @@
                 {{> classEdit}}
             {{/if}}
             {{#if isInRole 'admin, teacher'}}
+                {{> tdfAssignmentEdit}}
+            {{/if}}
+            {{#if isInRole 'admin, teacher'}}
                 {{> teacherReporting}}
             {{/if}}
         {{/if}}
