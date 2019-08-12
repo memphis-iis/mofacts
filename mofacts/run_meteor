@@ -15,7 +15,7 @@ sudo mount --bind "$HOME/.meteor/local" .meteor/local
 mkdir -p "$HOME/.meteor/packages"
 sudo mount --bind "$HOME/.meteor/packages" packages
 
-meteor npm install
+meteor npm install --no-bin-links
 
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
