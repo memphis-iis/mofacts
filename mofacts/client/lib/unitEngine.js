@@ -314,6 +314,7 @@ function modelUnitEngine() {
                     initResponses[response] = {
                         responseSuccessCount: 0,
                         responseFailureCount: 0,
+                        outcomeHistory: [],
                     };
                 }
             }
@@ -453,6 +454,11 @@ function modelUnitEngine() {
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
+        p.responseOutcomeHistory = p.resp.outcomeHistory;
+
+        console.log("p.stimResponseText: " + p.stimResponseText);
+        console.log("p.responseOutcomeHistory: " + JSON.stringify(p.responseOutcomeHistory));
+
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
@@ -886,6 +892,8 @@ function modelUnitEngine() {
             if (answerText && answerText in cardProbabilities.responses) {
                 if (wasCorrect) cardProbabilities.responses[answerText].responseSuccessCount += 1;
                 else            cardProbabilities.responses[answerText].responseFailureCount += 1;
+
+                cardProbabilities.responses[answerText].outcomeHistory.push(wasCorrect ? 1 : 0);
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
