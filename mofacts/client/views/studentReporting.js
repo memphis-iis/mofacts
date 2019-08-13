@@ -1,9 +1,15 @@
-Session.set("tdfs",[]);
+Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
 
 curTdf = "";
 loadedLabels = false;
 const numTrialsForKCLearningCurve = 5;
+
+window.onpopstate = function(event){
+  //console.log("back button pressed?" + document.location.pathname);
+  Session.set("studentReportingTdfs",[]);
+  Session.set("curStudentPerformance",{});
+}
 
 getStimProbs = function(){
   //We've selected the "All" tdf option
@@ -110,7 +116,7 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
 
 Template.studentReporting.helpers({
   tdfs: function(){
-    return Session.get("tdfs");
+    return Session.get("studentReportingTdfs");
   },
 
   curStudentPerformance: function(){
@@ -125,23 +131,22 @@ Template.studentReporting.helpers({
   }
 });
 
-Meteor.subscribe('userMetrics',function () {
-  console.log("userMetrics!!!");
-  var studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
-  console.log("studentUsername:" + studentUsername);
-  var studentID = translateUsernameToID(studentUsername);
-  if(studentID === undefined){
-    Meteor.setTimeout(function(){
-      studentID = translateUsernameToID(studentUsername);
-      console.log("studentID: " + studentID)
-      Session.set("tdfs",getAllNamesOfTdfsAttempted(studentID));
-    },200)
-  }else{
-      Session.set("tdfs",getAllNamesOfTdfsAttempted(studentID));
-  }
-});
-
 Template.studentReporting.onRendered(function(){
+  Meteor.subscribe('userMetrics',function () {
+    console.log("userMetrics!!!");
+    var studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
+    console.log("studentUsername:" + studentUsername);
+    var studentID = translateUsernameToID(studentUsername);
+    if(studentID === undefined){
+      Meteor.setTimeout(function(){
+        studentID = translateUsernameToID(studentUsername);
+        console.log("studentID: " + studentID)
+        Session.set("studentReportingTdfs",getAllNamesOfTdfsAttempted(studentID));
+      },200)
+    }else{
+        Session.set("studentReportingTdfs",getAllNamesOfTdfsAttempted(studentID));
+    }
+  });
   console.log("rendered!!!");
   if($("#tdf-select").val() !== "invalid" && $("#tdf-select").val() !== null){
     updateDataAndCharts($("#tdf-select").val());
