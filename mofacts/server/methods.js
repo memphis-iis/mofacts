@@ -139,6 +139,10 @@ Meteor.publish(null, function () {
     return defaultData;
 });
 
+Meteor.publish('userMetrics', function(){
+  return UserMetrics.find({});
+})
+
 Meteor.publish('tdfs', function(){
   return Tdfs.find({});
 })
@@ -451,11 +455,11 @@ Meteor.startup(function () {
             var res = await turk.getAccountBalance(
               UserProfileData.findOne({_id: Meteor.user()._id})
             );
-            
+
             if (!res) {
               throw "There was an error reading your account balance";
             }
-            
+
             result = true;
             acctBal = res.AvailableBalance;
             errmsg = "";

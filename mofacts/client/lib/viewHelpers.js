@@ -4,6 +4,7 @@ Meteor.call('usernameToIDMap',function(err,res){
   if(!!err){
     console.log("ERROR getting usernameToIDMap: " + err);
   }else{
+    console.log("!!! usernameToIDMap defined: " + JSON.stringify(res));
     usernameToIDMap = res;
   }
 });
@@ -42,6 +43,28 @@ getAllTdfs = function(){
     myTdfs.push(entry);
   });
   return myTdfs;
+}
+
+getAllNamesOfTdfsAttempted = function(studentID){
+  var allNamesOfTdfsAttempted = [];
+
+  UserMetrics.find({"_id":studentID}).forEach(function(entry){
+    console.log("userMetric: " + JSON.stringify(entry));
+    var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
+    for(var index in possibleTdfs){
+      var possibleTdf = possibleTdfs[index];
+      console.log(possibleTdf);
+      if(possibleTdf.indexOf("_xml") != -1){
+        var curTdfName = possibleTdf;
+        var replacement = ".";
+        //Replace only last underscore with "." to reconstruct actual tdf name
+        curTdfName = curTdfName.replace(/_([^_]*)$/,replacement+'$1');
+        allNamesOfTdfsAttempted.push(curTdfName);
+      }
+    }
+  });
+
+  return allNamesOfTdfsAttempted;
 }
 
 getStudentPerformance = function(studentUsername,studentID,curTdf){
