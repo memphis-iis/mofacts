@@ -4,3 +4,4 @@ vagrant up
 vagrant ssh
 cd mofacts/mofacts
 ./run_meteor
+   
