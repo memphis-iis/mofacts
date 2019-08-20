@@ -456,9 +456,6 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
 
-        //console.log("p.stimResponseText: " + p.stimResponseText);
-        //console.log("p.responseOutcomeHistory: " + JSON.stringify(p.responseOutcomeHistory));
-
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
@@ -466,8 +463,11 @@ function modelUnitEngine() {
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
         p.stimOutcomeHistory = stim.outcomeHistory;
+        console.log("stimOutcomeHistory: " + p.stimOutcomeHistory);
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
+
+        console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
 
         // Calculated metrics
 
@@ -869,7 +869,9 @@ function modelUnitEngine() {
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
 
+                console.log("!!!appending to outcomeHistory: " + card.outcomeHistory);
                 card.outcomeHistory.push(wasCorrect ? 1 : 0);
+                console.log("!!!appending to outcomeHistory2: " + card.outcomeHistory);
 
                 var stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
@@ -877,7 +879,9 @@ function modelUnitEngine() {
                     else            card.stims[stim].stimFailureCount += 1;
 
                     //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+                    console.log("!!!appending to stim outcomeHistory: " + card.stims[stim].outcomeHistory);
                     card.stims[stim].outcomeHistory.push(wasCorrect ? 1 : 0);
+                    console.log("!!!appending to stim outcomeHistory2: " + card.stims[stim].outcomeHistory);
                 }
             }
 
@@ -887,7 +891,9 @@ function modelUnitEngine() {
                 if (wasCorrect) cardProbabilities.responses[answerText].responseSuccessCount += 1;
                 else            cardProbabilities.responses[answerText].responseFailureCount += 1;
 
+                console.log("!!!appending to responses outcomeHistory: " + cardProbabilities.responses[answerText].outcomeHistory);
                 cardProbabilities.responses[answerText].outcomeHistory.push(wasCorrect ? 1 : 0);
+                console.log("!!!appending to responses outcomeHistory2: " + cardProbabilities.responses[answerText].outcomeHistory);
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
@@ -898,7 +904,9 @@ function modelUnitEngine() {
             }
 
             // All stats gathered - calculate probabilities
-            calculateCardProbabilities();
+            //Need a delay so that the outcomehistory arrays can be properly updated
+            //before we use them in calculateCardProbabilities
+            Meteor.setTimeout(calculateCardProbabilities,20);
         },
 
         unitFinished: function() {
