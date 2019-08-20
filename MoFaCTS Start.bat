@@ -1,5 +1,5 @@
-set PATH=%PATH%;C:\Users\ppavl\AppData\Local\Programs\Git\usr\bin
-cd C:\Users\ppavl\Dropbox\Active projects\mofacts
+
+cd C:\Users\ppavl\Dropbox\Active projects\mofacts_IIS
 vagrant up
 vagrant ssh
 cd mofacts/mofacts

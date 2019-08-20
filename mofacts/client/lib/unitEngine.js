@@ -456,6 +456,9 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
 
+        //console.log("p.stimResponseText: " + p.stimResponseText);
+        //console.log("p.responseOutcomeHistory: " + JSON.stringify(p.responseOutcomeHistory));
+
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
@@ -479,6 +482,7 @@ function modelUnitEngine() {
         // over our nested data structure, but it also gives us more readable
         // code when we're setting something per stimulus
         var probs = cardProbabilities.probs;
+        var ptemp = [];
         for (var i = 0; i < probs.length; ++i) {
             // card.canUse is true if and only if it is in the clusterlist
             // for the current unit. You could just return here if these clusters
@@ -486,7 +490,10 @@ function modelUnitEngine() {
             var parms = calculateSingleProb(probs[i]);
             probs[i].probFunctionsParameters = parms;
             probs[i].probability = parms.probability;
+            ptemp[i]=Math.round(100*parms.probability)/100;
+
         }
+        console.log(...ptemp);
     }
 
     // Return index of PROB with minimum probability that was last seen at least
@@ -500,7 +507,7 @@ function modelUnitEngine() {
             var card = cards[prob.cardIndex];
 
             if (card.canUse && card.trialsSinceLastSeen > 2) {
-                if (prob.probability < currentMin) {   // Note that this is stim probability
+                if (prob.probability <= currentMin) {   // Note that this is stim probability
                     currentMin = prob.probability;
                     indexToReturn = i;
                 }
@@ -520,7 +527,7 @@ function modelUnitEngine() {
             var prob = probs[i];
             var card = cards[prob.cardIndex];
 
-            if (card.canUse && card.trialsSinceLastSeen > 2) {
+            if (card.canUse && card.trialsSinceLastSeen > 1) {
                 // Note that we are checking stim probability
                 if (prob.probability > currentMax && prob.probability < ceiling) {
                     currentMax = prob.probability;
@@ -542,17 +549,17 @@ function modelUnitEngine() {
           var parameters = card.stims[prob.stimIndex].parameter;
           var optimalProb = parameters[1];
           if(!optimalProb){
-            console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            //console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
           }
-          console.log("!!!parameters: " + JSON.stringify(parameters) + ", optimalProb: " + optimalProb);
+          //console.log("!!!parameters: " + JSON.stringify(parameters) + ", optimalProb: " + optimalProb);
 
           if (card.canUse && card.trialsSinceLastSeen > 1) {
               var dist = Math.abs(prob.probability - optimalProb)
 
             //  console.log(dist)
               // Note that we are checking stim probability
-              if (dist < currentMin) {
+              if (dist <= currentMin) {
                   currentMin = dist;
                   indexToReturn = i;
               }
@@ -563,13 +570,9 @@ function modelUnitEngine() {
     }
 
     function findMaxProbCardThresholdCeilingPerCard(cards,probs){
-      var currentDistFromThresholdCeiling = 1.00001;
+
+      var currentMax = 0;
       var indexToReturn = -1;
-
-      var currentDistOverThresholdCeiling = 1.00001;
-      var indexToReturnOverThresholdCeiling = 0;
-
-      //TODO: take one closest to own threshold instead of first
 
       for (var i = probs.length - 1; i >= 0; --i) {
           var prob = probs[i];
@@ -578,27 +581,18 @@ function modelUnitEngine() {
 
           var thresholdCeiling = parameters[1];
           if(!thresholdCeiling){
-            console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
+          //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
             thresholdCeiling = 0.90;
           }
-          console.log("!!!parameters: " + JSON.stringify(parameters) + ", thresholdCeiling: " + thresholdCeiling + ", card: " + JSON.stringify(card));
+          //console.log("!!!parameters: " + JSON.stringify(parameters) + ", thresholdCeiling: " + thresholdCeiling + ", card: " + JSON.stringify(card));
 
-          if (card.canUse && card.trialsSinceLastSeen > 2) {
-              var dist = Math.abs(prob.probability - thresholdCeiling);
+          if (card.canUse && card.trialsSinceLastSeen > 1) {
               // Note that we are checking stim probability
-              if (dist < currentDistFromThresholdCeiling && prob.probability < thresholdCeiling) {
-                  currentDistFromThresholdCeiling = dist;
+              if (prob.probability >= currentMax && prob.probability < thresholdCeiling) {
+                  currentMax = prob.probability;
                   indexToReturn = i;
-              }else if(dist < currentDistOverThresholdCeiling){
-                currentDistOverThresholdCeiling = dist;
-                indexToReturnOverThresholdCeiling = i;
               }
           }
-
-      }
-
-      if(indexToReturn == -1){
-        indexToReturn = indexToReturnOverThresholdCeiling;
       }
 
       return indexToReturn;
@@ -645,6 +639,9 @@ function modelUnitEngine() {
             switch(this.unitMode){
               case 'thresholdCeiling':
                 newProbIndex = findMaxProbCardThresholdCeilingPerCard(cards, probs);
+                if (newProbIndex === -1) {
+                    newProbIndex = findMinProbCard(cards, probs);
+                }
                 break;
               case 'distance':
                 newProbIndex = findMinProbDistCard(cards,probs);
@@ -686,9 +683,9 @@ function modelUnitEngine() {
               var prompts = currentQuestion.split("|");
               Session.set("currentQuestion",prompts[0]);
               Session.set("currentQuestionPart2",prompts[1]);
-              console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
+          //    console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
             }else{
-              console.log("one part question detected");
+          //    console.log("Q: " +prompts[0]);
               Session.set("currentQuestionPart2",undefined);
             }
 
