@@ -369,6 +369,9 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
          var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
          var audioPromptSpeakingRate = getTDFValueIfPresentAndExperiment(tdfAudioPromptSpeakingRate,userAudioPromptSpeakingRate);
          Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+
+         var audioPromptMode = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptMode;
+         Session.set("audioPromptMode",audioPromptMode);
     }
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled

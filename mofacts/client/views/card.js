@@ -428,7 +428,7 @@ Template.card.events({
             else {
                 $("#userForceCorrect").val("");
                 $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
-                speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'");
+                speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", false, "feedback");
                 startRecording();
             }
           }
@@ -1454,7 +1454,7 @@ function startQuestionTimeout(textFocus) {
     else {
         //Only speak the prompt if the question type makes sense
         if(questionType === "text" || questionType === "cloze"){
-          speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true);
+          speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true,"all");
         }
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
@@ -1507,7 +1507,7 @@ function showUserInteraction(isGoodNews, news) {
         .text(news)
         .show();
 
-    speakMessageIfAudioPromptFeedbackEnabled(news);
+    speakMessageIfAudioPromptFeedbackEnabled(news,"all");
 
     // forceCorrection is now part of user interaction - we always clear the
     // textbox, but only show it if:
@@ -1525,12 +1525,14 @@ function showUserInteraction(isGoodNews, news) {
             var forceCorrectDelay = getCurrentDeliveryParams().forcecorrecttimeout;
             var prompt = getCurrentDeliveryParams().forcecorrectprompt;
             $("#forceCorrectGuidance").text(prompt);
-            speakMessageIfAudioPromptFeedbackEnabled(prompt);
+
+            speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
             var savedFunc = timeoutFunc;
             beginMainCardTimeout(forceCorrectDelay, savedFunc);
           } else {
             $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
-            speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue");
+
+            speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue",false,"feedback");
           }
             $("#userForceCorrect").val("").focus();
             startRecording();
@@ -1566,7 +1568,7 @@ function hideUserInteraction() {
 // BEGIN WEB AUDIO section
 
 //Audio prompt/feedback (web audio speech synthesis)
-function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
+function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptSource){
   var savedFunc = timeoutFunc;
   var savedDelay = timeoutDelay;
   if(resetTimeout){
@@ -1574,15 +1576,18 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout){
     clearCardTimeout();
   }
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
+  var audioPromptMode = Session.get("audioPromptMode");
   if(enableAudioPromptAndFeedback){
-    var synth = window.speechSynthesis;
-    //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
-    //UNDERSCORE...speech from literal reading of text
-    msg = msg.replace(/_+/g,'blank');
-    var message = new SpeechSynthesisUtterance(msg);
-    message.rate = Session.get("audioPromptSpeakingRate");
-    synth.speak(message);
-    console.log("providing audio feedback");
+    if(!!audioPromptMode && ((audioPromptSource === audioPromptMode) || audioPromptMode === "all")){
+      var synth = window.speechSynthesis;
+      //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
+      //UNDERSCORE...speech from literal reading of text
+      msg = msg.replace(/_+/g,'blank');
+      var message = new SpeechSynthesisUtterance(msg);
+      message.rate = Session.get("audioPromptSpeakingRate");
+      synth.speak(message);
+      console.log("providing audio feedback");
+    }
   }else{
     console.log("audio feedback disabled");
   }

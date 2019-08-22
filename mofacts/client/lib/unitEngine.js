@@ -869,9 +869,7 @@ function modelUnitEngine() {
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
 
-                console.log("!!!appending to outcomeHistory: " + card.outcomeHistory);
                 card.outcomeHistory.push(wasCorrect ? 1 : 0);
-                console.log("!!!appending to outcomeHistory2: " + card.outcomeHistory);
 
                 var stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
@@ -879,9 +877,7 @@ function modelUnitEngine() {
                     else            card.stims[stim].stimFailureCount += 1;
 
                     //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
-                    console.log("!!!appending to stim outcomeHistory: " + card.stims[stim].outcomeHistory);
                     card.stims[stim].outcomeHistory.push(wasCorrect ? 1 : 0);
-                    console.log("!!!appending to stim outcomeHistory2: " + card.stims[stim].outcomeHistory);
                 }
             }
 
@@ -891,9 +887,7 @@ function modelUnitEngine() {
                 if (wasCorrect) cardProbabilities.responses[answerText].responseSuccessCount += 1;
                 else            cardProbabilities.responses[answerText].responseFailureCount += 1;
 
-                console.log("!!!appending to responses outcomeHistory: " + cardProbabilities.responses[answerText].outcomeHistory);
                 cardProbabilities.responses[answerText].outcomeHistory.push(wasCorrect ? 1 : 0);
-                console.log("!!!appending to responses outcomeHistory2: " + cardProbabilities.responses[answerText].outcomeHistory);
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
