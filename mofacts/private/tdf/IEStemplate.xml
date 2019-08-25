@@ -1,17 +1,13 @@
 <tutor>
     <setspec>
-        <lessonname>IES Optimized Cloze Practice of Basic Statistics</lessonname>
-        <userselect>false</userselect>
-        <stimulusfile>SVOIESstims.xml</stimulusfile>
-        <isModeled>false</isModeled>
+        <lessonname>Title of the unit goes here***</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>IESstimexample.xml</stimulusfile>
         <lfparameter>.85</lfparameter>
-        <shuffleclusters>0-17</shuffleclusters>
-        <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.75</simCorrectProb>
     </setspec>
     <unit>
-        <unitinstructions>Here comes the optimized learning.</unitinstructions>
-        <unitname>Model Unit</unitname>
+        <unitinstructions>Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.</unitinstructions>
+        <unitname>Title of the unit goes here***</unitname>
         <learningsession>
              <clusterlist>0-17</clusterlist>
              <unitMode>thresholdCeiling</unitMode>
@@ -66,11 +62,9 @@
           }
 
           p.y = -0.72159+
-          .58150 *
-            logitdec(
+          .58150 * logitdec(
               p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,
-              p.overallOutcomeHistory.length),
-                .97) +
+              p.overallOutcomeHistory.length), .97) +
           .54467 * logitdec(p.responseOutcomeHistory, .79) +
           9.67995 * recency(p.stimSecsSinceLastShown, .35)+
           1.85143  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
@@ -78,60 +72,20 @@
           -0.27823 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities);
           p.probability = 1.0 / (1.0 + Math.exp(-p.y));
 
-
-         console.log(
-          p.overallOutcomeHistory+" - "+
-        p.responseOutcomeHistory +" - "+
-        p.stimSecsSinceLastShown+" - "+
-    p.stimOutcomeHistory+" - "+
-  p.stimPreviousCalculatedProbabilities);
+        // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);
           return p
-
              ]]></calculateProbability>
          </learningsession>
         <deliveryparams>
             <drill>60000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>12000</reviewstudy>
+            <reviewstudy>20000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
-    <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[Demographic Survey<br><br>
-Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
-        <buttonorder>fixed</buttonorder>
-        <deliveryparams>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>5</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>18-22</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions>You are all done.</unitinstructions>
-    </unit>
+
 </tutor>
