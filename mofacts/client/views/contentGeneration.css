@@ -1,0 +1,13 @@
+textarea {
+    resize: vertical;
+    min-width: 100%;
+}
+
+#parsed-sentences {
+    height: 600px;
+    overflow: auto;
+}
+
+.cur-sentence {
+    color: #a834eb;
+}
