@@ -61,6 +61,7 @@ sessionCleanUp = function() {
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);
     Session.set("currentStimName", undefined);
+    Session.set("curTeacher",undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("currentQuestion", undefined);

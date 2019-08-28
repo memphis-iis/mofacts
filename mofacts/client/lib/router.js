@@ -174,6 +174,13 @@ Router.route('/profile', {
     }
 });
 
+Router.route('/profileSouthwest',{
+  name: "client.profileSouthwest",
+  action: function(){
+    this.render('profileSouthwest');
+  }
+})
+
 Router.route('/card', {
     name: "client.card",
     action: function () {
@@ -225,13 +232,6 @@ Router.route('/studentReporting',{
     action: function () {
         this.render('studentReporting');
     }
-});
-
-Router.route('/contentGeneration',{
-  name: 'client.contentGeneration',
-  action: function() {
-    this.render('contentGeneration');
-  }
 });
 
 //Sends the user to the choose page where the user can choose

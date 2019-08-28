@@ -401,6 +401,24 @@ Meteor.startup(function () {
           }
         },
 
+        getTdfsAssignedToStudent: function(user){
+          console.log('user: ' + user);
+          var classesWithStudent = Classes.find({"students":user}).fetch();
+          console.log("classesWithStudent: " + JSON.stringify(classesWithStudent));
+          tdfs = new Set([]);
+          for(var index in classesWithStudent){
+            var curClass = classesWithStudent[index];
+            console.log("curClass: " + JSON.stringify(curClass));
+            var tdfsInCurClass = curClass.tdfs;
+            for(var index2 in tdfsInCurClass){
+              var tdf = tdfsInCurClass[index2];
+              tdfs.add(tdf);
+            }
+          }
+          console.log("tdfs: " + JSON.stringify(Array.from(tdfs)));
+          return Array.from(tdfs);
+        },
+
         serverLog: function(data){
           if(Meteor.user()){
             logData = "User:" + Meteor.user()._id + ', log:' + data;

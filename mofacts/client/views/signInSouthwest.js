@@ -1,6 +1,5 @@
 Session.set("teachers",[]);
-
-curTeacher = "";
+Session.set("curTeacher","");
 
 function testLogin(){
   console.log("SW Login");
@@ -40,7 +39,7 @@ function testLogin(){
 
       sessionCleanUp();
 
-      Meteor.call("addUserToTeachersClass",testUserName,curTeacher, function(err, result){
+      Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher"), function(err, result){
         if(!!err){
           console.log("error adding user to teacher class: " + err);
         }
@@ -61,7 +60,7 @@ function testLogin(){
                   var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                   console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
               }
-              Router.go("/profile");
+              Router.go("/profileSouthwest");
           }
       });
   });
@@ -69,7 +68,7 @@ function testLogin(){
 
 setTeacher = function(teacher){
   console.log(teacher);
-  curTeacher = teacher;
+  Session.set("curTeacher",teacher);
   $("#initialInstructorSelection").prop('hidden','true');
   $("#loginDiv").prop('hidden','');
 }
