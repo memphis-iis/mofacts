@@ -13,10 +13,14 @@
       <h3>Sentences</h3>
       <div id="parsed-sentences">
         {{#each sentences}}
+        {{#if this.hasCloze}}
         {{#if isCurrentPair this.id}}
-        <span id="sentence" class="cur-sentence" uid="{{this.id}}">{{this.sentence}}</span>
+        <span id="sentence" class="cur-sentence sentence-with-cloze" uid="{{this.id}}">{{this.sentence}}</span>
         {{else}}
-        <span id="sentence" uid="{{this.id}}">{{this.sentence}}</span>
+        <span id="sentence" class="sentence-with-cloze" uid="{{this.id}}">{{this.sentence}}</span>
+        {{/if}}
+        {{else}}
+        <span id="sentence" uid="{{this.id}}" class="sentence-no-cloze">{{this.sentence}}</span>
         {{/if}}
         {{/each}}
       </div>
@@ -27,11 +31,11 @@
         {{#each clozes}}
         {{#if isCurrentPair this.id}}
         <div id="cloze" uid="{{this.id}}">
-          <span class="cur-sentence">{{this.cloze}}</span><input type="image" id="delete-btn" src="images/trash.svg" />
+          <span class="cur-sentence">{{this.cloze}}</span><input type="image" id="delete-btn" uid="{{this.id}}" src="images/trash.svg" />
         </div>
         {{else}}
         <div id="cloze" uid="{{this.id}}">
-          <span>{{this.cloze}}</span><input type="image" id="delete-btn" src="images/trash.svg" />
+          <span>{{this.cloze}}</span><input type="image" id="delete-btn" uid="{{this.id}}" src="images/trash.svg" />
         </div>
         {{/if}}
         {{/each}}
