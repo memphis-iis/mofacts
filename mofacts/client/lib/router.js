@@ -133,6 +133,14 @@ Router.route('/signin', {
     }
 });
 
+Router.route('/signInSouthwest', {
+    name: "client.signinSouthwest",
+    action: function () {
+        console.log("signin southwest");
+        this.render('signInSouthwest');
+    }
+})
+
 Router.route('/signup', {
     name: "client.signup",
     action: function () {

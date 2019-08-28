@@ -161,6 +161,14 @@ Meteor.publish('allUsers', function () {
 	return Meteor.users.find({}, opts);
 });
 
+Meteor.publish('allTeachers', function(){
+  var opts = {
+    fields: {username: 1}
+  }
+
+  return Meteor.users.find({'roles':'teacher'},opts);
+});
+
 //Config for scheduled jobs - the start command is at the end of
 //Meteor.startup below
 SyncedCron.config({
@@ -364,6 +372,33 @@ Meteor.startup(function () {
 
         deleteClass: function(myClass){
           Classes.remove({"instructor":this.userId,"name":myClass.name});
+        },
+
+        addUserToTeachersClass: function(user,teacherUsername){
+          var teacherID = usernameToIDMap[teacherUsername];
+          console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
+          var teacherClasses = Classes.find({"instructor":teacherID}).fetch();
+          if(teacherClasses.length == 0){
+            teacherClasses.push({
+              name:teacherUsername + "_class",
+              instructor: teacherID,
+              students: []
+            })
+          }
+          console.log("teacherClasses: " + JSON.stringify(teacherClasses));
+          var studentInAClass = false;
+          for(var index in teacherClasses){
+            var curClass = teacherClasses[index];
+            console.log("curClass: " + curClass);
+            if(user in curClass.students){
+              studentInAClass = true;
+            }
+          }
+          if(!studentInAClass){
+            var classToUpdate = teacherClasses[0];
+            classToUpdate.students.push(user);
+            Classes.update({"_id":classToUpdate._id},classToUpdate,{upsert: true});
+          }
         },
 
         serverLog: function(data){
