@@ -227,6 +227,13 @@ Router.route('/studentReporting',{
     }
 });
 
+Router.route('/contentGeneration',{
+  name: 'client.contentGeneration',
+  action: function() {
+    this.render('contentGeneration');
+  }
+});
+
 //Sends the user to the choose page where the user can choose
 //between viewing all of the items or all of the students for the system.
 Router.route('/choose', {

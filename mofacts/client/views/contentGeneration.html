@@ -1,0 +1,49 @@
+<template name="contentGeneration">
+  <div class="row">
+    <div class="col-md-5 form-group" id="textbox-div">
+      <textarea class="form-control" id="source-text" placeholder="Paste source material here"></textarea>
+    </div>
+    <div class="col-md-5" id="submit-btn-div">
+      <button class="btn btn-primary" type="button" id="submit-btn"> Submit </button>
+    </div>
+  </div>
+  
+  <div class="row">
+    <div class="col-md-6" id="sentences-div">
+      <h3>Sentences</h3>
+      <div id="parsed-sentences">
+        {{#each sentences}}
+        {{#if this.hasCloze}}
+        {{#if isCurrentPair this.id}}
+        <span id="sentence" class="cur-sentence sentence-with-cloze" uid="{{this.id}}">{{this.sentence}}</span>
+        {{else}}
+        <span id="sentence" class="sentence-with-cloze" uid="{{this.id}}">{{this.sentence}}</span>
+        {{/if}}
+        {{else}}
+        <span id="sentence" uid="{{this.id}}" class="sentence-no-cloze">{{this.sentence}}</span>
+        {{/if}}
+        {{/each}}
+      </div>
+    </div>
+    <div class="col-md-6" id="clozes-div">
+      <h3>Clozes</h3>
+      <div id="extracted-clozes">
+        {{#each clozes}}
+        {{#if isCurrentPair this.id}}
+        <div id="cloze" uid="{{this.id}}">
+          <span class="cur-sentence">{{this.cloze}}</span><input type="image" id="delete-btn" uid="{{this.id}}" src="images/trash.svg" />
+        </div>
+        {{else}}
+        <div id="cloze" uid="{{this.id}}">
+          <span>{{this.cloze}}</span><input type="image" id="delete-btn" uid="{{this.id}}" src="images/trash.svg" />
+        </div>
+        {{/if}}
+        {{/each}}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12" id="footer"><button class="btn btn-primary" type="button" id="save-btn">Save</button></div>
+  </div>
+  
+</template>
