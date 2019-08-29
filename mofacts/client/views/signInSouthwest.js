@@ -3,6 +3,7 @@ Session.set("curTeacher","");
 
 function testLogin(){
   console.log("SW Login");
+  Session.set("loginMode","southwest");
 
   var testUserName = _.trim($("#username").val()).toUpperCase();
   if (!testUserName) {

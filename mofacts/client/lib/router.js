@@ -75,7 +75,10 @@ routeToSignin = function() {
         Session.set("experimentXCond", Cookie.get("experimentXCond"));
     }
 
-    if (Session.get("loginMode") === "experiment") {
+    var loginMode = Session.get("loginMode");
+    console.log("loginMode: " + loginMode);
+
+    if (loginMode === "experiment") {
         console.log("loginMode === experiment");
         var routeParts = ['/experiment'];
 
@@ -89,10 +92,15 @@ routeToSignin = function() {
         }
 
         Router.go(routeParts.join('/'));
-    }
-    else {
-        console.log("else, signin");
-        Router.go("/signin");
+    }else if(loginMode === "southwest"){
+      console.log("southwest login, routing to southwest login");
+      Router.go("/signInSouthwest");
+    }else if(loginMode === "password"){
+      console.log("password login");
+      Router.go("/signIn");
+    }else{ //Normal login mode
+      console.log("else, signin");
+      Router.go("/");
     }
 };
 
