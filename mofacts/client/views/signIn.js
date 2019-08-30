@@ -162,7 +162,8 @@ function UserPasswordCheck() {
                 $("#signInButton").prop("disabled",false);
                 return;
             }
-
+            
+            Session.set('loginMode','password');
             signinNotify();
         }
     });
