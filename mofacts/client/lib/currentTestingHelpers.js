@@ -141,8 +141,12 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
       }
     }
     for(responseIndex in clusters[clusterIndex].response){
-      var answer = clusters[clusterIndex].response[responseIndex];
-          allAnswers.push(answer);
+      var responseParts = clusters[clusterIndex].response[responseIndex].toLowerCase().split(";");
+      var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
+      if(answerArray.length > 0){
+        var singularAnswer = answerArray[0].split("~")[0];
+        allAnswers.push(singularAnswer);
+      }
     }
   }
 
