@@ -22,7 +22,7 @@ search = function(key, prop, array){
   }
 }
 
-getAllClassesForCurrentTeacher = function(){
+getAllClassesForCurrentInstructor = function(){
   var curClasses = [];
   if (Roles.userIsInRole(Meteor.user(), ["admin"])){
     Classes.find({}).forEach(function(entry){

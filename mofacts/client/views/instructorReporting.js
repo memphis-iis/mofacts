@@ -1,4 +1,4 @@
-Session.set("teacherReportingTdfs",[]);
+Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClassStudentTotals",null);
 
@@ -36,9 +36,9 @@ getCurClassStudents = function(curClassName,currentTdf){
   Session.set("curClassStudentTotals",studentTotals);
 }
 
-Template.teacherReporting.helpers({
+Template.instructorReporting.helpers({
   tdfs: function(){
-    return Session.get("teacherReportingTdfs");
+    return Session.get("instructorReportingTdfs");
   },
 
   classes: function(){
@@ -59,7 +59,7 @@ Template.teacherReporting.helpers({
   }
 });
 
-Template.teacherReporting.events({
+Template.instructorReporting.events({
   "change #tdf-select": function(event, template){
     var myNavTabs = $(".myNavTab");
     for(var i=0;i<myNavTabs.length;i++){
@@ -84,13 +84,13 @@ Template.teacherReporting.events({
   }
 });
 
-Template.teacherReporting.onRendered(function(){
+Template.instructorReporting.onRendered(function(){
   Meteor.subscribe('tdfs',function () {
-    Session.set("teacherReportingTdfs",getAllTdfs());
+    Session.set("instructorReportingTdfs",getAllTdfs());
   });
 
   Meteor.subscribe('classes',function(){
-    var classes = getAllClassesForCurrentTeacher();
+    var classes = getAllClassesForCurrentInstructor();
     Session.set("classes",classes);
   });
 })

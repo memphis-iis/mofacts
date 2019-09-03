@@ -228,10 +228,10 @@ Router.route('/tdfAssignmentEdit',{
     }
 })
 
-Router.route('/teacherReporting',{
-    name: "client.teacherReporting",
+Router.route('/instructorReporting',{
+    name: "client.instructorReporting",
     action: function () {
-        this.render('teacherReporting');
+        this.render('instructorReporting');
     }
 });
 

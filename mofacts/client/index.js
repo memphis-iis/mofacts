@@ -62,7 +62,7 @@ Template.body.events({
       if(!curTdf){
         Session.set("curStudentPerformance",{});
       //Otherwise populate the data with the new information (for the current user
-      //and not the user from teacherReporting)
+      //and not the user from instructorReporting)
       }else{
         Session.set("curStudentPerformance",getStudentPerformance(Meteor.user().username,translateUsernameToID(Meteor.user().username),curTdf));
       }

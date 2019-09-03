@@ -28,7 +28,7 @@ genID = function(length){
 }
 
 Meteor.subscribe("classes",function(){
-  Session.set("classes",getAllClassesForCurrentTeacher());
+  Session.set("classes",getAllClassesForCurrentInstructor());
 });
 
 ////////////////////////////////////////////////////////////////////////////

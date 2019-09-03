@@ -6,7 +6,7 @@ Session.set("tdfsNotSelected",[]);
 curClass = {};
 
 Meteor.subscribe("classes",function(){
-  Session.set("classes",getAllClassesForCurrentTeacher());
+  Session.set("classes",getAllClassesForCurrentInstructor());
 });
 
 Meteor.subscribe('tdfs',function () {
