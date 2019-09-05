@@ -68,7 +68,7 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
 
   var tdfQueryName = curTdf;
 
-  UserMetrics.find({"_id":Meteor.user()._id}).forEach(function(entry){
+  UserMetrics.find({"_id":studentID}).forEach(function(entry){
     test = entry;
     for(var tdf in entry){
       //Make sure we filter out keys that aren't tdfs
@@ -159,7 +159,7 @@ Template.studentReporting.onRendered(function(){
 
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
-    var curTdf = $(event.currentTarget).val().replace(".","_");
+    curTdf = $(event.currentTarget).val().replace(".","_");
     var curTdfFileName = $(event.currentTarget).val();
     updateDataAndCharts(curTdf,curTdfFileName);
   }
