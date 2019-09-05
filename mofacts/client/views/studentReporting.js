@@ -290,12 +290,13 @@ drawCharts = function (drawWithoutData) {
 
       var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
       var itemDataProbRes = rawProbs[0];
+      var stimProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
       if(Session.get("currentTdfName") === null){
-          $("#stimProbsChart").css("margin-left", "20%");
+          stimProbsChartAxisYOffset = 250;
       }else{
-          $("#stimProbsChart").css("margin-left", "0%");
+          stimProbsChartAxisYOffset = 50;
       }
 
       // Now actually create the charts - but only if we can find the proper
@@ -320,6 +321,9 @@ drawCharts = function (drawWithoutData) {
           labelInterpolationFnc: function(value, index) {
             return index % 2 === 0 ? value : null;
           }
+        },
+        axisY:{
+          offset: stimProbsChartAxisYOffset
         }
       });
     }
