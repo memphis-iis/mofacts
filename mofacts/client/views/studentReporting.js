@@ -1,12 +1,10 @@
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
 
-curTdf = "";
 loadedLabels = false;
 const numTrialsForKCLearningCurve = 5;
 
 window.onpopstate = function(event){
-  //console.log("back button pressed?" + document.location.pathname);
   Session.set("studentReportingTdfs",[]);
   Session.set("curStudentPerformance",{});
 }
@@ -16,41 +14,32 @@ getStimProbs = function(){
   if(Session.get("currentStimName") === null){
     var allTdfProbs = [];
     var allTdfProbLabels = [];
-    var studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
-    var studentID = translateUsernameToID(studentUsername);
-    UserMetrics.find({"_id":studentID}).forEach(function(entry){
-      console.log("userMetric: " + JSON.stringify(entry));
-      var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
-      for(var index in possibleTdfs){
-        var possibleTdf = possibleTdfs[index];
-        console.log(possibleTdf);
-        if(possibleTdf.indexOf("_xml") != -1){
-          var curTdfName = possibleTdf;
-          var curTdf = entry[curTdfName];
-          console.log(curTdf);
-          var replacement = ".";
-          curTdfName = curTdfName.replace(/_([^_]*)$/,replacement+'$1');
-          Session.set("currentTdfName",curTdfName);
-          if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
-            Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+    var studentReportingTdfs = Session.get("studentReportingTdfs");
 
-            var tempModelUnitEngine = createModelUnit();
-            var totalStimProb = 0;
-            var cardProbs = tempModelUnitEngine.getCardProbs();
-            for(var i=0;i<cardProbs.length;i++){
-              if(!!cardProbs[i].probability){
-                totalStimProb += cardProbs[i].probability;
-              }
-            }
+    for(var i=0;i<studentReportingTdfs.length;i++){
 
-            var avgStimProbForTdf = totalStimProb / cardProbs.length;
-            console.log(avgStimProbForTdf);
-            allTdfProbLabels.push(curTdfName.replace('-',''));
-            allTdfProbs.push(avgStimProbForTdf);
+      var curTdfFileName = studentReportingTdfs[i].fileName;
+      var curTdfDisplayName = studentReportingTdfs[i].displayName;
+      Session.set("currentTdfName",curTdfFileName);
+      console.log("curTdfFileName: " + curTdfFileName);
+      if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
+        Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+
+        var tempModelUnitEngine = createModelUnit();
+        var totalStimProb = 0;
+        var cardProbs = tempModelUnitEngine.getCardProbs();
+        console.log("past getCardProbs");
+        for(var j=0;j<cardProbs.length;j++){
+          if(!!cardProbs[j].probability){
+            totalStimProb += cardProbs[j].probability;
           }
         }
+
+        var avgStimProbForTdf = totalStimProb / cardProbs.length;
+        allTdfProbLabels.push(curTdfDisplayName.replace(" ",'_'));
+        allTdfProbs.push(avgStimProbForTdf);
       }
-    });
+    }
     Session.set("currentStimName",null);
     Session.set("currentTdfName",null);
     return [allTdfProbLabels,allTdfProbs];
@@ -131,50 +120,64 @@ Template.studentReporting.helpers({
   }
 });
 
+setTdfFileNamesAndDisplayValues = function(studentID,postSubscriptionCallback){
+  console.log("setTdfFileNamesAndDisplayValues, studentID: " + studentID);
+  namesOfTdfsAttempted = getAllNamesOfTdfsAttempted(studentID);
+  studentReportingTdfs = [];
+  Meteor.subscribe('tdfs',function(){
+    Tdfs.find({}).forEach(function(entry){
+      var fileName = entry.fileName;
+      var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+      if(namesOfTdfsAttempted.indexOf(fileName) != -1){
+        studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
+      }
+    });
+
+    Session.set('studentReportingTdfs',studentReportingTdfs);
+    postSubscriptionCallback();
+  });
+}
+
 Template.studentReporting.onRendered(function(){
+  console.log("rendered!!!");
   Meteor.subscribe('userMetrics',function () {
-    console.log("userMetrics!!!");
+    var studentReportingTdfs = [];
     var studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
     console.log("studentUsername:" + studentUsername);
-    var studentID = translateUsernameToID(studentUsername);
-    if(studentID === undefined){
-      Meteor.setTimeout(function(){
-        studentID = translateUsernameToID(studentUsername);
-        console.log("studentID: " + studentID)
-        Session.set("studentReportingTdfs",getAllNamesOfTdfsAttempted(studentID));
-      },200)
-    }else{
-        Session.set("studentReportingTdfs",getAllNamesOfTdfsAttempted(studentID));
-    }
+    Meteor.setTimeout(function(){
+      studentID = translateUsernameToID(studentUsername);
+
+      function selectAllByDefaultAndUpdateCharts(){
+        $("#tdf-select").val("xml");
+        updateDataAndCharts($("#tdf-select").val());
+      }
+
+      setTdfFileNamesAndDisplayValues(studentID,selectAllByDefaultAndUpdateCharts);
+    },200)
   });
-  console.log("rendered!!!");
-  if($("#tdf-select").val() !== "invalid" && $("#tdf-select").val() !== null){
-    updateDataAndCharts($("#tdf-select").val());
-  }
 });
 
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
-    if(!loadedLabels){
-      $("#correctnessChart").attr('data-x-axis-label','Trial Number');
-      $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
-
-      $("#stimProbsChart").attr('data-x-axis-label','Probability');
-      $("#stimProbsChart").attr('data-y-axis-label',"Stim Number");
-
-      loadedLabels = true;
-    }
-    curTdf = $(event.currentTarget).val().replace(".","_");
-    updateDataAndCharts($(event.currentTarget).val());
+    var curTdf = $(event.currentTarget).val().replace(".","_");
+    var curTdfFileName = $(event.currentTarget).val();
+    updateDataAndCharts(curTdf,curTdfFileName);
   }
 });
 
-updateDataAndCharts = function(curTdfName){
-  console.log("curTdfName: " + curTdfName);
-  Session.set("currentTdfName",curTdfName);
+updateDataAndCharts = function(curTdf,curTdfFileName){
+  console.log("curTdfFileName: " + curTdfFileName);
+  $("#correctnessChart").attr('data-x-axis-label','Trial Number');
+  $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
+
+  $("#stimProbsChart").attr('data-x-axis-label','Correctness (%)');
   if(curTdf === "xml" || !curTdf){
     Session.set("currentStimName",null);
+    $("#stimProbsChart").attr('data-y-axis-label',"Chapter");
   }else{
+    $("#stimProbsChart").attr('data-y-axis-label',"Stim Number");
+
+    Session.set("currentTdfName",curTdfFileName);
     var curTdfFile = getCurrentTdfFile();
     if(!!curTdfFile){
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);

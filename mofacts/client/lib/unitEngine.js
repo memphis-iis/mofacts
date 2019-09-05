@@ -463,14 +463,11 @@ function modelUnitEngine() {
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
         p.stimOutcomeHistory = stim.outcomeHistory;
-        console.log("stimOutcomeHistory: " + p.stimOutcomeHistory);
+        //console.log("stimOutcomeHistory: " + p.stimOutcomeHistory);
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
 
-        console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
-
-        // Calculated metrics
-
+        //console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
 
         return probFunction(p);
     }
@@ -493,7 +490,7 @@ function modelUnitEngine() {
             ptemp[i]=Math.round(100*parms.probability)/100;
 
         }
-        console.log("pvec ",...ptemp);
+        console.log(...ptemp);
     }
 
     // Return index of PROB with minimum probability that was last seen at least
@@ -870,7 +867,6 @@ function modelUnitEngine() {
                 else            card.questionFailureCount += 1;
 
                 card.outcomeHistory.push(wasCorrect ? 1 : 0);
-                console.log("!!!appending to outcomeHistory2: " + card.outcomeHistory);
 
                 var stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {

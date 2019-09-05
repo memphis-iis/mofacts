@@ -1,6 +1,7 @@
 
 usernameToIDMap = {};
 Meteor.call('usernameToIDMap',function(err,res){
+  console.log("usernameToIDMap loaded");
   if(!!err){
     console.log("ERROR getting usernameToIDMap: " + err);
   }else{

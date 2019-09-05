@@ -11,7 +11,7 @@
           <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
           <option value="xml">All</option>
           {{#each tdfs}}
-            <option value="{{this}}">{{this}}</option>
+            <option value="{{this.fileName}}">{{this.displayName}}</option>
           {{/each}}
       </select>
     </div>
@@ -29,9 +29,11 @@
     <div>
       <h3>Progress Charts</h3>
       <div>
+        <h4>Repetition Correctness</h4>
         <div class="graphs">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
         </div>
+        <h4>Future Performance Estimate</h4>
         <div class="graphs">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="stimProbsChart"></div>
         </div>
