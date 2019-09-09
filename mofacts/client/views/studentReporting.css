@@ -1,12 +1,29 @@
-.thWide {
-  width: 50%;
-  padding-right: 5px;
+.allContent{
+  margin-left: 2%;
+  margin-right: 2%;
+  text-align: center;
+  align-content: center;
 }
 
-.graphs {
-  width: 50%;
-  margin-left: 10px;
+.thWide {
+  width: 33%;
+  padding-right: 5px;
+  text-align: center;
 }
+
+.centerAndHalfWidth {
+  width: 50%;
+  -webkit-transform: translateX(50%);
+  -ms-transform: translateX(50%);
+  transform: translateX(50%);
+}
+
+/* .graphs {
+  width: 50%;
+  -webkit-transform: translateX(50%);
+  -ms-transform: translateX(50%);
+  transform: translateX(50%);
+} */
 
 svg:not(:root){
   overflow: visible;

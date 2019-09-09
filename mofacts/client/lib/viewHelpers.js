@@ -84,7 +84,7 @@ getStudentPerformance = function(studentUsername,studentID,curTdf){
         var answerTimes = stim.answerTimes;
         for(var index in answerTimes){
           var time = answerTimes[index];
-          totalTime += time / 1000; //Covert to seconds from milliseconds
+          totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
         }
       }
     }
@@ -93,7 +93,7 @@ getStudentPerformance = function(studentUsername,studentID,curTdf){
   if(count != 0){
     percentCorrect = (numCorrect / count).toFixed(4)*100  + "%";
   }
-  totalTime = totalTime.toFixed(2);
+  totalTime = totalTime.toFixed(1);
   var studentObj = {
     "username":studentUsername,
     "count":count,

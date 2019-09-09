@@ -4,7 +4,7 @@
   {{else}}
     <legend class="text-center">Student Reporting - {{currentUser.username}}</legend>
   {{/if}}
-  <div>
+  <div class="allContent">
     <div>
       <h3>Select Chapter</h3>
       <select id="tdf-select">
@@ -17,8 +17,8 @@
     </div>
     <div>
       <h3>Progress Data</h3>
-      <table border="1">
-        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (seconds)</th></tr>
+      <table border="0" class="centerAndHalfWidth">
+        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (minutes)</th></tr>
           <tr>
             <td>{{curStudentPerformance.percentCorrect}}</td>
             <td>{{curStudentPerformance.count}}</td>
@@ -30,11 +30,11 @@
       <h3>Progress Charts</h3>
       <div>
         <h4>Repetition Correctness</h4>
-        <div class="graphs">
+        <div class="graphs centerAndHalfWidth">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
         </div>
         <h4>Future Performance Estimate</h4>
-        <div class="graphs">
+        <div class="graphs centerAndHalfWidth">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="stimProbsChart"></div>
         </div>
       </div>
