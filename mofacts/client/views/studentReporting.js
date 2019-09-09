@@ -285,8 +285,10 @@ drawCharts = function (drawWithoutData) {
     }else{
       // Get our series and populate a range array for chart labeling
       var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve());
+      correctSeries = correctSeries.map(function(val){return val*100});
       var rawProbs = getStimProbs();
       probSeries = safeSeries(rawProbs[1]);
+      probSeries = probSeries.map(function(val){return val*100});
 
       var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
       var itemDataProbRes = rawProbs[0];
@@ -304,7 +306,7 @@ drawCharts = function (drawWithoutData) {
 
 
       drawCorrectnessLine('#correctnessChart', itemDataCorRes, correctSeries, "correctness", {
-          high: 1,
+          high: 100,
           axisY: {
               onlyInteger: false
           }
@@ -313,7 +315,7 @@ drawCharts = function (drawWithoutData) {
       var probBarsHeight = Math.max((probSeries.length * 16),200);
 
       drawProbBars('#stimProbsChart', itemDataProbRes, probSeries, "probabilities", {
-        high: 1,
+        high: 100,
         seriesBarDistance: 5,
         height: probBarsHeight,
         horizontalBars: true,
