@@ -1,8 +1,8 @@
 <template name="studentReporting">
   {{#if isInRole 'admin, teacher'}}
-    <legend class="text-center">Student Reporting - {{studentUsername}}</legend>
+    <legend class="text-center">Progress for {{studentUsername}}</legend>
   {{else}}
-    <legend class="text-center">Student Reporting - {{currentUser.username}}</legend>
+    <legend class="text-center">Progress for {{currentUser.username}}</legend>
   {{/if}}
   <div class="allContent">
     <div>
