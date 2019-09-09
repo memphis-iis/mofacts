@@ -1578,7 +1578,11 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptS
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
   var audioPromptMode = Session.get("audioPromptMode");
   if(enableAudioPromptAndFeedback){
-    if(!!audioPromptMode && ((audioPromptSource === audioPromptMode) || audioPromptMode === "all")){
+    //For older tdfs where audioPromptMode was unspecified, default to "all"
+    if(!audioPromptMode){
+      audioPromptMode = "all";
+    }
+    if(audioPromptSource === audioPromptMode || audioPromptMode === "all"){
       var synth = window.speechSynthesis;
       //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       //UNDERSCORE...speech from literal reading of text
