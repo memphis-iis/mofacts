@@ -167,7 +167,7 @@ Template.studentReporting.events({
 
 updateDataAndCharts = function(curTdf,curTdfFileName){
   console.log("curTdfFileName: " + curTdfFileName);
-  $("#correctnessChart").attr('data-x-axis-label','Trial Number');
+  $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
   $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
 
   $("#stimProbsChart").attr('data-x-axis-label','Correctness (%)');
