@@ -3,7 +3,6 @@ Session.set("curTeacher","");
 
 function testLogin(){
   console.log("SW Login");
-  Session.set("loginMode","southwest");
 
   var testUserName = _.trim($("#username").val()).toUpperCase();
   if (!testUserName) {
@@ -82,6 +81,10 @@ Meteor.subscribe('allTeachers',function () {
   }
   console.log(JSON.stringify(teachers));
   Session.set("teachers",teachers);
+});
+
+Template.signInSouthwest.onRendered(function(){
+  Session.set("loginMode","southwest");
 });
 
 Template.signInSouthwest.helpers({

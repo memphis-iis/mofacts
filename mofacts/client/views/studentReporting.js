@@ -7,6 +7,11 @@ const numTrialsForKCLearningCurve = 5;
 window.onpopstate = function(event){
   Session.set("studentReportingTdfs",[]);
   Session.set("curStudentPerformance",{});
+  if(Session.get("loginMode") === "southwest"){
+    Router.go("/profileSouthwest");
+  }else{
+    Router.go("/profile");
+  }
 }
 
 getcardProbs = function(){
