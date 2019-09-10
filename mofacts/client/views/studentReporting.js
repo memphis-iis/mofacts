@@ -17,7 +17,6 @@ getStimProbs = function(){
     var studentReportingTdfs = Session.get("studentReportingTdfs");
 
     for(var i=0;i<studentReportingTdfs.length;i++){
-
       var curTdfFileName = studentReportingTdfs[i].fileName;
       var curTdfDisplayName = studentReportingTdfs[i].displayName;
       Session.set("currentTdfName",curTdfFileName);
@@ -175,7 +174,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
     Session.set("currentStimName",null);
     $("#stimProbsChart").attr('data-y-axis-label',"Chapter");
   }else{
-    $("#stimProbsChart").attr('data-y-axis-label',"Stim Number");
+    $("#stimProbsChart").attr('data-y-axis-label',"Fill-in item Number");
 
     Session.set("currentTdfName",curTdfFileName);
     var curTdfFile = getCurrentTdfFile();
@@ -270,7 +269,7 @@ var drawProbBars = function(targetSelector, labels, series, dataDescrip, chartCo
 
         var fullConfig = _.extend({
             low: 0,
-            fullWidth: true
+            fullWidth: true,
         }, chartConfig);
 
         new Chartist.Bar(target, chartData, fullConfig);
@@ -288,10 +287,10 @@ drawCharts = function (drawWithoutData) {
       correctSeries = correctSeries.map(function(val){return val*100});
       var rawProbs = getStimProbs();
       probSeries = safeSeries(rawProbs[1]);
-      probSeries = probSeries.map(function(val){return val*100});
+      probSeries = probSeries.map(function(val){return val*100}).reverse();
 
       var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
-      var itemDataProbRes = rawProbs[0];
+      var itemDataProbRes = rawProbs[0].reverse();
       var stimProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
@@ -322,7 +321,8 @@ drawCharts = function (drawWithoutData) {
         axisX:{
           labelInterpolationFnc: function(value, index) {
             return index % 2 === 0 ? value : null;
-          }
+          },
+          position: 'start',
         },
         axisY:{
           offset: stimProbsChartAxisYOffset

@@ -37,6 +37,10 @@ line.ct-bar:nth-child(2n+1) {
 	stroke: lightpink;
 }
 
+#stimProbsChart.show-axis-labels[data-x-axis-label]::before {
+   position: unset;
+}
+
 .show-axis-labels[data-x-axis-label]::before {
    content: attr(data-x-axis-label);
    position: absolute;
