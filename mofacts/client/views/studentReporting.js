@@ -9,7 +9,7 @@ window.onpopstate = function(event){
   Session.set("curStudentPerformance",{});
 }
 
-getStimProbs = function(){
+getcardProbs = function(){
   //We've selected the "All" tdf option
   if(Session.get("currentStimName") === null){
     var allTdfProbs = [];
@@ -44,15 +44,15 @@ getStimProbs = function(){
     return [allTdfProbLabels,allTdfProbs];
   }else{
     var tempModelUnitEngine = createModelUnit();
-    var stimProbs = [];
-    var stimProbsLabels = [];
-    var cardProbs = tempModelUnitEngine.getCardProbs();
-    for(var i=0;i<cardProbs.length;i++){
-        stimProbsLabels.push(i+1);
-        stimProbs.push(cardProbs[i].probability);
+    var cardProbs = [];
+    var cardProbsLabels = [];
+    var mycardProbs = tempModelUnitEngine.getCardProbs();
+    for(var i=0;i<mycardProbs.length;i++){
+        cardProbsLabels.push(i+1);
+        mycardProbs.push(cardProbs[i].probability);
     }
 
-    return [stimProbsLabels,stimProbs];
+    return [cardProbsLabels,cardProbs];
   }
 }
 
@@ -169,12 +169,12 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
   $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
   $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
 
-  $("#stimProbsChart").attr('data-x-axis-label','Correctness (%)');
+  $("#cardProbsChart").attr('data-x-axis-label','Correctness (%)');
   if(curTdf === "xml" || !curTdf){
     Session.set("currentStimName",null);
-    $("#stimProbsChart").attr('data-y-axis-label',"Chapter");
+    $("#cardProbsChart").attr('data-y-axis-label',"Chapter");
   }else{
-    $("#stimProbsChart").attr('data-y-axis-label',"Fill-in item Number");
+    $("#cardProbsChart").attr('data-y-axis-label',"Fill-in item Number");
 
     Session.set("currentTdfName",curTdfFileName);
     var curTdfFile = getCurrentTdfFile();
@@ -280,24 +280,24 @@ drawCharts = function (drawWithoutData) {
     if(!!drawWithoutData){
       drawCorrectnessLine('#correctnessChart', [], [], "correctness", {});
 
-      drawProbBars('#stimProbsChart', [], [], "probabilities", {});
+      drawProbBars('#cardProbsChart', [], [], "probabilities", {});
     }else{
       // Get our series and populate a range array for chart labeling
       var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve());
       correctSeries = correctSeries.map(function(val){return val*100});
-      var rawProbs = getStimProbs();
+      var rawProbs = getcardProbs();
       probSeries = safeSeries(rawProbs[1]);
       probSeries = probSeries.map(function(val){return val*100}).reverse();
 
       var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
       var itemDataProbRes = rawProbs[0].reverse();
-      var stimProbsChartAxisYOffset;
+      var cardProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
       if(Session.get("currentTdfName") === null){
-          stimProbsChartAxisYOffset = 250;
+          cardProbsChartAxisYOffset = 250;
       }else{
-          stimProbsChartAxisYOffset = 50;
+          cardProbsChartAxisYOffset = 50;
       }
 
       // Now actually create the charts - but only if we can find the proper
@@ -313,7 +313,7 @@ drawCharts = function (drawWithoutData) {
 
       var probBarsHeight = Math.max((probSeries.length * 16),200);
 
-      drawProbBars('#stimProbsChart', itemDataProbRes, probSeries, "probabilities", {
+      drawProbBars('#cardProbsChart', itemDataProbRes, probSeries, "probabilities", {
         high: 100,
         seriesBarDistance: 5,
         height: probBarsHeight,
@@ -325,7 +325,7 @@ drawCharts = function (drawWithoutData) {
           position: 'start',
         },
         axisY:{
-          offset: stimProbsChartAxisYOffset
+          offset: cardProbsChartAxisYOffset
         }
       });
     }
