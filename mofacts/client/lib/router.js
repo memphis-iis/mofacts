@@ -187,7 +187,14 @@ Router.route('/profileSouthwest',{
   action: function(){
     this.render('profileSouthwest');
   }
-})
+});
+
+Router.route('/contentGeneration',{
+  name: "client.contentGeneration",
+  action: function(){
+    this.render('contentGeneration');
+  }
+});
 
 Router.route('/card', {
     name: "client.card",
