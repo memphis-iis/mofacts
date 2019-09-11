@@ -389,7 +389,7 @@ Meteor.startup(function () {
           var studentInAClass = false;
           for(var index in teacherClasses){
             var curClass = teacherClasses[index];
-            console.log("curClass: " + curClass);
+            console.log("curClass: " + JSON.stringify(curClass));
             if(user in curClass.students){
               studentInAClass = true;
             }

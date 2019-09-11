@@ -165,7 +165,7 @@ Template.profileSouthwest.rendered = function () {
 
 
 
-    Meteor.call('getTdfsAssignedToStudent',"test",function(err,result){
+    Meteor.call('getTdfsAssignedToStudent',Meteor.user().username.toLowerCase(),function(err,result){
       console.log("err: " + err + ", res: " + result);
       var assignedTdfs = result;
       var allTdfs = Tdfs.find();
