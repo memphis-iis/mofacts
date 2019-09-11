@@ -30,6 +30,8 @@ getcardProbs = function(){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
 
         var tempModelUnitEngine = createModelUnit();
+        var expKey = Session.get("currentTdfName").replace('.','_');
+        processUserTimesLog(true,expKey,tempModelUnitEngine);
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
         console.log("past getCardProbs");
@@ -48,7 +50,9 @@ getcardProbs = function(){
     Session.set("currentTdfName",null);
     return [allTdfProbLabels,allTdfProbs];
   }else{
-    var tempModelUnitEngine = createModelUnit();
+    tempModelUnitEngine = createModelUnit();
+    var expKey = Session.get("currentTdfName").replace('.','_');
+    processUserTimesLog(true,expKey,tempModelUnitEngine);
     var cardProbs = [];
     var cardProbsLabels = [];
     var mycardProbs = tempModelUnitEngine.getCardProbs();

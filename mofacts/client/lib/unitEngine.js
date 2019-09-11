@@ -491,6 +491,7 @@ function modelUnitEngine() {
 
         }
         console.log(...ptemp);
+        return cardProbabilities.probs;
     }
 
     // Return index of PROB with minimum probability that was last seen at least
@@ -598,8 +599,7 @@ function modelUnitEngine() {
     //Our actual implementation
     return {
         getCardProbs: function(){
-          calculateCardProbabilities();
-          return cardProbabilities.probs;
+          return calculateCardProbabilities();
         },
 
         unitType: "model",

@@ -1992,9 +1992,9 @@ function allowUserInput(textFocus) {
 // BEGIN Resume Logic
 
 //Helper for getting the relevant user times log
-function getCurrentUserTimesLog() {
+getCurrentUserTimesLog = function(expKey) {
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-    var expKey = userTimesExpKey(true);
+    var expKey = expKey || userTimesExpKey(true);
 
     var entries = [];
     if (userLog && userLog[expKey] && userLog[expKey].length) {
@@ -2250,7 +2250,9 @@ function resumeFromUserTimesLog() {
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
 //set up the TDF/Stim session variables
-function processUserTimesLog() {
+processUserTimesLog = function(simulateCard=false,expKey,myengine) {
+    engine = engine || myengine;
+
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
@@ -2307,7 +2309,7 @@ function processUserTimesLog() {
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
-    _.each(getCurrentUserTimesLog(), function(entry, index, currentList) {
+    _.each(getCurrentUserTimesLog(expKey), function(entry, index, currentList) {
         // IMPORTANT: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
@@ -2531,54 +2533,55 @@ function processUserTimesLog() {
     //If we make it here, then we know we won't need a resume until something
     //else happens
     Session.set("needResume", false);
+    if(!simulateCard){
+      if (needFirstUnitInstructions) {
+          //They haven't seen our first instruction yet
+          console.log("RESUME FINISHED: displaying initial instructions");
+          leavePage("/instructions");
+      }
+      else if (!!lastQuestionEntry) {
+          //Question outstanding: force question display and let them give an answer
+          console.log("RESUME FINISHED: displaying current question");
+          newQuestionHandler();
+      }
+      else if (moduleCompleted) {
+          //They are DONE!
+          console.log("TDF already completed - leaving for profile page.");
+          if (Session.get("loginMode") === "experiment") {
+              // Experiment users don't *have* a normal page
+              leavePage(routeToSignin);
+          }
+          else {
+              // "Normal" user - they just go back to their root page
+              leavePage("/profile");
+          }
+      }
+      else {
+          // If we get this far and the unit engine thinks the unit is finished,
+          // we might need to stick with the instructions *IF AND ONLY IF* the
+          // lockout period hasn't finished (which prepareCard won't handle)
+          if (engine.unitFinished()) {
+              var lockoutMins = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
+              if (lockoutMins > 0) {
+                  var unitStartTimestamp = _.intval(Session.get("currentUnitStartTime"));
+                  if (unitStartTimestamp < 1) {
+                      unitStartTimestamp = Date.now();
+                  }
+                  var lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+                  if (Date.now() < lockoutFreeTime) {
+                      console.log("RESUME FINISHED: showing lockout instructions");
+                      leavePage("/instructions");
+                      return;
+                  }
+              }
+          }
 
-    if (needFirstUnitInstructions) {
-        //They haven't seen our first instruction yet
-        console.log("RESUME FINISHED: displaying initial instructions");
-        leavePage("/instructions");
-    }
-    else if (!!lastQuestionEntry) {
-        //Question outstanding: force question display and let them give an answer
-        console.log("RESUME FINISHED: displaying current question");
-        newQuestionHandler();
-    }
-    else if (moduleCompleted) {
-        //They are DONE!
-        console.log("TDF already completed - leaving for profile page.");
-        if (Session.get("loginMode") === "experiment") {
-            // Experiment users don't *have* a normal page
-            leavePage(routeToSignin);
-        }
-        else {
-            // "Normal" user - they just go back to their root page
-            leavePage("/profile");
-        }
-    }
-    else {
-        // If we get this far and the unit engine thinks the unit is finished,
-        // we might need to stick with the instructions *IF AND ONLY IF* the
-        // lockout period hasn't finished (which prepareCard won't handle)
-        if (engine.unitFinished()) {
-            var lockoutMins = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
-            if (lockoutMins > 0) {
-                var unitStartTimestamp = _.intval(Session.get("currentUnitStartTime"));
-                if (unitStartTimestamp < 1) {
-                    unitStartTimestamp = Date.now();
-                }
-                var lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-                if (Date.now() < lockoutFreeTime) {
-                    console.log("RESUME FINISHED: showing lockout instructions");
-                    leavePage("/instructions");
-                    return;
-                }
-            }
-        }
-
-        // Stil here...
-        // We have an answer (or no questions at all) - run next question logic
-        // Note that this will also handle new units, instructions, and whether
-        // or not they are completed
-        console.log("RESUME FINISHED: next-question logic to commence");
-        prepareCard();
+          // Stil here...
+          // We have an answer (or no questions at all) - run next question logic
+          // Note that this will also handle new units, instructions, and whether
+          // or not they are completed
+          console.log("RESUME FINISHED: next-question logic to commence");
+          prepareCard();
+      }
     }
 }
