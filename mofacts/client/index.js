@@ -76,6 +76,7 @@ Template.body.events({
               console.log("User:", Meteor.user(), "Error:", error);
           }
           else {
+              sessionCleanUp();
               routeToSignin();
           }
       });

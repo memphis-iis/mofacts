@@ -54,7 +54,7 @@ getcardProbs = function(){
     var mycardProbs = tempModelUnitEngine.getCardProbs();
     for(var i=0;i<mycardProbs.length;i++){
         cardProbsLabels.push(i+1);
-        mycardProbs.push(cardProbs[i].probability);
+        cardProbs.push(mycardProbs[i].probability);
     }
 
     return [cardProbsLabels,cardProbs];
@@ -124,7 +124,7 @@ Template.studentReporting.helpers({
   }
 });
 
-setTdfFileNamesAndDisplayValues = function(studentID,postSubscriptionCallback){
+setTdfFileNamesAndDisplayValues = function(studentID){
   console.log("setTdfFileNamesAndDisplayValues, studentID: " + studentID);
   namesOfTdfsAttempted = getAllNamesOfTdfsAttempted(studentID);
   studentReportingTdfs = [];
@@ -138,31 +138,58 @@ setTdfFileNamesAndDisplayValues = function(studentID,postSubscriptionCallback){
     });
 
     Session.set('studentReportingTdfs',studentReportingTdfs);
-    postSubscriptionCallback();
   });
 }
 
-Template.studentReporting.onRendered(function(){
-  console.log("rendered!!!");
+selectFirstOptionByDefaultAndUpdateCharts = function(){
+  console.log("selectFirstOptionByDefaultAndUpdateCharts");
+   var tdfs = Session.get("studentReportingTdfs");
+
+   //Have to wait for DOM to update after studentReportingTdfs is set
+   Tracker.afterFlush(function(){
+     console.log("selectFirstOptionByDefaultAndUpdateCharts, tdfs: " + JSON.stringify(tdfs));
+     if(!!tdfs[0]){
+       var firstIndividualTdf = tdfs[0].fileName;
+       $("#tdf-select").val(firstIndividualTdf);
+       console.log("selectFirstOptionByDefaultAndUpdateCharts: " + $("#tdf-select").val());
+       if($("#tdf-select").val() != null){
+        curTdf = $("#tdf-select").val().replace(".","_");
+        var curTdfFileName = $("#tdf-select").val();
+        updateDataAndCharts(curTdf,curTdfFileName);
+       }
+     }
+   });
+}
+
+Tracker.autorun(selectFirstOptionByDefaultAndUpdateCharts);
+
+Template.studentReporting.onCreated(function(){
+  console.log("created!!!");
   Meteor.subscribe('userMetrics',function () {
-    var studentReportingTdfs = [];
+    console.log("usermetrics ready!!!");
+    //var studentReportingTdfs = [];
     var studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
     console.log("studentUsername:" + studentUsername);
-    Meteor.setTimeout(function(){
-      studentID = translateUsernameToID(studentUsername);
-
-      function selectAllByDefaultAndUpdateCharts(){
-        $("#tdf-select").val("xml");
-        updateDataAndCharts($("#tdf-select").val());
+    Meteor.call('usernameToIDMap',function(err,res){
+      console.log("usernameToIDMap loaded 1");
+      if(!!err){
+        console.log("ERROR getting usernameToIDMap: " + err);
+      }else{
+        usernameToIDMap = res;
+        studentID = translateUsernameToID(studentUsername);
+        setTdfFileNamesAndDisplayValues(studentID);
       }
-
-      setTdfFileNamesAndDisplayValues(studentID,selectAllByDefaultAndUpdateCharts);
-    },200)
+    });
   });
 });
 
+Template.studentReporting.onRendered(function(){
+  console.log("rendered!!!");
+})
+
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
+    console.log("change tdf select");
     curTdf = $(event.currentTarget).val().replace(".","_");
     var curTdfFileName = $(event.currentTarget).val();
     updateDataAndCharts(curTdf,curTdfFileName);

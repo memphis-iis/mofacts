@@ -53,6 +53,7 @@
 //Handle an entire session - note that we current don't limit this to the
 //client... but maybe we should?
 sessionCleanUp = function() {
+    console.log("session cleanup!!!");
     Session.set("audioEnabled",undefined);
     Session.set("audioInputSensitivity",undefined);
     Session.set("audioPromptFeedbackView",undefined);
@@ -89,6 +90,8 @@ sessionCleanUp = function() {
     Session.set("statsUserTimeLogView", undefined);
     Session.set("testType", undefined);
     Session.set("VADInitialized",false);
+    Session.set("studentReportingTdfs",[]);
+    Session.set("curStudentPerformance",{});
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {
