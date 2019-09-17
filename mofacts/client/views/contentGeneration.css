@@ -8,6 +8,11 @@ textarea {
     overflow: auto;
 }
 
+#extracted-clozes {
+    height: 600px;
+    overflow: auto;
+}
+
 .cur-sentence {
     color: #a834eb;
 }
@@ -15,4 +20,3 @@ textarea {
 .sentence-no-cloze{
     color: #666666;
 }
-               

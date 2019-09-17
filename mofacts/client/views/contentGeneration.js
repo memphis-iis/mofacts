@@ -60,13 +60,15 @@ stubGenerateAndSubmitTDF = function(){
 
 Template.contentGeneration.events({
   'click #cloze': function(event){
-    console.log("cloze uid: " + event.currentTarget.getAttribute('uid'));
-    Session.set("curClozeSentencePairItemId", event.currentTarget.getAttribute('uid'));
+    var cloze_uid = parseInt(event.currentTarget.getAttribute('uid'));
+    Session.set("curClozeSentencePairItemId", cloze_uid);
+    $("#parsed-sentences").find("[uid=" + cloze_uid + "]").get(0).scrollIntoView();
   },
 
   'click .sentence-with-cloze': function(event){
-    console.log("sentence uid: " + event.currentTarget.getAttribute('uid'));
-    Session.set("curClozeSentencePairItemId", event.currentTarget.getAttribute('uid'));
+    var sentence_uid = parseInt(event.currentTarget.getAttribute('uid'));
+    Session.set("curClozeSentencePairItemId", sentence_uid);
+    $("#extracted-clozes").find("[uid=" + sentence_uid + "]").get(0).scrollIntoView();
   },
 
   'click #submit-btn': function(event){
@@ -86,8 +88,8 @@ Template.contentGeneration.events({
   },
 
   'click #delete-btn': function(event){
-    var curClozeId = event.currentTarget.getAttribute('cloze-uid');
-    var curItemId = event.currentTarget.getAttribute('uid');
+    var curClozeId = parseInt(event.currentTarget.getAttribute('cloze-uid'));
+    var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
     var prevClozeSentencePairs = Session.get("clozeSentencePairs");
 
     var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
