@@ -175,7 +175,16 @@ Router.route('/profile', {
           if (Roles.userIsInRole(Meteor.user(), ["admin"])) {
               this.subscribe('allUsers').wait();
           }
-          this.render('profile');
+          var loginMode = Session.get("loginMode");
+          console.log("loginMode: " + loginMode);
+
+          if(loginMode === "southwest"){
+            console.log("southwest login, routing to southwest profile");
+            this.render("/profileSouthwest");
+          }else{ //Normal login mode
+            console.log("else, progress");
+            this.render('profile');
+          }
         }else{
           this.redirect('/');
         }
