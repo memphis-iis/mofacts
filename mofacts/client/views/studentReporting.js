@@ -101,11 +101,10 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
   for(var i=0;i<numTrialsForKCLearningCurve;i++){
     var count = countAndNumCorrectPerTrialNum[i].count;
     var numCorrect = countAndNumCorrectPerTrialNum[i].numCorrect;
-    var avg = 0;
     if(count > 0){
-      avg = numCorrect / count;
+      var avg = numCorrect / count;
+      avgCorrectnessAcrossKCsLearningCurve.push(avg);
     }
-    avgCorrectnessAcrossKCsLearningCurve.push(avg);
   }
 
   return avgCorrectnessAcrossKCsLearningCurve;
@@ -248,10 +247,6 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
 safeSeries = function(series) {
     if (!series || series.length < 1)
         return series;
-
-    while (series.length < 2) {
-        series.push(null);  // null are missing points
-    }
     return series;
 }
 
@@ -261,7 +256,7 @@ var drawCorrectnessLine = function(targetSelector, labels, series, dataDescrip, 
         console.log("no target");
         return;
     }
-    if (series.length < 1) {
+    if (series.length < 2) {
         $(target)
             .removeClass("show-axis-labels")
             .html("<div class='nodata'>No " + dataDescrip + " data available</div>");

@@ -1,12 +1,12 @@
 <template name="studentReporting">
   {{#if isInRole 'admin, teacher'}}
-    <legend class="text-center">Progress for {{studentUsername}}</legend>
+    <h1 class="text-center">Progress for {{studentUsername}}</h1>
   {{else}}
-    <legend class="text-center">Progress for {{currentUser.username}}</legend>
+    <h1 class="text-center">Progress for {{currentUser.username}}</h1>
   {{/if}}
   <div class="allContent">
     <div>
-      <h3>Select Chapter</h3>
+      <h2>Select Chapter</h2>
       <select id="tdf-select">
           <option value="invalid" disabled="true">Select a tdf</option>
           <option value="xml">All</option>
@@ -16,7 +16,7 @@
       </select>
     </div>
     <div>
-      <h3>Progress Data</h3>
+      <h2>Progress Data</h2>
       <table border="0" class="centerAndHalfWidth">
         <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (minutes)</th></tr>
           <tr>
@@ -27,13 +27,13 @@
       </table>
     </div>
     <div>
-      <h3>Progress Charts</h3>
+      <h2>Progress Charts</h2>
       <div>
-        <h4>Corrrectness Across Repetitions of the Same Fill-in</h4>
+        <h3>Corrrectness Across Repetitions of the Same Fill-in</h3>
         <div class="graphs centerAndHalfWidth">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
         </div>
-        <h4>Current Estimate of Recall</h4>
+        <h3>Current Estimate of Recall</h3>
         <div class="graphs centerAndHalfWidth">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="cardProbsChart"></div>
         </div>
