@@ -314,6 +314,7 @@ function modelUnitEngine() {
                     initResponses[response] = {
                         responseSuccessCount: 0,
                         responseFailureCount: 0,
+                        lastShownTimestamp: 0,
                         outcomeHistory: [],
                     };
                 }
@@ -455,6 +456,7 @@ function modelUnitEngine() {
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
+        p.responseSecsSinceLastShown = elapsed(p.resp.lastShownTimestamp);
 
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
@@ -881,10 +883,12 @@ function modelUnitEngine() {
             // "Response" stats
             var answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
             if (answerText && answerText in cardProbabilities.responses) {
-                if (wasCorrect) cardProbabilities.responses[answerText].responseSuccessCount += 1;
-                else            cardProbabilities.responses[answerText].responseFailureCount += 1;
+                var resp = cardProbabilities.responses[answerText];
+                if (wasCorrect) resp.responseSuccessCount += 1;
+                else            resp.responseFailureCount += 1;
 
-                cardProbabilities.responses[answerText].outcomeHistory.push(wasCorrect ? 1 : 0);
+                resp.outcomeHistory.push(wasCorrect ? 1 : 0);
+                resp.lastShownTimestamp = Date.now();
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
