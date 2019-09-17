@@ -338,7 +338,9 @@ drawCharts = function (drawWithoutData) {
       drawCorrectnessLine('#correctnessChart', itemDataCorRes, correctSeries, "correctness", {
           high: 100,
           axisY: {
-              onlyInteger: false
+              type: Chartist.FixedScaleAxis,
+              ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+              low: 0
           }
       });
 
@@ -351,9 +353,13 @@ drawCharts = function (drawWithoutData) {
         horizontalBars: true,
         axisX:{
           labelInterpolationFnc: function(value, index) {
-            return index % 2 === 0 ? value : null;
+            return value % 10 === 0 ? value : null;
           },
           position: 'start',
+          onlyInteger: true,
+          type: Chartist.AutoScaleAxis,
+          scaleMinSpace:10,
+          low: 0,
         },
         axisY:{
           offset: cardProbsChartAxisYOffset
