@@ -6,6 +6,9 @@
   {{/if}}
   <div class="allContent">
     <div>
+      <p>Instructions for using and interpreting this page are located at the bottom of the page</p>
+    </div>
+    <div>
       <h2>Select Chapter</h2>
       <select id="tdf-select">
           <option value="invalid" disabled="true">Select a tdf</option>
@@ -17,7 +20,7 @@
     </div>
     <div>
       <h2>Progress Data</h2>
-      <table border="0" class="centerAndHalfWidth">
+      <table border="0" class="halfWidth centerForDesktop">
         <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (minutes)</th></tr>
           <tr>
             <td>{{curStudentPerformance.percentCorrect}}</td>
@@ -30,14 +33,19 @@
       <h2>Progress Charts</h2>
       <div>
         <h3>Corrrectness Across Repetitions of the Same Fill-in</h3>
-        <div class="graphs centerAndHalfWidth">
+        <div class="graphs halfWidth centerForDesktop">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
         </div>
         <h3>Current Estimate of Recall</h3>
-        <div class="graphs centerAndHalfWidth">
+        <div class="graphs halfWidth centerForDesktop">
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="cardProbsChart"></div>
         </div>
       </div>
+    </div>
+    <div>
+      <p>To see progress on a given chapter, you may select it from the "Select Chapter" dropdown.  If you don't see a chapter in the dropdown, that means you haven't practiced it.</p>
+      <p>On a desktop machine you can see the item names and values for the bottom chart by hovering over the individual bars on the chart with your mouse.</p>
+      <p>On mobile, to see item names and values for the bottom chart tap the individual bars on the chart.</p>
     </div>
   </div>
 </template>

@@ -55,9 +55,12 @@ getcardProbs = function(){
     processUserTimesLog(true,expKey,tempModelUnitEngine);
     var cardProbs = [];
     var cardProbsLabels = [];
-    var mycardProbs = tempModelUnitEngine.getCardProbs();
+    var mycardProbs =tempModelUnitEngine.getCardProbs();
     for(var i=0;i<mycardProbs.length;i++){
-        cardProbsLabels.push(i+1);
+        var cardIndex = mycardProbs[i].cardIndex;
+        var stimIndex = mycardProbs[i].stimIndex;
+        var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
+        cardProbsLabels.push(currentQuestion);
         cardProbs.push(mycardProbs[i].probability);
     }
 
@@ -209,7 +212,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
     Session.set("currentStimName",null);
     $("#cardProbsChart").attr('data-y-axis-label',"Chapter");
   }else{
-    $("#cardProbsChart").attr('data-y-axis-label',"Fill-in item Number");
+    $("#cardProbsChart").attr('data-y-axis-label',"");
 
     Session.set("currentTdfName",curTdfFileName);
     var curTdfFile = getCurrentTdfFile();
@@ -298,14 +301,35 @@ var drawProbBars = function(targetSelector, labels, series, dataDescrip, chartCo
             'series': [series]
         };
 
+        lookUpLabelByDataValue = function(value){
+          return labels[series.findIndex(function(element){
+            return element == value;
+          })];
+        }
+
         var fullConfig = _.extend({
             low: 0,
             fullWidth: true,
         }, chartConfig);
 
-        new Chartist.Bar(target, chartData, fullConfig);
+        new Chartist.Bar(target, chartData, fullConfig).on("draw", function(data) {
+          test = data;
+          if (data.type === "bar") {
+        		data.element._node.setAttribute("title", "Item: " + lookUpLabelByDataValue(data.value) + " Value: " + data.value.toFixed(2));
+        		data.element._node.setAttribute("data-chart-tooltip", target);
+        	}
+        }).on("created", function() {
+        	// Initiate Tooltip
+        	$(target).tooltip({
+        		selector: '[data-chart-tooltip="'+target+'"]',
+        		container: target,
+        		html: true
+        	});
+        });
     }
-};
+}
+
+test = "";
 
 drawCharts = function (drawWithoutData) {
     if(!!drawWithoutData){
@@ -320,49 +344,53 @@ drawCharts = function (drawWithoutData) {
       probSeries = safeSeries(rawProbs[1]);
       probSeries = probSeries.map(function(val){return val*100}).reverse();
 
-      var itemDataCorRes = _.range(1, correctSeries.length+1);  // from 1 to len
-      var itemDataProbRes = rawProbs[0].reverse();
+      var itemDataCorLabels = _.range(1, correctSeries.length+1);  // from 1 to len
+      var itemDataProbLabels = rawProbs[0].reverse();
       var cardProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
       if(Session.get("currentTdfName") === null){
           cardProbsChartAxisYOffset = 250;
+          showYAxisLabel = true
+          probBarsHeight = Math.max((probSeries.length * 10),200);
       }else{
           cardProbsChartAxisYOffset = 50;
+          showYAxisLabel = false;//
+          probBarsHeight = (probSeries.length * 10);
       }
 
       // Now actually create the charts - but only if we can find the proper
       // elements and there is data to display
 
 
-      drawCorrectnessLine('#correctnessChart', itemDataCorRes, correctSeries, "correctness", {
-          high: 100,
+      drawCorrectnessLine('#correctnessChart', itemDataCorLabels, correctSeries, "correctness", {
+          height: 300,
           axisY: {
               type: Chartist.FixedScaleAxis,
               ticks: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-              low: 0
+              low: 0,
+              high: 100
           }
       });
 
-      var probBarsHeight = Math.max((probSeries.length * 16),200);
-
-      drawProbBars('#cardProbsChart', itemDataProbRes, probSeries, "probabilities", {
-        high: 100,
-        seriesBarDistance: 5,
+      drawProbBars('#cardProbsChart', itemDataProbLabels, probSeries, "probabilities", {
+        seriesBarDistance: 0,
         height: probBarsHeight,
         horizontalBars: true,
+        high: 100,
         axisX:{
           labelInterpolationFnc: function(value, index) {
-            return value % 10 === 0 ? value : null;
+            return value % 10 == 0 ? value : null;
           },
           position: 'start',
           onlyInteger: true,
           type: Chartist.AutoScaleAxis,
-          scaleMinSpace:10,
+          scaleMinSpace: 10,
           low: 0,
         },
         axisY:{
-          offset: cardProbsChartAxisYOffset
+          offset: cardProbsChartAxisYOffset,
+          showLabel: showYAxisLabel
         }
       });
     }

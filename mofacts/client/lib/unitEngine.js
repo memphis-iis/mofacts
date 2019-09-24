@@ -213,7 +213,7 @@ function modelUnitEngine() {
             .value();
     }
 
-    function fastGetStimQuestion(index, whichQuestion) {
+    fastGetStimQuestion = function(index, whichQuestion) {
         return fastGetStimCluster(index).display[whichQuestion];
     }
     function fastGetStimAnswer(index, whichAnswer) {
@@ -457,6 +457,11 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
         p.responseSecsSinceLastShown = elapsed(p.resp.lastShownTimestamp);
+
+        // console.log('p.stimSecsSinceLastShown: '+  p.stimSecsSinceLastShown);
+        // console.log('p.stimSecsSinceFirstShown: '+ p.stimSecsSinceFirstShown);
+        // console.log('p.questionSecsSinceLastShown' + p.questionSecsSinceLastShown);
+        // console.log("p.questionSecsSinceFirstShown" + p.questionSecsSinceFirstShown);
 
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
