@@ -299,7 +299,7 @@ function modelUnitEngine() {
                     lastShownTimestamp: 0,
                     firstShownTimestamp: 0,
                     otherPracticeTimeSinceFirst: 0,
-                    otherPracticeTimeSinceLast: 0
+                    otherPracticeTimeSinceLast: 0,
                 });
 
                 initProbs.push({
@@ -457,11 +457,6 @@ function modelUnitEngine() {
         p.responseFailureCount = p.resp.responseFailureCount;
         p.responseOutcomeHistory = p.resp.outcomeHistory;
         p.responseSecsSinceLastShown = elapsed(p.resp.lastShownTimestamp);
-
-        // console.log('p.stimSecsSinceLastShown: '+  p.stimSecsSinceLastShown);
-        // console.log('p.stimSecsSinceFirstShown: '+ p.stimSecsSinceFirstShown);
-        // console.log('p.questionSecsSinceLastShown' + p.questionSecsSinceLastShown);
-        // console.log("p.questionSecsSinceFirstShown" + p.questionSecsSinceFirstShown);
 
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
@@ -712,6 +707,12 @@ function modelUnitEngine() {
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
 
+            var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]);
+            if (responseText && responseText in cardProbabilities.responses) {
+                resp = cardProbabilities.responses[responseText];
+                resp.lastShownTimestamp = Date.now();
+            }
+
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]) || Meteor.user().username.startsWith('debug')) {
                 console.log(">>>BEGIN METRICS>>>>>>>");
@@ -742,7 +743,6 @@ function modelUnitEngine() {
                 );
 
                 // Display response and current response stats
-                var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]);
                 console.log("Response is", responseText, displayify(cardProbabilities.responses[responseText]));
 
                 console.log("<<<END   METRICS<<<<<<<");
@@ -764,6 +764,11 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var card = cards[indexForNewCard];
             var stim = card.stims[prob.stimIndex];
+            var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).response[prob.stimIndex]);
+            var resp = {};
+            if (responseText && responseText in cardProbabilities.responses) {
+                resp = cardProbabilities.responses[responseText];
+            }
 
             // Update our top-level stats
             cardProbabilities.numQuestionsIntroduced += 1;
@@ -773,6 +778,11 @@ function modelUnitEngine() {
             if (!!resumeData) {
                 _.extend(card, resumeData.cardModelData);
                 _.extend(currentCardInfo, resumeData.currentCardInfo);
+
+                if(resumeData.responseData.responseText == responseText){
+                  resp.lastShownTimestamp = Math.max(resumeData.responseData.lastShownTimestamp,resp.lastShownTimestamp);
+                }
+
                 if (currentCardInfo.clusterIndex != indexForNewCard) {
                     console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, indexForNewCard,
                         "selectVal=", selectVal,
@@ -806,9 +816,16 @@ function modelUnitEngine() {
         createQuestionLogEntry: function() {
             var idx = fastGetStimCluster(getCurrentClusterIndex()).clusterIndex;
             var card = cardProbabilities.cards[idx];
+            var cluster = fastGetStimCluster(getCurrentClusterIndex());
+            var responseText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
+            var responseData = {
+              responseText: responseText,
+              lastShownTimestamp: Date.now()
+            };
             return {
                 'cardModelData':   _.omit(card, ["question", "answer"]),
                 'currentCardInfo': _.extend({}, currentCardInfo),
+                'responseData': responseData,
                 'whichStim': currentCardInfo.whichStim
             };
         },
@@ -893,7 +910,6 @@ function modelUnitEngine() {
                 else            resp.responseFailureCount += 1;
 
                 resp.outcomeHistory.push(wasCorrect ? 1 : 0);
-                resp.lastShownTimestamp = Date.now();
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
