@@ -14,7 +14,8 @@
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
+        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+        <textToSpeechAPIKey></textToSpeechAPIKey>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

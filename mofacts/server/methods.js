@@ -183,7 +183,6 @@ SyncedCron.config({
 
 Meteor.startup(function () {
 
-
     // Let anyone looking know what config is in effect
     serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 

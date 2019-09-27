@@ -4,13 +4,14 @@
         <userselect>false</userselect>
         <stimulusfile>CH10AB.xml</stimulusfile>
         <lfparameter>.85</lfparameter>
-        <speechAPIKey>AIzaSyBc_xB-ZofR90jVFrTd5my7C7vgQ5a6kWA</speechAPIKey>
+        <speechAPIKey></speechAPIKey>
         <audioInputEnabled>true</audioInputEnabled>
         <audioInputSensitivity>15</audioInputSensitivity>
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
+        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+        <textToSpeechAPIKey></textToSpeechAPIKey>
     </setspec>
     <unit>
         <unitinstructions>Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.</unitinstructions>

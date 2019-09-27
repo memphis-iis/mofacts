@@ -488,7 +488,27 @@ var onEndCallbackDict = {};
 Template.card.rendered = function() {
   console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     var audioInputEnabled = Session.get("audioEnabled");
+    if(audioInputEnabled){
+      if(!Session.get("audioInputSensitivity")){
+        //Default to 20 in case tdf doesn't specify and we're in an experiment
+        var audioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity || 20;
+        Session.set("audioInputSensitivity",audioInputSensitivity);
+      }
+    }
+
+    var audioOutputEnabled = Session.get("enableAudioPromptAndFeedback");
+    if(audioOutputEnabled){
+      if(!Session.get("audioPromptSpeakingRate")){
+        //Default to 1 in case tdf doesn't specify and we're in an experiment
+        var audioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
+        Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+      }
+    }
     var audioInputDetectionInitialized = Session.get("VADInitialized");
+
+    window.AudioContext = window.webkitAudioContext || window.AudioContext;
+    window.URL = window.URL || window.webkitURL;
+    audioContext = new AudioContext();
     //If user has enabled audio input initialize web audio (this takes a bit)
     //(this will eventually call cardStart after we redirect through the voice
     //interstitial and get back here again)
@@ -660,10 +680,6 @@ Template.card.helpers({
 
 var initializeAudio = function(){
   try {
-    window.AudioContext = window.webkitAudioContext || window.AudioContext;
-    window.URL = window.URL || window.webkitURL;
-    audioContext = new AudioContext();
-
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
       console.log("media devices undefined");
@@ -1507,7 +1523,7 @@ function showUserInteraction(isGoodNews, news) {
         .text(news)
         .show();
 
-    speakMessageIfAudioPromptFeedbackEnabled(news,"all");
+    speakMessageIfAudioPromptFeedbackEnabled(news,false,"feedback");
 
     // forceCorrection is now part of user interaction - we always clear the
     // textbox, but only show it if:
@@ -1578,18 +1594,17 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptS
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
   var audioPromptMode = Session.get("audioPromptMode");
   if(enableAudioPromptAndFeedback){
-    //For older tdfs where audioPromptMode was unspecified, default to "all"
-    if(!audioPromptMode){
-      audioPromptMode = "all";
-    }
     if(audioPromptSource === audioPromptMode || audioPromptMode === "all"){
-      var synth = window.speechSynthesis;
       //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       //UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g,'blank');
-      var message = new SpeechSynthesisUtterance(msg);
-      message.rate = Session.get("audioPromptSpeakingRate");
-      synth.speak(message);
+      var ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey;
+      var audioPromptSpeakingRate = Session.get("audioPromptSpeakingRate");
+      makeGoogleTTSApiCall(msg,ttsAPIKey,audioPromptSpeakingRate,function(audioObj){
+        window.currentAudioObj = audioObj;
+        console.log("inside callback, playing audioObj:");
+        audioObj.play();
+      });
       console.log("providing audio feedback");
     }
   }else{
@@ -1599,6 +1614,30 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptS
     console.log("RESTARTING TIMEOUT AFTER READING");
     beginMainCardTimeout(savedDelay, savedFunc);
   }
+}
+
+decodeBase64AudioContent = function(audioDataEncoded){
+  return new Audio("data:audio/ogg;base64," + audioDataEncoded);
+}
+
+makeGoogleTTSApiCall = function(message,ttsAPIKey,audioPromptSpeakingRate,callback){
+      const request = {
+        input: { text: message},
+        voice: { languageCode: "en-US", ssmlGender: "FEMALE"},
+        audioConfig: { audioEncoding: "MP3", speakingRate: audioPromptSpeakingRate },
+      };
+
+      var ttsURL = "https://texttospeech.googleapis.com/v1/text:synthesize?key=" + ttsAPIKey;
+
+      HTTP.call("POST",ttsURL,{"data":request}, function(err,response){
+        if(!!err){
+          console.log("err: " + JSON.stringify(err));
+        }else{
+          var audioDataEncoded = response.data.audioContent;
+          var audioData = decodeBase64AudioContent(audioDataEncoded);
+          callback(audioData);
+        }
+      });
 }
 
 //Speech recognition function to process audio data, this is called by the web worker
