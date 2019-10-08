@@ -350,6 +350,11 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        insertStimTDFPair:function(newStimJSON,newTDFJSON){
+          Stimuli.insert(newStimJSON);
+          Tdfs.insert(newTDFJSON);
+        },
+
         usernameToIDMap:function(){
           usernameToIDMap = {};
           Meteor.users.find({}).forEach(function(user){

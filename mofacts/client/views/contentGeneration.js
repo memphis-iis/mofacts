@@ -1,68 +1,181 @@
 Session.set("curClozeSentencePairItemId", "");
 Session.set("clozeSentencePairs", {});
 Session.set("clozeHistory", []);
+Session.set("editingSentence",{});
+Session.set("editingCloze",{});
+sentenceIDtoSentenceMap = {};
+sentenceIDtoClozesMap = {};
+clozeIDToClozeMap = {};
+tdfFileNameToStimfileMap = {};
 
-stubGenerateContent = function(textData){
-  var sentences = [
-    {"sentence":"Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.", "itemId":"1", "hasCloze":true},
-    {"sentence":"Cras placerat accumsan nulla.", "itemId":"2", "hasCloze":false},
-    {"sentence":"Fusce sagittis, libero non molestie mollis, magna orci ultrices dolor, at vulputate neque nulla lacinia eros.", "itemId":"3", "hasCloze":false},
-    {"sentence":"Nunc eleifend leo vitae magna.", "itemId":"4", "hasCloze":false},
-    {"sentence":"Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.", "itemId":"5", "hasCloze":true},
-    {"sentence":"Sed diam.", "itemId":"6", "hasCloze":false},
-    {"sentence":"Etiam laoreet quam sed arcu.", "itemId":"7", "hasCloze":false},
-    {"sentence":"Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.", "itemId":"8", "hasCloze":false},
-    {"sentence":"Donec at pede.", "itemId":"9", "hasCloze":false},
-    {"sentence":"Sed diam.", "itemId":"10", "hasCloze":false},
-    {"sentence":"Nam vestibulum accumsan nisl.", "itemId":"11", "hasCloze":false},
-    {"sentence":"Nunc rutrum turpis sed pede.", "itemId":"12", "hasCloze":false},
-    {"sentence":"Pellentesque dapibus suscipit ligula.", "itemId":"13", "hasCloze":false},
-    {"sentence":"Suspendisse potenti.", "itemId":"14", "hasCloze":false},
-    {"sentence":"Nam a sapien.", "itemId":"15", "hasCloze":false},
-    {"sentence":"Vivamus id enim.", "itemId":"16", "hasCloze":false},
-    {"sentence":"Fusce suscipit, wisi nec facilisis facilisis, est dui fermentum leo, quis tempor ligula erat quis odio.", "itemId":"17", "hasCloze":false},
-    {"sentence":"Aliquam feugiat tellus ut neque.", "itemId":"18", "hasCloze":true},
-    {"sentence":"Praesent fermentum tempor tellus.", "itemId":"19", "hasCloze":false},
-    {"sentence":"Mauris mollis tincitemIdunt felis.", "itemId":"20", "hasCloze":true},
-    {"sentence":"Etiam vel tortor sodales tellus ultricies commodo.", "itemId":"21", "hasCloze":false},
-    {"sentence":"Donec hendrerit tempor tellus.", "itemId":"22", "hasCloze":true},
-    {"sentence":"Praesent fermentum tempor tellus.", "itemId":"23", "hasCloze":false},
-    {"sentence":"Phasellus neque orci, porta a, aliquet quis, semper a, massa.", "itemId":"24", "hasCloze":false},
-    {"sentence":"Fusce suscipit, wisi nec facilisis facilisis, est dui fermentum leo, quis tempor ligula erat quis odio.", "itemId":"25", "hasCloze":false},
-    {"sentence":"Nunc rutrum turpis sed pede.", "itemId":"26", "hasCloze":false},
-    {"sentence":"Aliquam erat volutpat.", "itemId":"27", "hasCloze":false},
-    {"sentence":"Donec neque quam, dignissim in, mollis nec, sagittis eu, wisi.", "itemId":"28", "hasCloze":false},
-    {"sentence":"Nulla posuere.", "itemId":"29", "hasCloze":false},
-    {"sentence":"Nunc porta vulputate tellus.", "itemId":"30", "hasCloze":false},
-    {"sentence":"Vivamus id enim.", "itemId":"31", "hasCloze":true},
-    {"sentence":"Nullam tristique diam non turpis.", "itemId":"32", "hasCloze":false}
-  ];
+recordClozeEditHistory = function(oldCloze,newCloze){
+  var timestamp = Date.now();
+  console.log(timestamp.toString() + ":" + JSON.stringify(oldCloze) + "|" + JSON.stringify(newCloze));
+}
 
-  var clozes = [
-    {"cloze":"Donec _____ quam, dignissim in, mollis nec, sagittis eu, wisi.", "itemId":"1","clozeId":"c1", "correctResponse":"neque"},
-    {"cloze":"Proin quam nisl, _____ et, mattis eget, convallis nec, purus.", "itemId":"5","clozeId":"c2", "correctResponse":"tincidunt"},
-    {"cloze":"Aliquam feugiat _____ ut neque.", "itemId":"18","clozeId":"c3", "correctResponse":"tellus"},
-    {"cloze":"Mauris mollis _____ felis.", "itemId":"20","clozeId":"c4", "correctResponse":"tincidunt"},
-    {"cloze":"Donec _____ tempor tellus.", "itemId":"22","clozeId":"c5", "correctResponse":"hendrerit"},
-    {"cloze":"_____ id enim", "itemId":"31","clozeId":"c6", "correctResponse":"Vivamus"},
-    {"cloze":"Vivamus id _____", "itemId":"31","clozeId":"c7", "correctResponse":"enim"}
-  ];
+setAllTdfs = function(){
+  console.log("setAllTdfs");
+  allTdfs = [];
+  Meteor.subscribe('tdfs',function(){
+    Tdfs.find({}).forEach(function(entry){
+      try{
+        var fileName = entry.fileName;
+        var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+        var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
 
-  Session.set("clozeSentencePairs", {
-    "sentences":serverStubContent.sentences,
-    "clozes":serverStubContent.clozes
+        var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
+        var containsClozes = (_.filter(stimulusObject.stimuli.setspec.clusters[0].cluster,function(cluster){
+          return !!cluster.displayType && cluster.displayType.length > 0 && cluster.displayType[0].toLowerCase() === "cloze";
+        })).length > 0;
+
+        if(containsClozes){
+          allTdfs.push({'fileName':fileName,'displayName':displayName});
+          tdfFileNameToStimfileMap[fileName] = stimulusObject;
+        }
+      }catch(err){
+        console.log("error with setting all tdfs: " + JSON.stringify(err));
+      }
+    });
+
+    Session.set('allTdfs',allTdfs);
   });
 }
 
-stubGenerateAndSubmitTDF = function(){
-  console.log('Generating TDF with clozes: ', Session.get('clozeSentencePairs').clozes);
+setClozesFromStimObject = function(stimObject){
+  var allClozes = [];
+  var allClusters = stimObject.stimuli.setspec.clusters[0].cluster;
+  for(var index in allClusters){
+    var cluster = allClusters[index];
+    var fakeSentenceId = _.random(-9999999999,9999999999);
+    for(var index2 in cluster.display){
+      var clozeText = cluster.display[index2];
+      var clozeResponse = cluster.response[index2];
+      var clozeId = _.random(-9999999999,9999999999);
+      allClozes.push({
+        cloze:clozeText,
+        correctResponse:clozeResponse,
+        clozeId:clozeId,
+        itemId:fakeSentenceId
+      })
+    }
+  }
+  Session.set("clozeSentencePairs", {
+    "sentences":[],
+    "clozes":allClozes
+  });
+  fillOutItemLookupMaps([],allClozes);
 }
+
+fillOutItemLookupMaps = function(sentences,clozes){
+  sentenceIDtoSentenceMap = {};
+  clozeIDToClozeMap = {};
+  sentenceIDtoClozesMap = {};
+
+  for(var sentenceIndex in sentences){
+    var sentence = sentences[sentenceIndex];
+    var sentenceID = parseInt(sentence.itemId);
+    sentenceIDtoSentenceMap[sentenceID] = sentence;
+  }
+
+  _.map(clozes,function(cloze){
+      clozeIDToClozeMap[cloze.clozeId] = cloze;
+      var sentenceID = cloze.itemId;
+      if(!sentenceIDtoClozesMap[sentenceID]){
+        sentenceIDtoClozesMap[sentenceID] = [];
+      }
+      sentenceIDtoClozesMap[sentenceID].push(cloze);
+  });
+}
+
+stubGenerateContent = function(textData){
+  var sentences = serverStubContent.sentences;
+
+  var clozes = serverStubContent.clozes;
+
+  Session.set("clozeSentencePairs", {
+    "sentences":sentences,
+    "clozes":clozes
+  });
+
+  fillOutItemLookupMaps(sentences,clozes);
+}
+
+stubGenerateAndSubmitTDF = function(){
+  var clozes = Session.get('clozeSentencePairs').clozes;
+  console.log('Generating TDF with clozes: ' + JSON.stringify(clozes));
+  var displayName = $("#tdfDisplayNameTextBox").val();
+  var curUserName = Meteor.user().username.split('@')[0];
+  var curDateTime = new Date().toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
+  var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_TDF.xml";
+  var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_Stim.xml";
+
+  var newStimJSON = generateStimJSON(clozes,stimFileName);
+  var numClusters = newStimJSON.stimuli.setspec.clusters[0].cluster.length;
+  var newTDFJSON = generateTDFJSON(newStimJSON,tdfFileName,displayName,stimFileName,numClusters);
+
+  Meteor.call("insertStimTDFPair",newStimJSON,newTDFJSON,function(err,res){
+    if(!!err){
+      console.log("Error inserting stim/tdf pair: " + err);
+      alert("Error creating content: " + err);
+    }else{
+      console.log("Inserting stim/tdf pair result: " + res);
+      alert("Saved Successfully!");
+      $("#tdfDisplayNameTextBox").val("");
+      $("#save-modal").hide();
+    }
+  });
+  console.log("newStimJSON: " + JSON.stringify(newStimJSON));
+  console.log("newTDFJSON: " + JSON.stringify(newTDFJSON));
+}
+
+generateStimJSON = function(clozes,stimFileName){
+  var curStim = JSON.parse(JSON.stringify(templateStimJSON));
+  curStim.fileName = stimFileName;
+  curStim.owner = Meteor.userId();
+  var completedSentenceIDs = {};
+  for(var index in clozes){
+    var sentenceID = clozes[index].itemId;
+    if(!completedSentenceIDs[sentenceID]){
+      var cluster = {displayType:["Cloze"],display:[],response:[],parameter:[]};
+      var curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
+      for(var index2 in curSentenceClozes){
+        var cloze = curSentenceClozes[index2];
+        cluster.parameter.push("0,.72");
+        cluster.display.push(cloze.cloze);
+        cluster.response.push(cloze.correctResponse);
+      }
+      curStim.stimuli.setspec.clusters[0].cluster.push(cluster);
+      completedSentenceIDs[sentenceID] = true;
+    }
+  }
+
+  return curStim;
+}
+
+generateTDFJSON = function(newStimJSON,tdfFileName,displayName,stimFileName,numStimClozes){
+  var curTdf = JSON.parse(JSON.stringify(templateTdfJSON));
+  curTdf.owner = Meteor.userId();
+  curTdf.fileName = tdfFileName;
+
+  curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
+  curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimFileName];
+  curTdf.tdfs.tutor.unit[0].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];
+
+  return curTdf;
+}
+
+Template.contentGeneration.onRendered(function(){
+  setAllTdfs();
+});
 
 Template.contentGeneration.events({
   'click #cloze': function(event){
     var cloze_uid = parseInt(event.currentTarget.getAttribute('uid'));
     Session.set("curClozeSentencePairItemId", cloze_uid);
-    $("#parsed-sentences").find("[uid=" + cloze_uid + "]").get(0).scrollIntoView();
+    var parsedSentencesMatchingSentence = $("#parsed-sentences").find("[uid=" + cloze_uid + "]").get(0);
+    if(!!parsedSentencesMatchingSentence){
+      parsedSentencesMatchingSentence.scrollIntoView();
+    }
   },
 
   'click .sentence-with-cloze': function(event){
@@ -73,6 +186,43 @@ Template.contentGeneration.events({
 
   'click #submit-btn': function(event){
     stubGenerateContent();
+    $("#templateTDFSelect").val($("#templateTDFSelect option:first").val());
+  },
+
+  'click #editClozeSaveButton': function(event){
+    console.log(event);
+    var newCloze = $("#clozeTextEdit").val();
+    var response = $("#clozeResponseEdit").val();
+    var editingCloze = Session.get("editingCloze");
+
+    var sentenceID = editingCloze.itemId;
+    var clozeID = editingCloze.clozeId;
+    if(newCloze.indexOf("_") == -1){
+      alert("Please make sure to insert underscores to indicate a missing word.");
+    }else if (response.length < 1) {
+      alert("Please enter a correct response");
+    }else{
+      var oldCloze = clozeIDToClozeMap[clozeID];
+      var newCloze = {cloze:newCloze,correctResponse:response,itemId:sentenceID,clozeId:clozeID};
+      recordClozeEditHistory(oldCloze,newCloze);
+      var clozeSentencePairs = Session.get('clozeSentencePairs');
+      var clozes = clozeSentencePairs.clozes;
+      var clozesWithNew = [];
+      for(var clozeIndex in clozes){
+        var cloze = clozes[clozeIndex];
+        if(cloze.clozeId === clozeID){
+          clozesWithNew.push(newCloze);
+        }else{
+          clozesWithNew.push(cloze);
+        }
+      }
+
+      clozeSentencePairs.clozes = clozesWithNew;
+      Session.set("clozeSentencePairs",clozeSentencePairs);
+      clozeIDToClozeMap[clozeID] = newCloze;
+      $('#edit-modal').modal('hide');
+      $("#clozeResponseEdit").val("");
+    }
   },
 
   'click #save-btn-final': function(event){
@@ -84,6 +234,20 @@ Template.contentGeneration.events({
   },
 
   'click #edit-btn': function(event){
+    var cloze_uid = parseInt(event.currentTarget.getAttribute('cloze-uid'));
+    var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
+    Session.set("curClozeSentencePairItemId", curItemId);
+    Session.set("editingClozeUID",cloze_uid);
+
+    var curCloze = clozeIDToClozeMap[cloze_uid];
+    var curSentence = sentenceIDtoSentenceMap[curItemId];
+    Session.set("editingCloze",curCloze);
+    if(!!curSentence){
+      Session.set("editingSentence",curSentence);
+    }else{
+      $("#clozeTextEdit").val("");
+      Session.set("editingSentence",{});
+    }
     $('#edit-modal').modal('show');
   },
 
@@ -91,6 +255,9 @@ Template.contentGeneration.events({
     var curClozeId = parseInt(event.currentTarget.getAttribute('cloze-uid'));
     var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
     var prevClozeSentencePairs = Session.get("clozeSentencePairs");
+
+    var oldCloze = clozeIDToClozeMap[curClozeId];
+    recordClozeEditHistory(oldCloze,{});
 
     var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
     var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
@@ -108,6 +275,12 @@ Template.contentGeneration.events({
       'sentences':newSentences,
       'clozes':newClozes
     });
+  },
+
+  "change #templateTDFSelect": function(event){
+    var curTdfFileName = $(event.currentTarget).val();
+    var stimObject = tdfFileNameToStimfileMap[curTdfFileName];
+    setClozesFromStimObject(stimObject);
   }
 });
 
@@ -131,10 +304,145 @@ Template.contentGeneration.helpers({
       if (c.itemId === curClozeItemId) { curClozeText = c.cloze }
     });
     return curClozeText;
+  },
+
+  editingCloze: function(){
+    return Session.get("editingCloze").cloze;
+  },
+
+  editingClozeResponse: function(){
+    return Session.get("editingCloze").correctResponse;
+  },
+
+  editingSentence: function(){
+    return Session.get("editingSentence").sentence;
+  },
+
+  tdfs: function(){
+    return Session.get("allTdfs");
   }
 });
 
-var serverStubContent = {
+templateStimJSON = {
+    "fileName" : "CH10AB.xml",
+    "stimuli" : {
+        "setspec" : {
+            "clusters" : [
+                {
+                    "cluster" : []
+                }
+            ]
+        }
+    },
+    "owner" : "",
+    "source" : "content_generation"
+}
+
+templateTdfJSON = {
+    "fileName" : "IESchapter10AB.xml",
+    "tdfs" : {
+        "tutor" : {
+            "setspec" : [
+                {
+                    "lessonname" : [
+                        "Chapter 10 Nervous System 1 AB"
+                    ],
+                    "userselect" : [
+                        "false"
+                    ],
+                    "stimulusfile" : [
+                        "CH10AB.xml"
+                    ],
+                    "lfparameter" : [
+                        ".85"
+                    ],
+                    "speechAPIKey" : [
+                        ""
+                    ],
+                    "audioInputEnabled" : [
+                        "true"
+                    ],
+                    "audioInputSensitivity" : [
+                        "15"
+                    ],
+                    "speechIgnoreOutOfGrammarResponses" : [
+                        "true"
+                    ],
+                    "speechOutOfGrammarFeedback" : [
+                        "Please try again"
+                    ],
+                    "enableAudioPromptAndFeedback" : [
+                        "true"
+                    ],
+                    "audioPromptSpeakingRate" : [
+                        "1"
+                    ],
+                    "textToSpeechAPIKey" : [
+                        ""
+                    ]
+                }
+            ],
+            "unit" : [
+                {
+                    "unitinstructions" : [
+                        "Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount."
+                    ],
+                    "unitname" : [
+                        "Chapter 10 Nervous System 1"
+                    ],
+                    "learningsession" : [
+                        {
+                            "clusterlist" : [
+                                "0-0"
+                            ],
+                            "unitMode" : [
+                                "thresholdCeiling"
+                            ],
+                            "calculateProbability" : [
+                                "\n\n          function mul(m1, m2) {\n            var result = 0;\n            var len = m1.length;\n            for (var i = 0; i < len; i++) {\n                result += m1[i] * m2[i]\n            } return result}\n\n          function logitdec(outcomes, decay) {\n            if (outcomes) {\n                var outcomessuc = JSON.parse(JSON.stringify(outcomes));\n                var outcomesfail = outcomes.map(function(value) {\n                    return Math.abs(value - 1)\n                });\n                var w = outcomessuc.unshift(1);\n                var v = outcomesfail.unshift(1);\n                return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                }))) } return 0}\n\n          function recency(age, d) {\n          if (age==0) { return 0;\n          } else\n            {return Math.pow(1 + age, -d); }}\n\n          function quaddiffcor(seq, probs) {\n            return mul(seq, probs.map(function(value) {\n                return value * value\n            }))}\n\n          function linediffcor(seq, probs) {\n            return mul(seq, probs)}\n\n          function linediffincor(seq, probs) {\n            return mul(seq.map(function(value) {\n                return Math.abs(value - 1)\n            }), probs)}\n\n          p.y = -0.88209+\n          0.56762 * logitdec(\n              p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,\n              p.overallOutcomeHistory.length), .97) +\n          0.66748 * logitdec(p.responseOutcomeHistory, .91) +\n          12.38413 * recency(p.stimSecsSinceLastShown, .52) +\n          1.57492 *  recency(p.responseSecsSinceLastShown, .105) +\n          1.72852  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +\n          -1.83550 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +\n          -0.27823 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities);\n          p.probability = 1.0 / (1.0 + Math.exp(-p.y));\n\n        // console.log(p.overallOutcomeHistory+\" - \"+p.responseOutcomeHistory +\" - \"+p.stimSecsSinceLastShown+\" - \"+p.stimOutcomeHistory+\" - \"+p.stimPreviousCalculatedProbabilities);\n          return p\n             "
+                            ]
+                        }
+                    ],
+                    "deliveryparams" : [
+                        {
+                            "autostopTimeoutThreshold" : [
+                                "1"
+                            ],
+                            "drill" : [
+                                "30000"
+                            ],
+                            "purestudy" : [
+                                "16000"
+                            ],
+                            "skipstudy" : [
+                                "true"
+                            ],
+                            "reviewstudy" : [
+                                "15000"
+                            ],
+                            "correctprompt" : [
+                                "750"
+                            ],
+                            "fontsize" : [
+                                "4"
+                            ],
+                            "correctscore" : [
+                                "1"
+                            ],
+                            "incorrectscore" : [
+                                "0"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "owner" : "",
+    "source" : "content_generation"
+}
+
+serverStubContent = {
   "sentences": [
     {
       "sentence": "Snap your fingers !",

@@ -20,3 +20,20 @@ textarea {
 .sentence-no-cloze{
     color: #666666;
 }
+
+#clozeTextEdit{
+  height:100%;
+  width:100%;
+}
+
+.flexContent{
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#fileTemplateLabel{
+  margin-top: 0px;
+}
