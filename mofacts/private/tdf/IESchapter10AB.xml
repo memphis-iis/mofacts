@@ -60,16 +60,17 @@
                 return Math.abs(value - 1)
             }), probs)}
 
-          p.y = -0.88209+
-          0.56762 * logitdec(
+          p.y = -0.86820+
+          0.57548 * logitdec(
               p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,
               p.overallOutcomeHistory.length), .97) +
-          0.66748 * logitdec(p.responseOutcomeHistory, .91) +
-          12.38413 * recency(p.stimSecsSinceLastShown, .52) +
-          1.57492 *  recency(p.responseSecsSinceLastShown, .105) +
-          1.72852  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
-          -1.83550 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
-          -0.27823 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities);
+          0.77959 * logitdec(p.responseOutcomeHistory, .91) +
+          12.49161 * recency(p.stimSecsSinceLastShown, .52) +
+          1.25622 *  recency(p.responseSecsSinceLastShown, .105) +
+          1.32434  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+          -1.54024 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+          -0.52084 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities)+
+           0.13108 * (p.stimSuccessCount+p.stimFailureCount);
           p.probability = 1.0 / (1.0 + Math.exp(-p.y));
 
         // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);

@@ -506,7 +506,7 @@ function modelUnitEngine() {
             var prob = probs[i];
             var card = cards[prob.cardIndex];
 
-            if (card.canUse && card.trialsSinceLastSeen > 2) {
+            if (card.canUse && card.trialsSinceLastSeen > 1) {
                 if (prob.probability <= currentMin) {   // Note that this is stim probability
                     currentMin = prob.probability;
                     indexToReturn = i;
