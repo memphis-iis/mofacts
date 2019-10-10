@@ -371,10 +371,6 @@ window.onpopstate = function(event){
 //Clean up things if we navigate away from this page
 function leavePage(dest) {
     console.log("leaving page for dest: " + dest);
-    if(window.speechSynthesis.speaking){
-      window.speechSynthesis.pause();
-      window.speechSynthesis.cancel();
-    }
     if(window.audioContext && !(dest == "/card" || dest == "/instructions" || dest == "/voice")){
       console.log("closing audio context");
       stopRecording();
@@ -1583,8 +1579,8 @@ function hideUserInteraction() {
 
 // BEGIN WEB AUDIO section
 
-//Audio prompt/feedback (web audio speech synthesis)
-function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptSource){
+//Audio prompt/feedback
+speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPromptSource){
   var savedFunc = timeoutFunc;
   var savedDelay = timeoutDelay;
   if(resetTimeout){
@@ -1598,7 +1594,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg,resetTimeout, audioPromptS
       //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       //UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g,'blank');
-      var ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey;
+      var ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
       var audioPromptSpeakingRate = Session.get("audioPromptSpeakingRate");
       makeGoogleTTSApiCall(msg,ttsAPIKey,audioPromptSpeakingRate,function(audioObj){
         window.currentAudioObj = audioObj;

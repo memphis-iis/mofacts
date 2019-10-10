@@ -7,10 +7,16 @@ sentenceIDtoSentenceMap = {};
 sentenceIDtoClozesMap = {};
 clozeIDToClozeMap = {};
 tdfFileNameToStimfileMap = {};
+tdfFileNameToTdfFileMap = {};
+speechAPIKey = undefined;
+textToSpeechAPIKey = undefined;
+originalClozes = undefined;
+clozeEdits = [];
 
 recordClozeEditHistory = function(oldCloze,newCloze){
   var timestamp = Date.now();
-  console.log(timestamp.toString() + ":" + JSON.stringify(oldCloze) + "|" + JSON.stringify(newCloze));
+  console.log(new Date(timestamp).toString() + ":" + JSON.stringify(oldCloze) + "|" + JSON.stringify(newCloze));
+  clozeEdits.push({startingCloze:oldCloze,endingCloze:newCloze,timestamp:timestamp});
 }
 
 setAllTdfs = function(){
@@ -30,6 +36,7 @@ setAllTdfs = function(){
 
         if(containsClozes){
           allTdfs.push({'fileName':fileName,'displayName':displayName});
+          tdfFileNameToTdfFileMap[fileName] = entry;
           tdfFileNameToStimfileMap[fileName] = stimulusObject;
         }
       }catch(err){
@@ -63,6 +70,7 @@ setClozesFromStimObject = function(stimObject){
     "sentences":[],
     "clozes":allClozes
   });
+  originalClozes = allClozes;
   fillOutItemLookupMaps([],allClozes);
 }
 
@@ -100,7 +108,26 @@ stubGenerateContent = function(textData){
   fillOutItemLookupMaps(sentences,clozes);
 }
 
-stubGenerateAndSubmitTDF = function(){
+saveEditHistory = function(originalClozes,newClozes){
+  var history = {
+    originalClozes:originalClozes,
+    endingClozes:newClozes,
+    clozeEdits:clozeEdits,
+    user:Meteor.userId(),
+    timestamp:Date.now()
+  };
+  Meteor.call('insertClozeEditHistory',history,function(err,result){
+    if(!!err){
+      console.log("error saving cloze edit history: " + JSON.stringify(err));
+    }else{
+      console.log("saving cloze edit history results: " + JSON.stringify(result));
+    }
+  });
+
+  clozeEdits = [];
+}
+
+generateAndSubmitTDFAndStimFiles = function(){
   var clozes = Session.get('clozeSentencePairs').clozes;
   console.log('Generating TDF with clozes: ' + JSON.stringify(clozes));
   var displayName = $("#tdfDisplayNameTextBox").val();
@@ -111,7 +138,7 @@ stubGenerateAndSubmitTDF = function(){
 
   var newStimJSON = generateStimJSON(clozes,stimFileName);
   var numClusters = newStimJSON.stimuli.setspec.clusters[0].cluster.length;
-  var newTDFJSON = generateTDFJSON(newStimJSON,tdfFileName,displayName,stimFileName,numClusters);
+  var newTDFJSON = generateTDFJSON(tdfFileName,displayName,stimFileName,numClusters);
 
   Meteor.call("insertStimTDFPair",newStimJSON,newTDFJSON,function(err,res){
     if(!!err){
@@ -119,9 +146,10 @@ stubGenerateAndSubmitTDF = function(){
       alert("Error creating content: " + err);
     }else{
       console.log("Inserting stim/tdf pair result: " + res);
+      saveEditHistory(originalClozes,clozes);
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
-      $("#save-modal").hide();
+      $("#save-modal").modal('hide');
     }
   });
   console.log("newStimJSON: " + JSON.stringify(newStimJSON));
@@ -152,14 +180,20 @@ generateStimJSON = function(clozes,stimFileName){
   return curStim;
 }
 
-generateTDFJSON = function(newStimJSON,tdfFileName,displayName,stimFileName,numStimClozes){
-  var curTdf = JSON.parse(JSON.stringify(templateTdfJSON));
+generateTDFJSON = function(tdfFileName,displayName,stimFileName,numStimClozes){
+  var tdfTemplateFileName = $("#templateTDFSelect").val();
+  var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
+  var curTdf = originalTDF || JSON.parse(JSON.stringify(templateTdfJSON));
+
+  delete curTdf._id;
   curTdf.owner = Meteor.userId();
   curTdf.fileName = tdfFileName;
 
   curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
   curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimFileName];
   curTdf.tdfs.tutor.unit[0].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];
+  curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
+  curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
 
   return curTdf;
 }
@@ -185,8 +219,11 @@ Template.contentGeneration.events({
   },
 
   'click #submit-btn': function(event){
-    stubGenerateContent();
-    $("#templateTDFSelect").val($("#templateTDFSelect option:first").val());
+    alert("This feature is not yet implemented.  Please choose a template file.");
+    originalClozes = undefined;
+    clozeEdits = [];
+    // stubGenerateContent();
+    // $("#templateTDFSelect").val($("#templateTDFSelect option:first").val());
   },
 
   'click #editClozeSaveButton': function(event){
@@ -226,7 +263,7 @@ Template.contentGeneration.events({
   },
 
   'click #save-btn-final': function(event){
-    stubGenerateAndSubmitTDF();
+    generateAndSubmitTDFAndStimFiles();
   },
 
   'click #save-btn': function(event){
@@ -280,7 +317,19 @@ Template.contentGeneration.events({
   "change #templateTDFSelect": function(event){
     var curTdfFileName = $(event.currentTarget).val();
     var stimObject = tdfFileNameToStimfileMap[curTdfFileName];
+    var tdfObject = tdfFileNameToTdfFileMap[curTdfFileName];
+    if(!!tdfObject.tdfs.tutor.setspec[0].speechAPIKey && !!tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0]){
+      speechAPIKey = tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0];
+    }else{
+      speechAPIKey = null;
+    }
+    if(!!tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey && !!tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0]){
+      textToSpeechAPIKey = tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    }else{
+      textToSpeechAPIKey = null;
+    }
     setClozesFromStimObject(stimObject);
+    clozeEdits = [];
   }
 });
 

@@ -368,6 +368,8 @@ showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode = function(audioPromp
 function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
+    var audioPromptFeedbackView = Session.get("audioPromptFeedbackView");
+
     //make sure session variables are cleared from previous tests
     sessionCleanUp();
 
@@ -404,7 +406,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     });
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
-    var userAudioPromptFeedbackToggled = (Session.get("audioPromptFeedbackView") == "feedback") || (Session.get("audioPromptFeedbackView") == "all");
+    var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
     var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
     var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
@@ -434,7 +436,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       var tdfKeyPresent = getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey && getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey != "";
+       var tdfKeyPresent = !!getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey && !!getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey[0];
        if(!speechAPIKey && !tdfKeyPresent)
        {
          console.log("speech api key not found, showing modal for user to input");
@@ -452,6 +454,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
    Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
    Session.set("audioInputSensitivityView",document.getElementById("audioInputSensitivity").value);
+   Session.set("audioPromptFeedbackView",audioPromptFeedbackView);
+   Session.set("audioPromptMode",audioPromptFeedbackView);
 
    if(continueToCard){
      //Go directly to the card session - which will decide whether or

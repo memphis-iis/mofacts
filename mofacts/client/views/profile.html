@@ -114,6 +114,9 @@
             {{#if isInRole 'admin, teacher'}}
                 {{> instructorReporting}}
             {{/if}}
+            {{#if isInRole 'admin, teacher'}}
+              {{> contentGeneration}}
+            {{/if}}
         {{/if}}
 
         <br><br>

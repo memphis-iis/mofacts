@@ -9,6 +9,8 @@ var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
 
+var clozeGeneration = require('./lib/Process.js');
+
 // Open file stream for active user log
 var activeUserLogStream = fs.createWriteStream("activeUserLog.csv", {flags: 'a'});
 
@@ -182,7 +184,6 @@ SyncedCron.config({
 //Server-side startup logic
 
 Meteor.startup(function () {
-
     // Let anyone looking know what config is in effect
     serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 
@@ -350,6 +351,14 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        insertClozeEditHistory:function(history){
+          ClozeEditHistory.insert(history);
+        },
+        getClozesAndSentencesForText:function(rawText){
+          console.log("rawText!!!: " + rawText);
+          return clozeGeneration.GetClozeAPI(null,null,null,rawText);
+        },
+
         insertStimTDFPair:function(newStimJSON,newTDFJSON){
           Stimuli.insert(newStimJSON);
           Tdfs.insert(newTDFJSON);

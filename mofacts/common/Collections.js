@@ -9,3 +9,4 @@ UserMetrics = new Mongo.Collection("userMetrics");
 ScheduledTurkMessages = new Mongo.Collection("scheduledTurkMessages");
 GoogleSpeechAPIKeys = new Mongo.Collection("googleSpeechAPIKeys");
 Classes = new Mongo.Collection("classes");
+ClozeEditHistory = new Mongo.Collection("clozeEditHistory");
