@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <lessonname>Title of the unit goes here***</lessonname>
-        <userselect>false</userselect>
+        <userselect>true</userselect>
         <stimulusfile>IESstimexample.xml</stimulusfile>
         <lfparameter>.85</lfparameter>
         <speechAPIKey></speechAPIKey>
@@ -10,10 +10,21 @@
         <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
+        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
     </setspec>
     <unit>
-        <unitinstructions>Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.</unitinstructions>
+        <unitinstructions><![CDATA[
+          <center><h3>Anatomy & Physiology Practice Instructions</h3></center><br>
+Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.
+<br>
+        <center><h3>Practice Tips video.</h3></center>
+        <br>
+          <center>
+                  <iframe width="560" height="315" src="https://www.youtube.com/embed/TzhgPXrFSm8" frameborder="0" allow="accelerometer;
+          margin-left: auto;
+          margin-right: auto;
+          autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  </center>
+        ]]></unitinstructions>
         <unitname>Title of the unit goes here***</unitname>
         <learningsession>
              <clusterlist>0-17</clusterlist>
@@ -68,23 +79,26 @@
             }), probs)
           }
 
-          p.y = -0.72159+
-          .58150 * logitdec(
-              p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,
-              p.overallOutcomeHistory.length), .97) +
-          .54467 * logitdec(p.responseOutcomeHistory, .79) +
-          9.67995 * recency(p.stimSecsSinceLastShown, .35)+
-          1.85143  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
-          -1.96012 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
-          -0.27823 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities);
-          p.probability = 1.0 / (1.0 + Math.exp(-p.y));
+                    p.y = -0.86820+
+                    0.57548 * logitdec(
+                        p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,
+                        p.overallOutcomeHistory.length), .97) +
+                    0.77959 * logitdec(p.responseOutcomeHistory, .91) +
+                    12.49161 * recency(p.stimSecsSinceLastShown, .52) +
+                    1.25622 *  recency(p.responseSecsSinceLastShown, .105) +
+                    1.32434  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+                    -1.54024 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+                    -0.52084 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities)+
+                     0.13108 * (p.stimSuccessCount+p.stimFailureCount);
+                    p.probability = 1.0 / (1.0 + Math.exp(-p.y));
 
-        // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);
-          return p
-             ]]></calculateProbability>
-         </learningsession>
+                  // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);
+                    return p
+                       ]]></calculateProbability>
+                   </learningsession>
+
         <deliveryparams>
-            <drill>60000</drill>
+            <drill>30000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
             <reviewstudy>20000</reviewstudy>
