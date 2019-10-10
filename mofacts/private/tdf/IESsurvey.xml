@@ -1,0 +1,76 @@
+<tutor>
+    <setspec>
+        <lessonname>Survey for A&amp;P Students</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>IESsurveystims.xml</stimulusfile>
+        <lfparameter>.85</lfparameter>
+        <speechAPIKey></speechAPIKey>
+        <audioInputEnabled>true</audioInputEnabled>
+        <audioInputSensitivity>15</audioInputSensitivity>
+        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
+        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+    </setspec>
+    <unit>
+        <unitinstructions>Survey Instructions</unitinstructions>
+        <unitname>Survey for A&amp;P Students</unitname>
+          <buttonorder>fixed</buttonorder>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>30</templatesrepeated>
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+                0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10
+A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 A_19 A_20
+A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
+            </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-29</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+        <deliveryparams>
+            <drill>10000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>0</reviewstudy>
+            <correctprompt>0</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>      <unitinstructions>This part of the survey just asks you to say True whenever the author is a real author, and False when it is not an author. There will be 130 names, but each only takes a second or 2 to respond.</unitinstructions>
+          <unitname>Survey for A&amp;P Students</unitname>
+        <unitinstructions>Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.</unitinstructions>
+        <unitname>Survey for A&amp;P Students</unitname>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>4</templatesrepeated>
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
+            </conditiontemplatesbygroup>
+            <initialpositions> A_1 A_2 A_3 A_4 </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>64-67</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+        <deliveryparams>
+            <drill>10000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>0</reviewstudy>
+            <correctprompt>0</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+</tutor>

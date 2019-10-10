@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<setspec>
+  <clusters>
+    <cluster>
+      <display>Race?</display>
+      <response>Caucasian</response>
+      <falseResponse>African American</falseResponse>
+      <falseResponse>Asian</falseResponse>
+      <falseResponse>Pacific Islander</falseResponse>
+      <falseResponse>Other</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Gender?</display>
+      <response>Male</response>
+      <falseResponse>Female</falseResponse>
+      <falseResponse>Other</falseResponse>
+      <falseResponse>Prefer not to answer</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Age?</display>
+      <response>18-25</response>
+      <falseResponse>26-34</falseResponse>
+      <falseResponse>35-54</falseResponse>
+      <falseResponse>55-64</falseResponse>
+      <falseResponse>65 and over</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Are you a 1st generation college student?</display>
+      <response>Yes</response>
+      <falseResponse>No</falseResponse>
+    </cluster>
+    <cluster>
+      <display>How many years have you been speaking English?</display>
+      <response>0-2 years</response>
+      <falseResponse>3-7 years</falseResponse>
+      <falseResponse>8-15 years</falseResponse>
+      <falseResponse>more than 15 years</falseResponse>
+    </cluster>
+    <cluster>
+      <display>What program are you in at Southwest?</display>
+      <response>Nursing</response>
+      <falseResponse>Physical Therapy Assistant</falseResponse>
+      <falseResponse>Medical Lab Technician</falseResponse>
+      <falseResponse>Other</falseResponse>
+    </cluster>
+    <cluster>
+      <display>What year are you in your program?</display>
+      <response>Freshman</response>
+      <falseResponse>Sophomore</falseResponse>
+    </cluster>
+    <cluster>
+      <display>What did you score on your ACT?</display>
+      <response>15 or below</response>
+      <falseResponse>15-18</falseResponse>
+      <falseResponse>19-21</falseResponse>
+      <falseResponse>22-25</falseResponse>
+      <falseResponse>26 or above</falseResponse>
+      <falseResponse>did not take</falseResponse>
+    </cluster>
+    <cluster>
+      <display>What did you score on your SAT?</display>
+      <response>850 or below</response>
+      <falseResponse>851-1000</falseResponse>
+      <falseResponse>1001-1150</falseResponse>
+      <falseResponse>1151-1250</falseResponse>
+      <falseResponse>1251 or above</falseResponse>
+      <falseResponse>did not take</falseResponse>
+    </cluster>
+    <cluster>
+      <display>How many sciences courses have you taken before A&amp;P?</display>
+      <response>Only the prerequisites for this course</response>
+      <falseResponse>1 additional course</falseResponse>
+      <falseResponse>2 additional courses</falseResponse>
+      <falseResponse>3 additional courses</falseResponse>
+      <falseResponse>4 or more additional courses</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Have you taken a biology course before?</display>
+      <response>Yes</response>
+      <falseResponse>No</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Have you taken an A&amp;P course before?</display>
+      <response>Yes</response>
+      <falseResponse>No</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Have you taken any other science courses before?</display>
+      <response>Yes</response>
+      <falseResponse>No</falseResponse>
+    </cluster>
+    <cluster>
+      <display>A&amp;P class is boring.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More of less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I find studying A&amp;P to be fun.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am taking A&amp;P primarily because it is required.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>A&amp;P is a subject I really enjoy.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>A&amp;P course is relatively easy.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>A&amp;P is a very challenging subject.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I find studying for A&amp;P is difficult.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I have to spend a lot of time studying for my A&amp;P course.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>The content in A&amp;P is hard.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school to prove to myself that I am capable of completing my college degree.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school because of the fact that when I succeed in school I feel important.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school to show myself that I am intelligent person.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school because I want to show myself that I can succeed in my studies.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school because I need at least a college degree in order to find a high-paying job later on.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school in order to obtain a more prestigious job later on.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school because I want to have “the good life” later on.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>I am in school in order to have a better salary later on.</display>
+      <response>Strongly agree</response>
+      <falseResponse>Agree</falseResponse>
+      <falseResponse>More or less agree</falseResponse>
+      <falseResponse>Neither agree nor disagree</falseResponse>
+      <falseResponse>More or less disagree</falseResponse>
+      <falseResponse>Disagree</falseResponse>
+      <falseResponse>Strongly disagree</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Patrick Banville</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Kristen Steinke</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Ernest Hemingway</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Clive Cussler</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Hiroyuki Oshita</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Kurt Vonnegut</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Anne McCaffrey</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Elinor Harring</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Sue Grafton</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Lisa Woodward</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>David Harper Townsend</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Anna Tsing</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>T.C. Boyle</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Jonathan Kellerman</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Cameron McGrath</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>F. Scott Fitzgerald</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>A.C. Kelly</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Peter Flaegerty</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Kazuo Ishiguro</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Jane Smiley</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>James Patterson</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Martha Farah</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Craig DeLord</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Nora Ephron</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Ann Beattie</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Stewart Simon</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Danielle Steel</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Dick Francis</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Ted Mantel</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>I.K. Nachbar</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Judith Krantz</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Thoman Pynchon</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Wayne Fillback</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Harry Coltheart</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Gary Curwen</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Herman Wouk</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Geoffrey Pritchett</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Ray Bradbury</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Jay Peter Holmes</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Christina Johnson</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Jean M. Auel</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Judith Stanley</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Gloria McCumber</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>James Joyce</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Robert Ludlum</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Larry Applegate</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Keith Cartwright</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Jackie Collins</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Umberto Eco</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>David Ashley</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Jack London</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Seth Bakis</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Padraig O’seaghdha</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>E.B. White</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Giles Mallon</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Raymond Chandler</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Isabel Allende</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Amy Graham</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Marion Coles Snow</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>George Orwell</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Maya Angelou</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Bernard Malamud</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>John Grisham</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Erich Fagles</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Walter Dorris</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Gabriel Garcia Marquez</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Virginia Woolf</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>John Landau</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Toni Morrison</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Harriet Troudeau</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Roswell Strong</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>J.R.R. Tolkien</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Margaret Atwood</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Seamus Huneven</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Harper Lee</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Chris Schwartz</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Walter LeMour</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Alice Walker</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Elizabeth Engle</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>T.S. Elliot</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Marvin Benoit</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Joyce Carol Oates</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Jessica Ann Lewis</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Nelson Demille</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Arturo Garcia Perez</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>S.L. Holloway</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>John Irving</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Stephen Houston</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Marcus Lecherou</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Valerie Cooper</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Tom Clancy</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Vladimir Nabokov</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Pamela Lovejoy</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Vikram Roy</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Saul Bellow </display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Stephen King</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Elizabeth May Kenyon</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Frederick Mundow</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Tony Hillerman</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Amy R. Baskin</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>James Clavell</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Salmon Rushdie</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Maryann Phillips</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Scott Alexander</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Ayn Rand</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Alex D. Miles</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Margaret Mitchell</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Leslie Kraus</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Ralph Ellison</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Sidney Sheldon</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Brian Herbert</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Sue Hammond</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Jared Gibbons</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Michael Ondaatje</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Thomas Wolfe</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Jeremy Weissman</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Willa Cather</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>J.D. Salinger</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Antonia Cialdini</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Lisa Hong Chan</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Samuel Beckett</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Beatrice Dobkin</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Wally Lamb</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Katherine Kreutz</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>James Michener</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>William Faulkner</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Isaac Asimov</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Lindsey Carter</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+    <cluster>
+      <display>Paul Theroux</display>
+      <response>True</response>
+      <falseResponse>False</falseResponse>
+    </cluster>
+    <cluster>
+      <display>Francine Preston</display>
+      <falseResponse>True</falseResponse>
+      <response>False</response>
+    </cluster>
+  </clusters>
+</setspec>
