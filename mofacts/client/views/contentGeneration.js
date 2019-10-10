@@ -188,7 +188,7 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,numStimClozes){
   delete curTdf._id;
   curTdf.owner = Meteor.userId();
   curTdf.fileName = tdfFileName;
-
+  curTdf.source = "content_generation";
   curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
   curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimFileName];
   curTdf.tdfs.tutor.unit[0].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];

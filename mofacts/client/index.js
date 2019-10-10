@@ -48,13 +48,17 @@ Meteor.startup(function() {
 Template.body.events({
   'click #homeButton' : function (event) {
       event.preventDefault();
-      window.currentAudioObj.pause();
+      if(!!window.currentAudioObj){
+        window.currentAudioObj.pause();
+      }
       Router.go("/profile");
   },
 
   'click #progressButton' : function (event) {
       event.preventDefault();
-      window.currentAudioObj.pause();
+      if(!!window.currentAudioObj){
+        window.currentAudioObj.pause();
+      }
       //Clear out studentUsername in case we are a teacher/admin who previously
       //navigated to this page for a particular student and want to see our own progress
       Session.set("studentUsername",null);
@@ -72,7 +76,9 @@ Template.body.events({
 
   'click #logoutButton' : function (event) {
       event.preventDefault();
-      window.currentAudioObj.pause();
+      if(!!window.currentAudioObj){
+        window.currentAudioObj.pause();
+      }
       Meteor.logout( function (error) {
           if (typeof error !== "undefined") {
               //something happened during logout
