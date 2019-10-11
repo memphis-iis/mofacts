@@ -12,6 +12,9 @@ speechAPIKey = undefined;
 textToSpeechAPIKey = undefined;
 originalClozes = undefined;
 clozeEdits = [];
+dropDownTdfFileNames = ['Chapter_9_Template_andrew.tackett_2019_10_10T22_49_09_052Z_TDF.xml',
+                        'Chapter_10_Template_andrew.tackett_2019_10_10T22_15_20_268Z_TDF.xml',
+                        'Chapter_11_Template_andrew.tackett_2019_10_10T22_16_29_616Z_TDF.xml'];
 
 recordClozeEditHistory = function(oldCloze,newCloze){
   var timestamp = Date.now();
@@ -26,18 +29,20 @@ setAllTdfs = function(){
     Tdfs.find({}).forEach(function(entry){
       try{
         var fileName = entry.fileName;
-        var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-        var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
+        if(dropDownTdfFileNames.includes(fileName)){
+          var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+          var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
 
-        var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-        var containsClozes = (_.filter(stimulusObject.stimuli.setspec.clusters[0].cluster,function(cluster){
-          return !!cluster.displayType && cluster.displayType.length > 0 && cluster.displayType[0].toLowerCase() === "cloze";
-        })).length > 0;
+          var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
+          var containsClozes = (_.filter(stimulusObject.stimuli.setspec.clusters[0].cluster,function(cluster){
+            return !!cluster.displayType && cluster.displayType.length > 0 && cluster.displayType[0].toLowerCase() === "cloze";
+          })).length > 0;
 
-        if(containsClozes){
-          allTdfs.push({'fileName':fileName,'displayName':displayName});
-          tdfFileNameToTdfFileMap[fileName] = entry;
-          tdfFileNameToStimfileMap[fileName] = stimulusObject;
+          if(containsClozes){
+            allTdfs.push({'fileName':fileName,'displayName':displayName});
+            tdfFileNameToTdfFileMap[fileName] = entry;
+            tdfFileNameToStimfileMap[fileName] = stimulusObject;
+          }
         }
       }catch(err){
         console.log("error with setting all tdfs: " + JSON.stringify(err));
