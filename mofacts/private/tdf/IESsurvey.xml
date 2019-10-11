@@ -13,7 +13,8 @@
         <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
     </setspec>
     <unit>
-        <unitinstructions>Survey Instructions</unitinstructions>
+        <unitinstructions>This is the survey to get the 10$ gift certificate. Be sure you have logged in with the special ID
+        your professor gave you. These random ID allow us to match data to grades without knowing who you are.</unitinstructions>
         <unitname>Survey for A&amp;P Students</unitname>
           <buttonorder>fixed</buttonorder>
         <assessmentsession>
@@ -41,24 +42,50 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
             <reviewstudy>0</reviewstudy>
             <correctprompt>0</correctprompt>
             <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
+            <correctscore>0</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
-    <unit>      <unitinstructions>This part of the survey just asks you to say True whenever the author is a real author, and False when it is not an author. There will be 130 names, but each only takes a second or 2 to respond.</unitinstructions>
-          <unitname>Survey for A&amp;P Students</unitname>
-        <unitinstructions>Instructions: Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.</unitinstructions>
-        <unitname>Survey for A&amp;P Students</unitname>
+    <unit>
+        <unitinstructions>The following survey tests your recall of authors. Please pick TRUE if you have heard of this author. Some of the names are made up, some are real authors. </unitinstructions>
+        <unitname>Author Recognition Survey for A&amp;P Students</unitname>
+          <buttonorder>fixed</buttonorder>
+          <wrongButtonOptions>True, False</wrongButtonOptions>
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
                 <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>4</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
+                <templatesrepeated>130</templatesrepeated>
+                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+                  0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+                  0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+        0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+        0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>
             </conditiontemplatesbygroup>
-            <initialpositions> A_1 A_2 A_3 A_4 </initialpositions>
+            <initialpositions> A_1	A_2	A_3	A_4	A_5	A_6	A_7	A_8	A_9	A_10
+              A_11	A_12	A_13	A_14	A_15	A_16	A_17	A_18	A_19	A_20
+              A_21	A_22	A_23	A_24	A_25	A_26	A_27	A_28	A_29	A_30
+              A_31	A_32	A_33	A_34	A_35	A_36	A_37	A_38	A_39	A_40
+              A_41	A_42	A_43	A_44	A_45	A_46	A_47	A_48	A_49	A_50
+              A_51	A_52	A_53	A_54	A_55	A_56	A_57	A_58	A_59	A_60
+              A_61	A_62	A_63	A_64	A_65	A_66	A_67	A_68	A_69	A_70
+              A_71	A_72	A_73	A_74	A_75	A_76	A_77	A_78	A_79	A_80
+              A_81	A_82	A_83	A_84	A_85	A_86	A_87	A_88	A_89	A_90
+              A_91	A_92	A_93	A_94	A_95	A_96	A_97	A_98	A_99	A_100
+              A_101	A_102	A_103	A_104	A_105	A_106	A_107	A_108	A_109	A_110
+              A_111	A_112	A_113	A_114	A_115	A_116	A_117	A_118	A_119	A_120
+              A_121	A_122	A_123	A_124	A_125	A_126	A_127	A_128	A_129	A_130
+            </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>64-67</clusterlist>
+            <clusterlist>30-159</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
@@ -69,7 +96,7 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
             <reviewstudy>0</reviewstudy>
             <correctprompt>0</correctprompt>
             <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
+            <correctscore>0</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
     </unit>
