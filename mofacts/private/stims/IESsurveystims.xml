@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <setspec>
   <clusters>
-    <cluster>
-      <display>Race?</display>
-      <response>Caucasian</response>
-      <falseResponse>African American</falseResponse>
-      <falseResponse>Asian</falseResponse>
-      <falseResponse>Pacific Islander</falseResponse>
-      <falseResponse>Other</falseResponse>
-    </cluster>
+
     <cluster>
       <display>Gender?</display>
       <response>Male</response>
@@ -18,12 +11,22 @@
     </cluster>
     <cluster>
       <display>Age?</display>
-      <response>18-25</response>
-      <falseResponse>26-34</falseResponse>
-      <falseResponse>35-54</falseResponse>
-      <falseResponse>55-64</falseResponse>
-      <falseResponse>65 and over</falseResponse>
-    </cluster>
+      <response>18-20</response>
+      <falseResponse>21-25</falseResponse>
+      <falseResponse>26-40</falseResponse>
+      <falseResponse>41-60</falseResponse>
+      <falseResponse>61 and over</falseResponse>
+
+    </cluster>  <cluster>
+        <display>Please pick your racial/ethnic category?</display>
+        <response>American Indian or Alaska Native</response>
+        <falseResponse>Asian</falseResponse>
+        <falseResponse>Black or African American</falseResponse>
+        <falseResponse>Hispanic or Latino</falseResponse>
+        <falseResponse>Native Hawaiian or Other Pacific Islander</falseResponse>
+        <falseResponse>White</falseResponse>
+        <falseResponse>Other</falseResponse>
+      </cluster>
     <cluster>
       <display>Are you a 1st generation college student?</display>
       <response>Yes</response>
@@ -31,7 +34,8 @@
     </cluster>
     <cluster>
       <display>How many years have you been speaking English?</display>
-      <response>0-2 years</response>
+      <response>Native speaker</response>
+      <falseResponse>0-2 years</falseResponse>
       <falseResponse>3-7 years</falseResponse>
       <falseResponse>8-15 years</falseResponse>
       <falseResponse>more than 15 years</falseResponse>
@@ -45,8 +49,8 @@
     </cluster>
     <cluster>
       <display>What year are you in your program?</display>
-      <response>Freshman</response>
-      <falseResponse>Sophomore</falseResponse>
+      <response>1st year</response>
+      <falseResponse>2nd year</falseResponse>
     </cluster>
     <cluster>
       <display>What did you score on your ACT?</display>
