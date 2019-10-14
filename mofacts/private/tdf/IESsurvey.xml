@@ -11,10 +11,11 @@
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
         <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+        <shuffleclusters>30-159</shuffleclusters>
     </setspec>
     <unit>
-        <unitinstructions>This is the survey to get the 10$ gift certificate. Be sure you have logged in with the special ID
-        your professor gave you. These random ID allow us to match data to grades without knowing who you are.</unitinstructions>
+        <unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 35 questions and second with 65 questions. Be sure you have logged in with the special ID
+        your instructor gave you. These random ID allow us to match data to grades without knowing who you are.]]></unitinstructions>
         <unitname>Survey for A&amp;P Students</unitname>
           <buttonorder>fixed</buttonorder>
         <assessmentsession>
@@ -47,7 +48,7 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
         </deliveryparams>
     </unit>
     <unit>
-        <unitinstructions>The following survey tests your recall of authors. Please pick TRUE if you have heard of this author. Some of the names are made up, some are real authors. </unitinstructions>
+        <unitinstructions><![CDATA[The following survey tests your recall of authors. Please pick TRUE if you are sure it is a real author and pick FALSE if you are not sure or know it is fake.]]></unitinstructions>
         <unitname>Author Recognition Survey for A&amp;P Students</unitname>
           <buttonorder>fixed</buttonorder>
           <wrongButtonOptions>True, False</wrongButtonOptions>
@@ -55,20 +56,14 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
                 <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>130</templatesrepeated>
+                <templatesrepeated>65</templatesrepeated>
                 <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
                   0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
                   0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
               0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
               0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
             0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-          0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-        0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-        0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>
+            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
             </conditiontemplatesbygroup>
             <initialpositions> A_1	A_2	A_3	A_4	A_5	A_6	A_7	A_8	A_9	A_10
               A_11	A_12	A_13	A_14	A_15	A_16	A_17	A_18	A_19	A_20
@@ -76,16 +71,10 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
               A_31	A_32	A_33	A_34	A_35	A_36	A_37	A_38	A_39	A_40
               A_41	A_42	A_43	A_44	A_45	A_46	A_47	A_48	A_49	A_50
               A_51	A_52	A_53	A_54	A_55	A_56	A_57	A_58	A_59	A_60
-              A_61	A_62	A_63	A_64	A_65	A_66	A_67	A_68	A_69	A_70
-              A_71	A_72	A_73	A_74	A_75	A_76	A_77	A_78	A_79	A_80
-              A_81	A_82	A_83	A_84	A_85	A_86	A_87	A_88	A_89	A_90
-              A_91	A_92	A_93	A_94	A_95	A_96	A_97	A_98	A_99	A_100
-              A_101	A_102	A_103	A_104	A_105	A_106	A_107	A_108	A_109	A_110
-              A_111	A_112	A_113	A_114	A_115	A_116	A_117	A_118	A_119	A_120
-              A_121	A_122	A_123	A_124	A_125	A_126	A_127	A_128	A_129	A_130
+              A_61	A_62	A_63	A_64	A_65
             </initialpositions>
             <randomizegroups>false</randomizegroups>
-            <clusterlist>30-159</clusterlist>
+            <clusterlist>30-94</clusterlist>
             <assignrandomclusters>false</assignrandomclusters>
             <permutefinalresult>0-0</permutefinalresult>
         </assessmentsession>
@@ -99,5 +88,9 @@ A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
             <correctscore>0</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions><![CDATA[Thanks for the information, we hope it will help us to understand the results of our research. Your instructor will tell you when the gift cards are available, (after chapter 12 exam is completed).]]></unitinstructions>
     </unit>
 </tutor>
