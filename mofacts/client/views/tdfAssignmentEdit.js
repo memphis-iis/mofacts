@@ -14,7 +14,7 @@ Meteor.subscribe('tdfs',function () {
   var allTdfObjects = getAllTdfs();
   for(var i in allTdfObjects){
     var tdf = allTdfObjects[i];
-    allTdfs.push(tdf.fileName);
+    allTdfs.push({fileName:tdf.fileName,displayName:tdf.displayName});
   }
   Session.set("allTdfs",allTdfs);
 });
@@ -49,15 +49,15 @@ Template.tdfAssignmentEdit.events({
 
   "click #selectTdf": function(event, template){
     console.log("select tdf: ");
-    var selectedTdfs = getSelectedValues("notSelectedTdfs");
+    var selectedTdfs = getselectedItems("notSelectedTdfs");
     curClass.tdfs = curClass.tdfs.concat(selectedTdfs);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #unselectTdf": function(event, template){
     console.log("unselect tdf: ");
-    var unselectedTdfs = getSelectedValues("selectedTdfs");
-    curClass.tdfs = curClass.tdfs.filter(x => unselectedTdfs.indexOf(x) == -1);
+    var unselectedTdfs = getselectedItems("selectedTdfs");
+    curClass.tdfs = curClass.tdfs.filter(x => unselectedTdfs.findIndex(y => y.fileName == x.fileName) == -1);
     updateTdfsSelectedAndNotSelected();
   },
 
@@ -81,19 +81,21 @@ Template.tdfAssignmentEdit.events({
   }
 });
 
-function getSelectedValues(itemSelector){
-  var selectedValues = [];
+function getselectedItems(itemSelector){
+  var selectedItems = [];
   var selectedOptions = $("select#" + itemSelector + " option:selected");
   selectedOptions.each(function(index){
     var selectedValue = selectedOptions[index].value;
-    console.log(selectedValue);
-    selectedValues.push(selectedValue);
+    var selectedDisplay = selectedOptions[index].text;
+    var selectedItem = {fileName:selectedValue,displayName:selectedDisplay};
+    console.log(selectedItem);
+    selectedItems.push(selectedItem);
   });
 
-  return selectedValues;
+  return selectedItems;
 }
 
 function updateTdfsSelectedAndNotSelected(){
   Session.set("tdfsSelected",curClass.tdfs);
-  Session.set("tdfsNotSelected",Session.get("allTdfs").filter(x => curClass.tdfs.indexOf(x) == -1));
+  Session.set("tdfsNotSelected",Session.get("allTdfs").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
 }

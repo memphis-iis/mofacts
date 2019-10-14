@@ -28,7 +28,7 @@
         <h3 class="text-center">Available Chapters</h3>
         <select size="20" class="center" id="notSelectedTdfs" multiple>
           {{#each tdfsNotSelected}}
-            <option value="{{this}}">{{this}}</option>
+            <option value="{{this.fileName}}">{{this.displayName}}</option>
           {{/each}}
         </select>
       </div>
@@ -43,7 +43,7 @@
         <h3 class="text-center">Selected Chapters</h3>
         <select size="20" class="center" id="selectedTdfs" multiple>
             {{#each tdfsSelected}}
-              <option value="{{this}}">{{this}}</option>
+              <option value="{{this.fileName}}">{{this.displayName}}</option>
             {{/each}}
         </select>
       </div>

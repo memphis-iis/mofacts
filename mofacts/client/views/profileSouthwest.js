@@ -158,7 +158,7 @@ Template.profileSouthwest.rendered = function () {
           }
 
           //Make sure we only present the tdfs assigned to the classes the user is in
-          if(assignedTdfs.indexOf(tdfObject.fileName) == -1){
+          if(assignedTdfs.findIndex(x => x.fileName == tdfObject.fileName) == -1){
             console.log("tdf filename not in assignedTdfs: " + tdfObject.fileName);
             return;
           }
