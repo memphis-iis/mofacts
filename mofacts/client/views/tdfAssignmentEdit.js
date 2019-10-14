@@ -15,7 +15,9 @@ Template.tdfAssignmentEdit.onRendered(function(){
     var allTdfObjects = getAllTdfs();
     for(var i in allTdfObjects){
       var tdf = allTdfObjects[i];
-      allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
+      if(tdf.owner == Meteor.userId()){
+        allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
+      }
     }
     Session.set("allTdfs",allTdfs);
   });

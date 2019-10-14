@@ -152,6 +152,7 @@ generateAndSubmitTDFAndStimFiles = function(){
     }else{
       console.log("Inserting stim/tdf pair result: " + res);
       saveEditHistory(originalClozes,clozes);
+      //Update session variable used in tdfAssignmentEdit so that we can assign a tdf immediately after generation without reloading the page
       Session.set("allTdfs",Session.get("allTdfs").concat({fileName:tdfFileName,displayName:displayName}));
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
