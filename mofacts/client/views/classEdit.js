@@ -32,9 +32,7 @@ genID = function(length){
 ////////////////////////////////////////////////////////////////////////////
 
 Template.classEdit.onRendered(function(){
-  Meteor.subscribe("classes",function(){
-    Session.set("classes",getAllClassesForCurrentInstructor());
-  });
+  Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
 });
 
 Template.classEdit.helpers({

@@ -135,7 +135,8 @@ Meteor.publish(null, function () {
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find({})
+        UserMetrics.find({}),
+        Classes.find({})
     ];
 
     return defaultData;
@@ -149,9 +150,9 @@ Meteor.publish('tdfs', function(){
   return Tdfs.find({});
 })
 
-Meteor.publish('classes',function(){
-  return Classes.find({instructor:this.userId});
-});
+// Meteor.publish('classes',function(){
+//   return Classes.find({instructor:this.userId});
+// });
 
 Meteor.publish('allUsers', function () {
     var opts = {
@@ -387,29 +388,21 @@ Meteor.startup(function () {
           Classes.remove({"instructor":this.userId,"name":myClass.name});
         },
 
-        addUserToTeachersClass: function(user,teacherUsername){
+        addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
           user = user.toLowerCase();
           var teacherID = usernameToIDMap[teacherUsername];
           console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
-          var teacherClasses = Classes.find({"instructor":teacherID}).fetch();
-          if(teacherClasses.length == 0){
-            teacherClasses.push({
-              name:teacherUsername + "_class",
-              instructor: teacherID,
-              students: []
-            })
-          }
+          var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();
           console.log("teacherClasses: " + JSON.stringify(teacherClasses));
           var studentInAClass = false;
           for(var index in teacherClasses){
             var curClass = teacherClasses[index];
-            console.log("curClass: " + JSON.stringify(curClass));
             if(curClass.students.findIndex(x => x === user) != -1){
               studentInAClass = true;
               break;
             }
           }
-          if(!studentInAClass){
+          if(!studentInAClass && teacherClasses.length > 0){
             console.log("student not in a class");
             var classToUpdate = teacherClasses[0];
             classToUpdate.students.push(user);
@@ -655,9 +648,13 @@ Meteor.startup(function () {
             var row = rows[index];
             var username = row[0];
             var password = row[1];
+            serverConsole("username: " + username + ", password: " + password);
             Meteor.call('signUpUser',username,password,true,function(error,result){
               if(!!error){
                 allErrors.push({username:error});
+              }
+              if(!!result){
+                allErrors.push({username:result});
               }
             });
           }

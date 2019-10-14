@@ -23,14 +23,14 @@ search = function(key, prop, array){
   }
 }
 
-getAllClassesForCurrentInstructor = function(){
+getAllClassesForCurrentInstructor = function(instructorID){
   var curClasses = [];
   if (Roles.userIsInRole(Meteor.user(), ["admin"])){
     Classes.find({}).forEach(function(entry){
       curClasses.push(entry);
     });
   }else{
-    Classes.find({instructor:Meteor.userId()}).forEach(function(entry){
+    Classes.find({instructor:instructorID}).forEach(function(entry){
       curClasses.push(entry);
     });
   }

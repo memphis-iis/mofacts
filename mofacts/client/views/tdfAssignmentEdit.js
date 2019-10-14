@@ -3,12 +3,10 @@ Session.set("allTdfs",[]);
 Session.set("tdfsSelected",[]);
 Session.set("tdfsNotSelected",[]);
 
-curClass = {};
+curClass = {tdfs:[]};
 
 Template.tdfAssignmentEdit.onRendered(function(){
-  Meteor.subscribe("classes",function(){
-    Session.set("classes",getAllClassesForCurrentInstructor());
-  });
+  Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
 
   Meteor.subscribe('tdfs',function () {
     var allTdfs = [];

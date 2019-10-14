@@ -90,7 +90,7 @@ Template.instructorReporting.onRendered(function(){
   });
 
   Meteor.subscribe('classes',function(){
-    var classes = getAllClassesForCurrentInstructor();
+    var classes = getAllClassesForCurrentInstructor(Meteor.userId());
     Session.set("classes",classes);
   });
 })
