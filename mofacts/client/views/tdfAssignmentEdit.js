@@ -5,18 +5,24 @@ Session.set("tdfsNotSelected",[]);
 
 curClass = {};
 
-Meteor.subscribe("classes",function(){
-  Session.set("classes",getAllClassesForCurrentInstructor());
-});
+Template.tdfAssignmentEdit.onRendered(function(){
+  Meteor.subscribe("classes",function(){
+    Session.set("classes",getAllClassesForCurrentInstructor());
+  });
 
-Meteor.subscribe('tdfs',function () {
-  var allTdfs = [];
-  var allTdfObjects = getAllTdfs();
-  for(var i in allTdfObjects){
-    var tdf = allTdfObjects[i];
-    allTdfs.push({fileName:tdf.fileName,displayName:tdf.displayName});
-  }
-  Session.set("allTdfs",allTdfs);
+  Meteor.subscribe('tdfs',function () {
+    var allTdfs = [];
+    var allTdfObjects = getAllTdfs();
+    for(var i in allTdfObjects){
+      var tdf = allTdfObjects[i];
+      allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
+    }
+    Session.set("allTdfs",allTdfs);
+  });
+
+  Tracker.autorun(function(){
+      updateTdfsSelectedAndNotSelected();
+  });
 });
 
 ////////////////////////////////////////////////////////////////////////////
@@ -96,6 +102,7 @@ function getselectedItems(itemSelector){
 }
 
 function updateTdfsSelectedAndNotSelected(){
+  console.log("updateTdfsSelectedAndNotSelected");
   Session.set("tdfsSelected",curClass.tdfs);
   Session.set("tdfsNotSelected",Session.get("allTdfs").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
 }

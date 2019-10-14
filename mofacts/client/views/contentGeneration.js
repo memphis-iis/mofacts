@@ -49,7 +49,7 @@ setAllTdfs = function(){
       }
     });
 
-    Session.set('allTdfs',allTdfs);
+    Session.set('contentGenerationAllTdfs',allTdfs);
   });
 }
 
@@ -152,6 +152,7 @@ generateAndSubmitTDFAndStimFiles = function(){
     }else{
       console.log("Inserting stim/tdf pair result: " + res);
       saveEditHistory(originalClozes,clozes);
+      Session.set("allTdfs",Session.get("allTdfs").concat({fileName:tdfFileName,displayName:displayName}));
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
       $("#save-modal").modal('hide');
@@ -373,7 +374,7 @@ Template.contentGeneration.helpers({
   },
 
   tdfs: function(){
-    return Session.get("allTdfs");
+    return Session.get("contentGenerationAllTdfs");
   }
 });
 

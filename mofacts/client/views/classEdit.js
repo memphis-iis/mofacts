@@ -27,13 +27,15 @@ genID = function(length){
   return Math.random().toString(36).substring(2, (2+length));
 }
 
-Meteor.subscribe("classes",function(){
-  Session.set("classes",getAllClassesForCurrentInstructor());
-});
-
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers
 ////////////////////////////////////////////////////////////////////////////
+
+Template.classEdit.onRendered(function(){
+  Meteor.subscribe("classes",function(){
+    Session.set("classes",getAllClassesForCurrentInstructor());
+  });
+});
 
 Template.classEdit.helpers({
   classes: function(){
