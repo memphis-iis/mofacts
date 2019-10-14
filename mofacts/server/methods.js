@@ -404,11 +404,13 @@ Meteor.startup(function () {
           for(var index in teacherClasses){
             var curClass = teacherClasses[index];
             console.log("curClass: " + JSON.stringify(curClass));
-            if(user in curClass.students){
+            if(curClass.students.findIndex(x => x === user) != -1){
               studentInAClass = true;
+              break;
             }
           }
           if(!studentInAClass){
+            console.log("student not in a class");
             var classToUpdate = teacherClasses[0];
             classToUpdate.students.push(user);
             Classes.update({"_id":classToUpdate._id},classToUpdate,{upsert: true});
