@@ -10,6 +10,7 @@
         <simCorrectProb>0.85</simCorrectProb>
         <shuffleclusters>0-70</shuffleclusters>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <textToSpeechAPIKey></textToSpeechAPIKey>
     </setspec>
     <unit>
         <unitname>Show the questions</unitname>

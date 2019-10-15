@@ -1597,6 +1597,9 @@ speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPrompt
       var ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
       var audioPromptSpeakingRate = Session.get("audioPromptSpeakingRate");
       makeGoogleTTSApiCall(msg,ttsAPIKey,audioPromptSpeakingRate,function(audioObj){
+        if(!!window.currentAudioObj){
+          window.currentAudioObj.pause();
+        }
         window.currentAudioObj = audioObj;
         console.log("inside callback, playing audioObj:");
         audioObj.play();

@@ -13,10 +13,6 @@ Template.profile.helpers({
 
     simulationChecked: function() {
         return Session.get("runSimulation");
-    },
-
-    speechAPIKeyIsSetup: function(){
-      return Session.get("speechAPIKeyIsSetup");
     }
 });
 
@@ -51,158 +47,38 @@ Template.profile.events({
         );
     },
 
-    'click .audioPromptRadio': function(event){
-      console.log("audio prompt mode: " + event.currentTarget.id);
-      var audioPromptMode = "silent";
-
-      switch(event.currentTarget.id){
-        case "audioPromptOff":
-          audioPromptMode = "silent";
-          break;
-        case "audioPromptFeedbackOnly":
-          audioPromptMode = "feedback";
-          break;
-        case "audioPromptAll":
-          audioPromptMode = "all";
-          break;
-      }
-
-      Session.set("audioPromptMode",audioPromptMode);
-      Session.set("audioPromptFeedbackView",audioPromptMode);
-
-      showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
-    },
-
     'click #simulation': function(event, template) {
         var checked = template.$("#simulation").prop('checked');
         Session.set("runSimulation", checked);
         console.log("runSimulation", Session.get("runSimulation"));
-    },
-
-    'click #setupAPIKey' : function(e){
-      e.preventDefault();
-      $('#speechAPIModal').modal('show');//{backdrop: "static"}
-      Meteor.call('getUserSpeechAPIKey', function(error,key){
-        $('#speechAPIKey').val(key);
-      });
-    },
-
-    'click #speechAPISubmit' : function(e){
-      var key = $('#speechAPIKey').val();
-      Meteor.call("saveUserSpeechAPIKey", key, function(error, serverReturn) {
-          //Make sure to update our reactive session variable so the api key is
-          //setup indicator updates
-          checkAndSetSpeechAPIKeyIsSetup();
-
-          $('#speechAPIModal').modal('hide');
-
-          if (!!error) {
-              console.log("Error saving speech api key", error);
-              alert("Your changes were not saved! " + error);
-          }
-          else {
-              console.log("Profile saved:", serverReturn);
-              //Clear any controls that shouldn't be kept around
-              $(".clearOnSave").val("");
-              alert("Your profile changes have been saved");
-          }
-      });
-    },
-
-    'click #speechAPIDelete' : function(e){
-      Meteor.call("deleteUserSpeechAPIKey",function(error){
-        //Make sure to update our reactive session variable so the api key is
-        //setup indicator updates
-        checkAndSetSpeechAPIKeyIsSetup();
-        $('#speechAPIModal').modal('hide');
-        if(!!error){
-          console.log("Error deleting speech api key", error);
-          alert("Your changes were not saved! " + error);
-        }else{
-          console.log("User speech api key deleted");
-          alert("Your profile changes have been saved");
-        }
-      })
     }
 });
 
+var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
+  console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
+  var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
+  if(audioInputEnabled){
+    container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
+  }
+  container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
+  if(enableAudioPromptAndFeedback){
+    container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>')
+  }
+  container = $(container).prepend(btnObj);
+  $("#testButtonContainer").append(container);
+};
+
+//We'll use this in card.js if audio input is enabled and user has provided a
+//speech API key
+speechAPIKey = null;
+
 Template.profile.rendered = function () {
-    $('#speechAPIModal').on('shown.bs.modal', function () {
-      $('#speechAPIKey').focus();
-    })
-
-    checkAndSetSpeechAPIKeyIsSetup();
-
-    //Set up input sensitivity range to display/hide when audio input is enabled/disabled
-    var audioToggle = document.getElementById('audioToggle');
-
-    var showHideAudioEnabledGroup = function()
-    {
-      if(audioToggle.checked){
-          $('.audioEnabledGroup').removeClass('invisible');
-          $('.audioEnabledGroup').addClass('flow');
-      }else{
-        $('.audioEnabledGroup').addClass('invisible');
-        $('.audioEnabledGroup').removeClass('flow');
-      }
-    };
-    $('#audioToggle').change(showHideAudioEnabledGroup);
-
-    $('#audioInputSensitivity').change(function() {
-        $('#audioInputSensitivityLabel').text(document.getElementById("audioInputSensitivity").value);
-    });
-
-    $('#audioPromptSpeakingRate').change(function() {
-        $('#audioPromptSpeakingRateLabel').text("Audio prompt speaking rate: " + document.getElementById("audioPromptSpeakingRate").value);
-    });
-
-    //Restore toggle values from prior page loads
-    audioToggle.checked = Session.get("audioEnabledView");
-    var audioPromptMode = Session.get("audioPromptFeedbackView");
-    switch(audioPromptMode){
-      case "silent":
-        $("#audioPromptOff")[0].checked = true;
-        break;
-      case "feedback":
-        $("#audioPromptFeedbackOnly")[0].checked = true;
-        break;
-      case "all":
-        $("#audioPromptAll")[0].checked = true;
-        break;
-    }
-    showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
-    showHideAudioEnabledGroup();
-
-    //Restore range/label values from prior page loads
-    var audioInputSensitivityView = Session.get("audioInputSensitivityView");
-    if(!!audioInputSensitivityView){
-      document.getElementById("audioInputSensitivity").value = audioInputSensitivityView;
-    }
-
-    var audioPromptSpeakingRateView = Session.get("audioPromptSpeakingRateView");
-    if(!!audioPromptSpeakingRateView){
-      document.getElementById("audioPromptSpeakingRate").value = audioPromptSpeakingRateView;
-      document.getElementById("audioPromptSpeakingRateLabel").innerHTML = audioPromptSpeakingRateView;
-    }
+    Session.set("showSpeechAPISetup",true);
 
     //this is called whenever the template is rendered.
     var allTdfs = Tdfs.find({});
 
     $("#expDataDownloadContainer").html("");
-
-    var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
-      console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
-      var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
-      if(audioInputEnabled){
-        container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
-      }
-      container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
-      if(enableAudioPromptAndFeedback){
-        container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>')
-      }
-      container = $(container).prepend(btnObj);
-      $("#testButtonContainer").append(container);
-    };
 
     //In experiment mode, they may be forced to a single tdf
     var experimentTarget = null;
@@ -336,34 +212,6 @@ Template.profile.rendered = function () {
     }
 };
 
-showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode = function(audioPromptMode){
-  var showHideAudioPromptFeedbackGroup = function(show)
-  {
-    if(show){
-        $('.audioPromptFeedbackGroup').removeClass('invisible');
-        $('.audioPromptFeedbackGroup').addClass('flow');
-    }else{
-      $('.audioPromptFeedbackGroup').addClass('invisible');
-      $('.audioPromptFeedbackGroup').removeClass('flow');
-    }
-  };
-
-  switch(audioPromptMode){
-    case "silent":
-      showHideAudioPromptFeedbackGroup(false);
-      break;
-    case "feedback":
-      showHideAudioPromptFeedbackGroup(true);
-      break;
-    case "all":
-      showHideAudioPromptFeedbackGroup(true);
-      break;
-    default:
-      showHideAudioPromptFeedbackGroup(false);
-      break;
-  }
-}
-
 //Actual logic for selecting and starting a TDF
 function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
@@ -382,6 +230,21 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     Session.set("currentStimName", stimulusfile);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
+
+    //Record state to restore when we return to this page
+    var audioPromptMode = getAudioPromptModeFromPage();
+    Session.set("audioPromptMode",audioPromptMode);
+    Session.set("audioPromptFeedbackView",audioPromptMode);
+    var audioInputEnabled = getAudioInputFromPage();
+    Session.set("audioEnabledView",audioInputEnabled);
+    var audioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
+    Session.set("audioPromptSpeakingRateView",audioPromptSpeakingRate);
+    var audioInputSensitivity = document.getElementById("audioInputSensitivity").value;
+    Session.set("audioInputSensitivityView",audioInputSensitivity);
+
+    //Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
+    Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+    Session.set("audioInputSensitivity",audioInputSensitivity);
 
     //Get some basic info about the current user's environment
     var userAgent = "[Could not read user agent string]";
@@ -411,14 +274,9 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
-    if(Session.get("enableAudioPromptAndFeedback")){
-         var userAudioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
-         Session.set("audioPromptSpeakingRate",userAudioPromptSpeakingRate);
-    }
-
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
-   var userAudioToggled = document.getElementById('audioToggle').checked;
+   var userAudioToggled = audioInputEnabled;
    var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled;
    var audioEnabled = tdfAudioEnabled && userAudioToggled;
    Session.set("audioEnabled", audioEnabled);
@@ -427,10 +285,6 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
 
    if(Session.get("audioEnabled"))
    {
-     var userAudioInputSensitivity = document.getElementById("audioInputSensitivity").value;
-     var audioInputSensitivity = userAudioInputSensitivity;
-     Session.set("audioInputSensitivity",audioInputSensitivity);
-
      //Check if the tdf or user has a speech api key defined, if not show the modal form
      //for them to input one.  If so, actually continue initializing web audio
      //and going to the practice set
@@ -450,31 +304,10 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      console.log("audio toggle not checked, navigating to card");
    }
 
-   //Record state to restore when we return to this page
-   Session.set("audioEnabledView",document.getElementById('audioToggle').checked);
-   Session.set("audioPromptSpeakingRateView",document.getElementById("audioPromptSpeakingRate").value);
-   Session.set("audioInputSensitivityView",document.getElementById("audioInputSensitivity").value);
-   Session.set("audioPromptFeedbackView",audioPromptFeedbackView);
-   Session.set("audioPromptMode",audioPromptFeedbackView);
-
    if(continueToCard){
      //Go directly to the card session - which will decide whether or
      //not to show instruction
      Session.set("needResume", true);
      Router.go("/card");
    }
-}
-
-//We'll use this in card.js if audio input is enabled and user has provided a
-//speech API key
-speechAPIKey = null;
-
-checkAndSetSpeechAPIKeyIsSetup = function(){
-  Meteor.call('isUserSpeechAPIKeySetup', function(err,data){
-    if(err){
-      console.log("Error getting whether speech api key is setup");
-    }else {
-      Session.set('speechAPIKeyIsSetup',data);
-    }
-  })
 }
