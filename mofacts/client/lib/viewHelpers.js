@@ -8,10 +8,12 @@ Meteor.call('usernameToIDMap',function(err,res){
     usernameToIDMap = res;
   }
 });
+
 translateUsernameToID = function(username){
   if(username.indexOf("@") == -1){
     username = username.toUpperCase();
   }
+
   return usernameToIDMap[username];
 }
 
@@ -58,7 +60,7 @@ getAllNamesOfTdfsAttempted = function(studentID){
         var curTdfName = possibleTdf;
         var replacement = ".";
         //Replace only last underscore with "." to reconstruct actual tdf name
-        curTdfName = curTdfName.replace(/_([^_]*)$/,replacement+'$1');
+        curTdfName = curTdfName.replace("_xml",".xml");
         allNamesOfTdfsAttempted.push(curTdfName);
       }
     }

@@ -128,7 +128,7 @@ Meteor.publish(null, function () {
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({_id: userId}),
+        UserTimesLog.find({}),
         Meteor.users.find({_id: userId}),
         UserProfileData.find({_id: userId}, {fields: {
             have_aws_id: 1,

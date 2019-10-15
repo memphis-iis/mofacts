@@ -2029,6 +2029,35 @@ function allowUserInput(textFocus) {
 ////////////////////////////////////////////////////////////////////////////
 // BEGIN Resume Logic
 
+getUserTimesLog = function(expKey,userID) {
+    var userLog = UserTimesLog.findOne({ _id: userID});
+    var expKey = expKey || userTimesExpKey(true);
+
+    var entries = [];
+    if (userLog && userLog[expKey] && userLog[expKey].length) {
+        entries = userLog[expKey];
+    }
+
+    var previousRecords = {};
+    var records = [];
+
+    for(var i = 0; i < entries.length; ++i) {
+        var rec = entries[i];
+
+        //Suppress duplicates like we do on the server side for file export
+        var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
+        if (uniqifier in previousRecords) {
+            continue; //dup detected
+        }
+        previousRecords[uniqifier] = true;
+
+        //We don't do much other than save the record
+        records.push(rec);
+    }
+
+    return records;
+}
+
 //Helper for getting the relevant user times log
 getCurrentUserTimesLog = function(expKey) {
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
@@ -2288,7 +2317,7 @@ function resumeFromUserTimesLog() {
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
 //set up the TDF/Stim session variables
-processUserTimesLog = function(simulateCard=false,expKey,myengine) {
+processUserTimesLog = function(simulateCard=false,expKey,myengine,studentID=null) {
     engine = engine || myengine;
 
     //Get TDF info
@@ -2347,7 +2376,10 @@ processUserTimesLog = function(simulateCard=false,expKey,myengine) {
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
-    _.each(getCurrentUserTimesLog(expKey), function(entry, index, currentList) {
+    getRelevantUserTimesLog = studentID ? getUserTimesLog : getCurrentUserTimesLog;
+
+    console.log("studentID: " + studentID + ", expKey: " + expKey);
+    _.each(getRelevantUserTimesLog(expKey,studentID), function(entry, index, currentList) {
         // IMPORTANT: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing

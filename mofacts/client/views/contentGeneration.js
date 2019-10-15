@@ -136,7 +136,7 @@ generateAndSubmitTDFAndStimFiles = function(){
   var clozes = Session.get('clozeSentencePairs').clozes;
   console.log('Generating TDF with clozes: ' + JSON.stringify(clozes));
   var displayName = $("#tdfDisplayNameTextBox").val();
-  var curUserName = Meteor.user().username.split('@')[0];
+  var curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g,"_");
   var curDateTime = new Date().toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
   var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_TDF.xml";
   var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_Stim.xml";

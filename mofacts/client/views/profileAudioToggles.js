@@ -48,6 +48,21 @@ setAudioInputOnPage = function(audioInputEnabled){
   }
 }
 
+showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode = function(audioPromptMode){
+  switch(audioPromptMode){
+    case "feedback":
+    case "all":
+      $('.audioPromptFeedbackGroup').addClass('flow');
+      $('.audioPromptFeedbackGroup').removeClass('invisible');
+      break;
+    case "silent":
+    default:
+      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').removeClass('flow');
+      break;
+  }
+}
+
 Template.profileAudioToggles.rendered = function(){
     $('#speechAPIModal').on('shown.bs.modal', function () {
       $('#speechAPIKey').focus();
