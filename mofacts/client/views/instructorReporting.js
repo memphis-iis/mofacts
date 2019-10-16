@@ -2,7 +2,7 @@ Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClassStudentTotals",null);
 
-curTdf = "";
+curTdf = "invalid";
 curClassName = "";
 
 navigateToStudentReporting = function(studentUsername){
@@ -23,8 +23,7 @@ getCurClassStudents = function(curClassName,currentTdf){
   var students = [];
   if(!!curClass){
     curClass.students.forEach(function(studentUsername){
-      var studentID = translateUsernameToID(studentUsername);
-      var studentPerformance = getStudentPerformance(studentUsername,studentID,currentTdf);
+      var studentPerformance = getStudentPerformance(studentUsername,currentTdf);
       studentTotals.count += studentPerformance.count;
       studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
       studentTotals.numCorrect += studentPerformance.numCorrect;
@@ -85,8 +84,9 @@ Template.instructorReporting.events({
 });
 
 Template.instructorReporting.onRendered(function(){
+  console.log("instructorReporting rendered");
   Meteor.subscribe('tdfs',function () {
-    Session.set("instructorReportingTdfs",getAllTdfs());
+    Session.set("instructorReportingTdfs",Tdfs.find({}).fetch());
   });
 
   Meteor.subscribe('classes',function(){

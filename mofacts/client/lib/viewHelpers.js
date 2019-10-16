@@ -1,22 +1,3 @@
-
-usernameToIDMap = {};
-Meteor.call('usernameToIDMap',function(err,res){
-  console.log("usernameToIDMap loaded");
-  if(!!err){
-    console.log("ERROR getting usernameToIDMap: " + err);
-  }else{
-    usernameToIDMap = res;
-  }
-});
-
-translateUsernameToID = function(username){
-  if(username.indexOf("@") == -1){
-    username = username.toUpperCase();
-  }
-
-  return usernameToIDMap[username];
-}
-
 search = function(key, prop, array){
   for(var i=0;i<array.length;i++){
     if(array[i][prop] === key){
@@ -37,14 +18,6 @@ getAllClassesForCurrentInstructor = function(instructorID){
     });
   }
   return curClasses;
-}
-
-getAllTdfs = function(){
-  myTdfs = [];
-  Tdfs.find({}).forEach(function(entry){
-    myTdfs.push(entry);
-  });
-  return myTdfs;
 }
 
 getAllNamesOfTdfsAttempted = function(studentID){
@@ -69,11 +42,16 @@ getAllNamesOfTdfsAttempted = function(studentID){
   return allNamesOfTdfsAttempted;
 }
 
-getStudentPerformance = function(studentUsername,studentID,curTdf){
+getStudentPerformance = function(studentUsername,curTdf){
   var tdfQueryName = curTdf.replace(".","_");
   var count = 0;
   var numCorrect = 0;
   var totalTime = 0;
+  var student = Meteor.users.findOne({"username":studentUsername});
+  var studentID = null;
+  if(!!student){
+    studentID = student._id;
+  }
   UserMetrics.find({_id:studentID}).forEach(function(entry){
     var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
     for(var index in tdfEntries){

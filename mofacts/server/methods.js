@@ -169,7 +169,7 @@ Meteor.publish('allTeachers', function(){
     fields: {username: 1}
   }
 
-  return Meteor.users.find({'roles':'teacher'},opts);
+  return Meteor.users.find({'roles':'teacher',"username":/southwest[.]tn[.]edu/i},opts);
 });
 
 //Config for scheduled jobs - the start command is at the end of
@@ -363,14 +363,6 @@ Meteor.startup(function () {
         insertStimTDFPair:function(newStimJSON,newTDFJSON){
           Stimuli.insert(newStimJSON);
           Tdfs.insert(newTDFJSON);
-        },
-
-        usernameToIDMap:function(){
-          usernameToIDMap = {};
-          Meteor.users.find({}).forEach(function(user){
-            usernameToIDMap[user.username] = user._id;
-          })
-          return usernameToIDMap;
         },
 
         addClass: function(myClass){

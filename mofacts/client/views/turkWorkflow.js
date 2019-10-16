@@ -92,7 +92,7 @@ Template.turkWorkflow.rendered = function () {
         'show': false
     });
 
-    var allTdfs = Tdfs.find({});
+    var allTdfs = Tdfs.find();
     var turkLogCount = 0; //Check all the valid TDF's
 
     var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);

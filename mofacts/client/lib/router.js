@@ -191,6 +191,13 @@ Router.route('/profile', {
     }
 });
 
+Router.route('/userAdmin',{
+  name: "client.userAdmin",
+  action: function(){
+    this.render('userAdmin');
+  }
+});
+
 Router.route('/profileSouthwest',{
   name: "client.profileSouthwest",
   action: function(){

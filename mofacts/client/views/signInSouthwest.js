@@ -90,26 +90,14 @@ setClass = function(curClass){
   $("#loginDiv").prop('hidden','');
 }
 
-Meteor.subscribe('allTeachers',function () {
-  var teachers = Meteor.users.find({}).fetch();
-  var curUserIndex = teachers.findIndex(function(user){return user._id == Meteor.userId();})
-  if(curUserIndex > -1){
-    teachers.splice(curUserIndex,1);
-  }
-  var southwestTeachers = [];
-  for(var i=0;i<teachers.length;i++){
-    var curTeacher = teachers[i];
-    if(curTeacher.username.toLowerCase().indexOf("southwest.tn.edu") != -1){
-      southwestTeachers.push(curTeacher);
-    }
-  }
-
-  console.log(JSON.stringify(southwestTeachers));
-  Session.set("teachers",southwestTeachers);
-});
-
 Template.signInSouthwest.onRendered(function(){
   Session.set("loginMode","southwest");
+
+  Meteor.subscribe('allTeachers',function () {
+    var teachers = Meteor.users.find({}).fetch();
+    console.log("got teachers");
+    Session.set("teachers",teachers);
+  });
 });
 
 Template.signInSouthwest.helpers({

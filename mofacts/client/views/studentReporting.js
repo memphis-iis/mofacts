@@ -14,7 +14,8 @@ window.onpopstate = function(event){
   }
 }
 
-getcardProbs = function(studentID){
+getcardProbs = function(){
+  var studentID = Session.get("curStudentID");
   //We've selected the "All" tdf option
   if(Session.get("currentStimName") === null){
     var allTdfProbs = [];
@@ -68,7 +69,8 @@ getcardProbs = function(studentID){
   }
 }
 
-getAvgCorrectnessAcrossKCsLearningCurve = function(studentID){
+getAvgCorrectnessAcrossKCsLearningCurve = function(){
+  var studentID = Session.get("curStudentID");
   var avgCorrectnessAcrossKCsLearningCurve = [];
 
   var countAndNumCorrectPerTrialNum = {};
@@ -176,8 +178,9 @@ Template.studentReporting.helpers({
   }
 });
 
-setTdfFileNamesAndDisplayValues = function(studentID){
-  console.log("setTdfFileNamesAndDisplayValues, studentID: " + studentID);
+setTdfFileNamesAndDisplayValues = function(){
+  console.log("setTdfFileNamesAndDisplayValues");
+  var studentID = Session.get("curStudentID");
   namesOfTdfsAttempted = getAllNamesOfTdfsAttempted(studentID);
   studentReportingTdfs = [];
   Meteor.subscribe('tdfs',function(){
@@ -196,8 +199,6 @@ setTdfFileNamesAndDisplayValues = function(studentID){
 selectFirstOptionByDefaultAndUpdateCharts = function(){
   console.log("selectFirstOptionByDefaultAndUpdateCharts");
    var tdfs = Session.get("studentReportingTdfs");
-   var studentID = Session.get("curStudentID");
-   var studentUsername = Session.get("curStudentUsername");
 
    //Have to wait for DOM to update after studentReportingTdfs is set
    Tracker.afterFlush(function(){
@@ -209,39 +210,33 @@ selectFirstOptionByDefaultAndUpdateCharts = function(){
        if($("#tdf-select").val() != null){
         curTdf = $("#tdf-select").val().replace(".","_");
         var curTdfFileName = $("#tdf-select").val();
-        updateDataAndCharts(curTdf,curTdfFileName,studentID,studentUsername);
+        updateDataAndCharts(curTdf,curTdfFileName);
        }
      }
    });
 }
 
-Tracker.autorun(selectFirstOptionByDefaultAndUpdateCharts);
-
-Template.studentReporting.onCreated(function(){
-  console.log("created!!!");
+Template.studentReporting.onRendered(function(){
+  console.log("rendered!!!");
   var studentUsername = "";
   var studentID = "";
   if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
     console.log("admin/teacher");
     studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
     Session.set("curStudentUsername",studentUsername);
-    Meteor.call('usernameToIDMap',function(err,res){
-      console.log("usernameToIDMap loaded 1");
-      if(!!err){
-        console.log("ERROR getting usernameToIDMap: " + err);
-      }else{
-        usernameToIDMap = res;
-        studentID = translateUsernameToID(studentUsername);
-        Session.set("curStudentID",studentID);
-        setTdfFileNamesAndDisplayValues(studentID);
-      }
-    });
+    var student = Meteor.users.findOne({"username":studentUsername});
+    if(!!student){
+      studentID = student._id;
+    }
+    Session.set("curStudentID",studentID);
+    setTdfFileNamesAndDisplayValues();
   }else{
     console.log("student");
     studentUsername = Meteor.user().username;
     studentID = Meteor.user()._id;
+    Session.set("curStudentUsername",studentUsername);
     Session.set("curStudentID",studentID);
-    setTdfFileNamesAndDisplayValues(studentID);
+    setTdfFileNamesAndDisplayValues();
   }
   console.log("studentUsername:" + studentUsername);
   console.log("studentID:" + studentID);
@@ -249,6 +244,7 @@ Template.studentReporting.onCreated(function(){
 
 Template.studentReporting.onRendered(function(){
   console.log("rendered!!!");
+  Tracker.autorun(selectFirstOptionByDefaultAndUpdateCharts);
 })
 
 Template.studentReporting.events({
@@ -256,13 +252,11 @@ Template.studentReporting.events({
     console.log("change tdf select");
     curTdf = $(event.currentTarget).val().replace(".","_");
     var curTdfFileName = $(event.currentTarget).val();
-    var studentID = Session.get("curStudentID");
-    var studentUsername = Session.get("curStudentUsername");
-    updateDataAndCharts(curTdf,curTdfFileName,studentID,studentUsername);
+    updateDataAndCharts(curTdf,curTdfFileName);
   }
 });
 
-updateDataAndCharts = function(curTdf,curTdfFileName,studentID,studentUsername){
+updateDataAndCharts = function(curTdf,curTdfFileName){
   console.log("curTdfFileName: " + curTdfFileName);
   $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
   $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
@@ -280,6 +274,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName,studentID,studentUsername){
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
     }else{
       //Gracefully handle case where a tdf has been deleted
+      var studentUsername = Session.get("curStudentUsername");
       Session.set("curStudentPerformance",{
         "username":studentUsername,
         "count":"N/A",
@@ -287,14 +282,14 @@ updateDataAndCharts = function(curTdf,curTdfFileName,studentID,studentUsername){
         "numCorrect":"N/A",
         "totalTime":"N/A"
       });
-      drawCharts(true,studentID);
+      drawCharts(true);
       return;
     }
   }
 
-  Session.set("curStudentPerformance",getStudentPerformance(studentUsername,studentID,curTdf));
+  Session.set("curStudentPerformance",getStudentPerformance(studentUsername,curTdf));
 
-  drawCharts(false,studentID);
+  drawCharts(false);
 }
 
 safeSeries = function(series) {
@@ -381,16 +376,16 @@ var drawProbBars = function(targetSelector, labels, series, dataDescrip, chartCo
 
 test = "";
 
-drawCharts = function (drawWithoutData,studentID) {
+drawCharts = function (drawWithoutData) {
     if(!!drawWithoutData){
       drawCorrectnessLine('#correctnessChart', [], [], "correctness", {});
 
       drawProbBars('#cardProbsChart', [], [], "probabilities", {});
     }else{
       // Get our series and populate a range array for chart labeling
-      var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve(studentID));
+      var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve());
       correctSeries = correctSeries.map(function(val){return val*100});
-      var rawProbs = getcardProbs(studentID);
+      var rawProbs = getcardProbs();
       probSeries = safeSeries(rawProbs[1]);
       probSeries = probSeries.map(function(val){return val*100}).reverse();
 
