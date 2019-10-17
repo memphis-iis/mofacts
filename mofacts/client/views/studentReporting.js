@@ -89,6 +89,44 @@ getUserTimesLog = function(expKey){
   return records;
 }
 
+checkIfNeedSubTdfName = function(rootTDF){
+  var setspec = rootTDF.tdfs.tutor.setspec[0];
+  var needExpCondition = (setspec.condition && setspec.condition.length);
+
+  var userTimesLog = getUserTimesLog(userTimesExpKey(true));
+
+  //We must always check for experiment condition
+  if (needExpCondition) {
+      console.log("Experimental condition is required: searching");
+      var prevCondition = _.find(userTimesLog, function(entry) {
+          return entry && entry.action && entry.action === "expcondition";
+      });
+
+      var subTdf = null;
+
+      if (prevCondition) {
+          //Use previous condition and log a notification that we did so
+          console.log("Found previous experimental condition: using that");
+          subTdf = prevCondition.selectedTdf;
+          conditionAction = "condition-notify";
+          conditionData.note = "Using previous condition: " + subTdf;
+      }
+      else {
+          //Select condition and save it
+          console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
+          subTdf = _.sample(setspec.condition);
+      }
+
+      if (!subTdf) {
+          console.log("No experimental condition could be selected!");
+          return;
+      }
+
+      //Now we have a different current TDF (but root stays the same)
+      Session.set("currentTdfName", subTdf);
+  }
+}
+
 getcardProbs = function(){
   console.log('getCardProbs');
   var studentID = Session.get("curStudentID");
@@ -105,7 +143,7 @@ getcardProbs = function(){
       console.log("curTdfFileName: " + curTdfFileName);
       if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
-
+        checkIfNeedSubTdfName(getCurrentTdfFile());
         var tempModelUnitEngine = createModelUnit();
         var expKey = Session.get("currentTdfName").replace('.','_');
         processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
@@ -127,6 +165,7 @@ getcardProbs = function(){
     Session.set("currentTdfName",null);
     return [allTdfProbLabels,allTdfProbs];
   }else{
+    checkIfNeedSubTdfName(getCurrentTdfFile());
     tempModelUnitEngine = createModelUnit();
     var expKey = Session.get("curSelectedTdf").replace('.','_');
     processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));

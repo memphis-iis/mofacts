@@ -168,12 +168,12 @@ Meteor.publish('allUsers', function () {
 	return Meteor.users.find({}, opts);
 });
 
-Meteor.publish('allTeachers', function(){
-  var opts = {
-    fields: {username: 1}
-  }
+Meteor.publish('classesForInstructor',function(instructorID){
+  return Classes.find({"instructor":instructorID});
+})
 
-  return Meteor.users.find({'roles':'teacher',"username":/southwest[.]tn[.]edu/i},opts);
+Meteor.publish('allTeachers', function(){
+  return Meteor.users.find({'roles':'teacher',"username":/southwest[.]tn[.]edu/i});
 });
 
 //Config for scheduled jobs - the start command is at the end of
@@ -465,7 +465,8 @@ Meteor.startup(function () {
 
         addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
           user = user.toLowerCase();
-          var teacherID = usernameToIDMap[teacherUsername];
+          var teacher = Meteor.users.find("username":teacherUsername) || {};
+          var teacherID = teacher._id;
           console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
           var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();
           console.log("teacherClasses: " + JSON.stringify(teacherClasses));
