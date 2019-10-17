@@ -2,6 +2,8 @@ Template.userAdmin.created = function(){
   Session.set("filter","@gmail.com");
 }
 
+Session.set("allUsers",undefined);
+
 Template.userAdmin.rendered = function () {
     //Init the modal dialog
     $('#userAdminModal').modal({
@@ -9,15 +11,17 @@ Template.userAdmin.rendered = function () {
         'keyboard': false,
         'show': false
     });
+
+    Meteor.subscribe('allUsers',function(){
+      Session.set("allUsers",Meteor.users.find({},{ fields: {username: 1}, sort: [['username', 'asc']] }).fetch());
+    });
 };
 
 Template.userAdmin.helpers({
     userRoleEditList: function() {
         var userList = [];
-        Meteor.users.find(
-            {},
-            { fields: {username: 1}, sort: [['username', 'asc']] }
-        ).forEach(function(user) {
+        var allUsers = Session.get("allUsers") || [];
+        allUsers.forEach(function(user) {
             var username = _.chain(user).prop("username").trim().value();
 
             // Only show users for admin work if the username is an email addr

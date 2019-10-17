@@ -70,7 +70,8 @@ Template.body.events({
       //Otherwise populate the data with the new information (for the current user
       //and not the user from instructorReporting)
       }else{
-        Session.set("curStudentPerformance",getStudentPerformance(Meteor.user().username,curTdf));
+        Session.set("curStudentID",Meteor.userId());
+        setCurrentStudentPerformance();
       }
   },
 

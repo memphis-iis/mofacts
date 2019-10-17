@@ -1,8 +1,10 @@
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
+Session.set("curSelectedTdf","");
 
 loadedLabels = false;
 const numTrialsForKCLearningCurve = 5;
+currentUserTimeLogs = undefined;
 
 window.onpopstate = function(event){
   Session.set("studentReportingTdfs",[]);
@@ -14,7 +16,81 @@ window.onpopstate = function(event){
   }
 }
 
+setCurrentStudentPerformance = function(){
+  var studentID = Session.get("curStudentID");
+  Meteor.subscribe('specificUserMetrics',studentID,function(){
+    var studentUsername = Session.get("curStudentUsername");
+    var count = 0;
+    var numCorrect = 0;
+    var totalTime = 0;
+    var tdfQueryName = Session.get("curSelectedTdf").replace('.','_');
+    UserMetrics.find({}).forEach(function(entry){
+      var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+      for(var index in tdfEntries){
+        var key = tdfEntries[index];
+        var tdf = entry[key];
+        for(var index in tdf){
+          var stim = tdf[index];
+          count += stim.questionCount || 0;
+          numCorrect += stim.correctAnswerCount || 0;
+          var answerTimes = stim.answerTimes;
+          for(var index in answerTimes){
+            var time = answerTimes[index];
+            totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+          }
+        }
+      }
+    });
+    var percentCorrect = "N/A";
+    if(count != 0){
+      percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
+      console.log('percentCorrect: ' + percentCorrect + ", numCorrect: " + numCorrect + ", count: " + count);
+    }
+    totalTime = totalTime.toFixed(1);
+    var studentObj = {
+      "username":studentUsername,
+      "count":count,
+      "percentCorrect":percentCorrect,
+      "numCorrect":numCorrect,
+      "totalTime":totalTime
+    }
+    Session.set("curStudentPerformance",studentObj);
+  })
+}
+
+getUserTimesLog = function(expKey){
+  userLog = currentUserTimeLogs;
+
+  console.log("expKey:" + expKey);
+  var entries = [];
+  if (userLog && userLog[expKey] && userLog[expKey].length) {
+      entries = userLog[expKey];
+  }else{
+    console.log("no entries");
+  }
+
+  var previousRecords = {};
+  var records = [];
+
+  for(var i = 0; i < entries.length; ++i) {
+      var rec = entries[i];
+
+      //Suppress duplicates like we do on the server side for file export
+      var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
+      if (uniqifier in previousRecords) {
+          continue; //dup detected
+      }
+      previousRecords[uniqifier] = true;
+
+      //We don't do much other than save the record
+      records.push(rec);
+  }
+
+  return records;
+}
+
 getcardProbs = function(){
+  console.log('getCardProbs');
   var studentID = Session.get("curStudentID");
   //We've selected the "All" tdf option
   if(Session.get("currentStimName") === null){
@@ -32,7 +108,7 @@ getcardProbs = function(){
 
         var tempModelUnitEngine = createModelUnit();
         var expKey = Session.get("currentTdfName").replace('.','_');
-        processUserTimesLog(true,expKey,tempModelUnitEngine,studentID);
+        processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
         console.log("past getCardProbs");
@@ -52,8 +128,8 @@ getcardProbs = function(){
     return [allTdfProbLabels,allTdfProbs];
   }else{
     tempModelUnitEngine = createModelUnit();
-    var expKey = Session.get("currentTdfName").replace('.','_');
-    processUserTimesLog(true,expKey,tempModelUnitEngine,studentID);
+    var expKey = Session.get("curSelectedTdf").replace('.','_');
+    processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
     var cardProbs = [];
     var cardProbsLabels = [];
     var mycardProbs =tempModelUnitEngine.getCardProbs();
@@ -70,6 +146,7 @@ getcardProbs = function(){
 }
 
 getAvgCorrectnessAcrossKCsLearningCurve = function(){
+  console.log("getAvgCorrectnessAcrossKCsLearningCurve");
   var studentID = Session.get("curStudentID");
   var avgCorrectnessAcrossKCsLearningCurve = [];
 
@@ -82,10 +159,16 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
   tdfQueryNames = [];
 
   if(curTdf == "xml"){
-    tdfQueryNames = getAllNamesOfTdfsAttempted(studentID);
+    //NOTE: this line is dependent on timing, specifically the page should have been mostly set up before we get to here
+    var allTdfsAttempted = Session.get("studentReportingTdfs");
+    _.each(allTdfsAttempted,function(tdf){
+      tdfQueryNames.push(tdf.fileName);
+    });
   }else{
     tdfQueryNames.push(curTdf);
   }
+
+  console.log("tdfQueryNames:" + JSON.stringify(tdfQueryNames));
 
   _.each(tdfQueryNames,function(tdfQueryName){
     var curStim = undefined;
@@ -94,7 +177,7 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
     var expKey = tdfQueryName.replace(".xml","_xml");
     console.log("expKey:" + expKey);
     console.log("studentID: " + studentID);
-    _.each(getUserTimesLog(expKey,studentID), function(entry, index, currentList) {
+    _.each(getUserTimesLog(expKey), function(entry, index, currentList) {
       if (!entry.action) {
           console.log("Ignoring user times entry with no action");
           return;
@@ -181,19 +264,25 @@ Template.studentReporting.helpers({
 setTdfFileNamesAndDisplayValues = function(){
   console.log("setTdfFileNamesAndDisplayValues");
   var studentID = Session.get("curStudentID");
-  namesOfTdfsAttempted = getAllNamesOfTdfsAttempted(studentID);
-  studentReportingTdfs = [];
-  Meteor.subscribe('tdfs',function(){
-    Tdfs.find({}).forEach(function(entry){
-      var fileName = entry.fileName;
-      var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-      if(namesOfTdfsAttempted.indexOf(fileName) != -1){
-        studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
-      }
-    });
+  Meteor.call('namesOfTdfsAttempted',studentID,function(err,res){
+    if(!!err){
+      console.log("Error getting names of tdfs attempted: " + JSON.stringify(err));
+    }else{
+      namesOfTdfsAttempted = res;
+      studentReportingTdfs = [];
+      Meteor.subscribe('tdfs',function(){
+        Tdfs.find({}).forEach(function(entry){
+          var fileName = entry.fileName;
+          var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+          if(namesOfTdfsAttempted.indexOf(fileName) != -1){
+            studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
+          }
+        });
 
-    Session.set('studentReportingTdfs',studentReportingTdfs);
-  });
+        Session.set('studentReportingTdfs',studentReportingTdfs);
+      });
+    }
+  })
 }
 
 selectFirstOptionByDefaultAndUpdateCharts = function(){
@@ -210,54 +299,73 @@ selectFirstOptionByDefaultAndUpdateCharts = function(){
        if($("#tdf-select").val() != null){
         curTdf = $("#tdf-select").val().replace(".","_");
         var curTdfFileName = $("#tdf-select").val();
+        Session.set("curSelectedTdf",curTdfFileName);
         updateDataAndCharts(curTdf,curTdfFileName);
        }
      }
    });
 }
 
-Template.studentReporting.onRendered(function(){
+Template.studentReporting.rendered = function(){
   console.log("rendered!!!");
-  var studentUsername = "";
-  var studentID = "";
-  if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
-    console.log("admin/teacher");
-    studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
-    Session.set("curStudentUsername",studentUsername);
-    var student = Meteor.users.findOne({"username":studentUsername});
-    if(!!student){
-      studentID = student._id;
+  Tracker.autorun(function(){
+    console.log("autorun");
+    var user = Meteor.user();
+    if(!!user){
+      var studentUsername = "";
+      var studentID = "";
+      if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
+        console.log("admin/teacher");
+        studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
+        if(studentUsername.indexOf("@") == -1){
+          studentUsername = studentUsername.toUpperCase();
+        }
+        Session.set("curStudentUsername",studentUsername);
+        Meteor.subscribe("specificUser",studentUsername,function(){
+          console.log("specificUser subscription done");
+          var student = Meteor.users.findOne({"username":studentUsername});
+          console.log("student: " + JSON.stringify(student));
+          if(!!student){
+            studentID = student._id;
+          }
+          Session.set("curStudentID",studentID);
+          setTdfFileNamesAndDisplayValues();
+        });
+      }else{
+        console.log("student");
+        studentUsername = Meteor.user().username;
+        console.log("student2");
+        studentID = Meteor.userId();
+        console.log("student3");
+        Session.set("curStudentUsername",studentUsername);
+        Session.set("curStudentID",studentID);
+        console.log('student4');
+        setTdfFileNamesAndDisplayValues();
+      }
+      console.log("studentUsername:" + studentUsername);
+      console.log("studentID:" + studentID);
+      Meteor.subscribe('specificUserTimesLog',studentID,function(){
+        currentUserTimeLogs = UserTimesLog.findOne({});
+        console.log("currentUserTimeLogs subscription done");
+      });
+      selectFirstOptionByDefaultAndUpdateCharts();
     }
-    Session.set("curStudentID",studentID);
-    setTdfFileNamesAndDisplayValues();
-  }else{
-    console.log("student");
-    studentUsername = Meteor.user().username;
-    studentID = Meteor.user()._id;
-    Session.set("curStudentUsername",studentUsername);
-    Session.set("curStudentID",studentID);
-    setTdfFileNamesAndDisplayValues();
-  }
-  console.log("studentUsername:" + studentUsername);
-  console.log("studentID:" + studentID);
-});
-
-Template.studentReporting.onRendered(function(){
-  console.log("rendered!!!");
-  Tracker.autorun(selectFirstOptionByDefaultAndUpdateCharts);
-})
+  });
+};
 
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
     console.log("change tdf select");
     curTdf = $(event.currentTarget).val().replace(".","_");
     var curTdfFileName = $(event.currentTarget).val();
+    Session.set("curSelectedTdf",curTdfFileName);
     updateDataAndCharts(curTdf,curTdfFileName);
   }
 });
 
 updateDataAndCharts = function(curTdf,curTdfFileName){
   console.log("curTdfFileName: " + curTdfFileName);
+  var studentUsername = Session.get("curStudentUsername");
   $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
   $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
 
@@ -274,7 +382,6 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
     }else{
       //Gracefully handle case where a tdf has been deleted
-      var studentUsername = Session.get("curStudentUsername");
       Session.set("curStudentPerformance",{
         "username":studentUsername,
         "count":"N/A",
@@ -287,7 +394,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
     }
   }
 
-  Session.set("curStudentPerformance",getStudentPerformance(studentUsername,curTdf));
+  setCurrentStudentPerformance();
 
   drawCharts(false);
 }
@@ -394,7 +501,7 @@ drawCharts = function (drawWithoutData) {
       var cardProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
-      if(Session.get("currentTdfName") === null){
+      if(Session.get("curSelectedTdf") === "xml"){
           cardProbsChartAxisYOffset = 250;
           showYAxisLabel = true
           probBarsHeight = Math.max((probSeries.length * 10),200);
@@ -441,3 +548,307 @@ drawCharts = function (drawWithoutData) {
     }
 
 };
+
+function recordProgress(question, answer, userAnswer, isCorrect) {
+    var uid = Meteor.userId();
+    if (!uid) {
+        console.log("NO USER ID!!!");
+        return;
+    }
+
+    var questionIndex = Session.get("questionIndex");
+    if (!questionIndex && questionIndex !== 0) {
+        questionIndex = null;
+    }
+
+    var prog = getUserProgress();
+    prog.progressDataArray.push({
+        clusterIndex: getCurrentClusterIndex(),
+        questionIndex: questionIndex,
+        question: question,
+        answer: answer,
+        userAnswer: userAnswer,
+        isCorrect: isCorrect,
+    });
+
+    //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+    //Ignore instruction type questions for overallOutcomeHistory
+    if(Session.get("testType") != "i"){
+      prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    }
+}
+
+processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
+    var engine = tempEngine;
+    //Get TDF info
+    var file = getCurrentTdfFile();
+    var tutor = file.tdfs.tutor;
+    var currentStimName = getCurrentStimName();
+
+    //Before the below options, reset current test data
+    initUserProgress({
+        overallOutcomeHistory: [],
+        progressDataArray: [],
+        currentSchedule: {}
+    });
+
+    //Default to first unit
+    Session.set("currentUnitNumber", 0);
+    Session.set("currentUnitStartTime", Date.now());
+
+    //We'll be tracking the last question so that we can match with the answer
+    var lastQuestionEntry = null;
+
+    //prepareCard will handle whether or not new units see instructions, but
+    //it will miss instructions for the very first unit.
+    var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
+
+    //Helper to determine if a unit specified by index has the given field
+    var unitHasOption = function(unitIdx, optionName) {
+        var unitSection = _.chain(file.tdfs.tutor)
+            .prop("unit").prop(unitIdx)
+            .prop(optionName).first().value();
+        console.log("UNIT CHECK", unitIdx, optionName, !!unitSection);
+        return !!unitSection;
+    };
+
+    //It's possible that they clicked Continue on a final unit, so we need to
+    //know to act as if we're done
+    var moduleCompleted = false;
+
+    //Reset current engine
+    var resetEngine = function(currUnit) {
+        if (unitHasOption(currUnit, "assessmentsession")) {
+            engine = createScheduleUnit();
+        }
+        else if (unitHasOption(currUnit, "learningsession")) {
+            engine = createModelUnit();
+        }
+        else {
+            engine = createEmptyUnit();
+        }
+    };
+
+    //The last unit we captured start time for - this way we always get the
+    //earliest time for our unit start
+    var startTimeMinUnit = -1;
+
+    //At this point, our state is set as if they just started this learning
+    //session for the first time. We need to loop thru the user times log
+    //entries and update that state
+
+    _.each(userTimesLogs, function(entry, index, currentList) {
+        // IMPORTANT: this won't really work since we're in a tight loop. If we really
+        // want to get this to work, we would need asynch loop processing (see
+        // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
+        // if you're unfamiliar). As a result, we just have a loading message
+        // IMPORTANT: remember that you will need to integrate with
+        // Meteor's handling of the event loop (so base your async loop on
+        // Meteor.setTimeout or something)
+        // var progress = (index + 1.0) / currentList.length;
+        // progress = _.intval(progress * 100);
+        // $('#resumeMsg').text(progress + "% Complete");
+        // $('.progress-bar').css('width', progress+'%').attr('aria-valuenow', progress);
+
+        if (!entry.action) {
+            console.log("Ignoring user times entry with no action");
+            return;
+        }
+
+        //Only examine the messages that we care about
+        var action = _.trim(entry.action).toLowerCase();
+
+        //Generally we use the last timestamp for our major actions. This will
+        //currently only be set to false in the default/fall-thru else block
+        var recordTimestamp = true;
+
+        if (action === "instructions") {
+            //They've been shown instructions for this unit
+            needFirstUnitInstructions = false;
+            var instructUnit = entry.currentUnit;
+            if (!!instructUnit || instructUnit === 0) {
+                Session.set("currentUnitNumber", instructUnit);
+                Session.set("questionIndex", 0);
+                Session.set("clusterIndex", undefined);
+                Session.set("currentQuestion", undefined);
+                Session.set("currentQuestionPart2",undefined);
+                Session.set("currentAnswer", undefined);
+                Session.set("testType", undefined);
+
+                resetEngine(instructUnit);
+            }
+        }
+
+        else if (action === "unit-end") {
+            //Logged completion of unit - if this is the final unit we also
+            //know that the TDF is completed
+            var finishedUnit = _.intval(entry.currentUnit, -1);
+            var checkUnit = _.intval(Session.get("currentUnitNumber"), -2);
+            if (finishedUnit >= 0 && checkUnit === finishedUnit) {
+                //Correctly matches current unit - reset
+                needFirstUnitInstructions = false;
+                lastQuestionEntry = null;
+
+                Session.set("questionIndex", 0);
+                Session.set("clusterIndex", undefined);
+                Session.set("currentQuestion", undefined);
+                Session.set("currentQuestionPart2",undefined);
+                Session.set("currentAnswer", undefined);
+                Session.set("testType", undefined);
+
+                if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
+                    //Completed
+                    moduleCompleted = true;
+                }
+                else {
+                    //Moving to next unit
+                    checkUnit += 1;
+                    Session.set("currentUnitNumber", checkUnit);
+                    resetEngine(checkUnit);
+                }
+            }
+        }
+
+        else if (action === "turk-approval" || action === "turk-bonus") {
+            //Currently just walk on by (but we don't log an "ignored this" msg)
+        }
+
+        else if (action === "schedule") {
+            //Read in the previously created schedule
+            lastQuestionEntry = null; //Kills the last question
+            needFirstUnitInstructions = false;
+
+            var unit = entry.unitindex;
+            if (!unit && unit !== 0) {
+                //If we don't know the unit, then we can't proceed
+                console.log("Schedule Entry is missing unitindex", unit);
+                return;
+            }
+
+            var setSpec = file.tdfs.tutor.setspec[0];
+            var currUnit = file.tdfs.tutor.unit[unit];
+            var schedule = entry.schedule;
+
+            if (!schedule) {
+                //There was an error creating the schedule - there's really nothing
+                //left to do since the experiment is broken
+                recordUserTime("FAILURE to read schedule from user time log", {
+                    unitname: _.display(currUnit.unitname),
+                    unitindex: unit
+                });
+                alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
+                clearCardTimeout();
+                leavePage("/profile");
+                return;
+            }
+
+            //Update what we know about the session
+            //Note that the schedule unit engine will see and use this
+            getUserProgress().currentSchedule = schedule;
+            Session.set("currentUnitNumber", unit);
+            Session.set("questionIndex", 0);
+
+            //Blank out things that should restart with a schedule
+            Session.set("clusterIndex", undefined);
+            Session.set("currentQuestion", undefined);
+            Session.set("currentQuestionPart2",undefined);
+            Session.set("currentAnswer", undefined);
+            Session.set("testType", undefined);
+        }
+
+        else if (action === "question") {
+            //Read in previously asked question
+            lastQuestionEntry = entry; //Always save the last question
+            needFirstUnitInstructions = false;
+
+            if (!entry.selType) {
+                console.log("Ignoring user times entry question with no selType", entry);
+                return;
+            }
+
+            //Restore the session variables we save with each question
+            //REMEMBER - the logged card had its mapped index logged as
+            //clusterIndex, but we use the UN-mapped index right up until we
+            //send the log or access a stimulus cluster. Luckily the unmapped
+            //index should have been logged as shufIndex. Note that if there
+            //isn't a shufIndex, we just use the clusterIndex
+            var cardIndex = entry.shufIndex || entry.clusterIndex;
+
+            Session.set("clusterIndex",         cardIndex);
+            Session.set("questionIndex",        entry.questionIndex);
+            Session.set("currentUnitNumber",    entry.currentUnit);
+            Session.set("currentQuestion",      entry.selectedQuestion);
+            Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
+            Session.set("currentAnswer",        entry.selectedAnswer);
+            Session.set("showOverlearningText", entry.showOverlearningText);
+            Session.set("testType",             entry.testType);
+
+            // Notify the current engine about the card selection (and note that
+            // the engine knows that this is a resume because we're passing the
+            // log entry back to it). The entry should include the original
+            // selection value to pass in, but if it doesn't we default to
+            // cardIndex (which should work for all units except the model)
+            engine.cardSelected(entry.selectVal || cardIndex, entry);
+        }
+
+        else if (action === "answer" || action === "[timeout]") {
+            //Read in the previously recorded answer (even if it was a timeout)
+            needCurrentInstruction = false; //Answer means they got past the instructions
+            needFirstUnitInstructions = false;
+            if (lastQuestionEntry === null) {
+                console.log("Ignore answer for no question", entry);
+                return;
+            }
+
+            //Did they get it right or wrong?
+            var wasCorrect;
+            if (action === "answer") {
+                wasCorrect = typeof entry.isCorrect !== "undefined" ? entry.isCorrect : null;
+                if (wasCorrect === null) {
+                    console.log("Missing isCorrect on an answer - assuming false", entry);
+                    wasCorrect = false;
+                }
+            }
+            else {
+                wasCorrect = false; //timeout is never correct
+            }
+
+            //Test type is always recorded with an answer, so we just reset it
+            var testType = entry.ttype;
+            Session.set("testType", testType);
+
+            //The session variables should be set up correctly from the question
+            recordProgress(
+                Session.get("currentQuestion"),
+                Session.get("currentAnswer"),
+                entry.answer,
+                wasCorrect
+            );
+
+            var simCorrect = null;
+            if (_.chain(entry).prop("wasSim").intval() > 0) {
+                simCorrect = wasCorrect;
+            }
+
+            //Notify unit engine about card answer
+            engine.cardAnswered(wasCorrect, entry);
+
+            //We know the last question no longer applies
+            lastQuestionEntry = null;
+        }
+
+        else {
+            recordTimestamp = false; //Don't use the timestamp for this one
+            //console.log("Ignoring user times log entry with action", action);
+        }
+
+        if (recordTimestamp && entry.clientSideTimeStamp) {
+            Session.set("lastTimestamp", entry.clientSideTimeStamp);
+
+            if (Session.get("currentUnitNumber") > startTimeMinUnit) {
+                Session.set("currentUnitStartTime", Session.get("lastTimestamp"));
+                startTimeMinUnit = Session.get("currentUnitNumber");
+            }
+        }
+    });
+}

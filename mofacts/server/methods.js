@@ -128,31 +128,35 @@ Meteor.publish(null, function () {
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({}),
+        UserTimesLog.find({_id:userId}),
         Meteor.users.find({_id: userId}),
         UserProfileData.find({_id: userId}, {fields: {
             have_aws_id: 1,
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find({}),
+        UserMetrics.find({_id:userId}),
         Classes.find({})
     ];
 
     return defaultData;
 });
 
-Meteor.publish('userMetrics', function(){
-  return UserMetrics.find({});
+Meteor.publish('specificUser',function(username){
+  return Meteor.users.find({"username":username});
 })
 
 Meteor.publish('tdfs', function(){
   return Tdfs.find({});
 })
 
-// Meteor.publish('classes',function(){
-//   return Classes.find({instructor:this.userId});
-// });
+Meteor.publish('specificUserTimesLog',function(userId){
+  return UserTimesLog.find({_id:userId});
+})
+
+Meteor.publish('specificUserMetrics',function(userId){
+  return UserMetrics.find({_id:userId});
+})
 
 Meteor.publish('allUsers', function () {
     var opts = {
@@ -352,6 +356,85 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          getStudentPerformanceForClassAndTdf:function(classID,tdfFileName){
+            var curClass = Classes.findOne({_id:classID});
+            studentTotals = {
+              numCorrect: 0,
+              count: 0,
+              totalTime: 0
+            }
+            var students = [];
+            if(!!curClass){
+              curClass.students.forEach(function(studentUsername){
+                if(studentUsername.indexOf("@") == -1){
+                  studentUsername = studentUsername.toUpperCase();
+                }
+                var student = Meteor.users.findOne({"username":studentUsername}) || {};
+                var studentID = student._id;
+                var count = 0;
+                var numCorrect = 0;
+                var totalTime = 0;
+                var tdfQueryName = tdfFileName.replace('.','_');
+                UserMetrics.find({_id:studentID}).forEach(function(entry){
+                  var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+                  for(var index in tdfEntries){
+                    var key = tdfEntries[index];
+                    var tdf = entry[key];
+                    for(var index in tdf){
+                      var stim = tdf[index];
+                      count += stim.questionCount || 0;
+                      numCorrect += stim.correctAnswerCount || 0;
+                      var answerTimes = stim.answerTimes;
+                      for(var index in answerTimes){
+                        var time = answerTimes[index];
+                        totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+                      }
+                    }
+                  }
+                });
+                var percentCorrect = "N/A";
+                if(count != 0){
+                  percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
+                }
+                totalTime = totalTime.toFixed(1);
+                var studentPerformance = {
+                  "username":studentUsername,
+                  "count":count,
+                  "percentCorrect":percentCorrect,
+                  "numCorrect":numCorrect,
+                  "totalTime":totalTime
+                }
+                studentTotals.count += studentPerformance.count;
+                studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+                studentTotals.numCorrect += studentPerformance.numCorrect;
+                students.push(studentPerformance);
+              })
+            }
+            studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
+            return [students,studentTotals];
+          },
+
+          namesOfTdfsAttempted:function(userId){
+            var allNamesOfTdfsAttempted = [];
+
+            var userMetrics = UserMetrics.find({_id:userId});
+
+            userMetrics.forEach(function(entry){
+              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
+              for(var index in possibleTdfs){
+                var possibleTdf = possibleTdfs[index];
+                if(possibleTdf.indexOf("_xml") != -1){
+                  var curTdfName = possibleTdf;
+                  //Replace only last underscore with "." to reconstruct actual tdf name
+                  curTdfName = curTdfName.replace("_xml",".xml");
+                  allNamesOfTdfsAttempted.push(curTdfName);
+                }
+              }
+            });
+
+            return allNamesOfTdfsAttempted;
+        },
+
         insertClozeEditHistory:function(history){
           ClozeEditHistory.insert(history);
         },

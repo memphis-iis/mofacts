@@ -154,7 +154,7 @@ generateAndSubmitTDFAndStimFiles = function(){
       saveEditHistory(originalClozes,clozes);
       //Update session variable used in tdfAssignmentEdit so that we can assign a tdf immediately after generation without reloading the page
       Session.set("allTdfFilenamesAndDisplayNames",Session.get("allTdfFilenamesAndDisplayNames").concat({fileName:tdfFileName,displayName:displayName}));
-      Session.set("allTdfs",Session.get("allTdfs").concat(newTDFJSON));
+      Session.set("contentGenerationAllTdfs",Session.get("contentGenerationAllTdfs").concat(newTDFJSON));
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
       $("#save-modal").modal('hide');
