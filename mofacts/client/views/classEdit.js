@@ -1,7 +1,6 @@
 Session.set("classes",[]);
 
 var isNewClass = true;
-const lengthOfNewGeneratedIDs = 6;
 
 function classSelectedSetup(curClassName){
     //$("#newClassName").prop('disabled',true);
@@ -21,10 +20,6 @@ function noClassSelectedSetup(){
   $("#deleteClass").prop('disabled',true);
   $("#classStudents").val("");
   isNewClass = true;
-}
-
-genID = function(length){
-  return Math.random().toString(36).substring(2, (2+length));
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -62,22 +57,17 @@ Template.classEdit.events({
     if(isNaN(numIDsToGen)){
       alert("Please enter a numeric value");
     }else{
-      var newIDs = [];
-      var idMap = {};
-      for(var id in Object.keys(usernameToIDMap)){
-        idMap[id] = true;
-      }
-      for(var i=0;i<numIDsToGen;i++){
-        var newID = genID(lengthOfNewGeneratedIDs);
-        while(idMap[newID]){
-          newID = genID(lengthOfNewGeneratedIDs);
+      Meteor.call('generateUnusedIDs',numIDsToGen,function(err,res){
+        console.log("generateUnusedIDs return");
+        if(!!err){
+          console.log("error generating unused ids: " + JSON.stringify(err));
+        }else{
+          var newIDs = res;
+          var students = $("#classStudents").val().trim().split('\n').filter(x => x !== "");
+          students = students.concat(newIDs);
+          $("#classStudents").val(students.map(x => x + '\n').join(''));
         }
-        newIDs.push(newID);
-        idMap[newID] = true;
-      }
-      var students = $("#classStudents").val().trim().split('\n').filter(x => x !== "");
-      students = students.concat(newIDs);
-      $("#classStudents").val(students.map(x => x + '\n').join(''));
+      });
     }
   },
 

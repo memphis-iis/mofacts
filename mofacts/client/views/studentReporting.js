@@ -5,10 +5,15 @@ Session.set("curSelectedTdf","");
 loadedLabels = false;
 const numTrialsForKCLearningCurve = 5;
 currentUserTimeLogs = undefined;
+curTracker = undefined;
 
 window.onpopstate = function(event){
+  console.log("window popstate");
   Session.set("studentReportingTdfs",[]);
   Session.set("curStudentPerformance",{});
+  if(!!curTracker){
+    curTracker.stop();
+  }
   if(Session.get("loginMode") === "southwest"){
     Router.go("/profileSouthwest");
   }else{
@@ -23,7 +28,7 @@ setCurrentStudentPerformance = function(){
     var count = 0;
     var numCorrect = 0;
     var totalTime = 0;
-    var tdfQueryName = Session.get("curSelectedTdf").replace('.','_');
+    var tdfQueryName = Session.get("curSelectedTdf").replace(/[.]/g,'_');
     UserMetrics.find({}).forEach(function(entry){
       var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
       for(var index in tdfEntries){
@@ -61,7 +66,6 @@ setCurrentStudentPerformance = function(){
 getUserTimesLog = function(expKey){
   userLog = currentUserTimeLogs;
 
-  console.log("expKey:" + expKey);
   var entries = [];
   if (userLog && userLog[expKey] && userLog[expKey].length) {
       entries = userLog[expKey];
@@ -145,7 +149,7 @@ getcardProbs = function(){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
         checkIfNeedSubTdfName(getCurrentTdfFile());
         var tempModelUnitEngine = createModelUnit();
-        var expKey = Session.get("currentTdfName").replace('.','_');
+        var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
         processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
@@ -167,7 +171,7 @@ getcardProbs = function(){
   }else{
     checkIfNeedSubTdfName(getCurrentTdfFile());
     tempModelUnitEngine = createModelUnit();
-    var expKey = Session.get("curSelectedTdf").replace('.','_');
+    var expKey = Session.get("curSelectedTdf").replace(/[.]/g,'_');
     processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
     var cardProbs = [];
     var cardProbsLabels = [];
@@ -207,15 +211,11 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
     tdfQueryNames.push(curTdf);
   }
 
-  console.log("tdfQueryNames:" + JSON.stringify(tdfQueryNames));
-
   _.each(tdfQueryNames,function(tdfQueryName){
     var curStim = undefined;
     var curCluster = undefined;
     var allAnswerAttempts = {};
-    var expKey = tdfQueryName.replace(".xml","_xml");
-    console.log("expKey:" + expKey);
-    console.log("studentID: " + studentID);
+    var expKey = tdfQueryName.replace(/[.]/g,"_");
     _.each(getUserTimesLog(expKey), function(entry, index, currentList) {
       if (!entry.action) {
           console.log("Ignoring user times entry with no action");
@@ -255,8 +255,6 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
       }
     });
 
-    console.log("working through allAnswerAttempts");
-    console.log("allAnswerAttempts: " + JSON.stringify(allAnswerAttempts));
     _.each(_.keys(allAnswerAttempts),function(curCluster){
       _.each(_.keys(allAnswerAttempts[curCluster]),function(curStim){
           var curAnswerArray = allAnswerAttempts[curCluster][curStim];
@@ -312,21 +310,22 @@ setTdfFileNamesAndDisplayValues = function(){
       Meteor.subscribe('tdfs',function(){
         Tdfs.find({}).forEach(function(entry){
           var fileName = entry.fileName;
+          var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
           var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-          if(namesOfTdfsAttempted.indexOf(fileName) != -1){
+          if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1){
             studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
           }
         });
 
         Session.set('studentReportingTdfs',studentReportingTdfs);
+        selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
       });
     }
   })
 }
 
-selectFirstOptionByDefaultAndUpdateCharts = function(){
+selectFirstOptionByDefaultAndUpdateCharts = function(tdfs){
   console.log("selectFirstOptionByDefaultAndUpdateCharts");
-   var tdfs = Session.get("studentReportingTdfs");
 
    //Have to wait for DOM to update after studentReportingTdfs is set
    Tracker.afterFlush(function(){
@@ -347,8 +346,12 @@ selectFirstOptionByDefaultAndUpdateCharts = function(){
 
 Template.studentReporting.rendered = function(){
   console.log("rendered!!!");
-  Tracker.autorun(function(){
+  curTracker = Tracker.autorun(function(thisTracker){
     console.log("autorun");
+    if(document.location.pathname != "/studentReporting"){
+      console.log("navigated away from student reporting. stop tracker");
+      thisTracker.stop();
+    }
     var user = Meteor.user();
     if(!!user){
       var studentUsername = "";
@@ -368,26 +371,28 @@ Template.studentReporting.rendered = function(){
             studentID = student._id;
           }
           Session.set("curStudentID",studentID);
-          setTdfFileNamesAndDisplayValues();
+          console.log("studentUsername:" + studentUsername);
+          console.log("studentID:" + studentID);
+          Meteor.subscribe('specificUserTimesLog',studentID,function(){
+            currentUserTimeLogs = UserTimesLog.findOne({});
+            console.log("currentUserTimeLogs subscription done");
+            setTdfFileNamesAndDisplayValues();
+          });
         });
       }else{
-        console.log("student");
         studentUsername = Meteor.user().username;
-        console.log("student2");
         studentID = Meteor.userId();
-        console.log("student3");
+
+        console.log("studentUsername:" + studentUsername);
+        console.log("studentID:" + studentID);
         Session.set("curStudentUsername",studentUsername);
         Session.set("curStudentID",studentID);
-        console.log('student4');
-        setTdfFileNamesAndDisplayValues();
+        Meteor.subscribe('specificUserTimesLog',studentID,function(){
+          currentUserTimeLogs = UserTimesLog.findOne({});
+          console.log("currentUserTimeLogs subscription done");
+          setTdfFileNamesAndDisplayValues();
+        });
       }
-      console.log("studentUsername:" + studentUsername);
-      console.log("studentID:" + studentID);
-      Meteor.subscribe('specificUserTimesLog',studentID,function(){
-        currentUserTimeLogs = UserTimesLog.findOne({});
-        console.log("currentUserTimeLogs subscription done");
-      });
-      selectFirstOptionByDefaultAndUpdateCharts();
     }
   });
 };

@@ -60,7 +60,6 @@ Template.profileSouthwest.rendered = function () {
       console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
       //Check all the valid TDF's
       allTdfs.forEach( function (tdfObject) {
-        console.log("tdfObject fileName: " + JSON.stringify(tdfObject.fileName));
           //Make sure we have a valid TDF (with a setspec)
           var setspec = _.chain(tdfObject)
               .prop("tdfs")
@@ -81,7 +80,6 @@ Template.profileSouthwest.rendered = function () {
 
           //Make sure we only present the tdfs assigned to the classes the user is in
           if(assignedTdfs.findIndex(x => x.fileName == tdfObject.fileName) == -1){
-            console.log("tdf filename not in assignedTdfs: " + tdfObject.fileName);
             return;
           }
 

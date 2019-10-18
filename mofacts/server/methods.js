@@ -118,6 +118,12 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
     };
 }
 
+function genID(length){
+  return Math.random().toString(36).substring(2, (2+length));
+}
+
+const lengthOfNewGeneratedIDs = 6;
+
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
@@ -356,6 +362,26 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          generateUnusedIDs:function(numIDsToGen){
+            var newIDs = [];
+            var idMap = {};
+            var allUsers = Meteor.users.find({}).fetch();
+            _.each(allUsers,function(user){
+              var id = user.username;
+              idMap[id] = true;
+            })
+            for(var i=0;i<numIDsToGen;i++){
+              var newID = genID(lengthOfNewGeneratedIDs);
+              while(idMap[newID]){
+                newID = genID(lengthOfNewGeneratedIDs);
+              }
+              newIDs.push(newID);
+              idMap[newID] = true;
+            }
+
+            return newIDs;
+          },
+
           getStudentPerformanceForClassAndTdf:function(classID,tdfFileName){
             var curClass = Classes.findOne({_id:classID});
             studentTotals = {
@@ -411,6 +437,7 @@ Meteor.startup(function () {
               })
             }
             studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
+            studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
             return [students,studentTotals];
           },
 
@@ -425,14 +452,32 @@ Meteor.startup(function () {
                 var possibleTdf = possibleTdfs[index];
                 if(possibleTdf.indexOf("_xml") != -1){
                   var curTdfName = possibleTdf;
-                  //Replace only last underscore with "." to reconstruct actual tdf name
-                  curTdfName = curTdfName.replace("_xml",".xml");
+                  // //Replace only last underscore with "." to reconstruct actual tdf name
+                  // curTdfName = curTdfName.replace("_xml",".xml");
                   allNamesOfTdfsAttempted.push(curTdfName);
                 }
               }
             });
 
             return allNamesOfTdfsAttempted;
+        },
+
+        getTdfNamesAssignedByInstructor:function(instructorID){
+          var user = Meteor.users.findOne({_id:instructorID});
+          var instructorClasses;
+          if(Roles.userIsInRole(user, ['admin'])){
+            instructorClasses = Classes.find({}).fetch();
+          }else{
+            instructorClasses = Classes.find({"instructor":instructorID}).fetch();
+          }
+          var tdfs = new Set();
+          _.each(instructorClasses,function(curClass){
+            var tdfsInClass = curClass.tdfs;
+            _.each(tdfsInClass,function(curTdf){
+              tdfs.add(curTdf);
+            });
+          });
+          return Array.from(tdfs);
         },
 
         insertClozeEditHistory:function(history){

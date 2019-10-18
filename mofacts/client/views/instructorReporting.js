@@ -80,8 +80,12 @@ Template.instructorReporting.events({
 
 Template.instructorReporting.onRendered(function(){
   console.log("instructorReporting rendered");
-  Meteor.subscribe('tdfs',function () {
-    Session.set("instructorReportingTdfs",Tdfs.find({}).fetch());
+  Meteor.call('getTdfNamesAssignedByInstructor',Meteor.userId(),function (err,res) {
+    if(!!err){
+      console.log("error getting tdf names assigned by instructor: " + JSON.stringify(err));
+    }else{
+      Session.set("instructorReportingTdfs",res);
+    }
   });
 
   var classes = getAllClassesForCurrentInstructor(Meteor.userId());

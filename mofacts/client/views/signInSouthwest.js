@@ -99,8 +99,9 @@ Template.signInSouthwest.onRendered(function(){
 
   Meteor.subscribe('allTeachers',function () {
     var teachers = Meteor.users.find({}).fetch();
+    var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
     console.log("got teachers");
-    Session.set("teachers",teachers);
+    Session.set("teachers",verifiedTeachers);
   });
 });
 
