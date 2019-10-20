@@ -361,7 +361,7 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
             <drill>30000</drill>
             <purestudy>16000</purestudy>
             <skipstudy>false</skipstudy>
-            <reviewstudy>20000</reviewstudy>
+            <reviewstudy>16000</reviewstudy>
             <correctprompt>750</correctprompt>
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
