@@ -72,16 +72,20 @@ setTeacher = function(teacher){
   Session.set("curTeacher",teacher);
   $("#initialInstructorSelection").prop('hidden','true');
 
-  var curClasses = getAllClassesForCurrentInstructor(teacher._id);
+  Meteor.subscribe('classesForInstructor',teacher._id,function(){
+    var curClasses = Classes.find({"instructor":Session.get("curTeacher")._id}).fetch();
 
-  if(curClasses.length == 0){
-    Session.set("curTeacher",{});
-    $("#initialInstructorSelection").prop('hidden','');
-    alert("Your instructor hasn't set up their assignments yet.  Please contact them and check back in at a later time.");
-  }else{
-    Session.set("curTeacherClasses",curClasses);
-    $("#classSelection").prop('hidden','');
-  }
+    console.log("classesForInstructor returned");
+
+    if(curClasses.length == 0){
+      Session.set("curTeacher",{});
+      $("#initialInstructorSelection").prop('hidden','');
+      alert("Your instructor hasn't set up their assignments yet.  Please contact them and check back in at a later time.");
+    }else{
+      Session.set("curTeacherClasses",curClasses);
+      $("#classSelection").prop('hidden','');
+    }
+  });
 }
 
 setClass = function(curClass){
@@ -90,26 +94,15 @@ setClass = function(curClass){
   $("#loginDiv").prop('hidden','');
 }
 
-Meteor.subscribe('allTeachers',function () {
-  var teachers = Meteor.users.find({}).fetch();
-  var curUserIndex = teachers.findIndex(function(user){return user._id == Meteor.userId();})
-  if(curUserIndex > -1){
-    teachers.splice(curUserIndex,1);
-  }
-  var southwestTeachers = [];
-  for(var i=0;i<teachers.length;i++){
-    var curTeacher = teachers[i];
-    if(curTeacher.username.toLowerCase().indexOf("southwest.tn.edu") != -1){
-      southwestTeachers.push(curTeacher);
-    }
-  }
-
-  console.log(JSON.stringify(southwestTeachers));
-  Session.set("teachers",southwestTeachers);
-});
-
 Template.signInSouthwest.onRendered(function(){
   Session.set("loginMode","southwest");
+
+  Meteor.subscribe('allTeachers',function () {
+    var teachers = Meteor.users.find({}).fetch();
+    var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
+    console.log("got teachers");
+    Session.set("teachers",verifiedTeachers);
+  });
 });
 
 Template.signInSouthwest.helpers({

@@ -57,6 +57,20 @@
                   <td>&nbsp;</td>
                   <td><button type="button" id="progressButton" class="button btn  navbar-btn">Progress</button></td>
                   <td>&nbsp;</td>
+                  {{#if isInRole 'admin'}}
+                  <td><button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button></td>
+                  <td>&nbsp;</td>
+                  {{/if}}
+                  {{#if isInRole 'admin,teacher'}}
+                  <td><button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button></td>
+                  <td>&nbsp;</td>
+                  <td><button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button></td>
+                  <td>&nbsp;</td>
+                  <td><button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button></td>
+                  <td>&nbsp;</td>
+                  <td><button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button></td>
+                  <td>&nbsp;</td>
+                  {{/if}}
                   <td><button type="button" id="logoutButton" class="button btn  navbar-btn">Logout</button></td>
                   {{/if}}
               </table>

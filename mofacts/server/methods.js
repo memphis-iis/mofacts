@@ -118,6 +118,12 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
     };
 }
 
+function genID(length){
+  return Math.random().toString(36).substring(2, (2+length));
+}
+
+const lengthOfNewGeneratedIDs = 6;
+
 //Published to all clients (even without subscription calls)
 Meteor.publish(null, function () {
     //Only valid way to get the user ID for publications
@@ -128,31 +134,35 @@ Meteor.publish(null, function () {
     var defaultData = [
         Stimuli.find({}),
         Tdfs.find({}),
-        UserTimesLog.find({}),
+        UserTimesLog.find({_id:userId}),
         Meteor.users.find({_id: userId}),
         UserProfileData.find({_id: userId}, {fields: {
             have_aws_id: 1,
             have_aws_secret: 1,
             use_sandbox: 1
         }}),
-        UserMetrics.find({}),
+        UserMetrics.find({_id:userId}),
         Classes.find({})
     ];
 
     return defaultData;
 });
 
-Meteor.publish('userMetrics', function(){
-  return UserMetrics.find({});
+Meteor.publish('specificUser',function(username){
+  return Meteor.users.find({"username":username});
 })
 
 Meteor.publish('tdfs', function(){
   return Tdfs.find({});
 })
 
-// Meteor.publish('classes',function(){
-//   return Classes.find({instructor:this.userId});
-// });
+Meteor.publish('specificUserTimesLog',function(userId){
+  return UserTimesLog.find({_id:userId});
+})
+
+Meteor.publish('specificUserMetrics',function(userId){
+  return UserMetrics.find({_id:userId});
+})
 
 Meteor.publish('allUsers', function () {
     var opts = {
@@ -164,12 +174,12 @@ Meteor.publish('allUsers', function () {
 	return Meteor.users.find({}, opts);
 });
 
-Meteor.publish('allTeachers', function(){
-  var opts = {
-    fields: {username: 1}
-  }
+Meteor.publish('classesForInstructor',function(instructorID){
+  return Classes.find({"instructor":instructorID});
+})
 
-  return Meteor.users.find({'roles':'teacher'},opts);
+Meteor.publish('allTeachers', function(){
+  return Meteor.users.find({'roles':'teacher',"username":/southwest[.]tn[.]edu/i});
 });
 
 //Config for scheduled jobs - the start command is at the end of
@@ -352,6 +362,124 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          generateUnusedIDs:function(numIDsToGen){
+            var newIDs = [];
+            var idMap = {};
+            var allUsers = Meteor.users.find({}).fetch();
+            _.each(allUsers,function(user){
+              var id = user.username;
+              idMap[id] = true;
+            })
+            for(var i=0;i<numIDsToGen;i++){
+              var newID = genID(lengthOfNewGeneratedIDs);
+              while(idMap[newID]){
+                newID = genID(lengthOfNewGeneratedIDs);
+              }
+              newIDs.push(newID);
+              idMap[newID] = true;
+            }
+
+            return newIDs;
+          },
+
+          getStudentPerformanceForClassAndTdf:function(classID,tdfFileName){
+            var curClass = Classes.findOne({_id:classID});
+            studentTotals = {
+              numCorrect: 0,
+              count: 0,
+              totalTime: 0
+            }
+            var students = [];
+            if(!!curClass){
+              curClass.students.forEach(function(studentUsername){
+                if(studentUsername.indexOf("@") == -1){
+                  studentUsername = studentUsername.toUpperCase();
+                }
+                var student = Meteor.users.findOne({"username":studentUsername}) || {};
+                var studentID = student._id;
+                var count = 0;
+                var numCorrect = 0;
+                var totalTime = 0;
+                var tdfQueryName = tdfFileName.replace('.','_');
+                UserMetrics.find({_id:studentID}).forEach(function(entry){
+                  var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+                  for(var index in tdfEntries){
+                    var key = tdfEntries[index];
+                    var tdf = entry[key];
+                    for(var index in tdf){
+                      var stim = tdf[index];
+                      count += stim.questionCount || 0;
+                      numCorrect += stim.correctAnswerCount || 0;
+                      var answerTimes = stim.answerTimes;
+                      for(var index in answerTimes){
+                        var time = answerTimes[index];
+                        totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+                      }
+                    }
+                  }
+                });
+                var percentCorrect = "N/A";
+                if(count != 0){
+                  percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
+                }
+                totalTime = totalTime.toFixed(1);
+                var studentPerformance = {
+                  "username":studentUsername,
+                  "count":count,
+                  "percentCorrect":percentCorrect,
+                  "numCorrect":numCorrect,
+                  "totalTime":totalTime
+                }
+                studentTotals.count += studentPerformance.count;
+                studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+                studentTotals.numCorrect += studentPerformance.numCorrect;
+                students.push(studentPerformance);
+              })
+            }
+            studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
+            studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
+            return [students,studentTotals];
+          },
+
+          namesOfTdfsAttempted:function(userId){
+            var allNamesOfTdfsAttempted = [];
+
+            var userMetrics = UserMetrics.find({_id:userId});
+
+            userMetrics.forEach(function(entry){
+              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
+              for(var index in possibleTdfs){
+                var possibleTdf = possibleTdfs[index];
+                if(possibleTdf.indexOf("_xml") != -1){
+                  var curTdfName = possibleTdf;
+                  // //Replace only last underscore with "." to reconstruct actual tdf name
+                  // curTdfName = curTdfName.replace("_xml",".xml");
+                  allNamesOfTdfsAttempted.push(curTdfName);
+                }
+              }
+            });
+
+            return allNamesOfTdfsAttempted;
+        },
+
+        getTdfNamesAssignedByInstructor:function(instructorID){
+          var user = Meteor.users.findOne({_id:instructorID});
+          var instructorClasses;
+          if(Roles.userIsInRole(user, ['admin'])){
+            instructorClasses = Classes.find({}).fetch();
+          }else{
+            instructorClasses = Classes.find({"instructor":instructorID}).fetch();
+          }
+          var tdfs = new Set();
+          _.each(instructorClasses,function(curClass){
+            var tdfsInClass = curClass.tdfs;
+            _.each(tdfsInClass,function(curTdf){
+              tdfs.add(curTdf);
+            });
+          });
+          return Array.from(tdfs);
+        },
+
         insertClozeEditHistory:function(history){
           ClozeEditHistory.insert(history);
         },
@@ -363,14 +491,6 @@ Meteor.startup(function () {
         insertStimTDFPair:function(newStimJSON,newTDFJSON){
           Stimuli.insert(newStimJSON);
           Tdfs.insert(newTDFJSON);
-        },
-
-        usernameToIDMap:function(){
-          usernameToIDMap = {};
-          Meteor.users.find({}).forEach(function(user){
-            usernameToIDMap[user.username] = user._id;
-          })
-          return usernameToIDMap;
         },
 
         addClass: function(myClass){
@@ -390,7 +510,8 @@ Meteor.startup(function () {
 
         addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
           user = user.toLowerCase();
-          var teacherID = usernameToIDMap[teacherUsername];
+          var teacher = Meteor.users.find("username":teacherUsername) || {};
+          var teacherID = teacher._id;
           console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
           var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();
           console.log("teacherClasses: " + JSON.stringify(teacherClasses));

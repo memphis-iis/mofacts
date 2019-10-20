@@ -1,23 +1,24 @@
 Session.set("classes",[]);
-Session.set("allTdfs",[]);
+Session.set("allTdfFilenamesAndDisplayNames",[]);
 Session.set("tdfsSelected",[]);
 Session.set("tdfsNotSelected",[]);
 
 curClass = {tdfs:[]};
 
 Template.tdfAssignmentEdit.onRendered(function(){
+  console.log("tdfAssignmentEdit rendered");
   Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
 
   Meteor.subscribe('tdfs',function () {
     var allTdfs = [];
-    var allTdfObjects = getAllTdfs();
+    var allTdfObjects = Tdfs.find({}).fetch();
     for(var i in allTdfObjects){
       var tdf = allTdfObjects[i];
       if(tdf.owner == Meteor.userId()){
         allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
       }
     }
-    Session.set("allTdfs",allTdfs);
+    Session.set("allTdfFilenamesAndDisplayNames",allTdfs);
   });
 
   Tracker.autorun(function(){
@@ -104,5 +105,5 @@ function getselectedItems(itemSelector){
 function updateTdfsSelectedAndNotSelected(){
   console.log("updateTdfsSelectedAndNotSelected");
   Session.set("tdfsSelected",curClass.tdfs);
-  Session.set("tdfsNotSelected",Session.get("allTdfs").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
+  Session.set("tdfsNotSelected",Session.get("allTdfFilenamesAndDisplayNames").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
 }

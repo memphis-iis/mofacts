@@ -153,7 +153,8 @@ generateAndSubmitTDFAndStimFiles = function(){
       console.log("Inserting stim/tdf pair result: " + res);
       saveEditHistory(originalClozes,clozes);
       //Update session variable used in tdfAssignmentEdit so that we can assign a tdf immediately after generation without reloading the page
-      Session.set("allTdfs",Session.get("allTdfs").concat({fileName:tdfFileName,displayName:displayName}));
+      Session.set("allTdfFilenamesAndDisplayNames",Session.get("allTdfFilenamesAndDisplayNames").concat({fileName:tdfFileName,displayName:displayName}));
+      Session.set("contentGenerationAllTdfs",Session.get("contentGenerationAllTdfs").concat(newTDFJSON));
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
       $("#save-modal").modal('hide');
@@ -206,6 +207,7 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,numStimClozes){
 }
 
 Template.contentGeneration.onRendered(function(){
+  console.log("contentGeneration rendered");
   setAllTdfs();
 });
 

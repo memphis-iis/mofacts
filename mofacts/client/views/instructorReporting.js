@@ -2,7 +2,7 @@ Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClassStudentTotals",null);
 
-curTdf = "";
+curTdf = "invalid";
 curClassName = "";
 
 navigateToStudentReporting = function(studentUsername){
@@ -12,28 +12,20 @@ navigateToStudentReporting = function(studentUsername){
   Router.go("/studentReporting");
 }
 
-getCurClassStudents = function(curClassName,currentTdf){
+setCurClassStudents = function(curClassName,currentTdf){
   var classes = Session.get("classes");
   var curClass = search(curClassName,"name",classes);
-  studentTotals = {
-    numCorrect: 0,
-    count: 0,
-    totalTime: 0
-  }
-  var students = [];
-  if(!!curClass){
-    curClass.students.forEach(function(studentUsername){
-      var studentID = translateUsernameToID(studentUsername);
-      var studentPerformance = getStudentPerformance(studentUsername,studentID,currentTdf);
-      studentTotals.count += studentPerformance.count;
-      studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
-      studentTotals.numCorrect += studentPerformance.numCorrect;
-      students.push(studentPerformance);
-    })
-  }
-  studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count).toFixed(4) * 100 + "%";
-  Session.set("curClassStudents",students);
-  Session.set("curClassStudentTotals",studentTotals);
+  var classID = curClass._id;
+
+  Meteor.call('getStudentPerformanceForClassAndTdf',classID,currentTdf,function(err,res){
+    if(!!err){
+      console.log("error getting student performance for class and tdf: " + JSON.stringify(err));
+    }else{
+      console.log("getStudentPerformanceForClassAndTdf returned: " + JSON.stringify(res));
+      Session.set("curClassStudents",res[0]);
+      Session.set("curClassStudentTotals",res[1]);
+    }
+  })
 }
 
 Template.instructorReporting.helpers({
@@ -46,7 +38,7 @@ Template.instructorReporting.helpers({
   },
 
 //Session var index by curClassName?
-  getCurClassStudents: function(curClassName){
+  getCurClassStudents: function(){
     return Session.get("curClassStudents");
   },
 
@@ -67,7 +59,7 @@ Template.instructorReporting.events({
     }
     curTdf = $(event.currentTarget).val();
     if(!!curClassName){
-      getCurClassStudents(curClassName,curTdf);
+      setCurClassStudents(curClassName,curTdf);
     }
   },
   "click .nav-tabs": function(event, template){
@@ -78,19 +70,26 @@ Template.instructorReporting.events({
       setTimeout(function(){
         //Need to strip newlines because chrome appends them for some reason
         curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-        getCurClassStudents(curClassName,curTdf);
+        console.log("click nav tabs after timeout, curClassName: " + curClassName);
+        setCurClassStudents(curClassName,curTdf);
+        $("#")
       },200);
     }
   }
 });
 
 Template.instructorReporting.onRendered(function(){
-  Meteor.subscribe('tdfs',function () {
-    Session.set("instructorReportingTdfs",getAllTdfs());
+  console.log("instructorReporting rendered");
+  Meteor.call('getTdfNamesAssignedByInstructor',Meteor.userId(),function (err,res) {
+    if(!!err){
+      console.log("error getting tdf names assigned by instructor: " + JSON.stringify(err));
+    }else{
+      Session.set("instructorReportingTdfs",res);
+    }
   });
 
-  Meteor.subscribe('classes',function(){
-    var classes = getAllClassesForCurrentInstructor(Meteor.userId());
-    Session.set("classes",classes);
-  });
+  var classes = getAllClassesForCurrentInstructor(Meteor.userId());
+  console.log("userID: " + Meteor.userId());
+  console.log("classes: " + JSON.stringify(classes));
+  Session.set("classes",classes);
 })
