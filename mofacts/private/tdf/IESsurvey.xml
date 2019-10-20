@@ -14,6 +14,246 @@
         <shuffleclusters>30-159</shuffleclusters>
     </setspec>
     <unit>
+        <unitname>Informed Consent</unitname>
+        <unitinstructions><![CDATA[
+          <center><table width="738" cellspacing="0" cellpadding="0" border="2">
+  	<tbody>
+  		<tr>
+  			<td colspan="2" width="738">
+  				<center>
+  				<h3>	<strong>Consent for Research Participation</strong></h3>
+        </center>
+  			</td>
+  		</tr>
+  		<tr>
+  			<td width="380">
+  				<p>
+  					<strong>Title</strong>
+  				</p>
+  				<p>
+  					<strong> </strong>
+  				</p>
+  			</td>
+  			<td width="358" valign="top">
+  				<p>
+  					Using Adaptive Practice to Improve Recall and Understanding
+  					in Postsecondary Anatomy and Physiology
+  				</p>
+  			</td>
+  		</tr>
+  		<tr>
+  			<td width="380">
+  				<p>
+  					<strong>Sponsor</strong>
+  				</p>
+  			</td>
+  			<td width="358" valign="top">
+  				<p>
+  					Department of Education, Institute of Educational Science
+  				</p>
+  			</td>
+  		</tr>
+  		<tr>
+  			<td width="380">
+  				<p>
+  					<strong>Researcher(s)</strong>
+  				</p>
+  			</td>
+  			<td width="358" valign="top">
+  				<p>
+  					Philip Pavlik, University of Memphis
+  				</p>
+  				<p>
+  					Andrew Olney, University of Memphis
+  				</p>
+  				<p>
+  					Amanda Banker, Southwest Tennessee Community College
+  				</p>
+  			</td>
+  		</tr>
+  		<tr>
+  			<td width="380">
+  				<p>
+  					<strong>Researchers Contact Information</strong>
+  				</p>
+  			</td>
+  			<td width="358">
+  				<p>
+  					412-605-0581, ppavlik@memphis.edu
+  				</p>
+  			</td>
+  		</tr>
+  	</tbody>
+  </table></center>
+          <p>
+            You are being asked to participate in a research study. The box below
+            highlights key information for you to consider when deciding if you want to
+            participate. More detailed information is provided below the box. Please
+            ask the researcher(s) any questions about the study before you make your
+            decision. If you volunteer, you will be one of about 150 people to do so.
+          </p>
+          <center><table cellspacing="0" cellpadding="0" border="2">
+            <tbody>
+              <tr>
+                <td width="714" valign="top">
+                  <p align="center">
+                    <strong>Key Information for You to Consider</strong>
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td width="714" valign="top">
+                  <p>
+                    <strong><u>Voluntary Consent: </u></strong>
+                    You are being asked to volunteer for a research study. It
+                    is up to you whether you choose to participate or not.
+                    There will be no penalty or loss of benefit to which you
+                    are otherwise entitled if you choose not to participate or
+                    discontinue participation.
+                  </p>
+                  <p>
+                    <strong><u>Purpose:</u></strong>
+                    The purpose of the study is to help us understand results
+                    from an adaptive practice system for Anatomy and
+                    Physiology. You are being invited to participate because
+                    are a student in a participating section of Anatomy and
+                    Physiology at Southwest Tennessee Community College.
+                  </p>
+                  <p>
+                    <strong><u>Duration:</u></strong>
+                    It is expected that your participation will last 30 minutes
+                    or less.
+                  </p>
+                  <p>
+                    <strong><u>Procedures and Activities</u></strong>
+                    : You will be asked some demographic questions to get a
+                    better idea of past experience of students. There will also
+                    be a survey of author recognition to get an idea how much
+                    reading you do in your spare time.
+                  </p>
+                  <p>
+                    <strong><u>Risk:</u></strong>
+                    Some of the foreseeable risk or discomforts of your
+                    participation include boredom or stress if you find the
+                    author recognition difficult.
+                  </p>
+                  <p>
+                    <strong><u>Benefits:</u></strong>
+                    The benefit is in helping us improve the system for future
+                    students. This may improve student learning and success.
+                  </p>
+                  <p>
+                    <strong><u>Alternatives</u></strong>
+                    : Participation is voluntary, and the only alternative is
+                    to not participate. As a student if you decide not to take
+                    part in this study your choice will have no effect on your
+                    academic status or grade in your class.
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table></center>
+          <p>
+            <h3>Who is conducting this research?</h3>
+          </p>
+          <p>
+            Philip Pavlik of the University of Memphis, Institute of Intelligent
+            Systems and Department of Psychology is in charge of the study. There may
+            be other research team members assisting during the study.
+          </p>
+            <h3>What happens if I agree to participate in this Research?</h3>
+
+          <p>
+            If you agree you will be asked to answer 30 quick demographics questions
+            and then try to identify authors from a list of 65 authors that will be
+            presented.
+          </p>
+            <h3>
+              What happens to the information collected for this research?
+            </h3>
+          <p>
+            By participating, you understand and agree that the deidentified data
+            gathered during this study may be used by the University of Memphis and
+            published and/or disclosed by the University of Memphis to others outside
+            of the University of Memphis. However, no personally identifying
+            information will ever be mentioned in any such publication or dissemination
+            of the research data and/or results to other researchers. In fact, we will
+            never receive any personally identifying information in the course of this
+            study.
+          </p>
+          <p>
+            <h3>How will my privacy and data confidentiality be protected?</h3>
+          </p>
+          <p>
+            We are very careful to protect student's identity in the course of this
+            research. Our data collection strategy is designed to never expose the true
+            identity of students to our research team. Data-linkage will occur through
+            a random login ID distributed to each student the first week of the course.
+            Your instructors have been carefully informed that they should not share
+            the identities of students with us, so we will only identify you with your
+            assigned login. Only teachers will create the keys to match logins to
+            individuals. We do not log GPS or IP address information. We will further
+            deidentify your data (remove your ID) after the experiment before storing
+            it on our computers long-term..
+          </p>
+
+            <h3>What if I want to stop participating in this research?</h3>
+
+          <p>
+            It is up to you to decide whether you want to volunteer for this study. It
+            is also ok to decide to end your participation at any time. There is no
+            penalty or loss of benefits to which you are otherwise entitled if you
+            decided to withdraw your participation. Your decision about participating
+            will not affect your relationship with the researcher(s) or the University
+          of Memphis or Southwest Tennessee Community College.
+          </p>
+          <h3>
+            Will it cost me money to take part in this research?
+          </h3>
+          <p>
+            No.
+          </p>
+          <h3>
+            Will I receive any compensation or reward for participating in this
+            research?
+          </h3>
+          <p>
+            Your professor will distribute a $10 Macy's gift card if you complete this
+            survey before the chapter 11 exam. Professors will distribute
+            the gift cards to the students who completed the survey.
+          </p>
+          <h3>
+            Who can answer my question about this research?
+          </h3>
+          <p>
+        Before you decide to volunteer for this study, if you have questions, suggestions, concerns, or complaints about the
+            study, you can contact the investigator, Dr. Philip Pavlik at 412-605-0581
+          or email	<a href="mailto:ppavlik@memphis.edu">ppavlik@memphis.edu</a>. If you
+            have any questions about your rights as a volunteer in this research,
+            contact the Institutional Review Board staff at the University of Memphis
+          at 901-678-2705 or email	<a href="mailto:irb@memphis.edu">irb@memphis.edu</a>. You may print this
+            screen webpage for your records.
+          </p>
+          <p>
+            <center><strong>STATEMENT OF CONSENT </strong></center>
+          </p>
+          <p>
+            I have had the opportunity to consider the information in this form. I have
+            asked any questions needed for me to decide about my participation. I
+            understand that I can ask additional questions though the study.
+          </p>
+          <p>
+            By clicking below, I am electronically signing, I volunteer to participate
+            in this research. I understand that I am not waiving any legal rights. I
+            may print a copy of this form.
+          </p>
+
+
+
+
+          ]]> </unitinstructions>
+    </unit>
+    <unit>
         <unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 35 questions and second with 65 questions. Be sure you have logged in with the special ID
         your instructor gave you. These random ID allow us to match data to grades without knowing who you are.]]></unitinstructions>
         <unitname>Survey for A&amp;P Students</unitname>
