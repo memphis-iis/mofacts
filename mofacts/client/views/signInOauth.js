@@ -69,6 +69,13 @@ function testLogin(){
 }
 
 var waitOnConfig = function(){
+  var loginMode = Session.get("loginMode");
+  if(loginMode === "southwest" || loginMode === "password" || loginMode === "experiment"){
+    console.log("wrong login page rendered, redirecting:");
+    routeToSignin();
+    return;
+  }
+
   if(!Accounts.loginServicesConfigured()){
     console.log('+++++ Config not loaded! Waiting... +++++');
     $('#signInButtonOAuth').hide();

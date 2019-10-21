@@ -526,6 +526,7 @@ Template.card.helpers({
 
     'username': function () {
         if (!haveMeteorUser()) {
+          console.log("!haveMeteorUser");
             leavePage(routeToSignin);
         }
         else {

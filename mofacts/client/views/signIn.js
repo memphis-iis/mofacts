@@ -1,3 +1,8 @@
+Template.signIn.onRendered(function(){
+  console.log("password signin, setting login mode");
+  Session.set('loginMode','password');
+})
+
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
@@ -162,8 +167,6 @@ function UserPasswordCheck() {
                 $("#signInButton").prop("disabled",false);
                 return;
             }
-            
-            Session.set('loginMode','password');
             signinNotify();
         }
     });
