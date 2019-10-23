@@ -362,6 +362,10 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          logUserAgentAndLoginTime:function(userID,userAgent){
+            var loginTime = new Date();
+            return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
+          },
           generateUnusedIDs:function(numIDsToGen){
             var newIDs = [];
             var idMap = {};

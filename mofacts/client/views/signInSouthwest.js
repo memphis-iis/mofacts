@@ -60,6 +60,7 @@ function testLogin(){
                     var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
                     console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
                 }
+                Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
                 Router.go("/profileSouthwest");
             }
         });

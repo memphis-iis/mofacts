@@ -62,6 +62,7 @@ function testLogin(){
                   console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
                   Meteor.call("debugLog", "TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION");
               }
+              Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
               Router.go("/profile");
           }
       });
@@ -119,7 +120,7 @@ Template.signInOauth.events({
                 console.log(currentUser + " was logged in successfully! Current route is ", Router.current().route.getName());
                 Meteor.call("debugLog", "Sign in was successful");
             }
-
+            Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
             Router.go("/profile");
         });
     },

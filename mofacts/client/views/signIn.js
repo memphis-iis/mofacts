@@ -138,6 +138,7 @@ function UserPasswordCheck() {
                       $("#signInButton").prop("disabled",false);
                   }
                   else {
+                      Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
                       signinNotify();
                   }
               });
@@ -167,6 +168,7 @@ function UserPasswordCheck() {
                 $("#signInButton").prop("disabled",false);
                 return;
             }
+            Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
             signinNotify();
         }
     });
