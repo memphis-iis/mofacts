@@ -92,6 +92,10 @@ function create(func) {
 
 // Our "public" functions
 
+stripSpacesAndLowerCase = function(input){
+  return input.replace(/ /g,'').toLowerCase();
+}
+
 createEmptyUnit = function() {
     return create(emptyUnitEngine);
 };
@@ -197,7 +201,7 @@ function modelUnitEngine() {
 
     //We cache the stimuli found since it shouldn't change during the unit
     var cachedStimuli = null;
-    function fastGetStimCluster(index) {
+    fastGetStimCluster =function(index) {
         if (!cachedStimuli) {
             cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
         }
@@ -238,7 +242,7 @@ function modelUnitEngine() {
     }
 
     //Initialize card probabilities, with optional initial data
-    var cardProbabilities = [];
+    cardProbabilities = [];
     function initCardProbs(overrideData) {
         var initVals = {
             numQuestionsAnswered: 0,
@@ -309,7 +313,7 @@ function modelUnitEngine() {
                 });
 
                 // Per-response counts
-                var response = Answers.getDisplayAnswerText(cluster.response[j]);
+                var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[j]));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
                         responseSuccessCount: 0,
@@ -451,7 +455,7 @@ function modelUnitEngine() {
 
         p.stimSuccessCount = stim.stimSuccessCount;
         p.stimFailureCount = stim.stimFailureCount;
-        p.stimResponseText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex));
+        p.stimResponseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)));
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
@@ -707,7 +711,7 @@ function modelUnitEngine() {
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
 
-            var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]);
+            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]));
             if (responseText && responseText in cardProbabilities.responses) {
                 resp = cardProbabilities.responses[responseText];
                 resp.lastShownTimestamp = Date.now();
@@ -764,7 +768,7 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var card = cards[indexForNewCard];
             var stim = card.stims[prob.stimIndex];
-            var responseText = Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).response[prob.stimIndex]);
+            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).response[prob.stimIndex]));
             var resp = {};
             if (responseText && responseText in cardProbabilities.responses) {
                 resp = cardProbabilities.responses[responseText];
@@ -817,7 +821,7 @@ function modelUnitEngine() {
             var idx = fastGetStimCluster(getCurrentClusterIndex()).clusterIndex;
             var card = cardProbabilities.cards[idx];
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
-            var responseText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
+            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]));
             var responseData = {
               responseText: responseText,
               lastShownTimestamp: Date.now()
@@ -903,7 +907,7 @@ function modelUnitEngine() {
             }
 
             // "Response" stats
-            var answerText = Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]);
+            var answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]));
             if (answerText && answerText in cardProbabilities.responses) {
                 var resp = cardProbabilities.responses[answerText];
                 if (wasCorrect) resp.responseSuccessCount += 1;
