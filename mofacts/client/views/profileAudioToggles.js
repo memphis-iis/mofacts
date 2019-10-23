@@ -48,6 +48,14 @@ setAudioInputOnPage = function(audioInputEnabled){
   }
 }
 
+showHideheadphonesSuggestedDiv = function(show){
+  if(show){
+    $("#headphonesSuggestedDiv").removeClass("invisible");
+  }else{
+    $("#headphonesSuggestedDiv").addClass("invisible");
+  }
+}
+
 showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode = function(audioPromptMode){
   switch(audioPromptMode){
     case "feedback":
@@ -107,13 +115,23 @@ Template.profileAudioToggles.events({
     console.log("audio prompt mode: " + event.currentTarget.id);
     var audioPromptMode = getAudioPromptModeFromPage();
 
+    var showHeadphonesSuggestedDiv = (audioPromptMode != "silent") && getAudioInputFromPage();
+
+    showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
+
     Session.set("audioPromptFeedbackView",audioPromptMode);
 
     showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
   },
 
   'click .audioInputRadio': function(event){
+    console.log("audio input mode: " + event.currentTarget.id);
     var audioInputEnabled = getAudioInputFromPage();
+
+    var showHeadphonesSuggestedDiv = (getAudioPromptModeFromPage() != "silent") && audioInputEnabled;
+
+    showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
+
     showHideAudioEnabledGroup(audioInputEnabled);
   },
 
