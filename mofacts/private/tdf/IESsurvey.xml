@@ -4,7 +4,7 @@
         <userselect>true</userselect>
         <stimulusfile>IESsurveystims.xml</stimulusfile>
         <lfparameter>.85</lfparameter>
-      
+
         <shuffleclusters>30-159</shuffleclusters>
     </setspec>
     <unit>
@@ -248,7 +248,7 @@
           ]]> </unitinstructions>
     </unit>
     <unit>
-        <unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 35 questions and second with 65 questions. Be sure you have logged in with the special ID
+        <unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 30 questions and second with 65 questions. Be sure you have logged in with the special ID
         your instructor gave you. These random ID allow us to match data to grades without knowing who you are.]]></unitinstructions>
         <unitname>Survey for A&amp;P Students</unitname>
           <buttonorder>fixed</buttonorder>
