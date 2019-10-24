@@ -7,7 +7,7 @@
         <speechAPIKey></speechAPIKey>
         <audioInputEnabled>true</audioInputEnabled>
         <audioInputSensitivity>15</audioInputSensitivity>
-        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
+        <speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
         <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
         <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
         <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
@@ -273,6 +273,32 @@
           ]]> </unitinstructions>
     </unit>
     <unit>
+        <unitname>Reading competed</unitname>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>1</templatesrepeated>
+                <group>0,f,d,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions> A_1     </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>18-18</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+        <deliveryparams>
+            <drill>10000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>8000</reviewstudy>
+            <correctprompt>8000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
         <unitinstructions><![CDATA[
           <center><h3>Anatomy & Physiology Practice Instructions</h3></center><br>
 Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.
@@ -363,7 +389,7 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
             <skipstudy>false</skipstudy>
             <reviewstudy>16000</reviewstudy>
             <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
+            <fontsize>3</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
