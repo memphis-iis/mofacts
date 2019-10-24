@@ -271,39 +271,12 @@
             <response>participated~Correct.;sample~Sample is incorrect. The correct response is participated. Using the word sample to describe a sample doesn't add much explanation. Therefore, we want to say generally what the sample did, which is to say that they participated.;.*~Incorrect. The correct fill-in is 'participated'.</response>
         </cluster>
         <cluster>
-            <display>Age?</display>
-            <response>18-25</response>
-            <falseResponse>26-34</falseResponse>
-            <falseResponse>35-54</falseResponse>
-            <falseResponse>55-64</falseResponse>
-            <falseResponse>65 and over</falseResponse>
-        </cluster>
-        <cluster>
-            <display>Gender?</display>
-            <response>Male</response>
-            <falseResponse>Female</falseResponse>
-            <falseResponse>Other</falseResponse>
-            <falseResponse>Prefer not to answer</falseResponse>
-        </cluster>
-        <cluster>
-            <display>Which is the highest level of education you have completed?</display>
-            <response>Less than High School</response>
-            <falseResponse>High School or GED</falseResponse>
-            <falseResponse>Some College</falseResponse>
-            <falseResponse>4-year College Degree/ Bachelors</falseResponse>
-            <falseResponse>Graduate Degree</falseResponse>
-        </cluster>
-        <cluster>
-            <display>Did you have a high school statistics class?</display>
-            <response>Yes</response>
-            <falseResponse>No</falseResponse>
-        </cluster>
-        <cluster>
-            <display>How many college statistics classes have you taken?</display>
-            <response>0</response>
-            <falseResponse>1</falseResponse>
-            <falseResponse>2</falseResponse>
-            <falseResponse>3 or more</falseResponse>
-        </cluster>
+          <displayType>Cloze</displayType>
+          <parameter>0,.71</parameter>
+          <display>Did you read the chapter (yes/no)?</display>
+          <response>Yes~Excellent this should make the practice more effective.;.*~That may not be the best choice. We suggest going back and reading the chapter. </response>
+      </cluster>
+
+
     </clusters>
 </setspec>
