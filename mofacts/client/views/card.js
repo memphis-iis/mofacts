@@ -190,9 +190,9 @@ var currentQuestionSound = null; //See later in this file for sound functions
 
 //We need to track the name/ID for clear and reset. We need the function and
 //delay used for reset
-var timeoutName = null;
-var timeoutFunc = null;
-var timeoutDelay = null;
+timeoutName = null;
+timeoutFunc = null;
+timeoutDelay = null;
 var varLenTimeoutName = null;
 var simTimeoutName = null;
 
@@ -234,16 +234,23 @@ function clearCardTimeout() {
 //Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
 function beginMainCardTimeout(delay, func) {
     clearCardTimeout();
+
     timeoutFunc = function(){
-      if(document.location.pathname != "/card"){
-        leavePage(function(){console.log("cleaning up page after nav away from card")});
-      }else if (typeof func === "function") {
-          func();
+      var numRemainingLocks = Session.get("pausedLocks");
+      if(numRemainingLocks > 0){
+        console.log("timeout reached but there are " + numRemainingLocks + " locks outstanding");
       }else{
-        console.log("function!!!: " + JSON.stringify(func));
+        if(document.location.pathname != "/card"){
+          leavePage(function(){console.log("cleaning up page after nav away from card")});
+        }else if (typeof func === "function") {
+            func();
+        }else{
+          console.log("function!!!: " + JSON.stringify(func));
+        }
       }
     };
     timeoutDelay = delay;
+    Session.set("mainCardTimeoutStart",new Date());
     timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
     varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }

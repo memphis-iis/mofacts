@@ -28,6 +28,13 @@ Meteor.startup(function() {
     console.logs = [];
     console.defaultLog = console.log.bind(console);
     console.log = function() {
+      for(var index in arguments){
+        var arg = arguments[index];
+        if(typeof(arg) != "object"){
+          console.logs.unshift(arg);
+        }
+      }
+      console.logs = console.logs.slice(0,1000);
       console.defaultLog.apply(console,arguments);
       //TODO: uncomment this when log rotation is set up
       // try{
@@ -44,6 +51,40 @@ Meteor.startup(function() {
         redoCardImage();
     });
 });
+
+restartMainCardTimeoutIfNecessary = function(){
+  console.log("restartMainCardTimeoutIfNecessary");
+  var mainCardTimeoutStart = Session.get("mainCardTimeoutStart");
+  if(!mainCardTimeoutStart){
+    var numRemainingLocks = Session.get("pausedLocks")-1;
+    Session.set("pausedLocks",numRemainingLocks);
+    return;
+  }
+  var errorReportStart = Session.get("errorReportStart");
+  Session.set("errorReportStart",null);
+  var usedDelayTime = errorReportStart - mainCardTimeoutStart;
+  var remainingDelay = timeoutDelay - usedDelayTime;
+  timeoutDelay = remainingDelay;
+  var rightNow = new Date();
+  Session.set("mainCardTimeoutStart",rightNow);
+  wrappedTimeout = function(){
+    var numRemainingLocks = Session.get("pausedLocks")-1;
+    Session.set("pausedLocks",numRemainingLocks);
+    if(numRemainingLocks <= 0){
+      timeoutFunc();
+    }else{
+      console.log("timeout reached but there are " + numRemainingLocks + " locks outstanding");
+    }
+  }
+  timeoutName = Meteor.setTimeout(wrappedTimeout,remainingDelay);
+}
+
+Template.body.onRendered(function(){
+  $('#errorReportingModal').on('hidden.bs.modal', function () {
+    console.log("error reporting modal hidden");
+    restartMainCardTimeoutIfNecessary();
+  });
+})
 
 Template.body.events({
   'click #homeButton' : function (event) {
@@ -73,6 +114,27 @@ Template.body.events({
         Session.set("curStudentID",Meteor.userId());
         setCurrentStudentPerformance();
       }
+  },
+
+  'click #errorReportButton' : function (event) {
+    event.preventDefault();
+    Session.set("pausedLocks",Session.get("pausedLocks")+1);
+    Session.set("errorReportStart",new Date());
+    $("#errorReportingModal").modal('show');
+  },
+
+  'click #errorReportingSaveButton' : function (event) {
+    event.preventDefault();
+    console.log("save error reporting button pressed");
+    var errorDescription = $("#errorDescription").val();
+    var curUser = Meteor.userId();
+    var curPage = document.location.pathname;
+    var sessionVars = Session.all();
+    var userAgent = navigator.userAgent;
+    var logs = console.logs;
+    Meteor.call('sendUserErrorReport',curUser,errorDescription,curPage,sessionVars,userAgent,logs);
+    $("#errorReportingModal").modal('hide');
+    $("#errorDescription").val("");
   },
 
   'click #userAdminButton': function(event){

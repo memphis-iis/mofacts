@@ -57,6 +57,8 @@
                   <td>&nbsp;</td>
                   <td><button type="button" id="progressButton" class="button btn  navbar-btn">Progress</button></td>
                   <td>&nbsp;</td>
+                  <td><button type="button" id="errorReportButton" class="button btn  navbar-btn">Report Error</button></td>
+                  <td>&nbsp;</td>
                   {{#if isInRole 'admin'}}
                   <td><button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button></td>
                   <td>&nbsp;</td>
@@ -79,5 +81,36 @@
       </div>  <!-- close container -->
   </nav>  <!-- close nav -->
   <!-- main page content -->
+  <div id="errorReportingModal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="dismissErrorReportingButton" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><b>Error Reporting</b></h4>
+        </div> <!-- .modal-header -->
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 nav-box">
+              <b>Error:</b>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <textarea id="errorDescription" placeholder="Describe the error here"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer row">
+          <div class="col-md-3">
+            <button type="button" id="closeErrorReportingButton" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+          <div class="col-md-6"></div>
+          <div class="col-md-3">
+            <button type="button" id="errorReportingSaveButton" class="btn btn-primary">Submit Error Report</button>
+          </div>
+        </div> <!-- .modal-footer -->
+      </div> <!-- .modal-content -->
+    </div> <!-- .modal-dialog -->
+  </div>
   {{> yield}}
 </template>

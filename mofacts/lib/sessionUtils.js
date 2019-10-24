@@ -71,6 +71,9 @@ sessionCleanUp = function() {
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
     Session.set("enableAudioPromptAndFeedback",false);
+    Session.set("errorReportStart",undefined);
+    Session.set("mainCardTimeoutStart",undefined);
+    Session.set("pausedLocks",0);
     Session.set("audioPromptMode",undefined);
     Session.set("experimentPasswordRequired",false);
     Session.set("filter","@gmail.com");

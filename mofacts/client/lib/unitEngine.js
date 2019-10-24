@@ -496,7 +496,7 @@ function modelUnitEngine() {
             ptemp[i]=Math.round(100*parms.probability)/100;
 
         }
-        console.log(...ptemp);
+        console.log(JSON.stringify(ptemp));
         return cardProbabilities.probs;
     }
 

@@ -8,6 +8,12 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
+process.env.MAIL_URL = Meteor.settings.MAIL_URL;
+if(!!Meteor.settings.public.testLogin){
+  process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+  console.log("dev environment, allow insecure tls");
+}
+var adminUsers = Meteor.settings.initRoles.admins;
 
 var clozeGeneration = require('./lib/Process.js');
 
@@ -53,6 +59,32 @@ function logNumOnlineUsers() {
   var rowToWrite = now + ',' + numUsers + '\n';
   activeUserLogStream.write(rowToWrite);
   serverConsole('Logged ' + numUsers + ' active users.');
+}
+
+function sendErrorReportSummaries(){
+  serverConsole("sendErrorReportSummaries");
+  var unsentErrorReports = ErrorReports.find({"emailed":false}).fetch();
+  if(unsentErrorReports.length > 0){
+    var sentErrorReports = new Set();
+    for(var index in adminUsers){
+      var admin = adminUsers[index];
+      var from = "mofacts_app";
+      var subject = "Error Reports Summary";
+      var text = "";
+      for(var index2 in unsentErrorReports){
+        var unsentErrorReport = unsentErrorReports[index2];
+        var userWhoReportedError = Meteor.users.findOne({_id:unsentErrorReport.user});
+        text = text + "User: " + userWhoReportedError.username + ", page: " + unsentErrorReport.page + ", time: " + unsentErrorReport.time + ", description: " + unsentErrorReport.description + ", userAgent: " + unsentErrorReport.userAgent + " \n";
+        sentErrorReports.add(unsentErrorReport._id);
+      }
+      sendEmail(admin,from,subject,text);
+    }
+    sentErrorReports = Array.from(sentErrorReports);
+    ErrorReports.update({_id:{$in:sentErrorReports}},{$set:{"emailed":true}},{multi:true});
+    serverConsole("Sent " + sentErrorReports.length + " error reports summary");
+  }else{
+      serverConsole("no unsent error reports to send");
+  }
 }
 
 // Save the given user profile via "upsert" logic
@@ -120,6 +152,11 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
 
 function genID(length){
   return Math.random().toString(36).substring(2, (2+length));
+}
+
+function sendEmail(to,from,subject,text){
+  check([to,from,subject,text],[String]);
+  Email.send({to,from,subject,text});
 }
 
 const lengthOfNewGeneratedIDs = 6;
@@ -362,6 +399,28 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          sendErrorReportSummaries:function(){
+            sendErrorReportSummaries();
+          },
+          sendEmail:function(to,from,subject,text){
+            this.unblock();
+            sendEmail(to,from,subject,text);
+          },
+
+          sendUserErrorReport:function(userID,description,curPage,sessionVars,userAgent,logs){
+            var errorReport = {
+              user:userID,
+              description:description,
+              page:curPage,
+              time:new Date(),
+              sessionVars:sessionVars,
+              userAgent:userAgent,
+              logs:logs,
+              emailed:false
+            };
+            return ErrorReports.insert(errorReport);
+          },
+
           logUserAgentAndLoginTime:function(userID,userAgent){
             var loginTime = new Date();
             return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
@@ -922,6 +981,12 @@ Meteor.startup(function () {
     schedule: function(parser) { return parser.text('every 5 minutes'); },
     job: function() { return logNumOnlineUsers(); }
   });
+
+  SyncedCron.add({
+    name: 'Send Error Report Summaries',
+    schedule: function(parser) { return parser.text('every 24 hours');},
+    job: function() { return sendErrorReportSummaries(); }
+  })
 });
 
 //We use a special server-side route for our experimental data download
