@@ -2,6 +2,21 @@ Session.set("teachers",[]);
 Session.set("curTeacher",{});
 Session.set("curClass","");
 
+function getUrlVars()
+{
+    var vars = [], hash;
+    if(window.location.href.indexOf('?') > 0){
+      var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+      for(var i = 0; i < hashes.length; i++)
+      {
+          hash = hashes[i].split('=');
+          vars.push(hash[0]);
+          vars[hash[0]] = hash[1];
+      }
+    }
+    return vars;
+}
+
 function testLogin(){
   console.log("SW Login");
 
@@ -111,6 +126,11 @@ Template.signInSouthwest.onRendered(function(){
       }
     }
     console.log("got teachers");
+    var urlVars = getUrlVars();
+    if(!urlVars['showTestLogins']){
+      var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
+      verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+    }
     Session.set("teachers",verifiedTeachers);
   });
 });
