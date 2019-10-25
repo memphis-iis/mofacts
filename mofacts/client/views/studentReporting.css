@@ -52,7 +52,7 @@ line.ct-bar:nth-child(2n+1) {
    width: 100%;
    text-align: center;
    left: 0;
-   bottom: 0;
+   bottom: -10px;
    font-size: 1.45rem;
    color: #000;
    font-weight: bolder;
