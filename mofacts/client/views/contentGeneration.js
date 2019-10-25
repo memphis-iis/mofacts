@@ -39,7 +39,7 @@ setAllTdfs = function(){
             return !!cluster.displayType && cluster.displayType.length > 0 && cluster.displayType[0].toLowerCase() === "cloze";
           })).length > 0;
 
-          if(containsClozes){
+          if(containsClozes || fileName == "IESsurvey.xml"){
             allTdfs.push({'fileName':fileName,'displayName':displayName});
             tdfFileNameToTdfFileMap[fileName] = entry;
             tdfFileNameToStimfileMap[fileName] = stimulusObject;
