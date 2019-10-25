@@ -1013,7 +1013,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
             keypressTimestamp = Date.now();
         }
     }
-    else if (source === "buttonClick" || source === "simulation") {
+    else if (source === "buttonClick" || source === "simulation" || source === "voice") {
         //to save space we will just go ahead and act like it was a key press.
         key = 13;
     }
@@ -1041,6 +1041,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
     }
     else if (source === "simulation") {
         userAnswer = simAnswerCorrect ? "SIM: Correct Answer" : "SIM: Wrong Answer";
+    }else if (source === "voice"){
+      if(getButtonTrial()){
+        userAnswer = e.answer.name;
+      }else{
+        userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
+      }
     }
 
     //Show user feedback and find out if they answered correctly
@@ -1112,7 +1118,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
         'inferredReviewLatency': reviewLatency,
         'wasSim': (source === "simulation") ? 1 : 0,
         'displayedSystemResponse': $("#UserInteraction").text() || "",
-        'forceCorrectFeedback': ""
+        'forceCorrectFeedback': "",
+        'audioInputEnabled':Session.get("audioEnabled") || false,
+        'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false
     };
     var writeAnswerLog = function() {
         var realReviewLatency = Date.now() - reviewBegin;
@@ -1768,7 +1776,7 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
 
       if(getButtonTrial()){
         console.log("button trial, setting user answer to verbalChoice");
-        userAnswer = $("[verbalChoice='" + transcript + "']");
+        userAnswer = $("[verbalChoice='" + transcript + "']")[0];
         if(!userAnswer){
           console.log("Choice couldn't be found");
           ignoredOrSilent = true;
@@ -1793,10 +1801,9 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         //Only simulate enter key press if we picked up transcribable/in grammar
         //audio for better UX
         if(getButtonTrial()){
-            console.log("Simulating click on user's answer choice button");
-            userAnswer.click();
+            handleUserInput({answer:userAnswer},"voice");
         }else{
-            simulateUserAnswerEnterKeyPress();
+            handleUserInput({},"voice");
         }
       }
     });

@@ -123,7 +123,8 @@ Router.route('/experiment/:target?/:xcond?', {
         var tdf = Tdfs.findOne({"tdfs.tutor.setspec.experimentTarget":target});
         if(!!tdf){
           console.log("tdf found");
-          Session.set("experimentPasswordRequired",tdf.tdfs.tutor.setspec[0].experimentPasswordRequired);
+          Session.set("experimentPasswordRequired",eval(tdf.tdfs.tutor.setspec[0].experimentPasswordRequired[0]));
+          console.log("experimentPasswordRequired:" + Session.get("experimentPasswordRequired"));
 
           console.log("EXPERIMENT target:", target, "xcond", xcond);
 

@@ -68,7 +68,7 @@ function sendErrorReportSummaries(){
     var sentErrorReports = new Set();
     for(var index in adminUsers){
       var admin = adminUsers[index];
-      var from = "mofacts_app";
+      var from = "mofacts_app@mofacts.optimallearning.org";
       var subject = "Error Reports Summary";
       var text = "";
       for(var index2 in unsentErrorReports){

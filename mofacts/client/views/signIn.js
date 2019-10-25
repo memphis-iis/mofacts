@@ -1,6 +1,8 @@
 Template.signIn.onRendered(function(){
-  console.log("password signin, setting login mode");
-  Session.set('loginMode','password');
+  if(Session.get("loginMode") !== "experiment"){
+    console.log("password signin, setting login mode");
+    Session.set('loginMode','password');
+  }
 })
 
 ////////////////////////////////////////////////////////////////////////////
