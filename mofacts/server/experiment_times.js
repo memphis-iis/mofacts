@@ -61,6 +61,9 @@
         "Time", //stimDisplayedTime
         "Selection",
         "Action",
+        "GUI Source",
+        "Audio Input Enabled",
+        "Audio Output Enabled",
         "Input", //userAnswer
         "Outcome", //answerCorrect recoded as CORRECT or INCORRECT
         "Student Response Type", //trialType
@@ -314,6 +317,9 @@
             "Time": d(lastq.clientSideTimeStamp, 0),
             "Selection": '',
             "Action": '',
+            "GUI Source":d(lasta.guiSource,''),
+            "Audio Input Enabled":lasta.audioInputEnabled,
+            "Audio Output Enabled":lasta.audioOutputEnabled,
             "Input": d(lasta.answer, ''),
             "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
             "Student Response Type": isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
