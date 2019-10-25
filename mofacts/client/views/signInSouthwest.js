@@ -101,6 +101,15 @@ Template.signInSouthwest.onRendered(function(){
   Meteor.subscribe('allTeachers',function () {
     var teachers = Meteor.users.find({}).fetch();
     var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
+
+    //Hack to redirect rblaudow classes to ambanker
+    var ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
+    if(!!ambanker){
+      var rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
+      if(!!rblaudow){
+        rblaudow._id = ambanker._id;
+      }
+    }
     console.log("got teachers");
     Session.set("teachers",verifiedTeachers);
   });
