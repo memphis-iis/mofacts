@@ -14,6 +14,7 @@ if(!!Meteor.settings.public.testLogin){
   console.log("dev environment, allow insecure tls");
 }
 var adminUsers = Meteor.settings.initRoles.admins;
+var ownerEmail = Meteor.settings.owner;
 
 var clozeGeneration = require('./lib/Process.js');
 
@@ -68,7 +69,7 @@ function sendErrorReportSummaries(){
     var sentErrorReports = new Set();
     for(var index in adminUsers){
       var admin = adminUsers[index];
-      var from = "mofacts_app@mofacts.optimallearning.org";
+      var from = ownerEmail;
       var subject = "Error Reports Summary";
       var text = "";
       for(var index2 in unsentErrorReports){
