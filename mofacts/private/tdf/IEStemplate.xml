@@ -367,7 +367,7 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
 
                     p.y = -0.86820+
                     0.57548 * logitdec(
-                        p.overallOutcomeHistory.slice(p.overallOutcomeHistory.length-60,
+                        p.overallOutcomeHistory.slice(Math.max(p.overallOutcomeHistory.length-60,1),
                         p.overallOutcomeHistory.length), .97) +
                     0.77959 * logitdec(p.responseOutcomeHistory, .91) +
                     12.49161 * recency(p.stimSecsSinceLastShown, .52) +
