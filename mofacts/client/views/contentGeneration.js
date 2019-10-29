@@ -11,6 +11,8 @@ tdfFileNameToTdfFileMap = {};
 speechAPIKey = undefined;
 textToSpeechAPIKey = undefined;
 originalClozes = undefined;
+origTdfFileName = undefined;
+clusterListMappings = {};
 clozeEdits = [];
 dropDownTdfFileNames = ['Chapter_9_Template_andrew.tackett_2019_10_10T22_49_09_052Z_TDF.xml',
                         'Chapter_10_Template_andrew.tackett_2019_10_10T22_15_20_268Z_TDF.xml',
@@ -58,18 +60,32 @@ setClozesFromStimObject = function(stimObject){
   var allClozes = [];
   var allClusters = stimObject.stimuli.setspec.clusters[0].cluster;
   for(var index in allClusters){
-    var cluster = allClusters[index];
-    var fakeSentenceId = _.random(-9999999999,9999999999);
-    for(var index2 in cluster.display){
-      var clozeText = cluster.display[index2];
-      var clozeResponse = cluster.response[index2];
-      var clozeId = _.random(-9999999999,9999999999);
-      allClozes.push({
-        cloze:clozeText,
-        correctResponse:clozeResponse,
-        clozeId:clozeId,
-        itemId:fakeSentenceId
-      })
+    var inLearningSession = false;
+    var clusterUnitIndex = -1;
+    for(var unitIndex in clusterListMappings){
+      var mapping = clusterListMappings[unitIndex];
+      var clusterListIndices = mapping.orig;
+      if(index >= clusterListIndices[0] && index <= clusterListIndices[1]){
+        inLearningSession = mapping.sessionType === "learningsession";
+        clusterUnitIndex = unitIndex;
+        break;
+      }
+    }
+    if(inLearningSession){
+      var cluster = allClusters[index];
+      var fakeSentenceId = _.random(-9999999999,9999999999);
+      for(var index2 in cluster.display){
+        var clozeText = cluster.display[index2];
+        var clozeResponse = cluster.response[index2];
+        var clozeId = _.random(-9999999999,9999999999);
+        allClozes.push({
+          unitIndex:clusterUnitIndex,
+          cloze:clozeText,
+          correctResponse:clozeResponse,
+          clozeId:clozeId,
+          itemId:fakeSentenceId
+        })
+      }
     }
   }
   Session.set("clozeSentencePairs", {
@@ -143,8 +159,7 @@ generateAndSubmitTDFAndStimFiles = function(){
   var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_Stim.xml";
 
   var newStimJSON = generateStimJSON(clozes,stimFileName);
-  var numClusters = newStimJSON.stimuli.setspec.clusters[0].cluster.length;
-  var newTDFJSON = generateTDFJSON(tdfFileName,displayName,stimFileName,numClusters);
+  var newTDFJSON = generateTDFJSON(tdfFileName,displayName,stimFileName);
 
   Meteor.call("insertStimTDFPair",newStimJSON,newTDFJSON,function(err,res){
     if(!!err){
@@ -166,13 +181,21 @@ generateAndSubmitTDFAndStimFiles = function(){
 }
 
 generateStimJSON = function(clozes,stimFileName){
-  var curStim = JSON.parse(JSON.stringify(templateStimJSON));
+  origStim = tdfFileNameToStimfileMap[origTdfFileName];
+  curStim = JSON.parse(JSON.stringify(templateStimJSON));
   curStim.fileName = stimFileName;
   curStim.owner = Meteor.userId();
   var completedSentenceIDs = {};
   for(var index in clozes){
     var sentenceID = clozes[index].itemId;
+    var unitIndex = clozes[index].unitIndex;
     if(!completedSentenceIDs[sentenceID]){
+      var curClusterIndex = curStim.stimuli.setspec.clusters[0].cluster.length;
+      if(!!!(clusterListMappings[unitIndex].new)){
+        clusterListMappings[unitIndex].new = [curClusterIndex];
+      }
+      clusterListMappings[unitIndex].new[1] = curClusterIndex;
+
       var cluster = {displayType:["Cloze"],display:[],response:[],parameter:[]};
       var curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
       for(var index2 in curSentenceClozes){
@@ -186,13 +209,30 @@ generateStimJSON = function(clozes,stimFileName){
     }
   }
 
+  for(var index in clusterListMappings){
+    var unitMapping = clusterListMappings[index];
+    var curClusterIndex = curStim.stimuli.setspec.clusters[0].cluster.length;
+    if(!!!unitMapping.new){
+      var curUnitStart = unitMapping.orig[0];
+      var curUnitEnd = unitMapping.orig[1];
+      var numInUnit = curUnitEnd - curUnitStart;
+      var newUnitStart = curClusterIndex;
+      var newUnitEnd = newUnitStart + numInUnit;
+      unitMapping.new = [newUnitStart,newUnitEnd];
+      for(var i=curUnitStart;i<=curUnitEnd;i++){
+        var cluster = origStim.stimuli.setspec.clusters[0].cluster[i];
+        curStim.stimuli.setspec.clusters[0].cluster.push(cluster);
+      }
+    }
+  }
+
   return curStim;
 }
 
-generateTDFJSON = function(tdfFileName,displayName,stimFileName,numStimClozes){
+generateTDFJSON = function(tdfFileName,displayName,stimFileName){
   var tdfTemplateFileName = $("#templateTDFSelect").val();
   var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
-  var curTdf = originalTDF || JSON.parse(JSON.stringify(templateTdfJSON));
+  var curTdf = JSON.parse(JSON.stringify(originalTDF)) || JSON.parse(JSON.stringify(templateTdfJSON));
 
   delete curTdf._id;
   curTdf.owner = Meteor.userId();
@@ -200,7 +240,13 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,numStimClozes){
   curTdf.source = "content_generation";
   curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
   curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimFileName];
-  curTdf.tdfs.tutor.unit[0].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];
+  for(var unitIndex in clusterListMappings){
+    var isLearningSession = clusterListMappings[unitIndex].sessionType === "learningsession";
+    var unit = curTdf.tdfs.tutor.unit[unitIndex];
+    var clusterlist = isLearningSession ? unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
+    clusterlist[0] = clusterListMappings[unitIndex].new.join('-');
+  }
+  //curTdf.tdfs.tutor.unit[learningsessionUnitNum].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];
   curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
   curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
 
@@ -325,9 +371,22 @@ Template.contentGeneration.events({
   },
 
   "change #templateTDFSelect": function(event){
-    var curTdfFileName = $(event.currentTarget).val();
-    var stimObject = tdfFileNameToStimfileMap[curTdfFileName];
-    var tdfObject = tdfFileNameToTdfFileMap[curTdfFileName];
+    clusterListMappings = {};
+    origTdfFileName = $(event.currentTarget).val();
+    var stimObject = tdfFileNameToStimfileMap[origTdfFileName];
+    var tdfObject = tdfFileNameToTdfFileMap[origTdfFileName];
+    var units = tdfObject.tdfs.tutor.unit;
+    for(var index in units){
+      var unit = units[index];
+      if(!!unit.learningsession || !!unit.assessmentsession){
+        var session = unit.learningsession || unit.assessmentsession;
+        var sessionType = !!unit.learningsession ? "learningsession" : "assessmentsession";
+        clusterListMappings[index] = {
+          sessionType:sessionType,
+          orig:session[0].clusterlist[0].split('-').map(x => parseInt(x))
+        };
+      }
+    }
     if(!!tdfObject.tdfs.tutor.setspec[0].speechAPIKey && !!tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0]){
       speechAPIKey = tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0];
     }else{
