@@ -222,7 +222,6 @@ function clearCardTimeout() {
     safeClear(Meteor.clearTimeout, timeoutName);
     safeClear(Meteor.clearTimeout, simTimeoutName);
     safeClear(Meteor.clearInterval, varLenTimeoutName);
-
     timeoutName = null;
     timeoutFunc = null;
     timeoutDelay = null;
@@ -381,7 +380,7 @@ function leavePage(dest) {
     if(window.audioContext && !(dest == "/card" || dest == "/instructions" || dest == "/voice")){
       console.log("closing audio context");
       stopRecording();
-      window.audioContext.close();
+      clearAudioContextAndRelatedVariables();
     }else{
       console.log("NOT closing audio context");
     }
@@ -682,7 +681,43 @@ Template.card.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
-var initializeAudio = function(){
+pollMediaDevicesInterval = null;
+
+pollMediaDevices = function(){
+  navigator.mediaDevices.enumerateDevices().then(function(devices){
+    if(selectedInputDevice != null){
+      if(devices.filter(x => x.deviceId == selectedInputDevice).length == 0){
+        console.log("input device lost!!!");
+        reinitializeMediaDueToDeviceChange();
+      }
+    }
+  })
+}
+
+clearAudioContextAndRelatedVariables = function(){
+  window.audioContext.close();
+  streamSource.disconnect();
+  var tracks = userMediaStream.getTracks();
+  for(var i=0;i<tracks.length;i++){
+    var track = tracks[i];
+    track.stop();
+  }
+  selectedInputDevice = null;
+  userMediaStream = null;
+  streamSource = null;
+  Meteor.clearInterval(pollMediaDevicesInterval);
+  pollMediaDevicesInterval = null;
+}
+
+reinitializeMediaDueToDeviceChange = function(){
+  //This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
+  Session.set("pausedLocks",Session.get("pausedLocks")+1);
+  clearAudioContextAndRelatedVariables();
+  alert("It appears you may have unplugged your microphone.  Please plug it back then click ok to reinitialize audio input.");
+  initializeAudio();
+}
+
+initializeAudio = function(){
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
@@ -1812,11 +1847,19 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
 recorder = null;
 callbackManager = null;
 audioContext = null;
+selectedInputDevice = null;
+userMediaStream = null;
+streamSource = null;
 
 //The callback used in initializeAudio when an audio data stream becomes available
-function startUserMedia(stream) {
+startUserMedia = function(stream) {
+  userMediaStream = stream;
+  var tracks = stream.getTracks();
+  selectedInputDevice = tracks[0].getSettings().deviceId;
+  pollMediaDevicesInterval = Meteor.setInterval(pollMediaDevices,2000);
   console.log("START USER MEDIA");
   var input = audioContext.createMediaStreamSource(stream);
+  streamSource = input;
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
   window.firefox_audio_hack = input;
   //Capture the sampling rate for later use in google speech api as input
@@ -1844,6 +1887,10 @@ function startUserMedia(stream) {
         Session.set("VADInitialized",true);
         $("#voiceDetected").value = "Voice detected, refreshing now...";
         Session.set("needResume", true);
+        if(Session.get("pausedLocks")>0){
+          var numRemainingLocks = Session.get("pausedLocks")-1;
+          Session.set("pausedLocks",numRemainingLocks);
+        }
         Router.go("/card");
         return;
       }else if(!Session.get('recording')){
