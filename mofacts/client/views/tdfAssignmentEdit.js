@@ -14,7 +14,7 @@ Template.tdfAssignmentEdit.onRendered(function(){
     var allTdfObjects = Tdfs.find({}).fetch();
     for(var i in allTdfObjects){
       var tdf = allTdfObjects[i];
-      if(tdf.owner == Meteor.userId()){
+      if(tdf.owner == Meteor.userId() || tdf.fileName == "IESsurvey.xml"){
         allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
       }
     }
