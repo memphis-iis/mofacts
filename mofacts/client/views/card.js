@@ -696,8 +696,10 @@ pollMediaDevices = function(){
 
 clearAudioContextAndRelatedVariables = function(){
   window.audioContext.close();
-  streamSource.disconnect();
-  var tracks = userMediaStream.getTracks();
+  if(!!streamSource){
+    streamSource.disconnect();
+  }
+  var tracks = !!userMediaStream ? userMediaStream.getTracks() : [];
   for(var i=0;i<tracks.length;i++){
     var track = tracks[i];
     track.stop();

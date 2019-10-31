@@ -295,9 +295,11 @@ Template.contentGeneration.events({
     }else if (response.length < 1) {
       alert("Please enter a correct response");
     }else{
-      var oldCloze = clozeIDToClozeMap[clozeID];
+      var unitIndex = clozeIDToClozeMap[clozeID].unitIndex;
+      var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId']);
       var newCloze = {cloze:newCloze,correctResponse:response,itemId:sentenceID,clozeId:clozeID};
       recordClozeEditHistory(oldCloze,newCloze);
+      newCloze = Object.assign({unitIndex:unitIndex},newCloze);
       var clozeSentencePairs = Session.get('clozeSentencePairs');
       var clozes = clozeSentencePairs.clozes;
       var clozesWithNew = [];
@@ -349,7 +351,7 @@ Template.contentGeneration.events({
     var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
     var prevClozeSentencePairs = Session.get("clozeSentencePairs");
 
-    var oldCloze = clozeIDToClozeMap[curClozeId];
+    var oldCloze = _.pick(clozeIDToClozeMap[curClozeId],['cloze','correctResponse','itemId','clozeId']);
     recordClozeEditHistory(oldCloze,{});
 
     var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
