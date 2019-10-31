@@ -61,9 +61,6 @@
         "Time", //stimDisplayedTime
         "Selection",
         "Action",
-        "GUI Source",
-        "Audio Input Enabled",
-        "Audio Output Enabled",
         "Input", //userAnswer
         "Outcome", //answerCorrect recoded as CORRECT or INCORRECT
         "Student Response Type", //trialType
@@ -74,6 +71,9 @@
         "KC Category(Default)",
         "KC(Cluster)",
         "KC Category(Cluster)",
+        "CF (GUI Source)",
+        "CF (Audio Input Enabled)",
+        "CF (Audio Output Enabled)",
         "CF (Display Order)", //questionIndex
         "CF (Stim File Index)", //clusterIndex
         "CF (Set Shuffled Index)", //shufIndex
@@ -317,9 +317,6 @@
             "Time": d(lastq.clientSideTimeStamp, 0),
             "Selection": '',
             "Action": '',
-            "GUI Source":d(lasta.guiSource,''),
-            "Audio Input Enabled":lasta.audioInputEnabled,
-            "Audio Output Enabled":lasta.audioOutputEnabled,
             "Input": d(lasta.answer, ''),
             "Outcome": d(outcome, null), //answerCorrect recoded as CORRECT or INCORRECT
             "Student Response Type": isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
@@ -330,6 +327,9 @@
             "KC Category(Default)": '',
             "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, corans), ''),
             "KC Category(Cluster)": '',
+            "CF (GUI Source)":d(lasta.guiSource,''),
+            "CF (Audio Input Enabled)":lasta.audioInputEnabled,
+            "CF (Audio Output Enabled)":lasta.audioOutputEnabled,
             "CF (Display Order)": d(lastq.questionIndex, -1),
             "CF (Stim File Index)": d(lastq.clusterIndex, -1),
             "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
