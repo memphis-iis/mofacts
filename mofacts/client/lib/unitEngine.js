@@ -839,7 +839,6 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
             var card = _.prop(cards, cluster.clusterIndex);
-            var stim = card.stims[currentCardInfo.whichStim];
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)

@@ -6,6 +6,7 @@ loadedLabels = false;
 const numTrialsForKCLearningCurve = 5;
 currentUserTimeLogs = undefined;
 curTracker = undefined;
+tempModelUnitEngine = undefined;
 
 window.onpopstate = function(event){
   console.log("window popstate");
@@ -21,6 +22,36 @@ window.onpopstate = function(event){
   }
 }
 
+getAssessmentItems = function(tdfFileName){
+  var tdfQueryNames = [];
+  if(tdfFileName === "xml"){
+    tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
+  }else{
+    tdfQueryNames = [tdfFileName];
+  }
+
+  assessmentItems = {};
+  _.each(tdfQueryNames,function(tdfQueryName){
+    tdfObject = Tdfs.findOne({fileName:tdfQueryName});
+    _.each(tdfObject.tdfs.tutor.unit,function(unit){
+      if(!!unit.assessmentsession){
+        if(!assessmentItems[tdfQueryName]){
+          assessmentItems[tdfQueryName] = {};
+        }
+        clusterList = unit.assessmentsession[0].clusterlist[0];
+        clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
+        _.each(clusterLists,function(clusterStartEnd){
+          for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
+            assessmentItems[tdfQueryName][i] = true;
+          }
+        });
+      }
+    });
+  });
+
+  return assessmentItems;
+}
+
 setCurrentStudentPerformance = function(){
   var studentID = Session.get("curStudentID");
   Meteor.subscribe('specificUserMetrics',studentID,function(){
@@ -28,20 +59,27 @@ setCurrentStudentPerformance = function(){
     var count = 0;
     var numCorrect = 0;
     var totalTime = 0;
-    var tdfQueryName = Session.get("curSelectedTdf").replace(/[.]/g,'_');
+    var tdfFileName = Session.get("curSelectedTdf");
+
+    var assessmentItems = getAssessmentItems(tdfFileName);
+
+    var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
     UserMetrics.find({}).forEach(function(entry){
       var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
       for(var index in tdfEntries){
         var key = tdfEntries[index];
         var tdf = entry[key];
         for(var index in tdf){
-          var stim = tdf[index];
-          count += stim.questionCount || 0;
-          numCorrect += stim.correctAnswerCount || 0;
-          var answerTimes = stim.answerTimes;
-          for(var index in answerTimes){
-            var time = answerTimes[index];
-            totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+          //Ignore assessment entries
+          if(!assessmentItems[key] || !assessmentItems[key][index]){
+            var stim = tdf[index];
+            count += stim.questionCount || 0;
+            numCorrect += stim.correctAnswerCount || 0;
+            var answerTimes = stim.answerTimes;
+            for(var index in answerTimes){
+              var time = answerTimes[index];
+              totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+            }
           }
         }
       }
@@ -68,7 +106,7 @@ getUserTimesLog = function(expKey){
 
   var entries = [];
   if (userLog && userLog[expKey] && userLog[expKey].length) {
-      entries = userLog[expKey];
+      entries = JSON.parse(JSON.stringify(userLog[expKey]));
   }else{
     console.log("no entries");
   }
@@ -144,25 +182,32 @@ getcardProbs = function(){
       var curTdfFileName = studentReportingTdfs[i].fileName;
       var curTdfDisplayName = studentReportingTdfs[i].displayName;
       Session.set("currentTdfName",curTdfFileName);
+      Session.set("currentRootTdfName",curTdfFileName);
       console.log("curTdfFileName: " + curTdfFileName);
       if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
         checkIfNeedSubTdfName(getCurrentTdfFile());
-        var tempModelUnitEngine = createModelUnit();
+        tempModelUnitEngine = createModelUnit();
         var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
+        var assessmentItems = getAssessmentItems(curTdfFileName);
         processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
         console.log("past getCardProbs");
+        var numProbs = 0;
         for(var j=0;j<cardProbs.length;j++){
-          if(!!cardProbs[j].probability){
+          var cardIndex = cardProbs[j].cardIndex;
+          if(!!cardProbs[j].probability && (!assessmentItems[curTdfFileName] || !assessmentItems[curTdfFileName][cardIndex])){
             totalStimProb += cardProbs[j].probability;
+            numProbs += 1;
           }
         }
 
-        var avgStimProbForTdf = totalStimProb / cardProbs.length;
-        allTdfProbLabels.push(curTdfDisplayName.replace(" ",'_'));
-        allTdfProbs.push(avgStimProbForTdf);
+        if(numProbs > 0){
+          var avgStimProbForTdf = totalStimProb / numProbs;
+          allTdfProbLabels.push(curTdfDisplayName.replace(" ",'_'));
+          allTdfProbs.push(avgStimProbForTdf);
+        }
       }
     }
     Session.set("currentStimName",null);
@@ -171,17 +216,21 @@ getcardProbs = function(){
   }else{
     checkIfNeedSubTdfName(getCurrentTdfFile());
     tempModelUnitEngine = createModelUnit();
-    var expKey = Session.get("curSelectedTdf").replace(/[.]/g,'_');
+    var curTdfFileName = Session.get("curSelectedTdf");
+    var expKey = curTdfFileName.replace(/[.]/g,'_');
+    var assessmentItems = getAssessmentItems(curTdfFileName);
     processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
     var cardProbs = [];
     var cardProbsLabels = [];
     var mycardProbs =tempModelUnitEngine.getCardProbs();
     for(var i=0;i<mycardProbs.length;i++){
         var cardIndex = mycardProbs[i].cardIndex;
-        var stimIndex = mycardProbs[i].stimIndex;
-        var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
-        cardProbsLabels.push(currentQuestion);
-        cardProbs.push(mycardProbs[i].probability);
+        if(!assessmentItems[curTdfFileName] || !assessmentItems[curTdfFileName][cardIndex]){
+          var stimIndex = mycardProbs[i].stimIndex;
+          var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
+          cardProbsLabels.push(currentQuestion);
+          cardProbs.push(mycardProbs[i].probability);
+        }
     }
 
     return [cardProbsLabels,cardProbs];
@@ -193,7 +242,7 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
   var studentID = Session.get("curStudentID");
   var avgCorrectnessAcrossKCsLearningCurve = [];
 
-  var countAndNumCorrectPerTrialNum = {};
+  countAndNumCorrectPerTrialNum = {};
 
   for(var i=0;i<numTrialsForKCLearningCurve;i++){
     countAndNumCorrectPerTrialNum[i] = {"count":0,"numCorrect":0};
@@ -214,8 +263,9 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
   _.each(tdfQueryNames,function(tdfQueryName){
     var curStim = undefined;
     var curCluster = undefined;
-    var allAnswerAttempts = {};
+    allAnswerAttempts = {};
     var expKey = tdfQueryName.replace(/[.]/g,"_");
+    var curQuestionIsAssessment = false;
     _.each(getUserTimesLog(expKey), function(entry, index, currentList) {
       if (!entry.action) {
           console.log("Ignoring user times entry with no action");
@@ -226,9 +276,14 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
       var action = _.trim(entry.action).toLowerCase();
 
       if (action === "question") {
+        curQuestionIsAssessment = entry.selType === "schedule";
         curStim = entry.whichStim;
         curCluster = entry.clusterIndex;
       }else if(action === "answer" || action === "[timeout]"){
+        if(curQuestionIsAssessment){
+          console.log("found an assessment question, skipping");
+          return;
+        }
         var wasCorrect;
         if (action === "answer") {
             wasCorrect = typeof entry.isCorrect !== "undefined" ? entry.isCorrect : null;
@@ -400,7 +455,7 @@ Template.studentReporting.rendered = function(){
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
     console.log("change tdf select");
-    curTdf = $(event.currentTarget).val().replace(".","_");
+    curTdf = $(event.currentTarget).val().replace(/[.]/g,"_");
     var curTdfFileName = $(event.currentTarget).val();
     Session.set("curSelectedTdf",curTdfFileName);
     updateDataAndCharts(curTdf,curTdfFileName);
@@ -421,6 +476,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
     $("#cardProbsChart").attr('data-y-axis-label',"");
 
     Session.set("currentTdfName",curTdfFileName);
+    Session.set("currentRootTdfName",curTdfFileName);
     var curTdfFile = getCurrentTdfFile();
     if(!!curTdfFile){
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
@@ -605,6 +661,11 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
         questionIndex = null;
     }
 
+    //Don't count assessment session trials as part of user progress
+    if(Session.get("sessionType") === "assessmentsession"){
+      return;
+    }
+
     var prog = getUserProgress();
     prog.progressDataArray.push({
         clusterIndex: getCurrentClusterIndex(),
@@ -664,12 +725,15 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
     var resetEngine = function(currUnit) {
         if (unitHasOption(currUnit, "assessmentsession")) {
             engine = createScheduleUnit();
+            Session.set("sessionType","assessmentsession");
         }
         else if (unitHasOption(currUnit, "learningsession")) {
             engine = createModelUnit();
+            Session.set("sessionType","learningsession");
         }
         else {
             engine = createEmptyUnit();
+            Session.set("sessionType","empty");
         }
     };
 
