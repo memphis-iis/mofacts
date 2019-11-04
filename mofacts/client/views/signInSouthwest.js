@@ -112,7 +112,16 @@ setClass = function(curClass){
 
 Template.signInSouthwest.onRendered(function(){
   Session.set("loginMode","southwest");
-
+  window.onpopstate = function(event){
+    console.log("window popstate signin southwest");
+    if(document.location.pathname == "/signinsouthwest"){
+      Session.set("curTeacher",{});
+      Session.set("curClass",{});
+      $("#initialInstructorSelection").prop('hidden','');
+      $("#classSelection").prop('hidden','true');
+      $("#loginDiv").prop('hidden','true');
+    }
+  }
   Meteor.subscribe('allTeachers',function () {
     var teachers = Meteor.users.find({}).fetch();
     var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);

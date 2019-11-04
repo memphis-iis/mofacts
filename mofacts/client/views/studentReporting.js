@@ -8,20 +8,6 @@ currentUserTimeLogs = undefined;
 curTracker = undefined;
 tempModelUnitEngine = undefined;
 
-window.onpopstate = function(event){
-  console.log("window popstate");
-  Session.set("studentReportingTdfs",[]);
-  Session.set("curStudentPerformance",{});
-  if(!!curTracker){
-    curTracker.stop();
-  }
-  if(Session.get("loginMode") === "southwest"){
-    Router.go("/profileSouthwest");
-  }else{
-    Router.go("/profile");
-  }
-}
-
 getAssessmentItems = function(tdfFileName){
   var tdfQueryNames = [];
   if(tdfFileName === "xml"){
@@ -400,6 +386,19 @@ selectFirstOptionByDefaultAndUpdateCharts = function(tdfs){
 }
 
 Template.studentReporting.rendered = function(){
+  window.onpopstate = function(event){
+    console.log("window popstate student reporting");
+    Session.set("studentReportingTdfs",[]);
+    Session.set("curStudentPerformance",{});
+    if(!!curTracker){
+      curTracker.stop();
+    }
+    if(document.location.pathname == "/studentReporting" && Session.get("loginMode") === "southwest"){
+      Router.go("/profileSouthwest");
+    }else{
+      Router.go("/profile");
+    }
+  }
   console.log("rendered!!!");
   curTracker = Tracker.autorun(function(thisTracker){
     console.log("autorun");

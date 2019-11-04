@@ -368,12 +368,6 @@ function varLenDisplayTimeout() {
 ////////////////////////////////////////////////////////////////////////////
 // Events
 
-//Catch page navigation events (like pressing back button) so we can call our cleanup method
-window.onpopstate = function(event){
-  //console.log("back button pressed?" + document.location.pathname);
-  leavePage(document.location.pathname);
-}
-
 //Clean up things if we navigate away from this page
 function leavePage(dest) {
     console.log("leaving page for dest: " + dest);
@@ -488,6 +482,13 @@ var imagesDict = {};
 var onEndCallbackDict = {};
 
 Template.card.rendered = function() {
+  //Catch page navigation events (like pressing back button) so we can call our cleanup method
+  window.onpopstate = function(event){
+    //console.log("back button pressed?" + document.location.pathname);
+    if(document.location.pathname == "/card"){
+      leavePage(document.location.pathname);
+    }
+  }
   console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     var audioInputEnabled = Session.get("audioEnabled");
     if(audioInputEnabled){
@@ -1417,6 +1418,11 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
     var questionIndex = Session.get("questionIndex");
     if (!questionIndex && questionIndex !== 0) {
         questionIndex = null;
+    }
+
+    //Don't count assessment session trials as part of user progress
+    if(Session.get("sessionType") === "assessmentsession"){
+      return;
     }
 
     var prog = getUserProgress();
@@ -2393,12 +2399,15 @@ processUserTimesLog = function(expKey) {
     var resetEngine = function(currUnit) {
         if (unitHasOption(currUnit, "assessmentsession")) {
             engine = createScheduleUnit();
+            Session.set("sessionType","assessmentsession");
         }
         else if (unitHasOption(currUnit, "learningsession")) {
             engine = createModelUnit();
+            Session.set("sessionType","learningsession");
         }
         else {
             engine = createEmptyUnit();
+            Session.set("sessionType","empty");
         }
     };
 
