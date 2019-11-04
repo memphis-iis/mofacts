@@ -271,14 +271,14 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
     var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
+    var audioPromptFeedbackEnabled = !Session.get("experimentTarget") ? (tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled) : tdfAudioPromptFeedbackEnabled;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
    var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled;
-   var audioEnabled = tdfAudioEnabled && userAudioToggled;
+   var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
    var continueToCard = true;
