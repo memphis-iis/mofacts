@@ -693,7 +693,16 @@ function modelUnitEngine() {
             }
 
             Session.set("currentAnswer", fastGetStimAnswer(cardIndex, whichStim));
-            Session.set("testType", "d");
+            if(getCurrentDeliveryParams().studyFirst){
+              if(card.studyTrialCount == 0){
+                console.log("!!! STUDY FOR FIRST TRIAL");
+                Session.set("testType",'s');
+              }else{
+                Session.set("testType", "d");
+              }
+            }else{
+              Session.set("testType", "d");
+            }
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", showOverlearningText);
 

@@ -375,7 +375,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'timeuntilstimulus' : 0,
         'forcecorrectprompt':'',
         'forcecorrecttimeout':0,
-        'unitMode': 'default'
+        'unitMode': 'default',
+        'studyFirst':false
     };
 
     //We've defined defaults - also define translatations for values
