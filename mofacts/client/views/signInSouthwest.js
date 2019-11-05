@@ -114,7 +114,7 @@ Template.signInSouthwest.onRendered(function(){
   Session.set("loginMode","southwest");
   window.onpopstate = function(event){
     console.log("window popstate signin southwest");
-    if(document.location.pathname == "/signinsouthwest"){
+    if(document.location.pathname == "/signInSouthwest"){
       Session.set("curTeacher",{});
       Session.set("curClass",{});
       $("#initialInstructorSelection").prop('hidden','');
