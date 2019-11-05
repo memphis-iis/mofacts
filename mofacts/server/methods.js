@@ -400,6 +400,14 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          getClozeEditAuthors:function(){
+            var authorIDs = {};
+            ClozeEditHistory.find({}).forEach(function(entry){
+              authorIDs[entry.user] = Meteor.users.findOne({_id:entry.user}).username;
+            });
+            return authorIDs;
+          },
+
           sendErrorReportSummaries:function(){
             sendErrorReportSummaries();
           },
@@ -464,20 +472,36 @@ Meteor.startup(function () {
                 var count = 0;
                 var numCorrect = 0;
                 var totalTime = 0;
-                var tdfQueryName = tdfFileName.replace('.','_');
+                tdfObject = Tdfs.findOne({fileName:tdfFileName});
+                assessmentItems = {};
+                _.each(tdfObject.tdfs.tutor.unit,function(unit){
+                  if(!!unit.assessmentsession){
+                    clusterList = unit.assessmentsession[0].clusterlist[0];
+                    clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
+                    _.each(clusterLists,function(clusterStartEnd){
+                      for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
+                        assessmentItems[i] = true;
+                      }
+                    });
+                  }
+                });
+                var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
                 UserMetrics.find({_id:studentID}).forEach(function(entry){
                   var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
                   for(var index in tdfEntries){
                     var key = tdfEntries[index];
                     var tdf = entry[key];
                     for(var index in tdf){
-                      var stim = tdf[index];
-                      count += stim.questionCount || 0;
-                      numCorrect += stim.correctAnswerCount || 0;
-                      var answerTimes = stim.answerTimes;
-                      for(var index in answerTimes){
-                        var time = answerTimes[index];
-                        totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+                      //Only count items in learning sessions
+                      if(!assessmentItems[index]){
+                        var stim = tdf[index];
+                        count += stim.questionCount || 0;
+                        numCorrect += stim.correctAnswerCount || 0;
+                        var answerTimes = stim.answerTimes;
+                        for(var index in answerTimes){
+                          var time = answerTimes[index];
+                          totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+                        }
                       }
                     }
                   }
@@ -988,6 +1012,39 @@ Meteor.startup(function () {
     schedule: function(parser) { return parser.text('every 24 hours');},
     job: function() { return sendErrorReportSummaries(); }
   })
+});
+
+Router.route("clozeEditHistory",{
+  name: "server.clozeData",
+  where: "server",
+  path: "/clozeEditHistory/:userID",
+  action: function () {
+      var userID = this.params.userID;
+      var response = this.response;
+
+      if (!userID) {
+          response.writeHead(404);
+          response.end("No user id specified");
+          return;
+      }
+
+      var filename = userID + "-clozeEditHistory.json";
+
+      response.writeHead(200, {
+          "Content-Type": "application/json",
+          "Content-Disposition": "attachment; filename=" + filename
+      });
+
+      var recCount = 0;
+      ClozeEditHistory.find({"user":userID}).forEach(function(record){
+        recCount += 1;
+        response.write(JSON.stringify(record));
+        response.write("\r\n");
+      });
+      response.end("");
+
+      serverConsole("Sent all  data for", userID, "as file", filename, "with record-count:", recCount);
+  }
 });
 
 //We use a special server-side route for our experimental data download
