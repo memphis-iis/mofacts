@@ -45,7 +45,7 @@ setCurrentStudentPerformance = function(){
     var count = 0;
     var numCorrect = 0;
     var totalTime = 0;
-    var tdfFileName = Session.get("curSelectedTdf");
+    var tdfFileName = Session.get("currentTdfName");
 
     var assessmentItems = getAssessmentItems(tdfFileName);
 
@@ -202,7 +202,7 @@ getcardProbs = function(){
   }else{
     checkIfNeedSubTdfName(getCurrentTdfFile());
     tempModelUnitEngine = createModelUnit();
-    var curTdfFileName = Session.get("curSelectedTdf");
+    var curTdfFileName = Session.get("currentTdfName");
     var expKey = curTdfFileName.replace(/[.]/g,'_');
     var assessmentItems = getAssessmentItems(curTdfFileName);
     processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
@@ -476,6 +476,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
 
     Session.set("currentTdfName",curTdfFileName);
     Session.set("currentRootTdfName",curTdfFileName);
+    checkIfNeedSubTdfName(getCurrentTdfFile());
     var curTdfFile = getCurrentTdfFile();
     if(!!curTdfFile){
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
