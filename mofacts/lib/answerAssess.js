@@ -76,6 +76,15 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
     }
 }
 
+checkIfAnswerMatchesOtherQuestionAnswers = function(userAnswer,curQuestionAnswer){
+  if(userAnswer == curQuestionAnswer){
+    return false;
+  }else{
+    otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== curQuestionAnswer);
+    return otherQuestionAnswers.findIndex(x => x == userAnswer) != -1;
+  }
+}
+
 // We perform regex matching, which is special in Mofacts. If the regex is
 // "complicated", then we just match. However, if the regex is nothing but
 // pipe-delimited (disjunction) strings that contain only letters, numbers,
@@ -186,7 +195,6 @@ Answers = {
         }
         else {
             var isCorrect, matchText;
-            var match = stringMatch(answer, userInput, lfparameter);
 
             var dispAnswer = _.trim(answer);
             if (dispAnswer.indexOf("|") >= 0) {
@@ -194,22 +202,31 @@ Answers = {
                 dispAnswer = _.trim(dispAnswer.split("|")[0]);
             }
 
-            if (match === 0) {
-                isCorrect = false;
-                matchText = "";
-            }
-            else if (match === 1) {
-                isCorrect = true;
-                matchText = "Correct.";
-            }
-            else if (match === 2) {
-                isCorrect = true;
-                matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
-            }
-            else {
-                console.log("MATCH ERROR: something fails in our comparison");
-                isCorrect = false;
-                matchText = "";
+            //Check to see if the user answer is an exact match for any other answers in the stim file,
+            //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
+            if(checkIfAnswerMatchesOtherQuestionAnswers(userInput,answer)){
+              isCorrect = false;
+              matchText = "";
+            }else{
+              var match = stringMatch(answer, userInput, lfparameter);
+
+              if (match === 0) {
+                  isCorrect = false;
+                  matchText = "";
+              }
+              else if (match === 1) {
+                  isCorrect = true;
+                  matchText = "Correct.";
+              }
+              else if (match === 2) {
+                  isCorrect = true;
+                  matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+              }
+              else {
+                  console.log("MATCH ERROR: something fails in our comparison");
+                  isCorrect = false;
+                  matchText = "";
+              }
             }
 
             if (!matchText) {

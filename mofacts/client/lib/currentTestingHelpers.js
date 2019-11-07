@@ -130,7 +130,7 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   var currentClusterIndex = getCurrentClusterIndex();
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
-  var allAnswers = [];
+  var allAnswers = new Set;
   var exclusionList = ["18-25","Male","Less than High School"];
 
   for(clusterIndex in clusters){
@@ -145,10 +145,12 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
       var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
       if(answerArray.length > 0){
         var singularAnswer = answerArray[0].split("~")[0];
-        allAnswers.push(singularAnswer);
+        allAnswers.add(singularAnswer);
       }
     }
   }
+
+  allAnswers = Array.from(allAnswers);
 
   if(removeExcludedPhraseHints){
     //Remove the optional phrase hint exclusions
