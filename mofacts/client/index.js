@@ -137,51 +137,6 @@ Template.body.events({
     $("#errorDescription").val("");
   },
 
-  'click #userAdminButton': function(event){
-    event.preventDefault();
-    if(!!window.currentAudioObj){
-      window.currentAudioObj.pause();
-    }
-
-    Router.go('/userAdmin');
-  },
-
-  'click #classEditButton': function(event){
-    event.preventDefault();
-    if(!!window.currentAudioObj){
-      window.currentAudioObj.pause();
-    }
-
-    Router.go('/classEdit');
-  },
-
-  'click #tdfAssignmentEditButton': function(event){
-    event.preventDefault();
-    if(!!window.currentAudioObj){
-      window.currentAudioObj.pause();
-    }
-
-    Router.go('/tdfAssignmentEdit');
-  },
-
-  'click #instructorReportingButton': function(event){
-    event.preventDefault();
-    if(!!window.currentAudioObj){
-      window.currentAudioObj.pause();
-    }
-
-    Router.go('/instructorReporting');
-  },
-
-  'click #contentGenerationButton': function(event){
-    event.preventDefault();
-    if(!!window.currentAudioObj){
-      window.currentAudioObj.pause();
-    }
-
-    Router.go('/contentGeneration');
-  },
-
   'click #logoutButton' : function (event) {
       event.preventDefault();
       if(!!window.currentAudioObj){

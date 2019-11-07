@@ -14,13 +14,12 @@
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
-            {{> turkWorkflow}}
             <br><br>
 
             <div class="row">
                 <div class="col-md-offset-3 col-md-6">
-                    <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
-                        TDF Practice
+                    <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#testButtonContainer" aria-expanded="false" aria-controls="testButtonContainer">
+                        TDF Practice +
                     </button>
                 </div>
             </div>
@@ -31,24 +30,56 @@
                     <input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?
                 </legend>
             </div>
-
-            {{> contentUpload}}
-            {{> userProfileEdit}}
-            <!-- {{#if isInRole 'admin'}}
-                {{> userAdmin}}
-            {{/if}} -->
-            <!-- {{#if isInRole 'admin, teacher'}}
-                {{> classEdit}}
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="mechTurkButton" class="button btn  navbar-btn">Mechanical Turk</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="contentUploadButton" class="button btn  navbar-btn">Content and File Uploading</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="userProfileEditButton" class="button btn  navbar-btn">AWS User Profile Data</button>
+                </div>
+            </div>
+            {{#if isInRole 'admin'}}
+              <br><br>
+              <div class="row">
+                  <div class="col-md-offset-3 col-md-6">
+                      <button type="button" id="userAdminButton" class="button btn  navbar-btn">User Admin</button>
+                  </div>
+              </div>
             {{/if}}
-            {{#if isInRole 'admin, teacher'}}
-                {{> tdfAssignmentEdit}}
-            {{/if}}
-            {{#if isInRole 'admin, teacher'}}
-                {{> instructorReporting}}
-            {{/if}}
-            {{#if isInRole 'admin, teacher'}}
-              {{> contentGeneration}}
-            {{/if}} -->
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="classEditButton" class="button btn  navbar-btn">Class Edit</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="tdfAssignmentEditButton" class="button btn  navbar-btn">Chapter Assignments</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="instructorReportingButton" class="button btn  navbar-btn">Instructor Reporting</button>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button type="button" id="contentGenerationButton" class="button btn  navbar-btn">Content Generation</button>
+                </div>
+            </div>
         {{/if}}
 
         <br><br>

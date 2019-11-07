@@ -193,6 +193,27 @@ Router.route('/profile', {
     }
 });
 
+Router.route('/turkWorkflow',{
+  name: "client.turkWorkflow",
+  action: function(){
+    this.render('turkWorkflow');
+  }
+});
+
+Router.route('/contentUpload',{
+  name: "client.contentUpload",
+  action: function(){
+    this.render('contentUpload');
+  }
+});
+
+Router.route('/userProfileEdit',{
+  name: "client.userProfileEdit",
+  action: function(){
+    this.render('userProfileEdit');
+  }
+});
+
 Router.route('/userAdmin',{
   name: "client.userAdmin",
   action: function(){

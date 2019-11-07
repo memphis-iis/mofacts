@@ -51,7 +51,56 @@ Template.profile.events({
         var checked = template.$("#simulation").prop('checked');
         Session.set("runSimulation", checked);
         console.log("runSimulation", Session.get("runSimulation"));
-    }
+    },
+
+    'click #tdfPracticeBtn': function(event){
+      var wasPracticeShown = $("#tdfPracticeBtn").attr('aria-expanded') == "false";
+      if(wasPracticeShown){
+        $("#tdfPracticeBtn").text("TDF Practice -");
+      }else{
+        $("#tdfPracticeBtn").text("TDF Practice +");
+      }
+    },
+
+    'click #mechTurkButton': function(event){
+      event.preventDefault();
+      Router.go('/turkWorkflow');
+    },
+
+    'click #contentUploadButton': function(event){
+      event.preventDefault();
+      Router.go('/contentUpload');
+    },
+
+    'click #userProfileEditButton': function(event){
+      event.preventDefault();
+      Router.go('/userProfileEdit');
+    },
+
+    'click #userAdminButton': function(event){
+      event.preventDefault();
+      Router.go('/userAdmin');
+    },
+
+    'click #classEditButton': function(event){
+      event.preventDefault();
+      Router.go('/classEdit');
+    },
+
+    'click #tdfAssignmentEditButton': function(event){
+      event.preventDefault();
+      Router.go('/tdfAssignmentEdit');
+    },
+
+    'click #instructorReportingButton': function(event){
+      event.preventDefault();
+      Router.go('/instructorReporting');
+    },
+
+    'click #contentGenerationButton': function(event){
+      event.preventDefault();
+      Router.go('/contentGeneration');
+    },
 });
 
 var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
