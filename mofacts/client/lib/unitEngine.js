@@ -621,7 +621,8 @@ function modelUnitEngine() {
 
         initImpl: function() {
             //We don't want cluster mapping for model-based optmization
-            Session.set("ignoreClusterMapping", true);
+            var ignoreClusterMapping = getCurrentDeliveryParams().ignoreClusterMapping;
+            Session.set("ignoreClusterMapping", ignoreClusterMapping);
             initializeActRModel();
         },
 

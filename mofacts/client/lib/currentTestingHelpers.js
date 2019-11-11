@@ -378,7 +378,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'forcecorrectprompt':'',
         'forcecorrecttimeout':0,
         'unitMode': 'default',
-        'studyFirst':false
+        'studyFirst':false,
+        'ignoreClusterMapping':true
     };
 
     //We've defined defaults - also define translatations for values
@@ -396,7 +397,9 @@ getCurrentDeliveryParams = function (currUnit) {
         'lockoutminutes': _.intval,
         'fontsize': _.intval,
         'practiceseconds': _.intval,
-        'timeuntilstimulus': _.intval
+        'timeuntilstimulus': _.intval,
+        'studyFirst':xlateBool,
+        'ignoreClusterMapping':xlateBool
     };
 
     var modified = false;
