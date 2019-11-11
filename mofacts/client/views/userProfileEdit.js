@@ -32,25 +32,6 @@ Template.userProfileEdit.rendered = function () {
         'keyboard': false,
         'show': false
     });
-
-    Meteor.call('getClozeEditAuthors',function(err,res){
-      if(!!err){
-        console.log("error getting cloze edit authors: " + JSON.stringify(err));
-      }else{
-        console.log("got cloze edit authors");
-        var authorIDs = res;
-        _.each(_.keys(authorIDs),function(authorID){
-          var disp = authorIDs[authorID] + " Cloze Edits";
-          $("#expDataDownloadContainer").append(
-              $("<div></div>").append(
-                  $("<a class='exp-data-link' target='_blank'></a>")
-                      .attr("href", "/clozeEditHistory/" + authorID)
-                      .text("Download: " + disp)
-              )
-          );
-        });
-      }
-    })
 };
 
 Template.userProfileEdit.events({

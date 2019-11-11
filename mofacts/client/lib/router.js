@@ -207,6 +207,13 @@ Router.route('/contentUpload',{
   }
 });
 
+Router.route('/dataDownload',{
+  name: "client.dataDownload",
+  action: function(){
+    this.render('dataDownload');
+  }
+});
+
 Router.route('/userProfileEdit',{
   name: "client.userProfileEdit",
   action: function(){

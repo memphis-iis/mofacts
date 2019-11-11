@@ -72,6 +72,11 @@ Template.profile.events({
       Router.go('/contentUpload');
     },
 
+    'click #dataDownloadButton': function(event){
+      event.preventDefault();
+      Router.go('/dataDownload');
+    },
+
     'click #userProfileEditButton': function(event){
       event.preventDefault();
       Router.go('/userProfileEdit');
