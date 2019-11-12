@@ -77,11 +77,11 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
 }
 
 checkIfAnswerMatchesOtherQuestionAnswers = function(userAnswer,curQuestionAnswer){
-  if(userAnswer == curQuestionAnswer){
+  if(userAnswer.toLowerCase() == curQuestionAnswer.toLowerCase()){
     return false;
   }else{
     otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== curQuestionAnswer);
-    return otherQuestionAnswers.findIndex(x => x == userAnswer) != -1;
+    return otherQuestionAnswers.findIndex(x => x.toLowerCase() == userAnswer.toLowerCase()) != -1;
   }
 }
 
