@@ -5,7 +5,13 @@
 ln -s /vagrant "$HOME/mofacts"
 
 # We will need to be able to compile some binary packages for Meteor
-sudo apt-get install -y build-essential gcc g++ make automake git
+sudo apt-get update
+sudo apt-get install -y build-essential 
+sudo apt-get install -y gcc
+sudo apt-get install -y g++
+sudo apt-get install -y make
+sudo apt-get install -y automake
+sudo apt-get install -y git
 
 
 ###############################################################################
