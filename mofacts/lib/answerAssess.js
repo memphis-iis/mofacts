@@ -23,9 +23,9 @@ function answerIsBranched(answer) {
     return _.trim(answer).indexOf(';') >= 0;
 }
 
-function simpleStringMatch(str1, str2, lfparameter) {
-    var s1 = _.trim(str1).toLowerCase();
-    var s2 = _.trim(str2).toLowerCase();
+function simpleStringMatch(userAnswer, correctAnswer, lfparameter) {
+    var s1 = _.trim(userAnswer).toLowerCase();
+    var s2 = _.trim(correctAnswer).toLowerCase();
 
     if (s1.localeCompare(s2) === 0) {
         //Exact match!
@@ -34,15 +34,22 @@ function simpleStringMatch(str1, str2, lfparameter) {
     else {
         //See if they were close enough
         if (!!lfparameter) {
-            var editDistScore = 1.0 - (
-                getEditDistance(s1, s2) /
-                Math.max(s1.length, s2.length)
-            );
-            if (editDistScore >= lfparameter) {
-                return 2;  //Close enough
-            }
-            else {
-                return 0;  //No match
+            //Check to see if the user answer is an exact match for any other answers in the stim file,
+            //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
+            otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== correctAnswer);
+            if(otherQuestionAnswers.findIndex(x => _.trim(x).toLowerCase().localeCompare(s1) === 0) != -1){
+              return 0;
+            }else{
+              var editDistScore = 1.0 - (
+                  getEditDistance(s1, s2) /
+                  Math.max(s1.length, s2.length)
+              );
+              if (editDistScore >= lfparameter) {
+                  return 2;  //Close enough
+              }
+              else {
+                  return 0;  //No match
+              }
             }
         }
         else {
@@ -72,17 +79,8 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
         return 0; //Nothing found
     }
     else {
-        return simpleStringMatch(stimStr, userAnswer, lfparameter);
+        return simpleStringMatch(userAnswer, stimStr, lfparameter);
     }
-}
-
-checkIfAnswerMatchesOtherQuestionAnswers = function(userAnswer,curQuestionAnswer){
-  if(userAnswer.toLowerCase() == curQuestionAnswer.toLowerCase()){
-    return false;
-  }else{
-    otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== curQuestionAnswer);
-    return otherQuestionAnswers.findIndex(x => x.toLowerCase() == userAnswer.toLowerCase()) != -1;
-  }
 }
 
 // We perform regex matching, which is special in Mofacts. If the regex is
@@ -202,31 +200,24 @@ Answers = {
                 dispAnswer = _.trim(dispAnswer.split("|")[0]);
             }
 
-            //Check to see if the user answer is an exact match for any other answers in the stim file,
-            //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
-            if(checkIfAnswerMatchesOtherQuestionAnswers(userInput,answer)){
-              isCorrect = false;
-              matchText = "";
-            }else{
-              var match = stringMatch(answer, userInput, lfparameter);
+            var match = stringMatch(answer, userInput, lfparameter);
 
-              if (match === 0) {
-                  isCorrect = false;
-                  matchText = "";
-              }
-              else if (match === 1) {
-                  isCorrect = true;
-                  matchText = "Correct.";
-              }
-              else if (match === 2) {
-                  isCorrect = true;
-                  matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
-              }
-              else {
-                  console.log("MATCH ERROR: something fails in our comparison");
-                  isCorrect = false;
-                  matchText = "";
-              }
+            if (match === 0) {
+                isCorrect = false;
+                matchText = "";
+            }
+            else if (match === 1) {
+                isCorrect = true;
+                matchText = "Correct.";
+            }
+            else if (match === 2) {
+                isCorrect = true;
+                matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+            }
+            else {
+                console.log("MATCH ERROR: something fails in our comparison");
+                isCorrect = false;
+                matchText = "";
             }
 
             if (!matchText) {
