@@ -23,9 +23,28 @@ function answerIsBranched(answer) {
     return _.trim(answer).indexOf(';') >= 0;
 }
 
-function simpleStringMatch(userAnswer, correctAnswer, lfparameter) {
+checkIfUserAnswerMatchesOtherAnswers = function(userAnswer,correctAnswer){
+  otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== correctAnswer);
+  for(var i=0;i<otherQuestionAnswers.length;i++){
+    var stimStr = otherQuestionAnswers[i];
+    //split on ; and take first value because the first value is the correct branch in an answer
+    var checks = _.trim(_.trim(stimStr).split(';')[0]).split('|');
+    for(var j=0; j < checks.length; j++) {
+        if (checks[j].length < 1)
+            continue;  //No blank checks
+        checks[j] = _.trim(checks[j]).toLowerCase();
+        if(userAnswer.localeCompare(checks[j]) === 0){
+          return true;
+        }
+    }
+  }
+  return false;
+}
+
+function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr) {
     var s1 = _.trim(userAnswer).toLowerCase();
     var s2 = _.trim(correctAnswer).toLowerCase();
+    var fullAnswerText = _.trim(fullAnswerStr).toLowerCase();
 
     if (s1.localeCompare(s2) === 0) {
         //Exact match!
@@ -36,8 +55,7 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter) {
         if (!!lfparameter) {
             //Check to see if the user answer is an exact match for any other answers in the stim file,
             //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
-            otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== correctAnswer);
-            if(otherQuestionAnswers.findIndex(x => _.trim(x).toLowerCase().localeCompare(s1) === 0) != -1){
+            if(checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
               return 0;
             }else{
               var editDistScore = 1.0 - (
@@ -71,7 +89,7 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
         for(var i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
-            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter);
+            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter, stimStr);
             if (matched !== 0) {
                 return matched; //Match!
             }
@@ -79,7 +97,7 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
         return 0; //Nothing found
     }
     else {
-        return simpleStringMatch(userAnswer, stimStr, lfparameter);
+        return simpleStringMatch(userAnswer, stimStr, lfparameter, stimStr);
     }
 }
 
@@ -90,7 +108,7 @@ function stringMatch(stimStr, userAnswer, lfparameter) {
 // the current levenshtein distance.
 // ALSO notice that we use the same return values as stringMatch: 0 for no
 // match, 1 for exact match, 2 for edit distance match
-function regExMatch(regExStr, userAnswer, lfparameter) {
+function regExMatch(regExStr, userAnswer, lfparameter,fullAnswer) {
     if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
         // They have an edit distance parameter and the regex matching our
         // special condition - check it manually
@@ -98,7 +116,7 @@ function regExMatch(regExStr, userAnswer, lfparameter) {
         for(var i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
-            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter);
+            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter, fullAnswer);
             if (matched !== 0) {
                 return matched; //Match!
             }
@@ -126,7 +144,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
             continue;
 
         flds[0] = _.trim(flds[0]).toLowerCase();
-        var matched = regExMatch(flds[0], userAnswerCheck, lfparameter);
+        var matched = regExMatch(flds[0], userAnswerCheck, lfparameter,answer);
         if (matched !== 0) {
             matchText = _.trim(flds[1]);
             if (matched === 2) {
