@@ -1009,7 +1009,7 @@ Meteor.startup(function () {
 
   SyncedCron.add({
     name: 'Send Error Report Summaries',
-    schedule: function(parser) { return parser.text('every 24 hours');},
+    schedule: function(parser) { return parser.text('at 3:00 pm');},
     job: function() { return sendErrorReportSummaries(); }
   })
 });
