@@ -428,7 +428,7 @@ Template.studentReporting.rendered = function(){
           console.log("studentUsername:" + studentUsername);
           console.log("studentID:" + studentID);
           Meteor.subscribe('specificUserTimesLog',studentID,function(){
-            currentUserTimeLogs = UserTimesLog.findOne({});
+            currentUserTimeLogs = UserTimesLog.findOne({_id:studentID});
             console.log("currentUserTimeLogs subscription done");
             setTdfFileNamesAndDisplayValues();
           });
@@ -442,7 +442,7 @@ Template.studentReporting.rendered = function(){
         Session.set("curStudentUsername",studentUsername);
         Session.set("curStudentID",studentID);
         Meteor.subscribe('specificUserTimesLog',studentID,function(){
-          currentUserTimeLogs = UserTimesLog.findOne({});
+          currentUserTimeLogs = UserTimesLog.findOne({_id:studentID});
           console.log("currentUserTimeLogs subscription done");
           setTdfFileNamesAndDisplayValues();
         });
