@@ -8,7 +8,7 @@ currentUserTimeLogs = undefined;
 curTracker = undefined;
 tempModelUnitEngine = undefined;
 
-getAssessmentItems = function(tdfFileName){
+getLearningSessionItems = function(tdfFileName){
   var tdfQueryNames = [];
   if(tdfFileName === "xml"){
     tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
@@ -16,26 +16,26 @@ getAssessmentItems = function(tdfFileName){
     tdfQueryNames = [tdfFileName];
   }
 
-  assessmentItems = {};
+  learningSessionItems = {};
   _.each(tdfQueryNames,function(tdfQueryName){
     tdfObject = Tdfs.findOne({fileName:tdfQueryName});
     _.each(tdfObject.tdfs.tutor.unit,function(unit){
-      if(!!unit.assessmentsession){
-        if(!assessmentItems[tdfQueryName]){
-          assessmentItems[tdfQueryName] = {};
+      if(!!unit.learningsession){
+        if(!learningSessionItems[tdfQueryName]){
+          learningSessionItems[tdfQueryName] = {};
         }
-        clusterList = unit.assessmentsession[0].clusterlist[0];
+        clusterList = unit.learningsession[0].clusterlist[0];
         clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
         _.each(clusterLists,function(clusterStartEnd){
           for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
-            assessmentItems[tdfQueryName][i] = true;
+            learningSessionItems[tdfQueryName][i] = true;
           }
         });
       }
     });
   });
 
-  return assessmentItems;
+  return learningSessionItems;
 }
 
 setCurrentStudentPerformance = function(){
@@ -45,19 +45,20 @@ setCurrentStudentPerformance = function(){
     var count = 0;
     var numCorrect = 0;
     var totalTime = 0;
-    var tdfFileName = Session.get("currentTdfName");
+    var tdfFileName = Session.get("curTdfFileName");
 
-    var assessmentItems = getAssessmentItems(tdfFileName);
+    var learningSessionItems = getLearningSessionItems(tdfFileName);
 
     var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-    UserMetrics.find({}).forEach(function(entry){
+    UserMetrics.find({_id:studentID}).forEach(function(entry){
       var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
       for(var index in tdfEntries){
-        var key = tdfEntries[index];
-        var tdf = entry[key];
+        var tdfUserMetricsName = tdfEntries[index];
+        var tdf = entry[tdfUserMetricsName];
+        var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
         for(var index in tdf){
           //Ignore assessment entries
-          if(!assessmentItems[key] || !assessmentItems[key][index]){
+          if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){
             var stim = tdf[index];
             count += stim.questionCount || 0;
             numCorrect += stim.correctAnswerCount || 0;
@@ -175,7 +176,7 @@ getcardProbs = function(){
         checkIfNeedSubTdfName(getCurrentTdfFile());
         tempModelUnitEngine = createModelUnit();
         var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
-        var assessmentItems = getAssessmentItems(curTdfFileName);
+        var learningSessionItems = getLearningSessionItems(curTdfFileName);
         processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
@@ -183,7 +184,7 @@ getcardProbs = function(){
         var numProbs = 0;
         for(var j=0;j<cardProbs.length;j++){
           var cardIndex = cardProbs[j].cardIndex;
-          if(!!cardProbs[j].probability && (!assessmentItems[curTdfFileName] || !assessmentItems[curTdfFileName][cardIndex])){
+          if(!!cardProbs[j].probability && (!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex])){
             totalStimProb += cardProbs[j].probability;
             numProbs += 1;
           }
@@ -204,14 +205,14 @@ getcardProbs = function(){
     tempModelUnitEngine = createModelUnit();
     var curTdfFileName = Session.get("currentTdfName");
     var expKey = curTdfFileName.replace(/[.]/g,'_');
-    var assessmentItems = getAssessmentItems(curTdfFileName);
+    var learningSessionItems = getLearningSessionItems(curTdfFileName);
     processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
     var cardProbs = [];
     var cardProbsLabels = [];
     var mycardProbs =tempModelUnitEngine.getCardProbs();
     for(var i=0;i<mycardProbs.length;i++){
         var cardIndex = mycardProbs[i].cardIndex;
-        if(!assessmentItems[curTdfFileName] || !assessmentItems[curTdfFileName][cardIndex]){
+        if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
           var stimIndex = mycardProbs[i].stimIndex;
           var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
           cardProbsLabels.push(currentQuestion);
@@ -353,7 +354,7 @@ setTdfFileNamesAndDisplayValues = function(){
           var fileName = entry.fileName;
           var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
           var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-          if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1){
+          if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1 && !!getLearningSessionItems(fileName)[fileName]){
             studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
           }
         });
@@ -470,11 +471,14 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
   $("#cardProbsChart").attr('data-x-axis-label','Correctness (%)');
   if(curTdf === "xml" || !curTdf){
     Session.set("currentStimName",null);
+    Session.set("currentTdfName",curTdfFileName);
+    Session.set("curTdfFileName",curTdfFileName);
     $("#cardProbsChart").attr('data-y-axis-label',"Chapter");
   }else{
     $("#cardProbsChart").attr('data-y-axis-label',"");
 
     Session.set("currentTdfName",curTdfFileName);
+    Session.set("curTdfFileName",curTdfFileName);
     Session.set("currentRootTdfName",curTdfFileName);
     checkIfNeedSubTdfName(getCurrentTdfFile());
     var curTdfFile = getCurrentTdfFile();
