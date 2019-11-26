@@ -66,26 +66,23 @@ setClozesFromStimObject = function(stimObject){
       var mapping = clusterListMappings[unitIndex];
       var clusterListIndices = mapping.orig;
       if(index >= clusterListIndices[0] && index <= clusterListIndices[1]){
-        inLearningSession = mapping.sessionType === "learningsession";
         clusterUnitIndex = unitIndex;
         break;
       }
     }
-    if(inLearningSession){
-      var cluster = allClusters[index];
-      var fakeSentenceId = _.random(-9999999999,9999999999);
-      for(var index2 in cluster.display){
-        var clozeText = cluster.display[index2];
-        var clozeResponse = cluster.response[index2];
-        var clozeId = _.random(-9999999999,9999999999);
-        allClozes.push({
-          unitIndex:clusterUnitIndex,
-          cloze:clozeText,
-          correctResponse:clozeResponse,
-          clozeId:clozeId,
-          itemId:fakeSentenceId
-        })
-      }
+    var cluster = allClusters[index];
+    var fakeSentenceId = _.random(-9999999999,9999999999);
+    for(var index2 in cluster.display){
+      var clozeText = cluster.display[index2];
+      var clozeResponse = cluster.response[index2];
+      var clozeId = _.random(-9999999999,9999999999);
+      allClozes.push({
+        unitIndex:clusterUnitIndex,
+        cloze:clozeText,
+        correctResponse:clozeResponse,
+        clozeId:clozeId,
+        itemId:fakeSentenceId
+      })
     }
   }
   Session.set("clozeSentencePairs", {
@@ -136,7 +133,8 @@ saveEditHistory = function(originalClozes,newClozes){
     endingClozes:newClozes,
     clozeEdits:clozeEdits,
     user:Meteor.userId(),
-    timestamp:Date.now()
+    timestamp:Date.now().toString(),
+    templateTdf:origTdfFileName
   };
   Meteor.call('insertClozeEditHistory',history,function(err,result){
     if(!!err){
