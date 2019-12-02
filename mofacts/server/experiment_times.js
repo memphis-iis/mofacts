@@ -549,6 +549,13 @@
     // We return the number of records written
     createExperimentExport = function (expName, format, recordAcceptor) {
         var header = {};
+        var expNames = [];
+        
+        if (_.isString(expName)) {
+            expNames.push(expName);
+        } else {
+            expNames = expName;
+        }
 
         // We currently just ignore format
 
@@ -581,9 +588,11 @@
 
             var username = userRec.username;
 
-            processUserLog(username, entry, expName, function (rec) {
-                recordCount++;
-                recordAcceptor(delimitedRecord(rec));
+            expNames.forEach(function(expName) {
+                processUserLog(username, entry, expName, function (rec) {
+                    recordCount++;
+                    recordAcceptor(delimitedRecord(rec));
+                });
             });
         });
 

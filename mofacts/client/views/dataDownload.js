@@ -1,57 +1,96 @@
-Template.dataDownload.rendered = function () {
-  $("#expDataDownloadContainer").html("");
+import { ReactiveVar } from 'meteor/reactive-var'
 
-  var allTdfs = Tdfs.find({});
-
-  var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
-
-  //Check all the valid TDF's
-  allTdfs.forEach( function (tdfObject) {
-      // Show data download - note that this happens regardless of userselect
-      if (Meteor.userId() === tdfObject.owner || isAdmin) {
-          var disp = name;
-          if (tdfObject.fileName != name) {
-              disp += " (" + tdfObject.fileName + ")";
-          }
-
-          $("#expDataDownloadContainer").append(
-              $("<div></div>").append(
-                  $("<a class='exp-data-link' target='_blank'></a>")
-                      .attr("href", "/experiment-data/" + tdfObject.fileName +"/datashop")
-                      .text("Download: " + disp)
-              )
-          );
+Template.dataDownload.helpers({
+  'teachers': function() {
+    return Session.get('allUsersWithTeacherRole');
+  },
+  'selectedTeacherId': function() {
+    return Template.instance().selectedTeacherId.get();
+  },
+  'dataDownloads': function() {
+    var dataDownloads = [];
+    
+    dataDownloads = Tdfs.find({}).map(function(tdfObject) {
+      tdfObject.disp = name;
+      
+      if (tdfObject.fileName != name) {
+        tdfObject.disp += " (" + tdfObject.fileName + ")";
       }
+
+      return tdfObject;
+    }).filter(function(tdfObject) {
+      if (isAdmin()) {
+        if (_.isEmpty(Template.instance().selectedTeacherId.get())) {
+          return true; // If no teacher is selected, view all available TDF data downloads
+        } 
+
+        if (Template.instance().selectedTeacherId.get() == tdfObject.owner) {
+          return true; // If a teacher is selected, only return TDF data downloads where selected teacher is owner
+        }
+
+        return false;
+      } 
+
+      if (Meteor.userId() == tdfObject.owner) {
+        return true;
+      }
+
+      return false;
+    });
+
+    return dataDownloads;
+  },
+  'userClozeEdits': function() {
+    return Session.get('clozeEdits');;
+  },
+  'isTeacherSelected': function() {
+    return !_.isEmpty(Template.instance().selectedTeacherId.get());
+  }  
+});
+
+Template.dataDownload.events({
+  'change #teacherSelect': function(event, instance) {
+    if (event.currentTarget.value) {
+      instance.selectedTeacherId.set(event.currentTarget.value);
+    } else {
+      instance.selectedTeacherId.set("");
+    }
+  }
+});
+
+Template.dataDownload.onCreated(function() {
+  this.selectedTeacherId = new ReactiveVar(null);
+  
+  Meteor.subscribe('allUsersWithTeacherRole', function() {
+    var users = Meteor.users.find({}).fetch();
+    Session.set("allUsersWithTeacherRole", users);
   });
 
-  $("#expDataDownloadContainer").append(
-      $("<div></div>").append(
-          $("<legend class='text-center'>User Cloze Edits</legend>")
-      )
-  );
+  if (isAdmin()) {
+    var clozeEdits = [];
 
-  if(isAdmin){
-    Meteor.call('getClozeEditAuthors',function(err,res){
-      if(!!err){
-        console.log("error getting cloze edit authors: " + JSON.stringify(err));
-      }else{
-        console.log("got cloze edit authors");
-        var authorIDs = res;
-        _.each(_.keys(authorIDs),function(authorID){
-          var disp = authorIDs[authorID] + " Cloze Edits";
-          $("#expDataDownloadContainer").append(
-              $("<div></div>").append(
-                  $("<a class='exp-data-link' target='_blank'></a>")
-                      .attr("href", "/clozeEditHistory/" + authorID)
-                      .text("Download: " + disp)
-              )
-          );
+    Meteor.call('getClozeEditAuthors', function(err, res) {
+      if (!!err) {
+        console.log('error getting cloze edit authors: ' + JSON.stringify(err));
+      } else {
+        var authors = res;
+
+        _.each(_.keys(authors), function(authorId) {
+          var clozeEdit = {};
+          
+          clozeEdit.authorId = authorId;
+          clozeEdit.disp = authors[authorId];
+
+          clozeEdits.push(clozeEdit);
         });
       }
-    })
-  }else{
-    console.log("not an admin, not display cloze edits");
+
+      Session.set("clozeEdits", clozeEdits);
+    });
   }
 
+});
 
-};
+function isAdmin() {
+  return Roles.userIsInRole(Meteor.user(), ['admin']);
+}

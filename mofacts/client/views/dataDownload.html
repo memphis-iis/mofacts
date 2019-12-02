@@ -1,6 +1,40 @@
 <template name="dataDownload">
+    {{#if isInRole 'admin'}}
+        <div class="col-md-12" id="teacherSelectContainer">
+            <legend class="text-center">Teacher Select</legend>
+            <select id="teacherSelect" name="teacherSelect">
+                <option value="">Show all</option>
+                {{#each teachers}}
+                    {{#if this.profile.name}}
+                        <option value="{{this._id}}">{{this.profile.name}}</option>
+                    {{/if}}
+                {{/each}}
+            </select>
+            {{#if isTeacherSelected}}
+                <a id="downloadAllTdfDataLink" href="/data-by-teacher/{{selectedTeacherId}}/datashop" target="_blank">
+                    Download all TDF data for selected teacher
+                </a>
+            {{/if}}
+        </div>
+    {{/if}}
+
     <div class="col-md-12" id="downloadContainer">
         <legend class="text-center">Data Downloads</legend>
-        <div id="expDataDownloadContainer"></div>
+        
+        <ul class="downloadContainerList" id="expDataDownloadContainer">
+            {{#each dataDownloads}}
+                <li><a class="exp-data-link" target="_blank" href="/experiment-data/{{this.fileName}}/datashop">Download: {{this.disp}}</a></li>
+            {{/each}}
+        </ul>
+    </div>
+
+    <div class="col-md-12" id="userClozeEditsContainer">
+        <legend class="text-center">User Cloze Edits</legend>
+
+        <ul class="downloadContainerList" id="userClozeEditsDownloadContainer">
+            {{#each userClozeEdits}}
+                <li><a class="exp-data-link" target="_blank" href="/clozeEditHistory/{{this.authorId}}">Download: {{this.disp}}</a></li>
+            {{/each}}
+        </ul>
     </div>
 </template>
