@@ -1065,7 +1065,7 @@ Router.route("data-by-teacher", {
 
     if (!uid) {
       response.writeHead(404);
-      response.end("No user ID specified");var filename = fmt + exp + "-data.txt";
+      response.end("No user ID specified");
       return;
     }
 
@@ -1096,6 +1096,70 @@ Router.route("data-by-teacher", {
     }
 
     var fileName = "tdf-data-by-teacher.txt";
+
+    response.writeHead(200, {
+      "Content-Type": "text/tab-separated-values",
+      "Content-Disposition": "attachment; filename=" + fileName
+    });
+
+    var recCount = createExperimentExport(tdfs, fmt, function(record) {
+      response.write(record);
+      response.write('\r\n');
+    });
+
+    tdfs.forEach(function(tdf) {
+      serverConsole("Sent all  data for", tdf, "as file", fileName, "with record-count:", recCount);
+    });
+
+    response.end("");
+  }
+});
+
+// Serves data file containing all TDF data for all classes for a teacher
+Router.route("data-by-class", {
+  name: "server.classData",
+  where: "server",
+  path: "/data-by-class/:classid/:format",
+  action: function() {
+    var classId = this.params.classid;
+    var fmt = this.params.format;
+    var response = this.response;
+
+    var tdfs = [];
+
+    if (!classId) {
+      response.writeHead(404);
+      response.end("No class ID specified");
+      return;
+    }
+
+    if (fmt !== "datashop") {
+      response.writeHead(404);
+      response.end("Unknown format specified: only datashop currently supported");
+      return;
+    }
+
+    var classes = Classes.find({'_id': classId});
+  
+    if (!classes) {
+      response.writeHead(404);
+      response.end("No classes found for the specified class ID");
+      return;
+    }
+
+    classes.forEach(function(c) {
+      c.tdfs.forEach(function(tdf) {
+        tdfs.push(tdf.fileName);
+      });
+    });
+
+    if (!tdfs.length > 0) {
+      response.writeHead(404);
+      response.end("No tdfs found for any classes");
+      return;
+    }
+
+    var fileName = "tdf-data-by-class.txt";
 
     response.writeHead(200, {
       "Content-Type": "text/tab-separated-values",
