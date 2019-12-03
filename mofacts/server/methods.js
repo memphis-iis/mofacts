@@ -1095,7 +1095,11 @@ Router.route("data-by-teacher", {
       return;
     }
 
-    var fileName = "tdf-data-by-teacher.txt";
+    var user = Meteor.users.findOne({'_id': uid});
+    var userName = user.username;
+    userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
+
+    var fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
 
     response.writeHead(200, {
       "Content-Type": "text/tab-separated-values",
@@ -1139,18 +1143,16 @@ Router.route("data-by-class", {
       return;
     }
 
-    var classes = Classes.find({'_id': classId});
+    var foundClass = Classes.findOne({'_id': classId});
   
-    if (!classes) {
+    if (!foundClass) {
       response.writeHead(404);
       response.end("No classes found for the specified class ID");
       return;
     }
-
-    classes.forEach(function(c) {
-      c.tdfs.forEach(function(tdf) {
-        tdfs.push(tdf.fileName);
-      });
+    console.log(foundClass);
+    foundClass.tdfs.forEach(function(tdf) {
+      tdfs.push(tdf.fileName);
     });
 
     if (!tdfs.length > 0) {
@@ -1159,7 +1161,11 @@ Router.route("data-by-class", {
       return;
     }
 
-    var fileName = "tdf-data-by-class.txt";
+    var className = foundClass.name;
+    className = className.replace('/[/\\?%*:|"<>\s]/g', '_');
+    
+
+    var fileName = 'mofacts_' + className + '_all_class_data.txt';
 
     response.writeHead(200, {
       "Content-Type": "text/tab-separated-values",

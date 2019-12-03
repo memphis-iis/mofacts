@@ -1,7 +1,7 @@
 <template name="dataDownload">
     {{#if isInRole 'admin'}}
         <div class="col-md-12" id="teacherSelectContainer">
-            <legend class="text-center">Teacher Select</legend>
+            <legend class="downloadLegend">Teacher Select</legend>
             <select id="teacherSelect" name="teacherSelect">
                 <option value="">Show all</option>
                 {{#each teachers}}
@@ -20,7 +20,7 @@
 
     {{#if showClasses}}
         <div class="col-md-12" id="classSelectContainer">
-            <legend class="text-center">Class Select</legend>
+            <legend class="downloadLegend">Class Select</legend>
             <select id="classSelect" name="classSelect">
                 <option value="">Show all</option>
                 {{#each classes}}
@@ -36,8 +36,7 @@
     {{/if}}
 
     <div class="col-md-12" id="downloadContainer">
-        <legend class="text-center">Data Downloads</legend>
-        
+        <legend class="downloadLegend">Data Downloads</legend>
         <ul class="downloadContainerList" id="expDataDownloadContainer">
             <li><a class="exp-data-link" target="_blank" href="/data-by-teacher/{{currentUser}}/datashop">Download all TDF data for current user: {{user}}</a></li>
             {{#each dataDownloads}}
@@ -47,8 +46,7 @@
     </div>
 
     <div class="col-md-12" id="userClozeEditsContainer">
-        <legend class="text-center">User Cloze Edits</legend>
-
+        <legend class="downloadLegend">User Cloze Edits</legend>
         <ul class="downloadContainerList" id="userClozeEditsDownloadContainer">
             {{#each userClozeEdits}}
                 <li><a class="exp-data-link" target="_blank" href="/clozeEditHistory/{{this.authorId}}">Download: {{this.disp}}</a></li>
