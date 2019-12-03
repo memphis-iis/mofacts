@@ -11,8 +11,25 @@
                 {{/each}}
             </select>
             {{#if isTeacherSelected}}
-                <a id="downloadAllTdfDataLink" href="/data-by-teacher/{{selectedTeacherId}}/datashop" target="_blank">
+                <a class="downloadAllDataLink" href="/data-by-teacher/{{selectedTeacherId}}/datashop" target="_blank">
                     Download all TDF data for selected teacher
+                </a>
+            {{/if}}
+        </div>
+    {{/if}}
+
+    {{#if showClasses}}
+        <div class="col-md-12" id="classSelectContainer">
+            <legend class="text-center">Class Select</legend>
+            <select id="classSelect" name="classSelect">
+                <option value="">Show all</option>
+                {{#each classes}}
+                    <option value="{{this._id}}">{{this.name}}</option>
+                {{/each}}
+            </select>
+            {{#if isClassSelected}}
+                <a class="downloadAllDataLink" href="/data-by-class/{{selectedClassId}}/datashop" target="_blank">
+                    Download all TDF data for selected class
                 </a>
             {{/if}}
         </div>
@@ -22,6 +39,7 @@
         <legend class="text-center">Data Downloads</legend>
         
         <ul class="downloadContainerList" id="expDataDownloadContainer">
+            <li><a class="exp-data-link" target="_blank" href="/data-by-teacher/{{currentUser}}/datashop">Download all TDF data for current user: {{user}}</a></li>
             {{#each dataDownloads}}
                 <li><a class="exp-data-link" target="_blank" href="/experiment-data/{{this.fileName}}/datashop">Download: {{this.disp}}</a></li>
             {{/each}}
