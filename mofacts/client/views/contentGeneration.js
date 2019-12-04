@@ -66,23 +66,27 @@ setClozesFromStimObject = function(stimObject){
       var mapping = clusterListMappings[unitIndex];
       var clusterListIndices = mapping.orig;
       if(index >= clusterListIndices[0] && index <= clusterListIndices[1]){
+        inLearningSession = mapping.sessionType === "learningsession";
         clusterUnitIndex = unitIndex;
         break;
       }
     }
-    var cluster = allClusters[index];
-    var fakeSentenceId = _.random(-9999999999,9999999999);
-    for(var index2 in cluster.display){
-      var clozeText = cluster.display[index2];
-      var clozeResponse = cluster.response[index2];
-      var clozeId = _.random(-9999999999,9999999999);
-      allClozes.push({
-        unitIndex:clusterUnitIndex,
-        cloze:clozeText,
-        correctResponse:clozeResponse,
-        clozeId:clozeId,
-        itemId:fakeSentenceId
-      })
+
+    if (inLearningSession) {
+      var cluster = allClusters[index];
+      var fakeSentenceId = _.random(-9999999999,9999999999);
+      for(var index2 in cluster.display){
+        var clozeText = cluster.display[index2];
+        var clozeResponse = cluster.response[index2];
+        var clozeId = _.random(-9999999999,9999999999);
+        allClozes.push({
+          unitIndex:clusterUnitIndex,
+          cloze:clozeText,
+          correctResponse:clozeResponse,
+          clozeId:clozeId,
+          itemId:fakeSentenceId
+        })
+      }
     }
   }
   Session.set("clozeSentencePairs", {
@@ -247,6 +251,10 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName){
   //curTdf.tdfs.tutor.unit[learningsessionUnitNum].learningsession[0].clusterlist = ["0-"+(numStimClozes-1)];
   curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
   curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
+
+  for(var unitIndex in clusterListMappings) {
+    clusterListMappings[unitIndex].new = undefined;
+  }
 
   return curTdf;
 }
