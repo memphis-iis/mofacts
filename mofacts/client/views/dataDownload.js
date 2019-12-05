@@ -94,7 +94,7 @@ Template.dataDownload.helpers({
       return tdfObject;
     }).filter(function(tdfObject) {
       if (!_.isEmpty(Template.instance().selectedClassId.get())) {
-        if (!classTdfNames.includes(tdfObject.fileName)) {
+        if (!_.includes(classTdfNames, tdfObject.fileName)) {
           return false; // If a class is selected, reject any TDF data that does not belong to the selected class
         }
       }
