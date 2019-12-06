@@ -154,6 +154,14 @@ test the application, commit code to the repository, etc. in your native
 operating system. The vagrant-controlled virtual machine is where you run
 the project in a suitable environment for testing.
 
+## Testing
+To run tests* in Vagrant, use
+
+```
+./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json
+```
+*The `--full-app` option may be used for integration testing.
+
 ## When you're done with development
 
 Once you've reached a stopping point, you should shut down your environment
@@ -179,7 +187,7 @@ the virtual machine for you.
 
 ## FAQs
 
-###Question
+### Question
 
 I'm encountering the following error when trying to run meteor:
 ````
@@ -187,7 +195,7 @@ vagrant@vagrant-ubuntu-trusty-64:~/mofacts/mofacts$ ./run_meteor
 -bash: ./run_meteor: /bin/bash^M: bad interpreter: No such file or directory
 ````
 
-###Solution
+### Solution
 
 This is an error due to the run_meteor file's line endings being converted to windows line endings and not linux line endings.  To fix it simply run the following commands inside the vagrant vm:
 
