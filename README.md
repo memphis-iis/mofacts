@@ -155,10 +155,10 @@ operating system. The vagrant-controlled virtual machine is where you run
 the project in a suitable environment for testing.
 
 ## Testing
-To run tests* in Vagrant, use
+To run both server and client tests* in Vagrant, use
 
 ```
-./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json
+TEST_WATCH=1 ./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json
 ```
 *The `--full-app` option may be used for integration testing.
 
