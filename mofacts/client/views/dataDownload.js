@@ -77,9 +77,11 @@ Template.dataDownload.helpers({
 
       classes.forEach(function(classObject) {
         if (classObject._id == Template.instance().selectedClassId.get()) {
-          classObject.tdfs.forEach(function(tdf) {
-            classTdfNames.push(tdf.fileName);
-          });
+          if (classObject.tdfs) {
+            classObject.tdfs.forEach(function(tdf) {
+              classTdfNames.push(tdf.fileName);
+            });
+          }
         }
       });
     }
@@ -94,7 +96,7 @@ Template.dataDownload.helpers({
       return tdfObject;
     }).filter(function(tdfObject) {
       if (!_.isEmpty(Template.instance().selectedClassId.get())) {
-        if (!_.includes(classTdfNames, tdfObject.fileName)) {
+        if (!_.contains(classTdfNames, tdfObject.fileName)) {
           return false; // If a class is selected, reject any TDF data that does not belong to the selected class
         }
       }
@@ -169,9 +171,9 @@ Template.dataDownload.events({
 });
 
 function isTeacher() {
-  return Roles.userIsInRole(Meteor.user(), ['teacher']);
+  return Roles.userIsInRole(Meteor.user(), 'teacher');
 }
 
 function isAdmin() {
-  return Roles.userIsInRole(Meteor.user(), ['admin']);
+  return Roles.userIsInRole(Meteor.user(), 'admin');
 }
