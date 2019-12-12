@@ -158,7 +158,7 @@ the project in a suitable environment for testing.
 To run both server and client tests* in Vagrant, use
 
 ```
-TEST_WATCH=1 ./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json
+TEST_WATCH=1 ./run_meteor test --driver-package meteortesting:mocha --settings ./settings.json --allow-incompatible-update
 ```
 *The `--full-app` option may be used for integration testing.
 
