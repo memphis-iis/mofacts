@@ -1,0 +1,11 @@
+{  
+    "logNotice": "Test Config",
+    "public": {
+        "testLogin": true
+    },
+    "owner": "admin",
+    "initRoles": {
+        "admins": [],
+        "teachers": []
+    }
+}
