@@ -221,7 +221,7 @@ Meteor.publish('allTeachers', function(){
 });
 
 Meteor.publish('allUsersWithTeacherRole', function() {
-  return Meteor.users.find({'roles': ['teacher']});
+  return Meteor.users.find({'roles': 'teacher'});
 });
 
 //Config for scheduled jobs - the start command is at the end of
