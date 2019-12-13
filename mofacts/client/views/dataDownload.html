@@ -5,8 +5,8 @@
             <select id="teacherSelect" name="teacherSelect">
                 <option value="">Show all</option>
                 {{#each teachers}}
-                    {{#if this.profile.name}}
-                        <option value="{{this._id}}">{{this.profile.name}}</option>
+                    {{#if this.username}}
+                        <option value="{{this._id}}">{{this.username}}</option>
                     {{/if}}
                 {{/each}}
             </select>
