@@ -3,9 +3,9 @@
     "public": {
         "testLogin": true
     },
-    "owner": "admin",
+    "owner": "ADMIN",
     "initRoles": {
-        "admins": [],
+        "admins": ["ADMIN"],
         "teachers": []
     }
 }

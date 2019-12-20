@@ -15,6 +15,10 @@ services:
       MONGO_URL: mongodb://mongo:27017/meteor
       METEOR_SETTINGS: "${METEOR_SETTINGS}"
     command: /bin/bash meteor
+    volumes:
+      - type: bind
+        source: mofacts
+        target: /opt/src/mofacts
 
   #For use by users interested in testing their tdfs/stims and not development
   test-app:
@@ -29,9 +33,13 @@ services:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongo:27017/meteor
       PORT: 3000
+    volumes:
+      - type: bind
+        source: /home/docker/mofacts
+        target: /opt/src/mofacts
 
   #For use in production
-  prod-app:
+  prod-app_1_a:
     build:
       context: .
       dockerfile: Dockerfile
@@ -42,11 +50,58 @@ services:
     environment:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongo:27017/meteor
+      METEOR_SETTINGS: "${METEOR_SETTINGS}"
+      PORT: 3000
+    restart: unless-stopped
+
+  prod-app_1_b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3001:3000'
+    depends_on:
+      - mongo
+    environment:
+      ROOT_URL: ${APP_ROOT_URL:-http://localhost}
+      MONGO_URL: mongodb://mongo:27017/meteor
+      METEOR_SETTINGS: "${METEOR_SETTINGS}"
+      PORT: 3000
+    restart: unless-stopped
+
+  prod-app_2_a:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3002:3000'
+    depends_on:
+      - mongo
+    environment:
+      ROOT_URL: ${APP_ROOT_URL:-http://localhost}
+      MONGO_URL: mongodb://mongo:27017/meteor
+      METEOR_SETTINGS: "${METEOR_SETTINGS}"
+      PORT: 3000
+    restart: unless-stopped
+
+  prod-app_2_b:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3003:3000'
+    depends_on:
+      - mongo
+    environment:
+      ROOT_URL: ${APP_ROOT_URL:-http://localhost}
+      MONGO_URL: mongodb://mongo:27017/meteor
+      METEOR_SETTINGS: "${METEOR_SETTINGS}"
+      PORT: 3000
     restart: unless-stopped
 
   mongo:
-    image: mongo:3.2
-    command:
-      - --storageEngine=wiredTiger
+    build:
+      context: .
+      dockerfile: Dockerfile_Mongo
     volumes:
-     - ./data:/data/db
+     - /home/docker/data:/data/db

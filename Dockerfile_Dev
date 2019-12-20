@@ -5,14 +5,8 @@ COPY ./mofacts/package*.json $APP_SOURCE_FOLDER/
 
 RUN bash $SCRIPTS_FOLDER/build-app-npm-dependencies.sh
 
-# Copy app source into container
-COPY ./mofacts $APP_SOURCE_FOLDER/
-
-# Copy default settings file into container
-#COPY ./mofacts/example.settings.json $APP_SOURCE_FOLDER/default.settings.json
-
 WORKDIR $APP_SOURCE_FOLDER
 
-CMD /bin/bash meteor --settings ./example.settings.json
+CMD cp -r node_modules ./mofacts/ && cp package*.json ./mofacts/ && cd ./mofacts && pwd && ls && meteor --settings ./example.settings.json
 
 EXPOSE 3000
