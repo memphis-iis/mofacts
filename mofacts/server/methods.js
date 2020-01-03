@@ -78,7 +78,12 @@ function sendErrorReportSummaries(){
         text = text + "User: " + userWhoReportedError.username + ", page: " + unsentErrorReport.page + ", time: " + unsentErrorReport.time + ", description: " + unsentErrorReport.description + ", userAgent: " + unsentErrorReport.userAgent + " \n";
         sentErrorReports.add(unsentErrorReport._id);
       }
-      sendEmail(admin,from,subject,text);
+      
+      try {
+        sendEmail(admin,from,subject,text);
+      } catch (err) {
+        serverConsole(err);
+      }
     }
     sentErrorReports = Array.from(sentErrorReports);
     ErrorReports.update({_id:{$in:sentErrorReports}},{$set:{"emailed":true}},{multi:true});
