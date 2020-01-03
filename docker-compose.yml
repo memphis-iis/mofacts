@@ -28,7 +28,7 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - mongo
+      - mongo_test
     environment:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongo:27017/meteor
@@ -100,6 +100,13 @@ services:
     restart: unless-stopped
 
   mongo:
+    build:
+      context: .
+      dockerfile: Dockerfile_Mongo
+    volumes:
+      - /data/db:/data/db
+
+  mongo_test:
     build:
       context: .
       dockerfile: Dockerfile_Mongo
