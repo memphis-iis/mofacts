@@ -24,11 +24,11 @@ sudo apt-get install -y git
 # sudo apt-get install -y mongodb-10gen=2.4.10
 # echo "mongodb-10gen hold" | sudo dpkg --set-selections
 
-# Use MongoDB 3.2
-sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys D68FA50FEA312927
-echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+# Use MongoDB 4.2
+wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 sudo apt-get update
+sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
 sudo apt-get install -y mongodb-org
 
 sudo apt-get install dos2unix
@@ -36,10 +36,7 @@ sudo apt-get install dos2unix
 # Upgrading from 2.4 to 2.6
 # mongodump
 # sudo apt-mark unhold mongodb-10gen
-# sudo apt-get install -y mongodb-10gen- mongodb-org
-# Upgrading from 2.6 to 3.0
-# mongodump
-# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+# sudo apt-get install -y mongodb-apt-key adv://keyserver.ubuntu.com:80 --recv 7F0CEB10
 # sudo rm /etc/apt/sources.list.d/mongodb.list
 # echo "deb http://repo.mongodb.org/apt/ubuntu precise/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
 # sudo apt-get update
@@ -49,6 +46,13 @@ sudo apt-get install dos2unix
 # sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
 # sudo rm /etc/apt/sources.list.d/mongodb-org-3.0.list
 # echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
+# sudo apt-get update
+# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
+# sudo apt-get install -y mongodb-org
+# Upgrading from 3.2 to 4.2
+# wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+# sudo rm /etc/apt/sources.list.d/mongodb-org-3.2.list
+# echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 # sudo apt-get update
 # sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
 # sudo apt-get install -y mongodb-org
@@ -73,7 +77,7 @@ sudo service mongod restart
 
 
 # Install meteor
-curl https://install.meteor.com/?release=1.6.1.1 | sh
+curl https://install.meteor.com/?release=1.8.3 | sh
 
 # In case we're running on a Windows host, we force the use of mounting instead
 # of symlinks for meteor packages
