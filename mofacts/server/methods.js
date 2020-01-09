@@ -481,19 +481,29 @@ Meteor.startup(function () {
                 var count = 0;
                 var numCorrect = 0;
                 var totalTime = 0;
-                tdfObject = Tdfs.findOne({fileName:tdfFileName});
                 assessmentItems = {};
-                _.each(tdfObject.tdfs.tutor.unit,function(unit){
-                  if(!!unit.assessmentsession){
-                    clusterList = unit.assessmentsession[0].clusterlist[0];
-                    clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
-                    _.each(clusterLists,function(clusterStartEnd){
-                      for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
-                        assessmentItems[i] = true;
-                      }
-                    });
-                  }
+
+                if(tdfFileName === "xml"){
+                  tdfQueryNames = Tdfs.find({}).fetch().map(x => x.fileName);
+                }else{
+                  tdfQueryNames = [tdfFileName];
+                }
+
+                _.each(tdfQueryNames, function(tdfQueryName) {
+                  tdfObject = Tdfs.findOne({fileName: tdfQueryName})
+                  _.each(tdfObject.tdfs.tutor.unit,function(unit){
+                    if(!!unit.assessmentsession){
+                      clusterList = unit.assessmentsession[0].clusterlist[0];
+                      clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
+                      _.each(clusterLists,function(clusterStartEnd){
+                        for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
+                          assessmentItems[i] = true;
+                        }
+                      });
+                    }
+                  });
                 });
+
                 var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
                 UserMetrics.find({_id:studentID}).forEach(function(entry){
                   var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
