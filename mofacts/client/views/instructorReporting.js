@@ -17,7 +17,10 @@ setCurClassStudents = function(curClassName,currentTdf){
   var curClass = search(curClassName,"name",classes);
   var classID = curClass._id;
 
+  Session.set("performanceLoading", true);
+
   Meteor.call('getStudentPerformanceForClassAndTdf',classID,currentTdf,function(err,res){
+    Session.set("performanceLoading", false);
     if(!!err){
       console.log("error getting student performance for class and tdf: " + JSON.stringify(err));
     }else{
@@ -48,6 +51,10 @@ Template.instructorReporting.helpers({
 
   curClassStudentTotals: function(){
     return Session.get("curClassStudentTotals");
+  },
+
+  performanceLoading: function() {
+    return Session.get("performanceLoading");
   }
 });
 
