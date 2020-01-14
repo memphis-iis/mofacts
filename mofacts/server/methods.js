@@ -617,7 +617,7 @@ Meteor.startup(function () {
 
         addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
           user = user.toLowerCase();
-          var teacher = Meteor.users.find("username":teacherUsername) || {};
+          var teacher = Meteor.users.find({"username": teacherUsername}) || {};
           var teacherID = teacher._id;
           console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
           var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();

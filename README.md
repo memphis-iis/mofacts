@@ -66,7 +66,7 @@ starting point. Assuming that you're in the mofacts directory that we cloned
 above:
 
 ````
-$ vagrant box add ubuntu/trusty64
+$ vagrant box add ubuntu/bionic64
 ````
 
 This will download a virtual machine image. ***WARNING:*** this may take a
