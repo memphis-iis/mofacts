@@ -8,11 +8,15 @@
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
 var endOfLine = Npm.require("os").EOL;
-process.env.MAIL_URL = Meteor.settings.MAIL_URL;
+if(!!process.env.METEOR_SETTINGS_WORKAROUND){
+  Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
+}
 if(!!Meteor.settings.public.testLogin){
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
   console.log("dev environment, allow insecure tls");
 }
+console.log("meteor settings: " + JSON.stringify(Meteor.settings));
+process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 var adminUsers = Meteor.settings.initRoles.admins;
 var ownerEmail = Meteor.settings.owner;
 
@@ -409,6 +413,12 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          getUsageReportData:function(){
+            const numDaysToQuery = 7;
+            var startQueryDate = new Date(Date.now() - (1000*60*60*24*numDaysToQuery));
+
+          },
+
           getClozeEditAuthors:function(){
             var authorIDs = {};
             ClozeEditHistory.find({}).forEach(function(entry){
