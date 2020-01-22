@@ -13,11 +13,12 @@ services:
     environment:
       ROOT_URL: ${APP_ROOT_URL:-http://localhost}
       MONGO_URL: mongodb://mongo:27017/meteor
-      METEOR_SETTINGS: "${METEOR_SETTINGS}"
-    command: /bin/bash meteor
+      METEOR_SETTINGS_WORKAROUND: "${METEOR_SETTINGS}"
+    command: ["env;pwd;ls -la;ls -la mofacts; cd mofacts; meteor"] #["pwd; ls; cp -r node_modules ./mofacts/;cp package*.json ./mofacts/;cd ./mofacts;pwd;ls -la;meteor"]
+    entrypoint: /bin/sh -c
     volumes:
       - type: bind
-        source: mofacts
+        source: ./mofacts
         target: /opt/src/mofacts
 
   #For use by users interested in testing their tdfs/stims and not development
