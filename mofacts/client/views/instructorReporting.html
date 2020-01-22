@@ -16,11 +16,14 @@
         <h3>Select Chapter</h3>
         <select id="tdf-select">
             <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
-            <option value="">All</option>
+            <option value="xml">All</option>
             {{#each tdfs}}
               <option value="{{this.fileName}}">{{this.displayName}}</option>
             {{/each}}
         </select>
+        {{#if performanceLoading}}
+          <p>Loading reports...</p>
+        {{/if}}
       </div>
       <h3>Class Data</h3>
       <ul class="nav nav-tabs">
