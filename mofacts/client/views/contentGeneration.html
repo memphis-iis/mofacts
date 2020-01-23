@@ -151,14 +151,22 @@
         </div>
       </div>
       <div class="col-md-7" id="clozes-div">
+        {{#if clozesSelected}}
+          <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
+        {{/if}}
+        
         <h3>Clozes</h3>
+
         <div id="extracted-clozes">
           {{#each clozes}}
+            <div id="cloze-display">
+            <input type="checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" />
             {{#if isCurrentPair this.itemId}}
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
                 <span class="cur-sentence">{{this.cloze}}</span>
                 <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/trash.svg" />
                 <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/edit.svg" />
+                
               </div>
             {{else}}
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
@@ -167,6 +175,7 @@
                 <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/edit.svg" />
               </div>
             {{/if}}
+            </div>
           {{/each}}
         </div>
       </div>
