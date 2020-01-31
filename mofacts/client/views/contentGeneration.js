@@ -352,6 +352,58 @@ Template.contentGeneration.events({
     $('#edit-modal').modal('show');
   },
 
+  'click #select-delete': function(event) {
+    var selectedForDelete = Session.get("selectedForDelete") || [];
+
+    var selectedCloze = {
+      clozeUid: parseInt(event.target.getAttribute('cloze-uid')),
+      curItemId: parseInt(event.target.getAttribute('uid'))
+    }
+    
+    if (event.target.checked) {
+      selectedForDelete.push(selectedCloze);
+    } else {
+      selectedForDelete = _.filter(selectedForDelete, function(c) {
+        return c.clozeUid != selectedCloze.clozeUid;
+      });
+    }
+
+    Session.set("selectedForDelete", selectedForDelete);
+  },
+
+  'click #delete-selected': function(event) {
+    var selectedForDelete = Session.get("selectedForDelete");
+
+    selectedForDelete.forEach(function(selectedCloze) {
+      var curClozeId = selectedCloze.clozeUid;
+      var curItemId = selectedCloze.curItemId;
+      var prevClozeSentencePairs = Session.get("clozeSentencePairs");
+
+      var oldCloze = _.pick(clozeIDToClozeMap[curClozeId],['cloze','correctResponse','itemId','clozeId']);
+      recordClozeEditHistory(oldCloze,{});
+  
+      var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
+      var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
+        if(s.itemId === curItemId) {
+          var matchingClozes = _.filter(newClozes, function(c) {
+            return c.itemId === s.itemId;
+          });
+          if(matchingClozes.length == 0) s.hasCloze = false;
+          return s;
+        } else {
+          return s;
+        }
+      });
+      
+      Session.set('clozeSentencePairs', {
+        'sentences':newSentences,
+        'clozes':newClozes
+      });
+    });
+
+    $('input:checkbox').removeAttr('checked');
+  },
+
   'click #delete-btn': function(event){
     var curClozeId = parseInt(event.currentTarget.getAttribute('cloze-uid'));
     var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
@@ -417,6 +469,10 @@ Template.contentGeneration.helpers({
 
   clozes: function() {
     return Session.get("clozeSentencePairs").clozes;
+  },
+
+  clozesSelected: function() {
+    return Session.get("selectedForDelete").length > 0;
   },
 
   isCurrentPair: function(itemId) {
