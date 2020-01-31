@@ -26,6 +26,16 @@ textarea {
   width:100%;
 }
 
+#select-delete {
+  float: left;
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.btn-default {
+  width: 250px !important;
+}
+
 .flexContent{
   display: -webkit-box;
   display: -webkit-flex;
