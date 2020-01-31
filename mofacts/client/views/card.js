@@ -82,7 +82,7 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 ////////////////////////////////////////////////////////////////////////////
 // Global variables and helper functions for them
 
-var engine = null; //The unit engine for display (i.e. model or schedule)
+engine = null; //The unit engine for display (i.e. model or schedule)
 var buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
@@ -1065,6 +1065,13 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
     //Stop current timeout and stop user input
     stopUserInput();
+    //We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose track of the fact that we were counting down to a recalculated delay after being on the error report modal
+    if(!!timeoutName){
+      if(Session.get("pausedLocks")>0){
+        var numRemainingLocks = Session.get("pausedLocks")-1;
+        Session.set("pausedLocks",numRemainingLocks);
+      }
+    }
     clearCardTimeout();
 
     var userAnswer;

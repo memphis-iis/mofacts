@@ -4,9 +4,6 @@
  * and/or the current trial. Much of this functionality began in card.js
  * but has been moved here for easier use. See also lib/sessionUtils.js for
  * a better list of Session variables we currently use.
- *
- * Note that we will optionally ignore cluster mapping if ignoreClusterMapping
- * is true. See unitEngine.js for how this is set on a per unit engine basis.
  * */
 
 //Return the current fontsize from the TDF
@@ -23,14 +20,20 @@ getCurrentScoreValues = function () {
     ];
 };
 
-//Return the current cluster index into the stimulus file. Note that this
-//returns the "raw" or "unmapped" cluster index. If you want the properly
-//mapped index that includes initial shuffles and swaps from setspec, then
-//you should call getStimCluster (which will have the pre and post mapped
-//indexes added as a property)
+//Returns the current cluster index with shuffles and swaps applied, NOT the original index in the stim file
 getCurrentClusterIndex = function () {
     return Session.get("clusterIndex");
 };
+
+//Returns the original current cluster index, i.e. the index in the original stim file without shuffles or swaps
+getOriginalCurrentClusterIndex = function () {
+  var clusterMapping = Session.get("clusterMapping");
+  if(clusterMapping){
+    return clusterMapping[getCurrentClusterIndex()];
+  }else{
+    throw "no cluster mapping found";
+  }
+}
 
 //Allow setting the current cluster index
 setCurrentClusterIndex = function(newIdx) {
@@ -46,15 +49,13 @@ getStimClusterCount = function() {
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping. Note that they are allowed to give us
 // a cached stimuli document for optimization
+
+//Note that the cluster mapping goes from current session index to raw index in order of the stim file
 getStimCluster = function (index, cachedStimuli) {
     var clusterMapping = Session.get("clusterMapping");
     var mappedIndex;
 
-    if(Session.get("ignoreClusterMapping")) {
-        //No mapping performed (a model unit)
-        mappedIndex = index;
-    }
-    else if(clusterMapping) {
+    if(clusterMapping) {
         //Generic, normal functioning - use the previously defined mapping
         mappedIndex = clusterMapping[index];
     }
@@ -127,7 +128,7 @@ getAllStimQuestions = function(){
 }
 
 getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
-  var currentClusterIndex = getCurrentClusterIndex();
+  var currentClusterIndex = getOriginalCurrentClusterIndex();
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
   var allAnswers = new Set;
@@ -378,8 +379,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'forcecorrectprompt':'',
         'forcecorrecttimeout':0,
         'unitMode': 'default',
-        'studyFirst':false,
-        'ignoreClusterMapping':true
+        'studyFirst':false
     };
 
     //We've defined defaults - also define translatations for values
@@ -398,8 +398,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'fontsize': _.intval,
         'practiceseconds': _.intval,
         'timeuntilstimulus': _.intval,
-        'studyFirst':xlateBool,
-        'ignoreClusterMapping':xlateBool
+        'studyFirst':xlateBool
     };
 
     var modified = false;

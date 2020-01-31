@@ -62,26 +62,15 @@ needs special startup logic to be called before it is used.
 This function is supplied by the default (base) engine and takes selectVal,
 which should be the value returnen by selectNextCard
 
-
-A note about the session variable "ignoreClusterMapping"
 --------------------------------------------------------
 
 Cluster mapping is created and maintained by resume logic in card.js. It is
 honored by the utility functions in currentTestingHelpers.js. The mapping is
 based on the top-level shuffle/swap-type cluster mapping. Generally this
 mapping should be remembered per-user per-experiment after creation and
-honored. However, some units (currently just model-based units) actually want
-this functionality ignored (although the unit itself can select certain
-clusters). As a result, you'll see that our default model sets
-ignoreClusterMapping to False before calling the engine's initImpl method. If
-you need to turn off ignoreClusterMapping, you MUST do it in the engine's
-initImpl method (as we do in modelUnitEngine). We will also set it explicitly
-on one-time startup.
+honored across all session types.
 
 ******************************************************************************/
-
-// First-time init of ignoreClusterMapping (see above)
-Session.set("ignoreClusterMapping", false);
 
 //Helper for our "public" functions
 function create(func) {
@@ -125,9 +114,7 @@ function defaultUnitEngine() {
         // Functions we supply
         init: function() {
             console.log("Engine created for unit:", this.unitType);
-            Session.set("ignoreClusterMapping", false);
             this.initImpl();
-            console.log("CLUSTER MAPPING USE (not ignore):", !Session.get("ignoreClusterMapping"));
         },
 
         writeQuestionEntry: function(selectVal) {
@@ -620,9 +607,6 @@ function modelUnitEngine() {
         })(),
 
         initImpl: function() {
-            //We don't want cluster mapping for model-based optmization
-            var ignoreClusterMapping = getCurrentDeliveryParams().ignoreClusterMapping;
-            Session.set("ignoreClusterMapping", ignoreClusterMapping);
             initializeActRModel();
         },
 
@@ -828,7 +812,7 @@ function modelUnitEngine() {
         },
 
         createQuestionLogEntry: function() {
-            var idx = fastGetStimCluster(getCurrentClusterIndex()).clusterIndex;
+            var idx = getCurrentClusterIndex();
             var card = cardProbabilities.cards[idx];
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
             var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]));
@@ -848,7 +832,7 @@ function modelUnitEngine() {
             // Get info we need for updates and logic below
             var cards = cardProbabilities.cards;
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
-            var card = _.prop(cards, cluster.clusterIndex);
+            var card = _.prop(cards, cluster.shufIndex);
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
@@ -862,7 +846,7 @@ function modelUnitEngine() {
                     card.otherPracticeTimeSinceLast = 0;
                     _.each(cards, function(otherCard, index) {
                       if(otherCard.firstShownTimestamp > 0){
-                        if (index != cluster.clusterIndex) {
+                        if (index != cluster.shufIndex) {
                             otherCard.otherPracticeTimeSinceFirst += practice;
                             otherCard.otherPracticeTimeSinceLast += practice;
                             _.each(otherCard.stims, function(otherStim, index){

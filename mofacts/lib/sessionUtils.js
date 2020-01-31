@@ -28,7 +28,6 @@
  * experimentTarget          - untouched in sessionCleanUp
  * experimentXCond           - untouched in sessionCleanUp
  * filter                    - filter for user admin page
- * ignoreClusterMapping      - see unitEngine.js and currentTestingHelpers.js
  * ignoreOutOfGrammarResponses - speech input, only transcribe if recognized word in answer set
  * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
