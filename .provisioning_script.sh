@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#Make sure we can find the custom meteor packages
+echo "export METEOR_PACKAGE_DIRS=/home/vagrant/mofacts/custom_packages" >> ~/.profile
 
 # Make a symbolic link to the sync'ed directory for more "natural" work
 ln -s /vagrant "$HOME/mofacts"

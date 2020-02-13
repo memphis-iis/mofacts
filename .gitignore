@@ -17,3 +17,4 @@ mofacts/node_modules
 docker-out/
 \#*\#
 *~
+mofacts/private/certs/*

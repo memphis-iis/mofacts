@@ -137,14 +137,21 @@ Template.signInSouthwest.onRendered(function(){
     console.log("got teachers");
     var urlVars = getUrlVars();
     if(!urlVars['showTestLogins']){
+      Session.set("showTestLogins",false);
       var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
       verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+    }else{
+      Session.set("showTestLogins",true);
     }
     Session.set("teachers",verifiedTeachers);
   });
 });
 
 Template.signInSouthwest.helpers({
+    'showTestLogins': function(){
+      return Session.get("showTestLogins");
+    },
+
     'teachers': function() {
         return Session.get('teachers');
     },
@@ -155,6 +162,21 @@ Template.signInSouthwest.helpers({
 });
 
 Template.signInSouthwest.events({
+    'click .saml-login': function(event) {
+      event.preventDefault();
+      console.log("saml login");
+      var provider = event.target.getAttribute('data-provider');
+      console.log("provider: " + JSON.stringify(provider));
+      Meteor.loginWithSaml({
+        provider
+      }, function(error, result) {
+        console.log("callback");
+        //handle errors and result
+        console.log("error: " + JSON.stringify(error));
+        console.log("result: " + JSON.stringify(result));
+      });
+    },
+
     'keypress .accept-enter-key' : function (event) {
         var key = event.keyCode || event.which;
         if (key == 13) {

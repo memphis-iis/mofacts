@@ -25,6 +25,22 @@ var clozeGeneration = require('./lib/Process.js');
 // Open file stream for active user log
 var activeUserLogStream = fs.createWriteStream("activeUserLog.csv", {flags: 'a'});
 
+//For Southwest SSO with ADFS/SAML 2.0
+for (i = 0; i < Meteor.settings.saml.length; i++) {
+  // privateCert is weird name, I know. spCert is better one. Will need to refactor
+  if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
+      console.log("Set keys/certs for " + Meteor.settings.saml[i].provider);
+      Meteor.settings.saml[i].privateCert = Assets.getText(Meteor.settings.saml[i].publicCertFile);
+      var myPrivateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
+      myPrivateKey = myPrivateKey.replace(/-+BEGIN CERTIFICATE-+\r?\n?/, '');
+      myPrivateKey = myPrivateKey.replace(/-+END CERTIFICATE-+\r?\n?/, '');
+      myPrivateKey = myPrivateKey.replace(/\r\n/g, '\n');
+      Meteor.settings.saml[i].privateKey = myPrivateKey;
+  } else {
+      console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
+  }
+}
+
 //Helper functions
 
 serverConsole = function() {
