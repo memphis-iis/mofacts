@@ -31,11 +31,7 @@ for (i = 0; i < Meteor.settings.saml.length; i++) {
   if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
       console.log("Set keys/certs for " + Meteor.settings.saml[i].provider);
       Meteor.settings.saml[i].privateCert = Assets.getText(Meteor.settings.saml[i].publicCertFile);
-      var myPrivateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
-      myPrivateKey = myPrivateKey.replace(/-+BEGIN CERTIFICATE-+\r?\n?/, '');
-      myPrivateKey = myPrivateKey.replace(/-+END CERTIFICATE-+\r?\n?/, '');
-      myPrivateKey = myPrivateKey.replace(/\r\n/g, '\n');
-      Meteor.settings.saml[i].privateKey = myPrivateKey;
+      Meteor.settings.saml[i].privateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
   } else {
       console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
   }
