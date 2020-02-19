@@ -13,6 +13,56 @@
         <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
         <displaygrouptags></displaygrouptags>
     </setspec>
+    <generatedtdfs>
+      <generatedtdf>
+        <name>Chapter 6 All Items</name>
+        <criterea>
+          <weights>1-20</weights>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 High Priority Items</name>
+        <criterea>
+          <weights>1-2</weights>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 1 Items</name>
+        <criterea>
+          <orderGroups>1</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 2 Items</name>
+        <criterea>
+          <orderGroups>2</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 3 Items</name>
+        <criterea>
+          <orderGroups>3</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 4 Items</name>
+        <criterea>
+          <orderGroups>4</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 5 Items</name>
+        <criterea>
+          <orderGroups>5</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 6 Section 6 Items</name>
+        <criterea>
+          <orderGroups>6</orderGroups>
+        </criterea>
+      </generatedtdf>
+    </generatedtdfs>
     <unit>
         <unitname>Informed Consent</unitname>
         <unitinstructions><![CDATA[
