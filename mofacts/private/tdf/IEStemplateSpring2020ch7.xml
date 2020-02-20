@@ -1,0 +1,337 @@
+<tutor>
+    <setspec>
+        <lessonname>Title of the SPRING 2020 unit goes here***</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>ch10-082619-clean-features-082819-machine-sentence-stims-2019-08-28.xml</stimulusfile>
+        <lfparameter>.85</lfparameter>
+        <speechAPIKey></speechAPIKey>
+        <audioInputEnabled>true</audioInputEnabled>
+        <audioInputSensitivity>15</audioInputSensitivity>
+        <speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
+        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+        <displaygrouptags></displaygrouptags>
+    </setspec>
+    <generatedtdfs>
+      <generatedtdf>
+        <name>Chapter 7 All Items</name>
+        <criterea>
+          <weights>1-20</weights>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 High Priority Items</name>
+        <criterea>
+          <weights>1-2</weights>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 1 Items</name>
+        <criterea>
+          <orderGroups>1</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 2 Items</name>
+        <criterea>
+          <orderGroups>2</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 3 Items</name>
+        <criterea>
+          <orderGroups>3</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 4 Items</name>
+        <criterea>
+          <orderGroups>4</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 5 Items</name>
+        <criterea>
+          <orderGroups>5</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 6 Items</name>
+        <criterea>
+          <orderGroups>6</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 7 Items</name>
+        <criterea>
+          <orderGroups>7</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 8 Items</name>
+        <criterea>
+          <orderGroups>8</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 9 Items</name>
+        <criterea>
+          <orderGroups>9</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 10 Items</name>
+        <criterea>
+          <orderGroups>10</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 11 Items</name>
+        <criterea>
+          <orderGroups>11</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 12 Items</name>
+        <criterea>
+          <orderGroups>12</orderGroups>
+        </criterea>
+      </generatedtdf>
+      <generatedtdf>
+        <name>Chapter 7 Section 13 Items</name>
+        <criterea>
+          <orderGroups>13</orderGroups>
+        </criterea>
+      </generatedtdf>
+    </generatedtdfs>
+    <unit>
+        <unitname>Informed Consent</unitname>
+        <unitinstructions><![CDATA[
+          <div>
+<table border="1">
+<tbody>
+<tr>
+<td>
+<blockquote>
+<p><strong>Consent for Research Participation</strong></p>
+</blockquote>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong>Title</strong></p>
+</td>
+<td>
+<p>Using Adaptive Practice to Improve Recall and Understanding in Postsecondary Anatomy and Physiology</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong>Sponsor</strong></p>
+</td>
+<td>
+<p>Department of Education, Institute of Educational Science</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong>Researcher(s)</strong></p>
+</td>
+<td>
+<p>Philip Pavlik, University of Memphis</p>
+<p>Andrew Olney, University of Memphis</p>
+<p>Amanda Banker, Southwest Tennessee Community College</p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong>Researchers Contact Information</strong></p>
+</td>
+<td>
+<p>901-678-2326, ppavlik@memphis.edu</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>You are being asked to participate in a research study. The box below highlights key information for you to consider when deciding if you want to participate. More detailed information is provided below the box. Please ask the researcher(s) any questions about the study before you make your decision. If you volunteer, you will be one of about 160 people to do so.&nbsp;</p>
+<table border="1">
+<tbody>
+<tr>
+<td>
+<p><strong>Key Information for You to Consider</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><strong><u>Voluntary Consent: </u></strong>&nbsp;You are being asked to volunteer for a research study. It is up to you whether you choose to participate or not. There will be no penalty or loss of benefit to which you are otherwise entitled if you choose not to participate or discontinue participation.</p>
+<p><strong><u>Purpose:</u></strong> The purpose of the study is to help us test an adaptive practice system for Anatomy and Physiology. You are being invited to participate because are a student in a participating section of Anatomy and Physiology at Southwest Tennessee Community College.</p>
+<p><strong><u>Duration:</u></strong> It is expected that your participation will last 3.5 hours, in 4 sessions, or more, depending on when you choose to do it.</p>
+<p><strong><u>Procedures and Activities</u></strong>: You will be asked to practice information in your textbook for at least 3 hours on a computer or smartphone. The practice items will come from your textbook and are designed to help your long-term memory and understanding. There is a survey at the end that will take less than 30 minutes.</p>
+<p><strong><u>Risk:</u></strong> Some of the foreseeable risk or discomforts of your participation include boredom, wasted time if practice is ineffective, or stress if you find it difficult.</p>
+<p><strong><u>Benefits:</u></strong> Some of the benefits that may be expected include improved exam performance and data that allows us to improve the system for future classes.</p>
+<p><strong><u>Alternatives</u></strong>: If you do not want to take part in the study, as an alternative for each of the 3 chapters you will be able to submit a completed McGraw Hill study guide worksheet exercise that accompanies the textbook. Please see your instructor or syllabus for the details of the alternative. As a student if you decide not to take part in this study your choice will have no effect on your academic status or grade in your class.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3>Who is conducting this research?</h3>
+<p>Philip Pavlik of the University of Memphis, Institute of Intelligent Systems and Department of Psychology is in charge of the study. There may be other research team members assisting during the study.</p>
+<h3>What happens if I agree to participate in this Research?</h3>
+<p>If you agree you will be asked to you will sign-in sometime during the coursework for each exam and spend 3 hours practicing for each of 3 to 6 chapters of material. There are not different groups in this study, since we are in the process of improving the system before a comparison test. Practice itself is a sequence of fill-in-the blank items created from your textbook to maximize their relevance to the chapter material. You fill in the correct words using a practice app on your smartphone or computer. The items repeat until you learn them completely, which we expect will help in the course exams.</p>
+<h3>What happens to the information collected for this research?</h3>
+<p>By participating, you understand and agree that the deidentified data gathered during this study may be used by the University of Memphis and published and/or disclosed by the University of Memphis to others outside of the University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers. In fact, we will never receive any personally identifying information in the course of this study.</p>
+<h3>How will my privacy and data confidentiality be protected?</h3>
+<p>We are very careful to protect student&rsquo;s identity in the course of this research. Our data collection strategy is designed to never expose the true identity of students to our research team. Data-linkage will occur through Southwest Tennessee Community colleges standard student login system which will give us a private code for each student. Your instructors have been carefully informed that they should not share the identities of students with us, so we will only identify you with your SWTCC code. Only teachers and Southwest staff have keys to match codes to individuals. We do not log GPS or IP address information. We will further deidentify your data (remove your SWTCC code) after the experiment before storing it on our password protected computers long-term.</p>
+<h3>What if I want to stop participating in this research?</h3>
+<p>It is up to you to decide whether you want to volunteer for this study. It is also ok to decide to end your participation at any time. There is no penalty or loss of benefits to which you are otherwise entitled if you decided to withdraw your participation. Your decision about participating will not affect your relationship with the researcher(s) or the University of Memphis or Southwest Tennessee Community College. You will receive partial credit for each hour of participation, i.e. 1% per hour.</p>
+<h3>Will it cost me money to take part in this research?</h3>
+<p>No.</p>
+<h3>Will I receive any compensation or reward for participating in this research?</h3>
+<p>For the 1 hour of practice on each of 3-6 chapters (total 3 hours) you will get 3% extra credit in the course.</p>
+<p>Who can answer my question about this research?</p>
+<p>Before you decide to volunteer for this study, if you have questions, suggestions, concerns, or complaints about the study, you can contact the investigator, Dr. Philip Pavlik at 901-678-2326 or email <u>ppavlik@memphis.edu</u>. If you have any questions about your rights as a volunteer in this research, contact the Institutional Review Board staff at the University of Memphis at 901-678-2705 or email <a href="mailto:irb@memphis.edu">irb@memphis.edu</a>. You may print this screen webpage for your records.</p>
+<p><strong>STATEMENT OF CONSENT </strong></p>
+<p>I have had the opportunity to consider the information in this form. I have asked any questions needed for me to decide about my participation. I understand that I can ask additional questions through the study.</p>
+<p>By clicking below I am electronically signing, I volunteer to participate in this research. I understand that I am not waiving any legal rights. I may print a copy of this form.</p>
+</div>
+
+          ]]> </unitinstructions>
+    </unit>
+    <unit>
+        <unitname>Reading competed</unitname>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>1</templatesrepeated>
+                <group>0,f,d,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions> A_1     </initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>18-18</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+            <permutefinalresult>0-0</permutefinalresult>
+        </assessmentsession>
+        <deliveryparams>
+            <drill>10000000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>8000</reviewstudy>
+            <correctprompt>8000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>0</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitinstructions><![CDATA[
+          <center><h3>Anatomy & Physiology Practice Instructions</h3></center><br>
+Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.
+<br>
+        <center><h3>Practice Tips Video</h3></center>
+        <br>
+          <center>
+                  <iframe width="560" height="315" src="https://www.youtube.com/embed/tgRcASfdjIY" frameborder="0" allow="accelerometer;
+          margin-left: auto;
+          margin-right: auto;
+          autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  </center>
+        ]]></unitinstructions>
+        <unitname>Title of the unit goes here***</unitname>
+        <learningsession>
+             <clusterlist>0-17</clusterlist>
+             <unitMode>thresholdCeiling</unitMode>
+             <calculateProbability><![CDATA[
+          function mul(m1, m2) {
+            var result = 0;
+            var len = m1.length;
+            for (var i = 0; i < len; i++) {
+                result += m1[i] * m2[i]
+            }
+            return result
+          }
+
+          function logitdec(outcomes, decay) {
+            if (outcomes) {
+                var outcomessuc = JSON.parse(JSON.stringify(outcomes));
+                var outcomesfail = outcomes.map(function(value) {
+                    return Math.abs(value - 1)
+                });
+                var w = outcomessuc.unshift(1);
+                var v = outcomesfail.unshift(1);
+                return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {
+                    return Math.pow(decay, value)
+                })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {
+                    return Math.pow(decay, value)
+                })))
+            }
+            return 0
+          }
+
+          function recency(age, d) {
+          if (age==0) { return 0;
+          } else
+            {return Math.pow(1 + age, -d);
+            }
+          }
+
+          function quaddiffcor(seq, probs) {
+            return mul(seq, probs.map(function(value) {
+                return value * value
+            }))
+          }
+
+          function quaddiffcor(seq, probs) {
+            return mul(seq, probs.map(function(value) {
+                return value * value
+            }))
+          }
+
+          function quaddiffincor(seq, probs) {
+            return mul(Math.abs(seq-1), probs.map(function(value) {
+                return value * value
+            }))
+          }
+
+          function linediffcor(seq, probs) {
+            return mul(seq, probs)
+          }
+
+          function linediffincor(seq, probs) {
+            return mul(seq.map(function(value) {
+                return Math.abs(value - 1)
+            }), probs)
+          }
+                    p.y = -1.36+
+                    0.78036 * logitdec(
+                        p.overallOutcomeHistory.slice(Math.max(p.overallOutcomeHistory.length-60,1),
+                        p.overallOutcomeHistory.length), .90) +
+                    0.16537 * logitdec(p.responseOutcomeHistory, .63) +
+                    6.98451 * recency(p.stimSecsSinceLastShown, .19) +
+                    4.32413 *  recency(p.responseSecsSinceLastShown, .64) +
+                    4.12702  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+                    -4.12702 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
+                    2.83628 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities)+
+                    -2.83628 * quaddiffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) ;
+                    p.probability = 1.0 / (1.0 + Math.exp(-p.y));
+                    if((p.stimSuccessCount+p.stimFailureCount)<2 && p.syllables>2) {
+                    p.hintsylls = getRandomInt(3);
+                    }
+                  // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);
+                    return p
+                       ]]></calculateProbability>
+                   </learningsession>
+
+        <deliveryparams>
+            <drill>30000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>16000</reviewstudy>
+            <correctprompt>750</correctprompt>
+            <fontsize>3</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+
+</tutor>
