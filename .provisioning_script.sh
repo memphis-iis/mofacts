@@ -8,7 +8,7 @@ ln -s /vagrant "$HOME/mofacts"
 
 # We will need to be able to compile some binary packages for Meteor
 sudo apt-get update
-sudo apt-get install -y build-essential 
+sudo apt-get install -y build-essential
 sudo apt-get install -y gcc
 sudo apt-get install -y g++
 sudo apt-get install -y make
@@ -101,7 +101,7 @@ mkdir -p "$HOME/.meteor/packages"
 sudo mount --bind "$HOME/.meteor/packages" packages
 
 #meteor update
-meteor npm install --save babel-runtime
+meteor npm install --save babel-runtime --no-bin-links
 
 
 # Remove Ubuntu's landscape stuff and clear login messages
