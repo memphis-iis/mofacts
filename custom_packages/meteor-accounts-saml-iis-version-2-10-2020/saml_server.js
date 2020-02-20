@@ -60,7 +60,7 @@ Meteor.methods({
         });
 
         // request.request: actual XML SAML Request
-        // request.id: comminucation id which will be mentioned in the ResponseTo field of SAMLResponse
+        // request.id: communication id which will be mentioned in the ResponseTo field of SAMLResponse
 
         Meteor.users.update({
             _id: Meteor.userId()
@@ -88,16 +88,16 @@ Accounts.registerLoginHandler(function(loginRequest) {
     console.log("saml login handler, request: " + JSON.stringify(loginRequest));
     var loginResult = Accounts.saml.retrieveCredential(loginRequest.credentialToken);
     if (Meteor.settings.debug) {
-        console.log("RESULT :" + JSON.stringify(loginResult));
+        console.log("RESULT42 :" + JSON.stringify(loginResult));
     }
 
-    if (loginResult && loginResult.profile && loginResult.profile.nameID) {
-        console.log("Profile: " + JSON.stringify(loginResult.profile.nameID));
-        var localProfileMatchAttribute;
+    if (loginResult && loginResult.profile) {
+        console.log("Profile: " + JSON.stringify(loginResult.profile));
+        var localProfileMatchAttribute = Meteor.settings.saml[0].localProfileMatchAttribute;
         var localFindStructure;
         var nameIDFormat;
         // Default nameIDFormat is emailAddress
-        if (!(Meteor.settings.saml[0].identifierFormat) || (Meteor.settings.saml[0].identifierFormat == "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress")) {
+        if (!(Meteor.settings.saml[0].identifierFormat)) {
           nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
         } else {
           nameIDFormat = Meteor.settings.saml[0].identifierFormat;
@@ -109,48 +109,44 @@ Accounts.registerLoginHandler(function(loginRequest) {
             localFindStructure = "emails.address";
             profileOrEmail = "email";
             profileOrEmailValue = loginResult.profile.nameID;
-        } else // any other nameID format
+        } else{ 
+            // any other nameID format
             // Check if Meteor.settings.saml[0].localProfileMatchAttribute has value
             // These values will be stored in profile substructure. They're NOT security relevant because profile isn't a safe place
             if (Meteor.settings.saml[0].localProfileMatchAttribute){
                profileOrEmail = "profile";
-               profileOrEmailValue = {
-                  [Meteor.settings.saml[0].localProfileMatchAttribute] : loginResult.profile.nameID
-               };
+               profileOrEmailValue = loginResult.profile[localProfileMatchAttribute]
                localFindStructure = 'profile.' + Meteor.settings.saml[0].localProfileMatchAttribute;
+            }
         }
         if (Meteor.settings.debug) {
-            console.log("Looking for user with " + localFindStructure + "=" + loginResult.profile.nameID);
+            console.log("Looking for user with " + localFindStructure + "=" + loginResult.profile[localProfileMatchAttribute]);
         }
         var user = Meteor.users.findOne({
             //profile[Meteor.settings.saml[0].localProfileMatchAttribute]: loginResult.profile.nameID
-            [localFindStructure]: loginResult.profile.nameID
+            [localFindStructure]: profileOrEmailValue
         });
 
         if (!user) {
             console.log("no existing user found");
             if (Meteor.settings.saml[0].dynamicProfile) {
                 var newUser = {
-                    password: "",
-                    username: loginResult.profile.nameID,
+                    password: Helpers.blankPassword(profileOrEmailValue),
+                    username: profileOrEmailValue,
                     [profileOrEmail]:  profileOrEmailValue
                 }
                 if (Meteor.settings.debug) {
                     console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[Meteor.settings.saml[0].localProfileMatchAttribute]);
-                    console.log("Identity handle: " + profileOrEmail + " = " + JSON.stringify(profileOrEmailValue) + " || username = " + loginResult.profile.nameID);
+                    console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
                     console.log("Create user: " + JSON.stringify(newUser));
                 }
-                Accounts.createUser({
-                    //email: loginResult.profile.email,
-                    password: "",
-                    username: loginResult.profile.nameID,
-                    [profileOrEmail]:  profileOrEmailValue});
+                Accounts.createUser(newUser);
                 console.log("#################");
                 if (Meteor.settings.debug) {
                     console.log("Trying to find user");
                 }
                 user = Meteor.users.findOne({
-                    "username": loginResult.profile.nameID
+                    "username": profileOrEmailValue
                 });
                 // update user profile w attrs from SAML Attr Satement
                 //Meteor.user.update(user, )
@@ -267,9 +263,12 @@ Accounts.saml.hasCredential = function(credentialToken) {
 }
 
 Accounts.saml.retrieveCredential = function(credentialToken) {
+    console.log("retrieve credential: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
     // The credentialToken in all these functions corresponds to SAMLs inResponseTo field and is mandatory to check.
     var result = Accounts.saml._loginResultForCredentialToken[credentialToken];
+    console.log("result, retrieve credential: " + JSON.stringify(result));
     delete Accounts.saml._loginResultForCredentialToken[credentialToken];
+    console.log("result, retrieve credential2: " + JSON.stringify(result));
     return result;
 }
 
