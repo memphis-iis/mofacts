@@ -107,7 +107,7 @@ setTeacher = function(teacher){
 setClass = function(curClass){
   $("#classSelection").prop('hidden','true');
   Session.set("curClass",curClass);
-  $("#loginDiv").prop('hidden','');
+  $(".login").prop('hidden','');
 }
 
 Template.signInSouthwest.onRendered(function(){
@@ -119,7 +119,7 @@ Template.signInSouthwest.onRendered(function(){
       Session.set("curClass",{});
       $("#initialInstructorSelection").prop('hidden','');
       $("#classSelection").prop('hidden','true');
-      $("#loginDiv").prop('hidden','true');
+      $(".login").prop('hidden','true');
     }
   }
   Meteor.subscribe('allTeachers',function () {
