@@ -332,8 +332,7 @@ middleware = function(req, res, next) {
             case "metadata":
                 console.log("metadata");
                 _saml = new SAML(service);
-                service.callbackUrl = "https://mofacts.optimallearning.org/sw-adfs/postResponse";
-                //service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");  TODO: revert
+                service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");
                 res.writeHead(200);
                 res.write(_saml.generateServiceProviderMetadata(service.callbackUrl));
                 res.end();
@@ -405,8 +404,7 @@ middleware = function(req, res, next) {
                 break;
             case "authorize":
                 console.log("authorize");
-                service.callbackUrl = "https://mofacts.optimallearning.org/sw-adfs/postResponse";
-                //service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");  TODO: revert
+                service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");
                 service.credentialToken = samlObject.credentialToken;
                 _saml = new SAML(service);
                 _saml.getAuthorizeForm(req, function(err, data) {
