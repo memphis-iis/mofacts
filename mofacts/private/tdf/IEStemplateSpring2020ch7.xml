@@ -1,6 +1,6 @@
 <tutor>
     <setspec>
-        <lessonname>Title of the SPRING 2020 unit goes here***</lessonname>
+        <lessonname>Title of the SPRING 2020 unit 7 goes here***</lessonname>
         <userselect>true</userselect>
         <stimulusfile>ch10-082619-clean-features-082819-machine-sentence-stims-2019-08-28.xml</stimulusfile>
         <lfparameter>.85</lfparameter>
@@ -108,16 +108,11 @@
     <unit>
         <unitname>Informed Consent</unitname>
         <unitinstructions><![CDATA[
-          <div>
+          <style>
+h2 {text-align:center;}</style>
+          <div><h2>Consent for Research Participation</h2><br>
 <table border="1">
 <tbody>
-<tr>
-<td>
-<blockquote>
-<p><strong>Consent for Research Participation</strong></p>
-</blockquote>
-</td>
-</tr>
 <tr>
 <td>
 <p><strong>Title</strong></p>
@@ -155,7 +150,7 @@
 </tbody>
 </table>
 <p>You are being asked to participate in a research study. The box below highlights key information for you to consider when deciding if you want to participate. More detailed information is provided below the box. Please ask the researcher(s) any questions about the study before you make your decision. If you volunteer, you will be one of about 160 people to do so.&nbsp;</p>
-<table border="1">
+<br><table border="1">
 <tbody>
 <tr>
 <td>
@@ -175,6 +170,7 @@
 </tr>
 </tbody>
 </table>
+<br>
 <h3>Who is conducting this research?</h3>
 <p>Philip Pavlik of the University of Memphis, Institute of Intelligent Systems and Department of Psychology is in charge of the study. There may be other research team members assisting during the study.</p>
 <h3>What happens if I agree to participate in this Research?</h3>
@@ -189,7 +185,7 @@
 <p>No.</p>
 <h3>Will I receive any compensation or reward for participating in this research?</h3>
 <p>For the 1 hour of practice on each of 3-6 chapters (total 3 hours) you will get 3% extra credit in the course.</p>
-<p>Who can answer my question about this research?</p>
+<h3>Who can answer my question about this research?</h3>
 <p>Before you decide to volunteer for this study, if you have questions, suggestions, concerns, or complaints about the study, you can contact the investigator, Dr. Philip Pavlik at 901-678-2326 or email <u>ppavlik@memphis.edu</u>. If you have any questions about your rights as a volunteer in this research, contact the Institutional Review Board staff at the University of Memphis at 901-678-2705 or email <a href="mailto:irb@memphis.edu">irb@memphis.edu</a>. You may print this screen webpage for your records.</p>
 <p><strong>STATEMENT OF CONSENT </strong></p>
 <p>I have had the opportunity to consider the information in this form. I have asked any questions needed for me to decide about my participation. I understand that I can ask additional questions through the study.</p>
