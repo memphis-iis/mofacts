@@ -202,7 +202,7 @@ generateStimJSON = function(clozes,stimFileName){
       var curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
       for(var index2 in curSentenceClozes){
         var cloze = curSentenceClozes[index2];
-        cluster.parameter.push("0,.72");
+        cluster.parameter.push("0,.7");
         cluster.display.push(cloze.cloze);
         cluster.response.push(cloze.correctResponse);
       }

@@ -6,28 +6,32 @@ if (!Accounts.saml) {
 
 Accounts.saml.initiateLogin = function (options, callback, dimensions) {
     // default dimensions that worked well for facebook and google
-    var popup = openCenteredPopup(
-        Meteor.absoluteUrl("sw-adfs/authorize/" + options.provider + "/" + options.credentialToken), (dimensions && dimensions.width) || 650, (dimensions && dimensions.height) || 500);
+    try{
+        var popup = openCenteredPopup(
+            Meteor.absoluteUrl("sw-adfs/authorize/" + options.provider + "/" + options.credentialToken), (dimensions && dimensions.width) || 650, (dimensions && dimensions.height) || 500);
 
-    var checkPopupOpen = setInterval(function () {
-        try {
-            // Fix for #328 - added a second test criteria (popup.closed === undefined)
-            // to humour this Android quirk:
-            // http://code.google.com/p/android/issues/detail?id=21061
-            var popupClosed = popup.closed || popup.closed === undefined;
-        } catch (e) {
-            // For some unknown reason, IE9 (and others?) sometimes (when
-            // the popup closes too quickly?) throws "SCRIPT16386: No such
-            // interface supported" when trying to read 'popup.closed'. Try
-            // again in 100ms.
-            return;
-        }
+        var checkPopupOpen = setInterval(function () {
+            try {
+                // Fix for #328 - added a second test criteria (popup.closed === undefined)
+                // to humour this Android quirk:
+                // http://code.google.com/p/android/issues/detail?id=21061
+                var popupClosed = popup.closed || popup.closed === undefined;
+            } catch (e) {
+                // For some unknown reason, IE9 (and others?) sometimes (when
+                // the popup closes too quickly?) throws "SCRIPT16386: No such
+                // interface supported" when trying to read 'popup.closed'. Try
+                // again in 100ms.
+                return;
+            }
 
-        if (popupClosed) {
-            clearInterval(checkPopupOpen);
-            callback(options.credentialToken);
-        }
-    }, 100);
+            if (popupClosed) {
+                clearInterval(checkPopupOpen);
+                callback(null,options.credentialToken);
+            }
+        }, 100);
+    }catch(err){
+        callback(err,null);
+    }
 };
 
 
@@ -90,6 +94,7 @@ Meteor.loginWithSaml = function (options, callback) {
     options.credentialToken = credentialToken;
 
     Accounts.saml.initiateLogin(options, function (error, result) {
+        console.log("initiatelogin callback, error: " + JSON.stringify(error) + ", result: " + JSON.stringify(result));
         Accounts.callLoginMethod({
             methodArguments: [{
                 saml: true,
