@@ -706,8 +706,8 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
                     if (attributes) {
                         for (let i = 0; i < attributes.length; i++) {
                             const values = attributes[i].getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion', 'AttributeValue');
-                            console.log("values: " + JSON.stringify(values));
                             let value;
+                            console.log("values.length = " + values.length);
                             if (values.length === 1) {
                                 value = values[0].textContent;
                             } else {
@@ -718,10 +718,10 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
                             }
                             if (Meteor.settings.debug) {
                                 console.log("Name: " + attributes[i]);
-                                console.log(`Adding attribute from SAML response to profile:` + attributes[i].getAttribute('Name') + " = " + value.textContent);
-                                console.log("value: " + JSON.stringify(value));
+                                console.log(`Adding attribute from SAML response to profile:` + attributes[i].getAttribute('Name') + " = " + value);
+                                //console.log("value: " + JSON.stringify(value));
                             }
-                            profile[attributes[i].getAttribute('Name')] = value.textContent || value;
+                            profile[attributes[i].getAttribute('Name').replace(/\./g,'_')] = value;
                         }
                         console.log("profile after attributes: " + JSON.stringify(profile));
                     } else {
@@ -729,15 +729,6 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
                             console.log("No Attributes found in SAML attribute statement.");
                         }
                     }
-
-                    // if (!profile.mail && profile['urn:oid:0.9.2342.19200300.100.1.3']) {
-                    //     // See http://www.incommonfederation.org/attributesummary.html for definition of attribute OIDs
-                    //     profile.mail = profile['urn:oid:0.9.2342.19200300.100.1.3'];
-                    // }
-
-                    // if (!profile.email && profile.mail) {
-                    //     profile.email = profile.mail;
-                    // }
                 } else {
                     if (Meteor.settings.debug) {
                         console.log("No Attribute Statement found in SAML response.");

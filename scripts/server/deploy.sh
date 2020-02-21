@@ -4,6 +4,7 @@
 # Configuration
 
 # variables used in this script
+HOME=/var/www/mofacts
 BUNDLE_NAME=mofacts.tar.gz
 BUNDLE_POSTDEP=$BUNDLE_NAME.deployed
 EXEC_USER=www-data
@@ -52,7 +53,7 @@ function deploy() {
     echo "Rebuilding bundle/programs/server"
     pushd bundle/programs/server
     sudo npm install
-    sudo npm install bcrypt
+    sudo npm install bcrypt@3.0.8
     popd
 
     echo "Insuring ownership of all files"
@@ -66,11 +67,11 @@ function execute() {
 
     #We run as the EXEC_USER but maintain the current environment,
     #So we also need to reset anything needed by that user
-    export HOME=$(pwd)
+    #export HOME=$(pwd)
 
     # The settings file MUST exist - and then we put the contents in the
     # environment variable required by Meteor
-    export SETTINGS_FILE=$HOME/settings.json
+    export SETTINGS_FILE=settings.json
     if [ ! -f $SETTINGS_FILE ]; then
         echo "Could not find $SETTINGS_FILE"
         echo "Execution can NOT continue"
@@ -84,8 +85,10 @@ function execute() {
 ################################################################
 # LOGIC
 
+pushd $HOME
 force_shutdown
 if [ -f $BUNDLE_NAME ]; then
     deploy
 fi
 execute
+popd
