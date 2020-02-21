@@ -169,11 +169,16 @@ Template.signInSouthwest.events({
       console.log("provider: " + JSON.stringify(provider));
       Meteor.loginWithSaml({
         provider
-      }, function(error, result) {
+      }, function(data,data2) {
         console.log("callback");
         //handle errors and result
-        console.log("error: " + JSON.stringify(error));
-        console.log("result: " + JSON.stringify(result));
+        console.log("data: " + JSON.stringify(data));
+        console.log("data2: " + JSON.stringify(data2));
+        if(!!data && !!data.error){
+          alert("Problem logging in: " + data.error);
+        }else{
+          Router.go("/profileSouthwest");
+        }
       });
     },
 

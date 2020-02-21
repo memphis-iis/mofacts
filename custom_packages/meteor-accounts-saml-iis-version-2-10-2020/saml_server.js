@@ -83,6 +83,7 @@ Meteor.methods({
 
 Accounts.registerLoginHandler(function(loginRequest) {
     if (!loginRequest.saml || !loginRequest.credentialToken) {
+        console.log("not saml login request");
         return undefined;
     }
     console.log("saml login handler, request: " + JSON.stringify(loginRequest));
@@ -90,169 +91,180 @@ Accounts.registerLoginHandler(function(loginRequest) {
     if (Meteor.settings.debug) {
         console.log("RESULT42 :" + JSON.stringify(loginResult));
     }
-
-    if (loginResult && loginResult.profile) {
-        console.log("Profile: " + JSON.stringify(loginResult.profile));
-        var localProfileMatchAttribute = Meteor.settings.saml[0].localProfileMatchAttribute;
-        var localFindStructure;
-        var nameIDFormat;
-        // Default nameIDFormat is emailAddress
-        if (!(Meteor.settings.saml[0].identifierFormat)) {
-          nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
-        } else {
-          nameIDFormat = Meteor.settings.saml[0].identifierFormat;
-        }
-
-        if (nameIDFormat == "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" ) {
-            // If nameID Format is emailAdress, we should not force 'email' as localProfileMatchAttribute
-            localProfileMatchAttribute = "email";
-            localFindStructure = "emails.address";
-            profileOrEmail = "email";
-            profileOrEmailValue = loginResult.profile.nameID;
-        } else{ 
-            // any other nameID format
-            // Check if Meteor.settings.saml[0].localProfileMatchAttribute has value
-            // These values will be stored in profile substructure. They're NOT security relevant because profile isn't a safe place
-            if (Meteor.settings.saml[0].localProfileMatchAttribute){
-               profileOrEmail = "profile";
-               profileOrEmailValue = loginResult.profile[localProfileMatchAttribute]
-               localFindStructure = 'profile.' + Meteor.settings.saml[0].localProfileMatchAttribute;
+    try{
+        if (loginResult && loginResult.profile) {
+            console.log("Profile: " + JSON.stringify(loginResult.profile));
+            var localProfileMatchAttribute = Meteor.settings.saml[0].localProfileMatchAttribute.replace(/\./g,'_');
+            var localFindStructure;
+            var nameIDFormat;
+            // Default nameIDFormat is emailAddress
+            if (!(Meteor.settings.saml[0].identifierFormat)) {
+            nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+            } else {
+            nameIDFormat = Meteor.settings.saml[0].identifierFormat;
             }
-        }
-        if (Meteor.settings.debug) {
-            console.log("Looking for user with " + localFindStructure + "=" + loginResult.profile[localProfileMatchAttribute]);
-        }
-        var user = Meteor.users.findOne({
-            //profile[Meteor.settings.saml[0].localProfileMatchAttribute]: loginResult.profile.nameID
-            [localFindStructure]: profileOrEmailValue
-        });
 
-        if (!user) {
-            console.log("no existing user found");
-            if (Meteor.settings.saml[0].dynamicProfile) {
-                var newUser = {
-                    password: Helpers.blankPassword(profileOrEmailValue),
-                    username: profileOrEmailValue,
-                    [profileOrEmail]:  profileOrEmailValue
+            if (nameIDFormat == "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" ) {
+                // If nameID Format is emailAdress, we should not force 'email' as localProfileMatchAttribute
+                localProfileMatchAttribute = "email";
+                localFindStructure = "emails.address";
+                profileOrEmail = "email";
+                profileOrEmailValue = loginResult.profile.nameID;
+            } else{ 
+                // any other nameID format
+                // Check if Meteor.settings.saml[0].localProfileMatchAttribute has value
+                // These values will be stored in profile substructure. They're NOT security relevant because profile isn't a safe place
+                if (Meteor.settings.saml[0].localProfileMatchAttribute){
+                profileOrEmail = "profile";
+                profileOrEmailValue = loginResult.profile[localProfileMatchAttribute]
+                localFindStructure = 'profile.' + localProfileMatchAttribute;
                 }
-                if (Meteor.settings.debug) {
-                    console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[Meteor.settings.saml[0].localProfileMatchAttribute]);
-                    console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
-                    console.log("Create user: " + JSON.stringify(newUser));
+            }
+            if (Meteor.settings.debug) {
+                console.log("Looking for user with " + localFindStructure + "=" + loginResult.profile[localProfileMatchAttribute]);
+            }
+            var user = Meteor.users.findOne({
+                //profile[Meteor.settings.saml[0].localProfileMatchAttribute]: loginResult.profile.nameID
+                [localFindStructure]: profileOrEmailValue
+            });
+
+            if (!user) {
+                console.log("no existing user found");
+                if (Meteor.settings.saml[0].dynamicProfile) {
+                    
+                    var newUser = {
+                        password: Helpers.blankPassword(profileOrEmailValue),
+                        username: profileOrEmailValue,
+                        [profileOrEmail]:  {
+                            [localProfileMatchAttribute]: profileOrEmailValue
+                        }
+                    }
+                    if (Meteor.settings.debug) {
+                        console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[localProfileMatchAttribute]);
+                        console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
+                        console.log("Create user: " + JSON.stringify(newUser));
+                    }
+                    Accounts.createUser(newUser);
+                    console.log("#################");
+                    if (Meteor.settings.debug) {
+                        console.log("Trying to find user");
+                    }
+                    user = Meteor.users.findOne({
+                        "username": profileOrEmailValue
+                    });
+                    // update user profile w attrs from SAML Attr Satement
+                    //Meteor.user.update(user, )
+                    if (Meteor.settings.debug) {
+                        console.log("Profile for attributes: " + JSON.stringify(loginResult.profile));
+                        console.log("Created User: " + JSON.stringify(user));
+                    }
+                    var attributeNames = Meteor.settings.saml[0].attributesSAML;
+                    var meteorProfile = {};
+                    if (attributeNames) {
+                    attributeNames.forEach(function(attribute) {
+                        meteorProfile[attribute] = loginResult.profile[attribute];
+                    });
+                    }
+                    if (Meteor.settings.debug) {
+                        console.log("Profile for Meteor: " + JSON.stringify(meteorProfile));
+                    }
+                    Meteor.users.update(user, {
+                        $set: {
+                            "profile": updateProfile(user.profile, meteorProfile)
+                        }
+                    });
+                    if (Meteor.settings.debug) {
+                        console.log("Created new user");
+                    }
+                } else {
+                    throw new Error("Could not find an existing user with supplied attribute  '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' and value:" + loginResult.profile[Meteor.settings.saml[0].localProfileMatchAttribute]);
                 }
-                Accounts.createUser(newUser);
-                console.log("#################");
+            } else {
                 if (Meteor.settings.debug) {
-                    console.log("Trying to find user");
-                }
-                user = Meteor.users.findOne({
-                    "username": profileOrEmailValue
-                });
-                // update user profile w attrs from SAML Attr Satement
-                //Meteor.user.update(user, )
-                if (Meteor.settings.debug) {
-                    console.log("Profile for attributes: " + JSON.stringify(loginResult.profile));
-                    console.log("Created User: " + JSON.stringify(user));
+                    console.log("Meteor User Found. Will try to update profile with values from SAML Response.");
                 }
                 var attributeNames = Meteor.settings.saml[0].attributesSAML;
                 var meteorProfile = {};
                 if (attributeNames) {
-                  attributeNames.forEach(function(attribute) {
+                attributeNames.forEach(function(attribute) {
                     meteorProfile[attribute] = loginResult.profile[attribute];
-                  });
+                });
                 }
                 if (Meteor.settings.debug) {
-                    console.log("Profile for Meteor: " + JSON.stringify(meteorProfile));
+                    console.log("Profile Update for Meteor: " + JSON.stringify(meteorProfile));
                 }
-                Meteor.users.update(user, {
+                if (Meteor.settings.debug) {
+                    var newProfile = updateProfile(user.profile, meteorProfile);
+                    console.log("New Profile: " + JSON.stringify(newProfile));
+                }
+                Meteor.users.update({
+                    _id: user._id
+                }, {
                     $set: {
-                        "profile": updateProfile(user.profile, meteorProfile)
+                        'profile': updateProfile(user.profile, meteorProfile)
                     }
                 });
-                if (Meteor.settings.debug) {
-                    console.log("Created new user");
-                }
-            } else {
-                throw new Error("Could not find an existing user with supplied attribute  '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' and value:" + loginResult.profile[Meteor.settings.saml[0].localProfileMatchAttribute]);
             }
-        } else {
-            if (Meteor.settings.debug) {
-                console.log("Meteor User Found. Will try to update profile with values from SAML Response.");
-            }
-            var attributeNames = Meteor.settings.saml[0].attributesSAML;
-            var meteorProfile = {};
-            if (attributeNames) {
-              attributeNames.forEach(function(attribute) {
-                meteorProfile[attribute] = loginResult.profile[attribute];
-              });
-            }
-            if (Meteor.settings.debug) {
-                console.log("Profile Update for Meteor: " + JSON.stringify(meteorProfile));
-            }
-            if (Meteor.settings.debug) {
-                var newProfile = updateProfile(user.profile, meteorProfile);
-                console.log("New Profile: " + JSON.stringify(newProfile));
-            }
-            Meteor.users.update({
-                _id: user._id
-            }, {
-                $set: {
-                    'profile': updateProfile(user.profile, meteorProfile)
-                }
-            });
-        }
 
 
 
-        //creating the token and adding to the user
-        var stampedToken = Accounts._generateStampedLoginToken();
-        Meteor.users.update(user, {
-            $push: {
-                'services.resume.loginTokens': stampedToken
-            }
-        });
+            //creating the token and adding to the user
+            var stampedToken = Accounts._generateStampedLoginToken();
+            // Meteor.users.update(user, {
+            //     $push: {
+            //         'services.resume.loginTokens': stampedToken
+            //     }
+            // });
 
-        var samlLogin = {
-            provider: Accounts.saml.RelayState,
-            idp: loginResult.profile.issuer,
-            idpSession: loginResult.profile.sessionIndex,
-            nameID: loginResult.profile.nameID,
-            nameIDFormat: loginResult.profile.nameIDFormat,
-            nameIDNameQualifier: loginResult.profile.nameIDNameQualifier
-        };
+            var samlLogin = {
+                provider: Accounts.saml.RelayState,
+                idp: loginResult.profile.issuer,
+                idpSession: loginResult.profile.sessionIndex,
+                nameID: loginResult.profile.nameID,
+                nameIDFormat: loginResult.profile.nameIDFormat,
+                nameIDNameQualifier: loginResult.profile.nameIDNameQualifier
+            };
 
-        console.log("samlLogin: " + JSON.stringify(samlLogin));
+            console.log("samlLogin: " + JSON.stringify(samlLogin));
 
-        Meteor.users.update({
-            _id: user._id
-        }, {
-            $set: {
-                // TBD this should be pushed, otherwise we're only able to SSO into a single IDP at a time
-                'services.saml': samlLogin
-            }
-        });
-
-        if (loginResult.profile.uid) {
             Meteor.users.update({
                 _id: user._id
             }, {
                 $set: {
                     // TBD this should be pushed, otherwise we're only able to SSO into a single IDP at a time
-                    'uid': loginResult.profile.uid
+                    'services.saml': samlLogin
                 }
             });
+
+            if (loginResult.profile.uid) {
+                Meteor.users.update({
+                    _id: user._id
+                }, {
+                    $set: {
+                        // TBD this should be pushed, otherwise we're only able to SSO into a single IDP at a time
+                        'uid': loginResult.profile.uid
+                    }
+                });
+            }
+
+            //sending token along with the userId
+            var result = {
+                userId: user._id//,
+                //token: stampedToken.token
+            };
+
+            console.log("result: " + JSON.stringify(result));
+
+            //loginRequest.userCallback(null,result);
+
+            return result;
+        } else {
+            console.log("error in saml login handler");
+            throw new Error("SAML Assertion did not contain a proper SAML subject value");
         }
-
-        //sending token along with the userId
-        var result = {
-            userId: user._id,
-            token: stampedToken.token
-        };
-
-        return result
-
-    } else {
-        throw new Error("SAML Assertion did not contain a proper SAML subject value");
+    }catch(err){
+        //loginRequest.userCallback(err,null);
+        throw err;
     }
 });
 
@@ -265,7 +277,7 @@ Accounts.saml.hasCredential = function(credentialToken) {
 Accounts.saml.retrieveCredential = function(credentialToken) {
     console.log("retrieve credential: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
     // The credentialToken in all these functions corresponds to SAMLs inResponseTo field and is mandatory to check.
-    var result = Accounts.saml._loginResultForCredentialToken[credentialToken];
+    var result = JSON.parse(JSON.stringify(Accounts.saml._loginResultForCredentialToken[credentialToken]));
     console.log("result, retrieve credential: " + JSON.stringify(result));
     delete Accounts.saml._loginResultForCredentialToken[credentialToken];
     console.log("result, retrieve credential2: " + JSON.stringify(result));
@@ -395,7 +407,7 @@ middleware = function(req, res, next) {
                 console.log("authorize");
                 service.callbackUrl = "https://mofacts.optimallearning.org/sw-adfs/postResponse";
                 //service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");  TODO: revert
-                service.id = samlObject.credentialToken;
+                service.credentialToken = samlObject.credentialToken;
                 _saml = new SAML(service);
                 _saml.getAuthorizeForm(req, function(err, data) {
                     if (err){
@@ -435,7 +447,7 @@ middleware = function(req, res, next) {
                     Accounts.saml._loginResultForCredentialToken[credentialToken] = {
                         profile: profile
                     };
-                    console.log("postResponse, validateResponse closePopup");
+                    console.log("postResponse, validateResponse closePopup: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
                     closePopup(res);
                 });
                 break;
