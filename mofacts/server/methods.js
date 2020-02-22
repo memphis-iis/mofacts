@@ -181,6 +181,15 @@ function sendEmail(to,from,subject,text){
   Email.send({to,from,subject,text});
 }
 
+const baseSyllableURL = 'http://localhost:4567/syllables/'
+getSyllablesForWord = function(word){
+  let syllablesURL = baseSyllableURL + word;
+  const result = HTTP.call('GET',syllablesURL);
+  let syllableArray = result.content.replace(/\[|\]/g,'').split(',').map(x => x.trim());
+  console.log("syllables for word, " + word + ": " + JSON.stringify(syllableArray) );
+  return syllableArray;
+}
+
 const lengthOfNewGeneratedIDs = 6;
 
 //Published to all clients (even without subscription calls)
@@ -191,6 +200,7 @@ Meteor.publish(null, function () {
     //The default data published to everyone - all TDF's and stims, and the
     //user data (user times log and user record) for them
     var defaultData = [
+        StimSyllables.find({}),
         Stimuli.find({}),
         Tdfs.find({}),
         UserTimesLog.find({_id:userId}),
@@ -425,6 +435,24 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          updateStimSyllableCache:function(stimFileName,answers){
+            console.log("updateStimSyllableCache");
+            let curStimSyllables = StimSyllables.findOne({filename:stimFileName});
+            console.log("curStimSyllables: " + JSON.stringify(curStimSyllables));
+            if(!curStimSyllables){
+              let data = {};
+              for(let answer of answers){
+                let syllableArray = getSyllablesForWord(answer);
+                data[answer] = {
+                  count: syllableArray.length,
+                  syllables: syllableArray
+                }
+              }
+              StimSyllables.insert({filename:stimFileName,data:data});
+              console.log("after updateStimSyllableCache");
+            }
+          },
+
           getUsageReportData:function(){
             const numDaysToQuery = 7;
             var startQueryDate = new Date(Date.now() - (1000*60*60*24*numDaysToQuery));
