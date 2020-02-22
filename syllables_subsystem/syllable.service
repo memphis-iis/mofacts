@@ -1,0 +1,15 @@
+[Unit]
+Description=Get syllables of a word
+After=syslog.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/java -jar /vagrant/syllables_subsystem/syllables.jar
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target
+

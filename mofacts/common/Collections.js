@@ -2,6 +2,7 @@
  * */
 
 Stimuli = new Meteor.Collection("stimuli");
+StimSyllables = new Meteor.Collection("stimuli_syllables");
 Tdfs = new Meteor.Collection("tdfs");
 UserTimesLog = new Meteor.Collection("userTimesLog");
 UserProfileData = new Mongo.Collection("userProfileData");

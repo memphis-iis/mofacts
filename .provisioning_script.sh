@@ -76,6 +76,14 @@ sudo cp "$CFGBASE.new" $CFGSRC
 sudo service mongod restart
 ###############################################################################
 
+# Install Java 8
+sudo apt-get install -y openjdk-8-jre
+
+# Set up syllable systemd service
+sudo cp /vagrant/syllables_subsystem/syllable.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable syllable.service
+sudo systemctl start syllable.service
 
 # Install meteor
 curl https://install.meteor.com/?release=1.8.3 | sh
