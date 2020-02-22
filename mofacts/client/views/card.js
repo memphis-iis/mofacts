@@ -86,6 +86,7 @@ engine = null; //The unit engine for display (i.e. model or schedule)
 var buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
+var cachedSyllables = null;
 
 function clearButtonList() {
     //In theory, they could put something without temp defined and we would
@@ -2143,6 +2144,20 @@ getCurrentUserTimesLog = function(expKey) {
 //should stop us cold.
 Session.set('inResume', false);
 
+checkSyllableCacheForCurrentStimFile = function(){
+  let curStimFile = getCurrentStimName().replace(/\./g,'_');
+  cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+  console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
+  if(!cachedSyllables){
+    console.log("no cached syllables for this stim, calling server method to create them");
+    let curAnswers = getAllCurrentStimAnswers();
+    Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
+      cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+      console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
+    });
+  }
+}
+
 //Re-initialize our User Progress and Card Probabilities internal storage
 //from the user times log. Note that most of the logic will be in
 //processUserTimesLog. This function just does some initial set up, insures
@@ -2361,6 +2376,8 @@ function resumeFromUserTimesLog() {
         processUserTimesLog();
         Session.set('inResume', false);
     });
+
+    checkSyllableCacheForCurrentStimFile();
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
