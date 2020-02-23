@@ -351,7 +351,7 @@ SAML.prototype.validateStatus = function(doc) {
     return ret;
 };
 
-//TODO: fix this?
+//TODO: fix this and run in during authentication
 SAML.prototype.validateSignature = function(xml, cert) {
     //console.log("validate signature, xml: " + JSON.stringify(xml) + ", cert: " + JSON.stringify(cert));
     const self = this;

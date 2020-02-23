@@ -64,8 +64,11 @@ sessionCleanUp = function() {
     Session.set("curTeacher",undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
+    Session.set("originalAnswer",undefined);
     Session.set("currentQuestion", undefined);
     Session.set("currentQuestionPart2",undefined);
+    Session.set("originalQuestion",undefined);
+    Session.set("originalQuestion2",undefined);
     Session.set("currentUnitNumber", 0);
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);

@@ -70,9 +70,12 @@ recordUserTimeQuestion = function(extendedData) {
         shufIndex:            currCluster.shufIndex,
         questionIndex:        Session.get("questionIndex"),
         currentUnit:          Session.get("currentUnitNumber"),
+        originalQuestion:     Session.get("originalQuestion"),
+        originalQuestion2:    Session.get("originalQuestion2"),
         selectedQuestion:     Session.get("currentQuestion"),
         selectedQuestionPart2:Session.get("currentQuestionPart2"),
         selectedAnswer:       Session.get("currentAnswer"),
+        originalAnswer:       Session.get("originalAnswer"),
         showOverlearningText: Session.get("showOverlearningText"),
         testType:             Session.get("testType"),
     }, extendedData || {});
