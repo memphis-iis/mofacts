@@ -202,56 +202,66 @@ Answers = {
 
     //Return [isCorrect, matchText] if userInput correctly matches answer -
     //taking into account both branching answers and edit distance
-    answerIsCorrect: function(userInput, answer, setspec) {
+    answerIsCorrect: function(userInput, answer, originalAnswer, setspec) {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
 
-        if (answerIsBranched(answer)) {
-            return matchBranching(answer, userInput, lfparameter);
-        }
-        else {
-            var isCorrect, matchText;
-
-            var dispAnswer = _.trim(answer);
-            if (dispAnswer.indexOf("|") >= 0) {
-                // Take first answer if it's a bar-delimited string
-                dispAnswer = _.trim(dispAnswer.split("|")[0]);
-            }
-
-            var match = stringMatch(answer, userInput, lfparameter);
-
-            if (match === 0) {
-                isCorrect = false;
-                matchText = "";
-            }
-            else if (match === 1) {
-                isCorrect = true;
-                matchText = "Correct.";
-            }
-            else if (match === 2) {
-                isCorrect = true;
-                matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+        checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
+            let answerDisplay = originalAnswer || correctAnswer;
+            if (answerIsBranched(correctAnswer)) {
+                return matchBranching(correctAnswer, userAnswer, lfparameter);
             }
             else {
-                console.log("MATCH ERROR: something fails in our comparison");
-                isCorrect = false;
-                matchText = "";
-            }
-
-            if (!matchText) {
-                if (userInput === "") {
-                    matchText = "The correct answer is " + dispAnswer + ".";
+                var isCorrect, matchText;
+    
+                var dispAnswer = _.trim(answerDisplay);
+                if (dispAnswer.indexOf("|") >= 0) {
+                    // Take first answer if it's a bar-delimited string
+                    dispAnswer = _.trim(dispAnswer.split("|")[0]);
                 }
-              else {
-                if(!getFeedbackForFalseResponse(userInput)){
-                  matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
-                } else {
-                  matchText = isCorrect ? "Correct" : getFeedbackForFalseResponse(userInput);
+    
+                var match = stringMatch(correctAnswer, userAnswer, lfparameter);
+    
+                if (match === 0) {
+                    isCorrect = false;
+                    matchText = "";
                 }
-              }
+                else if (match === 1) {
+                    isCorrect = true;
+                    matchText = "Correct.";
+                }
+                else if (match === 2) {
+                    isCorrect = true;
+                    matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+                }
+                else {
+                    console.log("MATCH ERROR: something fails in our comparison");
+                    isCorrect = false;
+                    matchText = "";
+                }
+    
+                if (!matchText) {
+                    if (userAnswer === "") {
+                        matchText = "The correct answer is " + dispAnswer + ".";
+                    }
+                  else {
+                    if(!getFeedbackForFalseResponse(userAnswer)){
+                      matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
+                    } else {
+                      matchText = isCorrect ? "Correct" : getFeedbackForFalseResponse(userAnswer);
+                    }
+                  }
+                }
+    
+                return [isCorrect, matchText];
             }
+        }
 
-            return [isCorrect, matchText];
+        let fullTextIsCorrect = checkAnswer(userInput,answer,originalAnswer);
+        if(!fullTextIsCorrect[0] && !!originalAnswer){
+            return checkAnswer(userInput,originalAnswer,originalAnswer);
+        }else{
+            return fullTextIsCorrect;
         }
     },
 };
