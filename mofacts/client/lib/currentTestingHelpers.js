@@ -132,7 +132,7 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
 
   var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
   var allAnswers = new Set;
-  var exclusionList = ["18-25","Male","Less than High School"];
+  var exclusionList = [];//["18-25","Male","Less than High School"];
 
   for(clusterIndex in clusters){
     //Grab the response phrases we want to exclude if this is the current cluster
@@ -240,7 +240,7 @@ getCurrentStimQuestion = function(whichQuestion) {
     return getStimQuestion(getCurrentClusterIndex(), whichQuestion);
 };
 getCurrentStimAnswer = function(whichAnswer) {
-    return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
+      return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
 };
 getCurrentStimParameter = function(whichParameter) {
     return getStimParameter(getCurrentClusterIndex(), whichParameter);

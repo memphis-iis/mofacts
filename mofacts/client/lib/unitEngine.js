@@ -73,33 +73,37 @@ honored across all session types.
 ******************************************************************************/
 
 //Helper for our "public" functions
-function create(func) {
-    var engine = _.extend(defaultUnitEngine(), func());
+function create(func,extensionData) {
+    var engine = _.extend(defaultUnitEngine(extensionData), func());
     engine.init();
     return engine;
 }
 
 // Our "public" functions
 
+getRandomInt = function(max){
+    return Math.floor(Math.random() * max);
+}
+
 stripSpacesAndLowerCase = function(input){
   return input.replace(/ /g,'').toLowerCase();
 }
 
-createEmptyUnit = function() {
-    return create(emptyUnitEngine);
+createEmptyUnit = function(extensionData) {
+    return create(emptyUnitEngine,extensionData);
 };
 
-createModelUnit = function() {
-    return create(modelUnitEngine);
+createModelUnit = function(extensionData) {
+    return create(modelUnitEngine,extensionData);
 };
 
-createScheduleUnit = function() {
-    return create(scheduleUnitEngine);
+createScheduleUnit = function(extensionData) {
+    return create(scheduleUnitEngine,extensionData);
 };
 
 // Return an instance of the "base" engine
-function defaultUnitEngine() {
-    return {
+function defaultUnitEngine(extensionData) {
+    let engine = {
         // Things actual engines must supply
         unitType: "DEFAULT",
         selectNextCard: function() { throw "Missing Implementation"; },
@@ -126,6 +130,8 @@ function defaultUnitEngine() {
             );
         }
     };
+    console.log("extension data: " + JSON.stringify(extensionData));
+    return _.extend(engine,extensionData);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -209,6 +215,37 @@ function modelUnitEngine() {
     }
     function fastGetStimAnswer(index, whichAnswer) {
         return fastGetStimCluster(index).response[whichAnswer];
+    }
+
+    getSubClozeAnswerSyllables = function(answer,syllableIndex,cachedSyllables){
+        console.log("!!!syllableIndex: " + syllableIndex + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
+        if(typeof(syllableIndex) === "undefined" || !cachedSyllables){
+            console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
+            return undefined;
+        }else{
+            let syllableArray = cachedSyllables.data[answer].syllables;
+            return {syllableArray,syllableIndex};
+        }    
+    }
+
+    replaceClozeWithSyllables = function(question,currentAnswerSyllables){
+        console.log("replaceClozeWithSyllables: " + question);
+        if(!question){
+            return undefined;
+        }
+
+        let clozeAnswer = "";
+        let syllablesArray = currentAnswerSyllables.syllableArray;
+        let syllableIndex = currentAnswerSyllables.syllableIndex;
+        for(let index in syllablesArray){
+            if(index != syllableIndex){
+                clozeAnswer += syllablesArray[index];
+            }else{
+                clozeAnswer += "____";
+            }
+        }
+
+        return question.replace(/_+/g,clozeAnswer);
     }
 
     var currentCardInfo = {
@@ -387,6 +424,7 @@ function modelUnitEngine() {
         4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
         0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
         p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
+        
         return p;
     }
 
@@ -442,7 +480,17 @@ function modelUnitEngine() {
 
         p.stimSuccessCount = stim.stimSuccessCount;
         p.stimFailureCount = stim.stimFailureCount;
-        p.stimResponseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)));
+        let answerText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
+        p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
+        let curStimFile = getCurrentStimName().replace(/\./g,'_');
+        if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
+            console.log("no cached syllables for: " + curStimFile + "|" + answerText);
+            throw new Error("can't find syllable data in database");
+        } //Curedit
+        let stimSyllableData = this.cachedSyllables.data[answerText];
+        p.syllables = stimSyllableData.count;
+        p.syllablesArray = stimSyllableData.syllables;
+
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
         p.responseFailureCount = p.resp.responseFailureCount;
@@ -591,6 +639,10 @@ function modelUnitEngine() {
 
     //Our actual implementation
     return {
+        getCardProbabilitiesNoCalc: function(){
+            return cardProbabilities;
+        },
+
         getCardProbs: function(){
           return calculateCardProbabilities();
         },
@@ -663,21 +715,39 @@ function modelUnitEngine() {
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
-            Session.set("currentQuestion", fastGetStimQuestion(cardIndex, whichStim));
-            var currentQuestion = Session.get("currentQuestion");
-            //If we have a dual prompt question populate the spare data field
-            if(currentQuestion.indexOf("|") != -1){
 
-              var prompts = currentQuestion.split("|");
-              Session.set("currentQuestion",prompts[0]);
-              Session.set("currentQuestionPart2",prompts[1]);
-          //    console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
+            let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
+            let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
+            if(!!currentAnswerSyllables){
+                stim.answerSyllables = currentAnswerSyllables;
+                let syllableAnswer = currentAnswerSyllables.syllableArray[currentAnswerSyllables.syllableIndex];
+                Session.set("currentAnswer",syllableAnswer);
+                Session.set("originalAnswer",currentStimAnswer);
             }else{
-          //    console.log("Q: " +prompts[0]);
-              Session.set("currentQuestionPart2",undefined);
+                Session.set("currentAnswer",currentStimAnswer);
+                Session.set("originalAnswer",undefined);
             }
 
-            Session.set("currentAnswer", fastGetStimAnswer(cardIndex, whichStim));
+            let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
+            let currentQuestionPart2 = undefined;
+
+            //If we have a dual prompt question populate the spare data field
+            if(currentQuestion.indexOf("|") != -1){
+                var prompts = currentQuestion.split("|");
+                currentQuestion = prompts[0];
+                currentQuestionPart2 = prompts[1];
+            }
+            Session.set("originalQuestion",currentQuestion);
+            Session.set("originalQuestion2",currentQuestionPart2);
+            
+            if(!!currentAnswerSyllables){
+                currentQuestion = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables);
+                currentQuestionPart2 = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables);
+            }
+
+            Session.set("currentQuestion",currentQuestion);
+            Session.set("currentQuestionPart2",currentQuestionPart2);
+
             if(getCurrentDeliveryParams().studyFirst){
               if(card.studyTrialCount == 0){
                 console.log("!!! STUDY FOR FIRST TRIAL");

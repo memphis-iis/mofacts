@@ -86,7 +86,7 @@ engine = null; //The unit engine for display (i.e. model or schedule)
 var buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
-var cachedSyllables = null;
+cachedSyllables = null;
 
 function clearButtonList() {
     //In theory, they could put something without temp defined and we would
@@ -131,7 +131,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
     else if (!!isTimeout) {
         //Timeout
-        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
+        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         isCorrect = false;
         historyUserAnswer = "You didn't answer in time.";
         historyCorrectMsg = correctAndText[1];
@@ -144,7 +144,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
     else {
         //"Regular" answers
-        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
+        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         isCorrect = correctAndText[0];
         historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
         historyCorrectMsg = correctAndText[1];
@@ -1323,7 +1323,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
     // if it's not a "standard" )
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
-        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), setspec);
+        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         handleAnswerState(false, "Time expired. " + correctAndText[1]);
     }
     else if (isCorrect) {
@@ -1335,7 +1335,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
         handleAnswerState(simCorrect, "Simulation");
     }
     else {
-        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), setspec);
+        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         handleAnswerState(correctAndText[0], correctAndText[1]);
     }
 
@@ -2144,7 +2144,7 @@ getCurrentUserTimesLog = function(expKey) {
 //should stop us cold.
 Session.set('inResume', false);
 
-checkSyllableCacheForCurrentStimFile = function(){
+checkSyllableCacheForCurrentStimFile = function(cb){
   let curStimFile = getCurrentStimName().replace(/\./g,'_');
   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
@@ -2154,7 +2154,10 @@ checkSyllableCacheForCurrentStimFile = function(){
     Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
       cachedSyllables = StimSyllables.findOne({filename:curStimFile});
       console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
+      cb();
     });
+  }else{
+    cb();
   }
 }
 
@@ -2372,12 +2375,14 @@ function resumeFromUserTimesLog() {
     //Notice that no matter what, we log something about condition data
     //ALSO NOTICE that we'll be calling processUserTimesLog after the server
     //returns and we know we've logged what happened
-    recordUserTimeMulti(serverRecords, function() {
-        processUserTimesLog();
-        Session.set('inResume', false);
-    });
+    cb = function(){
+        recordUserTimeMulti(serverRecords, function() {
+          processUserTimesLog();
+          Session.set('inResume', false);
+      });
+    }
 
-    checkSyllableCacheForCurrentStimFile();
+    checkSyllableCacheForCurrentStimFile(cb);
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
@@ -2421,16 +2426,20 @@ processUserTimesLog = function(expKey) {
 
     //Reset current engine
     var resetEngine = function(currUnit) {
+        let extensionData = {
+          cachedSyllables: cachedSyllables
+        }
+
         if (unitHasOption(currUnit, "assessmentsession")) {
-            engine = createScheduleUnit();
+            engine = createScheduleUnit(extensionData);
             Session.set("sessionType","assessmentsession");
         }
         else if (unitHasOption(currUnit, "learningsession")) {
-            engine = createModelUnit();
+            engine = createModelUnit(extensionData);
             Session.set("sessionType","learningsession");
         }
         else {
-            engine = createEmptyUnit();
+            engine = createEmptyUnit(extensionData);
             Session.set("sessionType","empty");
         }
     };
