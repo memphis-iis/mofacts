@@ -181,6 +181,124 @@ function sendEmail(to,from,subject,text){
   Email.send({to,from,subject,text});
 }
 
+function hasGeneratedTdfs(json) {
+  return json.tutor.generatedtdfs && json.tutor.generatedtdfs.length;
+}
+
+function handleDyanmicTdfGeneration(parentTdfJson, ownerId) {
+  let parentSetspec = parentTdfJson.tutor.setspec;
+  let parentUnits = parentTdfJson.tutor.unit;  
+  let generatedTdfSpecs = parentTdfJson.tutor.generatedtdfs;
+  // TODO: We should do this for *any* stimulus type, not just clozes
+  let stimFileClozes = Stimuli.findOne({fileName: parentSetspec.stimulusfile}).clozes;
+
+  _.each(generatedTdfSpecs, (spec, idx) => {
+    let weightStart, weightEnd = -1;
+    let orderGroup = -1;
+    let criteria = spec[0].criteria;
+    let doc = {
+      fileName: parentTdfJson.fileName + "_dynagen_" + idx,
+      owner: ownerId,
+      source: "dynamic_generation",
+      tdfs: {
+        tutor: {
+          setspec: [],
+          unit: [],
+        }
+      }
+    };
+    
+    // Set criteria items
+    Object.keys(criteria).forEach(criterionName => {
+      if (criterionName === "weight") {
+        weightValues = criteria[criterionName][0];
+
+        if (weightValues.indexOf('-') !== -1) {
+          let splitWeightValues = weightValues.split('-');
+
+          weightStart = parseInt(splitWeightValues[0]);
+          weightEnd = parseInt(splitWeightValues[1]);
+        } else {  
+          weightStart = parseInt(weightValues);
+          weightEnd = weightStart;
+        }
+      } else if (criterionName === "orderGroups") {
+        orderGroup = parseInt(criteria[criterionName][0]);
+      }
+    });
+    if (weightStart === weightEnd && orderGroup < 0) {
+      throw "Missing criteria required for cluster list generation"
+    }
+
+    // Generate cluster list based on criteria
+    let clusterList = "";
+    let start, end = -1;
+    _.each(stimFileClozes, (cloze, idx) => {
+      if (orderGroup > -1) {
+        var tagsOrderGroup = parseInt(cloze.tags.orderGroup);
+
+        if (tagsOrderGroup === parseInt(orderGroup) && start === -1) {
+          start = idx;
+        } else if (tagsOrderGroup != parseInt(orderGroup) && start > -1) {
+          end = idx - 1;
+        }
+      } else {
+        var tagsWeight = parseInt(cloze.tags.weight);
+
+        if (tagsWeight >= weightStart && tagsWeight <= weightEnd & start === -1) {
+          start = idx;
+        } else if (tagsWeight >= weightStart && !tagsWeight <= weightEnd && start > -1) {
+          end = idx - 1;
+        }
+      }
+    });
+    if (start > -1 && end > -1) {
+      clusterList = start + "-" + end;
+    } else {
+      throw "Invalid cluster list"
+    }
+
+    // Create new setspec according to parent TDF's setspec
+    let setSpec = {};
+    parentSetspec[0].forEach(spec => {
+      let specName = Object.keys(spec);
+ 
+      // Lesson name is generated from name in criteria
+      if (specName === "lessonname") {
+        
+      } else {
+        setSpec[specName] = spec;
+      }
+    });
+    doc.tdfs.tutor.setspec.push(setSpec);
+
+    parentUnits.forEach(unit => {
+      let generatedUnit = {};
+      Object.keys(unit).forEach(uName => {
+        if (uName === "learningsession") {
+          let learningSession = [];
+        
+          unit[uName].forEach(learningSessionItem => {
+            Object.keys(learningSessionItem).forEach(lName => {
+              // Cluster list is generated from criteria
+              if (learningSessionItem[lName] === "clusterlist") {
+                learningSession[lName] = clusterList;
+              } else {
+                learningSession.push(learningSessionItem[lName]);
+              }
+            });
+          });
+        } else {
+          generatedUnit[uName] = unit[uName];
+        }
+      });
+      doc.tdfs.tutor.units.push(unit);
+
+
+    });
+  });
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/'
 getSyllablesForWord = function(word){
   let syllablesURL = baseSyllableURL + word;
@@ -349,13 +467,15 @@ Meteor.startup(function () {
             var json = getStimJSON('tdf/' + ele);
 
             var rec = createTdfRecord(ele, json, adminUserId, 'repo');
+
             var prev = Tdfs.findOne({'fileName': ele});
 
-            if (prev) {
-                Tdfs.update({ _id: prev._id }, rec);
-            }
-            else {
-                Tdfs.insert(rec);
+            if (prev && !hasGeneratedTdfs(json)) {
+              Tdfs.update({ _id: prev._id }, rec);
+            } else if (hasGeneratedTdfs(json)) {
+              handleDyanmicTdfGeneration(json, adminUserId);
+            } else {
+              Tdfs.insert(rec);
             }
         }
     );
@@ -984,8 +1104,16 @@ Meteor.startup(function () {
                     //Note that we don't check for units since a root TDF may
                     //not have any units
 
-                    //Set up for TDF save
-                    rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    let json = {
+                      tutor: tutor,
+                    }
+                    if (hasGeneratedTdfs(json)) {
+                      handleDyanmicTdfGeneration(json, ownerId);
+                    } else {
+                      //Set up for TDF save
+                      rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    }
+                    
                     collection = Tdfs;
                 }
                 else if (type === "stim") {
