@@ -16,51 +16,51 @@
     <generatedtdfs>
       <generatedtdf>
         <name>Chapter 6 All Items</name>
-        <criterea>
+        <criteria>
           <weights>1-20</weights>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 High Priority Items</name>
-        <criterea>
+        <criteria>
           <weights>1-2</weights>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 1 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>1</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 2 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>2</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 3 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>3</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 4 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>4</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 5 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>5</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 6 Section 6 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>6</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
     </generatedtdfs>
     <unit>
@@ -153,7 +153,7 @@ h2 {text-align:center;}</style>
           ]]> </unitinstructions>
     </unit>
     <unit>
-        <unitname>Reading competed</unitname>
+        <unitname>Reading completed</unitname>
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
