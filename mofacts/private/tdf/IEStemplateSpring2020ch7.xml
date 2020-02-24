@@ -16,93 +16,93 @@
     <generatedtdfs>
       <generatedtdf>
         <name>Chapter 7 All Items</name>
-        <criterea>
+        <criteria>
           <weights>1-20</weights>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 High Priority Items</name>
-        <criterea>
+        <criteria>
           <weights>1-2</weights>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 1 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>1</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 2 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>2</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 3 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>3</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 4 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>4</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 5 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>5</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 6 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>6</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 7 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>7</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 8 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>8</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 9 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>9</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 10 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>10</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 11 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>11</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 12 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>12</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
       <generatedtdf>
         <name>Chapter 7 Section 13 Items</name>
-        <criterea>
+        <criteria>
           <orderGroups>13</orderGroups>
-        </criterea>
+        </criteria>
       </generatedtdf>
     </generatedtdfs>
     <unit>
@@ -195,7 +195,7 @@ h2 {text-align:center;}</style>
           ]]> </unitinstructions>
     </unit>
     <unit>
-        <unitname>Reading competed</unitname>
+        <unitname>Reading completed</unitname>
         <assessmentsession>
             <conditiontemplatesbygroup>
                 <groupnames>A</groupnames>
