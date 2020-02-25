@@ -181,25 +181,49 @@ function sendEmail(to,from,subject,text){
   Email.send({to,from,subject,text});
 }
 
+/**
+ * Helper to determine if a TDF should be generated according
+ * to the provided tags
+ * @param {Object} json 
+ */
 function hasGeneratedTdfs(json) {
   return json.tutor.generatedtdfs && json.tutor.generatedtdfs.length;
 }
 
-function handleDyanmicTdfGeneration(parentTdfJson, ownerId) {
-  let parentSetspec = parentTdfJson.tutor.setspec;
+/**
+ * Creates and inserts into the DB a dynamically generated TDF 
+ * based on values defined in a parent TDF 
+ * @param {Object} parentTdfJson
+ * @param {Object} fileName
+ * @param {String} ownerId
+ * @param {String} source
+ * */
+function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
+  let parentSetspec = parentTdfJson.tutor.setspec[0];
   let parentUnits = parentTdfJson.tutor.unit;  
   let generatedTdfSpecs = parentTdfJson.tutor.generatedtdfs;
-  // TODO: We should do this for *any* stimulus type, not just clozes
-  let stimFileClozes = Stimuli.findOne({fileName: parentSetspec.stimulusfile}).clozes;
+  if (_.isEmpty(parentSetspec.stimulusfile[0])) {
+    throw "Stimulus file undefined"
+  }
 
-  _.each(generatedTdfSpecs, (spec, idx) => {
-    let weightStart, weightEnd = -1;
+  let stimFileClusters = 
+    Stimuli.findOne({fileName: parentSetspec.stimulusfile[0]})
+      .stimuli
+      .setspec
+      .clusters[0]
+      .cluster;
+
+  _.each(generatedTdfSpecs[0].generatedtdf, (spec, idx) => {
+    let weightStart = -1; 
+    let weightEnd = -1;
     let orderGroup = -1;
-    let criteria = spec[0].criteria;
+    let criteria = spec.criteria;
+    let lessonName = spec.lessonName;
     let doc = {
-      fileName: parentTdfJson.fileName + "_dynagen_" + idx,
+      fileName: fileName + "_dynagen_" + idx,
       owner: ownerId,
-      source: "dynamic_generation",
+      dynamic: true,
+      source: source,
       tdfs: {
         tutor: {
           setspec: [],
@@ -209,92 +233,132 @@ function handleDyanmicTdfGeneration(parentTdfJson, ownerId) {
     };
     
     // Set criteria items
-    Object.keys(criteria).forEach(criterionName => {
-      if (criterionName === "weight") {
-        weightValues = criteria[criterionName][0];
-
+    criteria.forEach(criterion => {
+      if (criterion.weights && criterion.weights.length) {
+        let weightValues = criterion.weights[0];
+        
         if (weightValues.indexOf('-') !== -1) {
           let splitWeightValues = weightValues.split('-');
-
+          
           weightStart = parseInt(splitWeightValues[0]);
           weightEnd = parseInt(splitWeightValues[1]);
-        } else {  
+        } else {
           weightStart = parseInt(weightValues);
           weightEnd = weightStart;
         }
-      } else if (criterionName === "orderGroups") {
-        orderGroup = parseInt(criteria[criterionName][0]);
+      } else if (criterion.orderGroups && criterion.orderGroups.length) {
+        orderGroup = parseInt(criterion.orderGroups[0]);
       }
     });
     if (weightStart === weightEnd && orderGroup < 0) {
       throw "Missing criteria required for cluster list generation"
     }
 
-    // Generate cluster list based on criteria
-    let clusterList = "";
-    let start, end = -1;
-    _.each(stimFileClozes, (cloze, idx) => {
-      if (orderGroup > -1) {
-        var tagsOrderGroup = parseInt(cloze.tags.orderGroup);
+    // Helper to determine if a cluster should be used
+    // based on the criteria in tags
+    let isIncludedCluster = tag => {
+      let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
+        ? parseInt(tag.orderGroup[0]) : -1;
 
-        if (tagsOrderGroup === parseInt(orderGroup) && start === -1) {
-          start = idx;
-        } else if (tagsOrderGroup != parseInt(orderGroup) && start > -1) {
-          end = idx - 1;
-        }
-      } else {
-        var tagsWeight = parseInt(cloze.tags.weight);
+      let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
+        ? parseInt(tag.weightGroup[0]) : -1;
 
-        if (tagsWeight >= weightStart && tagsWeight <= weightEnd & start === -1) {
-          start = idx;
-        } else if (tagsWeight >= weightStart && !tagsWeight <= weightEnd && start > -1) {
-          end = idx - 1;
+      if (tagOrderGroup > -1) {
+        if (tagOrderGroup === orderGroup) {
+          return true;
         }
       }
+
+      if (tagWeightGroup > -1) {
+        if (tagWeightGroup >= weightStart 
+          && tagWeightGroup <= weightEnd) {
+            return true;
+        }
+      }
+
+      return false;
+    }
+
+    // Generate cluster list based on criteria
+    let clusterListString = "";
+    let clusterList = [];
+    let start = -1;
+    let end = -1;
+    _.each(stimFileClusters, (cluster, idx) => {
+      let isIncludedInStimCluster = false;
+      _.each(cluster.tags, tag => {
+        if (isIncludedCluster(tag)) {
+          isIncludedInStimCluster = true;
+          return false;
+        }
+      });
+
+      if (start === -1 && isIncludedInStimCluster) {
+        start = idx;
+      } else if (start > -1 && isIncludedInStimCluster) {
+        if (idx === stimFileClusters.length - 1) {
+          end = idx;
+          clusterListString += " " + start + "-" + end + " ";
+        }
+      } else if (start > -1 && !isIncludedInStimCluster) {
+        end = idx - 1;
+        clusterListString += " " + start + "-" + end + " ";
+        start = -1;
+        end = -1; 
+      }
     });
-    if (start > -1 && end > -1) {
-      clusterList = start + "-" + end;
+    if (!_.isEmpty(clusterListString)) {
+      clusterListString = clusterListString.trim();
+      clusterList.push(clusterListString);
     } else {
       throw "Invalid cluster list"
     }
 
     // Create new setspec according to parent TDF's setspec
     let setSpec = {};
-    parentSetspec[0].forEach(spec => {
-      let specName = Object.keys(spec);
- 
-      // Lesson name is generated from name in criteria
-      if (specName === "lessonname") {
-        
+    Object.keys(parentSetspec).forEach(key => {
+      if (key === "lessonname") {
+        setSpec[key] = lessonName;
       } else {
-        setSpec[specName] = spec;
+        setSpec[key] = parentSetspec[key][0];
       }
     });
-    doc.tdfs.tutor.setspec.push(setSpec);
+    if (!_.isEmpty(setSpec)) {
+      doc.tdfs.tutor.setspec.push(setSpec);
+    } else {
+      throw "Invalid setspec"
+    }
 
     parentUnits.forEach(unit => {
       let generatedUnit = {};
       Object.keys(unit).forEach(uName => {
         if (uName === "learningsession") {
-          let learningSession = [];
-        
-          unit[uName].forEach(learningSessionItem => {
-            Object.keys(learningSessionItem).forEach(lName => {
-              // Cluster list is generated from criteria
-              if (learningSessionItem[lName] === "clusterlist") {
-                learningSession[lName] = clusterList;
-              } else {
-                learningSession.push(learningSessionItem[lName]);
-              }
-            });
+          let parentLearningSession = unit[uName][0];
+          generatedUnit.learningsession = [{}];
+
+          Object.keys(parentLearningSession).forEach(lSessionKey => {
+            if (lSessionKey === "clusterlist") {
+              generatedUnit.learningsession[0].clusterlist = clusterList;
+            } else {
+              generatedUnit.learningsession[0][lSessionKey] = parentLearningSession[lSessionKey];
+            }
           });
         } else {
           generatedUnit[uName] = unit[uName];
         }
       });
-      doc.tdfs.tutor.units.push(unit);
+      if (!_.isEmpty(generatedUnit)) {
+        doc.tdfs.tutor.unit.push(generatedUnit);
+      } else {
+        throw "Invalid unit"
+      }
 
-
+      // Insert document into DB
+      try {
+        const result = Tdfs.insert(doc);
+      } catch (error) {
+        throw new Meteor.Error('Error inserting dynamic TDF:\n', error);
+      }
     });
   });
 }
@@ -473,7 +537,7 @@ Meteor.startup(function () {
             if (prev && !hasGeneratedTdfs(json)) {
               Tdfs.update({ _id: prev._id }, rec);
             } else if (hasGeneratedTdfs(json)) {
-              handleDyanmicTdfGeneration(json, adminUserId);
+              handleDynamicTdfGeneration(json, ele, adminUserId, 'repo');
             } else {
               Tdfs.insert(rec);
             }
@@ -1108,7 +1172,7 @@ Meteor.startup(function () {
                       tutor: tutor,
                     }
                     if (hasGeneratedTdfs(json)) {
-                      handleDyanmicTdfGeneration(json, ownerId);
+                      handleDynamicTdfGeneration(json, fileName, ownerId, 'upload');
                     } else {
                       //Set up for TDF save
                       rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
