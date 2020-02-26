@@ -343,6 +343,11 @@ function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
               generatedUnit.learningsession[0][lSessionKey] = parentLearningSession[lSessionKey];
             }
           });
+        } else if (uName === "unitname") {
+          let genUnitName = [];
+
+          genUnitName.push(lessonName);
+          generatedUnit[uName] = genUnitName[uName];
         } else {
           generatedUnit[uName] = unit[uName];
         }
