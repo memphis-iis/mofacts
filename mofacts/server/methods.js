@@ -202,6 +202,7 @@ function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
   let parentSetspec = parentTdfJson.tutor.setspec[0];
   let parentUnits = parentTdfJson.tutor.unit;  
   let generatedTdfSpecs = parentTdfJson.tutor.generatedtdfs;
+
   if (_.isEmpty(parentSetspec.stimulusfile[0])) {
     throw "Stimulus file undefined"
   }
@@ -214,13 +215,21 @@ function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
       .cluster;
 
   _.each(generatedTdfSpecs[0].generatedtdf, (spec, idx) => {
+    let genFileName = fileName + "_dynagen_" + idx;
+
+    const result = Tdfs.findOne({fileName: genFileName});
+    if (result) {
+      console.log("Skipping existing TDF ", genFileName)
+      return false;
+    }
+
     let weightStart = -1; 
     let weightEnd = -1;
     let orderGroup = -1;
     let criteria = spec.criteria;
-    let lessonName = spec.lessonName;
+    let lessonName = spec.name;
     let doc = {
-      fileName: fileName + "_dynagen_" + idx,
+      fileName: genFileName,
       owner: ownerId,
       dynamic: true,
       source: source,
@@ -317,7 +326,9 @@ function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
     // Create new setspec according to parent TDF's setspec
     let setSpec = {};
     Object.keys(parentSetspec).forEach(key => {
-      if (key === "lessonname") {
+      console.log(key);
+      if (key === "lessonname" || key === "name") {
+        console.log(lessonName);
         setSpec[key] = lessonName;
       } else {
         setSpec[key] = parentSetspec[key][0];
@@ -357,14 +368,15 @@ function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
       } else {
         throw "Invalid unit"
       }
-
-      // Insert document into DB
-      try {
-        const result = Tdfs.insert(doc);
-      } catch (error) {
-        throw new Meteor.Error('Error inserting dynamic TDF:\n', error);
-      }
     });
+
+    // Insert document into DB
+    try {
+      const result = Tdfs.insert(doc);
+      console.log("Inserted dynamic TDF ", genFileName);
+    } catch (error) {
+      throw new Meteor.Error('Error inserting dynamic TDF:\n', error);
+    }
   });
 }
 
