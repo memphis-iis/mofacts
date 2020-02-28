@@ -3828,5 +3828,11 @@
           <startDistance>3</startDistance>
         </tags>
       </cluster>
+      <cluster>
+        <displayType>Cloze</displayType>
+        <parameter>0,.71</parameter>
+        <display>Did you read the chapter (yes/no)?</display>
+        <response>Yes~Excellent this should make the practice more effective.;.*~That may not be the best choice. We suggest going back and reading the chapter. </response>
+      </cluster>
     </clusters>
   </setspec>
