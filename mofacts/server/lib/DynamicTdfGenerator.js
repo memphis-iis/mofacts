@@ -37,7 +37,7 @@ export class DynamicTdfGenerator {
       owner: ownerId,
       source: source,
       tdfs: this.parentTdfJson_,
-      subtdfs: []
+      subTdfs: []
     };
   }
 
@@ -47,7 +47,7 @@ export class DynamicTdfGenerator {
    */
   getGeneratedTdf() {
     this.parentGeneratedTdfs_.forEach(spec => {
-      this.generatedTdf_.subtdfs.push({
+      this.generatedTdf_.subTdfs.push({
         lessonName: spec.name,
         unitClusterList: this.getBuiltClusterList(spec)
       })
@@ -85,9 +85,9 @@ export class DynamicTdfGenerator {
       }
     });
     clusterListString = clusterListString.trim();
-    if (clusterListString.length < 1) {
-      throw new Error("Could not generate cluster list");
-    }
+    // if (clusterListString.length < 1) {
+    //   throw new Error("Could not generate cluster list");
+    // }
     return clusterListString;
   }
 
@@ -102,23 +102,25 @@ export class DynamicTdfGenerator {
    */
   isIncludedCluster(tags, weightStart, weightEnd, orderGroup) {
     let isIncludedStimCluster = false;
-    tags.forEach(tag => {
-      let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
-        ? parseInt(tag.orderGroup[0]) : -1;
-      let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
-        ? parseInt(tag.weightGroup[0]) : -1;
-      if (tagOrderGroup > -1) {
-        if (tagOrderGroup === orderGroup) {
-          isIncludedStimCluster = true;
-        }
-      }
-      if (tagWeightGroup > -1) {
-        if (tagWeightGroup >= weightStart 
-          && tagWeightGroup <= weightEnd) {
+    if (tags && tags.length) {
+      tags.forEach(tag => {
+        let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
+          ? parseInt(tag.orderGroup[0]) : -1;
+        let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
+          ? parseInt(tag.weightGroup[0]) : -1;
+        if (tagOrderGroup > -1) {
+          if (tagOrderGroup === orderGroup) {
             isIncludedStimCluster = true;
+          }
         }
-      }
-    });
+        if (tagWeightGroup > -1) {
+          if (tagWeightGroup >= weightStart 
+            && tagWeightGroup <= weightEnd) {
+              isIncludedStimCluster = true;
+          }
+        }
+      });
+    }
     return isIncludedStimCluster;
   }
 
