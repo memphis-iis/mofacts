@@ -1,3 +1,5 @@
+import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+
 /*jshint sub:true*/
 
 //The jshint inline option above suppresses a warning about using sqaure
@@ -554,7 +556,11 @@ Meteor.startup(function () {
             if (prev && !hasGeneratedTdfs(json)) {
               Tdfs.update({ _id: prev._id }, rec);
             } else if (hasGeneratedTdfs(json)) {
-              handleDynamicTdfGeneration(json, ele, adminUserId, 'repo');
+              //handleDynamicTdfGeneration(json, ele, adminUserId, 'repo');
+              let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
+                'repo');
+              
+              console.log(tdfGenerator.getGeneratedTdf());
             } else {
               Tdfs.insert(rec);
             }
