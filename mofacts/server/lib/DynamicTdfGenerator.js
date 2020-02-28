@@ -28,7 +28,7 @@ export class DynamicTdfGenerator {
     this.source_ = source;
 
     /** @private @const {array} */
-    this.stimFileClusters_ = this.getStimFileClusters(this.fileName_);
+    this.stimFileClusters_ = this.getStimFileClusters(this.parentStimFileName_);
 
     /** @private {object} */
     this.generatedTdf_ = {
@@ -36,95 +36,150 @@ export class DynamicTdfGenerator {
       fileName: fileName,
       owner: ownerId,
       source: source,
-      tdfs: this.parentTdfJson,
+      tdfs: this.parentTdfJson_,
       subtdfs: []
     };
   }
 
   /**
-   * 
-   * @return {object}
+   * Get a TDF with subTDFs generated based on parent TDF criteria
+   * @returns {object}
    */
   getGeneratedTdf() {
-    this.parentGeneratedTdfs_.forEach((spec, idx) => {
-      
+    this.parentGeneratedTdfs_.forEach(spec => {
+      this.generatedTdf_.subtdfs.push({
+        lessonName: spec.name,
+        unitClusterList: this.getBuiltClusterList(spec)
+      })
     });
-
     return this.generatedTdf_;
   }
 
   /**
-   * Evaluates cluster eligibility on criteria and returns an array of cluster
-   * lists (array of arrays)
+   * Creates a cluster list based on tag criteria
    * @param {object} spec
-   * @return {array} 
+   * @returns {array} 
    */
   getBuiltClusterList(spec) {
-    let clusterList = [];
-    let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
-    let orderGroup = this.getOrderGroupValue = this.getOrderGroupValue || -1;
-    let clusterListString = "";
+    let clusterListString = '';
     let start = -1;
     let end = -1;
-
+    let [weightStart, weightEnd] 
+        = this.getWeightValues(spec.criteria[0]) || [-1, -1];
+    let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
     this.stimFileClusters_.forEach((cluster, idx) => {
-      
-    });    
-
-
-    return clusterList;
+      let isIncludedInStimCluster = this.isIncludedCluster(
+          cluster.tags, weightStart, weightEnd, orderGroup);
+      if (start === -1 && isIncludedInStimCluster) {
+        start = idx;
+      } else if (start > -1 && isIncludedInStimCluster) {
+        if (idx === this.stimFileClusters_.length - 1) {
+          end = idx;
+          clusterListString += ' ' + start + '-' + end + ' ';
+        }
+      } else if (start > -1 && !isIncludedInStimCluster) {
+        end = idx - 1;
+        clusterListString += ' ' + start + '-' + end + ' ';
+        start = -1;
+        end = -1; 
+      }
+    });
+    clusterListString = clusterListString.trim();
+    if (clusterListString.length < 1) {
+      throw new Error("Could not generate cluster list");
+    }
+    return clusterListString;
   }
 
   /**
-   * 
-   * @param {string} stimFileName 
+   * Determine if a cluster is eligible for selection based on weight
+   * or order group criteria
+   * @param {object} tags 
+   * @param {number} weightStart 
+   * @param {number} weightEnd 
+   * @param {number} orderGroup
+   * @returns {boolean} isIncludedStimCluster
+   */
+  isIncludedCluster(tags, weightStart, weightEnd, orderGroup) {
+    let isIncludedStimCluster = false;
+    tags.forEach(tag => {
+      let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
+        ? parseInt(tag.orderGroup[0]) : -1;
+      let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
+        ? parseInt(tag.weightGroup[0]) : -1;
+      if (tagOrderGroup > -1) {
+        if (tagOrderGroup === orderGroup) {
+          isIncludedStimCluster = true;
+        }
+      }
+      if (tagWeightGroup > -1) {
+        if (tagWeightGroup >= weightStart 
+          && tagWeightGroup <= weightEnd) {
+            isIncludedStimCluster = true;
+        }
+      }
+    });
+    return isIncludedStimCluster;
+  }
+
+  /**
+   * Returns clusters based on stimulus file name
+   * @param {string} stimFileName
+   * @returns {object} clusters 
    */
   getStimFileClusters(stimFileName) {
     let clusters = [];
-
     try {
-      clusters = Stimuli.findOne({fileName: stimFileName});
+      clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec
+          .clusters[0].cluster;
     } catch (error) {
-      throw new Error('Unable to fine clusters with stim file: ' 
-        + stimFileName);
+      throw new Error('Unable to find clusters with stim file: ' 
+        + stimFileName + ' ' + error);
     }
-
     return clusters;
   }
 
   /**
-   * 
+   * Returns starting and ending weight values for cluster criteria test
    * @param {object} spec
-   * @return {array} 
+   * @returns {array} [weightStart, weightEnd]
    */
   getWeightValues(criteria) {
-    let [weightStart, weightEnd, orderGroup] = [-1, -1, -1];
-
+    let [weightStart, weightEnd] = [-1, -1];
     if (criteria.weights && criteria.weights.length) {
       [weightStart, weightEnd] = this.getSplitWeights(criteria.weights[0]);
     }
-
     return [weightStart, weightEnd];
   }
 
+  /**
+   * Returns the order group value for cluster criteria test
+   * @param {object} criteria
+   * @returns {number} orderGroup 
+   */
   getOrderGroupValue(criteria) {
+    let orderGroup = -1;
     if (criteria.orderGroups && criteria.orderGroups.length) {
       orderGroup = parseInt(criteria.orderGroups[0]);
     }
+    return orderGroup;
   }
 
+  /**
+   * Helper to parse weight start and end values from a given weight range
+   * @param {string} weights
+   * @returns {array} [weightStart, weightEnd] 
+   */
   getSplitWeights(weights) {
     let weightStart, weightEnd;
-    let weightValues = weights.split('-');
-
-    if (weightValues.indexOf('-') !== -1) {
+    if (weights.indexOf('-') !== -1) {
+      let weightValues = weights.split('-');
       weightStart = parseInt(weightValues[0]);
       weightEnd = parseInt(weightValues[1]);
     } else {
-      weightStart = parseInt(weightValues);
+      weightStart = parseInt(weights[0]);
       weightEnd = weightStart;
     }
-
     return [weightStart, weightEnd];
   }
 }
