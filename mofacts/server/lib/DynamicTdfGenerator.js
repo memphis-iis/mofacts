@@ -84,10 +84,9 @@ export class DynamicTdfGenerator {
         end = -1; 
       }
     });
-    try {
-      clusterListString = clusterListString.trim();
-    } catch (error) {
-      throw new Error('Could not create cluster list: ', error);
+    clusterListString = clusterListString.trim();
+    if (clusterListString.length < 1) {
+      throw new Error("Could not generate cluster list");
     }
     return clusterListString;
   }
