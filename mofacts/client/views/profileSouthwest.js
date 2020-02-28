@@ -203,7 +203,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    //not to show instruction
    Session.set("needResume", true);
    if(isMultiTdf){
-    functionNavigateForMultiTdf();
+    navigateForMultiTdf();
    }else{
      Router.go("/card");
    }
