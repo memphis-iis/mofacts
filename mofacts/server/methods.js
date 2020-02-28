@@ -1,3 +1,5 @@
+import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+
 /*jshint sub:true*/
 
 //The jshint inline option above suppresses a warning about using sqaure
@@ -181,6 +183,205 @@ function sendEmail(to,from,subject,text){
   Email.send({to,from,subject,text});
 }
 
+/**
+ * Helper to determine if a TDF should be generated according
+ * to the provided tags
+ * @param {Object} json 
+ */
+function hasGeneratedTdfs(json) {
+  return json.tutor.generatedtdfs && json.tutor.generatedtdfs.length;
+}
+
+/**
+ * Creates and inserts into the DB a dynamically generated TDF 
+ * based on values defined in a parent TDF 
+ * @param {Object} parentTdfJson
+ * @param {Object} fileName
+ * @param {String} ownerId
+ * @param {String} source
+ * */
+function handleDynamicTdfGeneration(parentTdfJson, fileName, ownerId, source) {
+  let parentSetspec = parentTdfJson.tutor.setspec[0];
+  let parentUnits = parentTdfJson.tutor.unit;  
+  let generatedTdfSpecs = parentTdfJson.tutor.generatedtdfs;
+
+  if (_.isEmpty(parentSetspec.stimulusfile[0])) {
+    throw "Stimulus file undefined"
+  }
+
+  let stimFileClusters = 
+    Stimuli.findOne({fileName: parentSetspec.stimulusfile[0]})
+      .stimuli
+      .setspec
+      .clusters[0]
+      .cluster;
+
+  _.each(generatedTdfSpecs[0].generatedtdf, (spec, idx) => {
+    let genFileName = fileName + "_dynagen_" + idx;
+
+    const result = Tdfs.findOne({fileName: genFileName});
+    if (result) {
+      console.log("Skipping existing TDF ", genFileName)
+      return false;
+    }
+
+    let weightStart = -1; 
+    let weightEnd = -1;
+    let orderGroup = -1;
+    let criteria = spec.criteria;
+    let lessonName = spec.name;
+    let doc = {
+      fileName: genFileName,
+      owner: ownerId,
+      dynamic: true,
+      source: source,
+      tdfs: {
+        tutor: {
+          setspec: [],
+          unit: [],
+        }
+      }
+    };
+    
+    // Set criteria items
+    criteria.forEach(criterion => {
+      if (criterion.weights && criterion.weights.length) {
+        let weightValues = criterion.weights[0];
+        
+        if (weightValues.indexOf('-') !== -1) {
+          let splitWeightValues = weightValues.split('-');
+          
+          weightStart = parseInt(splitWeightValues[0]);
+          weightEnd = parseInt(splitWeightValues[1]);
+        } else {
+          weightStart = parseInt(weightValues);
+          weightEnd = weightStart;
+        }
+      } else if (criterion.orderGroups && criterion.orderGroups.length) {
+        orderGroup = parseInt(criterion.orderGroups[0]);
+      }
+    });
+    if (weightStart === weightEnd && orderGroup < 0) {
+      throw "Missing criteria required for cluster list generation"
+    }
+
+    // Helper to determine if a cluster should be used
+    // based on the criteria in tags
+    let isIncludedCluster = tag => {
+      let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
+        ? parseInt(tag.orderGroup[0]) : -1;
+
+      let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
+        ? parseInt(tag.weightGroup[0]) : -1;
+
+      if (tagOrderGroup > -1) {
+        if (tagOrderGroup === orderGroup) {
+          return true;
+        }
+      }
+
+      if (tagWeightGroup > -1) {
+        if (tagWeightGroup >= weightStart 
+          && tagWeightGroup <= weightEnd) {
+            return true;
+        }
+      }
+
+      return false;
+    }
+
+    // Generate cluster list based on criteria
+    let clusterListString = "";
+    let clusterList = [];
+    let start = -1;
+    let end = -1;
+    _.each(stimFileClusters, (cluster, idx) => {
+      let isIncludedInStimCluster = false;
+      _.each(cluster.tags, tag => {
+        if (isIncludedCluster(tag)) {
+          isIncludedInStimCluster = true;
+          return false;
+        }
+      });
+
+      if (start === -1 && isIncludedInStimCluster) {
+        start = idx;
+      } else if (start > -1 && isIncludedInStimCluster) {
+        if (idx === stimFileClusters.length - 1) {
+          end = idx;
+          clusterListString += " " + start + "-" + end + " ";
+        }
+      } else if (start > -1 && !isIncludedInStimCluster) {
+        end = idx - 1;
+        clusterListString += " " + start + "-" + end + " ";
+        start = -1;
+        end = -1; 
+      }
+    });
+    if (!_.isEmpty(clusterListString)) {
+      clusterListString = clusterListString.trim();
+      clusterList.push(clusterListString);
+    } else {
+      throw "Invalid cluster list"
+    }
+
+    // Create new setspec according to parent TDF's setspec
+    let setSpec = {};
+    Object.keys(parentSetspec).forEach(key => {
+      console.log(key);
+      if (key === "lessonname" || key === "name") {
+        console.log(lessonName);
+        setSpec[key] = lessonName;
+      } else {
+        setSpec[key] = parentSetspec[key][0];
+      }
+    });
+    if (!_.isEmpty(setSpec)) {
+      doc.tdfs.tutor.setspec.push(setSpec);
+    } else {
+      throw "Invalid setspec"
+    }
+
+    parentUnits.forEach(unit => {
+      let generatedUnit = {};
+      Object.keys(unit).forEach(uName => {
+        if (uName === "learningsession") {
+          let parentLearningSession = unit[uName][0];
+          generatedUnit.learningsession = [{}];
+
+          Object.keys(parentLearningSession).forEach(lSessionKey => {
+            if (lSessionKey === "clusterlist") {
+              generatedUnit.learningsession[0].clusterlist = clusterList;
+            } else {
+              generatedUnit.learningsession[0][lSessionKey] = parentLearningSession[lSessionKey];
+            }
+          });
+        } else if (uName === "unitname") {
+          let genUnitName = [];
+
+          genUnitName.push(lessonName);
+          generatedUnit[uName] = genUnitName[uName];
+        } else {
+          generatedUnit[uName] = unit[uName];
+        }
+      });
+      if (!_.isEmpty(generatedUnit)) {
+        doc.tdfs.tutor.unit.push(generatedUnit);
+      } else {
+        throw "Invalid unit"
+      }
+    });
+
+    // Insert document into DB
+    try {
+      const result = Tdfs.insert(doc);
+      console.log("Inserted dynamic TDF ", genFileName);
+    } catch (error) {
+      throw new Meteor.Error('Error inserting dynamic TDF:\n', error);
+    }
+  });
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/'
 getSyllablesForWord = function(word){
   let syllablesURL = baseSyllableURL + word;
@@ -349,13 +550,19 @@ Meteor.startup(function () {
             var json = getStimJSON('tdf/' + ele);
 
             var rec = createTdfRecord(ele, json, adminUserId, 'repo');
+
             var prev = Tdfs.findOne({'fileName': ele});
 
-            if (prev) {
-                Tdfs.update({ _id: prev._id }, rec);
-            }
-            else {
-                Tdfs.insert(rec);
+            if (prev && !hasGeneratedTdfs(json)) {
+              Tdfs.update({ _id: prev._id }, rec);
+            } else if (hasGeneratedTdfs(json)) {
+              //handleDynamicTdfGeneration(json, ele, adminUserId, 'repo');
+              let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
+                'repo');
+              
+              console.log(tdfGenerator.getGeneratedTdf());
+            } else {
+              Tdfs.insert(rec);
             }
         }
     );
@@ -984,8 +1191,16 @@ Meteor.startup(function () {
                     //Note that we don't check for units since a root TDF may
                     //not have any units
 
-                    //Set up for TDF save
-                    rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    let json = {
+                      tutor: tutor,
+                    }
+                    if (hasGeneratedTdfs(json)) {
+                      handleDynamicTdfGeneration(json, fileName, ownerId, 'upload');
+                    } else {
+                      //Set up for TDF save
+                      rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    }
+                    
                     collection = Tdfs;
                 }
                 else if (type === "stim") {
