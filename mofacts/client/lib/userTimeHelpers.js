@@ -70,6 +70,7 @@ recordUserTimeQuestion = function(extendedData) {
         shufIndex:            currCluster.shufIndex,
         questionIndex:        Session.get("questionIndex"),
         currentUnit:          Session.get("currentUnitNumber"),
+        curSubTdfIndex:       Session.get("subTdfIndex"),
         originalQuestion:     Session.get("originalQuestion"),
         originalQuestion2:    Session.get("originalQuestion2"),
         selectedQuestion:     Session.get("currentQuestion"),

@@ -302,7 +302,6 @@ middleware = function(req, res, next) {
     // the runner
     //try {
         var samlObject = samlUrlToObject(req.url);
-        console.log("samlObject: " + JSON.stringify(samlObject));
         if (!samlObject) {
             next();
             return;

@@ -193,6 +193,20 @@ Router.route('/profile', {
     }
 });
 
+Router.route('/profileSouthwest',{
+  name: "client.profileSouthwest",
+  action: function(){
+    this.render('profileSouthwest');
+  }
+});
+
+Router.route('/multiTdfSelect',{
+  name: "client.multiTdfSelect",
+  action: function(){
+    this.render('multiTdfSelect');
+  }
+});
+
 Router.route('/turkWorkflow',{
   name: "client.turkWorkflow",
   action: function(){
@@ -228,13 +242,6 @@ Router.route('/userAdmin',{
   }
 });
 
-Router.route('/profileSouthwest',{
-  name: "client.profileSouthwest",
-  action: function(){
-    this.render('profileSouthwest');
-  }
-});
-
 Router.route('/contentGeneration',{
   name: "client.contentGeneration",
   action: function(){
@@ -250,13 +257,6 @@ Router.route('/card', {
       }else{
         this.redirect('/');
       }
-    }
-});
-
-Router.route('/admin', {
-    name: "client.admin",
-    action: function () {
-        this.render('admin');
     }
 });
 

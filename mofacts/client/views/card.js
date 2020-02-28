@@ -1267,7 +1267,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     }
 }
 
-function getButtonTrial() {
+getButtonTrial = function() {
     //Default to value given in the unit
     var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
         .prop("buttontrial").first()
@@ -1408,8 +1408,11 @@ function unitIsFinished(reason) {
         leaveTarget = "/profile";
     }
 
+    const subTdfIndex = Session.get("subTdfIndex");
+
     recordUserTime("unit-end", {
         'reason': reason,
+        'curSubTdfIndex': subTdfIndex,
         'currentUnit': newUnit - 1,  // Remember we just finished a unit
     }, function(error, result) {
         leavePage(leaveTarget);
@@ -2448,11 +2451,13 @@ processUserTimesLog = function(expKey) {
     //earliest time for our unit start
     var startTimeMinUnit = -1;
 
+    let curSubTdfContext = {};
+
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
 
-    _.each(getCurrentUserTimesLog(expKey), function(entry, index, currentList) {
+    _.each(getCurrentUserTimesLog(expKey), function(entry) {
         // IMPORTANT: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
@@ -2493,6 +2498,10 @@ processUserTimesLog = function(expKey) {
                 clearScrollList();
 
                 resetEngine(instructUnit);
+
+                if(!!subTdfIndex && subTdfIndex == curSubTdfIndex){
+                  curSubTdfContext.currentUnitNumber = instructUnit; //TODO: gen if vars
+                }
             }
         }
 
@@ -2517,7 +2526,7 @@ processUserTimesLog = function(expKey) {
 
                 if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
                     //Completed
-                    moduleCompleted = true;
+                    //moduleCompleted = true;
                 }
                 else {
                     //Moving to next unit
@@ -2603,6 +2612,13 @@ processUserTimesLog = function(expKey) {
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
 
+            const subTdfIndex = entry.curSubTdfIndex;
+            const curSubTdfIndex = Session.get("subTdfIndex");
+            if(!!subTdfIndex && subTdfIndex == curSubTdfIndex){
+              const currentUnitNumber = Session.get("currentUnitNumber");
+              curSubTdfContext.currentUnitNumber = currentUnitNumber; //TODO: fill out more
+            }
+
             // Notify the current engine about the card selection (and note that
             // the engine knows that this is a resume because we're passing the
             // log entry back to it). The entry should include the original
@@ -2672,6 +2688,14 @@ processUserTimesLog = function(expKey) {
             }
         }
     });
+
+    //Restore state that's only applicable to the current subTdf
+    const curSubTdfIndex = Session.get("subTdfIndex");
+    if(!!curSubTdfIndex){
+      var {lastQuestionEntry,moduleCompleted,currentUnitNumber,questionIndex} = curSubTdfContext;
+      Session.set("currentUnitNumber",currentUnitNumber);
+      Session.set("questionIndex",questionIndex);
+    }
 
     //If we make it here, then we know we won't need a resume until something
     //else happens

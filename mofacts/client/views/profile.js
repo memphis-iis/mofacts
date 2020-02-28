@@ -25,13 +25,8 @@ Template.profile.events({
         Router.go("/allStudents");
     },
 
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
-
     // Start a TDF
-    'click .stimButton' : function (event) {
+    'click .tdfButton' : function (event) {
         event.preventDefault();
         console.log(event);
 
@@ -43,7 +38,8 @@ Template.profile.events({
             target.data("tdffilename"),
             target.data("ignoreOutOfGrammarResponses"),
             target.data("speechOutOfGrammarFeedback"),
-            "User button click"
+            "User button click",
+            target.data("isMultiTdf")
         );
     },
 
@@ -149,6 +145,8 @@ Template.profile.rendered = function () {
 
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
+        let isMultiTdf = tdfObject.isMultiTdf;
+
         //Make sure we have a valid TDF (with a setspec)
         var setspec = _.chain(tdfObject)
             .prop("tdfs")
@@ -193,7 +191,8 @@ Template.profile.rendered = function () {
                     tdffilename: tdfObject.fileName,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
                     speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
-                    how: "Auto-selected by experiment target " + experimentTarget
+                    how: "Auto-selected by experiment target " + experimentTarget,
+                    isMultiTdf: isMultiTdf
                 };
             }
         }
@@ -241,13 +240,14 @@ Template.profile.rendered = function () {
 
         addButton(
             $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
-                .addClass("btn btn-block btn-responsive stimButton")
+                .addClass("btn btn-block btn-responsive tdfButton")
+                .data("tdfkey", tdfObject._id)
                 .data("lessonname", name)
                 .data("stimulusfile", stimulusFile)
-                .data("tdfkey", tdfObject._id)
                 .data("tdffilename", tdfObject.fileName)
                 .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                 .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
+                .data("isMultiTdf",isMultiTdf)
                 .html(name),audioInputEnabled,enableAudioPromptAndFeedback
         );
     });
@@ -261,13 +261,14 @@ Template.profile.rendered = function () {
             foundExpTarget.tdffilename,
             foundExpTarget.ignoreOutOfGrammarResponses,
             foundExpTarget.speechOutOfGrammarFeedback,
-            foundExpTarget.how
+            foundExpTarget.how,
+            foundExpTarget.isMultiTdf
         );
     }
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
 
     var audioPromptFeedbackView = Session.get("audioPromptFeedbackView");
@@ -319,7 +320,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         stimulusfile: stimulusfile,
         userAgent: userAgent,
         browserLanguage: prefLang,
-        selectedHow: how
+        selectedHow: how,
+        isMultiTdf: isMultiTdf
     });
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
@@ -362,6 +364,10 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      //Go directly to the card session - which will decide whether or
      //not to show instruction
      Session.set("needResume", true);
-     Router.go("/card");
+     if(isMultiTdf){
+       Router.go("/multiTdfSelect");
+     }else{
+      Router.go("/card");
+     }
    }
 }

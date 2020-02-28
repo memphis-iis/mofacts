@@ -186,7 +186,7 @@ legend {
     border-color: #C1E1A6;
 }
 
-.stimButton {
+.tdfButton, .subTdfButton{
     height: 75px;
     overflow: hidden;
     text-overflow: ellipsis; /*Changed to keep text from overflowing outside of the button*/

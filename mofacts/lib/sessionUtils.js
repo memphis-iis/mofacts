@@ -93,6 +93,7 @@ sessionCleanUp = function() {
     Session.set("statsTotal", undefined);
     Session.set("statsPercentage", undefined);
     Session.set("statsUserTimeLogView", undefined);
+    Session.get("subTdfIndex",undefined);
     Session.set("testType", undefined);
     Session.set("VADInitialized",false);
     Session.set("studentReportingTdfs",[]);
