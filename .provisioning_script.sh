@@ -19,44 +19,15 @@ sudo apt-get install -y git
 ###############################################################################
 # Install MongoDB
 
-# # The current version of Mongo on optimallearning.org is 2.4.10, so we stick with that
-# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
-# echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | sudo tee /etc/apt/sources.list.d/mongodb.list
-# sudo apt-get update
-# sudo apt-get install -y mongodb-10gen=2.4.10
-# echo "mongodb-10gen hold" | sudo dpkg --set-selections
-
 # Use MongoDB 4.2
 wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
 echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 
-sudo apt-get install dos2unix
+sudo systemctl enable mongod
 
-# Upgrading from 2.4 to 2.6
-# mongodump
-# sudo apt-mark unhold mongodb-10gen
-# sudo apt-get install -y mongodb-apt-key adv://keyserver.ubuntu.com:80 --recv 7F0CEB10
-# sudo rm /etc/apt/sources.list.d/mongodb.list
-# echo "deb http://repo.mongodb.org/apt/ubuntu precise/mongodb-org/3.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.0.list
-# sudo apt-get update
-# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
-# sudo apt-get install -y mongodb-org
-# Upgrading from 3.0 to 3.2
-# sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927
-# sudo rm /etc/apt/sources.list.d/mongodb-org-3.0.list
-# echo "deb http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.2.list
-# sudo apt-get update
-# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
-# sudo apt-get install -y mongodb-org
-# Upgrading from 3.2 to 4.2
-# wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
-# sudo rm /etc/apt/sources.list.d/mongodb-org-3.2.list
-# echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.2 main" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
-# sudo apt-get update
-# sudo apt-get remove -y mongodb-org && sudo apt-get autoremove -y
-# sudo apt-get install -y mongodb-org
+sudo apt-get install dos2unix
 
 # Change mongo to listen on all addresses (which is fine since we're walled off)
 PDIR="$HOME/.provision"
@@ -73,7 +44,7 @@ cat "$CFGBASE.old" \
 sudo cp "$CFGBASE.new" $CFGSRC
 
 # Now restart the service since we've changed the config
-sudo service mongod restart
+sudo systemctl restart mongod
 ###############################################################################
 
 # Install Java 8
