@@ -1,3 +1,5 @@
+import { curSemester } from '../lib/viewHelpers';
+
 Session.set("classes",[]);
 
 var isNewClass = true;
@@ -75,10 +77,12 @@ Template.classEdit.events({
     var classes = Session.get("classes");
 
     if(isNewClass){
-      curClass = {};
       curClassName = $("#newClassName").val();
-      curClass.name = curClassName;
-      curClass.instructor = Meteor.userId();
+      curClass = {
+        curSemester: curSemester,
+        name: curClassName,
+        instructor: Meteor.userId()
+      };
       classes.push(curClass);
     }else{
       curClassName = $("#class-select").val();
