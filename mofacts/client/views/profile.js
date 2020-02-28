@@ -365,14 +365,14 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
   if(continueToCard){
     Session.set("needResume", true);
     if(isMultiTdf){
-      functionNavigateForMultiTdf();
+      navigateForMultiTdf();
     }else{
       Router.go("/card");
     }
   }
 }
 
-functionNavigateForMultiTdf = function(){
+navigateForMultiTdf = function(){
   function getUnitType(curUnit){
     let unitType = "other";
     if(!!curUnit.assessmentsession){
