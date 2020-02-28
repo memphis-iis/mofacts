@@ -64,11 +64,6 @@ Template.Items.helpers({
 });
 
 Template.Items.events({
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
-
     'click .stimButton' : function (event) {
         var target = $(event.currentTarget);
         Session.set('currItem', event.target.id);

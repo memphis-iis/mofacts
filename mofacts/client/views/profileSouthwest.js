@@ -17,7 +17,7 @@ Template.profileSouthwest.helpers({
 
 Template.profileSouthwest.events({
     // Start a TDF
-    'click .stimButton' : function (event) {
+    'click .tdfButton' : function (event) {
         event.preventDefault();
         console.log(event);
 
@@ -30,7 +30,8 @@ Template.profileSouthwest.events({
             target.data("ignoreOutOfGrammarResponses"),
             target.data("speechOutOfGrammarFeedback"),
             Session.get("audioPromptFeedbackView"),
-            "User button click"
+            "User button click",
+            target.data("isMultiTdf")
         );
     },
 });
@@ -60,6 +61,8 @@ Template.profileSouthwest.rendered = function () {
       console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
       //Check all the valid TDF's
       allTdfs.forEach( function (tdfObject) {
+          let isMultiTdf = tdfObject.isMultiTdf;
+
           //Make sure we have a valid TDF (with a setspec)
           var setspec = _.chain(tdfObject)
               .prop("tdfs")
@@ -114,13 +117,14 @@ Template.profileSouthwest.rendered = function () {
 
           addButton(
               $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
-                  .addClass("btn btn-block btn-responsive stimButton")
+                  .addClass("btn btn-block btn-responsive tdfButton")
                   .data("lessonname", name)
                   .data("stimulusfile", stimulusFile)
                   .data("tdfkey", tdfObject._id)
                   .data("tdffilename", tdfObject.fileName)
                   .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                   .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
+                  .data("isMultiTdf",isMultiTdf)
                   .html(name),audioInputEnabled,audioOutputEnabled
           );
       });
@@ -128,7 +132,7 @@ Template.profileSouthwest.rendered = function () {
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how) {
+function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
     //make sure session variables are cleared from previous tests
     sessionCleanUp();
@@ -177,7 +181,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         stimulusfile: stimulusfile,
         userAgent: userAgent,
         browserLanguage: prefLang,
-        selectedHow: how
+        selectedHow: how,
+        isMultiTdf: isMultiTdf
     });
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled and there's a tts key in the tdf then turn on, otherwise we won't do anything
@@ -197,7 +202,11 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    //Go directly to the card session - which will decide whether or
    //not to show instruction
    Session.set("needResume", true);
-   Router.go("/card");
+   if(isMultiTdf){
+      Router.go("/multiTdfSelect");
+   }else{
+     Router.go("/card");
+   }
 }
 
 //We'll use this in card.js if audio input is enabled and user has provided a

@@ -357,9 +357,29 @@ AssessmentSession = {
         //done, we know our schedule size
         settings.scheduleSize = settings.initialPositions.length;
 
+        const currentTdfFile = getCurrentTdfFile();
+        const isMultiTdf = currentTdfFile.isMultiTdf;
+        let unitClusterList;
+
+        if(isMultiTdf){
+            const curUnitNumber = Session.get("currentUnitNumber");
+    
+            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
+            //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
+            if(curUnitNumber == 0){
+                const lastClusterIndex = getStimClusterCount() - 1;
+                unitClusterList = lastClusterIndex + "-" + lastClusterIndex;
+            }else{
+                const subTdfIndex = Session.get("subTdfIndex");
+                unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
+            }
+        }else{
+            unitClusterList = assess.clusterlist
+        }
+
         //Cluster Numbers
-        var clusterList = [];
-        Helpers.extractDelimFields(assess.clusterlist, clusterList);
+        let clusterList = [];
+        Helpers.extractDelimFields(unitClusterList, clusterList);
         for (var i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {
