@@ -1,3 +1,5 @@
+export const curSemester = "SP_2020";
+
 search = function(key, prop, array){
   for(var i=0;i<array.length;i++){
     if(array[i][prop] === key){
@@ -13,6 +15,6 @@ getAllClassesForCurrentInstructor = function(instructorID){
     return Classes.find({}).fetch();
   }else{
     console.log("teacher role, getAllClassesForCurrentInstructor");
-    return Classes.find({instructor:instructorID}).fetch();
+    return Classes.find({instructor:instructorID,"curSemester":curSemester}).fetch();
   }
 }
