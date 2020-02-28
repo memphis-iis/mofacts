@@ -360,14 +360,61 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      console.log("audio toggle not checked, navigating to card");
    }
 
-   if(continueToCard){
-     //Go directly to the card session - which will decide whether or
-     //not to show instruction
-     Session.set("needResume", true);
-     if(isMultiTdf){
-       Router.go("/multiTdfSelect");
-     }else{
+  //Go directly to the card session - which will decide whether or
+  //not to show instruction
+  if(continueToCard){
+    Session.set("needResume", true);
+    if(isMultiTdf){
+      functionNavigateForMultiTdf();
+    }else{
       Router.go("/card");
-     }
-   }
+    }
+  }
+}
+
+functionNavigateForMultiTdf = function(){
+  function getUnitType(curUnit){
+    let unitType = "other";
+    if(!!curUnit.assessmentsession){
+      unitType = "assessmentsession";
+    }else if(!!curUnit.learningsession){
+      unitType = "learningsession";
+    }
+    return unitType;
+  }
+
+  const userTimesLog = getCurrentUserTimesLog();
+  let lastUnitCompleted = -1;
+  let lastUnitStarted = -1;
+  let unitLocked = false;
+  userTimesLog.forEach(function(entry){
+    if(!!entry.currentUnit){
+      if(entry.action === "instructions"){
+        lastUnitStarted = entry.currentUnit;
+      }else if(entry.action === "unit-end"){
+        lastUnitCompleted = entry.currentUnit;
+      }
+    }
+
+    //If we haven't finished the unit yet, we may want to lock into the current unit
+    //so the user can't mess up the data
+    if(lastUnitStarted > lastUnitCompleted){
+      const curUnit = getCurrentTdfFile().tdfs.tutor.unit[lastUnitStarted];
+      const curUnitType = getUnitType(curUnit);
+      //We always want to lock users in to an assessment session
+      if(curUnitType === "assessmentsession"){
+        unitLocked = true;
+      }else if(curUnitType === "learningsession"){
+        if(!!curUnit.displayMinSeconds || !!curUnit.displayMaxSeconds){
+          unitLocked = true;
+        }
+      }
+    }
+  });
+  //Only show selection if we're in a unit where it doesn't matter (infinite learning sessions)
+  if(unitLocked){
+    Router.go("/card");
+  }else{
+    Router.go("/multiTdfSelect");
+  }
 }

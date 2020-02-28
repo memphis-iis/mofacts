@@ -114,6 +114,7 @@ function defaultUnitEngine(extensionData) {
 
         // Optional functions that engines can replace if they want
         initImpl: function() { },
+        reinitializeClusterListsFromCurrentSessionData: function() { },
 
         // Functions we supply
         init: function() {
@@ -186,11 +187,6 @@ function modelUnitEngine() {
     //creation, so if they leave in the middle of practice and come back to
     //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
-
-    var unitMode = _.chain(getCurrentTdfUnit())
-        .prop("learningsession").first()
-        .prop("unitMode").trim().value();
-        //getCurrentDeliveryParams().unitMode;
 
     //We cache the stimuli found since it shouldn't change during the unit
     var cachedStimuli = null;
@@ -281,6 +277,41 @@ function modelUnitEngine() {
         cardProbabilities = initVals;
     }
 
+    //TODO: do this function without side effects on cards
+    function setUpClusterList(cards){
+        const currentTdfFile = getCurrentTdfFile();
+        const isMultiTdf = currentTdfFile.isMultiTdf;
+        let clusterList = [];
+
+        if(isMultiTdf){
+            const curUnitNumber = Session.get("currentUnitNumber");
+
+            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
+            //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
+            if(curUnitNumber == 0){
+                const lastClusterIndex = numQuestions - 1;
+                clusterList = [lastClusterIndex + "-" + lastClusterIndex];
+            }else{
+                const subTdfIndex = Session.get("subTdfIndex");
+                const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
+                Helpers.extractDelimFields(unitClusterList, clusterList);
+            }
+        }else{
+            // Figure out which cluster numbers that they want
+            const unitClusterList = _.chain(getCurrentTdfUnit())
+            .prop("learningsession").first()
+            .prop("clusterlist").trim().value();
+            Helpers.extractDelimFields(unitClusterList, clusterList);
+        }
+
+        for (i = 0; i < clusterList.length; ++i) {
+            var nums = Helpers.rangeVal(clusterList[i]);
+            for (j = 0; j < nums.length; ++j) {
+                cards[_.intval(nums[j])].canUse = true;
+            }
+        }
+    }
+
     // Initialize cards as we'll need them for the created engine (for current
     // model). Note that we assume TDF/Stimulus is set up and correct - AND
     // that we've already turned off cluster mapping. You'll note that although
@@ -351,37 +382,7 @@ function modelUnitEngine() {
             initCards.push(card);
         }
 
-        const currentTdfFile = getCurrentTdfFile();
-        const isMultiTdf = currentTdfFile.isMultiTdf;
-        let clusterList = [];
-
-        if(isMultiTdf){
-            const curUnitNumber = Session.get("currentUnitNumber");
-
-            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
-            //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
-            if(curUnitNumber == 0){
-                const lastClusterIndex = numQuestions - 1;
-                clusterList = [lastClusterIndex + "-" + lastClusterIndex];
-            }else{
-                const subTdfIndex = Session.get("subTdfIndex");
-                const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
-                Helpers.extractDelimFields(unitClusterList, clusterList);
-            }
-        }else{
-            // Figure out which cluster numbers that they want
-            const unitClusterList = _.chain(getCurrentTdfUnit())
-            .prop("learningsession").first()
-            .prop("clusterlist").trim().value();
-            Helpers.extractDelimFields(unitClusterList, clusterList);
-        }
-
-        for (i = 0; i < clusterList.length; ++i) {
-            var nums = Helpers.rangeVal(clusterList[i]);
-            for (j = 0; j < nums.length; ++j) {
-                initCards[_.intval(nums[j])].canUse = true;
-            }
-        }
+        setUpClusterList(initCards);
 
         //Re-init the card probabilities
         initCardProbs({
@@ -663,6 +664,10 @@ function modelUnitEngine() {
 
         getCardProbs: function(){
           return calculateCardProbabilities();
+        },
+
+        reinitializeClusterListsFromCurrentSessionData: function(){
+            setUpClusterList(cardProbabilities.cards);
         },
 
         unitType: "model",
@@ -1015,6 +1020,7 @@ function modelUnitEngine() {
             var minSecs = _.chain(session).prop("displayminseconds").first().intval(0).value();
             var maxSecs = _.chain(session).prop("displaymaxseconds").first().intval(0).value();
 
+            //TODO: why are we using side effects to handle the unit being finished? Fix this
             if (minSecs > 0.0 || maxSecs > 0.0) {
                 // We ignore practice seconds if displayXXXseconds are specified:
                 // that means the unit will be over when the timer is exceeded
@@ -1023,6 +1029,7 @@ function modelUnitEngine() {
                 return false;
             }
 
+            //TODO: we should probably remove this as it's been superceded by displayminseconds/displaymaxseconds
             // If we're still here, check practice seconds
             var practiceSeconds = getCurrentDeliveryParams().practiceseconds;
             if (practiceSeconds < 1.0) {
