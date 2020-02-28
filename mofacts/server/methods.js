@@ -1018,7 +1018,7 @@ Meteor.startup(function () {
                     }
                     if (hasGeneratedTdfs(json)) {              
                       let tdfGenerator = new DynamicTdfGenerator(
-                          json, fileName, ownerId, 'repo');
+                          json, fileName, ownerId, 'upload');
                       let generatedTdf = tdfGenerator.getGeneratedTdf();
 
                       try {
