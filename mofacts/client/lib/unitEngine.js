@@ -351,13 +351,31 @@ function modelUnitEngine() {
             initCards.push(card);
         }
 
-        // Figure out which cluster numbers that they want
-        var unitClusterList = _.chain(getCurrentTdfUnit())
+        const currentTdfFile = getCurrentTdfFile();
+        const isMultiTdf = currentTdfFile.isMultiTdf;
+        let clusterList = [];
+
+        if(isMultiTdf){
+            const curUnitNumber = Session.get("currentUnitNumber");
+
+            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
+            //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
+            if(curUnitNumber == 0){
+                const lastClusterIndex = numQuestions - 1;
+                clusterList = [lastClusterIndex + "-" + lastClusterIndex];
+            }else{
+                const subTdfIndex = Session.get("subTdfIndex");
+                const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
+                Helpers.extractDelimFields(unitClusterList, clusterList);
+            }
+        }else{
+            // Figure out which cluster numbers that they want
+            const unitClusterList = _.chain(getCurrentTdfUnit())
             .prop("learningsession").first()
             .prop("clusterlist").trim().value();
+            Helpers.extractDelimFields(unitClusterList, clusterList);
+        }
 
-        var clusterList = [];
-        Helpers.extractDelimFields(unitClusterList, clusterList);
         for (i = 0; i < clusterList.length; ++i) {
             var nums = Helpers.rangeVal(clusterList[i]);
             for (j = 0; j < nums.length; ++j) {
@@ -1079,7 +1097,6 @@ function scheduleUnitEngine() {
         },
 
         selectNextCard: function() {
-            // currently unused: var unit = getCurrentUnitNumber();
             var questionIndex = Session.get("questionIndex");
             var questInfo = getSchedule().q[questionIndex];
             var whichStim = questInfo.whichStim;

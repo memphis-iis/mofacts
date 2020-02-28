@@ -74,11 +74,6 @@ Template.itemStats.events({
         event.preventDefault();
         $(".toggled").toggleClass("displayed");
         drawChart();
-    },
-
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
     }
 });
 

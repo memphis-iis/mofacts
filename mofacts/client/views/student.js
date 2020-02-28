@@ -210,11 +210,6 @@ Template.student.events({
         event.preventDefault();
         Router.go("/allStudents");
     },
-
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
 });
 
 Template.student.rendered = function () {

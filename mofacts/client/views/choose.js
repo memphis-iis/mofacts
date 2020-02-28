@@ -10,11 +10,6 @@ Template.choose.helpers({
 });
 
 Template.choose.events({
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
-
     'click .studentButton' : function (event) {
     	event.preventDefault();
     	Router.go("/allStudents");

@@ -52,11 +52,6 @@ Template.allStudents.helpers({
 // Template Events
 
 Template.allStudents.events({
-    'click .adminLink' : function (event) {
-        event.preventDefault();
-        Router.go("/admin");
-    },
-
     //Sets the session variable for the student that is selected
     //along with setting the username for display on the graph legend
     'click .studentButton' : function (event) {
