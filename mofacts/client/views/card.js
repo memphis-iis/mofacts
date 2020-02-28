@@ -1374,6 +1374,11 @@ function prepareCard() {
         // lag while loading the new image)
         $('#cardQuestionImg').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==');
         // Actual next card logic
+
+        //Do some cleanup for multiTdfs so users can continually select other sub sections to practice
+        if(!!Session.get("subTdfIndex")){
+          engine.reinitializeClusterListsFromCurrentSessionData();
+        }
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
         engine.writeQuestionEntry(selReturn);
@@ -1413,7 +1418,7 @@ function unitIsFinished(reason) {
     recordUserTime("unit-end", {
         'reason': reason,
         'curSubTdfIndex': subTdfIndex,
-        'currentUnit': newUnit - 1,  // Remember we just finished a unit
+        'currentUnit': unit,  
     }, function(error, result) {
         leavePage(leaveTarget);
     });
@@ -2394,7 +2399,6 @@ processUserTimesLog = function(expKey) {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
-    var currentStimName = getCurrentStimName();
 
     //Before the below options, reset current test data
     initUserProgress({
@@ -2416,7 +2420,7 @@ processUserTimesLog = function(expKey) {
 
     //Helper to determine if a unit specified by index has the given field
     var unitHasOption = function(unitIdx, optionName) {
-        var unitSection = _.chain(file.tdfs.tutor)
+        var unitSection = _.chain(file.tdfs.tutor) 
             .prop("unit").prop(unitIdx)
             .prop(optionName).first().value();
         console.log("UNIT CHECK", unitIdx, optionName, !!unitSection);
@@ -2442,7 +2446,7 @@ processUserTimesLog = function(expKey) {
             Session.set("sessionType","learningsession");
         }
         else {
-            engine = createEmptyUnit(extensionData);
+            engine = createEmptyUnit(extensionData); //used for instructional units
             Session.set("sessionType","empty");
         }
     };
@@ -2450,8 +2454,6 @@ processUserTimesLog = function(expKey) {
     //The last unit we captured start time for - this way we always get the
     //earliest time for our unit start
     var startTimeMinUnit = -1;
-
-    let curSubTdfContext = {};
 
     //At this point, our state is set as if they just started this learning
     //session for the first time. We need to loop thru the user times log
@@ -2498,10 +2500,6 @@ processUserTimesLog = function(expKey) {
                 clearScrollList();
 
                 resetEngine(instructUnit);
-
-                if(!!subTdfIndex && subTdfIndex == curSubTdfIndex){
-                  curSubTdfContext.currentUnitNumber = instructUnit; //TODO: gen if vars
-                }
             }
         }
 
@@ -2526,7 +2524,7 @@ processUserTimesLog = function(expKey) {
 
                 if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
                     //Completed
-                    //moduleCompleted = true;
+                    moduleCompleted = true; //TODO: what do we do in the case of multiTdfs?  Depends on structure of template parentTdf
                 }
                 else {
                     //Moving to next unit
@@ -2553,7 +2551,6 @@ processUserTimesLog = function(expKey) {
                 return;
             }
 
-            var setSpec = file.tdfs.tutor.setspec[0];
             var currUnit = file.tdfs.tutor.unit[unit];
             var schedule = entry.schedule;
 
@@ -2573,7 +2570,7 @@ processUserTimesLog = function(expKey) {
             //Update what we know about the session
             //Note that the schedule unit engine will see and use this
             getUserProgress().currentSchedule = schedule;
-            Session.set("currentUnitNumber", unit);
+            Session.set("currentUnitNumber", unit); //TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
             Session.set("questionIndex", 0);
 
             //Blank out things that should restart with a schedule
@@ -2605,19 +2602,12 @@ processUserTimesLog = function(expKey) {
 
             Session.set("clusterIndex",         cardIndex);
             Session.set("questionIndex",        entry.questionIndex);
-            Session.set("currentUnitNumber",    entry.currentUnit);
+            Session.set("currentUnitNumber",    entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
             Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
-
-            const subTdfIndex = entry.curSubTdfIndex;
-            const curSubTdfIndex = Session.get("subTdfIndex");
-            if(!!subTdfIndex && subTdfIndex == curSubTdfIndex){
-              const currentUnitNumber = Session.get("currentUnitNumber");
-              curSubTdfContext.currentUnitNumber = currentUnitNumber; //TODO: fill out more
-            }
 
             // Notify the current engine about the card selection (and note that
             // the engine knows that this is a resume because we're passing the
@@ -2688,14 +2678,6 @@ processUserTimesLog = function(expKey) {
             }
         }
     });
-
-    //Restore state that's only applicable to the current subTdf
-    const curSubTdfIndex = Session.get("subTdfIndex");
-    if(!!curSubTdfIndex){
-      var {lastQuestionEntry,moduleCompleted,currentUnitNumber,questionIndex} = curSubTdfContext;
-      Session.set("currentUnitNumber",currentUnitNumber);
-      Session.set("questionIndex",questionIndex);
-    }
 
     //If we make it here, then we know we won't need a resume until something
     //else happens
