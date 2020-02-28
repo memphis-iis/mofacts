@@ -556,11 +556,23 @@ Meteor.startup(function () {
             if (prev && !hasGeneratedTdfs(json)) {
               Tdfs.update({ _id: prev._id }, rec);
             } else if (hasGeneratedTdfs(json)) {
-              //handleDynamicTdfGeneration(json, ele, adminUserId, 'repo');
               let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
                 'repo');
-              
-              console.log(tdfGenerator.getGeneratedTdf());
+              let generatedTdf = tdfGenerator.getGeneratedTdf();
+              if (prev) {
+                try {
+                  Tdfs.update({_id: prev._id}, generatedTdf);
+                } catch (error) {
+                  throw new Error('Error updating generated TDF: ', error);
+                }
+              } else {
+                try {
+                  Tdfs.insert(generatedTdf);
+                } catch (error) {
+                  throw new Error('Error inserting generated TDF: ', error)
+                }
+              }
+              console.log(JSON.stringify(tdfGenerator.getGeneratedTdf()));
             } else {
               Tdfs.insert(rec);
             }
@@ -1194,8 +1206,16 @@ Meteor.startup(function () {
                     let json = {
                       tutor: tutor,
                     }
-                    if (hasGeneratedTdfs(json)) {
-                      handleDynamicTdfGeneration(json, fileName, ownerId, 'upload');
+                    if (hasGeneratedTdfs(json)) {              
+                      let tdfGenerator = new DynamicTdfGenerator(
+                          json, fileName, ownerId, 'repo');
+                      let generatedTdf = tdfGenerator.getGeneratedTdf();
+
+                      try {
+                        Tdfs.insert(generatedTdf);
+                      } catch (error) {
+                        throw new Error('Error inserting generated TDF: ', error)
+                      }
                     } else {
                       //Set up for TDF save
                       rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
