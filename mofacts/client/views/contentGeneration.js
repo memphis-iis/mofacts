@@ -1,3 +1,5 @@
+import { curSemester } from '../lib/viewHelpers';
+
 Session.set("curClozeSentencePairItemId", "");
 Session.set("clozeSentencePairs", {});
 Session.set("clozeHistory", []);
@@ -14,10 +16,6 @@ originalClozes = undefined;
 origTdfFileName = undefined;
 clusterListMappings = {};
 clozeEdits = [];
-dropDownTdfFileNames = ['Chapter_9_Template_andrew.tackett_2019_10_10T22_49_09_052Z_TDF.xml',
-                        'Chapter_10_Template_andrew.tackett_2019_10_10T22_15_20_268Z_TDF.xml',
-                        'Chapter_11_Template_andrew.tackett_2019_10_10T22_16_29_616Z_TDF.xml',
-                        'IESsurvey.xml'];
 
 recordClozeEditHistory = function(oldCloze,newCloze){
   var timestamp = Date.now();
@@ -32,7 +30,7 @@ setAllTdfs = function(){
     Tdfs.find({}).forEach(function(entry){
       try{
         var fileName = entry.fileName;
-        if(dropDownTdfFileNames.includes(fileName)){
+        if(fileName.indexOf(curSemester) != -1){
           var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
           var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
 

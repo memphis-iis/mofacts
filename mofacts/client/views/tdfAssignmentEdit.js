@@ -1,3 +1,5 @@
+import { curSemester } from '../lib/viewHelpers';
+
 Session.set("classes",[]);
 Session.set("allTdfFilenamesAndDisplayNames",[]);
 Session.set("tdfsSelected",[]);
@@ -14,7 +16,7 @@ Template.tdfAssignmentEdit.onRendered(function(){
     var allTdfObjects = Tdfs.find({}).fetch();
     for(var i in allTdfObjects){
       var tdf = allTdfObjects[i];
-      if(tdf.owner == Meteor.userId() || tdf.fileName == "IESsurvey.xml"){
+      if(tdf.owner == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
         allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
       }
     }
