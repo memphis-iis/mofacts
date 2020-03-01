@@ -1017,15 +1017,9 @@ Meteor.startup(function () {
                       tutor: tutor,
                     }
                     if (hasGeneratedTdfs(json)) {              
-                      let tdfGenerator = new DynamicTdfGenerator(
-                          json, fileName, ownerId, 'upload');
+                      let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload');
                       let generatedTdf = tdfGenerator.getGeneratedTdf();
-
-                      try {
-                        Tdfs.insert(generatedTdf);
-                      } catch (error) {
-                        throw new Error('Error inserting generated TDF: ', error)
-                      }
+                      rec = generatedTdf;
                     } else {
                       //Set up for TDF save
                       rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
