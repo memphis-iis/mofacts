@@ -49,7 +49,7 @@ export class DynamicTdfGenerator {
     this.parentGeneratedTdfs_.forEach(spec => {
       this.generatedTdf_.subTdfs.push({
         lessonName: spec.name,
-        unitClusterList: this.getBuiltClusterList(spec)
+        clusterList: this.getBuiltClusterList(spec)
       })
     });
     return this.generatedTdf_;
