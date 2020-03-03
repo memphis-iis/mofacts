@@ -481,7 +481,7 @@ Meteor.startup(function () {
                   syllableArray = [answer];
                   syllableGenerationError = e;
                 }
-                data[answer] = {
+                data[safeAnswer] = {
                   count: syllableArray.length,
                   syllables: syllableArray,
                   error:syllableGenerationError
