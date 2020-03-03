@@ -473,8 +473,8 @@ Meteor.startup(function () {
               for(let answer of answers){
                 let syllableArray;
                 let syllableGenerationError;
+                let safeAnswer = answer.replace(/\./g,'_')
                 try{
-                  let safeAnswer = answer.replace(/\./g,'_')
                   syllableArray = getSyllablesForWord(safeAnswer);
                 }catch(e){
                   console.log("error fetching syllables for " + answer + ": " + JSON.stringify(e));

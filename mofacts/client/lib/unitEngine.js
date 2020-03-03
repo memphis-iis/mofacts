@@ -512,11 +512,12 @@ function modelUnitEngine() {
         let answerText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
         let curStimFile = getCurrentStimName().replace(/\./g,'_');
+        answerText = answerText.replace(/\./g,'_')
         if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
             console.log("no cached syllables for: " + curStimFile + "|" + answerText);
             throw new Error("can't find syllable data in database");
         } //Curedit
-        answerText = answerText.replace(/\./g,'_')
+        
         let stimSyllableData = this.cachedSyllables.data[answerText];
         p.syllables = stimSyllableData.count;
         p.syllablesArray = stimSyllableData.syllables;
