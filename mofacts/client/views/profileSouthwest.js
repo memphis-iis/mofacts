@@ -29,7 +29,6 @@ Template.profileSouthwest.events({
             target.data("tdffilename"),
             target.data("ignoreOutOfGrammarResponses"),
             target.data("speechOutOfGrammarFeedback"),
-            Session.get("audioPromptFeedbackView"),
             "User button click",
             target.data("isMultiTdf")
         );

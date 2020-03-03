@@ -83,7 +83,7 @@ function testLogin(){
   })
 }
 
-import curSemester from '../lib/viewHelpers';
+import { curSemester } from '../lib/viewHelpers';
 setTeacher = function(teacher){
   console.log(teacher);
   Session.set("curTeacher",teacher);
@@ -95,9 +95,9 @@ setTeacher = function(teacher){
     console.log("classesForInstructor returned");
 
     if(curClasses.length == 0){
-      Session.set("curTeacher",{});
       $("#initialInstructorSelection").prop('hidden','');
       alert("Your instructor hasn't set up their classes yet.  Please contact them and check back in at a later time.");
+      Session.set("curTeacher",{});
     }else{
       Session.set("curTeacherClasses",curClasses);
       $("#classSelection").prop('hidden','');
