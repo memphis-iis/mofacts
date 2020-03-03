@@ -219,6 +219,7 @@ function modelUnitEngine() {
             console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
             return undefined;
         }else{
+            answer = answer.replace(/\./g,'_');
             let syllableArray = cachedSyllables.data[answer].syllables;
             return {syllableArray,syllableIndex};
         }    
@@ -515,6 +516,7 @@ function modelUnitEngine() {
             console.log("no cached syllables for: " + curStimFile + "|" + answerText);
             throw new Error("can't find syllable data in database");
         } //Curedit
+        answerText = answerText.replace(/\./g,'_')
         let stimSyllableData = this.cachedSyllables.data[answerText];
         p.syllables = stimSyllableData.count;
         p.syllablesArray = stimSyllableData.syllables;
