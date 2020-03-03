@@ -471,10 +471,20 @@ Meteor.startup(function () {
             if(!curStimSyllables){
               let data = {};
               for(let answer of answers){
-                let syllableArray = getSyllablesForWord(answer);
+                let syllableArray;
+                let syllableGenerationError;
+                try{
+                  let safeAnswer = answer.replace(/\./g,'_')
+                  syllableArray = getSyllablesForWord(safeAnswer);
+                }catch(e){
+                  console.log("error fetching syllables for " + answer + ": " + JSON.stringify(e));
+                  syllableArray = [answer];
+                  syllableGenerationError = e;
+                }
                 data[answer] = {
                   count: syllableArray.length,
-                  syllables: syllableArray
+                  syllables: syllableArray,
+                  error:syllableGenerationError
                 }
               }
               StimSyllables.insert({filename:stimFileName,data:data});

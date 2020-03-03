@@ -10,6 +10,9 @@ curClass = {tdfs:[]};
 Template.tdfAssignmentEdit.onRendered(function(){
   console.log("tdfAssignmentEdit rendered");
   Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
+  curClass = {
+    tdfs: []
+  };
 
   Meteor.subscribe('tdfs',function () {
     var allTdfs = [];
@@ -72,21 +75,26 @@ Template.tdfAssignmentEdit.events({
 
   "click #saveAssignment": function(event, template){
     console.log("save assignment");
-    Meteor.call('editClass',curClass, function(err,res){
-      if(!!err){
-        alert("Error saving class: " + err);
-      }else{
-        alert("Saved class successfully!");
-        console.log("curClass:" + JSON.stringify(curClass));
-        var classes = Session.get("classes");
-        for(var i=0;i<classes.length;i++){
-          if(classes[i].name == curClass.name){
-            classes[i] = curClass;
+
+    if(!curClass.name){
+      alert("Please select a class to assign Chapters to.");
+    }else{
+      Meteor.call('editClass',curClass, function(err,res){
+        if(!!err){
+          alert("Error saving class: " + err);
+        }else{
+          alert("Saved class successfully!");
+          console.log("curClass:" + JSON.stringify(curClass));
+          var classes = Session.get("classes");
+          for(var i=0;i<classes.length;i++){
+            if(classes[i].name == curClass.name){
+              classes[i] = curClass;
+            }
           }
+          Session.set("classes",classes);
         }
-        Session.set("classes",classes);
-      }
-    });
+      });
+    }
   }
 });
 

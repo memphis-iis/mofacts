@@ -395,22 +395,22 @@ navigateForMultiTdf = function(){
         lastUnitCompleted = entry.currentUnit;
       }
     }
+  });
 
-    //If we haven't finished the unit yet, we may want to lock into the current unit
-    //so the user can't mess up the data
-    if(lastUnitStarted > lastUnitCompleted){
-      const curUnit = getCurrentTdfFile().tdfs.tutor.unit[lastUnitStarted];
-      const curUnitType = getUnitType(curUnit);
-      //We always want to lock users in to an assessment session
-      if(curUnitType === "assessmentsession"){
+  //If we haven't finished the unit yet, we may want to lock into the current unit
+  //so the user can't mess up the data
+  if(lastUnitStarted > lastUnitCompleted){
+    const curUnit = getCurrentTdfFile().tdfs.tutor.unit[lastUnitStarted];
+    const curUnitType = getUnitType(curUnit);
+    //We always want to lock users in to an assessment session
+    if(curUnitType === "assessmentsession"){
+      unitLocked = true;
+    }else if(curUnitType === "learningsession"){
+      if(!!curUnit.displayMinSeconds || !!curUnit.displayMaxSeconds){
         unitLocked = true;
-      }else if(curUnitType === "learningsession"){
-        if(!!curUnit.displayMinSeconds || !!curUnit.displayMaxSeconds){
-          unitLocked = true;
-        }
       }
     }
-  });
+  }
   //Only show selection if we're in a unit where it doesn't matter (infinite learning sessions)
   if(unitLocked){
     Router.go("/card");
