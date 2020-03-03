@@ -224,7 +224,7 @@ function modelUnitEngine() {
         }    
     }
 
-    replaceClozeWithSyllables = function(question,currentAnswerSyllables){
+    replaceClozeWithSyllables = function(question,currentAnswerSyllables, origAnswer){
         console.log("replaceClozeWithSyllables: " + question);
         if(!question){
             return undefined;
@@ -233,15 +233,25 @@ function modelUnitEngine() {
         let clozeAnswer = "";
         let syllablesArray = currentAnswerSyllables.syllableArray;
         let syllableIndex = currentAnswerSyllables.syllableIndex;
+        let reconstructedAnswer = "";
+
         for(let index in syllablesArray){
+            reconstructedAnswer += syllablesArray[index];
+            let nextChar = reconstructedAnswer.length;
             if(index != syllableIndex){
                 clozeAnswer += syllablesArray[index];
             }else{
                 clozeAnswer += "____";
             }
-        }
 
-        return question.replace(/_+/g,clozeAnswer);
+            while(origAnswer.charAt(nextChar) == " "){
+                clozeAnswer += " ";
+                reconstructedAnswer += " ";
+                nextChar = reconstructedAnswer.length;
+            }
+        }
+        
+        return question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
     }
 
     var currentCardInfo = {
@@ -286,15 +296,14 @@ function modelUnitEngine() {
         if(isMultiTdf){
             const curUnitNumber = Session.get("currentUnitNumber");
 
-            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
+            //NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
             //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
-            if(curUnitNumber == 0){
-                const lastClusterIndex = numQuestions - 1;
-                clusterList = [lastClusterIndex + "-" + lastClusterIndex];
-            }else{
+            if(curUnitNumber == 2){
                 const subTdfIndex = Session.get("subTdfIndex");
                 const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
                 Helpers.extractDelimFields(unitClusterList, clusterList);
+            }else if(curUnitNumber > 2){
+                throw new Error("We shouldn't ever get here, dynamic tdf cluster list error");
             }
         }else{
             // Figure out which cluster numbers that they want
@@ -764,8 +773,8 @@ function modelUnitEngine() {
             Session.set("originalQuestion2",currentQuestionPart2);
             
             if(!!currentAnswerSyllables){
-                currentQuestion = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables);
-                currentQuestionPart2 = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables);
+                currentQuestion = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
+                currentQuestionPart2 = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
             }
 
             Session.set("currentQuestion",currentQuestion);

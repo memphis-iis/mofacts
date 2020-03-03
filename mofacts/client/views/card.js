@@ -372,12 +372,16 @@ function varLenDisplayTimeout() {
 //Clean up things if we navigate away from this page
 function leavePage(dest) {
     console.log("leaving page for dest: " + dest);
-    if(window.audioContext && !(dest == "/card" || dest == "/instructions" || dest == "/voice")){
-      console.log("closing audio context");
-      stopRecording();
-      clearAudioContextAndRelatedVariables();
-    }else{
-      console.log("NOT closing audio context");
+    if(!(dest == "/card" || dest == "/instructions" || dest == "/voice")){
+      console.log("resetting subtdfindex, dest: " + dest);
+      Session.set("subTdfIndex",null);
+      if(window.audioContext){
+        console.log("closing audio context");
+        stopRecording();
+        clearAudioContextAndRelatedVariables();
+      }else{
+        console.log("NOT closing audio context");
+      }
     }
     clearCardTimeout();
     clearPlayingSound();
