@@ -228,7 +228,10 @@ function modelUnitEngine() {
     replaceClozeWithSyllables = function(question,currentAnswerSyllables, origAnswer){
         console.log("replaceClozeWithSyllables: " + question);
         if(!question){
-            return undefined;
+            return {
+                clozeQuestion: undefined,
+                clozeMissingSyllables: undefined
+            }
         }
 
         let clozeAnswer = "";
