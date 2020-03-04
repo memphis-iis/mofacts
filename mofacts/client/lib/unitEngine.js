@@ -242,7 +242,7 @@ function modelUnitEngine() {
 
         for(let index in syllablesArray){
             index = parseInt(index);
-            if(syllableIndices.indexOf(index) == -1){
+            if(syllableIndices.indexOf(index) != -1){
                 clozeAnswer += syllablesArray[index];
             }else{
                 clozeAnswer += "____";
@@ -261,7 +261,7 @@ function modelUnitEngine() {
         
         return {
             clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
-            clozeMissingSyllables: clozeMissingSyllables.trim() //TODO: this won't work with nonconsecutive syllables missing
+            clozeMissingSyllables: clozeAnswer.replace(/[_]+/g,"").trim()
         };
     }
 
