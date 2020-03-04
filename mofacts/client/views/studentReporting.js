@@ -174,7 +174,11 @@ getcardProbs = function(){
       if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
         checkIfNeedSubTdfName(getCurrentTdfFile());
-        tempModelUnitEngine = createModelUnit();
+        let curStimFile = getCurrentStimName().replace(/\./g,'_');
+        console.log("getCardprobs, curStimFile: " + curStimFile);
+        cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+        console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
+        tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
         var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
         var learningSessionItems = getLearningSessionItems(curTdfFileName);
         processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
@@ -197,12 +201,17 @@ getcardProbs = function(){
         }
       }
     }
+    console.log("past studentReportingTdfs loop, setting stim and tdf to null");
     Session.set("currentStimName",null);
     Session.set("currentTdfName",null);
     return [allTdfProbLabels,allTdfProbs];
   }else{
     checkIfNeedSubTdfName(getCurrentTdfFile());
-    tempModelUnitEngine = createModelUnit();
+    let curStimFile = getCurrentStimName().replace(/\./g,'_');
+    console.log("getCardprobs, curStimFile: " + curStimFile);
+    cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+    console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
+    tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
     var curTdfFileName = Session.get("currentTdfName");
     var expKey = curTdfFileName.replace(/[.]/g,'_');
     var learningSessionItems = getLearningSessionItems(curTdfFileName);
@@ -470,6 +479,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
 
   $("#cardProbsChart").attr('data-x-axis-label','Correctness (%)');
   if(curTdf === "xml" || !curTdf){
+    console.log("updateDataAndCharts, setting currentStimName to null");
     Session.set("currentStimName",null);
     Session.set("currentTdfName",curTdfFileName);
     Session.set("curTdfFileName",curTdfFileName);
@@ -483,6 +493,7 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
     checkIfNeedSubTdfName(getCurrentTdfFile());
     var curTdfFile = getCurrentTdfFile();
     if(!!curTdfFile){
+      console.log("updateDataAndCharts, setting currentStimName to: " + curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
       Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
     }else{
       //Gracefully handle case where a tdf has been deleted
@@ -589,7 +600,7 @@ test = "";
 
 drawCharts = function (drawWithoutData) {
     if(!!drawWithoutData){
-      drawCorrectnessLine('#correctnessChart', [], [], "correctness", {});
+      drawCorrectnessLine('#correctnessChart', [], [], "repetition", {});
 
       drawProbBars('#cardProbsChart', [], [], "probabilities", {});
     }else{
@@ -619,7 +630,7 @@ drawCharts = function (drawWithoutData) {
       // elements and there is data to display
 
 
-      drawCorrectnessLine('#correctnessChart', itemDataCorLabels, correctSeries, "correctness", {
+      drawCorrectnessLine('#correctnessChart', itemDataCorLabels, correctSeries, "repetition", {
           height: 300,
           axisY: {
               type: Chartist.FixedScaleAxis,
@@ -692,7 +703,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
-    var currentStimName = getCurrentStimName();
+  
 
     //Before the below options, reset current test data
     initUserProgress({
@@ -727,19 +738,23 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
 
     //Reset current engine
     var resetEngine = function(currUnit) {
-        if (unitHasOption(currUnit, "assessmentsession")) {
-            engine = createScheduleUnit();
-            Session.set("sessionType","assessmentsession");
-        }
-        else if (unitHasOption(currUnit, "learningsession")) {
-            engine = createModelUnit();
-            Session.set("sessionType","learningsession");
-        }
-        else {
-            engine = createEmptyUnit();
-            Session.set("sessionType","empty");
-        }
-    };
+      let extensionData = {
+        cachedSyllables: cachedSyllables
+      }
+
+      if (unitHasOption(currUnit, "assessmentsession")) {
+          engine = createScheduleUnit(extensionData);
+          Session.set("sessionType","assessmentsession");
+      }
+      else if (unitHasOption(currUnit, "learningsession")) {
+          engine = createModelUnit(extensionData);
+          Session.set("sessionType","learningsession");
+      }
+      else {
+          engine = createEmptyUnit(extensionData); //used for instructional units
+          Session.set("sessionType","empty");
+      }
+  };
 
     //The last unit we captured start time for - this way we always get the
     //earliest time for our unit start

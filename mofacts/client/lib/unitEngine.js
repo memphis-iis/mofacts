@@ -261,7 +261,7 @@ function modelUnitEngine() {
         
         return {
             clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
-            clozeMissingSyllables: clozeAnswer.replace(/[_]+/g,"").trim()
+            clozeMissingSyllables: clozeMissingSyllables
         };
     }
 
@@ -311,8 +311,12 @@ function modelUnitEngine() {
             //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
             if(curUnitNumber == 2){
                 const subTdfIndex = Session.get("subTdfIndex");
-                const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
-                Helpers.extractDelimFields(unitClusterList, clusterList);
+                if(!subTdfIndex){
+                    console.log("assuming we are in studentReporting, therefore ignoring the clusterlists"); //TODO, make this an explicit argument and error when it happens if we don't pass in the argument
+                }else{
+                    const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
+                    Helpers.extractDelimFields(unitClusterList, clusterList);
+                }
             }else if(curUnitNumber > 2){
                 throw new Error("We shouldn't ever get here, dynamic tdf cluster list error");
             }
@@ -1019,6 +1023,7 @@ function modelUnitEngine() {
                 if (wasCorrect) resp.responseSuccessCount += 1;
                 else            resp.responseFailureCount += 1;
 
+                console.log("resp.outcomeHistory before: " + JSON.stringify(resp.outcomeHistory))
                 resp.outcomeHistory.push(wasCorrect ? 1 : 0);
             }
             else {
@@ -1032,7 +1037,9 @@ function modelUnitEngine() {
             // All stats gathered - calculate probabilities
             //Need a delay so that the outcomehistory arrays can be properly updated
             //before we use them in calculateCardProbabilities
-            Meteor.setTimeout(calculateCardProbabilities,20);
+            //Meteor.setTimeout(calculateCardProbabilities,20); //TODO: why did we need this?  Make sure we are calculating correct values now
+            console.log("resp.outcomeHistory after: " + JSON.stringify(resp.outcomeHistory))
+            calculateCardProbabilities();
         },
 
         unitFinished: function() {
