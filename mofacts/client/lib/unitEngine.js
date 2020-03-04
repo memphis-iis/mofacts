@@ -213,14 +213,14 @@ function modelUnitEngine() {
         return fastGetStimCluster(index).response[whichAnswer];
     }
 
-    getSubClozeAnswerSyllables = function(answer,syllableIndex,cachedSyllables){
-        console.log("!!!syllableIndex: " + syllableIndex + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
-        if(typeof(syllableIndex) === "undefined" || !cachedSyllables){
+    getSubClozeAnswerSyllables = function(answer,displaySyllableIndices,cachedSyllables){
+        console.log("!!!displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
+        if(typeof(displaySyllableIndices) === "undefined" || !cachedSyllables || displaySyllableIndices.length == 0){
             console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
             return undefined;
         }else{
             let syllableArray = cachedSyllables.data[answer].syllables;
-            return {syllableArray,syllableIndex};
+            return {syllableArray,displaySyllableIndices};
         }    
     }
 
@@ -231,27 +231,34 @@ function modelUnitEngine() {
         }
 
         let clozeAnswer = "";
+        let clozeMissingSyllables = ""
         let syllablesArray = currentAnswerSyllables.syllableArray;
-        let syllableIndex = currentAnswerSyllables.syllableIndex;
+        let syllableIndices = currentAnswerSyllables.displaySyllableIndices;
         let reconstructedAnswer = "";
 
         for(let index in syllablesArray){
-            reconstructedAnswer += syllablesArray[index];
-            let nextChar = reconstructedAnswer.length;
-            if(index != syllableIndex){
+            index = parseInt(index);
+            if(syllableIndices.indexOf(index) == -1){
                 clozeAnswer += syllablesArray[index];
             }else{
                 clozeAnswer += "____";
+                clozeMissingSyllables += syllablesArray[index];
             }
 
+            reconstructedAnswer += syllablesArray[index];
+            let nextChar = reconstructedAnswer.length;
             while(origAnswer.charAt(nextChar) == " "){
                 clozeAnswer += " ";
                 reconstructedAnswer += " ";
+                clozeMissingSyllables += " ";
                 nextChar = reconstructedAnswer.length;
             }
         }
         
-        return question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
+        return {
+            clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
+            clozeMissingSyllables: clozeMissingSyllables.trim() //TODO: this won't work with nonconsecutive syllables missing
+        };
     }
 
     var currentCardInfo = {
@@ -748,20 +755,10 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
 
-            let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
-            let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
-            if(!!currentAnswerSyllables){
-                stim.answerSyllables = currentAnswerSyllables;
-                let syllableAnswer = currentAnswerSyllables.syllableArray[currentAnswerSyllables.syllableIndex];
-                Session.set("currentAnswer",syllableAnswer);
-                Session.set("originalAnswer",currentStimAnswer);
-            }else{
-                Session.set("currentAnswer",currentStimAnswer);
-                Session.set("originalAnswer",undefined);
-            }
-
             let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
             let currentQuestionPart2 = undefined;
+            let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
+            let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
 
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){
@@ -773,8 +770,16 @@ function modelUnitEngine() {
             Session.set("originalQuestion2",currentQuestionPart2);
             
             if(!!currentAnswerSyllables){
-                currentQuestion = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
-                currentQuestionPart2 = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
+                stim.answerSyllables = currentAnswerSyllables;
+                let {clozeQuestion,clozeMissingSyllables} = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
+                currentQuestion = clozeQuestion;
+                Session.set("currentAnswer",clozeMissingSyllables);
+                Session.set("originalAnswer",currentStimAnswer);
+                let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
+                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
+            }else{
+                Session.set("currentAnswer",currentStimAnswer);
+                Session.set("originalAnswer",undefined);
             }
 
             Session.set("currentQuestion",currentQuestion);
