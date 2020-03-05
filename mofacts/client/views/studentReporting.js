@@ -22,8 +22,7 @@ getLearningSessionItems = function(tdfFileName){
     tdfObject = Tdfs.findOne({fileName:tdfQueryName});
     if(tdfObject.isMultiTdf){
       learningSessionItems[tdfQueryName] = {};
-      let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile;
-      console.log("stimFileName:" + stimFileName + "|");
+      let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile[0];
       let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters[0].cluster.length - 1;
       for(let i=0;i<lastStim -1;i++){ //for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
         learningSessionItems[tdfQueryName][i] = true;
@@ -261,31 +260,7 @@ setUpClusterMapping = function(userTimesLog){
     return entry && entry.action && entry.action === "cluster-mapping";
   });
   if (!clusterMapping) {
-      //No cluster mapping! Need to create it and store for resume
-      //We process each pair of shuffle/swap together and keep processing
-      //until we have nothing left
-      var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-
-      //Note our default of a single no-op to insure we at least build a
-      //default cluster mapping
-      var shuffles = setSpec.shuffleclusters || [""];
-      var swaps = setSpec.swapclusters || [""];
-      clusterMapping = [];
-
-      while(shuffles.length > 0 || swaps.length > 0) {
-          clusterMapping = createStimClusterMapping(
-              getStimClusterCount(),
-              shuffles.shift() || "",
-              swaps.shift() || "",
-              clusterMapping
-          );
-      }
-
-      serverRecords.push(createUserTimeRecord("cluster-mapping", {
-          clusterMapping: clusterMapping
-      }));
-
-      console.log("Cluster mapping created", clusterMapping);
+      //do nothing, we shouldn't create data when we're trying to view it
   }
   else {
       //Found the cluster mapping record - extract the embedded mapping
@@ -425,10 +400,13 @@ setTdfFileNamesAndDisplayValues = function(){
     if(!!err){
       console.log("Error getting names of tdfs attempted: " + JSON.stringify(err));
     }else{
+      console.log("tdfs attempted: " + JSON.stringify(res));
       namesOfTdfsAttempted = res;
       studentReportingTdfs = [];
       Meteor.subscribe('tdfs',function(){
-        Meteor.subscribe('stimuli',function(){
+        console.log("tdfs subscribe back");
+        Meteor.subscribe('Stimuli',function(){
+          console.log("stimuli subscribe back");
           Tdfs.find({}).forEach(function(entry){
             var fileName = entry.fileName;
             var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
@@ -438,6 +416,7 @@ setTdfFileNamesAndDisplayValues = function(){
             }
           });
   
+          console.log("studentReportingTdfs: " + JSON.stringify(studentReportingTdfs));
           Session.set('studentReportingTdfs',studentReportingTdfs);
           selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
         })
@@ -690,12 +669,11 @@ drawCharts = function (drawWithoutData) {
       if(Session.get("curSelectedTdf") === "xml"){
           cardProbsChartAxisYOffset = 250;
           showYAxisLabel = true
-          probBarsHeight = Math.max((probSeries.length * 10),200);
       }else{
           cardProbsChartAxisYOffset = 50;
           showYAxisLabel = false;//
-          probBarsHeight = (probSeries.length * 10);
       }
+      probBarsHeight = Math.max((probSeries.length * 10),200);
 
       // Now actually create the charts - but only if we can find the proper
       // elements and there is data to display
