@@ -60,10 +60,7 @@ getStimCluster = function (index, cachedStimuli) {
         mappedIndex = clusterMapping[index];
     }
     else {
-        //This is tricky - we may actually be called before everything is set
-        //up for rendering. As a result, we just return the first cluster
-        console.log("No cluster mapping available for stimulus clusters");
-        mappedIndex = 0;
+        mappedIndex = index || 0;
     }
 
     if (!cachedStimuli) {
