@@ -1807,7 +1807,7 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
       console.log(JSON.stringify(response));
       var transcript = '';
       var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
-      var speechOutOfGrammarFeedback = Session.get("speechOutOfGrammarFeedback");
+      var speechOutOfGrammarFeedback = "Please try again or press enter or say skip";//Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
       var ignoredOrSilent = false;
 
       //If we get back an error status make sure to inform the user so they at
@@ -1823,8 +1823,9 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         console.log("transcript: " + transcript);
         if(ignoreOutOfGrammarResponses)
         {
-          //Answer not in grammar, ignore and reset/re-record
-          if(answerGrammar.indexOf(transcript) == -1)
+          if(transcript == "skip"){
+            ignoredOrSilent = false;
+          }else if(answerGrammar.indexOf(transcript) == -1) //Answer not in grammar, ignore and reset/re-record
           {
             console.log("ANSWER OUT OF GRAMMAR, IGNORING");
             transcript = speechOutOfGrammarFeedback;
