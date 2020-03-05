@@ -243,7 +243,7 @@ getcardProbs = function(){
         if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
           var stimIndex = mycardProbs[i].stimIndex;
           var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
-          if(mycardProbs[i].probFunctionsParameters.clusterOutcomeHistory && mycardProbs[i].probFunctionsParameters.clusterOutcomeHistory.length > 0){
+          if(mycardProbs[i].probFunctionsParameters.stimOutcomeHistory && mycardProbs[i].probFunctionsParameters.stimOutcomeHistory.length > 0){
             console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
             cardProbsLabels.push(currentQuestion);
             cardProbs.push(mycardProbs[i].probability);
