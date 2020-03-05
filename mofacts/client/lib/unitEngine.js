@@ -545,7 +545,11 @@ function modelUnitEngine() {
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
-        p.clusterOutcomeHistory = card.outcomeHistory;
+        console.log("card.outcomeHistory: "+ JSON.stringify(card.outcomeHistory));
+        if(card.outcomeHistory.length > 0){
+            console.log("card with outcomehistory: " + JSON.stringify(card));
+        }
+        p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeHistory));
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
         p.stimOutcomeHistory = stim.outcomeHistory;
@@ -768,6 +772,9 @@ function modelUnitEngine() {
             let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
             let currentQuestionPart2 = undefined;
             let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
+            window.test = [];
+            console.log("currentStimAnswer: " + currentStimAnswer);
+            window.test.push("before: " + currentStimAnswer);
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
 
             //If we have a dual prompt question populate the spare data field
@@ -784,12 +791,15 @@ function modelUnitEngine() {
                 let {clozeQuestion,clozeMissingSyllables} = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
                 currentQuestion = clozeQuestion;
                 Session.set("currentAnswer",clozeMissingSyllables);
+                console.log("setting original answer to: " + currentStimAnswer);
+                window.test.push("after: " + currentStimAnswer);
                 Session.set("originalAnswer",currentStimAnswer);
                 let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
                 currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
             }else{
                 Session.set("currentAnswer",currentStimAnswer);
                 Session.set("originalAnswer",undefined);
+                window.test.push("undefined: " + currentStimAnswer);
             }
 
             Session.set("currentQuestion",currentQuestion);
@@ -950,6 +960,7 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var cluster = fastGetStimCluster(getCurrentClusterIndex());
             var card = _.prop(cards, cluster.shufIndex);
+            console.log("cardAnswered, card: " + JSON.stringify(card) + "cluster.shufIndex: " + cluster.shufIndex);
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
@@ -1001,11 +1012,13 @@ function modelUnitEngine() {
 
             // "Card-level" stats (and below - e.g. stim-level stats)
             if (card) {
+                console.log("card exists");
                 if (wasCorrect) card.questionSuccessCount += 1;
                 else            card.questionFailureCount += 1;
 
+                console.log("cardoutcomehistory before: " + JSON.stringify(card.outcomeHistory));
                 card.outcomeHistory.push(wasCorrect ? 1 : 0);
-
+                console.log("cardoutcomehistory after: " + JSON.stringify(card.outcomeHistory));
                 var stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
                     if (wasCorrect) card.stims[stim].stimSuccessCount += 1;

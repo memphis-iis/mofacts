@@ -12,13 +12,23 @@ getLearningSessionItems = function(tdfFileName){
   var tdfQueryNames = [];
   if(tdfFileName === "xml"){
     tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
-  }else{
+  }else if(tdfFileName){
     tdfQueryNames = [tdfFileName];
   }
 
   learningSessionItems = {};
+  console.log("getLearningSessionItems, tdfQueryNames:" + tdfQueryNames);
   _.each(tdfQueryNames,function(tdfQueryName){
     tdfObject = Tdfs.findOne({fileName:tdfQueryName});
+    if(tdfObject.isMultiTdf){
+      learningSessionItems[tdfQueryName] = {};
+      let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile;
+      console.log("stimFileName:" + stimFileName + "|");
+      let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters[0].cluster.length - 1;
+      for(let i=0;i<lastStim -1;i++){ //for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
+        learningSessionItems[tdfQueryName][i] = true;
+      }
+    }
     _.each(tdfObject.tdfs.tutor.unit,function(unit){
       if(!!unit.learningsession){
         if(!learningSessionItems[tdfQueryName]){
@@ -47,30 +57,33 @@ setCurrentStudentPerformance = function(){
     var totalTime = 0;
     var tdfFileName = Session.get("curTdfFileName");
 
-    var learningSessionItems = getLearningSessionItems(tdfFileName);
+    if(tdfFileName){
+      var learningSessionItems = getLearningSessionItems(tdfFileName);
 
-    var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-    UserMetrics.find({_id:studentID}).forEach(function(entry){
-      var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-      for(var index in tdfEntries){
-        var tdfUserMetricsName = tdfEntries[index];
-        var tdf = entry[tdfUserMetricsName];
-        var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
-        for(var index in tdf){
-          //Ignore assessment entries
-          if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){
-            var stim = tdf[index];
-            count += stim.questionCount || 0;
-            numCorrect += stim.correctAnswerCount || 0;
-            var answerTimes = stim.answerTimes;
-            for(var index in answerTimes){
-              var time = answerTimes[index];
-              totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+      var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
+      UserMetrics.find({_id:studentID}).forEach(function(entry){
+        var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+        for(var index in tdfEntries){
+          var tdfUserMetricsName = tdfEntries[index];
+          var tdf = entry[tdfUserMetricsName];
+          var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
+          for(var index in tdf){
+            //Ignore assessment entries
+            if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){
+              var stim = tdf[index];
+              count += stim.questionCount || 0;
+              numCorrect += stim.correctAnswerCount || 0;
+              var answerTimes = stim.answerTimes;
+              for(var index in answerTimes){
+                var time = answerTimes[index];
+                totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+              }
             }
           }
         }
-      }
-    });
+      });
+    }
+    
     var percentCorrect = "N/A";
     if(count != 0){
       percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
@@ -181,7 +194,9 @@ getcardProbs = function(){
         tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
         var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
         var learningSessionItems = getLearningSessionItems(curTdfFileName);
-        processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
+        let userTimesLog = getUserTimesLog(expKey);
+        setUpClusterMapping(userTimesLog);
+        processUserTimesLogStudentReporting(tempModelUnitEngine,userTimesLog);
         var totalStimProb = 0;
         var cardProbs = tempModelUnitEngine.getCardProbs();
         console.log("past getCardProbs");
@@ -215,22 +230,76 @@ getcardProbs = function(){
     var curTdfFileName = Session.get("currentTdfName");
     var expKey = curTdfFileName.replace(/[.]/g,'_');
     var learningSessionItems = getLearningSessionItems(curTdfFileName);
-    processUserTimesLogStudentReporting(tempModelUnitEngine,getUserTimesLog(expKey));
+    let userTimesLog = getUserTimesLog(expKey);
+    setUpClusterMapping(userTimesLog);
+    processUserTimesLogStudentReporting(tempModelUnitEngine,userTimesLog);
     var cardProbs = [];
     var cardProbsLabels = [];
     var mycardProbs =tempModelUnitEngine.getCardProbs();
     for(var i=0;i<mycardProbs.length;i++){
+      if(i==245){
+        console.log("245: " + JSON.stringify(mycardProbs[i]));
+      }
         var cardIndex = mycardProbs[i].cardIndex;
         if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
           var stimIndex = mycardProbs[i].stimIndex;
           var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
-          cardProbsLabels.push(currentQuestion);
-          cardProbs.push(mycardProbs[i].probability);
+          if(mycardProbs[i].probFunctionsParameters.clusterOutcomeHistory && mycardProbs[i].probFunctionsParameters.clusterOutcomeHistory.length > 0){
+            console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
+            cardProbsLabels.push(currentQuestion);
+            cardProbs.push(mycardProbs[i].probability);
+          }
         }
     }
 
     return [cardProbsLabels,cardProbs];
   }
+}
+
+setUpClusterMapping = function(userTimesLog){
+  var clusterMapping = _.find(userTimesLog, function(entry) {
+    return entry && entry.action && entry.action === "cluster-mapping";
+  });
+  if (!clusterMapping) {
+      //No cluster mapping! Need to create it and store for resume
+      //We process each pair of shuffle/swap together and keep processing
+      //until we have nothing left
+      var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+
+      //Note our default of a single no-op to insure we at least build a
+      //default cluster mapping
+      var shuffles = setSpec.shuffleclusters || [""];
+      var swaps = setSpec.swapclusters || [""];
+      clusterMapping = [];
+
+      while(shuffles.length > 0 || swaps.length > 0) {
+          clusterMapping = createStimClusterMapping(
+              getStimClusterCount(),
+              shuffles.shift() || "",
+              swaps.shift() || "",
+              clusterMapping
+          );
+      }
+
+      serverRecords.push(createUserTimeRecord("cluster-mapping", {
+          clusterMapping: clusterMapping
+      }));
+
+      console.log("Cluster mapping created", clusterMapping);
+  }
+  else {
+      //Found the cluster mapping record - extract the embedded mapping
+      clusterMapping = clusterMapping.clusterMapping;
+      console.log("Cluster mapping found", clusterMapping);
+  }
+
+  if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
+      console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
+      throw "The cluster mapping is invalid - can not continue";
+  }
+
+  //Go ahead and save the cluster mapping we found/created
+  Session.set("clusterMapping", clusterMapping);
 }
 
 getAvgCorrectnessAcrossKCsLearningCurve = function(){
@@ -359,17 +428,19 @@ setTdfFileNamesAndDisplayValues = function(){
       namesOfTdfsAttempted = res;
       studentReportingTdfs = [];
       Meteor.subscribe('tdfs',function(){
-        Tdfs.find({}).forEach(function(entry){
-          var fileName = entry.fileName;
-          var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
-          var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-          if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1 && !!getLearningSessionItems(fileName)[fileName]){
-            studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
-          }
-        });
-
-        Session.set('studentReportingTdfs',studentReportingTdfs);
-        selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
+        Meteor.subscribe('stimuli',function(){
+          Tdfs.find({}).forEach(function(entry){
+            var fileName = entry.fileName;
+            var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
+            var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+            if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1 && !!getLearningSessionItems(fileName)[fileName]){
+              studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
+            }
+          });
+  
+          Session.set('studentReportingTdfs',studentReportingTdfs);
+          selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
+        })
       });
     }
   })
