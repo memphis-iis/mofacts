@@ -311,7 +311,7 @@ function modelUnitEngine() {
             //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
             if(curUnitNumber == 2){
                 const subTdfIndex = Session.get("subTdfIndex");
-                if(!subTdfIndex){
+                if(typeof(subTdfIndex) == "undefined"){
                     console.log("assuming we are in studentReporting, therefore ignoring the clusterlists"); //TODO, make this an explicit argument and error when it happens if we don't pass in the argument
                 }else{
                     const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;

@@ -1380,8 +1380,11 @@ function prepareCard() {
         // Actual next card logic
 
         //Do some cleanup for multiTdfs so users can continually select other sub sections to practice
-        if(!!Session.get("subTdfIndex")){
+        if(typeof(Session.get("subTdfIndex")) != "undefined"){
+          console.log("reinitializeclusterlists for subTdfIndex: " + Session.get("subTdfIndex"));
           engine.reinitializeClusterListsFromCurrentSessionData();
+        }else{
+          console.log("not reinitializing clusterlists");
         }
         var selReturn = engine.selectNextCard();
         engine.cardSelected(selReturn);
