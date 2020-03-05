@@ -236,6 +236,11 @@ Meteor.publish('tdfs', function(){
   return Tdfs.find({});
 })
 
+
+Meteor.publish('Stimuli', function(){
+  return Stimuli.find({});
+})
+
 Meteor.publish('specificUserTimesLog',function(userId){
   return UserTimesLog.find({_id:userId});
 })

@@ -344,6 +344,7 @@ function modelUnitEngine() {
     function initializeActRModel() {
         var i, j;
 
+        
         var numQuestions = getStimClusterCount();
         var initCards = [];
         var initResponses = {};
@@ -545,10 +546,6 @@ function modelUnitEngine() {
         p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
-        console.log("card.outcomeHistory: "+ JSON.stringify(card.outcomeHistory));
-        if(card.outcomeHistory.length > 0){
-            console.log("card with outcomehistory: " + JSON.stringify(card));
-        }
         p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeHistory));
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
