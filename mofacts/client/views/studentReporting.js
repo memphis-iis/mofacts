@@ -958,6 +958,8 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
             Session.set("testType",             entry.testType);
+            Session.set("originalAnswer", entry.originalAnswer);
+            Session.set("originalQuestion",entry.originalQuestion);
 
             // Notify the current engine about the card selection (and note that
             // the engine knows that this is a resume because we're passing the
