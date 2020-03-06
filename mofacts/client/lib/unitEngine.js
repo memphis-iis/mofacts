@@ -783,7 +783,6 @@ function modelUnitEngine() {
             let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
             console.log("currentStimAnswer: " + currentStimAnswer);
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
-            console.log("probFunctionsParameters: " + JSON.stringify(prob.probFunctionsParameters));
 
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){
