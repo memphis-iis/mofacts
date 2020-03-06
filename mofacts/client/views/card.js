@@ -546,6 +546,15 @@ Template.card.helpers({
         }
     },
 
+    'subWordClozeCurrentQuestionExists': function(){
+      return typeof(Session.get("clozeQuestionParts")) != "undefined";
+    },
+
+    //For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
+    'subWordParts': function(){
+      return Session.get("clozeQuestionParts");
+    },
+
     'currentQuestion': function() {
         return Session.get("currentQuestion");
     },
