@@ -239,13 +239,17 @@ function modelUnitEngine() {
         let syllablesArray = currentAnswerSyllables.syllableArray;
         let syllableIndices = currentAnswerSyllables.displaySyllableIndices;
         let reconstructedAnswer = "";
+        let clozeAnswerOnlyUnderscores = "";
+        let clozeAnswerNoUnderscores = "";
 
         for(let index in syllablesArray){
             index = parseInt(index);
             if(syllableIndices.indexOf(index) != -1){
                 clozeAnswer += syllablesArray[index];
+                clozeAnswerNoUnderscores += syllablesArray[index];
             }else{
                 clozeAnswer += "____";
+                clozeAnswerOnlyUnderscores += "____";
                 clozeMissingSyllables += syllablesArray[index];
             }
 
@@ -255,13 +259,21 @@ function modelUnitEngine() {
                 clozeAnswer += " ";
                 reconstructedAnswer += " ";
                 clozeMissingSyllables += " ";
+                clozeAnswerOnlyUnderscores += " ";
+                clozeAnswerNoUnderscores += " ";
                 nextChar = reconstructedAnswer.length;
             }
         }
+
+        let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
+        clozeQuestionParts.splice(1,1);
+        clozeQuestionParts.splice(1,0,clozeAnswerNoUnderscores.trim());
+        clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + " " + clozeQuestionParts[2];
         
         return {
             clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
-            clozeMissingSyllables: clozeMissingSyllables
+            clozeMissingSyllables: clozeMissingSyllables,
+            clozeQuestionParts: clozeQuestionParts
         };
     }
 
@@ -769,10 +781,9 @@ function modelUnitEngine() {
             let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
             let currentQuestionPart2 = undefined;
             let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
-            window.test = [];
             console.log("currentStimAnswer: " + currentStimAnswer);
-            window.test.push("before: " + currentStimAnswer);
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
+            console.log("probFunctionsParameters: " + JSON.stringify(prob.probFunctionsParameters));
 
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){
@@ -785,18 +796,19 @@ function modelUnitEngine() {
             
             if(!!currentAnswerSyllables){
                 stim.answerSyllables = currentAnswerSyllables;
-                let {clozeQuestion,clozeMissingSyllables} = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
+                let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
                 currentQuestion = clozeQuestion;
                 Session.set("currentAnswer",clozeMissingSyllables);
                 console.log("setting original answer to: " + currentStimAnswer);
-                window.test.push("after: " + currentStimAnswer);
                 Session.set("originalAnswer",currentStimAnswer);
+                console.log("clozeQuestionParts: " + JSON.stringify(clozeQuestionParts));
+                Session.set("clozeQuestionParts",clozeQuestionParts);
                 let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
                 currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
             }else{
                 Session.set("currentAnswer",currentStimAnswer);
                 Session.set("originalAnswer",undefined);
-                window.test.push("undefined: " + currentStimAnswer);
+                Session.set("clozeQuestionParts",undefined);
             }
 
             Session.set("currentQuestion",currentQuestion);
