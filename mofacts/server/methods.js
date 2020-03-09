@@ -49,6 +49,65 @@ serverConsole = function() {
     console.log.apply(this, disp);
 };
 
+function getTdfQueryNames(tdfFileName) {
+  let tdfQueryNames = {};
+  if (tdfFileName === "xml") {
+    tdfQueryNames = geTTdfsByfileName(tdfFileName);
+  } else if (tdfFileName){
+    tdfQueryNames = [tdfFileName];
+  }
+  return tdfQueryNames;
+}
+
+function getTdfsByfileName(tdfFileName) {
+  return Tdfs.find({}).fetch().map(x => x.fileName);
+}
+
+function getLearningSessionItems(tdfFileName) {
+  let learningSessionItems = [];
+  let tdfQueryNames = getTdfQueryNames(tdfFileName);
+  tdfQueryNames.forEach(tdfQueryName => {
+    let tdf = Tdfs.findOne({fileName: tdfQueryName});
+    if (!learningSessionItems[tdfQueryName]) {
+      learningSessionItems[tdfQueryName] = {};
+    }
+    if (tdf.isMultiTdf) {
+      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
+    } else {
+      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
+    }
+  });
+  return learningSessionItems;
+}
+
+function setLearningSessionItemsMulti(learningSessionItem, tdf) {
+  let stimFileName = tdf.tdfs.tutor.setspec[0].stimulusfile[0];
+  let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec
+    .clusters[0].cluster.length - 1;
+  for (let i = 0; i < lastStim - 1; i++) {
+    learningSessionItem[i] = true;
+  }
+}
+
+function setLearningSessionItems(learningSessionItem, tdf) {
+  tdf.tdfs.tutor.unit.forEach(unit => {
+    if (!!unit.learningsession) {
+      let clusterList = getClusterListsFromUnit(unit);
+      clusterList.forEach(clusterRange => {
+        let [start, end] = clusterRange;
+        for (let i = start; i <= end; i++) {
+          learningSessionItem[i] = true;
+        }
+      });
+    }
+  });
+}
+
+function getClusterListsFromUnit(unit) {
+  let clustersToParse = unit.learningsession[0].clusterlist[0];
+  return clustersToParse.split(' ').map(x => x.split('-').map(y => parseInt(y)));
+}
+
 function getStimJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
@@ -576,27 +635,8 @@ Meteor.startup(function () {
                 var numCorrect = 0;
                 var totalTime = 0;
                 assessmentItems = {};
-
-                if(tdfFileName === "xml"){
-                  tdfQueryNames = Tdfs.find({}).fetch().map(x => x.fileName);
-                }else{
-                  tdfQueryNames = [tdfFileName];
-                }
-
-                _.each(tdfQueryNames, function(tdfQueryName) {
-                  tdfObject = Tdfs.findOne({fileName: tdfQueryName})
-                  _.each(tdfObject.tdfs.tutor.unit,function(unit){
-                    if(!!unit.assessmentsession){
-                      clusterList = unit.assessmentsession[0].clusterlist[0];
-                      clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y)));
-                      _.each(clusterLists,function(clusterStartEnd){
-                        for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
-                          assessmentItems[i] = true;
-                        }
-                      });
-                    }
-                  });
-                });
+    
+                let learningSessionItems = getLearningSessionItems(tdfFileName);
 
                 var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
                 UserMetrics.find({_id:studentID}).forEach(function(entry){
