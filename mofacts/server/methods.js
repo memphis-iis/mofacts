@@ -648,8 +648,6 @@ Meteor.startup(function () {
                       //Only count items in learning sessions
                       if(!!learningSessionItems[tdfFileName] 
                           && !!learningSessionItems[tdfFileName][index]){
-                        console.log(learningSessionItems[tdfFileName][index]);
-                        console.log(tdf[index]);
                         var stim = tdf[index];
                         count += stim.questionCount || 0;
                         numCorrect += stim.correctAnswerCount || 0;
