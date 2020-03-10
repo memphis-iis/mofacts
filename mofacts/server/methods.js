@@ -616,7 +616,7 @@ Meteor.startup(function () {
             return newIDs;
           },
 
-          getStudentPerformanceForClassAndTdf:function(classID,tdfFileName){
+          getStudentPerformanceForClassAndTdf: function(classID, tdfFileName){
             var curClass = Classes.findOne({_id:classID});
             studentTotals = {
               numCorrect: 0,
@@ -639,14 +639,17 @@ Meteor.startup(function () {
                 let learningSessionItems = getLearningSessionItems(tdfFileName);
 
                 var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-                UserMetrics.find({_id:studentID}).forEach(function(entry){
+                UserMetrics.find({_id: studentID}).forEach(function(entry){
                   var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
                   for(var index in tdfEntries){
                     var key = tdfEntries[index];
                     var tdf = entry[key];
                     for(var index in tdf){
                       //Only count items in learning sessions
-                      if(!assessmentItems[index]){
+                      if(!!learningSessionItems[tdfFileName] 
+                          && !!learningSessionItems[tdfFileName][index]){
+                        console.log(learningSessionItems[tdfFileName][index]);
+                        console.log(tdf[index]);
                         var stim = tdf[index];
                         count += stim.questionCount || 0;
                         numCorrect += stim.correctAnswerCount || 0;
