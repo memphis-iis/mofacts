@@ -27,6 +27,8 @@ var clozeGeneration = require('./lib/Process.js');
 // Open file stream for active user log
 var activeUserLogStream = fs.createWriteStream("activeUserLog.csv", {flags: 'a'});
 
+const ALL_TDFS = "xml";
+
 //For Southwest SSO with ADFS/SAML 2.0
 for (i = 0; i < Meteor.settings.saml.length; i++) {
   // privateCert is weird name, I know. spCert is better one. Will need to refactor
@@ -51,15 +53,15 @@ serverConsole = function() {
 
 function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = {};
-  if (tdfFileName === "xml") {
-    tdfQueryNames = geTTdfsByfileName(tdfFileName);
+  if (tdfFileName === ALL_TDFS) {
+    tdfQueryNames = getAllTdfFileNames();
   } else if (tdfFileName){
     tdfQueryNames = [tdfFileName];
   }
   return tdfQueryNames;
 }
 
-function getTdfsByfileName(tdfFileName) {
+function getAllTdfFileNames() {
   return Tdfs.find({}).fetch().map(x => x.fileName);
 }
 
@@ -90,17 +92,20 @@ function setLearningSessionItemsMulti(learningSessionItem, tdf) {
 }
 
 function setLearningSessionItems(learningSessionItem, tdf) {
-  tdf.tdfs.tutor.unit.forEach(unit => {
-    if (!!unit.learningsession) {
-      let clusterList = getClusterListsFromUnit(unit);
-      clusterList.forEach(clusterRange => {
-        let [start, end] = clusterRange;
-        for (let i = start; i <= end; i++) {
-          learningSessionItem[i] = true;
-        }
-      });
-    }
-  });
+  let units = tdf.tdfs.tutor.unit;
+  if (!_.isEmpty(units)) {
+    units.forEach(unit => {
+      if (!!unit.learningsession) {
+        let clusterList = getClusterListsFromUnit(unit);
+        clusterList.forEach(clusterRange => {
+          let [start, end] = clusterRange;
+          for (let i = start; i <= end; i++) {
+            learningSessionItem[i] = true;
+          }
+        });
+      }
+    });
+  }
 }
 
 function getClusterListsFromUnit(unit) {
@@ -635,19 +640,20 @@ Meteor.startup(function () {
                 var numCorrect = 0;
                 var totalTime = 0;
                 assessmentItems = {};
-    
                 let learningSessionItems = getLearningSessionItems(tdfFileName);
 
                 var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
+                let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
                 UserMetrics.find({_id: studentID}).forEach(function(entry){
                   var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
                   for(var index in tdfEntries){
                     var key = tdfEntries[index];
                     var tdf = entry[key];
+                    let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
                     for(var index in tdf){
                       //Only count items in learning sessions
-                      if(!!learningSessionItems[tdfFileName] 
-                          && !!learningSessionItems[tdfFileName][index]){
+                      if(!!learningSessionItems[tdfKey] 
+                          && !!learningSessionItems[tdfKey][index]){
                         var stim = tdf[index];
                         count += stim.questionCount || 0;
                         numCorrect += stim.correctAnswerCount || 0;
