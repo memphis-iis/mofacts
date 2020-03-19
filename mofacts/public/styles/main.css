@@ -523,3 +523,7 @@ input:checked + .slider:before {
 .responsiveTable{
   overflow-x:auto;
 }
+
+p.admin-info-p {
+  font-size: .75em;
+}
