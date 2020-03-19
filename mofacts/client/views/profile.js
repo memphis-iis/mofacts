@@ -1,3 +1,18 @@
+import { ReactiveVar } from 'meteor/reactive-var'
+
+/**
+ * Set up state variables for profile page
+ */
+Template.profile.created = function() {
+  this.showTdfs = new ReactiveVar(false);
+  this.enabledTdfs = new ReactiveVar([]);
+  this.disabledTdfs = new ReactiveVar([]);
+  this.tdfsToDisable = new ReactiveVar([]);
+  this.tdfsToEnable = new ReactiveVar([]);
+  this.showTdfAdminInfo = new ReactiveVar([]);
+  this.tdfOwnersMap = new ReactiveVar({});
+}
+
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
@@ -13,6 +28,26 @@ Template.profile.helpers({
 
     simulationChecked: function() {
         return Session.get("runSimulation");
+    },
+
+    showTdfs: () => {
+      return Template.instance().showTdfs.get();
+    },
+
+    enabledTdfs: () => {
+      return Template.instance().enabledTdfs.get();
+    },
+
+    disabledTdfs: () => {
+      return Template.instance().disabledTdfs.get();
+    },
+
+    showTdfAdminInfo: () => {
+      return Template.instance().showTdfAdminInfo.get();
+    },
+
+    tdfOwnersMap: ownerId => {
+      return Template.instance().tdfOwnersMap.get()[ownerId];
     }
 });
 
@@ -47,15 +82,6 @@ Template.profile.events({
         var checked = template.$("#simulation").prop('checked');
         Session.set("runSimulation", checked);
         console.log("runSimulation", Session.get("runSimulation"));
-    },
-
-    'click #tdfPracticeBtn': function(event){
-      var wasPracticeShown = $("#tdfPracticeBtn").attr('aria-expanded') == "false";
-      if(wasPracticeShown){
-        $("#tdfPracticeBtn").text("TDF Practice -");
-      }else{
-        $("#tdfPracticeBtn").text("TDF Practice +");
-      }
     },
 
     'click #mechTurkButton': function(event){
@@ -102,21 +128,98 @@ Template.profile.events({
       event.preventDefault();
       Router.go('/contentGeneration');
     },
+
+    'click #tdfPracticeBtn': function(event, instance) {
+      let showTdfs = instance.showTdfs.get();
+      instance.showTdfs.set(!showTdfs);
+    },
+
+    'click #select-disable': (event, instance) => {
+      let checked = event.target.checked;
+      let tdfId = event.target.getAttribute('uid');
+      let tdfsToDisable = instance.tdfsToDisable.get();
+
+      if (!checked && tdfsToDisable.includes(tdfId)) {
+        tdfsToDisable = tdfsToDisable.filter(x => x.uid != tdfId);
+      } else {
+        tdfsToDisable.push(tdfId);
+      }
+
+      instance.tdfsToDisable.set(tdfsToDisable);
+    },
+
+    'click #select-enable': (event, instance) => {
+      let checked = event.target.checked;
+      let tdfId = event.target.getAttribute('uid');
+      let tdfsToEnable = instance.tdfsToEnable.get();
+
+      if (!checked && tdfsToEnable.includes(tdfId)) {
+        tdfsToEnable = tdfsToEnable.filter(x => x.uid != tdfId);
+      } else {
+        tdfsToEnable.push(tdfId);
+      }
+
+      instance.tdfsToEnable.set(tdfsToEnable);
+    },
+
+    'click #disable-tdfs-btn': (event, instance) => {
+      toggleTdfPresence(instance, 'disable');
+    },
+
+    'click #enable-tdfs-btn': (event, instance) => {
+      toggleTdfPresence(instance, 'enable');
+    },
+
+    'click #tdf-admin-info': (event, instance) => {
+      let checked = event.target.checked;
+      instance.showTdfAdminInfo.set(checked);
+    }
 });
 
-var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) {
-  console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
-  var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
-  if(audioInputEnabled){
-    container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
+function toggleTdfPresence(instance, mode) {
+  const DISABLE = 'disable';
+
+  let tdfsToChange = [];
+  if (mode === DISABLE) {
+    tdfsToChange = instance.tdfsToDisable.get();
+  } else {
+    tdfsToChange = instance.tdfsToEnable.get();      
   }
-  container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
-  if(enableAudioPromptAndFeedback){
-    container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>')
-  }
-  container = $(container).prepend(btnObj);
-  $("#testButtonContainer").append(container);
-};
+
+  Meteor.call('toggleTdfPresence', tdfsToChange, mode, () =>{
+    let remainingTdfs = [];
+    let tdfsToUpdate = []; 
+    let tdfsInOtherModeState = []
+    if (mode === DISABLE) {
+      tdfsInOtherModeState = instance.enabledTdfs.get();
+    } else {
+      tdfsInOtherModeState = instance.disabledTdfs.get();
+    }
+
+    tdfsInOtherModeState.forEach(tdf => {
+      if (!tdfsToChange.includes(tdf._id)) {
+        remainingTdfs.push(tdf);
+      } else {
+        tdfsToUpdate.push(tdf);
+      }
+    });
+
+    let changedTdfs = [];
+    if (mode === DISABLE) {
+      instance.enabledTdfs.set(remainingTdfs);
+      changedTdfs = instance.disabledTdfs.get();
+      let newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+      instance.disabledTdfs.set(newlyChangedTdfs);
+      instance.tdfsToDisable.set([]);
+    } else {
+      instance.disabledTdfs.set(remainingTdfs);
+      changedTdfs = instance.enabledTdfs.get();
+      let newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
+      instance.enabledTdfs.set(newlyChangedTdfs)
+      instance.tdfsToEnable.set([]);
+    }
+  });
+}
 
 //We'll use this in card.js if audio input is enabled and user has provided a
 //speech API key
@@ -142,6 +245,10 @@ Template.profile.rendered = function () {
     var foundExpTarget = null;
 
     var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
+
+    let enabledTdfs = [];
+    let disabledTdfs = [];
+    let tdfOwnerIds = [];
 
     //Check all the valid TDF's
     allTdfs.forEach( function (tdfObject) {
@@ -238,19 +345,41 @@ Template.profile.rendered = function () {
           enableAudioPromptAndFeedback = false;
         }
 
-        addButton(
-            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
-                .addClass("btn btn-block btn-responsive tdfButton")
-                .data("tdfkey", tdfObject._id)
-                .data("lessonname", name)
-                .data("stimulusfile", stimulusFile)
-                .data("tdffilename", tdfObject.fileName)
-                .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
-                .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
-                .data("isMultiTdf",isMultiTdf)
-                .html(name),audioInputEnabled,enableAudioPromptAndFeedback
-        );
+        tdfObject.name = name;
+        tdfObject.stimulusFile = stimulusFile;
+        tdfObject.ignoreOutOfGrammarResponses = ignoreOutOfGrammarResponses;
+        tdfObject.speechOutOfGrammarFeedback = speechOutOfGrammarFeedback;
+        tdfObject.audioInputEnabled = audioInputEnabled;
+        tdfObject.enableAudioPromptAndFeedback = enableAudioPromptAndFeedback;
+
+
+        if (!!tdfObject.disabled) {
+          disabledTdfs.push(tdfObject);
+        } else {
+          enabledTdfs.push(tdfObject);
+        }
+
+        if (isAdmin) {
+          if (!tdfOwnerIds.includes(tdfObject.owner)) {
+            tdfOwnerIds.push(tdfObject.owner);
+          }
+        }
+
+        Template.instance().disabledTdfs.set(disabledTdfs);
+        Template.instance().enabledTdfs.set(enabledTdfs);
     });
+
+    if (isAdmin) {
+      const temp = Template.instance();
+      Meteor.call('getTdfOwnersMap', tdfOwnerIds, function(err, res) {
+        if (err) {
+          console.log(err);
+        } else {
+          temp.tdfOwnersMap.set(res);
+          console.log(temp.tdfOwnersMap.get());
+        }
+      });
+    }
 
     //Did we find something to auto-jump to?
     if (foundExpTarget) {
