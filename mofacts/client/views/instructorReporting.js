@@ -67,21 +67,19 @@ Template.instructorReporting.events({
     curTdf = $(event.currentTarget).val();
     if(!!curClassName){
       setCurClassStudents(curClassName,curTdf);
+    } else {
+      alert('Please select a class');
     }
   },
   "click .nav-tabs": function(event, template){
-    if(curTdf === "invalid"){
-      alert("Please select a tdf");
-    }else{
-      //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
-      setTimeout(function(){
-        //Need to strip newlines because chrome appends them for some reason
-        curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-        console.log("click nav tabs after timeout, curClassName: " + curClassName);
-        setCurClassStudents(curClassName,curTdf);
-        $("#")
-      },200);
-    }
+    //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
+    setTimeout(function(){
+      //Need to strip newlines because chrome appends them for some reason
+      curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
+      console.log("click nav tabs after timeout, curClassName: " + curClassName);
+      setCurClassStudents(curClassName,curTdf);
+      $("#")
+    },200);
   }
 });
 
