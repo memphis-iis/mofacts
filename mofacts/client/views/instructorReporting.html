@@ -12,6 +12,12 @@
   <div class="row collapse" id="instructorReportingCollapse"> -->
     <legend class="text-center">Instructor Reporting</legend>
     <div id="mainContent">
+      <h3>Class Selection</h3>
+      <ul class="nav nav-tabs">
+        {{#each classes}}
+          <li><a data-toggle="tab" href="#{{replaceSpacesWithUnderscores this.name}}" class="myNavTab">{{this.name}}</a></li>
+        {{/each}}
+      </ul>
       <div>
         <h3>Select Chapter</h3>
         <select id="tdf-select">
@@ -26,11 +32,6 @@
         {{/if}}
       </div>
       <h3>Class Data</h3>
-      <ul class="nav nav-tabs">
-        {{#each classes}}
-          <li><a data-toggle="tab" href="#{{replaceSpacesWithUnderscores this.name}}" class="myNavTab">{{this.name}}</a></li>
-        {{/each}}
-      </ul>
       <!-- <div class="tab-content">
         {{#each classes}}
           <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade"> -->
