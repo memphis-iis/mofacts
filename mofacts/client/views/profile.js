@@ -71,10 +71,10 @@ Template.profile.events({
             target.data("lessonname"),
             target.data("stimulusfile"),
             target.data("tdffilename"),
-            target.data("ignoreOutOfGrammarResponses"),
-            target.data("speechOutOfGrammarFeedback"),
+            target.data("ignoreoutofgrammarresponses"),
+            target.data("speechoutofgrammarfeedback"),
             "User button click",
-            target.data("isMultiTdf")
+            target.data("ismultitdf")
         );
     },
 
