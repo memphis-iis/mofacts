@@ -53,7 +53,9 @@
                     {{#if isInRole 'admin'}}
                         <input type="checkbox" name="tdf-admin-info" id="tdf-admin-info"> Show TDF admin info
                         <br>
-                        <button id="disable-tdfs-btn" class="btn btn-default">Disable selected TDFs</button>
+                        {{#if showTdfAdminInfo}}
+                            <button id="disable-tdfs-btn" class="btn btn-default">Disable selected TDFs</button>
+                        {{/if}}
                     {{/if}} 
                 </legend>
                 {{#if showTdfs}}
