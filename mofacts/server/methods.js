@@ -1156,6 +1156,20 @@ Meteor.startup(function () {
         return Meteor.users.find({'status.online':true}).count();
       },
 
+      toggleTdfPresence: (tdfIds, mode) => {
+        let disable = mode === 'disable' ? true : false;
+        tdfIds.forEach(uid => {
+          Tdfs.update({_id: uid}, { $set: { disabled: disable } });
+        });
+      },
+
+      getTdfOwnersMap: ownerIds => {
+        let ownerMap = {};
+        ownerIds.forEach(id => {
+          ownerMap[id] = Meteor.users.findOne({_id: id}).username;
+        });
+        return ownerMap;
+      }
     });
 
     //Create any helpful indexes for queries we run
