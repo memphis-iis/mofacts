@@ -11,6 +11,26 @@
                     Practice modules:
                 </legend>
             </div>
+
+            {{#each enabledTdfs}}
+                <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
+                    <button id="{{this._id}}" class="btn btn-block btn-responsive tdfButton" type="button" name="{{this.name}}"
+                        data-tdfkey="{{this._id}}"
+                        data-lessonname="{{this.name}}"
+                        data-stimulusfile="{{this.stimulusFile}}"
+                        data-tdffilename="{{this.fileName}}"
+                        data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                        data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}</button>
+                    {{#if this.enableAudioPromptAndFeedback}}
+                        <p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>
+                    {{/if}}
+                    <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
+                    {{#if this.audioInputEnabled}}
+                        <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
+                    {{/if}}
+                </div>
+            {{/each}}
         {{/unless}}
 
         {{#if isInRole 'admin,teacher'}}
@@ -28,8 +48,86 @@
                     Practice modules:
                     <br>
                     <input type="checkbox" name="simulation" id="simulation" checked={{simulationChecked}}> Simulate if TDF param present?
+                    <br>
+
+                    {{#if isInRole 'admin'}}
+                        <input type="checkbox" name="tdf-admin-info" id="tdf-admin-info"> Show TDF admin info
+                        <br>
+                        {{#if showTdfAdminInfo}}
+                            <button id="disable-tdfs-btn" class="btn btn-default">Disable selected TDFs</button>
+                        {{/if}}
+                    {{/if}} 
                 </legend>
+                {{#if showTdfs}}
+                    {{#each enabledTdfs}}
+                        <div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'>
+                            <button id="{{this._id}}" class="btn btn-block btn-responsive tdfButton" type="button" name="{{this.name}}"
+                                data-tdfkey="{{this._id}}"
+                                data-lessonname="{{this.name}}"
+                                data-stimulusfile="{{this.stimulusFile}}"
+                                data-tdffilename="{{this.fileName}}"
+                                data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
+                                data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
+                                data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}</button>
+                            {{#if isInRole 'admin'}}
+                                {{#if showTdfAdminInfo}}
+                                    <input type="checkbox" id="select-disable" uid="{{this._id}}"/>
+                                    <p class="admin-info-p" id="tdf-src">src: {{this.source}}</p>
+                                    <p class="admin-info-p" id="tdf-owner">own: {{tdfOwnersMap this.owner}}</p>
+                                {{/if}}
+                            {{/if}}
+                            {{#if this.enableAudioPromptAndFeedback}}
+                                <p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>
+                            {{/if}}
+                            <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
+                            {{#if this.audioInputEnabled}}
+                                <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
+                            {{/if}}
+
+                        </div>
+                    {{/each}}
+                {{/if}}
             </div>
+
+            <br><br>
+            {{#if isInRole 'admin'}}
+            <div class="row">
+                <div class="col-md-offset-3 col-md-6">
+                    <button id="showDisabledTdfsBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#showDisabledTdfsContainer" aria-expanded="false" aria-controls="showDisabledTdfsContainer">
+                        Show Disabled TDFs +
+                    </button>
+                </div>
+            </div>
+            <div class="row collapse" id="showDisabledTdfsContainer">
+                <div class="col-md-offset-2 col-md-8 responsiveTable">
+                    <legend class="text-center">Disabled TDFs</legend>
+                    <button id="enable-tdfs-btn" class="btn btn-default">Enabled selected TDFs</button>  
+
+                    <table class="table table-striped table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th>Enable?</th>
+                                <th>Name</th>
+                                <th>Owner</th>
+                                <th>Source</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each disabledTdfs}}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" id="select-enable" uid="{{this._id}}"/>
+                                    </td>
+                                    <td>{{this.name}}</td>
+                                    <td>{{tdfOwnersMap this.owner}}</td>
+                                    <td>{{this.source}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {{/if}}
             <br><br>
             <div class="row">
                 <div class="col-md-offset-3 col-md-6">
