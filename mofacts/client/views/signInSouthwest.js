@@ -178,7 +178,14 @@ Template.signInSouthwest.events({
         if(!!data && !!data.error){
           alert("Problem logging in: " + data.error);
         }else{
-          Router.go("/profileSouthwest");
+          Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass"), function(err, result){
+            if(!!err){
+              console.log("error adding user to teacher class: " + err);
+            }
+            console.log("addUserToTeachersClass result: " + result);
+            Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+            Router.go("/profileSouthwest");
+          });
         }
       });
     },
