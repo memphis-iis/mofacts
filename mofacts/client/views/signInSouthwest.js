@@ -178,7 +178,7 @@ Template.signInSouthwest.events({
         if(!!data && !!data.error){
           alert("Problem logging in: " + data.error);
         }else{
-          Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass"), function(err, result){
+          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass"), function(err, result){
             if(!!err){
               console.log("error adding user to teacher class: " + err);
             }
