@@ -1166,7 +1166,10 @@ Meteor.startup(function () {
       getTdfOwnersMap: ownerIds => {
         let ownerMap = {};
         ownerIds.forEach(id => {
-          ownerMap[id] = Meteor.users.findOne({_id: id}).username;
+          let foundUser = Meteor.users.findOne({_id: id});
+          if(typeof(foundUser) != "undefined"){
+            ownerMap[id] = foundUser.username;
+          }
         });
         return ownerMap;
       }
