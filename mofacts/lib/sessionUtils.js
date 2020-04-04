@@ -81,6 +81,7 @@ sessionCleanUp = function() {
     Session.set("experimentPasswordRequired",false);
     Session.set("filter","@gmail.com");
     Session.set("ignoreOutOfGrammarResponses",false);
+    Session.set("imageFilteringConditionGroup",false);
     Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
