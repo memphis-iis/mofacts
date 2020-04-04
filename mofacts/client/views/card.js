@@ -514,6 +514,23 @@ Template.card.rendered = function() {
     }
     var audioInputDetectionInitialized = Session.get("VADInitialized");
 
+    var alternateImageFiltering = getCurrentTdfFile().tdfs.tutor.setspec[0].alternateImageFiltering;
+    if(alternateImageFiltering){
+      let curTdfName = getCurrentTdfName().replace(/\./g,'_');
+      let profileCurTdf = Meteor.user().profile[curTdfName];
+      let imageFilteringConditionGroup = profileCurTdf && profileCurTdf.imageFilteringConditionGroup || undefined;
+      if(!imageFilteringConditionGroup){
+        imageFilteringConditionGroup = Math.random() < 0.5 ? "even" : "odd";
+        let profileAttribute = 'profile.' + curTdfName + '.imageFilteringConditionGroup'
+        Meteor.users.update({_id: Meteor.userId()}, {
+          $set: {
+              [profileAttribute]: imageFilteringConditionGroup
+          }
+        });
+      }
+      Session.set("imageFilteringConditionGroup",imageFilteringConditionGroup)
+    }
+
     window.AudioContext = window.webkitAudioContext || window.AudioContext;
     window.URL = window.URL || window.webkitURL;
     audioContext = new AudioContext();
@@ -913,7 +930,6 @@ function newQuestionHandler() {
         Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
-        var cluster = getStimCluster(getCurrentClusterIndex());
         var currentQuest = engine.findCurrentCardInfo();
 
         var buttonChoices = [];
