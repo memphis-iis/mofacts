@@ -810,6 +810,16 @@ function modelUnitEngine() {
                 Session.set("clozeQuestionParts",undefined);
             }
 
+            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
+            if(imageFilteringConditionGroup){
+                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
+                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }
+            }
+
             Session.set("currentQuestion",currentQuestion);
             Session.set("currentQuestionPart2",currentQuestionPart2);
 
@@ -1159,19 +1169,30 @@ function scheduleUnitEngine() {
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
             setCurrentClusterIndex(questInfo.clusterIndex);
-            Session.set("currentQuestion", getCurrentStimQuestion(whichStim));
-            var currentQuestion = Session.get("currentQuestion");
+            var currentQuestion = getCurrentStimQuestion(whichStim);
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){
-
               var prompts = currentQuestion.split("|");
-              Session.set("currentQuestion",prompts[0]);
+              currentQuestion = prompts[0];
               Session.set("currentQuestionPart2",prompts[1]);
               console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
             }else{
               console.log("one part question detected");
               Session.set("currentQuestionPart2",undefined);
             }
+
+            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
+            if(imageFilteringConditionGroup){
+                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
+                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }
+            }
+
+            Session.set("currentQuestion", currentQuestion);
+
             Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
