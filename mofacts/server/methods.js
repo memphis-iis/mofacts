@@ -256,6 +256,16 @@ function hasGeneratedTdfs(json) {
   return json.tutor.generatedtdfs && json.tutor.generatedtdfs.length;
 }
 
+function hasAssociatedStimFile(json) {
+  stim = Stimuli.findOne({fileName: json.tutor.setspec[0].stimulusfile[0]});
+
+  if (!stim) {
+    return false;
+  }
+
+  return true;
+}
+
 const baseSyllableURL = 'http://localhost:4567/syllables/'
 getSyllablesForWord = function(word){
   let syllablesURL = baseSyllableURL + word;
@@ -1078,10 +1088,17 @@ Meteor.startup(function () {
                     let json = {
                       tutor: tutor,
                     }
-                    if (hasGeneratedTdfs(json)) {              
-                      let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload');
-                      let generatedTdf = tdfGenerator.getGeneratedTdf();
-                      rec = generatedTdf;
+                    if (hasGeneratedTdfs(json)) {
+                      if (!hasAssociatedStimFile(json)) {
+                        results.result = false;
+                        results.errmsg = "Please upload stimulus file before uploading a TDF"
+
+                        return results;
+                      } else {
+                        let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload');
+                        let generatedTdf = tdfGenerator.getGeneratedTdf();
+                        rec = generatedTdf;
+                      }             
                     } else {
                       //Set up for TDF save
                       rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
