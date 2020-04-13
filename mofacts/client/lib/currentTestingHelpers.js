@@ -98,7 +98,7 @@ getCurStimImageSrcs = function(){
       var cluster = clusterCollection[clusterIndex];
       for(var dtIndex in cluster){
         var displayType = cluster[dtIndex];
-        if(!!displayType.displayType && displayType.displayType[0] === "Image"){
+        if(!!displayType && !!displayType.displayType && displayType.displayType[0] === "Image"){
           imageSrcs.push(displayType.display[0]);
         }
       }
@@ -377,7 +377,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'forcecorrecttimeout':0,
         'unitMode': 'default',
         'studyFirst':false,
-        'enhancedFeedback':false
+        'enhancedFeedback':false,
+        'checkOtherAnswers':false
     };
 
     //We've defined defaults - also define translatations for values
@@ -397,7 +398,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'practiceseconds': _.intval,
         'timeuntilstimulus': _.intval,
         'studyFirst':xlateBool,
-        'enhancedFeedback':xlateBool
+        'enhancedFeedback':xlateBool,
+        'checkOtherAnswers':xlateBool
     };
 
     var modified = false;
