@@ -1,4 +1,6 @@
 import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+import * as SpellingCorrector from "../server/lib/SpellingCorrector.js";
+import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 
 /*jshint sub:true*/
 
@@ -40,6 +42,16 @@ for (i = 0; i < Meteor.settings.saml.length; i++) {
       console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
   }
 }
+
+// console.log("reading spelling data");
+// var spellingData = fs.readFileSync(Meteor.settings.spellingCorrectorDataLocation);
+// console.log("initializing spelling corrector");
+// SpellingCorrector.Initialize(spellingData);
+
+console.log("reading feedbackdata");
+var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
+console.log("initializing feedback");
+DefinitionalFeedback.Initialize(feedbackData);
 
 //Helper functions
 
@@ -543,6 +555,12 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          getSimpleFeedbackForAnswer:function(userAnswer,correctAnswer){
+            let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
+            console.log("result: " + JSON.stringify(result));
+            return result;
+          },
+
           updateStimSyllableCache:function(stimFileName,answers){
             console.log("updateStimSyllableCache");
             let curStimSyllables = StimSyllables.findOne({filename:stimFileName});

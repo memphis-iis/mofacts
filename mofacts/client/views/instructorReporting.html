@@ -36,7 +36,7 @@
         {{#each classes}}
           <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade"> -->
             <table border="1">
-              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (seconds)</th></tr>
+              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th></tr>
               {{#each getCurClassStudents}}
                 <tr>
                   <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
