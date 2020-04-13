@@ -58,11 +58,12 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
             if(checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
               return 0;
             }else{
+              let editDistance = getEditDistance(s1, s2)
               var editDistScore = 1.0 - (
-                  getEditDistance(s1, s2) /
+                  editDistance /
                   Math.max(s1.length, s2.length)
               );
-              if (editDistScore >= lfparameter) {
+              if (editDistScore >= lfparameter || editDistance <= 1) {
                   return 2;  //Close enough
               }
               else {
@@ -202,18 +203,20 @@ Answers = {
 
     //Return [isCorrect, matchText] if userInput correctly matches answer -
     //taking into account both branching answers and edit distance
-    answerIsCorrect: function(userInput, answer, originalAnswer, setspec) {
+    answerIsCorrect: function(userInput, answer, originalAnswer, setspec,callback) {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
+        let enhancedFeedback = getCurrentDeliveryParams().enhancedFeedback;
+
+        console.log("answerIsCorrect, enhancedFeedback: " + enhancedFeedback);
 
         checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
             let answerDisplay = originalAnswer || correctAnswer;
+            let isCorrect, matchText;
             if (answerIsBranched(correctAnswer)) {
-                return matchBranching(correctAnswer, userAnswer, lfparameter);
+                [isCorrect,matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
             }
-            else {
-                var isCorrect, matchText;
-    
+            else {    
                 var dispAnswer = _.trim(answerDisplay);
                 if (dispAnswer.indexOf("|") >= 0) {
                     // Take first answer if it's a bar-delimited string
@@ -252,16 +255,31 @@ Answers = {
                     }
                   }
                 }
-    
-                return [isCorrect, matchText];
             }
+            return {isCorrect, matchText};
         }
 
         let fullTextIsCorrect = checkAnswer(userInput,answer,originalAnswer);
-        if(!fullTextIsCorrect[0] && !!originalAnswer){
-            return checkAnswer(userInput,originalAnswer,originalAnswer);
+
+        //Try again with original answer in case we did a syllable answer and they input the full response
+        if(!fullTextIsCorrect.isCorrect && !!originalAnswer){
+            fullTextIsCorrect = checkAnswer(userInput,originalAnswer,originalAnswer);
+        }
+
+        console.log("answerIsCorrect bottom: " + fullTextIsCorrect.isCorrect);
+
+        if(!fullTextIsCorrect.isCorrect && enhancedFeedback){
+            console.log("trying simple feedback service");
+            let answerToCheck = originalAnswer || answer;
+            Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
+                console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
+                if(typeof(err) == "undefined" && res != null){
+                    fullTextIsCorrect.matchText = res;
+                }
+                callback(fullTextIsCorrect);
+            });
         }else{
-            return fullTextIsCorrect;
+            callback(fullTextIsCorrect);
         }
     },
 };

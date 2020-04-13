@@ -38,15 +38,9 @@ setAllTdfs = function(){
           var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
 
           var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-          var containsClozes = (_.filter(stimulusObject.stimuli.setspec.clusters[0].cluster,function(cluster){
-            return !!cluster.displayType && cluster.displayType.length > 0 && cluster.displayType[0].toLowerCase() === "cloze";
-          })).length > 0;
-
-          if(containsClozes || fileName == "IESsurvey.xml"){
-            allTdfs.push({'fileName':fileName,'displayName':displayName});
-            tdfFileNameToTdfFileMap[fileName] = entry;
-            tdfFileNameToStimfileMap[fileName] = stimulusObject;
-          }
+          allTdfs.push({'fileName':fileName,'displayName':displayName});
+          tdfFileNameToTdfFileMap[fileName] = entry;
+          tdfFileNameToStimfileMap[fileName] = stimulusObject;
         }
       }catch(err){
         console.log("error with setting all tdfs: " + JSON.stringify(err));

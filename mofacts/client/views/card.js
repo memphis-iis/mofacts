@@ -112,9 +112,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
 
     var isCorrect = null;
     var historyUserAnswer = "";
-    var historyCorrectMsg = "";
-
-    var correctAndText;
+    var historyCorrectMsg = null;
 
     var setspec = null;
     if (!getButtonTrial()) {
@@ -122,6 +120,8 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
 
     var trueAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+
+    let userAnswerWithTimeout = null;
 
     if (getTestType() === "s") {
         //Study trial
@@ -131,10 +131,11 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
     else if (!!isTimeout) {
         //Timeout
-        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
+        userAnswerWithTimeout = "";
+        //correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         isCorrect = false;
         historyUserAnswer = "You didn't answer in time.";
-        historyCorrectMsg = correctAndText[1];
+        //historyCorrectMsg = correctAndText[1];
     }
     else if (typeof simCorrect === "boolean") {
         //Simulation! We know what they did
@@ -144,29 +145,47 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
     else {
         //"Regular" answers
-        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        isCorrect = correctAndText[0];
+        userAnswerWithTimeout = userAnswer;
+        //correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
+        isCorrect = null;//correctAndText[0];
         historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
-        historyCorrectMsg = correctAndText[1];
+        //historyCorrectMsg = correctAndText[1];
     }
 
-    var currCount = _.intval(Session.get("scrollListCount"));
-
-    scrollList.insert({
-        'temp': 1,                       // Deleted when clearing
-        'justAdded': justAdded,          // All 1's set to 0 on next question
-        'idx': currCount,                // Our ordering field
-        'userAnswer': historyUserAnswer,
-        'answer': trueAnswer,
-        'shownToUser': historyCorrectMsg,
-        'question': Session.get("currentQuestion"),
-        'userCorrect': isCorrect
-    }, function(err, newId) {
-        if (!!err) {
-            console.log("ERROR inserting scroll list member:", displayify(err));
+    var afterAnswerAssessment = function(correctAndText){
+      if(correctAndText){
+        if(historyCorrectMsg == null){
+          historyCorrectMsg = correctAndText.matchText;
         }
-        Session.set("scrollListCount", currCount + 1);
-    });
+        if(isCorrect == null){
+          isCorrect = correctAndText.isCorrect;
+        }
+      }
+
+      var currCount = _.intval(Session.get("scrollListCount"));
+
+      scrollList.insert({
+          'temp': 1,                       // Deleted when clearing
+          'justAdded': justAdded,          // All 1's set to 0 on next question
+          'idx': currCount,                // Our ordering field
+          'userAnswer': historyUserAnswer,
+          'answer': trueAnswer,
+          'shownToUser': historyCorrectMsg,
+          'question': Session.get("currentQuestion"),
+          'userCorrect': isCorrect
+      }, function(err, newId) {
+          if (!!err) {
+              console.log("ERROR inserting scroll list member:", displayify(err));
+          }
+          Session.set("scrollListCount", currCount + 1);
+      });
+    }
+
+    if(userAnswerWithTimeout != null){
+      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec,afterAnswerAssessment);
+    }else{
+      afterAnswerAssessment(null);
+    }    
 }
 
 function scrollElementIntoView(selector, scrollType) {
@@ -1124,176 +1143,177 @@ function handleUserInput(e, source, simAnswerCorrect) {
       }
     }
 
+    userAnswerFeedbackCallback = function(isCorrect){
+      //Note that we must provide the client-side timestamp since we need it...
+      //Pretty much everywhere else relies on recordUserTime to provide it.
+      //We also get the timestamp of the first keypress for the current trial.
+      //Of course for things like a button trial, we won't have it
+      var timestamp = Date.now();
+      var firstActionTimestamp = keypressTimestamp || timestamp;
+
+      //Note that if something messed up and we can't calculate start/end
+      //latency, we'll punt and the output script (experiment_times.js) will
+      //need to construct the times
+      var startLatency, endLatency;
+      if (trialTimestamp) {
+          startLatency = firstActionTimestamp - trialTimestamp;
+          endLatency = timestamp - trialTimestamp;
+      }
+      else {
+          console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
+      }
+
+      //Figure out button trial entries
+      var buttonEntries = "";
+      var wasButtonTrial = !!Session.get("buttonTrial");
+      if (wasButtonTrial) {
+          buttonEntries = _.map(
+              buttonList.find({}, {sort: {idx: 1}}).fetch(),
+              function(val) { return val.buttonValue; }
+          ).join(',');
+      }
+
+      //Note that we need to log from data in the cluster returned from
+      //getStimCluster so that we honor cluster mapping
+      var currCluster = getStimCluster(getCurrentClusterIndex());
+
+      //Figure out the review latency we should log
+      var reviewLatency = 0;
+      if (getTestType() === "d" && !isCorrect) {
+          reviewLatency = _.intval(getCurrentDeliveryParams().reviewstudy);
+      }
+
+      //Set up to log the answer they gave. We'll call the function below at the
+      //appropriate time
+      var reviewBegin = Date.now();
+      var answerLogAction = isTimeout ? "[timeout]" : "answer";
+      // var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
+      var answerLogRecord = {
+          'questionIndex': _.intval(Session.get("questionIndex"), -1),
+          'index': _.intval(currCluster.clusterIndex, -1),
+          'shufIndex': _.intval(currCluster.shufIndex, -1),
+          'ttype': _.trim(getTestType()),
+          'qtype':  _.trim(findQTypeSimpified()),
+          'guiSource':  _.trim(source),
+          'answer':  _.trim(userAnswer),
+          'isCorrect': isCorrect,
+          'trialStartTimestamp': trialTimestamp,
+          'clientSideTimeStamp': timestamp,
+          'firstActionTimestamp': firstActionTimestamp,
+          'startLatency': startLatency,
+          'endLatency': endLatency,
+          'wasButtonTrial': wasButtonTrial,
+          'buttonOrder': buttonEntries,
+          'reviewLatency': 0,
+          'inferredReviewLatency': reviewLatency,
+          'wasSim': (source === "simulation") ? 1 : 0,
+          'displayedSystemResponse': $("#UserInteraction").text() || "",
+          'forceCorrectFeedback': "",
+          'audioInputEnabled':Session.get("audioEnabled") || false,
+          'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false
+      };
+      var writeAnswerLog = function() {
+          var realReviewLatency = Date.now() - reviewBegin;
+          if (realReviewLatency > 0) {
+              answerLogRecord.reviewLatency = realReviewLatency;
+          }
+          //TODO: need a column for this in experiment_times
+          answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
+          recordUserTime(answerLogAction, answerLogRecord);
+      };
+
+      // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+      // is specified and we have seen that many (or more) timeouts in a row, then
+      // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+      // this feature MUST be turned on in the TDF.
+      if (!isTimeout) {
+          timeoutsSeen = 0;  // Reset count
+      }
+      else {
+          // Anothing timeout!
+          timeoutsSeen++;
+
+          // Figure out threshold (with default of 0)
+          // Also note: threshold < 1 means no autostop at all
+          var threshold = _.chain(getCurrentDeliveryParams())
+              .prop("autostopTimeoutThreshold")
+              .intval(0).value();
+
+          if (threshold > 0 && timeoutsSeen >= threshold) {
+              console.log("Hit timeout threshold", threshold, "Quitting");
+              leavePage("/profile");
+              return;  // We are totally done
+          }
+      }
+
+      //record progress in userProgress variable storage (note that this is
+      //helpful and used on the stats page, but the user times log is the
+      //"system of record"
+      recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
+
+      //Figure out timeout and reviewLatency
+      var deliveryParams = getCurrentDeliveryParams();
+      var timeout = 0;
+
+      if (getTestType() === "s") {
+          //Just a study - note that the purestudy timeout is used for the QUESTION
+          //timeout, not the display timeout after the ANSWER. However, we need a
+          //timeout for our logic below so just use the minimum
+          timeout = 1;
+      }
+      else if (getTestType() === "t" || getTestType() === "i") {
+          //A test or instruction unit - we don't have timeouts since they don't get feedback about
+          //how they did (that's what drills are for)
+          timeout = 1;
+      }
+      else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
+          //Drill - the timeout depends on how they did
+          if (isCorrect) {
+              timeout = _.intval(deliveryParams.correctprompt);
+          }
+          else {
+              timeout = _.intval(deliveryParams.reviewstudy);
+          }
+      }
+      else {
+          //We don't know what to do since this is an unsupported test type - fail
+          failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
+          return;
+      }
+
+      //We need at least a timeout of 1ms
+      if (timeout < 1) {
+          failNoDeliveryParams("No correct timeout specified");
+          return;
+      }
+
+      //Stop previous timeout
+      clearCardTimeout();
+
+      //Create the action we're about to call
+      var resetAfterTimeout = function() {
+          beginMainCardTimeout(timeout, function() {
+              writeAnswerLog();
+              prepareCard();
+              $("#userAnswer").val("");
+              hideUserInteraction();
+          });
+      };
+
+      //If incorrect answer for a drill on a sound, we need to replay the sound.
+      //Otherwise, we can just use our reset logic directly
+      if (getQuestionType() === "sound" && !isCorrect && getTestType() === "d") {
+          playCurrentQuestionSound(resetAfterTimeout);
+      }
+      else {
+          resetAfterTimeout();
+      }
+    }
+    
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    var isCorrect = userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect);
-
-    //Note that we must provide the client-side timestamp since we need it...
-    //Pretty much everywhere else relies on recordUserTime to provide it.
-    //We also get the timestamp of the first keypress for the current trial.
-    //Of course for things like a button trial, we won't have it
-    var timestamp = Date.now();
-    var firstActionTimestamp = keypressTimestamp || timestamp;
-
-    //Note that if something messed up and we can't calculate start/end
-    //latency, we'll punt and the output script (experiment_times.js) will
-    //need to construct the times
-    var startLatency, endLatency;
-    if (trialTimestamp) {
-        startLatency = firstActionTimestamp - trialTimestamp;
-        endLatency = timestamp - trialTimestamp;
-    }
-    else {
-        console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
-    }
-
-    //Figure out button trial entries
-    var buttonEntries = "";
-    var wasButtonTrial = !!Session.get("buttonTrial");
-    if (wasButtonTrial) {
-        buttonEntries = _.map(
-            buttonList.find({}, {sort: {idx: 1}}).fetch(),
-            function(val) { return val.buttonValue; }
-        ).join(',');
-    }
-
-    //Note that we need to log from data in the cluster returned from
-    //getStimCluster so that we honor cluster mapping
-    var currCluster = getStimCluster(getCurrentClusterIndex());
-
-    //Figure out the review latency we should log
-    var reviewLatency = 0;
-    if (getTestType() === "d" && !isCorrect) {
-        reviewLatency = _.intval(getCurrentDeliveryParams().reviewstudy);
-    }
-
-    //Set up to log the answer they gave. We'll call the function below at the
-    //appropriate time
-    var reviewBegin = Date.now();
-  var answerLogAction = isTimeout ? "[timeout]" : "answer";
-  // var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
-    var answerLogRecord = {
-        'questionIndex': _.intval(Session.get("questionIndex"), -1),
-        'index': _.intval(currCluster.clusterIndex, -1),
-        'shufIndex': _.intval(currCluster.shufIndex, -1),
-        'ttype': _.trim(getTestType()),
-        'qtype':  _.trim(findQTypeSimpified()),
-        'guiSource':  _.trim(source),
-        'answer':  _.trim(userAnswer),
-        'isCorrect': isCorrect,
-        'trialStartTimestamp': trialTimestamp,
-        'clientSideTimeStamp': timestamp,
-        'firstActionTimestamp': firstActionTimestamp,
-        'startLatency': startLatency,
-        'endLatency': endLatency,
-        'wasButtonTrial': wasButtonTrial,
-        'buttonOrder': buttonEntries,
-        'reviewLatency': 0,
-        'inferredReviewLatency': reviewLatency,
-        'wasSim': (source === "simulation") ? 1 : 0,
-        'displayedSystemResponse': $("#UserInteraction").text() || "",
-        'forceCorrectFeedback': "",
-        'audioInputEnabled':Session.get("audioEnabled") || false,
-        'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false
-    };
-    var writeAnswerLog = function() {
-        var realReviewLatency = Date.now() - reviewBegin;
-        if (realReviewLatency > 0) {
-            answerLogRecord.reviewLatency = realReviewLatency;
-        }
-        //TODO: need a column for this in experiment_times
-        answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
-        recordUserTime(answerLogAction, answerLogRecord);
-    };
-
-    // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-    // is specified and we have seen that many (or more) timeouts in a row, then
-    // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-    // this feature MUST be turned on in the TDF.
-    if (!isTimeout) {
-        timeoutsSeen = 0;  // Reset count
-    }
-    else {
-        // Anothing timeout!
-        timeoutsSeen++;
-
-        // Figure out threshold (with default of 0)
-        // Also note: threshold < 1 means no autostop at all
-        var threshold = _.chain(getCurrentDeliveryParams())
-            .prop("autostopTimeoutThreshold")
-            .intval(0).value();
-
-        if (threshold > 0 && timeoutsSeen >= threshold) {
-            console.log("Hit timeout threshold", threshold, "Quitting");
-            leavePage("/profile");
-            return;  // We are totally done
-        }
-    }
-
-    //record progress in userProgress variable storage (note that this is
-    //helpful and used on the stats page, but the user times log is the
-    //"system of record"
-    recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
-    //Figure out timeout and reviewLatency
-    var deliveryParams = getCurrentDeliveryParams();
-    var timeout = 0;
-    var file = getCurrentTdfFile();
-
-    if (getTestType() === "s") {
-        //Just a study - note that the purestudy timeout is used for the QUESTION
-        //timeout, not the display timeout after the ANSWER. However, we need a
-        //timeout for our logic below so just use the minimum
-        timeout = 1;
-    }
-    else if (getTestType() === "t" || getTestType() === "i") {
-        //A test or instruction unit - we don't have timeouts since they don't get feedback about
-        //how they did (that's what drills are for)
-        timeout = 1;
-    }
-    else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
-        //Drill - the timeout depends on how they did
-        if (isCorrect) {
-            timeout = _.intval(deliveryParams.correctprompt);
-        }
-        else {
-            timeout = _.intval(deliveryParams.reviewstudy);
-        }
-    }
-    else {
-        //We don't know what to do since this is an unsupported test type - fail
-        failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
-        return;
-    }
-
-    //We need at least a timeout of 1ms
-    if (timeout < 1) {
-        failNoDeliveryParams("No correct timeout specified");
-        return;
-    }
-
-    //Stop previous timeout
-    clearCardTimeout();
-
-    //Create the action we're about to call
-    var resetAfterTimeout = function() {
-        beginMainCardTimeout(timeout, function() {
-            writeAnswerLog();
-            prepareCard();
-            $("#userAnswer").val("");
-            hideUserInteraction();
-        });
-    };
-
-    //If incorrect answer for a drill on a sound, we need to replay the sound.
-    //Otherwise, we can just use our reset logic directly
-    if (getQuestionType() === "sound" && !isCorrect && getTestType() === "d") {
-        playCurrentQuestionSound(resetAfterTimeout);
-    }
-    else {
-        resetAfterTimeout();
-    }
+    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect,userAnswerFeedbackCallback);
 }
 
 getButtonTrial = function() {
@@ -1324,7 +1344,7 @@ getButtonTrial = function() {
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question. simCorrect will usually be undefined/null BUT if
 //it is true or false we know this is part of a simulation call
-function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
+function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
     var isCorrect = null;
     //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s") {
@@ -1332,58 +1352,78 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect) {
         isTimeout = false;
     }
 
-    //Helpers for correctness logic below
-  var isDrill = (getTestType() === "d" || getTestType() === "m" || getTestType() === "n");
-    var handleAnswerState = function(goodNews, msg) {
-        isCorrect = goodNews;
-        if (isDrill) {
-            showUserInteraction(goodNews, msg);
-        }
-    };
-
-    var correctAndText;
-
     var setspec = null;
     if (!getButtonTrial()) {
         setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     }
 
+    let goodNews = null;
+    let msg = null;
+    let userAnswerWithTimeout = null;
     // How was their answer? (And note we only need to update historyUserAnswer
     // if it's not a "standard" )
     if (!!isTimeout) {
         //Timeout - doesn't matter what the answer says!
-        correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        handleAnswerState(false, "Time expired. " + correctAndText[1]);
+        goodNews = false;
+        userAnswerWithTimeout = "";
+        // correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
+        // msg = "Time expired. " + correctAndText[1];
     }
     else if (isCorrect) {
         //We've already marked this as a correct answer
-        handleAnswerState(true, "Please study the answer");
+        goodNews = true;
+        msg = "Please study the answer";
     }
     else if (typeof simCorrect === "boolean") {
         //Simulation! We know what they did
-        handleAnswerState(simCorrect, "Simulation");
+        goodNews = simCorrect;
+        msg = "Simulation";
     }
     else {
-        correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        handleAnswerState(correctAndText[0], correctAndText[1]);
+      userAnswerWithTimeout = userAnswer;
+        // correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
+        // goodNews = correctAndText[0];
+        // msg = correctAndText[1];
     }
 
     //Make sure to record what they just did (and set justAdded)
     writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
 
-    //Give unit engine a chance to update any necessary stats
-    engine.cardAnswered(isCorrect);
+    var afterAnswerAssessment = function(correctAndText){
+      if(goodNews == null && correctAndText != null){
+        goodNews = correctAndText.isCorrect;
+      }
+      if(msg == null && correctAndText != null){
+        msg = correctAndText.matchText;
+      }
 
-    //If they are incorrect on a drill, we might need to do extra work for
-    //their review period
-    if (isDrill && !isCorrect) {
-        //Cheat and inject a review message
-        $("#UserInteraction").append(
-            $("<p class='text-danger'></p>").html("") //No review message currently
-        );
+      isCorrect = goodNews;
+
+      var isDrill = (getTestType() === "d" || getTestType() === "m" || getTestType() === "n");
+      if (isDrill) {
+          showUserInteraction(goodNews, msg);
+      }
+
+      //Give unit engine a chance to update any necessary stats
+      engine.cardAnswered(isCorrect);
+
+      //If they are incorrect on a drill, we might need to do extra work for
+      //their review period
+      if (isDrill && !isCorrect) {
+          //Cheat and inject a review message
+          $("#UserInteraction").append(
+              $("<p class='text-danger'></p>").html("") //No review message currently
+          );
+      }
+
+      callback(isCorrect);
     }
 
-    return isCorrect;
+    if(userAnswerWithTimeout != null){
+      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec,afterAnswerAssessment);
+    }else{
+      afterAnswerAssessment(null);
+    }    
 }
 
 function prepareCard() {

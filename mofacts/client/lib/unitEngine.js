@@ -732,7 +732,6 @@ function modelUnitEngine() {
             var newProbIndex;
             var showOverlearningText = false;
 
-            var numItemsPracticed = cardProbabilities.numQuestionsAnswered;
             var cards = cardProbabilities.cards;
             var probs = cardProbabilities.probs;
 

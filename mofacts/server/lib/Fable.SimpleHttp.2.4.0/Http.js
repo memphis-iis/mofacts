@@ -70,8 +70,6 @@ var _Seq = require("../fable-library.2.3.11/Seq");
 
 var _AsyncBuilder = require("../fable-library.2.3.11/AsyncBuilder");
 
-var XMLHttpRequest = require("../XMLHttpRequest.js").XMLHttpRequest;
-
 function FileReader$$$readBlobAsText(blob) {
   return (0, _Async.fromContinuations)(function (tupledArg) {
     const reader = new FileReader();
@@ -312,7 +310,6 @@ function Http$$$content(bodyContent, req$$5) {
 function Http$$$send(req$$6) {
   return (0, _Async.fromContinuations)(function (tupledArg$$2) {
     const xhr = new XMLHttpRequest();
-    console.log("req$$6.url!!!:" + req$$6.url);
     xhr.open(Http$$$serializeMethod(req$$6.method), req$$6.url);
 
     xhr.onreadystatechange = function () {
