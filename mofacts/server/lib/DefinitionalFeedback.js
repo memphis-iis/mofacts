@@ -43,8 +43,6 @@ var _String = require("./fable-library.2.3.11/String");
 
 var _RegExp = require("./fable-library.2.3.11/RegExp");
 
-var _SpellingCorrector = require("./SpellingCorrector");
-
 const EntryGloss = (0, _Types.declare)(function DefinitionalFeedback_EntryGloss(arg1, arg2, arg3, arg4) {
   this.entry = arg1;
   this.entryTag = arg2;
@@ -236,7 +234,7 @@ function FeedbackRequest$reflection() {
 }
 
 function GenerateFeedback(incorrectAnswer, correctAnswer) {
-  const incorrectAnswerSpellingMatch = (0, _SpellingCorrector.CorrectSpelling)(incorrectAnswer);
+  const incorrectAnswerSpellingMatch = incorrectAnswer;
   const matchValue$$4 = [(0, _Map.FSharpMap$$TryFind$$2B595)(definitionMap(), incorrectAnswerSpellingMatch), (0, _Map.FSharpMap$$TryFind$$2B595)(definitionMap(), correctAnswer)];
   var $target$$20, correctEntry, incorrectEntry;
 

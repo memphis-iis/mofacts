@@ -132,10 +132,8 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     else if (!!isTimeout) {
         //Timeout
         userAnswerWithTimeout = "";
-        //correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
         isCorrect = false;
         historyUserAnswer = "You didn't answer in time.";
-        //historyCorrectMsg = correctAndText[1];
     }
     else if (typeof simCorrect === "boolean") {
         //Simulation! We know what they did
@@ -146,10 +144,8 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     else {
         //"Regular" answers
         userAnswerWithTimeout = userAnswer;
-        //correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        isCorrect = null;//correctAndText[0];
+        isCorrect = null;
         historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
-        //historyCorrectMsg = correctAndText[1];
     }
 
     var afterAnswerAssessment = function(correctAndText){
@@ -1366,8 +1362,6 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
         //Timeout - doesn't matter what the answer says!
         goodNews = false;
         userAnswerWithTimeout = "";
-        // correctAndText = Answers.answerIsCorrect("", Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        // msg = "Time expired. " + correctAndText[1];
     }
     else if (isCorrect) {
         //We've already marked this as a correct answer
@@ -1381,9 +1375,6 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
     }
     else {
       userAnswerWithTimeout = userAnswer;
-        // correctAndText = Answers.answerIsCorrect(userAnswer, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec);
-        // goodNews = correctAndText[0];
-        // msg = correctAndText[1];
     }
 
     //Make sure to record what they just did (and set justAdded)
