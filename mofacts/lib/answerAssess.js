@@ -53,9 +53,10 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
     else {
         //See if they were close enough
         if (!!lfparameter) {
+            let checkOtherAnswers = getCurrentDeliveryParams().checkOtherAnswers;
             //Check to see if the user answer is an exact match for any other answers in the stim file,
             //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
-            if(checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
+            if(checkOtherAnswers && checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
               return 0;
             }else{
               let editDistance = getEditDistance(s1, s2)
