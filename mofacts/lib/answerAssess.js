@@ -266,10 +266,7 @@ Answers = {
             fullTextIsCorrect = checkAnswer(userInput,originalAnswer,originalAnswer);
         }
 
-        console.log("answerIsCorrect bottom: " + fullTextIsCorrect.isCorrect);
-
         if(!fullTextIsCorrect.isCorrect && enhancedFeedback){
-            console.log("trying simple feedback service");
             let answerToCheck = originalAnswer || answer;
             Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
                 console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
