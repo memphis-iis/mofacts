@@ -1,5 +1,4 @@
 import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
-import * as SpellingCorrector from "../server/lib/SpellingCorrector.js";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 
 /*jshint sub:true*/
@@ -42,11 +41,6 @@ for (i = 0; i < Meteor.settings.saml.length; i++) {
       console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
   }
 }
-
-// console.log("reading spelling data");
-// var spellingData = fs.readFileSync(Meteor.settings.spellingCorrectorDataLocation);
-// console.log("initializing spelling corrector");
-// SpellingCorrector.Initialize(spellingData);
 
 console.log("reading feedbackdata");
 var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
