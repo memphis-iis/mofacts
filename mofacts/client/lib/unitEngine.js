@@ -443,16 +443,6 @@ function modelUnitEngine() {
     // This is the final probability calculation used below if one isn't given
     // in the unit's learningsession/calculateProbability tag
     function defaultProbFunction(p) {
-        //        p.y = p.stimParameter+
-        //        0.866310634* ((0.5 + p.stimSuccessCount)/(1 + p.stimSuccessCount + p.stimFailureCount) - 0.5)+
-        //        0.270707611* ((0.5 + p.questionSuccessCount)/(1 + p.questionSuccessCount + p.questionFailureCount) - 0.5)+
-        //        0.869477261* ((0.5 + p.responseSuccessCount)/(1 + p.responseSuccessCount + p.responseFailureCount) - 0.5)+
-        //        3.642734384* ((0.5 + p.userCorrectResponses)/(1 + p.userTotalResponses) - 0.5)+
-        //        3.714113953* (p.recency)+
-        //        2.244795778* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +
-        //        0.447943182* p.intbs * Math.log(1 + p.questionStudyTrialCount) +
-        //        0.500901271* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
-
         // Calculated metrics
         p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);
 
@@ -488,6 +478,8 @@ function modelUnitEngine() {
     var probFunction = _.chain(getCurrentTdfUnit())
         .prop("learningsession").first()
         .prop("calculateProbability").first().trim().value();
+    var probFunctionHasHintSylls = typeof(probFunction) == "undefined" ? false : probFunction.indexOf("hintsylls") > -1;
+    console.log("probFunctionHasHintSylls: " + probFunctionHasHintSylls);
     if (!!probFunction) {
         probFunction = new Function("p", "'use strict';\n" + probFunction);  // jshint ignore:line
     }
@@ -502,16 +494,6 @@ function modelUnitEngine() {
     function calculateSingleProb(prob) {
         var card = cardProbabilities.cards[prob.cardIndex];
         var stim = card.stims[prob.stimIndex];
-
-        // Possibly useful one day
-        // var userTotalTrials = cardProbabilities.numQuestionsIntroduced;
-        // var totalPracticeSecs = secs(
-        //     _.chain(cards).pluck('practiceTimes').flatten().sum().value()
-        // );
-        // var questionTrialsSinceLastSeen = card.trialsSinceLastSeen;
-        // var questionHasBeenIntroduced = card.hasBeenIntroduced;
-        // var questionSecsInPractice = secs(_.sum(card.practiceTimes));
-        // var stimHasBeenIntroduced = stim.hasBeenIntroduced;
 
         // Store parameters in an object for easy logging/debugging
         var p = {};
@@ -539,15 +521,19 @@ function modelUnitEngine() {
         let answerText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
         let curStimFile = getCurrentStimName().replace(/\./g,'_');
-        answerText = answerText.replace(/\./g,'_')
-        if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
-            console.log("no cached syllables for: " + curStimFile + "|" + answerText);
-            throw new Error("can't find syllable data in database");
-        } //Curedit
+        answerText = answerText.replace(/\./g,'_');
         
-        let stimSyllableData = this.cachedSyllables.data[answerText];
-        p.syllables = stimSyllableData.count;
-        p.syllablesArray = stimSyllableData.syllables;
+        if(probFunctionHasHintSylls){
+            console.log("probFunctionHasHintSylls");
+            if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
+                console.log("no cached syllables for: " + curStimFile + "|" + answerText);
+                throw new Error("can't find syllable data in database");
+            }else{
+                let stimSyllableData = this.cachedSyllables.data[answerText];
+                p.syllables = stimSyllableData.count;
+                p.syllablesArray = stimSyllableData.syllables;
+            }
+        }
 
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.responseSuccessCount;
