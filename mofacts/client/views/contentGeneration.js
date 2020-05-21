@@ -19,6 +19,7 @@ clusterListMappings = {};
 clozeEdits = [];
 deletedClozeIds = [];
 origClusterIndexToClozeIDsMap = {};
+clozesComeFromTemplate = undefined;
 
 recordClozeEditHistory = function(oldCloze,newCloze){
   var timestamp = Date.now();
@@ -114,7 +115,7 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
     "sentences":[],
     "clozes":allClozes
   });
-  originalClozes = allClozes;
+  originalClozes = JSON.parse(JSON.stringify(allClozes));
   fillOutItemLookupMaps([],allClozes);
 }
 
@@ -168,10 +169,15 @@ generateAndSubmitTDFAndStimFiles = function(){
   var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_TDF.xml";
   var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_Stim.xml";
 
-
-  var tdfTemplateFileName = $("#templateTDFSelect").val();
-  var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
-  let isMultiTdf = originalTDF.isMultiTdf;
+  let isMultiTdf = false;
+  if(clozesComeFromTemplate){
+    var tdfTemplateFileName = $("#templateTDFSelect").val();
+    var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
+    isMultiTdf = originalTDF.isMultiTdf;
+  }else{
+    isMultiTdf = false;
+  }
+  
   var newStimJSON = generateStimJSON(clozes,stimFileName,isMultiTdf);
   var newTDFJSON = generateTDFJSON(tdfFileName,displayName,stimFileName,newStimJSON);
 
@@ -256,9 +262,16 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
 }
 
 generateTDFJSON = function(tdfFileName,displayName,stimFileName,newStimJSON){
-  var tdfTemplateFileName = $("#templateTDFSelect").val();
-  var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
-  var curTdf = JSON.parse(JSON.stringify(originalTDF));
+  console.log("clusterListMappings: " + JSON.stringify(clusterListMappings));
+  let curTdf = undefined;
+
+  if(clozesComeFromTemplate){
+    var tdfTemplateFileName = $("#templateTDFSelect").val();
+    var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
+    curTdf = JSON.parse(JSON.stringify(originalTDF));
+  }else{
+    curTdf = JSON.parse(JSON.stringify(templateTDFJSON));
+  }
 
   delete curTdf._id;
   curTdf.owner = Meteor.userId();
@@ -341,15 +354,54 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,newStimJSON){
     for(var unitIndex in clusterListMappings){
       var isLearningSession = clusterListMappings[unitIndex].sessionType === "learningsession";
       var unit = curTdf.tdfs.tutor.unit[unitIndex];
-      var clusterlist = isLearningSession ? unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
+      let clusterlist = isLearningSession ? unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
       clusterlist[0] = clusterListMappings[unitIndex].new.join('-');
     }
   }
   
-  curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
-  curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
+  if(typeof(speechAPIKey) !== "undefined"){
+    curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
+  }
+  if(typeof(speechAPIKey) !== "undefined"){
+    curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
+  }
 
   return curTdf;
+}
+
+function deleteCloze(clozeID,itemID){
+  console.log("clozeID: " + clozeID + ", itemID: " + itemID);
+  console.log("delete cloze: " + JSON.stringify(sentenceIDtoClozesMap[itemID]));
+  sentenceIDtoClozesMap[itemID] = sentenceIDtoClozesMap[itemID].filter(function(clozeItem){
+    console.log("clozeItem.clozeId != clozeID: " + (clozeItem.clozeId != clozeID));
+    console.log("clozeItem.clozeId: " + clozeItem.clozeId + ", clozeID: " + clozeID);
+    return clozeItem.clozeId != clozeID;
+  })
+  console.log("after: " + JSON.stringify(sentenceIDtoClozesMap[itemID]));
+
+  var prevClozeSentencePairs = Session.get("clozeSentencePairs");
+
+  var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId']);
+  
+  recordClozeEditHistory(oldCloze,{});
+  deletedClozeIds.push(oldCloze.clozeId);
+
+  var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != clozeID});
+  var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
+    if(s.itemId === itemID) {
+      var matchingClozes = _.filter(newClozes, function(c) {
+        return c.itemId === s.itemId;
+      });
+      if(matchingClozes.length == 0) s.hasCloze = false;
+      return s;
+    } else {
+      return s;
+    }
+  });
+  Session.set('clozeSentencePairs', {
+    'sentences':newSentences,
+    'clozes':newClozes
+  });
 }
 
 Template.contentGeneration.onRendered(function(){
@@ -374,9 +426,44 @@ Template.contentGeneration.events({
   },
 
   'click #submit-btn': function(event){
-    alert("This feature is not yet implemented.  Please choose a template file.");
-    originalClozes = undefined;
-    clozeEdits = [];
+    clozesComeFromTemplate = false;
+    let inputText = $("#source-text").val();
+    console.log("inputText: " + inputText);
+    Meteor.call('getClozesFromText',inputText,function(err,result){
+      window.testy123 = result;
+      if(typeof(err) !== "undefined"){
+        console.log("Error getting clozes, mofacts side: " + JSON.stringify(err));
+        alert("Couldn't generate clozes from source material: " + JSON.stringify(err));
+      }else if(result.tag != 0){
+        let error = result.fields[0];
+        console.log("Error getting clozes, content gen side: " + error);
+        alert("Couldn't generate clozes from source material: " + error);
+      }else{
+        console.log(JSON.stringify(result));
+        alert("Successfully generated clozes!");
+        deletedClozeIds = [];
+        origTdfFileName = "";
+        let sentences = result.fields[0].sentences;
+        let clozes = result.fields[0].clozes;
+        for(let cloze of clozes){
+          cloze.unitIndex = 0;
+        }
+        let origEnd = clozes.length - 1;
+        clusterListMappings = {
+          0:{
+            sessionType:"learningsession",
+            orig:[0,origEnd]
+          }
+        };
+        Session.set("clozeSentencePairs", {
+          "sentences":sentences,
+          "clozes":clozes
+        });
+        originalClozes = JSON.parse(JSON.stringify(clozes));
+        fillOutItemLookupMaps(sentences,clozes);
+        clozeEdits = [];
+      }
+    });
   },
 
   'click #editClozeSaveButton': function(event){
@@ -468,29 +555,7 @@ Template.contentGeneration.events({
     selectedForDelete.forEach(function(selectedCloze) {
       var curClozeId = selectedCloze.clozeUid;
       var curItemId = selectedCloze.curItemId;
-      var prevClozeSentencePairs = Session.get("clozeSentencePairs");
-
-      var oldCloze = _.pick(clozeIDToClozeMap[curClozeId],['cloze','correctResponse','itemId','clozeId']);
-      recordClozeEditHistory(oldCloze,{});
-      deletedClozeIds.push(oldCloze.clozeId);
-  
-      var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
-      var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
-        if(s.itemId === curItemId) {
-          var matchingClozes = _.filter(newClozes, function(c) {
-            return c.itemId === s.itemId;
-          });
-          if(matchingClozes.length == 0) s.hasCloze = false;
-          return s;
-        } else {
-          return s;
-        }
-      });
-      
-      Session.set('clozeSentencePairs', {
-        'sentences':newSentences,
-        'clozes':newClozes
-      });
+      deleteCloze(curClozeId,curItemId);
     });
 
     $('input:checkbox').removeAttr('checked');
@@ -499,32 +564,11 @@ Template.contentGeneration.events({
   'click #delete-btn': function(event){
     var curClozeId = parseInt(event.currentTarget.getAttribute('cloze-uid'));
     var curItemId = parseInt(event.currentTarget.getAttribute('uid'));
-    var prevClozeSentencePairs = Session.get("clozeSentencePairs");
-
-    var oldCloze = _.pick(clozeIDToClozeMap[curClozeId],['cloze','correctResponse','itemId','clozeId']);
-    
-    recordClozeEditHistory(oldCloze,{});
-    deletedClozeIds.push(oldCloze.clozeId);
-
-    var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.clozeId != curClozeId});
-    var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
-      if(s.itemId === curItemId) {
-        var matchingClozes = _.filter(newClozes, function(c) {
-          return c.itemId === s.itemId;
-        });
-        if(matchingClozes.length == 0) s.hasCloze = false;
-        return s;
-      } else {
-        return s;
-      }
-    });
-    Session.set('clozeSentencePairs', {
-      'sentences':newSentences,
-      'clozes':newClozes
-    });
+    deleteCloze(curClozeId,curItemId);
   },
 
   "change #templateTDFSelect": function(event){
+    clozesComeFromTemplate = true;
     clusterListMappings = {};
     deletedClozeIds = [];
     origTdfFileName = $(event.currentTarget).val();
@@ -609,7 +653,7 @@ Template.contentGeneration.helpers({
   }
 });
 
-templateStimJSON = {
+let templateStimJSON = {
     "fileName" : "",
     "stimuli" : {
         "setspec" : {
@@ -622,4 +666,78 @@ templateStimJSON = {
     },
     "owner" : "",
     "source" : "content_generation"
+}
+
+let templateTDFJSON = {
+  "fileName" : "",
+  "tdfs" : {
+      "tutor" : {
+          "setspec" : [ 
+              {
+                  "lessonname" : [ 
+                      ""
+                  ],
+                  "userselect" : [ 
+                      "true"
+                  ],
+                  "stimulusfile" : [ 
+                      ""
+                  ],
+                  "lfparameter" : [ 
+                      ".85"
+                  ]
+              }
+          ],
+          "unit" : [ 
+              {
+                  "unitinstructions" : [ 
+                      "\n          <center><h3>Practice Instructions</h3></center><br>\nPractice the clozes by entering the missing fill-in word."
+                  ],
+                  "unitname" : [ 
+                      "Content Generated from text extract"
+                  ],
+                  "learningsession" : [ 
+                      {
+                          "clusterlist" : [ 
+                              ""
+                          ],
+                          "unitMode" : [ 
+                              "thresholdCeiling"
+                          ]
+                      }
+                  ],
+                  "deliveryparams" : [ 
+                      {
+                          "drill" : [ 
+                              "30000"
+                          ],
+                          "purestudy" : [ 
+                              "16000"
+                          ],
+                          "skipstudy" : [ 
+                              "false"
+                          ],
+                          "reviewstudy" : [ 
+                              "16000"
+                          ],
+                          "correctprompt" : [ 
+                              "750"
+                          ],
+                          "fontsize" : [ 
+                              "3"
+                          ],
+                          "correctscore" : [ 
+                              "1"
+                          ],
+                          "incorrectscore" : [ 
+                              "0"
+                          ]
+                      }
+                  ]
+              }
+          ]
+      }
+  },
+  "owner" : "",
+  "source" : "content_generation"
 }

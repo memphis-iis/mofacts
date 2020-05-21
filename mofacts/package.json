@@ -12,6 +12,7 @@
     "aws-sdk": "^2.502.0",
     "babel-runtime": "^6.26.0",
     "core-js": "^2.5.7",
+    "isomorphic-fetch": "^2.2.1",
     "transliteration": "^2.1.7"
   },
   "devDependencies": {},

@@ -1,5 +1,6 @@
 import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
+import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 
 /*jshint sub:true*/
 
@@ -549,6 +550,11 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+          getClozesFromText:function(inputText){
+            let clozes = ClozeAPI.GetSelectCloze(null,null,null,true,null,inputText);
+            return clozes;
+          },
+
           getSimpleFeedbackForAnswer:function(userAnswer,correctAnswer){
             let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
             console.log("result: " + JSON.stringify(result));
