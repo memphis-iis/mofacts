@@ -67,19 +67,19 @@ exports.BigInteger$$$FromInt64$$Z524259C1 = BigInteger$$$FromInt64$$Z524259C1;
 exports.BigInteger$$$FromInt32$$Z524259A4 = BigInteger$$$FromInt32$$Z524259A4;
 exports.BigInteger = void 0;
 
-var _Types = require("../fable-library.2.3.11/Types");
+var _Types = require("../fable-library.2.8.4/Types");
 
-var _Reflection = require("../fable-library.2.3.11/Reflection");
+var _Reflection = require("../fable-library.2.8.4/Reflection");
 
 var _n = require("./n");
 
-var _Array = require("../fable-library.2.3.11/Array");
+var _Array = require("../fable-library.2.8.4/Array");
 
-var _Long = require("../fable-library.2.3.11/Long");
+var _Long = require("../fable-library.2.8.4/Long");
 
-var _Int = require("../fable-library.2.3.11/Int32");
+var _Int = require("../fable-library.2.8.4/Int32");
 
-var _Decimal = _interopRequireDefault(require("../fable-library.2.3.11/Decimal"));
+var _Decimal = _interopRequireDefault(require("../fable-library.2.8.4/Decimal"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -144,43 +144,43 @@ function BigInteger$$get_V(x$$2) {
 
 function BigInteger$$$op_Equality$$56F059C0(x$$3, y) {
   const matchValue = [BigInteger$$get_SignInt(x$$3), BigInteger$$get_SignInt(y)];
-  var $target$$2;
+  var $target$$12;
 
   if (matchValue[0] === -1) {
     if (matchValue[1] === -1) {
-      $target$$2 = 1;
+      $target$$12 = 1;
     } else if (matchValue[1] === 0) {
-      $target$$2 = 8;
+      $target$$12 = 8;
     } else if (matchValue[1] === 1) {
-      $target$$2 = 3;
+      $target$$12 = 3;
     } else {
-      $target$$2 = 9;
+      $target$$12 = 9;
     }
   } else if (matchValue[0] === 0) {
     if (matchValue[1] === -1) {
-      $target$$2 = 6;
+      $target$$12 = 6;
     } else if (matchValue[1] === 0) {
-      $target$$2 = 4;
+      $target$$12 = 4;
     } else if (matchValue[1] === 1) {
-      $target$$2 = 5;
+      $target$$12 = 5;
     } else {
-      $target$$2 = 9;
+      $target$$12 = 9;
     }
   } else if (matchValue[0] === 1) {
     if (matchValue[1] === -1) {
-      $target$$2 = 2;
+      $target$$12 = 2;
     } else if (matchValue[1] === 0) {
-      $target$$2 = 7;
+      $target$$12 = 7;
     } else if (matchValue[1] === 1) {
-      $target$$2 = 0;
+      $target$$12 = 0;
     } else {
-      $target$$2 = 9;
+      $target$$12 = 9;
     }
   } else {
-    $target$$2 = 9;
+    $target$$12 = 9;
   }
 
-  switch ($target$$2) {
+  switch ($target$$12) {
     case 0:
       {
         return (0, _n.BigNatModule$$$equal)(BigInteger$$get_V(x$$3), BigInteger$$get_V(y));
@@ -247,43 +247,43 @@ function BigInteger$$$op_Inequality$$56F059C0(x$$4, y$$1) {
 
 function BigInteger$$$op_LessThan$$56F059C0(x$$5, y$$2) {
   const matchValue$$1 = [BigInteger$$get_SignInt(x$$5), BigInteger$$get_SignInt(y$$2)];
-  var $target$$3;
+  var $target$$17;
 
   if (matchValue$$1[0] === -1) {
     if (matchValue$$1[1] === -1) {
-      $target$$3 = 1;
+      $target$$17 = 1;
     } else if (matchValue$$1[1] === 0) {
-      $target$$3 = 8;
+      $target$$17 = 8;
     } else if (matchValue$$1[1] === 1) {
-      $target$$3 = 3;
+      $target$$17 = 3;
     } else {
-      $target$$3 = 9;
+      $target$$17 = 9;
     }
   } else if (matchValue$$1[0] === 0) {
     if (matchValue$$1[1] === -1) {
-      $target$$3 = 6;
+      $target$$17 = 6;
     } else if (matchValue$$1[1] === 0) {
-      $target$$3 = 4;
+      $target$$17 = 4;
     } else if (matchValue$$1[1] === 1) {
-      $target$$3 = 5;
+      $target$$17 = 5;
     } else {
-      $target$$3 = 9;
+      $target$$17 = 9;
     }
   } else if (matchValue$$1[0] === 1) {
     if (matchValue$$1[1] === -1) {
-      $target$$3 = 2;
+      $target$$17 = 2;
     } else if (matchValue$$1[1] === 0) {
-      $target$$3 = 7;
+      $target$$17 = 7;
     } else if (matchValue$$1[1] === 1) {
-      $target$$3 = 0;
+      $target$$17 = 0;
     } else {
-      $target$$3 = 9;
+      $target$$17 = 9;
     }
   } else {
-    $target$$3 = 9;
+    $target$$17 = 9;
   }
 
-  switch ($target$$3) {
+  switch ($target$$17) {
     case 0:
       {
         return (0, _n.BigNatModule$$$lt)(BigInteger$$get_V(x$$5), BigInteger$$get_V(y$$2));
@@ -342,43 +342,43 @@ function BigInteger$$$op_LessThan$$56F059C0(x$$5, y$$2) {
 
 function BigInteger$$$op_GreaterThan$$56F059C0(x$$6, y$$3) {
   const matchValue$$2 = [BigInteger$$get_SignInt(x$$6), BigInteger$$get_SignInt(y$$3)];
-  var $target$$4;
+  var $target$$20;
 
   if (matchValue$$2[0] === -1) {
     if (matchValue$$2[1] === -1) {
-      $target$$4 = 1;
+      $target$$20 = 1;
     } else if (matchValue$$2[1] === 0) {
-      $target$$4 = 8;
+      $target$$20 = 8;
     } else if (matchValue$$2[1] === 1) {
-      $target$$4 = 3;
+      $target$$20 = 3;
     } else {
-      $target$$4 = 9;
+      $target$$20 = 9;
     }
   } else if (matchValue$$2[0] === 0) {
     if (matchValue$$2[1] === -1) {
-      $target$$4 = 6;
+      $target$$20 = 6;
     } else if (matchValue$$2[1] === 0) {
-      $target$$4 = 4;
+      $target$$20 = 4;
     } else if (matchValue$$2[1] === 1) {
-      $target$$4 = 5;
+      $target$$20 = 5;
     } else {
-      $target$$4 = 9;
+      $target$$20 = 9;
     }
   } else if (matchValue$$2[0] === 1) {
     if (matchValue$$2[1] === -1) {
-      $target$$4 = 2;
+      $target$$20 = 2;
     } else if (matchValue$$2[1] === 0) {
-      $target$$4 = 7;
+      $target$$20 = 7;
     } else if (matchValue$$2[1] === 1) {
-      $target$$4 = 0;
+      $target$$20 = 0;
     } else {
-      $target$$4 = 9;
+      $target$$20 = 9;
     }
   } else {
-    $target$$4 = 9;
+    $target$$20 = 9;
   }
 
-  switch ($target$$4) {
+  switch ($target$$20) {
     case 0:
       {
         return (0, _n.BigNatModule$$$gt)(BigInteger$$get_V(x$$6), BigInteger$$get_V(y$$3));
@@ -486,13 +486,7 @@ function BigInteger$$get_StructuredDisplayString(x$$8) {
 
 BigInteger.prototype.Equals = function (obj) {
   const this$ = this;
-
-  if (obj instanceof BigInteger) {
-    const that = obj;
-    return BigInteger$$$op_Equality$$56F059C0(this$, that);
-  } else {
-    return false;
-  }
+  return obj instanceof BigInteger ? BigInteger$$$op_Equality$$56F059C0(this$, obj) : false;
 };
 
 BigInteger.prototype.GetHashCode = function () {
@@ -538,8 +532,7 @@ function BigInteger$$$op_UnaryNegation$$Z665282C2(z$$1) {
   if (matchValue$$4 === 0) {
     return BigInteger$$$get_Zero();
   } else {
-    const i = matchValue$$4 | 0;
-    return BigInteger$$$create$$Z2BE94A1((0, _Int.op_UnaryNegation_Int32)(i), BigInteger$$get_V(z$$1));
+    return BigInteger$$$create$$Z2BE94A1((0, _Int.op_UnaryNegation_Int32)(matchValue$$4), BigInteger$$get_V(z$$1));
   }
 }
 
@@ -588,29 +581,29 @@ function BigInteger$$$op_Addition$$56F059C0(x$$12, y$$4) {
     return y$$4;
   } else {
     const matchValue$$5 = [BigInteger$$get_SignInt(x$$12), BigInteger$$get_SignInt(y$$4)];
-    var $target$$5;
+    var $target$$38;
 
     if (matchValue$$5[0] === -1) {
       if (matchValue$$5[1] === -1) {
-        $target$$5 = 1;
+        $target$$38 = 1;
       } else if (matchValue$$5[1] === 1) {
-        $target$$5 = 3;
+        $target$$38 = 3;
       } else {
-        $target$$5 = 4;
+        $target$$38 = 4;
       }
     } else if (matchValue$$5[0] === 1) {
       if (matchValue$$5[1] === -1) {
-        $target$$5 = 2;
+        $target$$38 = 2;
       } else if (matchValue$$5[1] === 1) {
-        $target$$5 = 0;
+        $target$$38 = 0;
       } else {
-        $target$$5 = 4;
+        $target$$38 = 4;
       }
     } else {
-      $target$$5 = 4;
+      $target$$38 = 4;
     }
 
-    switch ($target$$5) {
+    switch ($target$$38) {
       case 0:
         {
           return BigInteger$$$addnn$$6A57060(BigInteger$$get_V(x$$12), BigInteger$$get_V(y$$4));
@@ -646,29 +639,29 @@ function BigInteger$$$op_Subtraction$$56F059C0(x$$13, y$$5) {
     return BigInteger$$$op_UnaryNegation$$Z665282C2(y$$5);
   } else {
     const matchValue$$6 = [BigInteger$$get_SignInt(x$$13), BigInteger$$get_SignInt(y$$5)];
-    var $target$$6;
+    var $target$$41;
 
     if (matchValue$$6[0] === -1) {
       if (matchValue$$6[1] === -1) {
-        $target$$6 = 1;
+        $target$$41 = 1;
       } else if (matchValue$$6[1] === 1) {
-        $target$$6 = 3;
+        $target$$41 = 3;
       } else {
-        $target$$6 = 4;
+        $target$$41 = 4;
       }
     } else if (matchValue$$6[0] === 1) {
       if (matchValue$$6[1] === -1) {
-        $target$$6 = 2;
+        $target$$41 = 2;
       } else if (matchValue$$6[1] === 1) {
-        $target$$6 = 0;
+        $target$$41 = 0;
       } else {
-        $target$$6 = 4;
+        $target$$41 = 4;
       }
     } else {
-      $target$$6 = 4;
+      $target$$41 = 4;
     }
 
-    switch ($target$$6) {
+    switch ($target$$41) {
       case 0:
         {
           return BigInteger$$$subnn$$6A57060(BigInteger$$get_V(x$$13), BigInteger$$get_V(y$$5));
@@ -722,29 +715,29 @@ function BigInteger$$$DivRem$$56F059C0(x$$15, y$$7) {
   } else {
     const patternInput = (0, _n.BigNatModule$$$divmod)(BigInteger$$get_V(x$$15), BigInteger$$get_V(y$$7));
     const matchValue$$7 = [BigInteger$$get_SignInt(x$$15), BigInteger$$get_SignInt(y$$7)];
-    var $target$$7;
+    var $target$$46;
 
     if (matchValue$$7[0] === -1) {
       if (matchValue$$7[1] === -1) {
-        $target$$7 = 1;
+        $target$$46 = 1;
       } else if (matchValue$$7[1] === 1) {
-        $target$$7 = 3;
+        $target$$46 = 3;
       } else {
-        $target$$7 = 4;
+        $target$$46 = 4;
       }
     } else if (matchValue$$7[0] === 1) {
       if (matchValue$$7[1] === -1) {
-        $target$$7 = 2;
+        $target$$46 = 2;
       } else if (matchValue$$7[1] === 1) {
-        $target$$7 = 0;
+        $target$$46 = 0;
       } else {
-        $target$$7 = 4;
+        $target$$46 = 4;
       }
     } else {
-      $target$$7 = 4;
+      $target$$46 = 4;
     }
 
-    switch ($target$$7) {
+    switch ($target$$46) {
       case 0:
         {
           return [BigInteger$$$posn$$Z67CCE57D(patternInput[0]), BigInteger$$$posn$$Z67CCE57D(patternInput[1])];
@@ -774,11 +767,13 @@ function BigInteger$$$DivRem$$56F059C0(x$$15, y$$7) {
 }
 
 function BigInteger$$$op_Division$$56F059C0(x$$16, y$$8) {
-  return BigInteger$$$DivRem$$56F059C0(x$$16, y$$8)[0];
+  const tuple = BigInteger$$$DivRem$$56F059C0(x$$16, y$$8);
+  return tuple[0];
 }
 
 function BigInteger$$$op_Modulus$$56F059C0(x$$17, y$$9) {
-  return BigInteger$$$DivRem$$56F059C0(x$$17, y$$9)[1];
+  const tuple$$1 = BigInteger$$$DivRem$$56F059C0(x$$17, y$$9);
+  return tuple$$1[1];
 }
 
 function BigInteger$$$op_RightShift$$62E082A2(x$$18, y$$10) {
@@ -843,43 +838,43 @@ function BigInteger$$$Abs$$Z665282C2(x$$26) {
 
 function BigInteger$$$op_LessThanOrEqual$$56F059C0(x$$27, y$$16) {
   const matchValue$$9 = [BigInteger$$get_SignInt(x$$27), BigInteger$$get_SignInt(y$$16)];
-  var $target$$8;
+  var $target$$68;
 
   if (matchValue$$9[0] === -1) {
     if (matchValue$$9[1] === -1) {
-      $target$$8 = 1;
+      $target$$68 = 1;
     } else if (matchValue$$9[1] === 0) {
-      $target$$8 = 6;
+      $target$$68 = 6;
     } else if (matchValue$$9[1] === 1) {
-      $target$$8 = 3;
+      $target$$68 = 3;
     } else {
-      $target$$8 = 9;
+      $target$$68 = 9;
     }
   } else if (matchValue$$9[0] === 0) {
     if (matchValue$$9[1] === -1) {
-      $target$$8 = 8;
+      $target$$68 = 8;
     } else if (matchValue$$9[1] === 0) {
-      $target$$8 = 4;
+      $target$$68 = 4;
     } else if (matchValue$$9[1] === 1) {
-      $target$$8 = 7;
+      $target$$68 = 7;
     } else {
-      $target$$8 = 9;
+      $target$$68 = 9;
     }
   } else if (matchValue$$9[0] === 1) {
     if (matchValue$$9[1] === -1) {
-      $target$$8 = 2;
+      $target$$68 = 2;
     } else if (matchValue$$9[1] === 0) {
-      $target$$8 = 5;
+      $target$$68 = 5;
     } else if (matchValue$$9[1] === 1) {
-      $target$$8 = 0;
+      $target$$68 = 0;
     } else {
-      $target$$8 = 9;
+      $target$$68 = 9;
     }
   } else {
-    $target$$8 = 9;
+    $target$$68 = 9;
   }
 
-  switch ($target$$8) {
+  switch ($target$$68) {
     case 0:
       {
         return (0, _n.BigNatModule$$$lte)(BigInteger$$get_V(x$$27), BigInteger$$get_V(y$$16));
@@ -938,43 +933,43 @@ function BigInteger$$$op_LessThanOrEqual$$56F059C0(x$$27, y$$16) {
 
 function BigInteger$$$op_GreaterThanOrEqual$$56F059C0(x$$28, y$$17) {
   const matchValue$$10 = [BigInteger$$get_SignInt(x$$28), BigInteger$$get_SignInt(y$$17)];
-  var $target$$9;
+  var $target$$71;
 
   if (matchValue$$10[0] === -1) {
     if (matchValue$$10[1] === -1) {
-      $target$$9 = 1;
+      $target$$71 = 1;
     } else if (matchValue$$10[1] === 0) {
-      $target$$9 = 6;
+      $target$$71 = 6;
     } else if (matchValue$$10[1] === 1) {
-      $target$$9 = 3;
+      $target$$71 = 3;
     } else {
-      $target$$9 = 9;
+      $target$$71 = 9;
     }
   } else if (matchValue$$10[0] === 0) {
     if (matchValue$$10[1] === -1) {
-      $target$$9 = 8;
+      $target$$71 = 8;
     } else if (matchValue$$10[1] === 0) {
-      $target$$9 = 4;
+      $target$$71 = 4;
     } else if (matchValue$$10[1] === 1) {
-      $target$$9 = 7;
+      $target$$71 = 7;
     } else {
-      $target$$9 = 9;
+      $target$$71 = 9;
     }
   } else if (matchValue$$10[0] === 1) {
     if (matchValue$$10[1] === -1) {
-      $target$$9 = 2;
+      $target$$71 = 2;
     } else if (matchValue$$10[1] === 0) {
-      $target$$9 = 5;
+      $target$$71 = 5;
     } else if (matchValue$$10[1] === 1) {
-      $target$$9 = 0;
+      $target$$71 = 0;
     } else {
-      $target$$9 = 9;
+      $target$$71 = 9;
     }
   } else {
-    $target$$9 = 9;
+    $target$$71 = 9;
   }
 
-  switch ($target$$9) {
+  switch ($target$$71) {
     case 0:
       {
         return (0, _n.BigNatModule$$$gte)(BigInteger$$get_V(x$$28), BigInteger$$get_V(y$$17));
@@ -1215,8 +1210,7 @@ BigInteger.prototype.CompareTo = function (obj$$1) {
   const this$$$1 = this;
 
   if (obj$$1 instanceof BigInteger) {
-    const that$$1 = obj$$1;
-    return BigInteger$$$compare$$56F059C0(this$$$1, that$$1) | 0;
+    return BigInteger$$$compare$$56F059C0(this$$$1, obj$$1) | 0;
   } else {
     throw new Error("the objects are not comparable\\nParameter name: obj");
   }
