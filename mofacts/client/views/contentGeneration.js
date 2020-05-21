@@ -463,6 +463,7 @@ Template.contentGeneration.events({
         clozeEdits = [];
       }
     });
+    alert("Depending on the length of text inputted, this operation may take a while.  Another popup will inform you once it has completed.")
   },
 
   'click #editClozeSaveButton': function(event){
