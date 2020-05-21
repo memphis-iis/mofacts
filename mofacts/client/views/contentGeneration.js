@@ -430,7 +430,6 @@ Template.contentGeneration.events({
     let inputText = $("#source-text").val();
     console.log("inputText: " + inputText);
     Meteor.call('getClozesFromText',inputText,function(err,result){
-      window.testy123 = result;
       if(typeof(err) !== "undefined"){
         console.log("Error getting clozes, mofacts side: " + JSON.stringify(err));
         alert("Couldn't generate clozes from source material: " + JSON.stringify(err));
@@ -557,6 +556,8 @@ Template.contentGeneration.events({
       var curItemId = selectedCloze.curItemId;
       deleteCloze(curClozeId,curItemId);
     });
+
+    Session.set("selectedForDelete",[]);
 
     $('input:checkbox').removeAttr('checked');
   },
