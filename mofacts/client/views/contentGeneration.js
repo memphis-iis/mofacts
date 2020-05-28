@@ -6,6 +6,7 @@ Session.set("clozeHistory", []);
 Session.set("selectedForDelete",[]);
 Session.set("editingSentence",{});
 Session.set("editingCloze",{});
+Session.set("tdfOwnersMap", {});
 sentenceIDtoSentenceMap = {};
 sentenceIDtoClozesMap = {};
 clozeIDToClozeMap = {};
@@ -27,9 +28,9 @@ recordClozeEditHistory = function(oldCloze,newCloze){
   clozeEdits.push({startingCloze:oldCloze,endingCloze:newCloze,timestamp:timestamp});
 }
 
-setAllTdfs = function(){
-  console.log("setAllTdfs");
+setAllTdfs = function(ownerMapCallback){
   allTdfs = [];
+  let ownerIds = [];
   Meteor.subscribe('tdfs',function(){
     Tdfs.find({}).forEach(function(entry){
       try{
@@ -37,9 +38,16 @@ setAllTdfs = function(){
         if(fileName.indexOf(curSemester) != -1){
           var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
           var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
-
+          let formattedDate = "";
+          if (entry.createdAt) {
+            let date = new Date(entry.createdAt);
+            formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
+          }
+ 
+          let ownerId = entry.owner;
+          ownerIds.push(entry.owner);
           var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-          allTdfs.push({'fileName':fileName,'displayName':displayName});
+          allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": formattedDate || ""});
           tdfFileNameToTdfFileMap[fileName] = entry;
           tdfFileNameToStimfileMap[fileName] = stimulusObject;
         }
@@ -47,8 +55,18 @@ setAllTdfs = function(){
         console.log("error with setting all tdfs: " + JSON.stringify(err));
       }
     });
-
+    ownerMapCallback(ownerIds);
     Session.set('contentGenerationAllTdfs',allTdfs);
+  });
+}
+
+getTdfOwnersMap = function(ownerIds) {
+  Meteor.call('getTdfOwnersMap', ownerIds, function(err, res) {
+    if (err) {
+      console.log(err);
+    } else {
+      Session.set("tdfOwnersMap", res);
+    }
   });
 }
 
@@ -406,7 +424,7 @@ function deleteCloze(clozeID,itemID){
 
 Template.contentGeneration.onRendered(function(){
   console.log("contentGeneration rendered");
-  setAllTdfs();
+  setAllTdfs(getTdfOwnersMap);
 });
 
 Template.contentGeneration.events({
@@ -652,6 +670,10 @@ Template.contentGeneration.helpers({
 
   tdfs: function(){
     return Session.get("contentGenerationAllTdfs");
+  },
+
+  tdfOwnersMap: ownerId => {
+    return Session.get("tdfOwnersMap")[ownerId];
   }
 });
 
