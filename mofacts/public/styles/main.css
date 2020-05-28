@@ -527,3 +527,10 @@ input:checked + .slider:before {
 p.admin-info-p {
   font-size: .75em;
 }
+
+#toggleSwitchContainer {
+    width: 70% !important;
+    border-style: solid;
+    border-width: thin;
+    border-color: #7c9c62;
+}
