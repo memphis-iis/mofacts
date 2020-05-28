@@ -463,6 +463,7 @@ Meteor.startup(function () {
                 }
               } else {
                 try {
+                  generatedTdf.createdAt = new Date();
                   Tdfs.insert(generatedTdf);
                 } catch (error) {
                   throw new Error('Error inserting generated TDF: ', error)
@@ -470,6 +471,7 @@ Meteor.startup(function () {
               }
               console.log(JSON.stringify(tdfGenerator.getGeneratedTdf()));
             } else {
+              rec.createdAt = new Date();
               Tdfs.insert(rec);
             }
         }
@@ -766,6 +768,7 @@ Meteor.startup(function () {
 
         insertStimTDFPair:function(newStimJSON,newTDFJSON){
           Stimuli.insert(newStimJSON);
+          newTDFJSON.createdAt = new Date();
           Tdfs.insert(newTDFJSON);
         },
 
