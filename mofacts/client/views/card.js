@@ -1206,7 +1206,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
           'displayedSystemResponse': $("#UserInteraction").text() || "",
           'forceCorrectFeedback': "",
           'audioInputEnabled':Session.get("audioEnabled") || false,
-          'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false
+          'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
+          'currentAnswerSyllables':Session.get("currentAnswerSyllables") || ""
       };
       var writeAnswerLog = function() {
           var realReviewLatency = Date.now() - reviewBegin;

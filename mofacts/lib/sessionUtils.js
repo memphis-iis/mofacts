@@ -58,6 +58,7 @@ sessionCleanUp = function() {
     Session.set("audioPromptFeedbackView",undefined);
     Session.set("audioPromptSpeakingRate",undefined);
     Session.set("buttonTrial", false);
+    Session.set("currentAnswerSyllables",undefined);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);
     Session.set("currentStimName", undefined);

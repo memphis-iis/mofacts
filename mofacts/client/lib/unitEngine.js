@@ -777,6 +777,7 @@ function modelUnitEngine() {
             }
             Session.set("originalQuestion",currentQuestion);
             Session.set("originalQuestion2",currentQuestionPart2);
+            Session.set("currentAnswerSyllables",currentAnswerSyllables);
             
             if(!!currentAnswerSyllables){
                 stim.answerSyllables = currentAnswerSyllables;
