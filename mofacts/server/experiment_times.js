@@ -79,6 +79,8 @@
         "CF (Set Shuffled Index)", //shufIndex
         "CF (Stimulus Version)", //whichStim
         "CF (Correct Answer)", //CF correctAnswer
+        "CF (Correct Answer Syllables)", // CF syllable list for correct answer
+        "CF (Display Syllable Indices)", //CF the list of indices displayed to the user for subcloze hints
         "CF (Overlearning)", //CF isOverlearning
         "CF (Response Time)", //answerGivenTime
         "CF (Start Latency)", //startLatency check first trial discrepancy********
@@ -297,6 +299,13 @@
                 .value();
         }
 
+        let currentAnswerSyllablesArray = "";
+        let currentAnswerSyllableIndices = "";
+        if(typeof(lasta.currentAnswerSyllables) !== "undefined"){
+            currentAnswerSyllablesArray = lasta.currentAnswerSyllables.syllableArray;
+            currentAnswerSyllableIndices = lasta.currentAnswerSyllables.displaySyllableIndices;
+        }
+
         return {
             "Anon Student Id": d(username, ''),
             "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + tdfName, //hack
@@ -335,6 +344,8 @@
             "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
             "CF (Stimulus Version)": whichStim,
             "CF (Correct Answer)": corans,
+            "CF (Correct Answer Syllables)": currentAnswerSyllablesArray, 
+            "CF (Display Syllable Indices)": currentAnswerSyllableIndices, 
             "CF (Overlearning)": d(lastq.showOverlearningText, false),
             "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
             "CF (Start Latency)": d(startLatency, 0),
