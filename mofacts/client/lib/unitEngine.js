@@ -248,9 +248,16 @@ function modelUnitEngine() {
                 clozeAnswer += syllablesArray[index];
                 clozeAnswerNoUnderscores += syllablesArray[index];
             }else{
-                clozeAnswer += "____";
-                clozeAnswerOnlyUnderscores += "____";
-                clozeMissingSyllables += syllablesArray[index];
+                // Handle underscores for syllable array elements that contain whitespace
+                if (syllablesArray[index].indexOf(' ') >= 0) {
+                    clozeAnswer += "__ __";
+                    clozeAnswerOnlyUnderscores += "__ __"
+                    clozeMissingSyllables += syllablesArray[index];
+                } else {
+                    clozeAnswer += "____";
+                    clozeAnswerOnlyUnderscores += "____";
+                    clozeMissingSyllables += syllablesArray[index];
+                }
             }
 
             reconstructedAnswer += syllablesArray[index];
