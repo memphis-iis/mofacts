@@ -30,6 +30,9 @@ export class DynamicTdfGenerator {
     /** @private @const {array} */
     this.stimFileClusters_ = this.getStimFileClusters(this.parentStimFileName_);
 
+    /** @private {object} **/
+    this.orderGroupValuesMap_ = {};
+
     /** @private {object} */
     this.generatedTdf_ = {
       isMultiTdf: true,
@@ -46,11 +49,16 @@ export class DynamicTdfGenerator {
    * @returns {object}
    */
   getGeneratedTdf() {
+    this.setOrderGroupValuesMap();
     this.parentGeneratedTdfs_.forEach(spec => {
-      this.generatedTdf_.subTdfs.push({
-        lessonName: spec.name,
-        clusterList: this.getBuiltClusterList(spec)
-      })
+      let clusterList = this.getBuiltClusterList(spec)
+
+      if (!_.isEmpty(clusterList)) { // Ignore cluster lists where criteria was not met
+        this.generatedTdf_.subTdfs.push({
+          lessonName: spec.name,
+          clusterList: clusterList
+        })
+      }
     });
     return this.generatedTdf_;
   }
@@ -104,7 +112,7 @@ export class DynamicTdfGenerator {
     let isIncludedStimCluster = false;
     if (tags && tags.length) {
       tags.forEach(tag => {
-        let tagOrderGroup = !_.isEmpty(tag.orderGroup[0]) 
+        let tagOrderGroup = this.isValidOrderGroup(tag.orderGroup[0]) 
           ? parseInt(tag.orderGroup[0]) : -1;
         let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
           ? parseInt(tag.weightGroup[0]) : -1;
@@ -122,6 +130,42 @@ export class DynamicTdfGenerator {
       });
     }
     return isIncludedStimCluster;
+  }
+
+  /**
+   * Determine if an order group is valid based on the criteria
+   * 1. Order group exists in stim object
+   * 2. Stim object has at least 6 items in that order group
+   * @param {boolean}
+   */
+  isValidOrderGroup(orderGroupTag) {
+    if (_.isEmpty(orderGroupTag)) return false;
+
+    let orderGroup = parseInt(orderGroupTag);
+    if (this.orderGroupValuesMap_[orderGroup] 
+      && this.orderGroupValuesMap_[orderGroup] > 5) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Set a map of all order group value counts
+   * This map is used to determine TDF order group validity 
+   */
+  setOrderGroupValuesMap() {
+    this.stimFileClusters_.forEach(cluster => {
+      if (cluster.tags && cluster.tags[0].orderGroup) {
+        let orderGroupValueKey = cluster.tags[0].orderGroup[0].toString();
+        if (this.orderGroupValuesMap_[orderGroupValueKey]) {
+          let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
+          this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;
+        } else {
+          this.orderGroupValuesMap_[orderGroupValueKey] = 1;
+        }
+      }
+    });
   }
 
   /**
