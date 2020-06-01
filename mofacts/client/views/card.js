@@ -1183,6 +1183,16 @@ function handleUserInput(e, source, simAnswerCorrect) {
       //appropriate time
       var reviewBegin = Date.now();
       var answerLogAction = isTimeout ? "[timeout]" : "answer";
+      var currentAnswerSyllables;
+      var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
+      if(typeof(sessCurrentAnswerSyllables) != "undefined"){
+        currentAnswerSyllables = {
+          syllables:sessCurrentAnswerSyllables.syllables,
+          count:sessCurrentAnswerSyllables.syllables.length,
+          displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
+        };
+      }
+
       // var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
       var answerLogRecord = {
           'questionIndex': _.intval(Session.get("questionIndex"), -1),
@@ -1207,7 +1217,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
           'forceCorrectFeedback': "",
           'audioInputEnabled':Session.get("audioEnabled") || false,
           'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
-          'currentAnswerSyllables':Session.get("currentAnswerSyllables") || ""
+          'currentAnswerSyllables':currentAnswerSyllables || ""
       };
       var writeAnswerLog = function() {
           var realReviewLatency = Date.now() - reviewBegin;

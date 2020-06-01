@@ -80,6 +80,7 @@
         "CF (Stimulus Version)", //whichStim
         "CF (Correct Answer)", //CF correctAnswer
         "CF (Correct Answer Syllables)", // CF syllable list for correct answer
+        "CF (Correct Answer Syllables Count)", // CF syllable list length
         "CF (Display Syllable Indices)", //CF the list of indices displayed to the user for subcloze hints
         "CF (Overlearning)", //CF isOverlearning
         "CF (Response Time)", //answerGivenTime
@@ -302,8 +303,9 @@
         let currentAnswerSyllablesArray = "";
         let currentAnswerSyllableIndices = "";
         if(typeof(lasta.currentAnswerSyllables) !== "undefined"){
-            currentAnswerSyllablesArray = lasta.currentAnswerSyllables.syllableArray;
+            currentAnswerSyllablesArray = lasta.currentAnswerSyllables.syllables;
             currentAnswerSyllableIndices = lasta.currentAnswerSyllables.displaySyllableIndices;
+            currentAnswerSyllableCount = lasta.currentAnswerSyllables.count;
         }
 
         return {
@@ -345,6 +347,7 @@
             "CF (Stimulus Version)": whichStim,
             "CF (Correct Answer)": corans,
             "CF (Correct Answer Syllables)": currentAnswerSyllablesArray, 
+            "CF (Correct Answer Syllables Count)": currentAnswerSyllableCount,
             "CF (Display Syllable Indices)": currentAnswerSyllableIndices, 
             "CF (Overlearning)": d(lastq.showOverlearningText, false),
             "CF (Response Time)": d(lasta.clientSideTimeStamp, 0),
