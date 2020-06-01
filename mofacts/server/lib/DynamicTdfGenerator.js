@@ -162,7 +162,6 @@ export class DynamicTdfGenerator {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;
         } else {
-          console.log(orderGroupValueKey);
           this.orderGroupValuesMap_[orderGroupValueKey] = 1;
         }
       }
