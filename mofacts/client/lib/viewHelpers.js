@@ -1,4 +1,4 @@
-export const curSemester = "SP_2020";
+export const curSemester = "SU_2020";
 
 search = function(key, prop, array){
   for(var i=0;i<array.length;i++){
