@@ -279,7 +279,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
         }
 
-        var fullAnswer = (typeof(lastq.originalQuestion) == "undefined" || lastq.originalQuestion == "") ? lastq.selectedAnswer : lastq.originalQuestion;
+        var fullAnswer = (typeof(lastq.originalAnswer) == "undefined" || lastq.originalAnswer == "") ? lastq.selectedAnswer : lastq.originalAnswer;
         var temp = _.trim(d(fullAnswer, '')).split('~');
         var correctAnswer = temp[0];
 
