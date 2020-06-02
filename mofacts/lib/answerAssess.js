@@ -207,7 +207,8 @@ Answers = {
     answerIsCorrect: function(userInput, answer, originalAnswer, setspec,callback) {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
-        let enhancedFeedback = getCurrentDeliveryParams().enhancedFeedback;
+        let feedbackType = getCurrentDeliveryParams().feedbackType;
+        let enhancedFeedback = feedbackType == "refutational";
 
         console.log("answerIsCorrect, enhancedFeedback: " + enhancedFeedback);
 

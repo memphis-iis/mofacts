@@ -1193,7 +1193,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
         };
       }
 
-      // var forceCorrectFeedback = getTestType() === "m" || getTestType() === "n";
+      let feedbackType = getCurrentDeliveryParams().feedbackType || "simple";
+
       var answerLogRecord = {
           'questionIndex': _.intval(Session.get("questionIndex"), -1),
           'index': _.intval(currCluster.clusterIndex, -1),
@@ -1217,7 +1218,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
           'forceCorrectFeedback': "",
           'audioInputEnabled':Session.get("audioEnabled") || false,
           'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
-          'currentAnswerSyllables':currentAnswerSyllables || ""
+          'currentAnswerSyllables':currentAnswerSyllables || "",
+          'feedbackType':feedbackType
       };
       var writeAnswerLog = function() {
           var realReviewLatency = Date.now() - reviewBegin;
