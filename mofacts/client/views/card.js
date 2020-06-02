@@ -1187,8 +1187,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
       var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
       if(typeof(sessCurrentAnswerSyllables) != "undefined"){
         currentAnswerSyllables = {
-          syllables:sessCurrentAnswerSyllables.syllables,
-          count:sessCurrentAnswerSyllables.syllables.length,
+          syllables:sessCurrentAnswerSyllables.syllableArray,
+          count:sessCurrentAnswerSyllables.syllableArray.length,
           displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
         };
       }
