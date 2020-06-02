@@ -533,4 +533,6 @@ p.admin-info-p {
     border-style: solid;
     border-width: thin;
     border-color: #7c9c62;
+    margin-left: 15%;
+    text-align: center;
 }
