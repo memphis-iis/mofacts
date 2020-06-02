@@ -27,6 +27,8 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
+import { last } from "./lib/fable-library.2.8.4/Seq";
+
 (function () { //Begin IIFE pattern
 
     // Define an ordering for the fields and the column name we'll put in the
@@ -277,8 +279,9 @@
             outcome = !!lasta.isCorrect ? "CORRECT" : "INCORRECT";
         }
 
-        var temp = _.trim(d(lastq.selectedAnswer, '')).split('~');
-        var corans = temp[0];
+        var fullAnswer = (typeof(lastq.originalQuestion) == "undefined" || lastq.originalQuestion == "") ? lastq.selectedAnswer : lastq.originalQuestion;
+        var temp = _.trim(d(fullAnswer, '')).split('~');
+        var correctAnswer = temp[0];
 
         //Track previous step names in the cross-call state so that we can
         //uniqify it (by user) by prepending a count
@@ -336,7 +339,7 @@
             "Tutor Response Subtype": '',
             "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedQuestion, ''),
             "KC Category(Default)": '',
-            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, corans), ''),
+            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, correctAnswer), ''),
             "KC Category(Cluster)": '',
             "CF (GUI Source)":d(lasta.guiSource,''),
             "CF (Audio Input Enabled)":lasta.audioInputEnabled,
@@ -345,7 +348,7 @@
             "CF (Stim File Index)": d(lastq.clusterIndex, -1),
             "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
             "CF (Stimulus Version)": whichStim,
-            "CF (Correct Answer)": corans,
+            "CF (Correct Answer)": correctAnswer,
             "CF (Correct Answer Syllables)": currentAnswerSyllablesArray, 
             "CF (Correct Answer Syllables Count)": currentAnswerSyllableCount,
             "CF (Display Syllable Indices)": currentAnswerSyllableIndices, 
