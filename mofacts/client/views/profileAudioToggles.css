@@ -18,3 +18,12 @@
 .switch-toggle input:checked + label {
   background: green;
 }
+
+#switch-input {
+  margin-left: 26px;
+}
+
+#switch-feedback {
+  margin-left: 10px;
+}
+
