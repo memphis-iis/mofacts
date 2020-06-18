@@ -153,7 +153,7 @@
         <div id="extracted-clozes">
           {{#each clozes}}
             <div id="cloze-display">
-            <input type="checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" />
+            <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" />
             {{#if isCurrentPair this.itemId}}
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
                 <span class="cur-sentence">{{this.cloze}}</span>
