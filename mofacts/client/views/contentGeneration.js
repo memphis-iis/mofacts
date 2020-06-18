@@ -1,4 +1,5 @@
 import { curSemester } from '../lib/viewHelpers';
+import { Tracker } from 'meteor/tracker';
 
 Session.set("curClozeSentencePairItemId", "");
 Session.set("clozeSentencePairs", {});
@@ -425,6 +426,16 @@ function deleteCloze(clozeID,itemID){
 Template.contentGeneration.onRendered(function(){
   console.log("contentGeneration rendered");
   setAllTdfs(getTdfOwnersMap);
+
+  let template = this;
+  template.autorun(() => {
+    Session.get("clozeSentencePairs");
+    Tracker.afterFlush(() => {
+      setTimeout(() => {
+        $('.cloze-checkbox').shiftSelectable();
+      });
+    });
+  });
 });
 
 Template.contentGeneration.events({
@@ -548,7 +559,7 @@ Template.contentGeneration.events({
     $('#edit-modal').modal('show');
   },
 
-  'click #select-delete': function(event) {
+  'change #select-delete': function(event) {
     var selectedForDelete = Session.get("selectedForDelete") || [];
 
     var selectedCloze = {
