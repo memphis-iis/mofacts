@@ -431,9 +431,7 @@ Template.contentGeneration.onRendered(function(){
   template.autorun(() => {
     Session.get("clozeSentencePairs");
     Tracker.afterFlush(() => {
-      setTimeout(() => {
-        $('.cloze-checkbox').shiftSelectable();
-      });
+      $('.cloze-checkbox').shiftSelectable();
     });
   });
 });

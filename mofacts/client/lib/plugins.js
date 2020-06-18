@@ -1,3 +1,4 @@
+// Cbox shift-select plugin - credit to Andrew Ray https://gist.github.com/AndrewRayCode/3784055
 $.fn.shiftSelectable = function() {
   var lastChecked,
       $boxes = this;
