@@ -75,6 +75,7 @@ sessionCleanUp = function() {
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
     Session.set("dialogueInputMode",false);
+    Session.set("dialogueHistory",undefined);
     Session.set("enableAudioPromptAndFeedback",false);
     Session.set("errorReportStart",undefined);
     Session.set("mainCardTimeoutStart",undefined);
