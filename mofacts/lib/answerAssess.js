@@ -324,11 +324,14 @@ dialogueCallbackSaver = undefined;
 dialogueUserAnswerSaver = undefined;
 
 let dialogueTransitionStatements = [
-    "That wasn’t right, so to help you build the knowledge lets chat about it for a little.",
-    "That wasn’t the answer we are looking for. To help you construct the understanding, lets have a short discussion.",
-    "Sorry, but that wasn’t quite right. Lets talk through this item.",
+    "That wasn’t right, so to help you build the knowledge let’s chat about it for a little.",
+    "That wasn’t the answer we are looking for. To help you construct the understanding, let’s have a short discussion.",
+    "Sorry, but that wasn’t quite right. Let’s talk through this item.",
     "Incorrect. Lets help you build that knowledge with a brief discussion.",
-    "The right answer is different. To get you started learning it, lets chat."
+    "The right answer is different. To get you started learning it, let’s chat.",
+    "Your answer was incorrect. Let’s talk about this some more.",
+    "Not quite. I’m going to ask you some follow up questions."
+
 ]          
 
 let dialogueTransitionInstructions = "  Press the enter key to continue.";
