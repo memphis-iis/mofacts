@@ -318,6 +318,8 @@ Answers = {
     },
 };
 
+dialogueUserPrompts = [];
+dialogueUserAnswers = [];
 dialogueContext = undefined;
 dialogueCurrentQuestionSaver = undefined;
 dialogueCallbackSaver = undefined;
@@ -370,6 +372,7 @@ dialogueLoop = function(err,res){
         }
         updateDialogueDisplay(newDisplay);
         dialogueContext = result;
+        dialogueUserPrompts.push(newDisplay);
         //wait for user input
     }  
 }
