@@ -14,6 +14,7 @@
  * rest are matches for potential incorrect answers.
  * */
 
+
 function capFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -208,9 +209,6 @@ Answers = {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
         let feedbackType = getCurrentDeliveryParams().feedbackType;
-        let enhancedFeedback = feedbackType == "refutational";
-
-        console.log("answerIsCorrect, enhancedFeedback: " + enhancedFeedback);
 
         checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
             let answerDisplay = originalAnswer || correctAnswer;
@@ -268,17 +266,107 @@ Answers = {
             fullTextIsCorrect = checkAnswer(userInput,originalAnswer,originalAnswer);
         }
 
-        if(!fullTextIsCorrect.isCorrect && enhancedFeedback){
-            let answerToCheck = originalAnswer || answer;
-            Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
-                console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
-                if(typeof(err) == "undefined" && res != null){
-                    fullTextIsCorrect.matchText = res;
-                }
-                callback(fullTextIsCorrect);
-            });
+        if(!fullTextIsCorrect.isCorrect){
+            switch(feedbackType){
+                case "refutational":
+                    let answerToCheck = originalAnswer || answer;
+                    Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
+                        console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
+                        if(typeof(err) != "undefined"){
+                            console.log("error with refutational feedback, meteor call: ",err);
+                            console.log(res);
+                            callback(fullTextIsCorrect);
+                        }else if(res.tag != 0){
+                            console.log("error with refutational feedback, feedback call: " + res.name);
+                            console.log(res);
+                            callback(fullTextIsCorrect);
+                        }else if(res.tag == 0){
+                            let refutationalFeedback = res.fields[0].feedback;
+                            
+                            if(typeof(refutationalFeedback) != "undefined" && refutationalFeedback != null){
+                                fullTextIsCorrect.matchText = res;
+                            }
+                            callback(fullTextIsCorrect);
+                        }  
+                    });
+                break;
+                case "dialogue":
+                    Session.set("clozeQuestionParts",undefined);
+                    Session.set("dialogueInputMode",true);
+                    dialogueUserAnswerSaver = JSON.parse(JSON.stringify(userInput));
+                    dialogueCurrentQuestionSaver = JSON.parse(JSON.stringify(Session.get("currentQuestion")));
+                    let clozeItem = Session.get("originalQuestion") || dialogueCurrentQuestionSaver;
+                    let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
+                    dialogueContext = {
+                        "ClozeItem": clozeItem,
+                        "ClozeAnswer": clozeAnswer
+                    };
+
+                    let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+                    updateDialogueDisplay(transitionStatement);
+
+                    dialogueCallbackSaver = partialApplication(callback,fullTextIsCorrect);
+                    //wait for user to hit enter to make sure they read the transition statement
+                break;
+                default:
+                    callback(fullTextIsCorrect)
+            }
+            
         }else{
             callback(fullTextIsCorrect);
         }
     },
 };
+
+dialogueContext = undefined;
+dialogueCurrentQuestionSaver = undefined;
+dialogueCallbackSaver = undefined;
+dialogueUserAnswerSaver = undefined;
+
+let dialogueTransitionStatements = [
+    "That wasn’t right, so to help you build the knowledge lets chat about it for a little.",
+    "That wasn’t the answer we are looking for. To help you construct the understanding, lets have a short discussion.",
+    "Sorry, but that wasn’t quite right. Lets talk through this item.",
+    "Incorrect. Lets help you build that knowledge with a brief discussion.",
+    "The right answer is different. To get you started learning it, lets chat."
+]          
+
+let dialogueTransitionInstructions = "  Press the enter key to continue.";
+
+let endDialogueNotice = " Press the enter key to continue practice.";
+
+function updateDialogueDisplay(newDisplay){
+    //set prompt and feedback here
+    Session.set("currentQuestion",newDisplay);
+    Tracker.afterFlush(function(){
+        console.log("dialogue after flush");
+        $("#dialogueUserAnswer").focus();
+    });
+}
+
+function partialApplication(func,arg){
+  return () => func(arg);
+}
+
+dialogueLoop = function(err,res){
+    window.test = res;
+    if(typeof(err) != "undefined"){
+        console.log("error with dialogue loop, meteor call: ",err);
+        console.log(res);
+        callback(fullTextIsCorrect);
+    }else if(res.tag != 0){
+        console.log("error with dialog loop, dialogue call: " + res.name);
+        console.log(res);
+        callback(fullTextIsCorrect);
+    }else if(res.tag == 0){
+        let result = res.fields[0];
+        let newDisplay = result.Display;
+        
+        if(result.Finished){
+            newDisplay = result.Display + endDialogueNotice;
+        }
+        updateDialogueDisplay(newDisplay);
+        dialogueContext = result;
+        //wait for user input
+    }  
+}
