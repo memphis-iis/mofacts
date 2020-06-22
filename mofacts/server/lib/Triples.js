@@ -6,9 +6,6 @@ Object.defineProperty(exports, "__esModule", {
 exports.Tag$reflection = Tag$reflection;
 exports.Triple$reflection = Triple$reflection;
 exports.InternalAPI$reflection = InternalAPI$reflection;
-exports.collapseDependencies = collapseDependencies;
-exports.GetDependentNodes = GetDependentNodes;
-exports.srlArgToIndexMap = srlArgToIndexMap;
 exports.tripleIndicesFromSrlTags = tripleIndicesFromSrlTags;
 exports.triplesFromSentence = triplesFromSentence;
 exports.GetTriples = GetTriples;
@@ -20,15 +17,11 @@ var _Reflection = require("./fable-library.2.8.4/Reflection");
 
 var _AllenNLP = require("./AllenNLP");
 
-var _DependencyCollapser = require("./DependencyCollapser");
+var _Map = require("./fable-library.2.8.4/Map");
 
 var _Array = require("./fable-library.2.8.4/Array");
 
-var _String = require("./fable-library.2.8.4/String");
-
 var _Util = require("./fable-library.2.8.4/Util");
-
-var _Map = require("./fable-library.2.8.4/Map");
 
 var _Decode = require("./Thoth.Json.4.0.0/Decode");
 
@@ -71,67 +64,17 @@ function InternalAPI$reflection() {
   return (0, _Reflection.record)("Triples.InternalAPI", [], InternalAPI, () => [["sentences", (0, _Reflection.array)((0, _AllenNLP.SentenceAnnotation$reflection)())], ["coreference", (0, _AllenNLP.Coreference$reflection)()], ["triples", (0, _Reflection.array)((0, _Reflection.array)(Triple$reflection()))]]);
 }
 
-function collapseDependencies(sa) {
-  let ruleTokens;
-  let array$$1;
-  array$$1 = (0, _Array.mapIndexed)(function mapping(i, w) {
-    return (0, _DependencyCollapser.Rules$002EToken$$$Create$$Z2BAB6A85)(i, w, sa.dep.pos[i], sa.dep.predicted_dependencies[i], sa.dep.predicted_heads[i]);
-  }, sa.dep.words, Array);
-  ruleTokens = (0, _Array.toList)(array$$1);
-  const patternInput = (0, _DependencyCollapser.Collapser$$$CollapseTokens)(ruleTokens);
-  return patternInput[1];
-}
-
-function GetDependentNodes(start, sa$$1) {
-  const dependents = [];
-
-  for (let idx = 0; idx <= sa$$1.dep.predicted_heads.length - 1; idx++) {
-    const h = sa$$1.dep.predicted_heads[idx] | 0;
-    let hbar = h | 0;
-
-    while (hbar !== start ? hbar !== 0 : false) {
-      hbar = sa$$1.dep.predicted_heads[hbar];
-    }
-
-    if (hbar === start) {
-      void dependents.push(h);
-    }
-  }
-
-  return dependents.slice();
-}
-
-function srlArgToIndexMap(srlTags) {
-  let elements;
-  let array$$3;
-  array$$3 = (0, _Array.mapIndexed)(function mapping$$1(i$$1, t) {
-    return [(0, _String.substring)(t, t.indexOf("-")), i$$1];
-  }, srlTags, Array);
-  elements = (0, _Array.groupBy)(function projection(tuple) {
-    return tuple[0];
-  }, array$$3, Array, {
-    Equals($x$$1, $y$$2) {
-      return $x$$1 === $y$$2;
-    },
-
-    GetHashCode: _Util.structuralHash
-  });
-  return (0, _Map.ofArray)(elements, {
-    Compare: _Util.comparePrimitives
-  });
-}
-
-function tripleIndicesFromSrlTags(srlTags$$1) {
+function tripleIndicesFromSrlTags(srlTags) {
   let map;
-  map = srlArgToIndexMap(srlTags$$1);
+  map = (0, _AllenNLP.srlArgToIndexMap)(srlTags);
   let sortedArgs;
-  let array$$5;
-  let array$$4;
-  array$$4 = (0, _Map.toArray)(map);
-  array$$5 = (0, _Array.map)(function mapping$$2(tuple$$1) {
-    return tuple$$1[0];
-  }, array$$4, Array);
-  sortedArgs = array$$5.filter(function predicate(a) {
+  let array$$1;
+  let array;
+  array = (0, _Map.toArray)(map);
+  array$$1 = (0, _Array.map)(function mapping(tuple) {
+    return tuple[0];
+  }, array, Array);
+  sortedArgs = array$$1.filter(function predicate(a) {
     return a.indexOf("ARG") === 0;
   });
 
@@ -142,59 +85,59 @@ function tripleIndicesFromSrlTags(srlTags$$1) {
   }
 }
 
-function triplesFromSentence(sa$$2) {
+function triplesFromSentence(sa) {
   let copTuples;
-  let array$$7;
-  array$$7 = (0, _Array.indexed)(sa$$2.dep.predicted_dependencies);
-  copTuples = array$$7.filter(function predicate$$1(tupledArg) {
+  let array$$3;
+  array$$3 = (0, _Array.indexed)(sa.dep.predicted_dependencies);
+  copTuples = array$$3.filter(function predicate$$1(tupledArg) {
     return tupledArg[1] === "cop";
   });
   let candidateTriples;
-  candidateTriples = (0, _Array.map)(function mapping$$3(v) {
+  candidateTriples = (0, _Array.map)(function mapping$$1(v) {
     return tripleIndicesFromSrlTags(v.tags);
-  }, sa$$2.srl.verbs, Array);
-  return (0, _Array.collect)(function mapping$$7(tupledArg$$1) {
+  }, sa.srl.verbs, Array);
+  return (0, _Array.collect)(function mapping$$5(tupledArg$$1) {
     return (0, _Array.choose)(function chooser(tupledArg$$2) {
-      var $target$$22, edge, start$$1, stop;
+      var $target$$9, edge, start, stop;
 
       if (tupledArg$$2[0] != null) {
         if (tupledArg$$2[1] != null) {
           if (tupledArg$$2[2] != null) {
-            $target$$22 = 0;
+            $target$$9 = 0;
             edge = tupledArg$$2[1];
-            start$$1 = tupledArg$$2[0];
+            start = tupledArg$$2[0];
             stop = tupledArg$$2[2];
           } else {
-            $target$$22 = 1;
+            $target$$9 = 1;
           }
         } else {
-          $target$$22 = 1;
+          $target$$9 = 1;
         }
       } else {
-        $target$$22 = 1;
+        $target$$9 = 1;
       }
 
-      switch ($target$$22) {
+      switch ($target$$9) {
         case 0:
           {
             if (edge.some(function predicate$$2(tupledArg$$3) {
               return tupledArg$$3[1] === tupledArg$$1[0];
             })) {
               let arg0;
-              let start$$2;
-              start$$2 = (0, _Array.map)(function mapping$$4(tuple$$2) {
-                return tuple$$2[1];
-              }, start$$1, Int32Array);
+              let start$$1;
+              start$$1 = (0, _Array.map)(function mapping$$2(tuple$$1) {
+                return tuple$$1[1];
+              }, start, Int32Array);
               let edge$$1;
-              edge$$1 = (0, _Array.map)(function mapping$$5(tuple$$3) {
-                return tuple$$3[1];
+              edge$$1 = (0, _Array.map)(function mapping$$3(tuple$$2) {
+                return tuple$$2[1];
               }, edge, Int32Array);
               let stop$$1;
-              stop$$1 = (0, _Array.map)(function mapping$$6(tuple$$4) {
-                return tuple$$4[1];
+              stop$$1 = (0, _Array.map)(function mapping$$4(tuple$$3) {
+                return tuple$$3[1];
               }, stop, Int32Array);
               const trace = new _Types.List(new Tag(0, "Trace", "copIndex:" + (0, _Util.int32ToString)(tupledArg$$1[0])), new _Types.List());
-              arg0 = new Triple(start$$2, edge$$1, stop$$1, false, trace);
+              arg0 = new Triple(start$$1, edge$$1, stop$$1, false, trace);
               return arg0;
             } else {
               return null;
