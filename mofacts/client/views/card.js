@@ -433,10 +433,19 @@ Template.card.events({
           Tracker.afterFlush(function(){
             $("#userAnswer").val(dialogueUserAnswerSaver);
           })
+          dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
+          dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
+          dialogueUserPrompts = [];
+          dialogueUserAnswers = [];
+          Session.set("dialogueHistory",dialogueContext);
           dialogueCallbackSaver();
         }else{
           let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
           $("#dialogueUserAnswer").val("");
+          //First enter press is navigation, so don't record the input
+          if(typeof(dialogueContext.LastStudentAnswer) != "undefined"){
+            dialogueUserAnswers.push(answer);
+          }
           dialogueContext.LastStudentAnswer = answer;
           Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
         }
@@ -1222,6 +1231,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
       }
 
       let feedbackType = getCurrentDeliveryParams().feedbackType || "simple";
+      let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
 
       var answerLogRecord = {
           'questionIndex': _.intval(Session.get("questionIndex"), -1),
@@ -1247,8 +1257,10 @@ function handleUserInput(e, source, simAnswerCorrect) {
           'audioInputEnabled':Session.get("audioEnabled") || false,
           'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
           'currentAnswerSyllables':currentAnswerSyllables || "",
-          'feedbackType':feedbackType
+          'feedbackType':feedbackType,
+          'dialogueHistory':dialogueHistory
       };
+      Session.set("dialogueHistory",undefined);
       var writeAnswerLog = function() {
           var realReviewLatency = Date.now() - reviewBegin;
           if (realReviewLatency > 0) {
