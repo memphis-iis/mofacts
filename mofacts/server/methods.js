@@ -1,4 +1,5 @@
 import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 
@@ -7,7 +8,6 @@ import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 //The jshint inline option above suppresses a warning about using sqaure
 //brackets instead of dot notation - that's because we prefer square brackets
 //for creating some MongoDB queries
-
 
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
@@ -563,6 +563,14 @@ Meteor.startup(function () {
             return result;
           },
 
+          getDialogFeedbackForAnswer:function(state){
+            let feedback = TutorialDialogue.GetDialogue(state);
+            return feedback;
+            // Display: text to show the student. Show this always.
+            // Finished: if true, continue normal MoFaCTS operation; if false, get a student input
+            // LastStudentAnswer: Mutate this with student input you just got
+          },
+
           updateStimSyllableCache:function(stimFileName,answers){
             console.log("updateStimSyllableCache");
             let curStimSyllables = StimSyllables.findOne({filename:stimFileName});
@@ -1072,7 +1080,7 @@ Meteor.startup(function () {
                 'action': 'None'
             };
 
-            try {
+            //try {
                 if (!type)         throw "Type required for File Save";
                 if (!filename)     throw "Filename required for File Save";
                 if (!filecontents) throw "File Contents required for File Save";
@@ -1161,11 +1169,11 @@ Meteor.startup(function () {
 
                 results.result = true;
                 results.errmsg = "";
-            }
-            catch(e) {
-                results.result = false;
-                results.errmsg = e;
-            }
+            // }
+            // catch(e) {
+            //     results.result = false;
+            //     results.errmsg = e;
+            // }
 
             return results;
         },

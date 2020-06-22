@@ -378,7 +378,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'unitMode': 'default',
         'studyFirst':false,
         'enhancedFeedback':false,
-        'checkOtherAnswers':false
+        'checkOtherAnswers':false,
+        'feedbackType':''
     };
 
     //We've defined defaults - also define translatations for values

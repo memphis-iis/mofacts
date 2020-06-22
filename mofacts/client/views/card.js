@@ -87,6 +87,7 @@ var buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
 cachedSyllables = null;
+let ENTER_KEY = 13;
 
 function clearButtonList() {
     //In theory, they could put something without temp defined and we would
@@ -419,9 +420,32 @@ Template.card.events({
         handleUserInput(e , "keypress");
     },
 
+    'keypress #dialogueUserAnswer' : function(e){
+      let key = e.keyCode || e.which;
+      if (key == ENTER_KEY) {
+        if(dialogueContext.Finished){
+          //Press enter key to exit dialogue loop
+          console.log("dialogue loop finished, restoring state");
+          Session.set("dialogueInputMode",false);
+          //restore session state
+          Session.set("currentQuestion",dialogueCurrentQuestionSaver);
+          console.log("finished, exiting dialogue loop");
+          Tracker.afterFlush(function(){
+            $("#userAnswer").val(dialogueUserAnswerSaver);
+          })
+          dialogueCallbackSaver();
+        }else{
+          let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
+          $("#dialogueUserAnswer").val("");
+          dialogueContext.LastStudentAnswer = answer;
+          Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        }
+      }
+    },
+
     'keypress #userForceCorrect': function(e) {
         var key = e.keyCode || e.which;
-        if (key == 13) {
+        if (key == ENTER_KEY) {
             // Enter key - see if gave us the correct answer
             var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
           var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
@@ -576,6 +600,10 @@ Template.card.helpers({
         else {
             return Meteor.user().username;
         }
+    },
+
+    'dialogueInput': function(){
+      return Session.get("dialogueInputMode");
     },
 
     'subWordClozeCurrentQuestionExists': function(){
@@ -1086,7 +1114,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     var isTimeout = false;
     var key;
     if (source === "timeout") {
-        key = 13;
+        key = ENTER_KEY;
         isTimeout = true;
     }
     else if (source === "keypress") {
@@ -1098,12 +1126,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
     }
     else if (source === "buttonClick" || source === "simulation" || source === "voice") {
         //to save space we will just go ahead and act like it was a key press.
-        key = 13;
+        key = ENTER_KEY;
     }
 
     //If we haven't seen the correct keypress, then we want to reset our
     //timeout and leave
-    if (key != 13) {
+    if (key != ENTER_KEY) {
         resetMainCardTimeout();
         return;
     }
@@ -2072,14 +2100,14 @@ simulateUserAnswerEnterKeyPress = function(){
     press.bubbles = true;
     press.cancelBubble = false;
     press.cancelable = true;
-    press.charCode = 13;
+    press.charCode = ENTER_KEY;
     press.clipboardData = undefined;
     press.ctrlKey = false;
     press.currentTarget = $textBox[0];
     press.defaultPrevented = false;
     press.detail = 0;
     press.eventPhase = 2;
-    press.keyCode = 13;
+    press.keyCode = ENTER_KEY;
     press.keyIdentifier = "";
     press.keyLocation = 0;
     press.layerX = 0;
@@ -2093,7 +2121,7 @@ simulateUserAnswerEnterKeyPress = function(){
     press.target = $textBox[0];
     press.type = "keypress";
     press.view = Window;
-    press.which = 13;
+    press.which = ENTER_KEY;
 
     $textBox.trigger(press);
     console.log("SIMULATED ENTER KEY PRESS");

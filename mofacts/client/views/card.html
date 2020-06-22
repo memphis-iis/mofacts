@@ -82,7 +82,11 @@
             {{#unless buttonTrial}}
             <div class="row" id="textEntryRow">
                 <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                    {{> inputF}}
+                    {{#if dialogueInput}}
+                        {{> dialogueInputF}}
+                    {{else}}
+                        {{> inputF}}
+                    {{/if}}
                 </div>
             </div>  <!-- close row -->
             {{/unless}}
