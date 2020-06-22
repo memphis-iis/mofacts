@@ -12,19 +12,31 @@ exports.Coreference$reflection = Coreference$reflection;
 exports.SentenceCoreference$reflection = SentenceCoreference$reflection;
 exports.SentenceAnnotation$reflection = SentenceAnnotation$reflection;
 exports.DocumentAnnotation$reflection = DocumentAnnotation$reflection;
+exports.DocumentAnnotation$$$CreateEmpty = DocumentAnnotation$$$CreateEmpty;
+exports.Entailment$reflection = Entailment$reflection;
+exports.Entailment$$$CreateEmpty = Entailment$$$CreateEmpty;
 exports.SentenceRequest$reflection = SentenceRequest$reflection;
 exports.DocumentRequest$reflection = DocumentRequest$reflection;
 exports.TextRequest$reflection = TextRequest$reflection;
+exports.EntailmentRequest$reflection = EntailmentRequest$reflection;
 exports.GetCoreference = GetCoreference;
 exports.GetSRL = GetSRL;
 exports.GetDependencyParse = GetDependencyParse;
 exports.GetSentences = GetSentences;
 exports.GetForSentences = GetForSentences;
+exports.GetTextualEntailment = GetTextualEntailment;
 exports.RegexReplace = RegexReplace;
 exports.Split = Split;
 exports.CleanText = CleanText;
 exports.GetNLP = GetNLP;
-exports.endpoints = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
+exports.collapseDependencies = collapseDependencies;
+exports.getDependentIndices = getDependentIndices;
+exports.srlArgToIndexMap = srlArgToIndexMap;
+exports.getSubjectIndex = getSubjectIndex;
+exports.getBeRootIndex = getBeRootIndex;
+exports.getInvertAuxIndex = getInvertAuxIndex;
+exports.getPredicateIndex = getPredicateIndex;
+exports.endpoints = exports.EntailmentRequest = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.Entailment = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
 
 require("isomorphic-fetch");
 
@@ -58,6 +70,8 @@ var _String = require("./fable-library.2.8.4/String");
 
 var _Map = require("./fable-library.2.8.4/Map");
 
+var _DependencyCollapser = require("./DependencyCollapser");
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 function Promisify(input) {
@@ -66,16 +80,17 @@ function Promisify(input) {
   }));
 }
 
-const Endpoints = (0, _Types.declare)(function AllenNLP_Endpoints(arg1, arg2, arg3, arg4) {
+const Endpoints = (0, _Types.declare)(function AllenNLP_Endpoints(arg1, arg2, arg3, arg4, arg5) {
   this.SRL = arg1;
   this.Coreference = arg2;
   this.DependencyParser = arg3;
   this.SentenceSplitter = arg4;
+  this.TextualEntailment = arg5;
 }, _Types.Record);
 exports.Endpoints = Endpoints;
 
 function Endpoints$reflection() {
-  return (0, _Reflection.record)("AllenNLP.Endpoints", [], Endpoints, () => [["SRL", _Reflection.string], ["Coreference", _Reflection.string], ["DependencyParser", _Reflection.string], ["SentenceSplitter", _Reflection.string]]);
+  return (0, _Reflection.record)("AllenNLP.Endpoints", [], Endpoints, () => [["SRL", _Reflection.string], ["Coreference", _Reflection.string], ["DependencyParser", _Reflection.string], ["SentenceSplitter", _Reflection.string], ["TextualEntailment", _Reflection.string]]);
 }
 
 const SRLVerb = (0, _Types.declare)(function AllenNLP_SRLVerb(arg1, arg2, arg3) {
@@ -161,6 +176,28 @@ function DocumentAnnotation$reflection() {
   return (0, _Reflection.record)("AllenNLP.DocumentAnnotation", [], DocumentAnnotation, () => [["sentences", (0, _Reflection.array)(SentenceAnnotation$reflection())], ["coreference", Coreference$reflection()]]);
 }
 
+function DocumentAnnotation$$$CreateEmpty() {
+  return new DocumentAnnotation([], null);
+}
+
+const Entailment = (0, _Types.declare)(function AllenNLP_Entailment(arg1, arg2, arg3, arg4, arg5, arg6) {
+  this.h2p_attention = arg1;
+  this.hypothesis_tokens = arg2;
+  this.label_logits = arg3;
+  this.label_probs = arg4;
+  this.p2h_attention = arg5;
+  this.premise_tokens = arg6;
+}, _Types.Record);
+exports.Entailment = Entailment;
+
+function Entailment$reflection() {
+  return (0, _Reflection.record)("AllenNLP.Entailment", [], Entailment, () => [["h2p_attention", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.float64))], ["hypothesis_tokens", (0, _Reflection.array)(_Reflection.string)], ["label_logits", (0, _Reflection.array)(_Reflection.float64)], ["label_probs", (0, _Reflection.array)(_Reflection.float64)], ["p2h_attention", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.float64))], ["premise_tokens", (0, _Reflection.array)(_Reflection.string)]]);
+}
+
+function Entailment$$$CreateEmpty() {
+  return new Entailment([], [], new Float64Array([]), new Float64Array([]), [], []);
+}
+
 const SentenceRequest = (0, _Types.declare)(function AllenNLP_SentenceRequest(arg1) {
   this.sentence = arg1;
 }, _Types.Record);
@@ -189,7 +226,17 @@ function TextRequest$reflection() {
   return (0, _Reflection.record)("AllenNLP.TextRequest", [], TextRequest, () => [["text", _Reflection.string], ["model", _Reflection.string]]);
 }
 
-const endpoints = new Endpoints("https://allennlp.olney.ai/predict/semantic-role-labeling", "https://allennlp.olney.ai/predict/coreference-resolution", "https://allennlp.olney.ai/predict/dependency-parsing", "https://spacy.olney.ai/sents");
+const EntailmentRequest = (0, _Types.declare)(function AllenNLP_EntailmentRequest(arg1, arg2) {
+  this.hypothesis = arg1;
+  this.premise = arg2;
+}, _Types.Record);
+exports.EntailmentRequest = EntailmentRequest;
+
+function EntailmentRequest$reflection() {
+  return (0, _Reflection.record)("AllenNLP.EntailmentRequest", [], EntailmentRequest, () => [["hypothesis", _Reflection.string], ["premise", _Reflection.string]]);
+}
+
+const endpoints = new Endpoints("https://allennlp.olney.ai/predict/semantic-role-labeling", "https://allennlp.olney.ai/predict/coreference-resolution", "https://allennlp.olney.ai/predict/dependency-parsing", "https://spacy.olney.ai/sents", "https://allennlp.olney.ai/predict/textual-entailment");
 exports.endpoints = endpoints;
 
 function GetCoreference(input$$1) {
@@ -262,6 +309,22 @@ function GetForSentences(service, sentences) {
     return service(sentence);
   }, sentences);
   return Promise.all(pr);
+}
+
+function GetTextualEntailment(premise, hypothesis) {
+  return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.TextualEntailment, new EntailmentRequest(hypothesis, premise), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+      ResolveType() {
+        return Entailment$reflection();
+      }
+
+    }, {
+      ResolveType() {
+        return EntailmentRequest$reflection();
+      }
+
+    });
+  }));
 }
 
 function RegexReplace(pattern, replacement, input$$5) {
@@ -471,4 +534,115 @@ function GetNLP(chunksJsonOption, inputText) {
       }
     });
   }));
+}
+
+function collapseDependencies(sa) {
+  let ruleTokens;
+  let array$$18;
+  array$$18 = (0, _Array.mapIndexed)(function mapping$$12(i$$3, w) {
+    return (0, _DependencyCollapser.Rules$002EToken$$$Create$$Z2BAB6A85)(i$$3, w, sa.dep.pos[i$$3], sa.dep.predicted_dependencies[i$$3], sa.dep.predicted_heads[i$$3]);
+  }, sa.dep.words, Array);
+  ruleTokens = (0, _Array.toList)(array$$18);
+  const patternInput$$1 = (0, _DependencyCollapser.Collapser$$$CollapseTokens)(ruleTokens);
+  return patternInput$$1[1];
+}
+
+function getDependentIndices(start, sa$$1) {
+  const dependents = [];
+
+  for (let i$$4 = 0; i$$4 <= sa$$1.dep.predicted_heads.length - 1; i$$4++) {
+    let hbar = sa$$1.dep.predicted_heads[i$$4] - 1 | 0;
+
+    while (hbar !== start ? hbar !== -1 : false) {
+      hbar = sa$$1.dep.predicted_heads[hbar] - 1;
+    }
+
+    if (hbar === start ? true : i$$4 === start) {
+      void dependents.push(i$$4);
+    }
+  }
+
+  return dependents.slice();
+}
+
+function srlArgToIndexMap(srlTags) {
+  let elements$$1;
+  let array$$20;
+  array$$20 = (0, _Array.mapIndexed)(function mapping$$13(i$$5, t) {
+    return [(0, _String.substring)(t, t.indexOf("-") + 1), i$$5];
+  }, srlTags, Array);
+  elements$$1 = (0, _Array.groupBy)(function projection(tuple) {
+    return tuple[0];
+  }, array$$20, Array, {
+    Equals($x$$11, $y$$12) {
+      return $x$$11 === $y$$12;
+    },
+
+    GetHashCode: _Util.structuralHash
+  });
+  return (0, _Map.ofArray)(elements$$1, {
+    Compare: _Util.comparePrimitives
+  });
+}
+
+function getSubjectIndex(sa$$2) {
+  let rootIndex;
+  rootIndex = sa$$2.dep.predicted_heads.findIndex(function predicate$$1(h) {
+    return h === 0;
+  });
+  const array$$22 = sa$$2.dep.predicted_dependencies.slice(0, rootIndex + 1);
+  return (0, _Array.tryFindIndexBack)(function predicate$$2(h$$1) {
+    return h$$1 === "nsubj";
+  }, array$$22);
+}
+
+function getBeRootIndex(sa$$3) {
+  let rootIndex$$1;
+  rootIndex$$1 = sa$$3.dep.predicted_heads.findIndex(function predicate$$3(h$$2) {
+    return h$$2 === 0;
+  });
+  return (0, _Array.tryFindIndex)(function predicate$$4(h$$3) {
+    if (h$$3 === rootIndex$$1) {
+      return sa$$3.dep.predicted_dependencies[h$$3] === "cop";
+    } else {
+      return false;
+    }
+  }, sa$$3.dep.predicted_heads);
+}
+
+function getInvertAuxIndex(sa$$4) {
+  let rootIndex$$2;
+  rootIndex$$2 = sa$$4.dep.predicted_heads.findIndex(function predicate$$5(h$$4) {
+    return h$$4 === 0;
+  });
+  return (0, _Array.tryFindIndex)(function predicate$$6(h$$5) {
+    if (h$$5 === rootIndex$$2) {
+      return sa$$4.dep.predicted_dependencies[h$$5] === "aux";
+    } else {
+      return false;
+    }
+  }, sa$$4.dep.predicted_heads);
+}
+
+function getPredicateIndex(sa$$5) {
+  let rootIndex$$3;
+  rootIndex$$3 = sa$$5.dep.predicted_heads.findIndex(function predicate$$7(h$$6) {
+    return h$$6 === 0;
+  });
+
+  if (sa$$5.dep.pos[rootIndex$$3].indexOf("VB") === 0) {
+    let array$$29;
+    array$$29 = (0, _Array.mapIndexed)(function mapping$$14(i$$6, h$$7) {
+      return [i$$6, h$$7 - 1];
+    }, sa$$5.dep.predicted_heads, Array);
+    return (0, _Array.tryFindIndex)(function predicate$$8(tupledArg) {
+      if (tupledArg[1] === rootIndex$$3) {
+        return sa$$5.dep.predicted_dependencies[tupledArg[0]] === "dobj";
+      } else {
+        return false;
+      }
+    }, array$$29);
+  } else {
+    return rootIndex$$3;
+  }
 }
