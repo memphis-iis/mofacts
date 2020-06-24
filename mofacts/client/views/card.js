@@ -420,13 +420,19 @@ Template.card.events({
         handleUserInput(e , "keypress");
     },
 
-    'keypress #dialogueUserAnswer' : function(e){
-      let key = e.keyCode || e.which;
-      if (key == ENTER_KEY) {
-        if(dialogueContext.Finished){
-          //Press enter key to exit dialogue loop
+    'click #dialogueIntroExit' : function(e){
+      let dialogueLoopStage = Session.get("dialogueLoopStage");
+
+      switch(dialogueLoopStage){
+        case "intro":
+          //Enter dialogue loop
+          Session.set("dialogueLoopStage","insideLoop");
+          Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        break;
+        case "exit":
+          //Exit dialogue loop
           console.log("dialogue loop finished, restoring state");
-          Session.set("dialogueInputMode",false);
+          Session.set("dialogueLoopStage",undefined);
           //restore session state
           Session.set("currentQuestion",dialogueCurrentQuestionSaver);
           console.log("finished, exiting dialogue loop");
@@ -439,16 +445,18 @@ Template.card.events({
           dialogueUserAnswers = [];
           Session.set("dialogueHistory",dialogueContext);
           dialogueCallbackSaver();
-        }else{
-          let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
-          $("#dialogueUserAnswer").val("");
-          //First enter press is navigation, so don't record the input
-          if(typeof(dialogueContext.LastStudentAnswer) != "undefined"){
-            dialogueUserAnswers.push(answer);
-          }
-          dialogueContext.LastStudentAnswer = answer;
-          Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
-        }
+        break;
+      }
+    },
+
+    'keypress #dialogueUserAnswer' : function(e){
+      let key = e.keyCode || e.which;
+      if (key == ENTER_KEY) {
+        let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
+        $("#dialogueUserAnswer").val("");
+        dialogueUserAnswers.push(answer);
+        dialogueContext.LastStudentAnswer = answer;
+        Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
       }
     },
 
@@ -611,8 +619,8 @@ Template.card.helpers({
         }
     },
 
-    'dialogueInput': function(){
-      return Session.get("dialogueInputMode");
+    'inDialogueLoop': function(){
+      return typeof(Session.get("dialogueLoopStage")) != "undefined";
     },
 
     'subWordClozeCurrentQuestionExists': function(){

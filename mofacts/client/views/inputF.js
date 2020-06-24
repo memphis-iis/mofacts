@@ -10,7 +10,7 @@ Template.inputF.rendered = function() {
 Template.inputF.helpers({
     'fontSizeClass': function() {
         return 'h' + getCurrentFontSize().toString();  //Bootstrap classes
-    },
+    }
 });
 
 Template.inputForceCorrect.rendered = function() {
