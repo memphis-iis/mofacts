@@ -292,7 +292,7 @@ Answers = {
                 break;
                 case "dialogue":
                     Session.set("clozeQuestionParts",undefined);
-                    Session.set("dialogueInputMode",true);
+                    Session.set("dialogueLoopStage","intro");
                     dialogueUserAnswerSaver = JSON.parse(JSON.stringify(userInput));
                     dialogueCurrentQuestionSaver = JSON.parse(JSON.stringify(Session.get("currentQuestion")));
                     let clozeItem = Session.get("originalQuestion") || dialogueCurrentQuestionSaver;
@@ -336,9 +336,9 @@ let dialogueTransitionStatements = [
 
 ]          
 
-let dialogueTransitionInstructions = "  Press the enter key to continue.";
+let dialogueTransitionInstructions = "  Press the button to continue.";
 
-let endDialogueNotice = " Press the enter key to continue practice.";
+let endDialogueNotice = " Press the button to continue practice.";
 
 function updateDialogueDisplay(newDisplay){
     //set prompt and feedback here
@@ -369,6 +369,7 @@ dialogueLoop = function(err,res){
         
         if(result.Finished){
             newDisplay = result.Display + endDialogueNotice;
+            Session.set("dialogueLoopStage","exit");
         }
         updateDialogueDisplay(newDisplay);
         dialogueContext = result;

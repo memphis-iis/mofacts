@@ -82,8 +82,8 @@
             {{#unless buttonTrial}}
             <div class="row" id="textEntryRow">
                 <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                    {{#if dialogueInput}}
-                        {{> dialogueInputF}}
+                    {{#if inDialogueLoop}}
+                        {{> dialogueLoop}}
                     {{else}}
                         {{> inputF}}
                     {{/if}}
