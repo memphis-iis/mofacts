@@ -276,6 +276,15 @@ function modelUnitEngine() {
         clozeQuestionParts.splice(1,1);
         clozeQuestionParts.splice(1,0,clozeAnswerNoUnderscores.trim());
         clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + " " + clozeQuestionParts[2];
+
+        // If our third cloze part begins with an underscore,
+        // our second cloze part should be our syllables, so
+        // if the answer sans underscores doesn't end in whitespace,
+        // remove leading whitespace from part 3
+        if (clozeQuestionParts[2].trim().charAt(0) === "_"
+            && clozeAnswerNoUnderscores.slice(-1) != " ") {
+            clozeQuestionParts[2] = clozeQuestionParts[2].trim();
+        }
         
         return {
             clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
@@ -788,14 +797,16 @@ function modelUnitEngine() {
             
             if(!!currentAnswerSyllables){
                 stim.answerSyllables = currentAnswerSyllables;
-                let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = replaceClozeWithSyllables(currentQuestion,currentAnswerSyllables,currentStimAnswer);
+                let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = replaceClozeWithSyllables(
+                    currentQuestion,currentAnswerSyllables,currentStimAnswer);
                 currentQuestion = clozeQuestion;
                 Session.set("currentAnswer",clozeMissingSyllables);
                 console.log("setting original answer to: " + currentStimAnswer);
                 Session.set("originalAnswer",currentStimAnswer);
                 console.log("clozeQuestionParts: " + JSON.stringify(clozeQuestionParts));
                 Session.set("clozeQuestionParts",clozeQuestionParts);
-                let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
+                let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(
+                    currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
                 currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
             }else{
                 Session.set("currentAnswer",currentStimAnswer);
