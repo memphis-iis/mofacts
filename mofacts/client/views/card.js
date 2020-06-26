@@ -1560,10 +1560,10 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
         questionIndex = null;
     }
 
-    //Don't count assessment session trials as part of user progress
-    if(Session.get("sessionType") === "assessmentsession"){
-      return;
-    }
+    // //Don't count assessment session trials as part of user progress
+    // if(Session.get("sessionType") === "assessmentsession"){
+    //   return;
+    // }
 
     var prog = getUserProgress();
     prog.progressDataArray.push({
