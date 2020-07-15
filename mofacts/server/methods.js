@@ -91,8 +91,7 @@ function getLearningSessionItems(tdfFileName) {
 
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
   let stimFileName = tdf.tdfs.tutor.setspec[0].stimulusfile[0];
-  let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec
-    .clusters[0].cluster.length - 1;
+  let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
   for (let i = 0; i < lastStim - 1; i++) {
     learningSessionItem[i] = true;
   }
@@ -121,6 +120,18 @@ function getClusterListsFromUnit(unit) {
 }
 
 function getStimJSON(fileName) {
+  var future = new Future();
+  Assets.getText(fileName, function (err, data) {
+      if (err) {
+          serverConsole("Error reading Stim JSON", err);
+          throw err;
+      }
+      future.return(JSON.parse(data));
+  });
+  return future.wait();
+}
+
+function getTdfJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err) {
@@ -422,8 +433,11 @@ Meteor.startup(function () {
     var isXML = function (fn) {
         return fn.indexOf('.xml') >= 0;
     };
+    var isJSON = function (fn) {
+      return fn.indexOf('.json') >= 0;
+    };
     _.each(
-        _.filter(fs.readdirSync('./assets/app/stims/'), isXML),
+        _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
         function (ele, idx, lst) {
             serverConsole("Updating Stim in DB from ", ele);
             var json = getStimJSON('stims/' + ele);
@@ -443,7 +457,7 @@ Meteor.startup(function () {
         _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
         function (ele, idx, lst) {
             serverConsole("Updating TDF in DB from ", ele);
-            var json = getStimJSON('tdf/' + ele);
+            var json = getTdfJSON('tdf/' + ele);
 
             var rec = createTdfRecord(ele, json, adminUserId, 'repo');
 

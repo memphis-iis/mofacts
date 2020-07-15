@@ -1,0 +1,381 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "random"
+                        },
+                        "display": {
+                            "clozeText": "A __________ variable assigns a unique numerical value to each outcome of a random experiment."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "outcome"
+                        },
+                        "display": {
+                            "clozeText": "A random variable assigns a unique numerical value to each __________ of a random experiment."
+                        },
+                        "parameter": "-0.00011"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one|1"
+                        },
+                        "display": {
+                            "clozeText": "A random variable associates exactly __________ possible numerical outcome to each trial of a random experiment."
+                        },
+                        "parameter": "-0.00012"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "random variable"
+                        },
+                        "display": {
+                            "clozeText": "A __________ associates exactly one possible numerical outcome to each trial of a random experiment."
+                        },
+                        "parameter": "-0.00013"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Discrete"
+                        },
+                        "display": {
+                            "clozeText": "__________ random variables exist if possible values are a distinct list."
+                        },
+                        "parameter": "-0.00014"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "values"
+                        },
+                        "display": {
+                            "clozeText": "Discrete random variables exist if possible __________ are a distinct list."
+                        },
+                        "parameter": "-0.00015"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Continuous"
+                        },
+                        "display": {
+                            "clozeText": "__________ random variables can take any value within a certain interval."
+                        },
+                        "parameter": "-0.00016"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "interval"
+                        },
+                        "display": {
+                            "clozeText": "Continuous random variables can take any value within a certain __________."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "count"
+                        },
+                        "display": {
+                            "clozeText": "To distinguish between discrete and continuous random variables, we sometimes say that we __________ discrete variables and measure continuous variables."
+                        },
+                        "parameter": "-0.00018"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "measure"
+                        },
+                        "display": {
+                            "clozeText": "To distinguish between discrete and continuous random variables, we sometimes say that we count discrete variables and __________ continuous variables."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "continuous"
+                        },
+                        "display": {
+                            "clozeText": "To distinguish between discrete and continuous random variables, we sometimes say that we count discrete variables and measure __________ variables."
+                        },
+                        "parameter": "-0.00020"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "discrete"
+                        },
+                        "display": {
+                            "clozeText": "To distinguish between discrete and continuous random variables, we sometimes say that we count __________ variables and measure continuous variables."
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "discrete"
+                        },
+                        "display": {
+                            "clozeText": "To notate __________ random variables, we write P(X=x)."
+                        },
+                        "parameter": "-0.00022"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "X=x"
+                        },
+                        "display": {
+                            "clozeText": "To notate discrete random variables, we write P(__________)."
+                        },
+                        "parameter": "-0.00023"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distribution"
+                        },
+                        "display": {
+                            "clozeText": "The probability __________ of a random variable is the list of all possible values and probabilities."
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probabilities"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable is the list of all possible values and __________."
+                        },
+                        "parameter": "-0.00025"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zero|0"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable must have probabilities between __________ and one."
+                        },
+                        "parameter": "-0.00026"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one|1"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable must have probabilities between zero and __________."
+                        },
+                        "parameter": "-0.00027"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probability distribution"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a random variable must have probabilities between zero and one."
+                        },
+                        "parameter": "-0.00028"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sum|add|total"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable must have probabilities that __________ to one."
+                        },
+                        "parameter": "-0.00029"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one|1"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable must have probabilities that sum to __________."
+                        },
+                        "parameter": "-0.00030"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probabilities"
+                        },
+                        "display": {
+                            "clozeText": "The probability distribution of a random variable must have __________ that sum to one."
+                        },
+                        "parameter": "-0.00031"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a random variable is notated as μ<sub>X</sub>.  "
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "weighted"
+                        },
+                        "display": {
+                            "clozeText": "The mean of a random variable is sometimes referred to as the __________ average."
+                        },
+                        "parameter": "-0.00033"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "center|middle"
+                        },
+                        "display": {
+                            "clozeText": "The mean of a random variable is a weighted average that represents the __________ of its probability distribution. "
+                        },
+                        "parameter": "-0.00034"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a random variable is a weighted average that represents the center of its probability distribution. "
+                        },
+                        "parameter": "-0.00035"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probability distribution"
+                        },
+                        "display": {
+                            "clozeText": "The mean of a random variable is a weighted average that represents the center of its __________. "
+                        },
+                        "parameter": "-0.00036"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "variance"
+                        },
+                        "display": {
+                            "clozeText": "Notated as <span class=\"nobr\">σ<span class=\"supsub\">2<br />X</span></span>, the __________ of a random variable is the squared standard deviation."
+                        },
+                        "parameter": "-0.00037"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "squared"
+                        },
+                        "display": {
+                            "clozeText": "Notated as <span class=\"nobr\">σ<span class=\"supsub\">2<br />X</span></span>, the variance of a random variable is the __________ standard deviation."
+                        },
+                        "parameter": "-0.00038"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation"
+                        },
+                        "display": {
+                            "clozeText": "Notated as <span class=\"nobr\">σ<span class=\"supsub\">2<br />X</span></span>, the variance of a random variable is the squared __________."
+                        },
+                        "parameter": "-0.00039"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "When a variable has a larger standard deviation, we are __________ likely to find values farther away from the mean of that random variable."
+                        },
+                        "parameter": "-0.00040"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "large|larger"
+                        },
+                        "display": {
+                            "clozeText": "When a variable has a __________ standard deviation, we are more likely to find values farther away from the mean of that random variable."
+                        },
+                        "parameter": "-0.00041"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation"
+                        },
+                        "display": {
+                            "clozeText": "When a variable has a smaller __________, we are less likely to find values farther away from the mean of that random variable. "
+                        },
+                        "parameter": "-0.00042"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "When a variable has a smaller standard deviation, we are less likely to find values farther away from the __________ of that random variable. "
+                        },
+                        "parameter": "-0.00043"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "two|2"
+                        },
+                        "display": {
+                            "clozeText": "Values that fall within __________ standard deviations from the mean of a random variable are considered ordinary. "
+                        },
+                        "parameter": "-0.00044"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviations"
+                        },
+                        "display": {
+                            "clozeText": "Values that fall within two __________ from the mean of a random variable are considered ordinary. "
+                        },
+                        "parameter": "-0.00045"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "means"
+                        },
+                        "display": {
+                            "clozeText": "When combining random variables, we can sum the __________ and variances as long as the variables are independent of one another. "
+                        },
+                        "parameter": "-0.00046"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variances"
+                        },
+                        "display": {
+                            "clozeText": "When combining random variables, we can sum the means and __________ as long as the variables are independent of one another. "
+                        },
+                        "parameter": "-0.00047"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "independent "
+                        },
+                        "display": {
+                            "clozeText": "When combining random variables, we can sum the means and variances as long as the variables are __________ of one another. "
+                        },
+                        "parameter": "-0.00048"
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,771 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Personality~Well Done - Personality is correct. In characterizing psychopathology, we need to take into account the situation or context as well as the culture in which the behavior is taking place. The third factor to take into account is personal discomfort, which most psychological disorders will include.;The situation or context~Incorrect. The correct answer is personality. In characterizing psychopathology, we need to take into account the situation or context as well as the culture in which the behavior is taking place. The third factor to take into account is personal discomfort, which most psychological disorders will include.;Personal discomfort~Incorrect. The correct answer is personality. In characterizing psychopathology, we need to take into account the situation or context as well as the culture in which the behavior is taking place. The third factor to take into account is personal discomfort, which most psychological disorders will include.;Society or culture~Incorrect. The correct answer is personality.In characterizing psychopathology, we need to take into account the situation or context as well as the culture in which the behavior is taking place. The third factor to take into account is personal discomfort, which most psychological disorders will include.;.*~Wrong",
+                            "incorrectResponses": [
+                                "The situation or context",
+                                "Personal discomfort",
+                                "Society or culture"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT used to characterize psychopathology?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Insanity~Well Done - Insanity is correct. Insanity is not used in the Diagnostic and Statistical Manual (DSM) for Mental Disorders. Although insanity is used colloquially (in conversation), it is in fact a legal term, not sanctioned by the American Psychological Association.;Bipolar~Incorrect. The correct answer is insanity. Insanity is not used in the Diagnostic and Statistical Manual (DSM) for Mental Disorders. Although insanity is used colloquially (in conversation), it is in fact a legal term, not sanctioned by the American Psychological Association.;Dissociative~Incorrect. The correct answer is insanity. Insanity is not used in the Diagnostic and Statistical Manual (DSM) for Mental Disorders. Although insanity is used colloquially (in conversation), it is in fact a legal term, not sanctioned by the American Psychological Association.;Delusions~Incorrect. The correct answer is insanity. Insanity is not used in the Diagnostic and Statistical Manual (DSM) for Mental Disorders. Although insanity is used colloquially (in conversation), it is in fact a legal term, not sanctioned by the American Psychological Association.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Bipolar",
+                                "Dissociative",
+                                "Delusions"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT a term used in the Diagnostic and Statistical Manual for Mental Disorders?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "long-lasting emotional extremes~Well done - Long-lasting emotional extremes is correct. Long-lasting emotional extremes are symptoms of mood disorders, not psychotic disorders. Psychotic disorders is another category of mental health disorders including schizophrenia.; imaginary sensations~ Incorrect. The correct answer is long-lasting emotional extremes. Long-lasting emotional extremes are symptoms of mood disorders, not psychotic disorders. Psychotic disorders is another category of mental health disorders including schizophrenia.;personality disorganization~Incorrect. The correct answer is long-lasting emotional extremes. Long-lasting emotional extremes are symptoms of mood disorders, not psychotic disorders. Psychotic disorders is another category of mental health disorders including schizophrenia.;inability to control thoughts or actions~Incorrect. The correct answer is long-lasting emotional extremes. Long-lasting emotional extremes are symptoms of mood disorders, not psychotic disorders. Psychotic disorders is another category of mental health disorders including schizophrenia.;.*~Wrong.",
+                            "incorrectResponses": [
+                                "imaginary sensations",
+                                "personality disorganization",
+                                "inability to control thoughts or actions"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT a symptom or characteristic of someone diagnosed with a psychotic disorder?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "labels and expectations~Well Done - labels and expectations is correct. When the fake patients in the mental hospital stopped pretending to have schizophrenia, the staff did not recognize that the fake patients did not have any mental health issues. This is possibly because they had labeled the patients (as having schizophrenia) and treated them accordingly.;immediate medical intervention~Incorrect. The correct answer is labels and expectations. When the fake patients in the mental hospital stopped pretending to have schizophrenia, the staff did not recognize that the fake patients did not have any mental health issues. This is possibly because they had labeled the patients (as having schizophrenia) and treated them accordingly.;availability of effective medication~Incorrect. The correct answer is labels and expectations. When the fake patients in the mental hospital stopped pretending to have schizophrenia, the staff did not recognize that the fake patients did not have any mental health issues. This is possibly because they had labeled the patients (as having schizophrenia) and treated them accordingly.;staff training and morale~Incorrect. The correct answer is labels and expectations. When the fake patients in the mental hospital stopped pretending to have schizophrenia, the staff did not recognize that the fake patients did not have any mental health issues. This is possibly because they had labeled the patients (as having schizophrenia) and treated them accordingly.;.*~Wrong",
+                            "incorrectResponses": [
+                                "immediate medical intervention",
+                                "availability of effective medication",
+                                "staff training and morale"
+                            ]
+                        },
+                        "display": {
+                            "text": "The research involving pseudo-patients in a mental hospital suggests the importance of which of the following in the treatment of mental disorders?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Hearing voices coming from your mailbox~Well Done - Hearing voices coming from your mailbox is correct. A hallucination is an imaginary sensation. This includes seeing, hearing, feeling, tasting, or smelling a sensation that is not actually present. The rest of the answer options are a compulsion, obsession, and delusion.;Repeatedly locking and unlocking a door~Incorrect. The correct answer is hearing voices coming from your mailbox. A hallucination is an imaginary sensation. This includes seeing, hearing, feeling, tasting, or smelling a sensation that is not actually present. The rest of the answer options are a compulsion, obsession, and delusion.;Refusing to shake hands to avoid germs~Incorrect. The correct answer is hearing voices coming from your mailbox. A hallucination is an imaginary sensation. This includes seeing, hearing, feeling, tasting, or smelling a sensation that is not actually present. The rest of the answer options are a compulsion, obsession, and delusion.;Believing there is a hidden message for you in the newspaper~Incorrect. The correct answer is hearing voices coming from your mailbox. A hallucination is an imaginary sensation. This includes seeing, hearing, feeling, tasting, or smelling a sensation that is not actually present. The rest of the answer options are a compulsion, obsession, and delusion.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Repeatedly locking and unlocking a door",
+                                "Refusing to shake hands to avoid germs",
+                                "Believing there is a hidden message for you in the newspaper"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is an example of a hallucination?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Lack of emotional expression~Well Done - Lack of emotional expression is correct. Flat affect is one common symptom of schizophrenia and often manifests when a person is discussing or hearing sad, emotional topics but does not show any recognition of that emotion in their expression.;Garbled and chaotic speech~Incorrect. The correct answer is lack of emotional expression. Flat affect is one common symptom of schizophrenia and often manifests when a person is discussing or hearing sad, emotional topics but does not show any recognition of that emotion in their expression.;Personality that is “all over the place”~Incorrect. The correct answer is lack of emotional expression. Flat affect is one common symptom of schizophrenia and often manifests when a person is discussing or hearing sad, emotional topics but does not show any recognition of that emotion in their expression.;False, irrational beliefs~Incorrect. The correct answer is lack of emotional expression. Flat affect is one common symptom of schizophrenia and often manifests when a person is discussing or hearing sad, emotional topics but does not show any recognition of that emotion in their expression.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Garbled and chaotic speech",
+                                "Personality that is “all over the place”",
+                                "False, irrational beliefs"
+                            ]
+                        },
+                        "display": {
+                            "text": "Flat affect is best described as,"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "One explanation for the development of psychotic disorders involving the interaction of genetics and environment~Well Done - One explanation for the development of psychotic disorders involving the interaction of genetics and environment is correct. The “stress” refers to environmental stressors including traumatic experiences or health issues. The “vulnerability” refers to genetic vulnerability (i.e., a family member with the same psychological disorder).;A theoretical treatment for psychotic disorders that focuses on ways to manage stress.~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment. The “stress” refers to environmental stressors including traumatic experiences or health issues. The “vulnerability” refers to genetic vulnerability (i.e., a family member with the same psychological disorder).;An explanation for post-traumatic stress disorder referring to the re-living of a traumatic event~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment. The “stress” refers to environmental stressors including traumatic experiences or health issues. The “vulnerability” refers to genetic vulnerability (i.e., a family member with the same psychological disorder).;A rationale for why some personalities are more susceptible to developing anxiety disorders~Incorrect. The correct answer is one explanation for the development of psychotic disorders involving the interaction of genetics and environment. The “stress” refers to environmental stressors including traumatic experiences or health issues. The “vulnerability” refers to genetic vulnerability (i.e., a family member with the same psychological disorder).;.*~Wrong",
+                            "incorrectResponses": [
+                                "A theoretical treatment for psychotic disorders that focuses on ways to manage stress.",
+                                "An explanation for post-traumatic stress disorder referring to the re-living of a traumatic event",
+                                "A rationale for why some personalities are more susceptible to developing anxiety disorders"
+                            ]
+                        },
+                        "display": {
+                            "text": "The Stress-Vulnerability Hypothesis refers to…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "moderate mood~Well Done - moderate mood is correct. Dysthymic and cyclothymic disorders are moderate or mild versions of depression and bipolar disorders, respectively. The key differences are that dysthymia and cyclothymia are moderate and related to external events.;somatoform~Incorrect. The correct answer is moderate mood. Dysthymic and cyclothymic disorders are moderate or mild versions of depression and bipolar disorders, respectively. The key differences are that dysthymia and cyclothymia are moderate and related to external events.;dissociative~Incorrect. The correct answer is moderate mood. Dysthymic and cyclothymic disorders are moderate or mild versions of depression and bipolar disorders, respectively. The key differences are that dysthymia and cyclothymia are moderate and related to external events.;anxiety~Incorrect. The correct answer is moderate mood. Dysthymic and cyclothymic disorders are moderate or mild versions of depression and bipolar disorders, respectively. The key differences are that dysthymia and cyclothymia are moderate and related to external events.;.*~Wrong",
+                            "incorrectResponses": [
+                                "somatoform",
+                                "dissociative",
+                                "anxiety"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "Dysthymic and cyclothymic disorders are types of __________ disorders."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Washing your hands until they bleed~Well Done - Washing your hands until they bleed is correct. Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;Recurring/repetitive thoughts of death~Incorrect. The correct answer is washing your hands until they bleed. Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;The belief that you will die from touching doorknobs~Incorrect. The correct answer is washing your hands until they bleed. Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;Hearing voices that are not real~Incorrect. The correct answer is washing your hands until they bleed. Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;.*~Wrong",
+                            "incorrectResponses": [
+                                "Recurring/repetitive thoughts of death",
+                                "The belief that you will die from touching doorknobs",
+                                "Hearing voices that are not real"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is an example of a compulsion?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "“The CIA sometimes take over my body to complete secret missions.”~Well Done - “The CIA sometimes take over my body to complete secret missions.” is correct. Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;“I often see George Washington at the post office.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.” Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;“My neighbors garden contains several species of nymph and fairy that I talk to.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.” Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;“I can’t sleep because I can hear the people in the wall talking all night.”~Incorrect. The correct answer is “The CIA sometimes take over my body to complete secret missions.” Compulsions are repetitive behaviors or actions. The other answer options are delusions (false beliefs) and a hallucination (false sensation).;.*~Wrong",
+                            "incorrectResponses": [
+                                "“I often see George Washington at the post office.”",
+                                "“My neighbors garden contains several species of nymph and fairy that I talk to.”",
+                                "“I can’t sleep because I can hear the people in the wall talking all night.”"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following would NOT be classified as a hallucination?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "The benefits from manic episodes usually offset the negative effects of depressive episodes.~Well Done - The benefits from manic episodes usually offset the negative effects of depressive episodes is correct. The effects of a manic episode can be just as damaging as the effects of a depressive episode. For example, someone in a manic episodes may have excessive spending or sexual promiscuity.;Bipolar disorder involves extreme changes in mood.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes. The effects of a manic episode can be just as damaging as the effects of a depressive episode. For example, someone in a manic episodes may have excessive spending or sexual promiscuity.;Schizophrenia involves hallucinating and having delusions.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes. The effects of a manic episode can be just as damaging as the effects of a depressive episode. For example, someone in a manic episodes may have excessive spending or sexual promiscuity.;Therapy is not equally effective for all problems.~Incorrect. The correct answer is the benefits from manic episodes usually offset the negative effects of depressive episodes. The effects of a manic episode can be just as damaging as the effects of a depressive episode. For example, someone in a manic episodes may have excessive spending or sexual promiscuity.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Bipolar disorder involves extreme changes in mood.",
+                                "Schizophrenia involves hallucinating and having delusions.",
+                                "Therapy is not equally effective for all problems."
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is FALSE?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Obsessive Compulsive disorder~Well Done - Obsessive Compulsive disorder is correct. Anxiety disorders is a broad category which includes many psychological disorders including obsessive compulsive disorder, post-traumatic stress disorder, and phobias.;Bipolar disorder~Incorrect. The correct answer is Obsessive Compulsive disorder. Anxiety disorders is a broad category which includes many psychological disorders including obsessive compulsive disorder, post-traumatic stress disorder, and phobias.;Schizophrenia~Incorrect. The correct answer is Obsessive Compulsive disorder. Anxiety disorders is a broad category which includes many psychological disorders including obsessive compulsive disorder, post-traumatic stress disorder, and phobias.;Anorexia~Incorrect. The correct answer is Obsessive Compulsive disorder. Anxiety disorders is a broad category which includes many psychological disorders including obsessive compulsive disorder, post-traumatic stress disorder, and phobias.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Bipolar disorder",
+                                "Schizophrenia",
+                                "Anorexia"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is an example of an anxiety disorder?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Those with an eating disorder (Anorexia) have lost all control.~Well done - Those with an eating disorder (Anorexia) have lost all control is correct. In fact, the opposite is generally true. People with anorexia have an intense need for control, and obtain that through restricting their food intake (i.e., they are in control of how much/ little they eat).;Positive feedback from weight loss reinforces Anorexic behavior.~Incorrect. The correct answer is those with an eating disorder have lost all control. In fact, the opposite is generally true. People with anorexia have an intense need for control, and obtain that through restricting their food intake (i.e., they are in control of how much/ little they eat).;With other addictions, you can avoid the problem substance, but you cannot avoid food.~Incorrect. The correct answer is those with an eating disorder have lost all control. In fact, the opposite is generally true. People with anorexia have an intense need for control, and obtain that through restricting their food intake (i.e., they are in control of how much/ little they eat).;It can cause long-lasting changes to your set point, making it harder to gain weight back.~Incorrect. The correct answer is those with an eating disorder have lost all control. In fact, the opposite is generally true. People with anorexia have an intense need for control, and obtain that through restricting their food intake (i.e., they are in control of how much/ little they eat).;.*~Wrong",
+                            "incorrectResponses": [
+                                "Positive feedback from weight loss reinforces Anorexic behavior.",
+                                "With other addictions, you can avoid the problem substance, but you cannot avoid food.",
+                                "It can cause long-lasting changes to your set point, making it harder to gain weight back."
+                            ]
+                        },
+                        "display": {
+                            "text": "All of the following help explain why eating disorders (specifically Anorexia) can be dangerous except…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Cognitive Restructuring~Well Done - Cognitive Restructuring is correct. Cognitive restructuring is a therapy technique to corrective maladaptive thought patterns. One type of maladaptive thought pattern is catastrophizing which occurs when a person turns a simple problem into a major, life-altering one.;Electrical Stimulation Therapy~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring is a therapy technique to corrective maladaptive thought patterns. One type of maladaptive thought pattern is catastrophizing which occurs when a person turns a simple problem into a major, life-altering one.;Systematic Desensitization~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring is a therapy technique to corrective maladaptive thought patterns. One type of maladaptive thought pattern is catastrophizing which occurs when a person turns a simple problem into a major, life-altering one.;Behavioral Therapy~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring is a therapy technique to corrective maladaptive thought patterns. One type of maladaptive thought pattern is catastrophizing which occurs when a person turns a simple problem into a major, life-altering one.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Electrical Stimulation Therapy",
+                                "Systematic Desensitization",
+                                "Behavioral Therapy"
+                            ]
+                        },
+                        "display": {
+                            "text": "Catastrophizing is a type of maladaptive thought pattern that is typically addressed in which of the following types of therapy?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "psychotherapy.~Well Done - psychotherapy is correct. Psychotherapy refers to any type of treatment which uses psychologically-based methodology. Psychotherapy includes cognitive-behavioral therapy and systematic desensitization.;psychopathology.~Incorrect. The correct answer is psychotherapy. Psychotherapy refers to any type of treatment which uses psychologically-based methodology. Psychotherapy includes cognitive-behavioral therapy and systematic desensitization.;cognitive-behavioral therapy.~Incorrect. The correct answer is psychotherapy. Psychotherapy refers to any type of treatment which uses psychologically-based methodology. Psychotherapy includes cognitive-behavioral therapy and systematic desensitization.;systematic desensitization.~Incorrect. The correct answer is psychotherapy. Psychotherapy refers to any type of treatment which uses psychologically-based methodology. Psychotherapy includes cognitive-behavioral therapy and systematic desensitization.;.*~Wrong",
+                            "incorrectResponses": [
+                                "psychopathology.",
+                                "cognitive-behavioral therapy.",
+                                "systematic desensitization."
+                            ]
+                        },
+                        "display": {
+                            "text": "Any psychological technique used to facilitate positive changes in someone’s behaviors is called…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "psychopharmacology.~Well Done - psychopharmacology is correct. Think of the pharmacy where you go to pick up medications. This is one type of psychotherapy most necessary in the treatment of schizophrenia, but also used for major mood and anxiety disorders.;psychopathology.~Incorrect. The correct answer is psychopharmacology. Think of the pharmacy where you go to pick up medications. This is one type of psychotherapy most necessary in the treatment of schizophrenia, but also used for major mood and anxiety disorders.;cognitive-behavioral therapy.~Incorrect. The correct answer is psychopharmacology. Think of the pharmacy where you go to pick up medications. This is one type of psychotherapy most necessary in the treatment of schizophrenia, but also used for major mood and anxiety disorders.;psychoanalysis.~Incorrect. The correct answer is psychopharmacology. Think of the pharmacy where you go to pick up medications. This is one type of psychotherapy most necessary in the treatment of schizophrenia, but also used for major mood and anxiety disorders.;.*~Wrong",
+                            "incorrectResponses": [
+                                "psychopathology.",
+                                "cognitive-behavioral therapy.",
+                                "psychoanalysis."
+                            ]
+                        },
+                        "display": {
+                            "text": "The use of drugs to alleviate the symptoms of emotional disturbances is called…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Cognitive~Well Done - Cognitive is correct. A cognitive therapist handles emotional disturbances by addressing a person’s negative or maladaptive thought patterns. One way is to ask clients to keep track of such negative thoughts so they learn to recognize and change them.;Psychoanalytic~Incorrect. The correct answer is cognitive. A cognitive therapist handles emotional disturbances by addressing a person’s negative or maladaptive thought patterns. One way is to ask clients to keep track of such negative thoughts so they learn to recognize and change them.;Humanistic~Incorrect. The correct answer is cognitive. A cognitive therapist handles emotional disturbances by addressing a person’s negative or maladaptive thought patterns. One way is to ask clients to keep track of such negative thoughts so they learn to recognize and change them.;Psychiatrist~Incorrect. The correct answer is cognitive. A cognitive therapist handles emotional disturbances by addressing a person’s negative or maladaptive thought patterns. One way is to ask clients to keep track of such negative thoughts so they learn to recognize and change them.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Psychoanalytic",
+                                "Humanistic",
+                                "Psychiatrist"
+                            ]
+                        },
+                        "display": {
+                            "text": "What type of therapist might ask clients to keep a “thought journal” to record (and then work to reduce) maladaptive thoughts?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Systematic desensitization~Well Done - Systematic desensitization is correct. This process is most often used to help treat phobias (anxiety or fear related to an object or task). In order to make the client less sensitive to this object or task, a therapist may systematically, slowly guide the client in approaching the feared object/task while maintaining a sense of calm.;Psychotherapy~Incorrect. The correct answer is systematic desensitization. This process is most often used to help treat phobias (anxiety or fear related to an object or task). In order to make the client less sensitive to this object or task, a therapist may systematically, slowly guide the client in approaching the feared object/task while maintaining a sense of calm.;Cognitive-behavioral therapy~Incorrect. The correct answer is systematic desensitization. This process is most often used to help treat phobias (anxiety or fear related to an object or task). In order to make the client less sensitive to this object or task, a therapist may systematically, slowly guide the client in approaching the feared object/task while maintaining a sense of calm.;Psychopharmacology~Incorrect. The correct answer is systematic desensitization. This process is most often used to help treat phobias (anxiety or fear related to an object or task). In order to make the client less sensitive to this object or task, a therapist may systematically, slowly guide the client in approaching the feared object/task while maintaining a sense of calm.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Psychotherapy",
+                                "Cognitive-behavioral therapy",
+                                "Psychopharmacology"
+                            ]
+                        },
+                        "display": {
+                            "text": "In which of the following therapies does a client gradually get closer and closer to a feared object or completing a task that normally makes them anxious?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Systematic desensitization~Well Done - Systematic desensitization is correct. Systematic desensitization is a cognitive-behavioral technique, NOT a Freudian or psychoanalytic technique. Freudian techniques rely on bringing into awareness one’s unconscious fears or impulses.;Free association~Incorrect. The correct answer is systematic desensitization. Systematic desensitization is a cognitive-behavioral technique, NOT a Freudian or psychoanalytic technique. Freudian techniques rely on bringing into awareness one’s unconscious fears or impulses.;Dream analysis~Incorrect. The correct answer is systematic desensitization. Systematic desensitization is a cognitive-behavioral technique, NOT a Freudian or psychoanalytic technique. Freudian techniques rely on bringing into awareness one’s unconscious fears or impulses.;Analyzing transference~Incorrect. The correct answer is systematic desensitization. Systematic desensitization is a cognitive-behavioral technique, NOT a Freudian or psychoanalytic technique. Freudian techniques rely on bringing into awareness one’s unconscious fears or impulses.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Free association",
+                                "Dream analysis",
+                                "Analyzing transference"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following was NOT a Freudian technique used to discover unconscious feelings, thoughts, or conflicts?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "transference~Well Done - transference is correct. Treating one person (e.g., a therapist) as you would another person (e.g., a disliked family member) is an unconscious process called transference. This is often analyzed by psychoanalytic therapists to uncover (unconscious) feelings a client is unaware of.;therapeutic attachment~Incorrect. The correct answer is transference. Treating one person (e.g., a therapist) as you would another person (e.g., a disliked family member) is an unconscious process called transference. This is often analyzed by psychoanalytic therapists to uncover (unconscious) feelings a client is unaware of.;resistance~Incorrect. The correct answer is transference. Treating one person (e.g., a therapist) as you would another person (e.g., a disliked family member) is an unconscious process called transference. This is often analyzed by psychoanalytic therapists to uncover (unconscious) feelings a client is unaware of.;reflection~Incorrect. The correct answer is transference. Treating one person (e.g., a therapist) as you would another person (e.g., a disliked family member) is an unconscious process called transference. This is often analyzed by psychoanalytic therapists to uncover (unconscious) feelings a client is unaware of.;.*~Wrong",
+                            "incorrectResponses": [
+                                "therapeutic attachment",
+                                "resistance",
+                                "reflection"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to psychoanalytic/psychodynamic theory, a client in a therapy session may treat the therapist similar to a family member who used to treat the client poorly. This is referred to as…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "It only takes place in directive therapies.~Well Done - It only takes place in directive therapies is correct. This statement is FALSE because reflection, is a form of nondirective therapy where the therapist is not taking control (i.e., directing) the session, but rather is letting the client lead the way.;It involves a therapist rephrasing what a client has said.~Incorrect. The correct answer is it only takes place in directive therapies. This statement is FALSE because reflection, is a form of nondirective therapy where the therapist is not taking control (i.e., directing) the session, but rather is letting the client lead the way.;It is a component of some non-directive therapies.~Incorrect. The correct answer is it only takes place in directive therapies. This statement is FALSE because reflection, is a form of nondirective therapy where the therapist is not taking control (i.e., directing) the session, but rather is letting the client lead the way.;It offers clients a different perspective from which to view their thoughts.~Incorrect. The correct answer is it only takes place in directive therapies. This statement is FALSE because reflection, is a form of nondirective therapy where the therapist is not taking control (i.e., directing) the session, but rather is letting the client lead the way.;.*~Wrong",
+                            "incorrectResponses": [
+                                "It involves a therapist rephrasing what a client has said.",
+                                "It is a component of some non-directive therapies.",
+                                "It offers clients a different perspective from which to view their thoughts."
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT true of the technique of reflection?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Cognitive restructuring~Well Done - Cognitive restructuring is correct. Cognitive restructuring focuses on identifying and rectifying maladaptive thought patterns. This has been shown to be especially effective in treating depression and other mood disorders.;Systematic desensitization~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring focuses on identifying and rectifying maladaptive thought patterns. This has been shown to be especially effective in treating depression and other mood disorders.;Dream analysis~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring focuses on identifying and rectifying maladaptive thought patterns. This has been shown to be especially effective in treating depression and other mood disorders.;Reflection~Incorrect. The correct answer is cognitive restructuring. Cognitive restructuring focuses on identifying and rectifying maladaptive thought patterns. This has been shown to be especially effective in treating depression and other mood disorders.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Systematic desensitization",
+                                "Dream analysis",
+                                "Reflection"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is a treatment that has been especially effective in treating depression?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Dependent on friends and loved ones~Well Done - Dependent on friends and loved ones is correct. This statement is FALSE because self-actualizers are independent, although they do have deep loving relationships.;Being accepting of your own flaws~Incorrect. The correct answer is dependent on friends and loved ones. This statement is FALSE because self-actualizers are independent, although they do have deep loving relationships.;Creating deep and loving bonds~Incorrect. The correct answer is dependent on friends and loved ones. This statement is FALSE because self-actualizers are independent, although they do have deep loving relationships.;Comfort with solitude~Incorrect. The correct answer is dependent on friends and loved ones. This statement is FALSE because self-actualizers are independent, although they do have deep loving relationships.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Being accepting of your own flaws",
+                                "Creating deep and loving bonds",
+                                "Comfort with solitude"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT true of self-actualizers according to Maslow?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Humanistic~Well Done - Humanistic is correct. We discussed two humanistic theories- Maslow’s theory of self-actualization and Roger’s theory of self. Both consider personality/ “the self” to be flexible and involving continuous self-assessment.;Psychoanalytic~Incorrect. The correct answer is Humanistic. We discussed two humanistic theories- Maslow’s theory of self-actualization and Roger’s theory of self. Both consider personality/ “the self” to be flexible and involving continuous self-assessment.;Cognitive~Incorrect. The correct answer is Humanistic. We discussed two humanistic theories- Maslow’s theory of self-actualization and Roger’s theory of self. Both consider personality/ “the self” to be flexible and involving continuous self-assessment.;Trait~Incorrect. The correct answer is Humanistic. We discussed two humanistic theories- Maslow’s theory of self-actualization and Roger’s theory of self. Both consider personality/ “the self” to be flexible and involving continuous self-assessment.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Psychoanalytic",
+                                "Cognitive",
+                                "Trait"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following theories considers personality to be flexible and ever-changing?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Personality~Well Done - Personality is correct. Personality is defined as a set of consistent patterns of  behavior that a person displays in most circumstances. For example, someone who has a personality high in introversion tends to respond in a more quiet, passive manner.;Development~Incorrect. The correct answer is personality. Personality is defined as a set of consistent patterns of  behavior that a person displays in most circumstances. For example, someone who has a personality high in introversion tends to respond in a more quiet, passive manner.;Self-actualization~Incorrect. The correct answer is personality. Personality is defined as a set of consistent patterns of  behavior that a person displays in most circumstances. For example, someone who has a personality high in introversion tends to respond in a more quiet, passive manner.;Psychopathology~Incorrect. The correct answer is personality. Personality is defined as a set of consistent patterns of  behavior that a person displays in most circumstances. For example, someone who has a personality high in introversion tends to respond in a more quiet, passive manner.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Development",
+                                "Self-actualization",
+                                "Psychopathology"
+                            ]
+                        },
+                        "display": {
+                            "text": "Unique and enduring behavior patterns refers to…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oral, anal, phallic, latency, genital.~Well Done - oral, anal, phallic, latency, genital is correct. The stages are named based on where a person’s energy is focused during each point in life. For example, during the first year, an infant’s  energy is focused on eating (oral), then potty training (anal).;anal, oral, genital, phallic, sexual.~Incorrect. The correct answer is oral, anal, phallic, latency, genital. The stages are named based on where a person’s energy is focused during each point in life. For example, during the first year, an infant’s  energy is focused on eating (oral), then potty training (anal).;genital, orifice, vaginal, pubic, latency.~Incorrect. The correct answer is oral, anal, phallic, latency, genital. The stages are named based on where a person’s energy is focused during each point in life. For example, during the first year, an infant’s  energy is focused on eating (oral), then potty training (anal).;oral, gratification, anal, latency, genital.~Incorrect. The correct answer is oral, anal, phallic, latency, genital. The stages are named based on where a person’s energy is focused during each point in life. For example, during the first year, an infant’s  energy is focused on eating (oral), then potty training (anal).;.*~Wrong",
+                            "incorrectResponses": [
+                                "anal, oral, genital, phallic, sexual.",
+                                "genital, orifice, vaginal, pubic, latency.",
+                                "oral, gratification, anal, latency, genital."
+                            ]
+                        },
+                        "display": {
+                            "text": "Freud’s Stages of Psychosexual Development, in order, are:"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Psychoanalytic theory~Well Done - Psychoanalytic theory is correct. Freud founded psychoanalytic theory which focuses solely on the negative aspects of development (e.g., sex, aggression, overcoming unconscious urges).;Trait theory~Incorrect. The correct answer is Psychoanalytic theory. Freud founded psychoanalytic theory which focuses solely on the negative aspects of development (e.g., sex, aggression, overcoming unconscious urges).;Humanistic theory~Incorrect. The correct answer is Psychoanalytic theory. Freud founded psychoanalytic theory which focuses solely on the negative aspects of development (e.g., sex, aggression, overcoming unconscious urges).;Behaviorist theory~Incorrect. The correct answer is Psychoanalytic theory. Freud founded psychoanalytic theory which focuses solely on the negative aspects of development (e.g., sex, aggression, overcoming unconscious urges).;.*~Wrong",
+                            "incorrectResponses": [
+                                "Trait theory",
+                                "Humanistic theory",
+                                "Behaviorist theory"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following theories of personality views human nature as inherently bad/negative?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Anxious and unhappy or even-tempered and calm~Well Done - Anxious and unhappy or even-tempered and calm is correct. Remember that each trait exists on a continuum, meaning you can be high or low in each trait. If you are high in neuroticism, you would be anxious, but if you are low in this trait you would be even-tempered.;Suspicious and irritable or trusting and soft-hearted~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm. Remember that each trait exists on a continuum, meaning you can be high or low in each trait. If you are high in neuroticism, you would be anxious, but if you are low in this trait you would be even-tempered.;Disorganized and negligent or hard-working and well-organized~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm. Remember that each trait exists on a continuum, meaning you can be high or low in each trait. If you are high in neuroticism, you would be anxious, but if you are low in this trait you would be even-tempered.;Conventional and down to earth or imaginative and curious~Incorrect. The correct answer is anxious and unhappy or even-tempered and calm. Remember that each trait exists on a continuum, meaning you can be high or low in each trait. If you are high in neuroticism, you would be anxious, but if you are low in this trait you would be even-tempered.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Suspicious and irritable or trusting and soft-hearted",
+                                "Disorganized and negligent or hard-working and well-organized",
+                                "Conventional and down to earth or imaginative and curious"
+                            ]
+                        },
+                        "display": {
+                            "text": "In the five-factor theory of personality, the dimension of neuroticism measures whether a person is…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Partly in all three levels of consciousness~Well Done - Partly in all three levels of consciousness is correct. The levels of consciousness according to Freud are conscious, unconscious, and preconscious. The id is entirely unconscious, but the ego and superego exist to some degree at each level.;Completely conscious~Incorrect. The correct answer is partly in all three levels of consciousness. The levels of consciousness according to Freud are conscious, unconscious, and preconscious. The id is entirely unconscious, but the ego and superego exist to some degree at each level.;Completely preconscious~Incorrect. The correct answer is partly in all three levels of consciousness. The levels of consciousness according to Freud are conscious, unconscious, and preconscious. The id is entirely unconscious, but the ego and superego exist to some degree at each level.;Partly conscious and preconscious~Incorrect. The correct answer is partly in all three levels of consciousness. The levels of consciousness according to Freud are conscious, unconscious, and preconscious. The id is entirely unconscious, but the ego and superego exist to some degree at each level.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Completely conscious",
+                                "Completely preconscious",
+                                "Partly conscious and preconscious"
+                            ]
+                        },
+                        "display": {
+                            "text": "In the Freudian view of personality, while the ID is completely unconscious, the ego and superego are both…"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Identification of positive human attributes~Well Done - Identification of positive human attributes is correct. Freud’s psychoanalytic theory is focused on the unconscious sexual and aggressive instincts. In other words, it is focused on the negative aspects of human nature.;His view of women~Incorrect. The correct answer is identification of positive human attributes. Freud’s psychoanalytic theory is focused on the unconscious sexual and aggressive instincts. In other words, it is focused on the negative aspects of human nature.;An overemphasis of sex~Incorrect. The correct answer is identification of positive human attributes. Freud’s psychoanalytic theory is focused on the unconscious sexual and aggressive instincts. In other words, it is focused on the negative aspects of human nature.;Its inability to be verify scientifically~Incorrect. The correct answer is identification of positive human attributes. Freud’s psychoanalytic theory is focused on the unconscious sexual and aggressive instincts. In other words, it is focused on the negative aspects of human nature.;.*~Wrong",
+                            "incorrectResponses": [
+                                "His view of women",
+                                "An overemphasis of sex",
+                                "Its inability to be verify scientifically"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT one of the negative aspects of Freud’s psychoanalytic theory?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ideal self, self-image, and true self.~Well Done - ideal self, self-image, and true self is correct. Rogers believed that there were three components of personality- how you saw yourself (self-image), who you wanted to be (ideal self), and how others saw you (true self).;id, ego, and superego.~Incorrect. The correct answer is ideal self, self-image, and true self. Rogers believed that there were three components of personality- how you saw yourself (self-image), who you wanted to be (ideal self), and how others saw you (true self).;the needs for safety, esteem, and self-actualization.~Incorrect. The correct answer is ideal self, self-image, and true self. Rogers believed that there were three components of personality- how you saw yourself (self-image), who you wanted to be (ideal self), and how others saw you (true self).;psychological situation, expectancy, and reinforcement value.~Incorrect. The correct answer is ideal self, self-image, and true self. Rogers believed that there were three components of personality- how you saw yourself (self-image), who you wanted to be (ideal self), and how others saw you (true self).;.*~Wrong",
+                            "incorrectResponses": [
+                                "id, ego, and superego.",
+                                "the needs for safety, esteem, and self-actualization.",
+                                "psychological situation, expectancy, and reinforcement value."
+                            ]
+                        },
+                        "display": {
+                            "text": "What are the three entities included in Rogers’ (humanistic) theory of personality?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Congruence~Well Done - Congruence is correct. This semester we have discussed how gender can influence our automatic processing and associations, and one’s language and culture can put certain limitations on how we think.;Culture~Incorrect. The correct answer is congruence. This semester we have discussed how gender can influence our automatic processing and associations, and one’s language and culture can put certain limitations on how we think.;Gender~Incorrect. The correct answer is congruence. This semester we have discussed how gender can influence our automatic processing and associations, and one’s language and culture can put certain limitations on how we think.;Language~Incorrect. The correct answer is congruence. This semester we have discussed how gender can influence our automatic processing and associations, and one’s language and culture can put certain limitations on how we think.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Culture",
+                                "Gender",
+                                "Language"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is NOT a component of our lives that that can influence our cognition/ thoughts according to our discussions this semester?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "conscientiousness~Well Done - conscientiousness is correct. According to the Big Five theory of personality, the trait of conscientiousness is related to how careful, vigilant, efficient, or hard working a person is.;extraversion~Incorrect. The correct answer is conscientiousness. According to the Big Five theory of personality, the trait of conscientiousness is related to how careful, vigilant, efficient, or hard working a person is.;agreeableness~Incorrect. The correct answer is conscientiousness. According to the Big Five theory of personality, the trait of conscientiousness is related to how careful, vigilant, efficient, or hard working a person is.;neuroticism~Incorrect. The correct answer is conscientiousness. According to the Big Five theory of personality, the trait of conscientiousness is related to how careful, vigilant, efficient, or hard working a person is.;.*~Wrong",
+                            "incorrectResponses": [
+                                "extraversion",
+                                "agreeableness",
+                                "neuroticism"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the Big Five personality traits influences one’s work ethic?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Id~Well Done - Id is correct. The id is ruled by one’s innate instincts. That means the id only cares about seeking pleasure and has no impulse control. Someone who parties too much would be driven by their id, according to this theory.;Ego~Incorrect. The correct answer is Id. The id is ruled by one’s innate instincts. That means the id only cares about seeking pleasure and has no impulse control. Someone who parties too much would be driven by their id, according to this theory.;Superego~Incorrect. The correct answer is Id. The id is ruled by one’s innate instincts. That means the id only cares about seeking pleasure and has no impulse control. Someone who parties too much would be driven by their id, according to this theory.;Unconscious~Incorrect. The correct answer is Id. The id is ruled by one’s innate instincts. That means the id only cares about seeking pleasure and has no impulse control. Someone who parties too much would be driven by their id, according to this theory.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Ego",
+                                "Superego",
+                                "Unconscious"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Freud (psychoanalytic theory), which of the following components is self-serving and guided by innate urges?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Ego~Well Done - Ego is correct. The ego is in charge of negotiating between the id and superego. While the id and superego are on two ends of the spectrum, the ego is the rational one in the middle.;Id~Incorrect. The correct answer is Ego. The ego is in charge of negotiating between the id and superego. While the id and superego are on two ends of the spectrum, the ego is the rational one in the middle.;Superego~Incorrect. The correct answer is Ego. The ego is in charge of negotiating between the id and superego. While the id and superego are on two ends of the spectrum, the ego is the rational one in the middle.;Unconscious~Incorrect. The correct answer is Ego. The ego is in charge of negotiating between the id and superego. While the id and superego are on two ends of the spectrum, the ego is the rational one in the middle.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Id",
+                                "Superego",
+                                "Unconscious"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Freud (psychoanalytic theory), which of the following components is guided by the Reality Principle and thus is in charge of making thoughtful, executive decisions?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Superego~Well Done - Superego is correct. The superego is like the angel on one’s shoulder, keeping our actions in check by being a moral compass. It influences our behaviors with guilt and pride.;Id~Incorrect. The correct answer is Superego. The superego is like the angel on one’s shoulder, keeping our actions in check by being a moral compass. It influences our behaviors with guilt and pride.;Ego~Incorrect. The correct answer is Superego. The superego is like the angel on one’s shoulder, keeping our actions in check by being a moral compass. It influences our behaviors with guilt and pride.;Unconscious~Incorrect. The correct answer is Superego. The superego is like the angel on one’s shoulder, keeping our actions in check by being a moral compass. It influences our behaviors with guilt and pride.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Id",
+                                "Ego",
+                                "Unconscious"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Freud (psychoanalytic theory), which of the following components is a moral censor for our thoughts and actions?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Nature is no more important than nurture as both interact to play critical roles~Well Done - Nature is no more important than nurture as both interact to play critical roles is correct. While some psychologists like to argue for the importance of one over the other, nature (genetics) is just as influential as nurture (environment).;Nature is most important because it precedes the effects of experience.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles. While some psychologists like to argue for the importance of one over the other, nature (genetics) is just as influential as nurture (environment).;Nature is not as important because most behaviors of interest to psychologists are learned.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles. While some psychologists like to argue for the importance of one over the other, nature (genetics) is just as influential as nurture (environment).;Nature is more important because its effects are less flexible.~Incorrect. The correct answer is nature is no more important than nurture as both interact to play critical roles. While some psychologists like to argue for the importance of one over the other, nature (genetics) is just as influential as nurture (environment).;.*~Wrong",
+                            "incorrectResponses": [
+                                "Nature is most important because it precedes the effects of experience.",
+                                "Nature is not as important because most behaviors of interest to psychologists are learned.",
+                                "Nature is more important because its effects are less flexible."
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is TRUE regarding the role of “nature” in human development?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "in the same order~Well Done - in the same order is correct. Human development follows the same general order across all cultures. In other words, you have to learn to crawl before you can walk. However, the rate may differ (you could walk at 12 months or 16 months).;at the same rate~Incorrect. The correct answer is in the same order. Human development follows the same general order across all cultures. In other words, you have to learn to crawl before you can walk. However, the rate may differ (you could walk at 12 months or 16 months).;from the same genetics~Incorrect. The correct answer is in the same order. Human development follows the same general order across all cultures. In other words, you have to learn to crawl before you can walk. However, the rate may differ (you could walk at 12 months or 16 months).;on a strict timeline~Incorrect. The correct answer is in the same order. Human development follows the same general order across all cultures. In other words, you have to learn to crawl before you can walk. However, the rate may differ (you could walk at 12 months or 16 months).;.*~Wrong",
+                            "incorrectResponses": [
+                                "at the same rate",
+                                "from the same genetics",
+                                "on a strict timeline"
+                            ]
+                        },
+                        "display": {
+                            "text": "Physical growth and development in humans tend to happen..."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Authoritarian~Well Done - Authoritarian is correct. Asserting power or withdrawing love and affection are ways an authoritarian parent might punish their child. This illustrates the emotionally stiff way of authoritarian parenting.;Authoritative~Incorrect. The correct answer is authoritarian. Asserting power or withdrawing love and affection are ways an authoritarian parent might punish their child. This illustrates the emotionally stiff way of authoritarian parenting.;Passive~Incorrect. The correct answer is authoritarian. Asserting power or withdrawing love and affection are ways an authoritarian parent might punish their child. This illustrates the emotionally stiff way of authoritarian parenting.;Permissive~Incorrect. The correct answer is authoritarian. Asserting power or withdrawing love and affection are ways an authoritarian parent might punish their child. This illustrates the emotionally stiff way of authoritarian parenting.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Authoritative",
+                                "Passive",
+                                "Permissive"
+                            ]
+                        },
+                        "display": {
+                            "text": "Power assertion and withdrawal of love are approaches to discipline that may be used by which type of parents?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "authoritative~Well Done - authoritative is correct. The authoritative parent offers a good middle ground between providing structure and limitations, while offering emotional support and guidance.;authoritarian~Incorrect. The correct answer is authoritative. The authoritative parent offers a good middle ground between providing structure and limitations, while offering emotional support and guidance.;overly permissive~Incorrect. The correct answer is authoritative. The authoritative parent offers a good middle ground between providing structure and limitations, while offering emotional support and guidance.;ambivalent~Incorrect. The correct answer is authoritative. The authoritative parent offers a good middle ground between providing structure and limitations, while offering emotional support and guidance.;.*~Wrong",
+                            "incorrectResponses": [
+                                "authoritarian",
+                                "overly permissive",
+                                "ambivalent"
+                            ]
+                        },
+                        "display": {
+                            "text": "In which parental style is there a healthy and effective balance between the rights of parents and their children?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "object permanence.~Well Done - object permanence is correct. When a child has conquered/ understands object permanence, they might get bored with hide and seek, because they’re not surprised when you “re-appear.”;concrete permanence.~Incorrect. The correct answer is object permanence. When a child has conquered/ understands object permanence, they might get bored with hide and seek, because they’re not surprised when you “re-appear.”;concrete objectivity.~Incorrect. The correct answer is object permanence. When a child has conquered/ understands object permanence, they might get bored with hide and seek, because they’re not surprised when you “re-appear.”;permanent conservation.~Incorrect. The correct answer is object permanence. When a child has conquered/ understands object permanence, they might get bored with hide and seek, because they’re not surprised when you “re-appear.”;.*~Wrong",
+                            "incorrectResponses": [
+                                "concrete permanence.",
+                                "concrete objectivity.",
+                                "permanent conservation."
+                            ]
+                        },
+                        "display": {
+                            "text": "The understanding that objects continue to exist even when they are out of sight is called"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Egocentric thought~Well Done - Egocentric thought is correct. When a child still engages in ego (or self) centered thought, he/she does not understand that another person does not see or feel the same way that he/she does.;Object permanence~Incorrect. The correct answer is egocentric thought. When a child still engages in ego (or self) centered thought, he/she does not understand that another person does not see or feel the same way that he/she does.;Abstract thought~Incorrect. The correct answer is egocentric thought. When a child still engages in ego (or self) centered thought, he/she does not understand that another person does not see or feel the same way that he/she does.;Conservation~Incorrect. The correct answer is egocentric thought. When a child still engages in ego (or self) centered thought, he/she does not understand that another person does not see or feel the same way that he/she does.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Object permanence",
+                                "Abstract thought",
+                                "Conservation"
+                            ]
+                        },
+                        "display": {
+                            "text": "The inability to take another person’s perspective is called"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Formal operational~Well Done - Formal operational is correct. This is the final stage of Piaget’s theory of development during which a child tends to give very imaginative, abstract answers. Previously, children tend to think very concretely.;Sensorimotor~Incorrect. The correct answer is formal operational. This is the final stage of Piaget’s theory of development during which a child tends to give very imaginative, abstract answers. Previously, children tend to think very concretely.;Preoperational~Incorrect. The correct answer is formal operational. This is the final stage of Piaget’s theory of development during which a child tends to give very imaginative, abstract answers. Previously, children tend to think very concretely.;Concrete operational~Incorrect. The correct answer is formal operational. This is the final stage of Piaget’s theory of development during which a child tends to give very imaginative, abstract answers. Previously, children tend to think very concretely.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Sensorimotor",
+                                "Preoperational",
+                                "Concrete operational"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Piaget’s cognitive development theory, in which stage does a child tend to think of more creative or abstract answers to hypothetical questions?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "trust versus mistrust.~Well Done - trust versus mistrust is correct. Since an infant relies on its caregiver during the first year of life, according to Erikson, this is when a person would develop the tendency to trust someone (or not) depending on how reliable that caregiver is.;initiative versus guilt.~Incorrect. The correct answer is trust versus mistrust. Since an infant relies on its caregiver during the first year of life, according to Erikson, this is when a person would develop the tendency to trust someone (or not) depending on how reliable that caregiver is.;autonomy versus shame and doubt.~Incorrect. The correct answer is trust versus mistrust. Since an infant relies on its caregiver during the first year of life, according to Erikson, this is when a person would develop the tendency to trust someone (or not) depending on how reliable that caregiver is.;relatedness versus isolation.~Incorrect. The correct answer is trust versus mistrust. Since an infant relies on its caregiver during the first year of life, according to Erikson, this is when a person would develop the tendency to trust someone (or not) depending on how reliable that caregiver is.;.*~Wrong",
+                            "incorrectResponses": [
+                                "initiative versus guilt.",
+                                "autonomy versus shame and doubt.",
+                                "relatedness versus isolation."
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Erikson, the major conflict in the first year of life is that between"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "role confusion.~Well Done - role confusion is correct. According to Erikson, a teenager is focused on discovering “who they are.” This means they will either develop a role in society that is consistent with themselves, or be confused about their social roles.;isolation.~Incorrect. The correct answer is role confusion. According to Erikson, a teenager is focused on discovering “who they are.” This means they will either develop a role in society that is consistent with themselves, or be confused about their social roles.;inferiority.~Incorrect. The correct answer is role confusion. According to Erikson, a teenager is focused on discovering “who they are.” This means they will either develop a role in society that is consistent with themselves, or be confused about their social roles.;stagnation.~Incorrect. The correct answer is role confusion. According to Erikson, a teenager is focused on discovering “who they are.” This means they will either develop a role in society that is consistent with themselves, or be confused about their social roles.;.*~Wrong",
+                            "incorrectResponses": [
+                                "isolation.",
+                                "inferiority.",
+                                "stagnation."
+                            ]
+                        },
+                        "display": {
+                            "text": "According to Erikson, failure to develop a consistent identity results in"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

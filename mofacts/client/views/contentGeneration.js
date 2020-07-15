@@ -23,6 +23,8 @@ deletedClozeIds = [];
 origClusterIndexToClozeIDsMap = {};
 clozesComeFromTemplate = undefined;
 
+let stimParameter = "0,.7";
+
 recordClozeEditHistory = function(oldCloze,newCloze){
   var timestamp = Date.now();
   console.log(new Date(timestamp).toString() + ":" + JSON.stringify(oldCloze) + "|" + JSON.stringify(newCloze));
@@ -74,20 +76,20 @@ getTdfOwnersMap = function(ownerIds) {
 setClozesFromStimObject = function(stimObject,isMultiTdf){
   console.log("setClozesFromStimObject");
   var allClozes = [];
-  var allClusters = stimObject.stimuli.setspec.clusters[0].cluster;
+  var allClusters = stimObject.stimuli.setspec.clusters;
   for(var index in allClusters){
     if(isMultiTdf){
       if(index < allClusters.length -1){
         var cluster = allClusters[index];
         var fakeSentenceId = _.random(-9999999999,9999999999);
-        for(var index2 in cluster.display){
-          var clozeText = cluster.display[index2];
-          var clozeResponse = cluster.response[index2];
+        for(var stim of cluster.stims){
+          var clozeDisplay = stim.display;
+          var clozeResponse = stim.response;
           var clozeId = _.random(-9999999999,9999999999);
           allClozes.push({
             unitIndex:2,
-            cloze:clozeText,
-            correctResponse:clozeResponse,
+            cloze:clozeDisplay,
+            clozeResponse:clozeResponse,
             clozeId:clozeId,
             itemId:fakeSentenceId,
             origStimIndex: index
@@ -114,14 +116,14 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
       if (inLearningSession) {
         var cluster = allClusters[index];
         var fakeSentenceId = _.random(-9999999999,9999999999);
-        for(var index2 in cluster.display){
-          var clozeText = cluster.display[index2];
-          var clozeResponse = cluster.response[index2];
+        for(var stim of cluster.stims){
+          var clozeDisplay = stim.display;
+          var clozeResponse = stim.response;
           var clozeId = _.random(-9999999999,9999999999);
           allClozes.push({
             unitIndex:clusterUnitIndex,
-            cloze:clozeText,
-            correctResponse:clozeResponse,
+            cloze:clozeDisplay,
+            clozeResponse:clozeResponse,
             clozeId:clozeId,
             itemId:fakeSentenceId,
             origStimIndex: index
@@ -229,43 +231,44 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
 
   if(!isMultiTdf){
     curStim = JSON.parse(JSON.stringify(templateStimJSON));
-    var completedSentenceIDs = {};
+    let completedSentenceIDs = {};
     for(var index in clozes){
-      var sentenceID = clozes[index].itemId;
-      var unitIndex = clozes[index].unitIndex;
+      let sentenceID = clozes[index].itemId;
+      let unitIndex = clozes[index].unitIndex;
       if(!completedSentenceIDs[sentenceID]){
-        var curClusterIndex = curStim.stimuli.setspec.clusters[0].cluster.length;
+        let curClusterIndex = curStim.stimuli.setspec.clusters.length;
         if(!!!(clusterListMappings[unitIndex].new)){
           clusterListMappings[unitIndex].new = [curClusterIndex];
         }
         clusterListMappings[unitIndex].new[1] = curClusterIndex;
 
-        var cluster = {displayType:["Cloze"],display:[],response:[],parameter:[]};
-        var curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
-        for(var index2 in curSentenceClozes){
-          var cloze = curSentenceClozes[index2];
-          cluster.parameter.push("0,.7");
-          cluster.display.push(cloze.cloze);
-          cluster.response.push(cloze.correctResponse);
+        let cluster = {stims:[]};
+        let curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
+        for(let cloze of curSentenceClozes){
+          let stim = {display:{"clozeText":""},response:{},parameter:""};
+          stim.display = cloze.cloze;
+          stim.response = cloze.clozeResponse;
+          stim.parameter = stimParameter;
+          cluster.stims.push(stim);
         }
-        curStim.stimuli.setspec.clusters[0].cluster.push(cluster);
+        curStim.stimuli.setspec.clusters.push(cluster);
         completedSentenceIDs[sentenceID] = true;
       }
     }
 
     for(var index in clusterListMappings){
-      var unitMapping = clusterListMappings[index];
-      var curClusterIndex = curStim.stimuli.setspec.clusters[0].cluster.length;
+      let unitMapping = clusterListMappings[index];
+      let curClusterIndex = curStim.stimuli.setspec.clusters.length;
       if(!!!unitMapping.new){
-        var curUnitStart = unitMapping.orig[0];
-        var curUnitEnd = unitMapping.orig[1];
-        var numInUnit = curUnitEnd - curUnitStart;
-        var newUnitStart = curClusterIndex;
-        var newUnitEnd = newUnitStart + numInUnit;
+        let curUnitStart = unitMapping.orig[0];
+        let curUnitEnd = unitMapping.orig[1];
+        let numInUnit = curUnitEnd - curUnitStart;
+        let newUnitStart = curClusterIndex;
+        let newUnitEnd = newUnitStart + numInUnit;
         unitMapping.new = [newUnitStart,newUnitEnd];
         for(var i=curUnitStart;i<=curUnitEnd;i++){
-          var cluster = origStim.stimuli.setspec.clusters[0].cluster[i];
-          curStim.stimuli.setspec.clusters[0].cluster.push(cluster);
+          let cluster = origStim.stimuli.setspec.clusters[i];
+          curStim.stimuli.setspec.clusters.push(cluster);
         }
       }
     }
@@ -285,8 +288,8 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,newStimJSON){
   let curTdf = undefined;
 
   if(clozesComeFromTemplate){
-    var tdfTemplateFileName = $("#templateTDFSelect").val();
-    var originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
+    let tdfTemplateFileName = $("#templateTDFSelect").val();
+    let originalTDF = tdfFileNameToTdfFileMap[tdfTemplateFileName];
     curTdf = JSON.parse(JSON.stringify(originalTDF));
   }else{
     curTdf = JSON.parse(JSON.stringify(templateTDFJSON));
@@ -301,7 +304,7 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,newStimJSON){
   let isMultiTdf = curTdf.isMultiTdf;
 
   if(isMultiTdf){
-    let lastStim = newStimJSON.stimuli.setspec.clusters[0].cluster.length - 1;
+    let lastStim = newStimJSON.stimuli.setspec.clusters.length - 1;
     curTdf.tdfs.tutor.unit[1].assessmentsession.clusterlist = [lastStim + "-" + lastStim];
 
     let subTdfsToRemove = [];
@@ -400,7 +403,7 @@ function deleteCloze(clozeID,itemID){
 
   var prevClozeSentencePairs = Session.get("clozeSentencePairs");
 
-  var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId']);
+  var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','clozeResponse','itemId','clozeId']);
   
   recordClozeEditHistory(oldCloze,{});
   deletedClozeIds.push(oldCloze.clozeId);
@@ -495,27 +498,27 @@ Template.contentGeneration.events({
 
   'click #editClozeSaveButton': function(event){
     console.log(event);
-    var newCloze = $("#clozeTextEdit").val();
-    var response = $("#clozeResponseEdit").val();
-    var editingCloze = Session.get("editingCloze");
+    let newClozeText = $("#clozeTextEdit").val();
+    let response = $("#clozeResponseEdit").val();
+    let editingCloze = Session.get("editingCloze");
 
-    var sentenceID = editingCloze.itemId;
-    var clozeID = editingCloze.clozeId;
-    if(newCloze.indexOf("_") == -1){
+    let sentenceID = editingCloze.itemId;
+    let clozeID = editingCloze.clozeId;
+    if(newClozeText.indexOf("_") == -1){
       alert("Please make sure to insert underscores to indicate a missing word.");
     }else if (response.length < 1) {
       alert("Please enter a correct response");
     }else{
-      var unitIndex = clozeIDToClozeMap[clozeID].unitIndex;
-      var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId','origStimIndex']);
-      var newCloze = {cloze:newCloze,correctResponse:response,itemId:sentenceID,clozeId:clozeID,origStimIndex:oldCloze.origStimIndex};
+      let unitIndex = clozeIDToClozeMap[clozeID].unitIndex;
+      let oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','clozeResponse','itemId','clozeId','origStimIndex']);
+      let newCloze = {cloze:newClozeText,clozeResponse:response,itemId:sentenceID,clozeId:clozeID,origStimIndex:oldCloze.origStimIndex};
       recordClozeEditHistory(oldCloze,newCloze);
       newCloze = Object.assign({unitIndex:unitIndex},newCloze);
-      var clozeSentencePairs = Session.get('clozeSentencePairs');
-      var clozes = clozeSentencePairs.clozes;
-      var clozesWithNew = [];
-      for(var clozeIndex in clozes){
-        var cloze = clozes[clozeIndex];
+      let clozeSentencePairs = Session.get('clozeSentencePairs');
+      let clozes = clozeSentencePairs.clozes;
+      let clozesWithNew = [];
+      for(let clozeIndex in clozes){
+        let cloze = clozes[clozeIndex];
         if(cloze.clozeId === clozeID){
           clozesWithNew.push(newCloze);
         }else{
@@ -666,11 +669,11 @@ Template.contentGeneration.helpers({
   },
 
   editingCloze: function(){
-    return Session.get("editingCloze").cloze;
+    return Session.get("editingCloze").cloze.clozeText;
   },
 
   editingClozeResponse: function(){
-    return Session.get("editingCloze").correctResponse;
+    return Session.get("editingCloze").clozeResponse.correctResponse;
   },
 
   editingSentence: function(){
@@ -690,11 +693,7 @@ let templateStimJSON = {
     "fileName" : "",
     "stimuli" : {
         "setspec" : {
-            "clusters" : [
-                {
-                    "cluster" : []
-                }
-            ]
+            "clusters" : []
         }
     },
     "owner" : "",

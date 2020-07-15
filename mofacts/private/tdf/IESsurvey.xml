@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Survey for A&amp;P Students</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>IESsurveystims.xml</stimulusfile>
+        <stimulusfile>IESsurveystims.json</stimulusfile>
         <lfparameter>.85</lfparameter>
 
         <shuffleclusters>30-159</shuffleclusters>

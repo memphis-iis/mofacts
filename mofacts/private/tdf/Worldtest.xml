@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <lessonname>Optimized Drill Practice of World Countries</lessonname>
-        <stimulusfile>Worldstim.xml</stimulusfile>
+        <stimulusfile>Worldstim.json</stimulusfile>
         <shuffleclusters>0-175</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <simTimeout>1500</simTimeout>

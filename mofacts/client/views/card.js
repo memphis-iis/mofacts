@@ -203,7 +203,7 @@ var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
 var unitStartTimestamp = 0;
 var trialTimestamp = 0;
 var keypressTimestamp = 0;
-var currentQuestionSound = null; //See later in this file for sound functions
+var currentSound = null; //See later in this file for sound functions
 
 //We need to track the name/ID for clear and reset. We need the function and
 //delay used for reset
@@ -624,6 +624,7 @@ Template.card.helpers({
     },
 
     'subWordClozeCurrentQuestionExists': function(){
+      console.log("subWordClozeCurrentQuestionExists: " + (typeof(Session.get("clozeQuestionParts")) != "undefined"));
       return typeof(Session.get("clozeQuestionParts")) != "undefined";
     },
 
@@ -632,19 +633,30 @@ Template.card.helpers({
       return Session.get("clozeQuestionParts");
     },
 
-    'currentQuestion': function() {
-        return Session.get("currentQuestion");
+    'clozeText': function(){
+      let clozeText = Session.get("currentDisplay") ? Session.get("currentDisplay").clozeText : undefined;
+      return clozeText;
     },
 
-    'curImageSrc': function(){
-      var curQuestion = Session.get("currentQuestion");
-      if(!!curQuestion){
-        return imagesDict[curQuestion].src;
+    'text': function(){
+      let text = Session.get("currentDisplay") ? Session.get("currentDisplay").text : undefined;
+      return text;
+    },
+
+    'curImgSrc': function(){
+      let curImgSrc = Session.get("currentDisplay") ? Session.get("currentDisplay").imgSrc : undefined;
+      if(curImgSrc){
+        return imagesDict[curImgSrc].src;
       }else{
         return "";
       }
     },
 
+    'curVideoSrc': function(){
+      let curVideoSrc = Session.get("currentDisplay") ? Session.get("currentDisplay").videoSrc : undefined;
+      return curVideoSrc;
+    },
+    
     'displayAnswer': function() {
         return Answers.getDisplayAnswerText(Session.get("currentAnswer"));
     },
@@ -658,28 +670,33 @@ Template.card.helpers({
     },
 
     'textCard': function() {
-        return getQuestionType() === "text";
+      return getPopulatedQuestionDisplayTypes().text;
     },
 
     'audioCard': function() {
-        return getQuestionType() === "sound";
+      return getPopulatedQuestionDisplayTypes().sound;
     },
 
     'imageCard': function() {
-        return getQuestionType() === "image";
+      return getPopulatedQuestionDisplayTypes().image;
     },
 
     'videoCard': function() {
-        return getQuestionType() === "video";
+      return getPopulatedQuestionDisplayTypes().video;
     },
 
     'clozeCard': function() {
-        return getQuestionType() === "cloze";
+      return getPopulatedQuestionDisplayTypes().cloze;
     },
 
     'textOrClozeCard': function() {
-        var qt = getQuestionType();
-        return qt === "text" || qt === "cloze";
+      let populatedQuestionDisplayTypes = getPopulatedQuestionDisplayTypes();
+      return populatedQuestionDisplayTypes.text || populatedQuestionDisplayTypes.cloze;
+    },
+
+    'anythingButAudioCard': function() {
+      let populatedQuestionDisplayTypes = getPopulatedQuestionDisplayTypes();
+      return populatedQuestionDisplayTypes.cloze || populatedQuestionDisplayTypes.text || populatedQuestionDisplayTypes.image || populatedQuestionDisplayTypes.video;
     },
 
     'imageResponse' : function() {
@@ -852,49 +869,46 @@ initializeAudio = function(){
 }
 
 var preloadAudioFiles = function(){
-  var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-  var soundExtension = setSpec.soundExtension || ".wav";
-  console.log("sound extension!!!: " + soundExtension);
-  var allQuestions = getAllStimQuestions();
-  for(var index in allQuestions){
-    var question = allQuestions[index];
-    soundsDict[question] = new Howl({
+  let allSrcs = getCurrentStimDisplaySources('audioSrc');
+  for(let index in allSrcs){
+    let source = allSrcs[index];
+    soundsDict[source] = new Howl({
         preload: true,
         src: [
-            question + soundExtension
+          source
         ],
 
         //Must do an Immediately Invoked Function Expression otherwise question
         //is captured as a closure and will change to the last value in the loop
         //by the time we call this
-        onplay: (function(question) {
-            if (soundsDict[question]) {
-                soundsDict[question].isCurrentlyPlaying = true;
+        onplay: (function(source) {
+            if (soundsDict[source]) {
+                soundsDict[source].isCurrentlyPlaying = true;
             }
             console.log("Sound played");
-        })(question),
+        })(source),
 
-        onend: (function(question) {
+        onend: (function(source) {
           return function(){
-              if (soundsDict[question]) {
-                  soundsDict[question].isCurrentlyPlaying = false;
+              if (soundsDict[source]) {
+                  soundsDict[source].isCurrentlyPlaying = false;
               }
-              if (!!onEndCallbackDict[question]) {
-                  onEndCallbackDict[question]();
+              if (!!onEndCallbackDict[source]) {
+                  onEndCallbackDict[source]();
               }
               console.log("Sound completed");
           }
-        })(question),
+        })(source),
     });
   }
 }
 
-var preloadImages = function(curStimImageSrcs){
-  console.log("curStimImageSrcs: " + JSON.stringify(curStimImageSrcs));
+var preloadImages = function(){
+  let curStimImgSrcs = getCurrentStimDisplaySources("imgSrc");
+  console.log("curStimImgSrcs: " + JSON.stringify(curStimImgSrcs));
   imagesDict = {};
   var img;
-  for(var index in curStimImageSrcs){
-    var src = curStimImageSrcs[index];
+  for(var src of curStimImgSrcs){
     img = new Image();
     img.src = src;
     console.log("img:" + img);
@@ -990,8 +1004,6 @@ function newQuestionHandler() {
         Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
-        var currentQuest = engine.findCurrentCardInfo();
-
         var buttonChoices = [];
 
         var buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
@@ -1008,12 +1020,10 @@ function newQuestionHandler() {
         }
         if (!buttonChoices || buttonChoices.length < 1) {
             buttonChoices = [];
-            if (!!currentQuest && typeof currentQuest.whichStim !== "undefined") {
-                _.each(getCurrentFalseResponses(currentQuest.whichStim), function(ele) {
-                    buttonChoices.push(ele);
-                });
+            _.each(getCurrentFalseResponses(), function(ele) {
+                buttonChoices.push(ele);
                 optionsFromStim = true;
-            }
+            });
         }
         if (!buttonChoices || buttonChoices.length < 1) {
             //Whoops - they didn't specify any alternate choices
@@ -1082,7 +1092,7 @@ function newQuestionHandler() {
     //construct the question to display the actual information. Note that we
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
-    if (getTestType() === "s" && getQuestionType() === "cloze") {
+    if (getTestType() === "s" && (getPopulatedQuestionDisplayTypes().cloze)) {
         Session.set("currentQuestion", Answers.clozeStudy(
             Session.get("currentQuestion"),
             Session.get("currentAnswer")
@@ -1099,32 +1109,32 @@ function newQuestionHandler() {
 
 //Stop previous sound
 function clearPlayingSound() {
-    if (!!currentQuestionSound) {
+    if (!!currentSound) {
         try {
-            currentQuestionSound.stop();
+            currentSound.stop();
         }
         catch(e) {
         }
-        currentQuestionSound = null;
+        currentSound = null;
     }
 }
 
 //Play a sound matching the current question
-function playCurrentQuestionSound(onEndCallback) {
+function playCurrentSound(onEndCallback) {
     //We currently only play one sound at a time
     clearPlayingSound();
 
-    var currentQuestion = Session.get("currentQuestion");
-    console.log("current question: " + currentQuestion);
+    var currentAudioSrc = Session.get("currentDisplay").audioSrc;
+    console.log("currentAudioSrc: " + currentAudioSrc);
 
     //Reset sound and play it
-    currentQuestionSound = soundsDict[currentQuestion];
-    onEndCallbackDict[currentQuestion] = onEndCallback;
+    currentSound = soundsDict[currentAudioSrc];
+    onEndCallbackDict[currentAudioSrc] = onEndCallback;
 
     //In case our caller checks before the sound has a chance to load, we
     //mark the howler instance as playing
-    currentQuestionSound.isCurrentlyPlaying = true;
-    currentQuestionSound.play();
+    currentSound.isCurrentlyPlaying = true;
+    currentSound.play();
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
@@ -1305,7 +1315,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
       //record progress in userProgress variable storage (note that this is
       //helpful and used on the stats page, but the user times log is the
-      //"system of record"
+      //"system of record")
       recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
 
       //Figure out timeout and reviewLatency
@@ -1359,8 +1369,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
       //If incorrect answer for a drill on a sound, we need to replay the sound.
       //Otherwise, we can just use our reset logic directly
-      if (getQuestionType() === "sound" && !isCorrect && getTestType() === "d") {
-          playCurrentQuestionSound(resetAfterTimeout);
+      if (getPopulatedQuestionDisplayTypes().sound && !isCorrect && getTestType() === "d") {
+          playCurrentSound(resetAfterTimeout);
       }
       else {
           resetAfterTimeout();
@@ -1654,17 +1664,16 @@ function startQuestionTimeout(textFocus) {
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
-    var questionType = getQuestionType();
-    if(questionType === "sound") {
+    var questionDisplayTypes = getPopulatedQuestionDisplayTypes();
+    if(questionDisplayTypes.sound) {
         //We don't allow user input until the sound is finished playing
-        playCurrentQuestionSound(function() {
+        playCurrentSound(function() {
             allowUserInput(textFocus);
             startMainCardTimeout();
         });
-    }
-    else {
+    }else {
         //Only speak the prompt if the question type makes sense
-        if(questionType === "text" || questionType === "cloze"){
+        if(questionDisplayTypes.text || questionDisplayTypes.cloze){
           speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true,"all");
         }
         //Not a sound - can unlock now for data entry now
@@ -2323,6 +2332,7 @@ function resumeFromUserTimesLog() {
     Session.set("currentUnitNumber", undefined);
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
+    Session.set("currentDisplay", undefined);
     Session.set("currentQuestion", undefined);
     Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
@@ -2402,16 +2412,15 @@ function resumeFromUserTimesLog() {
     }
 
     //Pre-load sounds to be played into soundsDict to avoid audio lag issues
-    if(curStimIsSoundDisplayType()){
+    if(curStimHasSoundDisplayType()){
       console.log("Sound type questions detected, pre-loading sounds");
       preloadAudioFiles();
     }else{
       console.log("Non sound type detected");
     }
-    var curStimImageSrcs = getCurStimImageSrcs();
-    if(curStimImageSrcs.length > 0){
+    if(curStimHasAudioDisplayType()){
       console.log("image type questions detected, pre-loading images");
-      preloadImages(curStimImageSrcs);
+      preloadImages();
     }else{
       console.log("Non image type detected");
     }
@@ -2617,6 +2626,7 @@ processUserTimesLog = function(expKey) {
                 Session.set("currentUnitNumber", instructUnit);
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
+                Session.set("currentDisplay", undefined);
                 Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -2640,6 +2650,7 @@ processUserTimesLog = function(expKey) {
 
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
+                Session.set("currentDisplay", undefined);
                 Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -2700,6 +2711,7 @@ processUserTimesLog = function(expKey) {
 
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
+            Session.set("currentDisplay", undefined);
             Session.set("currentQuestion", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
@@ -2728,6 +2740,7 @@ processUserTimesLog = function(expKey) {
             Session.set("clusterIndex",         cardIndex);
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
+            Session.set("currentDisplay",       entry.selectedDisplay);
             Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);

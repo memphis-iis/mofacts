@@ -1,9 +1,9 @@
 <tutor>
     <setspec>
-        <name>Statistics Practice</name> <!-- TAKEN FROM Music2-0.xml -->
+        <name>Statistics Practice</name> <!-- TAKEN FROM Music2-0.json -->
         <lessonname>small SVO test</lessonname>
         <userselect>false</userselect> <!-- Don't show up for users -->
-        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <stimulusfile>SVO4stims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
     </setspec>

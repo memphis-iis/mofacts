@@ -199,18 +199,20 @@ function modelUnitEngine() {
 
     function getStimParameterArray(clusterIndex,whichParameter){
       return _.chain(fastGetStimCluster(clusterIndex))
-            .prop("parameter")
+            .prop("stims")
             .prop(_.intval(whichParameter))
+            .prop("parameter")
             .split(',')
             .map(x => _.floatval(x))
             .value();
     }
 
     fastGetStimQuestion = function(index, whichQuestion) {
-        return fastGetStimCluster(index).display[whichQuestion];
+        let display = fastGetStimCluster(index).stims[whichQuestion].display;
+        return display.clozeText || display.Text; //We only care about texts that are displayed, media sources are handled elsewhere
     }
     function fastGetStimAnswer(index, whichAnswer) {
-        return fastGetStimCluster(index).response[whichAnswer];
+        return fastGetStimCluster(index).stims[whichAnswer].response.correctResponse;
     }
 
     getSubClozeAnswerSyllables = function(answer,displaySyllableIndices,cachedSyllables){
@@ -397,7 +399,7 @@ function modelUnitEngine() {
 
             // We keep per-stim and re-response-text results as well
             var cluster = fastGetStimCluster(i);
-            var numStims = _.chain(cluster).prop("display").prop("length").intval().value();
+            var numStims = _.chain(cluster).prop("stims").prop("length").intval().value();
             for (j = 0; j < numStims; ++j) {
                 var parameter = getStimParameterArray(i,j); //Note this may be a single element array for older stims or a 3 digit array for newer ones
                 // Per-stim counts
@@ -421,7 +423,7 @@ function modelUnitEngine() {
                 });
 
                 // Per-response counts
-                var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[j]));
+                var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[j].response.correctResponse));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
                         responseSuccessCount: 0,
@@ -716,8 +718,7 @@ function modelUnitEngine() {
         unitMode: (function(){
           var unitMode = _.chain(getCurrentTdfUnit())
               .prop("learningsession").first()
-              .prop("unitMode").trim().value();
-              //getCurrentDeliveryParams().unitMode;
+              .prop("unitMode").trim().value() || "default";
           console.log("UNIT MODE: " + unitMode);
           return unitMode;
         })(),
@@ -764,14 +765,14 @@ function modelUnitEngine() {
             }
 
             // Found! Update everything and grab a reference to the card and stim
-            var prob = probs[newProbIndex];
-            var cardIndex = prob.cardIndex;
-            var card = cards[cardIndex];
-            var whichStim = prob.stimIndex;
-            var stim = card.stims[whichStim];
+            let prob = probs[newProbIndex];
+            let cardIndex = prob.cardIndex;
+            let card = cards[cardIndex];
+            let whichStim = prob.stimIndex;
+            let stim = card.stims[whichStim];
 
             // Store calculated probability for selected stim/cluster
-            var currentStimProbability = prob.probability;
+            let currentStimProbability = prob.probability;
             stim.previousCalculatedProbabilities.push(currentStimProbability);
             card.previousCalculatedProbabilities.push(currentStimProbability);
 
@@ -779,9 +780,12 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
 
+            let currentDisplay = fastGetStimCluster(cardIndex).stims[whichStim].display;
+            Session.set("currentDisplay", currentDisplay);
+
             let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
             let currentQuestionPart2 = undefined;
-            let currentStimAnswer = getCurrentStimAnswer(whichStim).toLowerCase();
+            let currentStimAnswer = fastGetStimAnswer(cardIndex, whichStim).toLowerCase();
             console.log("currentStimAnswer: " + currentStimAnswer);
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
 
@@ -854,7 +858,7 @@ function modelUnitEngine() {
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
 
-            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).response[whichStim]));
+            let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).stims[whichStim].response.correctResponse));
             if (responseText && responseText in cardProbabilities.responses) {
                 resp = cardProbabilities.responses[responseText];
                 resp.lastShownTimestamp = Date.now();
@@ -911,7 +915,7 @@ function modelUnitEngine() {
             var cards = cardProbabilities.cards;
             var card = cards[indexForNewCard];
             var stim = card.stims[prob.stimIndex];
-            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).response[prob.stimIndex]));
+            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).stims[prob.stimIndex].response.correctResponse));
             var resp = {};
             if (responseText && responseText in cardProbabilities.responses) {
                 resp = cardProbabilities.responses[responseText];
@@ -961,11 +965,11 @@ function modelUnitEngine() {
         },
 
         createQuestionLogEntry: function() {
-            var idx = getCurrentClusterIndex();
-            var card = cardProbabilities.cards[idx];
-            var cluster = fastGetStimCluster(getCurrentClusterIndex());
-            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]));
-            var responseData = {
+            let idx = getCurrentClusterIndex();
+            let card = cardProbabilities.cards[idx];
+            let cluster = fastGetStimCluster(getCurrentClusterIndex());
+            let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].response.correctResponse));
+            let responseData = {
               responseText: responseText,
               lastShownTimestamp: Date.now()
             };
@@ -979,15 +983,15 @@ function modelUnitEngine() {
 
         cardAnswered: function(wasCorrect, resumeData) {
             // Get info we need for updates and logic below
-            var cards = cardProbabilities.cards;
-            var cluster = fastGetStimCluster(getCurrentClusterIndex());
-            var card = _.prop(cards, cluster.shufIndex);
+            let cards = cardProbabilities.cards;
+            let cluster = fastGetStimCluster(getCurrentClusterIndex());
+            let card = _.prop(cards, cluster.shufIndex);
             console.log("cardAnswered, card: " + JSON.stringify(card) + "cluster.shufIndex: " + cluster.shufIndex);
 
             // Before our study trial check, capture if this is NOT a resume
             // call (and we captured the time for the last question)
             if (!resumeData && card.lastShownTimestamp > 0) {
-                var practice = Date.now() - card.lastShownTimestamp;
+                let practice = Date.now() - card.lastShownTimestamp;
                 // We assume more than 5 minutes is an artifact of resume logic
                 if (practice < 5 * 60 * 1000) {
                     // Capture the practice time. We also know that all the
@@ -1041,7 +1045,7 @@ function modelUnitEngine() {
                 console.log("cardoutcomehistory before: " + JSON.stringify(card.outcomeHistory));
                 card.outcomeHistory.push(wasCorrect ? 1 : 0);
                 console.log("cardoutcomehistory after: " + JSON.stringify(card.outcomeHistory));
-                var stim = currentCardInfo.whichStim;
+                let stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
                     if (wasCorrect) card.stims[stim].stimSuccessCount += 1;
                     else            card.stims[stim].stimFailureCount += 1;
@@ -1052,9 +1056,9 @@ function modelUnitEngine() {
             }
 
             // "Response" stats
-            var answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.response[currentCardInfo.whichStim]));
+            let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].response.correctResponse));
             if (answerText && answerText in cardProbabilities.responses) {
-                var resp = cardProbabilities.responses[answerText];
+                let resp = cardProbabilities.responses[answerText];
                 if (wasCorrect) resp.responseSuccessCount += 1;
                 else            resp.responseFailureCount += 1;
 
@@ -1065,7 +1069,7 @@ function modelUnitEngine() {
                 console.log("COULD NOT STORE RESPONSE METRICS",
                     answerText,
                     currentCardInfo.whichStim,
-                    displayify(cluster.response),
+                    displayify(cluster.stims[currentCardInfo.whichStim].response.correctResponse),
                     displayify(cardProbabilities.responses));
             }
 
@@ -1166,14 +1170,16 @@ function scheduleUnitEngine() {
         },
 
         selectNextCard: function() {
-            var questionIndex = Session.get("questionIndex");
-            var questInfo = getSchedule().q[questionIndex];
-            var whichStim = questInfo.whichStim;
+            let questionIndex = Session.get("questionIndex");
+            let questInfo = getSchedule().q[questionIndex];
+            let curClusterIndex = questInfo.clusterIndex;
+            let curStimIndex = questInfo.whichStim;
 
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
-            setCurrentClusterIndex(questInfo.clusterIndex);
-            var currentQuestion = getCurrentStimQuestion(whichStim);
+            setCurrentClusterIndex(curClusterIndex);
+            let currentDisplay = getStimCluster(curClusterIndex, curStimIndex).display;
+            let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){
               var prompts = currentQuestion.split("|");
@@ -1195,20 +1201,20 @@ function scheduleUnitEngine() {
                 }
             }
 
+            Session.set("currentDisplay", currentDisplay);
             Session.set("currentQuestion", currentQuestion);
-
-            Session.set("currentAnswer", getCurrentStimAnswer(whichStim));
+            Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
             Session.set("showOverlearningText", false);  //No overlearning in a schedule
 
             console.log("SCHEDULE UNIT card selection => ",
-                "cluster-idx-unmapped:", questInfo.clusterIndex,
-                "whichStim:", whichStim,
-                "parameter", getCurrentStimParameter(whichStim)
+                "cluster-idx-unmapped:", curClusterIndex,
+                "whichStim:", curStimIndex,
+                "parameter", getStimParameter(curClusterIndex,curStimIndex)
             );
 
-            return questInfo.clusterIndex;
+            return curClusterIndex;
         },
 
         findCurrentCardInfo: function() {

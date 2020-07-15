@@ -35,30 +35,42 @@
         {{/if}}
 
         {{#if trial}}
-        <div class="row">
-            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion" >
-                {{#if textOrClozeCard}}
-                    {{#if subWordClozeCurrentQuestionExists}}
-                        {{{subWordParts.[0]}}}<u>{{{subWordParts.[1]}}}</u>{{{subWordParts.[2]}}}
-                    {{else}}
-                        {{{currentQuestion}}}
+            <div class="row">
+                <div class="container-fluid" id="displayContainer">
+                    {{#if anythingButAudioCard}}
+                        <div id="leftPanel" class="col-md-11">
+                            {{#if textOrClozeCard}}
+                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                    {{#if subWordClozeCurrentQuestionExists}}
+                                        {{{subWordParts.[0]}}}<u>{{{subWordParts.[1]}}}</u>{{{subWordParts.[2]}}}
+                                    {{else}}
+                                        {{{clozeText}}}
+                                        {{{text}}}
+                                    {{/if}}
+                                </div>
+                            {{/if}}
+                            {{#if imageCard}}
+                                <div class="marginLeftAndRight h2" id="imageDisplay">
+                                    <img id="cardQuestionImg" src="http://localhost:3000/images/TNplants/6151_IMG00198.JPG" style="max-width: 100%; width: auto; height: max-content;"> 
+                                </div>
+                            {{/if}}
+                            {{#if videoCard}}
+                                <div class="marginLeftAndRight h2" id="videoDisplay">
+                                    <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
+                                        <source src="https://bart.binarydolphin.com/shortfriends.webm">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            {{/if}}
+                        </div>
                     {{/if}}
-                {{/if}}
-                {{#if audioCard}}
-                <img src="images/speaker.png" class="sound-img">
-                {{/if}}
-                {{#if imageCard}}
-                <!--<img id="cardQuestionImg" src={{currentQuestion}}>-->
-                <img id="cardQuestionImg" src={{curImageSrc}}>
-                {{/if}}
-                {{#if videoCard}}
-                <video width="95%" autoplay>
-                    <source src="{{currentQuestion}}">
-                    Your browser does not support the video tag.
-                </video>
-                {{/if}}
+                    {{#if audioCard}}
+                        <div id="rightmostPanel" class="col-md-1">
+                            <img src="images/speaker.png" class="marginLeftAndRight h2 sound-img">
+                        </div>
+                    {{/if}}
+                </div>
             </div>
-        </div>  <!-- close row -->
         {{/if}}
 
         {{#if study}}

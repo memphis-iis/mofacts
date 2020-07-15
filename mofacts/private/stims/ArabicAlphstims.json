@@ -1,0 +1,1179 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "alif"
+                        },
+                        "display": {
+                            "text": "ا"
+                        },
+                        "parameter": "-1.49888999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "alif"
+                        },
+                        "display": {
+                            "text": "ا"
+                        },
+                        "parameter": "-1.49889999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "alif"
+                        },
+                        "display": {
+                            "text": "ـا"
+                        },
+                        "parameter": "-1.49890999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "alif"
+                        },
+                        "display": {
+                            "text": "ـا"
+                        },
+                        "parameter": "-1.49891999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ba"
+                        },
+                        "display": {
+                            "text": "ب"
+                        },
+                        "parameter": "-1.49892999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ba"
+                        },
+                        "display": {
+                            "text": "بـ"
+                        },
+                        "parameter": "-1.49893999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ba"
+                        },
+                        "display": {
+                            "text": "ـبـ"
+                        },
+                        "parameter": "-1.49894999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ba"
+                        },
+                        "display": {
+                            "text": "ـب"
+                        },
+                        "parameter": "-1.49895999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ت"
+                        },
+                        "parameter": "-1.49896999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "تـ"
+                        },
+                        "parameter": "-1.49897999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ـتـ"
+                        },
+                        "parameter": "-1.49898999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ـت"
+                        },
+                        "parameter": "-1.49899999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tha"
+                        },
+                        "display": {
+                            "text": "ث"
+                        },
+                        "parameter": "-1.49900999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tha"
+                        },
+                        "display": {
+                            "text": "ثـ"
+                        },
+                        "parameter": "-1.49901999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tha"
+                        },
+                        "display": {
+                            "text": "ـثـ"
+                        },
+                        "parameter": "-1.49902999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tha"
+                        },
+                        "display": {
+                            "text": "ـث"
+                        },
+                        "parameter": "-1.49903999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "jim"
+                        },
+                        "display": {
+                            "text": "ج"
+                        },
+                        "parameter": "-1.49904999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jim"
+                        },
+                        "display": {
+                            "text": "جـ"
+                        },
+                        "parameter": "-1.49905999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jim"
+                        },
+                        "display": {
+                            "text": "ـجـ"
+                        },
+                        "parameter": "-1.49906999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jim"
+                        },
+                        "display": {
+                            "text": "ـج"
+                        },
+                        "parameter": "-1.49907999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ح"
+                        },
+                        "parameter": "-1.49908999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "حـ"
+                        },
+                        "parameter": "-1.49909999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ـحـ"
+                        },
+                        "parameter": "-1.49910999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ـح"
+                        },
+                        "parameter": "-1.49911999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "kha"
+                        },
+                        "display": {
+                            "text": "خ"
+                        },
+                        "parameter": "-1.49912999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kha"
+                        },
+                        "display": {
+                            "text": "خـ"
+                        },
+                        "parameter": "-1.49913999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kha"
+                        },
+                        "display": {
+                            "text": "ـخـ"
+                        },
+                        "parameter": "-1.49914999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kha"
+                        },
+                        "display": {
+                            "text": "ـخ"
+                        },
+                        "parameter": "-1.49915999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dal"
+                        },
+                        "display": {
+                            "text": "د"
+                        },
+                        "parameter": "-1.49916999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dal"
+                        },
+                        "display": {
+                            "text": "د"
+                        },
+                        "parameter": "-1.49917999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dal"
+                        },
+                        "display": {
+                            "text": "ـد"
+                        },
+                        "parameter": "-1.49918999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dal"
+                        },
+                        "display": {
+                            "text": "ـد"
+                        },
+                        "parameter": "-1.49919999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "zal"
+                        },
+                        "display": {
+                            "text": "ذ"
+                        },
+                        "parameter": "-1.49920999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zal"
+                        },
+                        "display": {
+                            "text": "ذ"
+                        },
+                        "parameter": "-1.49921999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zal"
+                        },
+                        "display": {
+                            "text": "ـذ"
+                        },
+                        "parameter": "-1.49922999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zal"
+                        },
+                        "display": {
+                            "text": "ـذ"
+                        },
+                        "parameter": "-1.49924"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ر"
+                        },
+                        "parameter": "-1.49925"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ر"
+                        },
+                        "parameter": "-1.49926"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ـر"
+                        },
+                        "parameter": "-1.49927"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ـر"
+                        },
+                        "parameter": "-1.49928"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "zay"
+                        },
+                        "display": {
+                            "text": "ز"
+                        },
+                        "parameter": "-1.49929"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zay"
+                        },
+                        "display": {
+                            "text": "ز"
+                        },
+                        "parameter": "-1.4993"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zay"
+                        },
+                        "display": {
+                            "text": "ـز"
+                        },
+                        "parameter": "-1.49931"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zay"
+                        },
+                        "display": {
+                            "text": "ـز"
+                        },
+                        "parameter": "-1.49932"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sin"
+                        },
+                        "display": {
+                            "text": "س"
+                        },
+                        "parameter": "-1.49933"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sin"
+                        },
+                        "display": {
+                            "text": "سـ"
+                        },
+                        "parameter": "-1.49934"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sin"
+                        },
+                        "display": {
+                            "text": "ـسـ"
+                        },
+                        "parameter": "-1.49935"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sin"
+                        },
+                        "display": {
+                            "text": "ـس"
+                        },
+                        "parameter": "-1.49936"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shin"
+                        },
+                        "display": {
+                            "text": "ش"
+                        },
+                        "parameter": "-1.49937"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shin"
+                        },
+                        "display": {
+                            "text": "شـ"
+                        },
+                        "parameter": "-1.49938"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shin"
+                        },
+                        "display": {
+                            "text": "ـشـ"
+                        },
+                        "parameter": "-1.49939"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shin"
+                        },
+                        "display": {
+                            "text": "ـش"
+                        },
+                        "parameter": "-1.4994"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sad"
+                        },
+                        "display": {
+                            "text": "ص"
+                        },
+                        "parameter": "-1.49941"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sad"
+                        },
+                        "display": {
+                            "text": "صـ"
+                        },
+                        "parameter": "-1.49942"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sad"
+                        },
+                        "display": {
+                            "text": "ـصـ"
+                        },
+                        "parameter": "-1.49943"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sad"
+                        },
+                        "display": {
+                            "text": "ـص"
+                        },
+                        "parameter": "-1.49944"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dad"
+                        },
+                        "display": {
+                            "text": "ض"
+                        },
+                        "parameter": "-1.49945"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dad"
+                        },
+                        "display": {
+                            "text": "ضـ"
+                        },
+                        "parameter": "-1.49946"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dad"
+                        },
+                        "display": {
+                            "text": "ـضـ"
+                        },
+                        "parameter": "-1.49947"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dad"
+                        },
+                        "display": {
+                            "text": "ـض"
+                        },
+                        "parameter": "-1.49948"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ط"
+                        },
+                        "parameter": "-1.49949"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "طـ"
+                        },
+                        "parameter": "-1.4995"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ـطـ"
+                        },
+                        "parameter": "-1.49951"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "ـط"
+                        },
+                        "parameter": "-1.49952"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "za"
+                        },
+                        "display": {
+                            "text": "ظ"
+                        },
+                        "parameter": "-1.49953"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "za"
+                        },
+                        "display": {
+                            "text": "ظـ"
+                        },
+                        "parameter": "-1.49954"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "za"
+                        },
+                        "display": {
+                            "text": "ـظـ"
+                        },
+                        "parameter": "-1.49955"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "za"
+                        },
+                        "display": {
+                            "text": "ـظ"
+                        },
+                        "parameter": "-1.49956"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ain"
+                        },
+                        "display": {
+                            "text": "ع"
+                        },
+                        "parameter": "-1.49957"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ain"
+                        },
+                        "display": {
+                            "text": "عـ"
+                        },
+                        "parameter": "-1.49958"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ain"
+                        },
+                        "display": {
+                            "text": "ـعـ"
+                        },
+                        "parameter": "-1.49959"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ain"
+                        },
+                        "display": {
+                            "text": "ـع"
+                        },
+                        "parameter": "-1.4996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ghain"
+                        },
+                        "display": {
+                            "text": "غ"
+                        },
+                        "parameter": "-1.49961"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ghain"
+                        },
+                        "display": {
+                            "text": "غـ"
+                        },
+                        "parameter": "-1.49962"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ghain"
+                        },
+                        "display": {
+                            "text": "ـغـ"
+                        },
+                        "parameter": "-1.49963"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ghain"
+                        },
+                        "display": {
+                            "text": "ـغ"
+                        },
+                        "parameter": "-1.49964"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fa"
+                        },
+                        "display": {
+                            "text": "ف"
+                        },
+                        "parameter": "-1.49965"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fa"
+                        },
+                        "display": {
+                            "text": "فـ"
+                        },
+                        "parameter": "-1.49966"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fa"
+                        },
+                        "display": {
+                            "text": "ـفـ"
+                        },
+                        "parameter": "-1.49967"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fa"
+                        },
+                        "display": {
+                            "text": "ـف"
+                        },
+                        "parameter": "-1.49968"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "qaf"
+                        },
+                        "display": {
+                            "text": "ق"
+                        },
+                        "parameter": "-1.49969"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qaf"
+                        },
+                        "display": {
+                            "text": "قـ"
+                        },
+                        "parameter": "-1.4997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qaf"
+                        },
+                        "display": {
+                            "text": "ـقـ"
+                        },
+                        "parameter": "-1.49971"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qaf"
+                        },
+                        "display": {
+                            "text": "ـق"
+                        },
+                        "parameter": "-1.49972"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "kaf"
+                        },
+                        "display": {
+                            "text": "ك"
+                        },
+                        "parameter": "-1.49973"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kaf"
+                        },
+                        "display": {
+                            "text": "كـ"
+                        },
+                        "parameter": "-1.49974"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kaf"
+                        },
+                        "display": {
+                            "text": "ـكـ"
+                        },
+                        "parameter": "-1.49975"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kaf"
+                        },
+                        "display": {
+                            "text": "ـك"
+                        },
+                        "parameter": "-1.49976"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lam"
+                        },
+                        "display": {
+                            "text": "ل"
+                        },
+                        "parameter": "-1.49977"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lam"
+                        },
+                        "display": {
+                            "text": "لـ"
+                        },
+                        "parameter": "-1.49978"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lam"
+                        },
+                        "display": {
+                            "text": "ـلـ"
+                        },
+                        "parameter": "-1.49979"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lam"
+                        },
+                        "display": {
+                            "text": "ـل"
+                        },
+                        "parameter": "-1.4998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mim"
+                        },
+                        "display": {
+                            "text": "م"
+                        },
+                        "parameter": "-1.49981"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mim"
+                        },
+                        "display": {
+                            "text": "مـ"
+                        },
+                        "parameter": "-1.49982"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mim"
+                        },
+                        "display": {
+                            "text": "ـمـ"
+                        },
+                        "parameter": "-1.49983"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mim"
+                        },
+                        "display": {
+                            "text": "ـم"
+                        },
+                        "parameter": "-1.49984"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nun"
+                        },
+                        "display": {
+                            "text": "ن"
+                        },
+                        "parameter": "-1.49985"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nun"
+                        },
+                        "display": {
+                            "text": "نـ"
+                        },
+                        "parameter": "-1.49986"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nun"
+                        },
+                        "display": {
+                            "text": "ـنـ"
+                        },
+                        "parameter": "-1.49987"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nun"
+                        },
+                        "display": {
+                            "text": "ـن"
+                        },
+                        "parameter": "-1.49988"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "هـ"
+                        },
+                        "parameter": "-1.49989"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "هـ"
+                        },
+                        "parameter": "-1.4999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ـهـ"
+                        },
+                        "parameter": "-1.49991"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ـه"
+                        },
+                        "parameter": "-1.49992"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "waw"
+                        },
+                        "display": {
+                            "text": "و"
+                        },
+                        "parameter": "-1.49993"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "waw"
+                        },
+                        "display": {
+                            "text": "و"
+                        },
+                        "parameter": "-1.49994"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "waw"
+                        },
+                        "display": {
+                            "text": "ـو"
+                        },
+                        "parameter": "-1.49995"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "waw"
+                        },
+                        "display": {
+                            "text": "ـو"
+                        },
+                        "parameter": "-1.49996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "ي"
+                        },
+                        "parameter": "-1.49997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "يـ"
+                        },
+                        "parameter": "-1.49998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "ـيـ"
+                        },
+                        "parameter": "-1.49999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "ـي"
+                        },
+                        "parameter": "-1.5"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

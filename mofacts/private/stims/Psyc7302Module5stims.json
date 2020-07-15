@@ -1,0 +1,373 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Sampling"
+                        },
+                        "display": {
+                            "clozeText": "__________ variability is the idea that sample results will change from sample to sample."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variability"
+                        },
+                        "display": {
+                            "clozeText": "Sampling __________ is the idea that sample results will change from sample to sample."
+                        },
+                        "parameter": "-0.00011"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "change"
+                        },
+                        "display": {
+                            "clozeText": "Sampling variability is the idea that sample results will __________ from sample to sample."
+                        },
+                        "parameter": "-0.00012"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "parameter"
+                        },
+                        "display": {
+                            "clozeText": "A __________ is a number that describes the population."
+                        },
+                        "parameter": "-0.00013"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "A parameter is a number that describes the __________."
+                        },
+                        "parameter": "-0.00014"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "statistic"
+                        },
+                        "display": {
+                            "clozeText": "A __________ is a number computed from the sample of an experiment."
+                        },
+                        "parameter": "-0.00015"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "A statistic is a number computed from the __________ of an experiment."
+                        },
+                        "parameter": "-0.00016"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a population is notated &mu;."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "The mean of a __________ is notated &mu;."
+                        },
+                        "parameter": "-0.00018"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a sample is notated x&#772;."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "The mean of a __________ is notated x&#772;."
+                        },
+                        "parameter": "-0.00020"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a population is notated p."
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "The proportion of a __________ is notated p."
+                        },
+                        "parameter": "-0.00022"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "p"
+                        },
+                        "display": {
+                            "clozeText": "The proportion of a population is notated __________."
+                        },
+                        "parameter": "-0.00023"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a sample is notated p&#770;."
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "The proportion of a __________ is notated p&#770;."
+                        },
+                        "parameter": "-0.00025"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a population is notated &sigma;."
+                        },
+                        "parameter": "-0.00026"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation of a __________ is notated &sigma;."
+                        },
+                        "parameter": "-0.00027"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a sample is notated s."
+                        },
+                        "parameter": "-0.00028"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation of a __________ is notated s."
+                        },
+                        "parameter": "-0.00029"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "s"
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation of a sample is notated __________."
+                        },
+                        "parameter": "-0.00030"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "smaller"
+                        },
+                        "display": {
+                            "clozeText": "The __________ the sample, the more variability or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00031"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the __________, the more variability or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variability"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the sample, the more __________ or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00033"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the sample, the __________ variability or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00034"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "larger"
+                        },
+                        "display": {
+                            "clozeText": "The __________ the sample, the less variability or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00035"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "The larger the __________, the less variability or spread we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00036"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "spread"
+                        },
+                        "display": {
+                            "clozeText": "The larger the sample, the less variability or __________ we can expect to see in the distribution."
+                        },
+                        "parameter": "-0.00037"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "distribution"
+                        },
+                        "display": {
+                            "clozeText": "The larger the sample, the less variability or spread we can expect to see in the __________."
+                        },
+                        "parameter": "-0.00038"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "clozeText": "As long as the np and n(1-p) are __________ or greater, we can expect a normal distribution for p&#770;."
+                        },
+                        "parameter": "-0.00039"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "normal"
+                        },
+                        "display": {
+                            "clozeText": "As long as the np and n(1-p) are 10 or greater, we can expect a __________ distribution for p&#770;."
+                        },
+                        "parameter": "-0.00040"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distribution"
+                        },
+                        "display": {
+                            "clozeText": "The sampling __________ for x&#772; will be approximately normal with sample sizes of 30 or greater."
+                        },
+                        "parameter": "-0.00041"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "normal"
+                        },
+                        "display": {
+                            "clozeText": "The sampling distribution for x&#772; will be approximately __________ with sample sizes of 30 or greater."
+                        },
+                        "parameter": "-0.00042"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "30|thirty"
+                        },
+                        "display": {
+                            "clozeText": "The sampling distribution for x&#772; will be approximately normal with sample sizes of __________ or greater."
+                        },
+                        "parameter": "-0.00043"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "greater|more"
+                        },
+                        "display": {
+                            "clozeText": "The sampling distribution for x&#772; will be approximately normal with sample sizes of 30 or __________."
+                        },
+                        "parameter": "-0.00044"
+                    }
+                ]
+            }
+        ]
+    }
+}
