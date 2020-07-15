@@ -3,7 +3,7 @@
         <userselect>false</userselect>
         <name>Heart2Ran</name>
         <lessonname>Heart-testing5</lessonname>
-        <stimulusfile>HeartHumStim.xml</stimulusfile>
+        <stimulusfile>HeartHumStim.json</stimulusfile>
         <clustersize>1</clustersize>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>

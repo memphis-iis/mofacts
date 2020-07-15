@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>IES Optimized Cloze Practice of Basic Statistics</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>SVOIESstims.xml</stimulusfile>
+        <stimulusfile>SVOIESstims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <shuffleclusters>0-17</shuffleclusters>

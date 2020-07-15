@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Optimized Practice for Psyc 7302: Module 4, part 2</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Psyc7302Module4stims2.xml</stimulusfile>
+        <stimulusfile>Psyc7302Module4stims2.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>

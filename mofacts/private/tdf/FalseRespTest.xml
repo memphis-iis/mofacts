@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <lessonname>Response Types test</lessonname>
-        <stimulusfile>FalseRespTest.xml</stimulusfile>
+        <stimulusfile>FalseRespTest.json</stimulusfile>
         <shuffleclusters>0-0</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>

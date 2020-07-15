@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Chapter 10 Nervous System 1 AB</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>CH10AB.xml</stimulusfile>
+        <stimulusfile>CH10AB.json</stimulusfile>
         <lfparameter>.85</lfparameter>
         <speechAPIKey></speechAPIKey>
         <audioInputEnabled>true</audioInputEnabled>

@@ -3,7 +3,7 @@
         <name>Cat Optim Test</name>
         <lessonname>Optimized Drill Practice of Chinese Tones</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>Chinesestimsoptimvals.xml</stimulusfile>
+        <stimulusfile>Chinesestimsoptimvals.json</stimulusfile>
     </setspec>
 
     <unit>

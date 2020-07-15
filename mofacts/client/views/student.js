@@ -112,8 +112,7 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
     var cluster = _.chain(Stimuli.findOne({fileName: getCurrentStimName()}))
         .prop("stimuli")
         .prop("setspec")
-        .prop("clusters").first()
-        .prop("cluster")
+        .prop("clusters")
         .value();
 
     // Get current items for associating the names with the IDs
@@ -134,12 +133,13 @@ generateStudentPerItemData = function(studentID, tdfname, currStim) {
 
         var newIndex = itemStats.length;
         var itemID = itemIDList[newIndex];
+        let display = _.chain(cluster).prop(itemID).prop("stims").first().prop("display").value();
         itemStats.push({
             'correctRatio': (corCount/totCount).toFixed(2),
             'avgLatency': (_.isNaN(corTime/corCount) ? 0 : corTime/corCount).toFixed(1),
             'repetitions': totCount,
             'itemID': itemID,
-            'name': _.chain(cluster).prop(itemID).prop("display").first().value(),
+            'name': display.clozeText || display.text,
         });
     });
 

@@ -1,0 +1,1563 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the heart",
+                            "incorrectResponses": [
+                                "the valves",
+                                "the lungs",
+                                "the blood vessels"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which component(s) of the circulatory system acts as a pump?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "because blood needs a pump to circulate it",
+                            "incorrectResponses": [
+                                "because blood must go back to the heart so the heart can receive blood also",
+                                "because valves stop the bloodflow",
+                                "because the blood needs to have the oxygen removed first (before it goes to the rest of the body)"
+                            ]
+                        },
+                        "display": {
+                            "text": "Why doesn't oxygen rich blood flow directly from the lungs to the rest of the body?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*heart).*$~Correct;.*~Incorrect. The correct answer is the heart."
+                        },
+                        "display": {
+                            "clozeText": "Which component(s) of the circulatory system acts as a pump?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*pump).*$|((?=.*mov)|(?=.*circul)).*$~Correct;.*~Incorrect. The correct answer is because blood needs a pump to circulate it."
+                        },
+                        "display": {
+                            "clozeText": "Why doesn't oxygen rich blood flow directly from the lungs to the rest of the body?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "arteries",
+                            "incorrectResponses": [
+                                "veins",
+                                "alveoli",
+                                "capillaries"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which type of blood vessel does blood flow through first when leaving the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "because arteries must withstand the high pressure of the blood coming directly from the pump/heart",
+                            "incorrectResponses": [
+                                "because arteries carry blood with a very high concentration of oxygen",
+                                "because arteries have muscles in their walls to pump blood",
+                                "because arteries must contain (and control) more blood than other blood vessels"
+                            ]
+                        },
+                        "display": {
+                            "text": "Why do the arteries have thicker walls than other blood vessels?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*arter).*$~Correct;.*~Incorrect. The correct answer is arteries."
+                        },
+                        "display": {
+                            "clozeText": "Which type of blood vessel does blood flow through first when leaving the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*pressure).*$~Correct;.*~Incorrect. The correct answer is because arteries must withstand the high pressure of blood coming directly from the heart/pump."
+                        },
+                        "display": {
+                            "clozeText": "Why do the arteries have thicker walls than other blood vessels?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "veins",
+                            "incorrectResponses": [
+                                "capillaries",
+                                "arteries",
+                                "atrium"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which type of blood vessel carries blood toward the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "veins",
+                            "incorrectResponses": [
+                                "arteries",
+                                "capillaries",
+                                "lungs"
+                            ]
+                        },
+                        "display": {
+                            "text": "What type of blood vessel would carry blood with the highest concentration of carbon dioxide?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*vein).*$~Correct;.*~Incorrect. The correct answer is veins."
+                        },
+                        "display": {
+                            "clozeText": "Which type of blood vessel carries blood toward the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*vein).*$~Correct;.*~Incorrect. The correct answer is veins."
+                        },
+                        "display": {
+                            "clozeText": "What type of blood vessel would carry blood with the highest concentration of carbon dioxide?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blood vessels closer to the heart are larger than those further away",
+                            "incorrectResponses": [
+                                "blood vessels further away are bigger than those closer to the heart",
+                                "blood vessels further away are double the size of those closer to the heart",
+                                "there is no size difference"
+                            ]
+                        },
+                        "display": {
+                            "text": "What is the size difference between vessels close to the heart and those further away?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "near the heart",
+                            "incorrectResponses": [
+                                "in the neck",
+                                "in the extremeties",
+                                "near the groin"
+                            ]
+                        },
+                        "display": {
+                            "text": "Where are the largest veins in the body located?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*small)((?=.*fur)|(?=.*far)|(?=.*away)).*$|((?=.*large)|(?=.*big))((?=.*close)|(?=.*near)|(?=.*around)).*$~Correct;.*~Incorrect. The correct answer is blood vessels closer to the heart are larger than those further away."
+                        },
+                        "display": {
+                            "clozeText": "What is the size difference between vessels close to the heart and those further away?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*heart).*$~Correct;.*~Incorrect. The correct answer is near the heart."
+                        },
+                        "display": {
+                            "clozeText": "Where are the largest veins in the body located?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "atria and ventricles",
+                            "incorrectResponses": [
+                                "right and left atria",
+                                "atria and alveoli",
+                                "alveoli and ventricles"
+                            ]
+                        },
+                        "display": {
+                            "text": "What are the top and bottom chambers of the heart called? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two discharging chambers total, one per circle",
+                            "incorrectResponses": [
+                                "four discharging chambers total, two per circle",
+                                "four discharging chambers total, one per circle",
+                                "two discharging chambers total, two per circle"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many discharging chamber(s) are there in the heart and how many discharging chamber(s) are there per circle of the circulatory system? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(atri)(.*ventric).*$~Correct;.*~Incorrect. The correct answer is atria and ventricles."
+                        },
+                        "display": {
+                            "clozeText": "What are the top and bottom chambers of the heart called? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((two)|(2))((.*one)|(.*1)).*$~Correct;.*~Incorrect. The correct answer is two discharging chambers total, and one per circle."
+                        },
+                        "display": {
+                            "clozeText": "How many discharging chamber(s) are there in the heart and how many discharging chamber(s) are there per circle of the circulatory system? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the vertical septum is solid and the horizontal septum has openings",
+                            "incorrectResponses": [
+                                "ventricles are solid and atria have openings",
+                                "all of the septums in the heart have openings",
+                                "all of the septums in the heart are solid"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the septums in the heart is/are solid and which has/have openings? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "vertical septum",
+                            "incorrectResponses": [
+                                "hoirzonal septum",
+                                "left septum",
+                                "right septum"
+                            ]
+                        },
+                        "display": {
+                            "text": "A defect called \"hole in the heart\" causes a hole to form in one of the septums of the heart. Which septum would this abnormality refer to?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((.*vertic)|(.*ventricular)(.*atrial))(.*horizontal).*$~Correct;.*~Incorrect. The correct answer is the vertical septum is solid and the horizontal septum has openings."
+                        },
+                        "display": {
+                            "clozeText": "Which of the septums in the heart is/are solid and which has/have openings? Answer in that order."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*vertic)|(?=.*ventric)|(?=.*atrial)).*$~Correct;.*~Incorrect. The correct answer is vertical septum."
+                        },
+                        "display": {
+                            "clozeText": "A defect called \"hole in the heart\" causes a hole to form in one of the septums of the heart. Which septum would this abnormality refer to?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "2",
+                            "incorrectResponses": [
+                                "3",
+                                "1",
+                                "4"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many circles are there in the circulatory system?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "it pumps blood out for both circles (out of the left side and out of the right side).            ",
+                            "incorrectResponses": [
+                                "It pumps twice as much blood",
+                                "It pumps blood into the heart and out of the heart",
+                                "It pumps oxygen to parts of the body and also pumps blood to other parts"
+                            ]
+                        },
+                        "display": {
+                            "text": "What does it mean that the heart is a \"\"double-pump\"\"?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*two)|(?=.*2)).*$~Correct;.*~Incorrect. The correct answer is 2."
+                        },
+                        "display": {
+                            "clozeText": "How many circles are there in the circulatory system?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*oxy)(?=.*carbon dio)).*$|((?=.*circle)|(?=.*cycle))|((?=.*left)(?=.*right)).*$~Correct;.*~Incorrect. The correct answer is it pumps blood out for both circles (out of the left side and out of the right side)."
+                        },
+                        "display": {
+                            "clozeText": "What does it mean that the heart is a \"\"double-pump\"\"?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "right, the lungs",
+                            "incorrectResponses": [
+                                "left, the body",
+                                "left, the lungs",
+                                "right, the left side"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "The ____ side of the heart receives blood from the veins and pumps it to ____."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the left atrium and left ventricle",
+                            "incorrectResponses": [
+                                "the right atrium and right ventricle",
+                                "the atria",
+                                "the ventricles"
+                            ]
+                        },
+                        "display": {
+                            "text": "Blood with a high concentration of oxygen is sometimes referred to as \"fresh blood.\" Which chamber(s) of the heart would contain fresh blood?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(right)((.*lung)|(.*pulmon)).*$~Correct;.*~Incorrect. The correct answer is right, the lungs."
+                        },
+                        "display": {
+                            "clozeText": "The ____ side of the heart receives blood from the veins and pumps it to ____."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*right).*$~Incorrect. The correct answer is the left atrium and left ventricle.;(?=.*left)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the left atrium and left ventricle."
+                        },
+                        "display": {
+                            "clozeText": "Blood with a high concentration of oxygen is sometimes referred to as \"fresh blood.\" Which chamber(s) of the heart would contain fresh blood?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "left, the body",
+                            "incorrectResponses": [
+                                "right, the lungs",
+                                "left, the right side",
+                                "left, the ventricles"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "The ___ side of the heart receives blood from the lungs and pumps  it to _____."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the right atrium and right ventricle ",
+                            "incorrectResponses": [
+                                "the left atrium and left ventricle",
+                                "the atria",
+                                "the ventricles"
+                            ]
+                        },
+                        "display": {
+                            "text": "Blood with a high concentration of carbon dioxide is a dark red color. Which chamber(s) of the heart would contain dark red blood?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(left)((.*body)|(.*systemic)).*$~Correct;.*~Incorrect. The correct answer is left, the body."
+                        },
+                        "display": {
+                            "clozeText": "The ___ side of the heart receives blood from the lungs and pumps  it to _____."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*right)(?=.*atri)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is the right atrium and right ventricle."
+                        },
+                        "display": {
+                            "clozeText": "Blood with a high concentration of carbon dioxide is a dark red color. Which chamber(s) of the heart would contain dark red blood?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "vertical septum",
+                            "incorrectResponses": [
+                                "chest",
+                                "valves",
+                                "horizontal septum"
+                            ]
+                        },
+                        "display": {
+                            "text": "In the heart, what physically separates the two circles of the circulatory system?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "so that the oxygen-rich blood and carbon dioxide-rich blood do not mix",
+                            "incorrectResponses": [
+                                "so the circles don't get to bunched up together",
+                                "so that the correct amount of blood is pumped",
+                                "so that the circles are kept separated to the right and left side of the body"
+                            ]
+                        },
+                        "display": {
+                            "text": "Why is it important for the two circles of the circulatory system physically separated from each other?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*vertical)|(?=.*atrial)|(?=.*ventricular))((?=.*sept)|(?=.*wall)).*$~Correct;.*~Incorrect. The correct answer is vertical septum."
+                        },
+                        "display": {
+                            "clozeText": "In the heart, what physically separates the two circles of the circulatory system?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*mix)|(?=.*combin)).*$~Correct;.*~Incorrect. The correct answer is so that the oxygen-rich blood and carbon dioxide-rich blood do not mix."
+                        },
+                        "display": {
+                            "clozeText": "Why is it important for the two circles of the circulatory system physically separated from each other?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "left ventricle",
+                            "incorrectResponses": [
+                                "left atrium",
+                                "right atrium",
+                                "right ventricle"
+                            ]
+                        },
+                        "display": {
+                            "text": "Blood is sent to various parts of the body from which specific  chamber of the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the left ventricle because it propels blood to the rest of the body",
+                            "incorrectResponses": [
+                                "the right atrium because they receives large amounts of blood",
+                                "the left and right ventricles because they are closer to the chest and need more protection",
+                                "The left atrium and left ventricle because they have oxygen-rich blood."
+                            ]
+                        },
+                        "display": {
+                            "text": "Which specific chamber(s) of the heart would need the thickest (strongest) walls and why?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*left)(?=.*ventric).*$~Correct;.*~Incorrect. The correct answer is left ventricle."
+                        },
+                        "display": {
+                            "clozeText": "Blood is sent to various parts of the body from which specific  chamber of the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*left )(?=.*ventric)((?=.*propel)|(?=.*pump))((?=.*body)|(?=.*systemic)).*$~Correct;.*~Incorrect. The correct answer is the left ventricle because it must propel blood to the rest of the body."
+                        },
+                        "display": {
+                            "clozeText": "Which specific chamber(s) of the heart would need the thickest (strongest) walls and why?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Blood delivers oxygen and removes carbon dioxide",
+                            "incorrectResponses": [
+                                "Blood offers protection from infection and temperature regulation",
+                                "Blood is responsible for communication and transportation",
+                                "Blood moves cells and keeps the heart pumping"
+                            ]
+                        },
+                        "display": {
+                            "text": "In terms of interacting with the cells of the body, blood serves what two functions?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "provides nutrients and eliminates toxins through gas exchange",
+                            "incorrectResponses": [
+                                "provides temperature control ",
+                                "provides pressure to keep the blood vessels in place",
+                                "provides a pump through wave motion"
+                            ]
+                        },
+                        "display": {
+                            "text": "Some aquatic species do not have circulatory systems because the water around them essentially serves the same function as the human circulatory system. What function would the water around them serve? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=((.*tak)|(.*rid)|(.*remov)).*(carbon diox))(?=((.*bring)|(.*deliver)|(.*giv)|(.*suppl)).*(oxy))|(?=.*gas)(?=.*exchang).*~Correct;.*~Incorrect. The correct answer is blood delivers oxygen and removes carbon dioxide."
+                        },
+                        "display": {
+                            "clozeText": "In terms of interacting with the cells of the body, blood serves what two functions?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=((.*tak)|(.*rid)|(.*remov)).*(carbon diox))(?=((.*bring)|(.*deliver)|(.*giv)|(.*suppl)).*(oxy))|(?=.*gas)(?=.*exchang).*~Correct;.*~Incorrect. The correct answer is provides nutrients and eliminates toxins through gas exchange."
+                        },
+                        "display": {
+                            "clozeText": "Some aquatic species do not have circulatory systems because the water around them essentially serves the same function as the human circulatory system. What function would the water around them serve? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "capillaries",
+                            "incorrectResponses": [
+                                "alveoli",
+                                "arteries",
+                                "veins"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which blood vessel allows oxygen and carbon dioxide to pass in and out?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "to allow for gas exchange",
+                            "incorrectResponses": [
+                                "because capillaries carry less blood",
+                                "so that the blood can flow through them more quickly",
+                                "because capillaries must reach tiny parts of the body"
+                            ]
+                        },
+                        "display": {
+                            "text": "Why are the walls of capillaries much thinner than the other blood  vessels?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*capil).*$~Correct;.*~Incorrect. The correct answer is capillaries."
+                        },
+                        "display": {
+                            "clozeText": "Which blood vessel allows oxygen and carbon dioxide to pass in and out?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*gas)(?=.*exchang).*$|(?=.*oxy)(?=.*carbon dio).*$~Correct;.*~Incorrect. The correct answer is to allow for gas e xchange."
+                        },
+                        "display": {
+                            "clozeText": "Why are the walls of capillaries much thinner than the other blood  vessels?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the heart muscles contracting",
+                            "incorrectResponses": [
+                                "the heart muscles expanding",
+                                "the walls of the heart bumping against the rib cage",
+                                "the heart valves opening"
+                            ]
+                        },
+                        "display": {
+                            "text": "What is the first part of the heartbeat?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "it would lower the heart rate because the heart can pump more blood with each contraction",
+                            "incorrectResponses": [
+                                "it would increase the heart rate because the heart is strong enough to pump blood at a faster rate",
+                                "it would lower the heart rate because it takes more effort to contract the large muscles",
+                                "it would increase the heart rate because the rest of the body would likely also be strong, and need more blood/oxygen"
+                            ]
+                        },
+                        "display": {
+                            "text": "What effect would stronger heart muscle have on a person's heart rate and why?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*contract)|(?=.*squeez)).*$~Correct;.*~Incorrect. The correct answer is the heart muscles contracting."
+                        },
+                        "display": {
+                            "clozeText": "What is the first part of the heartbeat?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*more)((?=.*low)|(?=.*decrease))((?=.*pump)|(?=.*beat)|(?=.*contract)).*$~Correct;.*~Incorrect. The correct answer is it would lower the heart rate because the heart can pump more blood with each contraction."
+                        },
+                        "display": {
+                            "clozeText": "What effect would stronger heart muscle have on a person's heart rate and why?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "atria",
+                            "incorrectResponses": [
+                                "the right side",
+                                "ventricles",
+                                "left atrium"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which part of the heart contracts first in each heartbeat?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the right atrium would contract at the same time as the left atrium",
+                            "incorrectResponses": [
+                                "the right atrium would contract before the left atrium",
+                                "the right atrium would contract after the left atrium",
+                                "the right atrium does not contract"
+                            ]
+                        },
+                        "display": {
+                            "text": "If the left atrium is contracting now, when does the right atrium contract?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*atri).*$~Correct;.*~Incorrect. The correct answer is atria."
+                        },
+                        "display": {
+                            "clozeText": "Which part of the heart contracts first in each heartbeat?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "((?=.*now)|(?=.*same)|(?=.*during)).*$~Correct;.*~Incorrect. The correct answer is at the same time."
+                        },
+                        "display": {
+                            "clozeText": "If the left atrium is contracting now, when does the right atrium contract?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "valves",
+                            "incorrectResponses": [
+                                "pressure",
+                                "veins",
+                                "air"
+                            ]
+                        },
+                        "display": {
+                            "text": "What prevents blood from flowing backward in the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "valves",
+                            "incorrectResponses": [
+                                "muscles",
+                                "cholesterol",
+                                "capillaries"
+                            ]
+                        },
+                        "display": {
+                            "text": "Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves."
+                        },
+                        "display": {
+                            "clozeText": "What prevents blood from flowing backward in the heart?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "(?=.*valve).*$~Correct;.*~Incorrect. The correct answer is valves."
+                        },
+                        "display": {
+                            "clozeText": "Blood in the legs that is flowing back to the heart is moving against gravity (i.e., it's trying to flow up). The pressure of the heart pumping prevents the blood from flowing downward, but what other component of the circulatory system could work here to prevent the blood from flowing downward/ backward?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Do you now, or have you ever, worked in a profession that dealt with knowledge of the circulatory system? <br><br>For example, if you have ever worked in any of the following jobs, you should select \"Yes\": nurse, EMT, student majoring in biology, teaching 12th grade anatomy, etc.\n<br><br> Examples of professions that would require you to select \"No\" include: Mathematics teacher, Student majoring in Psychology or Political Science, US Postal Service, etc."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "has"
+                        },
+                        "display": {
+                            "clozeText": "A heartbeat __________ two parts."
+                        },
+                        "parameter": "-2.0"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "parts"
+                        },
+                        "display": {
+                            "clozeText": "A heartbeat has two __________."
+                        },
+                        "parameter": "-2.00001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "can"
+                        },
+                        "display": {
+                            "clozeText": "The bottom chambers are called ventricles and __________ be thought of as discharging chambers."
+                        },
+                        "parameter": "-2.00002"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "discharging"
+                        },
+                        "display": {
+                            "clozeText": "The bottom chambers are called ventricles and can be thought of as __________ chambers."
+                        },
+                        "parameter": "-2.00003"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "clozeText": "The left ventricle of the heart sends __________ out through a big artery and from there, into branching arteries that carry it to various parts of the body."
+                        },
+                        "parameter": "-2.00004"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "that"
+                        },
+                        "display": {
+                            "clozeText": "The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries __________ carry it to various parts of the body."
+                        },
+                        "parameter": "-2.00005"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "various"
+                        },
+                        "display": {
+                            "clozeText": "The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries that carry it to __________ parts of the body."
+                        },
+                        "parameter": "-2.00006"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "parts"
+                        },
+                        "display": {
+                            "clozeText": "The left ventricle of the heart sends blood out through a big artery and from there, into branching arteries that carry it to various __________ of the body."
+                        },
+                        "parameter": "-2.00007"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "are"
+                        },
+                        "display": {
+                            "clozeText": "Its walls __________ made of thick muscle."
+                        },
+                        "parameter": "-2.00008"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "heart"
+                        },
+                        "display": {
+                            "clozeText": "The __________ is a pump."
+                        },
+                        "parameter": "-2.00009"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pump"
+                        },
+                        "display": {
+                            "clozeText": "The heart is a __________."
+                        },
+                        "parameter": "-2.0001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "soon"
+                        },
+                        "display": {
+                            "clozeText": "But the arteries __________ branch again and again, to form many smaller tubes."
+                        },
+                        "parameter": "-2.000109999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "smaller"
+                        },
+                        "display": {
+                            "clozeText": "But the arteries soon branch again and again, to form many __________ tubes."
+                        },
+                        "parameter": "-2.000119999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tubes"
+                        },
+                        "display": {
+                            "clozeText": "But the arteries soon branch again and again, to form many smaller __________."
+                        },
+                        "parameter": "-2.000129999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "walls"
+                        },
+                        "display": {
+                            "clozeText": "Then the __________ of the ventricles squeeze together and force the blood out into the arteries."
+                        },
+                        "parameter": "-2.000139999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ventricles"
+                        },
+                        "display": {
+                            "clozeText": "Then the walls of the __________ squeeze together and force the blood out into the arteries."
+                        },
+                        "parameter": "-2.000149999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "gases"
+                        },
+                        "display": {
+                            "clozeText": "These __________ pass easily back and forth through the thin walls of the tiny capillaries."
+                        },
+                        "parameter": "-2.000159999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pass"
+                        },
+                        "display": {
+                            "clozeText": "These gases __________ easily back and forth through the thin walls of the tiny capillaries."
+                        },
+                        "parameter": "-2.000169999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "easily"
+                        },
+                        "display": {
+                            "clozeText": "These gases pass __________ back and forth through the thin walls of the tiny capillaries."
+                        },
+                        "parameter": "-2.000179999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "forth"
+                        },
+                        "display": {
+                            "clozeText": "These gases pass easily back and __________ through the thin walls of the tiny capillaries."
+                        },
+                        "parameter": "-2.000189999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "left"
+                        },
+                        "display": {
+                            "clozeText": "The __________ side receives the blood from the lungs and pumps it to the rest of the body."
+                        },
+                        "parameter": "-2.000199999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "side"
+                        },
+                        "display": {
+                            "clozeText": "The left __________ receives the blood from the lungs and pumps it to the rest of the body."
+                        },
+                        "parameter": "-2.000209999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "out"
+                        },
+                        "display": {
+                            "clozeText": "The oxygen-rich blood is returned to the left atrium of the heart and pumped __________ to the body through the left ventricle."
+                        },
+                        "parameter": "-2.000219999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "body"
+                        },
+                        "display": {
+                            "clozeText": "The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the __________ through the left ventricle."
+                        },
+                        "parameter": "-2.000229999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "through"
+                        },
+                        "display": {
+                            "clozeText": "The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body __________ the left ventricle."
+                        },
+                        "parameter": "-2.000239999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "left"
+                        },
+                        "display": {
+                            "clozeText": "The oxygen-rich blood is returned to the left atrium of the heart and pumped out to the body through the __________ ventricle."
+                        },
+                        "parameter": "-2.000249999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "right"
+                        },
+                        "display": {
+                            "clozeText": "The blood is then pumped into the __________ ventricle, and then to the lungs."
+                        },
+                        "parameter": "-2.000259999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ventricle"
+                        },
+                        "display": {
+                            "clozeText": "The blood is then pumped into the right __________, and then to the lungs."
+                        },
+                        "parameter": "-2.000269999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lungs"
+                        },
+                        "display": {
+                            "clozeText": "The blood is then pumped into the right ventricle, and then to the __________."
+                        },
+                        "parameter": "-2.000279999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "made"
+                        },
+                        "display": {
+                            "clozeText": "The circulatory system is actually __________ up of two circles."
+                        },
+                        "parameter": "-2.000289999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "are"
+                        },
+                        "display": {
+                            "clozeText": "The arteries that leave the heart __________ thick tubes."
+                        },
+                        "parameter": "-2.000299999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tubes"
+                        },
+                        "display": {
+                            "clozeText": "The arteries that leave the heart are thick __________."
+                        },
+                        "parameter": "-2.000309999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Both"
+                        },
+                        "display": {
+                            "clozeText": "__________ oxygen and carbon dioxide are carried in the blood mainly by the red blood cells."
+                        },
+                        "parameter": "-2.000319999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "receives"
+                        },
+                        "display": {
+                            "clozeText": "The right side __________ the blood from veins and pumps it to the lungs."
+                        },
+                        "parameter": "-2.000329999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pumps"
+                        },
+                        "display": {
+                            "clozeText": "The right side receives the blood from veins and __________ it to the lungs."
+                        },
+                        "parameter": "-2.000339999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "clozeText": "The __________ is then returned to the right atrium."
+                        },
+                        "parameter": "-2.000349999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "They"
+                        },
+                        "display": {
+                            "clozeText": "__________ can squeeze (contract) to send blood rushing out."
+                        },
+                        "parameter": "-2.000359999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "can"
+                        },
+                        "display": {
+                            "clozeText": "They __________ squeeze (contract) to send blood rushing out."
+                        },
+                        "parameter": "-2.000369999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "rushing"
+                        },
+                        "display": {
+                            "clozeText": "They can squeeze (contract) to send blood __________ out."
+                        },
+                        "parameter": "-2.000379999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "out"
+                        },
+                        "display": {
+                            "clozeText": "They can squeeze (contract) to send blood rushing __________."
+                        },
+                        "parameter": "-2.000389999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "would"
+                        },
+                        "display": {
+                            "clozeText": "The tiniest blood vessels, called capillaries, are so small you __________ need a microscope to see them."
+                        },
+                        "parameter": "-2.000399999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "see"
+                        },
+                        "display": {
+                            "clozeText": "The tiniest blood vessels, called capillaries, are so small you would need a microscope to __________ them."
+                        },
+                        "parameter": "-2.000409999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "can"
+                        },
+                        "display": {
+                            "clozeText": "It is hollow and __________ fill up with blood."
+                        },
+                        "parameter": "-2.000419999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fill"
+                        },
+                        "display": {
+                            "clozeText": "It is hollow and can __________ up with blood."
+                        },
+                        "parameter": "-2.000429999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "clozeText": "It is hollow and can fill up with __________."
+                        },
+                        "parameter": "-2.000439999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "clozeText": "The veins that carry __________ back from the body parts empty the blood into the right atrium of the heart."
+                        },
+                        "parameter": "-2.000449999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "back"
+                        },
+                        "display": {
+                            "clozeText": "The veins that carry blood __________ from the body parts empty the blood into the right atrium of the heart."
+                        },
+                        "parameter": "-2.000459999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "empty"
+                        },
+                        "display": {
+                            "clozeText": "The veins that carry blood back from the body parts __________ the blood into the right atrium of the heart."
+                        },
+                        "parameter": "-2.000469999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "clozeText": "The veins that carry blood back from the body parts empty the __________ into the right atrium of the heart."
+                        },
+                        "parameter": "-2.000479999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "into"
+                        },
+                        "display": {
+                            "clozeText": "The veins that carry blood back from the body parts empty the blood __________ the right atrium of the heart."
+                        },
+                        "parameter": "-2.000489999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "First"
+                        },
+                        "display": {
+                            "clozeText": "__________ the heart muscle contracts."
+                        },
+                        "parameter": "-2.000499999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "heart"
+                        },
+                        "display": {
+                            "clozeText": "First the __________ muscle contracts."
+                        },
+                        "parameter": "-2.000509999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "contracts"
+                        },
+                        "display": {
+                            "clozeText": "First the heart muscle __________."
+                        },
+                        "parameter": "-2.000519999999998"
+                    }
+                ]
+            }
+        ]
+    }
+}

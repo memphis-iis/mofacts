@@ -1,0 +1,856 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "operational definition~Well Done - operational definition is correct;construct~Incorrect. The correct answer is operational definition.;theoretical explanation~Incorrect. The correct answer is operational definition.;hypothesis~Incorrect. The correct answer is operational definition.;.*~Wrong",
+                            "incorrectResponses": [
+                                "construct",
+                                "theoretical explanation",
+                                "hypothesis"
+                            ]
+                        },
+                        "display": {
+                            "text": "The researcher stated that in his experiment, “frustration is described as any interruption of the subject before he or she finishes the timed puzzle.” This description is considered to be a(n)"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "operational defininition~Well Done - operational definition is correct;construct~Incorrect. The correct answer is operational definition.;theoretical explanation~Incorrect. The correct answer is operational definition.;hypothesis~Incorrect. The correct answer is operational definition.;.*~Wrong",
+                            "incorrectResponses": [
+                                "construct",
+                                "theoretical explanation",
+                                "hypothesis"
+                            ]
+                        },
+                        "display": {
+                            "text": "The researcher stated that in his experiment, aggression will be described as “the number of times a frustrated individual insults the person who prevented his or her work on the puzzle.” This description is considered to be a(n)"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Gestalt psychology~Well Done - Gestalt psychology is correct;behaviorism~Incorrect. The correct answer is Gestalt psychology.;psychoanalytic psychology~Incorrect. The correct answer is Gestalt psychology.;structuralism~Incorrect. The correct answer is Gestalt psychology.;.*~Wrong",
+                            "incorrectResponses": [
+                                "behaviorism",
+                                "psychoanalytic psychology",
+                                "structuralism"
+                            ]
+                        },
+                        "display": {
+                            "text": "Psychologists in which school of thought believed that thinking, learning, and perception should be studied in whole units rather than analyzing these experiences into smaller parts? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Sigmund Freud~Well Done - Sigmund Freud is correct;John Watson~Incorrect. The correct answer is Sigmund Freud.;Wilhelm Wundt~Incorrect. The correct answer is Sigmund Freud.;William James~Incorrect. The correct answer is Sigmund Freud;.*~Wrong",
+                            "incorrectResponses": [
+                                "John Watson",
+                                "Wilhelm Wundt",
+                                "William James"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which theorist believed that our behavior is deeply influenced by unconscious thoughts, impulses, and desires, especially those concerning sex and aggression? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "are medical doctors who usually treat psychological disorders with medication.~Well Done - Psychiatrists are medical doctors who usually treat psychological disorders with medication is correct;are extensively trained in the theories and techniques of Sigmund Freud.~Incorrect. The correct answer is are medical doctors who usually treat psychological disorders with medication..;are extensively trained in experimental methodology and research design.~Incorrect. The correct answer is are medical doctors who usually treat psychological disorders with medication.;are doctors who usually treat psychological disorders with counseling or talk-therapy.~Incorrect. The correct answer is are medical doctors who usually treat psychological disorders with medication.;.*~Wrong",
+                            "incorrectResponses": [
+                                "are extensively trained in the theories and techniques of Sigmund Freud.",
+                                "are extensively trained in experimental methodology and research design.",
+                                "are doctors who usually treat psychological disorders with counseling or talk-therapy."
+                            ]
+                        },
+                        "display": {
+                            "text": "Psychiatrists differ from psychologists because psychiatrists"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "psychiatrist~Well Done - Psychiatrist is correct;licensed counselor~Incorrect. The correct answer is psychiatrist.;clinical psychologist~Incorrect. The correct answer is psychiatrist.;social worker~Incorrect. The correct answer is psychiatrist.;.*~Wrong",
+                            "incorrectResponses": [
+                                "licensed counselor",
+                                "clinical psychologist",
+                                "social worker"
+                            ]
+                        },
+                        "display": {
+                            "text": "Rosetta’s family has a history of emotional problems related to hormonal disturbances. For some time now, Rosetta, who now resides in Atlanta, Georgia, has been deeply depressed. Since her family has a long history of emotional problems related to brain chemical and hormonal disturbances, she will need a complete medical evaluation and possibly several medications. Rosetta should probably seek the aid of a"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "experiment~Well Done - Experiment is correct;naturalistic observation~Incorrect. The correct answer is experiment.;correlational study~Incorrect. The correct answer is experiment.;comparative case study~Incorrect. The correct answer is experiment.;.*~Wrong",
+                            "incorrectResponses": [
+                                "naturalistic observation",
+                                "correlational study",
+                                "comparative case study"
+                            ]
+                        },
+                        "display": {
+                            "text": "When a researcher creates two groups, varies a condition, and records whether varying the condition had any effect on behavior, the researcher is conducting a(n)"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "is characterized by all of these~Well Done - Is characterized by all of these is correct;measures the results of the experiment~Incorrect. The correct answer is characterized by all of these.;is affected by the independent variable~Incorrect. The correct answer is characterized by all of these.;is often revealed by measures of performance, such as test scores~Incorrect. The correct answer is characterized by all of these.;.*~Wrong",
+                            "incorrectResponses": [
+                                "measures the results of the experiment",
+                                "is affected by the independent variable",
+                                "is often revealed by measures of performance, such as test scores"
+                            ]
+                        },
+                        "display": {
+                            "text": "The dependent variable in an experiment"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "revealed by measures of performance.~Well Done - Revealed by measures of performance is correct;manipulated~Incorrect. The correct answer is revealed by measures of performance.;prevented from affecting the outcome of the experiment~Incorrect. The correct answer is revealed by measures of performance.;the suspected cause of the results~Incorrect. The correct answer is revealed by measures of performance.;.*~Wrong",
+                            "incorrectResponses": [
+                                "manipulated",
+                                "prevented from affecting the outcome of the experiment",
+                                "the suspected cause of the results"
+                            ]
+                        },
+                        "display": {
+                            "text": "The dependent variable is the one that is"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ability to concentrate.~Well Done - Ability to concentrate is correct;subjects’ overall intelligence~Incorrect. The correct answer is ability to concentrate.;size of the room~Incorrect. The correct answer is ability to concentrate.;room color~Incorrect. The correct answer is ability to concentrate.;.*~Wrong",
+                            "incorrectResponses": [
+                                "subjects’ overall intelligence",
+                                "size of the room",
+                                "room color"
+                            ]
+                        },
+                        "display": {
+                            "text": "Antoine is conducting an experiment on the effects of room color on people’s ability to concentrate. The dependent variable would be the"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dependent.~Well Done - Dependent is correct;independent~Incorrect. The correct answer is dependent.;extraneous~Incorrect. The correct answer is dependent.;control~Incorrect. The correct answer is dependent.;.*~Wrong",
+                            "incorrectResponses": [
+                                "independent",
+                                "extraneous",
+                                "control"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "A researcher wants to find out if taking a new antidepressant drug will decrease the symptoms of subjects suffering from social anxiety. The number of symptoms of social anxiety exhibited by the subjects after taking the drug would be the __________ variable."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "random assignment of subjects.~Well Done - Random assignment of subjects is correct;assuming the effects of the variable are negligible.~Incorrect. The correct answer is random assignment of subjects.;manipulating the dependent variables simultaneously.~Incorrect. The correct answer is random assignment of subjects.;repeating the experiment several times until the results are consistent.~Incorrect. The correct answer is random assignment of subjects.;.*~Wrong",
+                            "incorrectResponses": [
+                                "assuming the effects of the variable are negligible.",
+                                "manipulating the dependent variables simultaneously.",
+                                "repeating the experiment several times until the results are consistent."
+                            ]
+                        },
+                        "display": {
+                            "text": "A variable, such as the personality of a subject, that might affect the outcome of an experiment would be controlled by"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "independent.~Well Done - Independent is correct;dependent~Incorrect. The correct answer is independent.;extraneous~Incorrect. The correct answer is independent.;replication~Incorrect. The correct answer is independent.;.*~Wrong",
+                            "incorrectResponses": [
+                                "dependent",
+                                "extraneous",
+                                "replication"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "The control group and the experimental group in an experiment are treated exactly the same EXCEPT for the __________ variable."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "placebo~Well Done - Placebo is correct;extraneous variable~Incorrect. The correct answer is placebo.;dependent variable~Incorrect. The correct answer is placebo;control drug~Incorrect. The correct answer is placebo.;.*~Wrong",
+                            "incorrectResponses": [
+                                "extraneous variable",
+                                "dependent variable",
+                                "control drug"
+                            ]
+                        },
+                        "display": {
+                            "text": "An inactive substance, such as a sugar pill or a saline injection, that is given to subjects to make them think they’ve taken a drug is called a(n)"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "In a drug study, the participants in the experimental group get the placebo and those in the control group get the real drug.~Well Done - In a drug study, the participants in the experimental group get the placebo and those in the control group get the real drug. is correct;Doctors sometimes prescribe placebos for complaints that have no physical bias.~Incorrect. The correct answer is In a drug study, the participants in the experimental group get the placebo and those in the control group get the real drug.;If a placebo has any effect, it must be based on suggestion rather than chemistry.~Incorrect. The correct answer is In a drug study, the participants in the experimental group get the placebo and those in the control group get the real drug.;Placebos have been shown to affect pain, anxiety, depression, alertness, tension, sexual arousal, and cravings for alcohol.~Incorrect. The correct answer is In a drug study, the participants in the experimental group get the placebo and those in the control group get the real drug.;.*~Wrong",
+                            "incorrectResponses": [
+                                "Doctors sometimes prescribe placebos for complaints that have no physical bias.",
+                                "If a placebo has any effect, it must be based on suggestion rather than chemistry.",
+                                "Placebos have been shown to affect pain, anxiety, depression, alertness, tension, sexual arousal, and cravings for alcohol."
+                            ]
+                        },
+                        "display": {
+                            "text": "Regarding placebos, which of the following statements is FALSE?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "single-blind ~Well Done -Single-blind is correct;double-blind ~ Incorrect. The correct answer is single-blind.;correlational~Incorrect. The correct answer is single-blind.;observational~Incorrect. The correct answer is single-blind.;.*~Wrong",
+                            "incorrectResponses": [
+                                "double-blind",
+                                "correlational",
+                                "observational"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "In a research study, when the subjects do not know who is in the experimental group and who is in the control group, but the experimenters do know, the study is called a(n) __________ experiment."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "a double-blind experiment ~Well Done -A double-blind experiment is correct;random selection ~ Incorrect. The correct answer is a double-blind experiment.;random assignment~Incorrect. The correct answer is a double-blind experiment.;a single-blind experiment~Incorrect. The correct answer is a double-blind experiment;.*~Wrong",
+                            "incorrectResponses": [
+                                "random selection",
+                                "random assignment",
+                                "a single-blind experiment"
+                            ]
+                        },
+                        "display": {
+                            "text": "You want to test people’s cola preferences. So, you conduct a taste test using two different  brands of cola. However, you are worried about possible clues you may give people taking the test. So, you label the two colas and have your assistant, who does not know which cola is which, to administer the test to the subjects. Thus, you have prevented yourself and your assistant from giving out any clues by using"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "double-blind~Well Done -Double-blind is correct;single-blind ~ Incorrect. The correct answer is double-blind.;correlational~Incorrect. The correct answer is double-blind.;biased~Incorrect. The correct answer is double-blind.;.*~Wrong",
+                            "incorrectResponses": [
+                                "single-blind",
+                                "correlational",
+                                "biased"
+                            ]
+                        },
+                        "display": {
+                            "clozeText": "You want to test people’s reactions to a new artificial sweetener, and so you plan to give them coffee with two different kinds of sweetener. However, you are worried about possible cues you may give people as to which sweetener they’re getting. So, you have your assistant prepare the packets so she knows which is which but you do not, and then you give the two coffees to your subjects. This type of experiment is called a __________ experiment."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the observer effect~Well Done -The observer effect is correct;social desirability~ Incorrect. The correct answer is the observer effect.;researcher bias~Incorrect. The correct answer is the observer effect.;the placebo effect~Incorrect. The correct answer is the observer effect.;.*~Wrong",
+                            "incorrectResponses": [
+                                "social desirability",
+                                "researcher bias",
+                                "the placebo effect"
+                            ]
+                        },
+                        "display": {
+                            "text": "The fact that a subject’s behavior may change when they know they are being watched is called"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "observer effect~Well Done -Observer effect is correct;double-blind effect~ Incorrect. The correct answer is observer effect.;placebo effect~Incorrect. The correct answer is observer effect.;effects of extraneous variables~Incorrect. The correct answer is observer effect.;.*~Wrong",
+                            "incorrectResponses": [
+                                "double-blind effect",
+                                "placebo effect",
+                                "effects of extraneous variables"
+                            ]
+                        },
+                        "display": {
+                            "text": "Concealing the observer behind a two-way mirror or using hidden cameras can be used to minimize the "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "observer effect~Well Done -Observer effect is correct;confirmation bias~ Incorrect. The correct answer is observer effect.;self-fulfilling prophecy~Incorrect. The correct answer is observer effect.;anthropomorphic error~Incorrect. The correct answer is observer effect.;.*~Wrong",
+                            "incorrectResponses": [
+                                "confirmation bias",
+                                "self-fulfilling prophecy",
+                                "anthropomorphic error"
+                            ]
+                        },
+                        "display": {
+                            "text": "A college student has volunteered to tutor students in a first-grade classroom. She hopes to gain a realistic picture of the everyday behavior of these students. However, every time she enters the classroom, the students all stop what they are doing and run up to her begging her to tutor them next. This student will probably never get a realistic picture of a typical first grader’s school day because of the"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "negative correlation~Well Done -Negative correlation is correct;causal correlation~ Incorrect. The correct answer is negative correlation.;positive correlation~Incorrect. The correct answer is negative correlation.;zero correlation~Incorrect. The correct answer is negative correlation.;.*~Wrong",
+                            "incorrectResponses": [
+                                "causal correlation",
+                                "positive correlation",
+                                "zero correlation"
+                            ]
+                        },
+                        "display": {
+                            "text": "Decreases in one measure are matched by increases in the other measure in a"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "negative correlation~Well Done -Negative correlation is correct;causal relationship~ Incorrect. The correct answer is negative correlation.;positive correlation~Incorrect. The correct answer is negative correlation.;zero correlation~Incorrect. The correct answer is negative correlation.;.*~Wrong",
+                            "incorrectResponses": [
+                                "causal relationship",
+                                "positive correlation",
+                                "zero correlation"
+                            ]
+                        },
+                        "display": {
+                            "text": "An observation that the higher the air temperature, the lower the activity of test animals would be an example of a"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "antecedent~Well Done -Antecedent is correct.;behavior~ Incorrect. The correct answer is antecedent.;consequence~Incorrect. The correct answer is antecedent.;reinforcement~Incorrect. The correct answer is antecedent.;.*~Wrong",
+                            "incorrectResponses": [
+                                "behavior",
+                                "consequence",
+                                "reinforcement"
+                            ]
+                        },
+                        "display": {
+                            "text": "When three-year-old Ashley hears a truck pull into the driveway, it means that Daddy is home. The sound of the truck would be a(n)"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "what happens before we respond~Well Done -What happens before we respond is correct.;the consequences of making a response~ Incorrect. The correct answer is what happens before we respond.;punishments the organism receives~Incorrect. The correct answer is what happens before we respond.;the observation of another organism being reinforced for a response~Incorrect. The correct answer is what happens before we respond.;.*~Wrong",
+                            "incorrectResponses": [
+                                "the consequences of making a response",
+                                "punishments the organism receives",
+                                "the observation of another organism being reinforced for a response"
+                            ]
+                        },
+                        "display": {
+                            "text": "Classical conditioning is based on"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "classical conditioning~Well Done -Classical conditioning is correct.;operant conditioning~ Incorrect. The correct answer is classical conditioning.;cognitive learning~Incorrect. The correct answer is classical conditioning.;observational learning~Incorrect. The correct answer is classical conditioning.;.*~Wrong",
+                            "incorrectResponses": [
+                                "operant conditioning",
+                                "cognitive learning",
+                                "observational learning"
+                            ]
+                        },
+                        "display": {
+                            "text": "An antecedent stimulus that does not produce a response is linked with a stimulus that does produce the response in a type of learning known as "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "classical conditioning~Well Done -Classical conditioning is correct.;operant conditioning~ Incorrect. The correct answer is classical conditioning.;cognitive learning~Incorrect. The correct answer is classical conditioning.;observational learning~Incorrect. The correct answer is classical conditioning.;.*~Wrong",
+                            "incorrectResponses": [
+                                "operant conditioning",
+                                "cognitive learning",
+                                "observational learning"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following types of learning involves involuntary responses and passive responding by the animal or person?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shaping~Well Done -The correct answer is shaping. If you think about shaping clay, you keep molding it until it gets into the form you want. Similarly, shaping in operant conditioning means reinforcing successive approximations that get you closer to the desired behavior. ;observational learning~ Incorrect. The correct answer is shaping. If you think about shaping clay, you keep molding it until it gets into the form you want. Similarly, shaping in operant conditioning means reinforcing successive approximations that get you closer to the desired behavior. ;fading~Incorrect. The correct answer is shaping. If you think about shaping clay, you keep molding it until it gets into the form you want. Similarly, shaping in operant conditioning means reinforcing successive approximations that get you closer to the desired behavior. ;secondary reinforcement~Incorrect. The correct answer is shaping. If you think about shaping clay, you keep molding it until it gets into the form you want. Similarly, shaping in operant conditioning means reinforcing successive approximations that get you closer to the desired behavior. ;.*~Wrong",
+                            "incorrectResponses": [
+                                "observational learning",
+                                "fading",
+                                "secondary reinforcement"
+                            ]
+                        },
+                        "display": {
+                            "text": "The gradual molding of responses to a desired pattern is known as"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "negative reinforcement~Well Done -Negative reinforcement is correct.;positive punishment~ Incorrect. The correct answer is negative reinforcement.;negative punishment~Incorrect. The correct answer is negative reinforcement.;nonreinforcement~Incorrect. The correct answer is negative reinforcement.;.*~Wrong",
+                            "incorrectResponses": [
+                                "positive punishment",
+                                "negative punishment",
+                                "nonreinforcement"
+                            ]
+                        },
+                        "display": {
+                            "text": "The probability of repeating a response is increased by which of the following consequences? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "negatively reinforced~Well Done -Negatively reinforced is correct.;positively reinforced~ Incorrect. The correct answer is negatively reinforced.;vicariously reinforced~Incorrect. The correct answer is negatively reinforced.;extinguished~Incorrect. The correct answer is negatively reinforced.;.*~Wrong",
+                            "incorrectResponses": [
+                                "positively reinforced",
+                                "vicariously reinforced",
+                                "extinguished"
+                            ]
+                        },
+                        "display": {
+                            "text": "Because taking a drug reduces unpleasant withdrawal symptoms, taking the drug is  "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "punishment~Well Done -Punishment is correct.;negative reinforcement~ Incorrect. The correct answer is punishment.;positive reinforcement~Incorrect. The correct answer is punishment.;secondary reinforcement~Incorrect. The correct answer is punishment.;.*~Wrong",
+                            "incorrectResponses": [
+                                "negative reinforcement",
+                                "positive reinforcement",
+                                "secondary reinforcement"
+                            ]
+                        },
+                        "display": {
+                            "text": "Any event that follows a response and decreases the likelihood of the response occurring again is referred to as "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "The “good behavior” slips will lose their reinforcing value more quickly than primary reinforcers.~Well Done -The “good behavior” slips will lose their reinforcing value more quickly than primary reinforcers is correct.;The “good behavior” slips would be considered token reinforcers.~ Incorrect. The correct answer is The “good behavior” slips will lose their reinforcing value more quickly than primary reinforcers.;The “good behavior” slips would be considered secondary reinforcers.~Incorrect. The correct answer is The “good behavior” slips will lose their reinforcing value more quickly than primary reinforcers.;The students can exchange their “good behavior” slips at the end of the week for primary reinforcers.~Incorrect. The correct answer is The “good behavior” slips will lose their reinforcing value more quickly than primary reinforcers.\n.;.*~Wrong",
+                            "incorrectResponses": [
+                                "The “good behavior” slips would be considered token reinforcers.",
+                                "The “good behavior” slips would be considered secondary reinforcers.",
+                                "The students can exchange their “good behavior” slips at the end of the week for primary reinforcers."
+                            ]
+                        },
+                        "display": {
+                            "text": "In a behavior modification program at the local school, children were given “good behavior” slips that could be exchanged for candy or toys at the end of the week. Which of the following would be a FALSE statement regarding this type of reinforcement? "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "variable ratio~Well Done -Variable ratio is correct.;fixed ratio~ Incorrect. The correct answer is variable ratio.;variable interval~Incorrect. The correct answer is variable ratio.;continuous~Incorrect. The correct answer is variable ratio.;.*~Wrong",
+                            "incorrectResponses": [
+                                "fixed ratio",
+                                "variable interval",
+                                "continuous"
+                            ]
+                        },
+                        "display": {
+                            "text": "A gambler playing a slot machine is being reinforced on which schedule of reinforcement?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "by making liberal use of positive reinforcement, especially praise~Well Done -by making liberal use of positive reinforcement, especially praise is correct.;with mild punishment for problem behaviors~ Incorrect. The correct answer is by making liberal use of positive reinforcement, especially praise.;with severe punishment to eliminate problem behaviors~Incorrect. The correct answer is by making liberal use of positive reinforcement, especially praise.;by suppressing problem behaviors with negative reinforcement~Incorrect. The correct answer is by making liberal use of positive reinforcement, especially praise.;.*~Wrong",
+                            "incorrectResponses": [
+                                "with mild punishment for problem behaviors",
+                                "with severe punishment to eliminate problem behaviors",
+                                "by suppressing problem behaviors with negative reinforcement"
+                            ]
+                        },
+                        "display": {
+                            "text": "When using the three tools to control behavior (nonreinforcement, reinforcement, and punishment), it is usually best to begin"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "forgetting~Well Done -Forgetting is correct.;encoding~ Incorrect. The correct answer is forgetting.;storage~Incorrect. The correct answer is forgetting.;retrieval~Incorrect. The correct answer is forgetting.;.*~Wrong",
+                            "incorrectResponses": [
+                                "encoding",
+                                "storage",
+                                "retrieval"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is not one of the three basic processes of memory?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "encoding~Well Done -Encoding is correct.;retrieval~ Incorrect. The correct answer is encoding.;consolidation~Incorrect. The correct answer is encoding.;storage~Incorrect. The correct answer is encoding.;.*~Wrong",
+                            "incorrectResponses": [
+                                "retrieval",
+                                "consolidation",
+                                "storage"
+                            ]
+                        },
+                        "display": {
+                            "text": "Sensory information is initially converted into a form that can be retained. This conversion part of the memory process is known as"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "storage~Well Done -Storage is correct.;retrieval~ Incorrect. The correct answer is storage.;encoding~Incorrect. The correct answer is storage.;sensory memory~Incorrect. The correct answer is storage.;.*~Wrong",
+                            "incorrectResponses": [
+                                "retrieval",
+                                "encoding",
+                                "sensory memory"
+                            ]
+                        },
+                        "display": {
+                            "text": "After information has been entered into memory, this information is held for later use through the memory process or stage known as"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chunking~Well Done -Chunking is correct.;retrieval~ Incorrect. The correct answer is chunking.;spreading activation~Incorrect. The correct answer is chunking.;structuralism~Incorrect. The correct answer is chunking.;.*~Wrong",
+                            "incorrectResponses": [
+                                "spreading activation",
+                                "consolidation",
+                                "structuralism"
+                            ]
+                        },
+                        "display": {
+                            "text": "Organizing information into larger units as a way of improving the efficiency of short-term memory is called"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chunking~Well Done -Chunking is correct.;maintenance rehearsal~ Incorrect. The correct answer is chunking.;selective attention~Incorrect. The correct answer is chunking.;encoding~Incorrect. The correct answer is chunking.;.*~Wrong",
+                            "incorrectResponses": [
+                                "maintenance rehearsal",
+                                "selective attention",
+                                "encoding"
+                            ]
+                        },
+                        "display": {
+                            "text": "If the letters DVAFCBNLSBRC are rearranged into DVR-ABC-CBS-NFL, they become much easier to remember and store. This is because you’re using a process called\n"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "elaborative processing~Well Done -Elaborative processing is correct.;maintenance rehearsal~ Incorrect. The correct answer is elaborative processing.;rote learning~Incorrect. The correct answer is elaborative processing.;spreading activation~Incorrect. The correct answer is elaborative processing.;.*~Wrong",
+                            "incorrectResponses": [
+                                "maintenance rehearsal",
+                                "rote learning",
+                                "spreading activation"
+                            ]
+                        },
+                        "display": {
+                            "text": "You are able to remember your two computer passwords because they are the name of the place and state where you went on your honeymoon. This illustrates the use of which of the following?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "elaborative processing~Well Done -Elaborative processing is correct.;maintenance rehearsal~ Incorrect. The correct answer is elaborative processing.;encoding~Incorrect. The correct answer is elaborative processing.;spreading activation~Incorrect. The correct answer is elaborative processing.;.*~Wrong",
+                            "incorrectResponses": [
+                                "maintenance rehearsal",
+                                "encoding",
+                                "spreading activation"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which of the following is the most effective way to transfer information from short-term memory to long-term memory?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "spreading activation~Well Done -Spreading activation is correct.;elaborative processing~ Incorrect. The correct answer is spreading activation.;chunking~Incorrect. The correct answer is spreading activation.;encoding~Incorrect. The correct answer is spreading activation.;.*~Wrong",
+                            "incorrectResponses": [
+                                "elaborative processing",
+                                "chunking",
+                                "encoding"
+                            ]
+                        },
+                        "display": {
+                            "text": "An entire past experience may be reconstructed from one small recollection through a process known as "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "middle~Well Done -Middle is correct.;first~ Incorrect. The correct answer is middle.;last~Incorrect. The correct answer is middle.;first and last~Incorrect. The correct answer is middle.;.*~Wrong",
+                            "incorrectResponses": [
+                                "first",
+                                "last",
+                                "first and last"
+                            ]
+                        },
+                        "display": {
+                            "text": "According to the serial position effect, you are most likely to forget which items on a list?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "the serial position effect~Well Done -The serial position effect is correct.;the tip-of-the-tongue state~ Incorrect. The correct answer is the serial position effect.;spreading activation~Incorrect. The correct answer is the serial position effect.;selective attention~Incorrect. The correct answer is the serial position effect.;.*~Wrong",
+                            "incorrectResponses": [
+                                "the tip-of-the-tongue state",
+                                "spreading activation",
+                                "selective attention"
+                            ]
+                        },
+                        "display": {
+                            "text": "Remembering the first and last items on a list better than items in the middle is due to"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "middle~Well Done -Middle is correct.;first~ Incorrect. The correct answer is middle.;last~Incorrect. The correct answer is middle.;first and last~Incorrect. The correct answer is middle.;.*~Wrong",
+                            "incorrectResponses": [
+                                "first",
+                                "last",
+                                "first and last"
+                            ]
+                        },
+                        "display": {
+                            "text": "When learning an ordered list of words, which items are neither held in short-term memory nor moved to long-term memory, so they are often lost?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sequential lineup~Well Done -Sequential lineup is correct.;false positive interrogation~ Incorrect. The correct answer is sequential lineup.;serial position lineup~Incorrect. The correct answer is sequential lineup.;cognitive interview~Incorrect. The correct answer is sequential lineup.;.*~Wrong",
+                            "incorrectResponses": [
+                                "false positive interrogation",
+                                "serial position lineup",
+                                "cognitive interview"
+                            ]
+                        },
+                        "display": {
+                            "text": "Geraldine witnesses a robbery in the parking lot at her college. At the police station, she is shown one photo at a time of possible suspects and is asked if this is the person she saw. Geraldine is undergoing a"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bodily states can be a strong cue for later memory~Well Done -Bodily states can be a strong cue for later memory is correct.;learning and memory can be increased with the use of drugs~ Incorrect. The correct answer is bodily states can be a strong cue for later memory.;sad people tend to have more emotionally-cued memories than happy people do~Incorrect. The correct answer is bodily states can be a strong cue for later memory.;adults tend to lose eidetic memory as they grow older~Incorrect. The correct answer is bodily states can be a strong cue for later memory.;.*~Wrong",
+                            "incorrectResponses": [
+                                "learning and memory can be increased with the use of drugs",
+                                "sad people tend to have more emotionally-cued memories than happy people do",
+                                "adults tend to lose eidetic memory as they grow older"
+                            ]
+                        },
+                        "display": {
+                            "text": "State-dependent learning is a term which refers to the fact that"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "state-dependent learning~Well Done - State-dependent learning is correct.;context-dependent learning~ Incorrect. The correct answer is state-dependent learning.;suppression~Incorrect. The correct answer is state-dependent learning.;encoding failure~Incorrect. The correct answer is state-dependent learning.;.*~Wrong",
+                            "incorrectResponses": [
+                                "context-dependent learning",
+                                "suppression",
+                                "encoding failure"
+                            ]
+                        },
+                        "display": {
+                            "text": "Research shows that people who learned a list of words while in a happy mood recalled them better when they were again happy. People who learned the list while sad remembered best when they were sad. This illustrates"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "interference~Well Done - Interference is correct.;suppression~ Incorrect. The correct answer is interference.;state-dependent learning~Incorrect. The correct answer is interference.;encoding failure~Incorrect. The correct answer is interference.;.*~Wrong",
+                            "incorrectResponses": [
+                                "suppression",
+                                "state-dependent learning",
+                                "encoding failure"
+                            ]
+                        },
+                        "display": {
+                            "text": "In the classic experiment in which two groups of students studied lists of words with one group staying awake before the testing and the other group sleeping, the students who slept after studying the list remembered more because they experienced less "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "consolidation~Well Done - Consolidation is correct.;memory localization~ Incorrect. The correct answer is consolidation.;mnemonic processing~Incorrect. The correct answer is consolidation.;priming~Incorrect. The correct answer is consolidation.;.*~Wrong",
+                            "incorrectResponses": [
+                                "memory localization",
+                                "mnemonic processing",
+                                "priming"
+                            ]
+                        },
+                        "display": {
+                            "text": "The formation of long-term memories in the brain is known as "
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

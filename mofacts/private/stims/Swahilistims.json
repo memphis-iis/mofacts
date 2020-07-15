@@ -1,0 +1,312 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Thank You",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "Asante"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "food",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Thank You",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "chakula"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Hello",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "Habari"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yellow",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "manjano"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "today",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "leo"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "five",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "tano"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chicken",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "kuku"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fish",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "samaki"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Goodbye",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "Kwaheri"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "alligator",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "mamba"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "elephant",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Bathroom",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "tembo"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bathroom",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "bafu"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wall",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "ukuta"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "I",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "Mimi"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "friend",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "rafiki"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shoes",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "viatu"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "grandfather",
+                            "incorrectResponses": [
+                                "Drink",
+                                "Elephant",
+                                "Food",
+                                "Umbrella"
+                            ]
+                        },
+                        "display": {
+                            "text": "babu"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
