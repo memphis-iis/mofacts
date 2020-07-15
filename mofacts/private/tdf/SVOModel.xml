@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Optimized Cloze Practice of Basic Statistics</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>SVO5stims.xml</stimulusfile>
+        <stimulusfile>SVO5stims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <shuffleclusters>0-17</shuffleclusters>

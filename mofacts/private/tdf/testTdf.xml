@@ -1,0 +1,34 @@
+<tutor>
+    <setspec>
+        <name>Internal Testing</name>
+        <lessonname>Testing Tdf</lessonname>
+        <userselect>true</userselect>
+        <stimulusfile>testStim.json</stimulusfile>
+        <isModeled>false</isModeled>
+        <lfparameter>.85</lfparameter>
+        <simTimeout>3500</simTimeout>
+        <simCorrectProb>0.85</simCorrectProb>
+    </setspec>
+    <unit>
+        <unitinstructions>Here comes the testing learning session.</unitinstructions>
+        <unitname>Model Unit</unitname>
+        <learningsession>
+            <clusterlist>0-1</clusterlist>
+        </learningsession>
+        <deliveryparams>
+            <practiceseconds>1000000</practiceseconds>
+            <drill>8000</drill>
+            <purestudy>16000</purestudy>
+            <skipstudy>false</skipstudy>
+            <reviewstudy>500</reviewstudy>
+            <correctprompt>500</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+        </deliveryparams>
+    </unit>
+    <unit>
+        <unitname>last</unitname>
+        <unitinstructions>You are all done.</unitinstructions>
+    </unit>
+</tutor>

@@ -1,0 +1,1547 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pawpaw"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG2124.JPG"
+                        },
+                        "parameter": "-0.58"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pin oak"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0577.JPG"
+                        },
+                        "parameter": "-0.61"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blackgum"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0972.JPG"
+                        },
+                        "parameter": "-0.64"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blackhaw"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1293_IMG0093.JPG"
+                        },
+                        "parameter": "-0.64"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sourwood"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1771_IMG0008.JPG"
+                        },
+                        "parameter": "-0.64"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sweetbay"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD0889_IMG0022.JPG"
+                        },
+                        "parameter": "-0.64"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sweetgum"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0088.JPG"
+                        },
+                        "parameter": "-0.64"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "box elder"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/ML500_IMG0014.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "deerberry"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0030.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "red maple"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG2564.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sassafras"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/MBK_IMG0001.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wafer ash"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG02144.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "white ash"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD0878_IMG0011.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "white oak"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1757_IMG0008.JPG"
+                        },
+                        "parameter": "-0.67"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "coralberry"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RCM_IMG0473.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pitch pine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0268.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "red spruce"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG2333.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sweet fern"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD0874_IMG0045.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tulip tree"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0091.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "willow oak"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BKL_IMG0057.JPG"
+                        },
+                        "parameter": "-0.7"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "river birch"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3236.JPG"
+                        },
+                        "parameter": "-0.73"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sugar maple"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3946_IMG0021.JPG"
+                        },
+                        "parameter": "-0.73"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sweet birch"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0195.JPG"
+                        },
+                        "parameter": "-0.73"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "witch hazel"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0070.JPG"
+                        },
+                        "parameter": "-0.73"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bald cypress"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/MBK_IMG0002.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "black cherry"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG1307.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "black locust"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD2321_IMG0033.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "black walnut"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_01872.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cucumbertree"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG1500.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "flame azalea"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG2671.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "great laurel"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0278.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "joe-pye weed"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1285_IMG0055.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "smooth sumac"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD4891_IMG0015.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "swamp azalea"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1771_IMG0064.JPG"
+                        },
+                        "parameter": "-0.76"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american plum"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG1587.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "butterflyweed"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG1660.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chinkapin oak"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_03027.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "common yarrow"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/JH_00016.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "loblolly pine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_02770.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "striped maple"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG1411.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "virginia pine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG2386.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wild bergamot"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/TLM_IMG00361.JPG"
+                        },
+                        "parameter": "-0.79"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american beech"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3950_IMG0087.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american holly"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_01805.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bristly locust"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD2321_IMG0032.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern redbud"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0022.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "greek valerian"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3931.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "new jersey tea"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG1043.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pignut hickory"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG0718.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sundial lupine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0029.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "swamp milkweed"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG00198.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wild hydrangea"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BGNP_0188.JPG"
+                        },
+                        "parameter": "-0.82"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blue mistflower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG00336.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cardinal flower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG0857.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "catawba rosebay"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0086.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern hemlock"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_03860.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mountain laurel"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/TLM_IMG00214.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "scarlet beebalm"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3196.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "scarlet buckeye"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD0002_IMG0050.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "swamp sunflower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD2413_IMG0070.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "trumpet creeper"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG03257.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "white snakeroot"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG1105.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wild blue phlox"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3422_IMG0055.JPG"
+                        },
+                        "parameter": "-0.85"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bigleaf magnolia"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG2904.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blue wild indigo"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0010.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "common persimmon"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3309.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern bluestar"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3897_IMG0077.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "northern catalpa"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1323_IMG0089.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "northern red oak"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0996.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "white fringetree"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG1430.JPG"
+                        },
+                        "parameter": "-0.88"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american basswood"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG1616.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american hornbeam"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0017.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american sycamore"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/ML504_IMG0085.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "atlantic ninebark"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BGNP_0284.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bitternut hickory"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RWS_IMG2360.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "common buttonbush"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG00293.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "common elderberry"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG02416.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "coral honeysuckle"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD1293_IMG0053.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern red cedar"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/RCM_IMG2652.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "flowering dogwood"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0041.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "new england aster"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BGNP_0040.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "small's penstemon"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG1461.JPG"
+                        },
+                        "parameter": "-0.91"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "carolina jessamine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG00485.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dense blazing star"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0086.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "great blue lobelia"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BGNP_0237.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "northern spicebush"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0763.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rattlesnake master"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_01355.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "southern arrowwood"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0023.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "virginia bluebells"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0318.JPG"
+                        },
+                        "parameter": "-0.94"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american bladdernut"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3957_IMG0039.JPG"
+                        },
+                        "parameter": "-0.97"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "common serviceberry"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/TLM_IMG00071.JPG"
+                        },
+                        "parameter": "-0.97"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dotted blazing star"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_02018.JPG"
+                        },
+                        "parameter": "-0.97"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fall obedient plant"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG2987.JPG"
+                        },
+                        "parameter": "-0.97"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lanceleaf coreopsis"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG02755.JPG"
+                        },
+                        "parameter": "-0.97"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "allegheny chinquapin"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3433.JPG"
+                        },
+                        "parameter": "-1"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "prairie blazing star"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/CF_IMG0326.JPG"
+                        },
+                        "parameter": "-1"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "purple passionflower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_02540.JPG"
+                        },
+                        "parameter": "-1"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "threadleaf coreopsis"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_00999.JPG"
+                        },
+                        "parameter": "-1"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "alternateleaf dogwood"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/JCB_IMG0010.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american beautyberry "
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/6151_IMG00258.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american mountain ash"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0727.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "devil's walking stick"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3898_IMG0081.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern red columbine"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/J_M_IMG0899.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mississippi penstemon"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3632_IMG0082.JPG"
+                        },
+                        "parameter": "-1.03"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern gray penstemon"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD2945_IMG0070.JPG"
+                        },
+                        "parameter": "-1.06"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "green-headed coneflower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD4237_IMG0035.JPG"
+                        },
+                        "parameter": "-1.09"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rusty blackhaw viburnum"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/SAW_03957.JPG"
+                        },
+                        "parameter": "-1.09"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shrubby st. john's-wort"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG0595.JPG"
+                        },
+                        "parameter": "-1.09"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "american strawberry bush"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3452.JPG"
+                        },
+                        "parameter": "-1.12"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "crimson-eyed rose-mallow"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/BGNP_0186.JPG"
+                        },
+                        "parameter": "-1.12"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eastern purple coneflower"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/A_C_IMG3145.JPG"
+                        },
+                        "parameter": "-1.15"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "narrowleaf evening-primrose"
+                        },
+                        "display": {
+                            "clozeText": "images/TNplants/PCD3442_IMG0011.JPG"
+                        },
+                        "parameter": "-1.21"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Did you have a high school Botany class?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "0",
+                            "incorrectResponses": [
+                                "1",
+                                "2",
+                                "3 or more"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many college Botany classes have you taken?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

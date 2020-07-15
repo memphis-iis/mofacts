@@ -1,0 +1,462 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The A and P practice exercises were too hard to be useful."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Using the A and P practice exercises in my class enabled me to learn more quickly."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Using the A and P practice exercises enhanced my effectiveness in my class."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Using the A and P practice exercises made it easier to learn."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I found the A and P practice exercises useful in my class."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Learning to use the A and P practice exercises was easy for me."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I found it easy to get the A and P practice exercises to do what I want them to do."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "My interaction with the A and P practice exercises was clear and understandable."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I found the A and P practice exercises easy to use."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I was able to make meaningful connections to learn more deeply using the A and P exercises."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The A and P practice exercise went slowly enough for me to really understand the answers."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I did the A and P practice after reading chapter in the textbook."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I did the A and P practice after hearing the lecture for the chapter."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The feedback the system gave was adequate to help me learn what things mean."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I find the subject of A and P to be interesting."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am taking A and P primarily because it is required."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "A and P is a subject I really enjoy."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The A and P course is relatively easy."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I find studying for A and P is difficult."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I have to spend a lot of time studying for my A and P course."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The content in A and P is hard."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I found the number of practice items to be too large for each chapter."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I found the practice items were too often about unimportant details."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Mostly agree",
+                                "Not sure, guess agree",
+                                "Not sure, guess disagree",
+                                "Mostly disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I wanted the practice items to be more focused on A and P content vocabulary words."
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

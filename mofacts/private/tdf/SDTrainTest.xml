@@ -2,7 +2,7 @@
     <setspec>
         <name>SDTrainTest</name>
         <lessonname>SDTrainTest</lessonname>
-        <stimulusfile>SDTrainTestStims.xml</stimulusfile>
+        <stimulusfile>SDTrainTestStims.json</stimulusfile>
         <shuffleclusters>0-23</shuffleclusters>
         <swapclusters>0-23 25-26 28-29 30-30</swapclusters>
         <lfparameter>.85</lfparameter>

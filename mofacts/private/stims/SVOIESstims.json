@@ -1,0 +1,811 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distribution~Correct.;probability~Probability is incorrect. The correct response is distribution. The key problem is that the sentence says 'any' range of values, while a probability gives the likelihood for a specific range of values, only the distribution describes the likelihood in 'any' range of values.;standard deviation~Standard deviation is incorrect. The correct response is distribution. A standard deviation is a type of summary statistic of the distribution that describes how much the observations vary with respect to their distance to/from the mean. It is the distribution that tells us the exact likelihood of values existing in any range.;statistic~Statistic is incorrect. The correct response is distribution. While a statistic does describe a feature of the sample, the distribution is what represents all of the observations in the sample that we have collected. Since we would expect future observations to follow the same pattern, the distribution also acts as a prediction of where we expect future observations to occur.;variance~Variance is incorrect. The correct response is distribution. A variance is a type of summary statistic of the distribution that describes h much the observations vary with respect to their distance to/from the mean. It is the distribution that tells us the exact likelihood of values existing in any range.;.*~Incorrect. The correct fill-in is 'distribution'."
+                        },
+                        "display": {
+                            "clozeText": "A __________ describes the likelihood that observations will occur within any range of values."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "likelihood|probability~Correct.;.*~Incorrect. The correct fill-in is 'likelihood'."
+                        },
+                        "display": {
+                            "clozeText": "A distribution describes the __________ that observations will occur within any range of values."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observations~Correct.;variance~Variance is incorrect. The correct response is observations. While the distribution can be characterized by a variance, which describes overall variability, the distribution itself is a description of the frequency of the expected observations over the entire range.;.*~Incorrect. The correct fill-in is 'observations'."
+                        },
+                        "display": {
+                            "clozeText": "A distribution describes the likelihood that __________ will occur within any range of values."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "range|set~Correct.;number~Number is incorrect. The correct response is range. Any number of values is a broad statement that does not describe a distinct range properly using two numbers, e.g. -1 and 3.;.*~Incorrect. The correct fill-in is 'range'."
+                        },
+                        "display": {
+                            "clozeText": "A distribution describes the likelihood that observations will occur within any __________ of values."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "normal~Correct.;sample~Sample is incorrect. The correct response is normal. While the sample represents the distribution of a subset of observations in the population, this sentence describes the characteristics of the most common symmetric distribution, the normal distribution.;standard~Standard is incorrect. The correct response is normal. In common English, standard and normal mean the same thing, but in statistics, they refer to different things. This sentence refers to a normal distribution, the most commonly talked about distribution. Actually, there is no such thing as a standard distribution in statistics.;.*~Incorrect. The correct fill-in is 'normal'."
+                        },
+                        "display": {
+                            "clozeText": "A __________ distribution, the most common natural distribution, is symmetric, so for example, the probability of observing a value in the range between -1 and 0 is equal to the probability of the range between 0 and 1."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "symmetric~Correct.;68~68 is incorrect. The correct response is symmetric. While it is true that the range from -1 to 1 is about 68% of the normal distribution, this doesn't lead to the two ranges being equal. The two ranges are equal because they are symmetric.;variable~Variable is incorrect. The correct response is symmetric. The two ranges on either side of the mean are equal because they are symmetric. All distributions are variable, so variable is too redundant.;.*~Incorrect. The correct fill-in is 'symmetric'."
+                        },
+                        "display": {
+                            "clozeText": "A normal distribution, the most common natural distribution, is __________, so for example, the probability of observing a value in the range between -1 and 0 is equal to the probability of the range between 0 and 1."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probability~Correct.;difference~Difference is incorrect. The correct response is probability. Difference is a mathematical term, referring to subtraction, whereas this sentence refers to the mathematical computation of probability. Probability is the chance of obtaining a value within a distinct range.;range~Range is incorrect. The correct response is probability. Between -1 and 0 is a range, but here we are describing that the probability of obtaining a value within that range is equal to the probability of obtaining a value between (the range of) 0 and 1.;variance~Variance is incorrect. The correct response is probability. Variance is computed from the entire distribution of values, while probability represents how likely a set of values from the distribution are.;.*~Incorrect. The correct fill-in is 'probability'."
+                        },
+                        "display": {
+                            "clozeText": "A normal distribution, the most common natural distribution, is symmetric, so for example, the __________ of observing a value in the range between -1 and 0 is equal to the __________ of the range between 0 and 1."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "equal~Correct.;.*~Incorrect. The correct fill-in is 'equal'."
+                        },
+                        "display": {
+                            "clozeText": "A normal distribution, the most common natural distribution, is symmetric, so for example, the probability of observing a value in the range between -1 and 0 is __________ to the probability of the range between 0 and 1."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "statistic~Correct.;variable~Variable is incorrect. The correct response is statistic. In the field of statistics, the word statistic has been specifically defined to mean a summary characteristic of a sample. While the observations obtained from a sample are a measurement of some variable or factor, a statistic is what describes features of the whole sample.;.*~Incorrect. The correct fill-in is 'statistic'."
+                        },
+                        "display": {
+                            "clozeText": "A __________ describes a characteristic of a sample."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "describes|is|represents~Correct.;.*~Incorrect. The correct fill-in is 'describes'."
+                        },
+                        "display": {
+                            "clozeText": "A statistic __________ a characteristic of a sample."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "characteristic~Correct.;observation~Observation is incorrect. The correct response is characteristic. Statistics describe overall characteristics of samples, not single observations. While we do make observations about the sample, in statistical language an observation is a specific value in a sample, whereas the term statistic is a description of the sample as a whole.;.*~Incorrect. The correct fill-in is 'characteristic'."
+                        },
+                        "display": {
+                            "clozeText": "A statistic describes a __________ of a sample."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample~Correct.;observation~Observation is incorrect. The correct response is sample. In statistics, the word statistic has been specifically defined as a value that summarizes a characteristic of the whole sample, and not just a single observation.;population~Population is incorrect. The correct response is sample. In the field of statistics, the word statistic has been specifically defined to mean a characteristic of a sample. In the case of a population, the descriptive values are called parameters.;variable~Variable is incorrect. The correct response is sample. In statistics, the word statistic has been specifically defined to mean a summary characteristic of a sample. Variable is too general since the variable is what is being measured in the sample and/or population.;.*~Incorrect. The correct fill-in is 'sample'."
+                        },
+                        "display": {
+                            "clozeText": "A statistic describes a characteristic of a __________."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "samples~Correct.;observations~Observations is incorrect. The correct response is samples. While each observation does vary, observations do not necessarily represent the population. An individual observation may poorly represent the actual population in some case, rather the observations are intended to represent the sample, a subset of the population.;statistics~Statistics is incorrect. The correct response is samples. While a statistic represents a sample, it is the sample that then represents the population, which is what we are referring to here.;.*~Incorrect. The correct fill-in is 'samples'."
+                        },
+                        "display": {
+                            "clozeText": "Although multiple __________ are variable they are intended to represent the population from which they come."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variable|random~Correct.;small~Small is incorrect. The correct response is variable. While samples in most situations are smaller than the population, they still may be very large, restrained by only the size of the population. This sentence refers to how samples, regardless of size, are meant to exemplify the population.;.*~Incorrect. The correct fill-in is 'variable'."
+                        },
+                        "display": {
+                            "clozeText": "Although multiple samples are __________ they are intended to represent the population from which they come."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "represent|describe|sample~Correct.;.*~Incorrect. The correct fill-in is 'represent'."
+                        },
+                        "display": {
+                            "clozeText": "Although multiple samples are variable they are intended to __________ the population from which they come."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population~Correct.;sample~Sample is incorrect. The correct response is population. While we could take a sample from a sample, this is not generally done in statistics. Rather, in statistics the sample is taken from the population, and is used to make inferences about that population.;.*~Incorrect. The correct fill-in is 'population'."
+                        },
+                        "display": {
+                            "clozeText": "Although multiple samples are variable they are intended to represent the __________ from which they come."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Standard deviation~Correct.;deviation~Deviation is incorrect. The correct response is standard deviation. The word 'standard' is important to include because standard deviation has a precise statistical meaning, whereas the word deviation by itself has many meanings.;mean~Mean is incorrect. The correct response is the standard deviation. We call the standard deviation the root mean squared error because to compute it you need to take the square root of the mean of the squared differences (or errors) from the mean.;variance~Variance is incorrect. The correct response is standard deviation. Try to remember that when you square (multiply by itself) the standard deviation you get the variance, while if you take the square root of the variance you get the standard deviation back again.;.*~Incorrect. The correct fill-in is 'Standard deviation'."
+                        },
+                        "display": {
+                            "clozeText": "__________ is the square root of the variance, also known as root mean squared error."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "square root~Correct.;mean~Mean is incorrect. The correct response is square root. The variance measures how far apart, or how widely dispersed, a set of numbers is from the mean in either direction. To get the standard deviation, take the square root of the variance. The mean of the variance might be computed for multiple samples, but is not generally used for anything.;square~Square is incorrect. The correct response is square root. The variance measures how far apart, or how widely dispersed, a set of numbers is from the mean in either direction. The standard deviation gives us this information and is obtained by taking the square root of the variance. Squaring the variance (variance multiplied by variance), does not give us additional information about the spread of numbers.;sum~Sum is incorrect. The correct response is square root. The variance measures how far apart, or how widely dispersed, a set of numbers is from the mean in either direction. To get the standard deviation, take the square root of the variance. Since the variance is a single value for a sample, there is nothing to sum or add.;.*~Incorrect. The correct fill-in is 'square root'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation is the __________ of the variance, also known as root mean squared error."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variance~Correct.;difference~Difference is incorrect. The correct response is variance. Remember that if you take the square root of the variance, you get the standard deviation, while if you square the standard deviation, you get the variance back again. Difference is a mathematical term referring to subtraction, which cannot be completed here since you don't have two values.;mean~Mean is incorrect. The correct response is variance. There is a relationship between standard deviation and mean, because the standard deviation is a measure of the typical distance from the mean, but square roots are not involved. Remember that the variance is the standard deviation squared, and conversely, standard deviation is the square root of the variance.;.*~Incorrect. The correct fill-in is 'variance'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation is the square root of the __________, also known as root mean squared error."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "root mean squared error~Correct.;mean~Mean is incorrect. The correct response is root mean squared error. This sentence is describing the traditional mathematical representation of the standard deviation as the square Root of the Mean of the Squared Error (RMSE). The standard deviation measures variability from the mean, but it is not a mean.;.*~Incorrect. The correct fill-in is 'root mean squared error'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation is the square root of the variance, also known as __________."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Standard deviation~Correct.;distribution~Distribution is incorrect. The correct response is standard deviation. This sentence is meant to compare two measures of variability: standard deviation and standard error. Distribution is incorrect because it is too general, since multiple observations can also be described by a distribution.;variability~Variability is incorrect. The correct response is standard deviation. Variability does make sense, but it is too general a term, since multiple observations also have variability. Rather, standard deviation is the specific technical term for the main measure of the expected variability of a single observation.;variance~Variance is incorrect. The correct response is standard deviation. This sentence is meant to compare two measures of variability: standard error and standard deviation. The difference between these two is the level at which they are describing variability. Standard deviation is at the level of a single observation, and standard error is the variability between multiple observations.;.*~Incorrect. The correct fill-in is 'Standard deviation'."
+                        },
+                        "display": {
+                            "clozeText": "__________ refers to how individual observations vary from the mean, while standard error refers to how multiple observations (i.e. samples) vary from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "individual|single~Correct.;different~Different is incorrect. The correct response is individual. Different is incorrect because it doesn't fit the sentence as an opposite to the term 'multiple' used later in the sentence. In other words, we're talking about single individual observations versus multiple observations.;sample~Sample is incorrect. The correct response is individual. Sample is incorrect because it doesn't fit the sentence as an opposite to the term 'multiple' used later in the sentence. In other words, we're talking about single individual observations versus multiple observations.;.*~Incorrect. The correct fill-in is 'individual'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation refers to how __________ observations vary from the mean, while standard error refers to how multiple observations (i.e. samples) vary from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard error~Correct.;error~Error is incorrect. The correct response is standard error. The word 'standard' is important to include because standard error is has a precise statistical meaning, whereas the word error by itself has many meanings.;variance~Variance is incorrect. The correct response is standard error. Standard error essentially measures the same thing as standard deviation (variability), but at a higher level, between sets of multiple observations. On the other hand, standard deviation refers to how much a single observations might be expected to vary. Variance is actually the square of the standard deviation.;.*~Incorrect. The correct fill-in is 'standard error'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation refers to how individual observations vary from the mean, while __________ refers to how multiple observations (i.e. samples) vary from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "multiple|many~Correct.;different~Different is incorrect. The correct response is multiple. In common language, different and multiple may be synonyms. However, in statistics, the word different usually refers to variability. Here we are comparing how variability is measured for single versus multiple observations.;.*~Incorrect. The correct fill-in is 'multiple'."
+                        },
+                        "display": {
+                            "clozeText": "Standard deviation refers to how individual observations vary from the mean, while standard error refers to how __________ observations (i.e. samples) vary from the mean."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "density~Correct.;mean~Mean is incorrect. The correct response is density. The mean of the distribution is a single average value for the whole distribution, so you wouldn't calculate the mean for only a range of values within the distribution. The density of a distribution over a certain range refers to how many observations fall within that range, relative to the number of observations in the entire distribution.;range~Range is incorrect. The correct response is density. The density refers to how likely a new observation will be within a range of the distribution. The range itself just tells us where to measure the density of the distribution.;standard deviation~Standard deviation is incorrect. The correct response is density. The standard deviation is a single value for the whole distribution, so you wouldn't calculate it for only a specific range of values within the distribution. The density of a distribution over a certain range refers to how many observations fall within that range, relative to the number of observations in the entire distribution.;variance~Variance is incorrect. The correct response is density. The variance is a single value for the whole distribution, so you wouldn't calculate it for only a specific range of values within the distribution. The density of a distribution over a certain range refers to how many observations fall within that range, relative to the number of observations in the entire distribution.;.*~Incorrect. The correct fill-in is 'density'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a distribution between a range of values represents the probability that a new observation will fall within that range also."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "range|set~Correct.;sample~Sample is incorrect. The correct response is range. While it makes sense to sample from a distribution, you can't be 'between' a sample. Range fits much better in this sentence, because you can be between a range of values, for example, between the range of -3 to 2.;.*~Incorrect. The correct fill-in is 'range'."
+                        },
+                        "display": {
+                            "clozeText": "The density of a distribution between a __________ of values represents the probability that a new observation will fall within that __________ also."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probability|likelihood|chance~Correct.;range~Range is incorrect. The correct response is probability. A range of values in a distribution describes an area, which is interpreted as a proportion of the total distribution, which is the probability that future observations will fall within that range also. The range is not the probability;the range itself just tells us where to measure the probability of the distribution.;.*~Incorrect. The correct fill-in is 'probability'."
+                        },
+                        "display": {
+                            "clozeText": "The density of a distribution between a range of values represents the __________ that a new observation will fall within that range also."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observation~Correct.;sample~Sample is incorrect. The correct response is observation. The density of a distribution tells how likely it is that a new observation will fall within the range. The word sample refers to multiple observations, and since we are referring to a distribution we would usually assume the distribution is of observations. If the distribution were a distribution of samples we would call it a sample distribution.;value~Correct.;variable~Variable is incorrect. The correct response is observation. While we observe a variable, those observations are not called variable themselves. Typically, a distribution of scores describes how the observations (observed scores) are dispersed across a range of values for a single variable or factor.;.*~Incorrect. The correct fill-in is 'observation'."
+                        },
+                        "display": {
+                            "clozeText": "The density of a distribution between a range of values represents the probability that a new __________ will fall within that range also."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean|sample mean|average~Correct.;standard deviation~Standard deviation is incorrect. The correct response is mean. Mean refers to the average value of a set of numbers, whereas standard deviation refers to how different the numbers in that set are from the mean. The calculation described here is for the mean.;variance~Variance is incorrect. The correct response is mean. Mean refers to the mathematical average value of a set of numbers. The variance is a different statistic that describes how dispersed, or diverse, the numbers in the set are.;.*~Incorrect. The correct fill-in is 'mean'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ is computed by taking the sum of all the numbers in a set, divided by the count of the numbers in the set."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sum~Correct.;average~Average is incorrect. The correct response is sum. The average is the same as the mean, which is the value we are calculating here. To get the mean, or average, you would sum the numbers in a set and divide by the number of values in a set.;.*~Incorrect. The correct fill-in is 'sum'."
+                        },
+                        "display": {
+                            "clozeText": "The mean is computed by taking the __________ of all the numbers in a set, divided by the count of the numbers in the set."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "divided~Correct.;range~Range is incorrect. The correct response is divided. The missing word here needs to be a calculation that you are performing between the sum and the count. A range describes an interval between 2 numbers.;sample~Sample is incorrect. The correct response is divided. The missing word here needs to be a calculation that you perform between the sum and the count to get the mean. Since sample is not a calculation, it cannot be used in an equation.;.*~Incorrect. The correct fill-in is 'divided'."
+                        },
+                        "display": {
+                            "clozeText": "The mean is computed by taking the sum of all the numbers in a set, __________ by the count of the numbers in the set."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "count~Correct.;mean~Mean is incorrect. The correct response is count. We cannot calculate the mean by dividing by the mean. Rather, the mean is the sum of the numbers, divided by the count of how many numbers are in the set.;range~Range is incorrect. The correct response is count. Range refers to an interval of the distribution. For the mean, we need to divide the sum of the numbers in the set by the count of how many numbers are in the set.;sum~Sum is incorrect. The correct response is count. It doesn't make sense to divide the sum by the sum, since they are equal and the mean would always be 1. Rather, we would divide the sum by the count of how many numbers are in the set.;total~Total is incorrect. The correct response is count. In mathematical terms, 'total' would refer to the sum, so it doesn't make sense to divide the sum by the sum. Rather, we would divide the sum by the count of how many numbers are in the set.;.*~Incorrect. The correct fill-in is 'count'."
+                        },
+                        "display": {
+                            "clozeText": "The mean is computed by taking the sum of all the numbers in a set, divided by the __________ of the numbers in the set."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "normal~Correct.;standard~Standard is incorrect. The correct response is normal. In common English, standard and normal mean the same thing, but in statistics, they refer to different things. This sentence refers to a normal distribution, the most commonly talked about distribution. Actually, there is no such thing as a standard distribution in statistics.;.*~Incorrect. The correct fill-in is 'normal'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ distribution has 68 percent of its observations in the range between -1 and 1 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "68~Correct.;95~95 is incorrect. The correct response is 68. A normal distribution has several features, including specified amounts of the distribution that fall between any two points. This sentence asks what proportion of the distribution is between -1 and 1 standard deviations from the mean, which would be 68%. Your response, 95% occurs inside a larger range of the distribution, namely, between -2 and 2 standard deviations from the mean.;99.7~99.7 is incorrect. The correct response is 68. A normal distribution has several features, including specified amounts of the distribution that fall between any two points. This sentence asks what proportion of the distribution is between -1 and 1 standard deviations from the mean, which would be 68%. Your response, 99.7% occurs inside a much wider range, namely, between -3 and 3 standard deviations from the mean.;.*~Incorrect. The correct fill-in is '68'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has __________ percent of its observations in the range between -1 and 1 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "range~Correct.;1~1 is incorrect. The response is range. The idea to learn is that 68% of the time an observation from normal distribution has a value between the range of -1 and 1 standard deviations from the mean.;difference~Difference is incorrect. The correct response is range. A range is a restricted portion of the possible values, but a difference refers to subtraction. We could use subtraction to compute the length of the range, but that is a different concept.;.*~Incorrect. The correct fill-in is 'range'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 68 percent of its observations in the __________ between -1 and 1 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1~Correct.;2~2 is incorrect. The correct response is 1. A normal distribution has several features, including specified amounts of the distribution that fall between any two points. This sentence asks what range contains 68% of the normal distribution, which is from -1 to 1 standard deviations from the mean. Your response of 2 would contain a larger portion of the distribution, namely, 95%.;3~3 is incorrect. The correct response is 1. A normal distribution has several features, including specified amounts of the distribution that fall between any two points. This sentence asks what range contains 68% of the normal distribution, which is from -1 to 1 standard deviations from the mean. Your response of 3 would contain almost all of the distribution, namely, 99.7%.;.*~Incorrect. The correct fill-in is '1'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 68 percent of its observations in the range between -__________ and __________ standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "normal~Correct.;standard~Standard is incorrect. The correct response is 'normal.' In common English, standard and normal mean the same thing, but in statistics, they refer to different things. This sentence refers to a normal distribution, the most commonly talked about distribution. Actually, there is no such thing as a standard distribution in statistics.;.*~Incorrect. The correct fill-in is 'normal'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ distribution has 95 percent of its observations in the range between -2 and 2 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "95~Correct.;68~68 is incorrect. The correct response is 95. A normal distribution has several features, including specific amounts of the distribution that fall between any two points. This sentence asks what proportion of the distribution is between -2 and 2 standard deviations from the mean, which would be 95%. Your response, 68%, occurs inside a smaller range, namely, between -1 and 1 standard deviations from the mean.;98~98 is incorrect. The correct response is 95. A normal distribution has several features, including specific amounts of the distribution that fall between any two points. In a normal distribution 98% has no special significance. Perhaps you are confusing that 68% is between -1 and 1 standard deviations from the mean and that 95% is within -2 and 2 standard deviations from the mean.;99.7~99.7 is incorrect. The correct response is 95. A normal distribution has several features, including specific amounts of the distribution that fall between any two points. This sentence asks what proportion of the distribution is between -2 and 2 standard deviations from the mean, which would be 95%. Your response, 99.7%, occurs inside a larger range, namely, between -3 and 3 standard deviations from the mean.;.*~Incorrect. The correct fill-in is '95'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has __________ percent of its observations in the range between -2 and 2 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "range~Correct.;mean~Mean is incorrect. The correct answer is range. A portion (or percent) of a distribution always occurs between a range of two values, which in this example are -2 and 2 standard deviations from the mean. A mean is an average, which is a single specific value.;sample~Sample is incorrect. The correct response is range. While it makes sense to sample from a distribution, you characterize a restricted sample by talking about its range between two numbers, which in this case are -2 and 2 standard deviations from the mean.;.*~Incorrect. The correct fill-in is 'range'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 95 percent of its observations in the __________ between -2 and 2 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2~Correct.;1~1 is incorrect. The correct response is 2. A normal distribution has several features, including specific amounts of the distribution that fall between any two points. This sentence asks what range contains 95% of the normal distribution, which is from -2 to 2 standard deviations from the mean. Your response of 1 would contain a smaller portion of the distribution, namely, 68%.;3~3 is incorrect. The correct response is 2. A normal distribution has several features, including specific amounts of the distribution that fall between any two points. This sentence asks what range contains 95% of the normal distribution, which is from -2 to 2 standard deviations from the mean. Your response of 3 would contain a larger portion of the distribution, namely, 99.7%.;.*~Incorrect. The correct fill-in is '2'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 95 percent of its observations in the range between -__________ and __________ standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "normal~Correct.;standard~Standard is incorrect. The correct response is normal. In common English, standard and normal may mean the same thing, but in statistics, they refer to different things. This sentence refers to a normal distribution, the most commonly talked about distribution. Actually, there is no such thing as a standard distribution in statistics.;.*~Incorrect. The correct fill-in is 'normal'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ distribution has 99.7 percent of its observations in the range between -3 and 3 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "99.7~Correct.;68~68 is incorrect. The correct response is 99.7. In a normal distribution, almost all of the observations, 99.7%, fall within 3 standard deviations of the mean. Your response, 68%, is contained within a much narrower range, between 1 standard deviation above and below the mean.;95~95 is incorrect. The correct response is 99.7. In a normal distribution, almost all of the observations, 99.7%, fall within 3 standard deviations of the mean. Your response, 95%, is contained within 2 standard deviations above and below of the mean.;98~98 is incorrect. The correct response is 99.7. In a normal distribution, almost all of the observations, 99.7%, fall within 3 standard deviations of the mean. In a normal distribution 98% has no special significance. Perhaps you are confusing that 68% is between -1 and 1 standard deviation from the mean and 95% is within -2 and 2 standard deviations from the mean.;.*~Incorrect. The correct fill-in is '99.7'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has __________ percent of its observations in the range between -3 and 3 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "range~Correct.;difference~Difference is incorrect. The correct response is range. Here, a range refers to a restricted portion of the possible values, but a difference refers to subtraction, which we might use to compute the length of the range, a different concept.;sample~Sample is incorrect. The correct response is range. While it makes sense to sample from a distribution, you characterize a restricted sample by talking about its range between two numbers, which in this case are -3 and 3.;.*~Incorrect. The correct fill-in is 'range'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 99.7 percent of its observations in the __________ between -3 and 3 standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3~Correct.;1~1 is incorrect. The correct response is 3. In a normal distribution, 99.7 percent of observations are within 3 standard deviations above and below the mean. Your response, from -1 to 1 standard deviations would contain only 68% of the observations.;2~2 is incorrect. The correct response is 3. In a normal distribution, 99.7 percent of observations are within 3 standard deviations above and below the mean. Your response, from -2 to 2 standard deviations would contain 95% of the observations.;.*~Incorrect. The correct fill-in is '3'."
+                        },
+                        "display": {
+                            "clozeText": "The normal distribution has 99.7 percent of its observations in the range between -__________ and __________ standard deviations from the mean."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sample mean|mean~Correct.;.*~Incorrect. The correct fill-in is 'sample mean'."
+                        },
+                        "display": {
+                            "clozeText": "The __________, or average, is a statistic that represents what we expect observations in the sample to be centered around."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "statistic~Correct.;number~Number is incorrect. The correct response is statistic. While the mean or average is indeed a numbers, this answer is too vague. The word statistic fits much better since it specifically refers to summary values describing a sample.;range~Range is incorrect. The correct response is statistic. The average or mean cannot be a range of possible values. Rather, the mean is a single exact value, or statistic, we calculate.;sample~Sample is incorrect. The correct response is statistic. The sample is not a mean, rather the mean for the sample (or the sample mean) is a statistic we can calculate to represent the average in that sample.;value~Value is incorrect. The correct response is statistic. While the mean or average is a value, calling the sample mean a value is too vague. The word statistic fits much better since it specifically refers to summary values describing a sample.;variable~Variable is incorrect. The correct response is statistic. The word variable used here is inappropriate, since a variable is what we are observing. In statistics, the word statistic has been specifically defined to mean a summary characteristic of a sample.;.*~Incorrect. The correct fill-in is 'statistic'."
+                        },
+                        "display": {
+                            "clozeText": "The sample mean, or average, is a __________ that represents what we expect observations in the sample to be centered around."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "represents|describes|shows~Correct.;.*~Incorrect. The correct fill-in is 'represents'."
+                        },
+                        "display": {
+                            "clozeText": "The sample mean, or average, is a statistic that __________ what we expect observations in the sample to be centered around."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "expect~Correct.;measure~Measure is incorrect. The correct response is expect. In fact, what we measure may be very different than what we should expect. If we measure many times we can compute the sample mean, which is what we expect for observations on average.;.*~Incorrect. The correct fill-in is 'expect'."
+                        },
+                        "display": {
+                            "clozeText": "The sample mean, or average, is a statistic that represents what we __________ observations in the sample to be centered around."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation~Correct.;mean~Mean is incorrect. The correct response is standard deviation. Actually, the mean describes the expected or average value for observations, while it is the standard deviation that describes how much the sample observations vary (from the mean).;variance~Variance is incorrect. The correct response is standard deviation. Both are measures of variability, but standard deviation makes more sense here since it is measured from the mean in the same unit as the observation, whereas variance describes the variability using squared units.;.*~Incorrect. The correct fill-in is 'standard deviation'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ is a statistic that describes typical variability for a set of observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "statistic~Correct.;range~Range is incorrect. The correct response is statistic. The standard deviation is a single value;it is a statistic to summarize a sample. A range is the total interval or some partial interval of the distribution.;sample~Sample is incorrect. The correct response is statistic. The standard deviation is computed from a sample, but it is not itself a sample. Rather, standard deviation is the variability statistic for the sample.;.*~Incorrect. The correct fill-in is 'statistic'."
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation is a __________ that describes typical variability for a set of observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variability~Correct.;range~Range is incorrect. The correct response is variability. In common language, the use of range here might make sense, but in statistics it refers to an interval of a distribution. Standard deviation is a statistic that describes the expected variability of a single observation.;variance~Variance is incorrect. The correct response is variability. In common English these words may mean the same thing, but in statistics, variance is too specific since it is actually another statistic entirely. Variability is the more general term that would include variance and standard deviation.;.*~Incorrect. The correct fill-in is 'variability'."
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation is a statistic that describes typical __________ for a set of observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observations~Correct.;samples~Sample is incorrect. The correct response is observation. The standard deviation is computed from a sample, but it does not entirely describe the whole sample. Rather, the standard deviation describes the variability expected for each observation within the sample.;.*~Incorrect. The correct fill-in is 'observations'."
+                        },
+                        "display": {
+                            "clozeText": "The standard deviation is a statistic that describes typical variability for a set of __________."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "units~Correct.;range~Range is incorrect. The correct response is units. Standard deviation does not have a range, since there is a single standard deviation (a single value) for a distribution or sample. This fact refers to how the unit of measurement used for the observations in a sample is the same unit of measurement as the unit used for the standard deviation.;variance~Variance is incorrect. The correct response is units. Standard deviation does not have a variance;rather, it is itself a measure of variability. This fact refers to how the unit of measurement for the observations in a sample is also used as the unit of measurement for the standard deviation.;.*~Incorrect. The correct fill-in is 'units'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ for the standard deviation statistic are the same __________ used to measure the observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviation~Correct.;sample~Sample is incorrect. The correct response is standard deviation. As the sentence specifies, the answer is a statistic that measures variability in the same units as the observation, which is standard deviation. While samples are represented by multiple statistics, there is no statistic called the sample statistic.;.*~Incorrect. The correct fill-in is 'standard deviation'."
+                        },
+                        "display": {
+                            "clozeText": "The units for the __________ statistic are the same units used to measure the observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "same~Correct.;sample~Sample is incorrect. The correct response is same. This fact refers to how the unit of measurement for an observation (e.g. seconds) is the same unit of measurement for the standard deviation. There is no such thing as a sample unit.;standard~Standard is incorrect. The correct response is same. There are no 'standard units' referred to in statistics to measure an observation. Rather, this fact is pointing out that whatever the unit of measurement is for the observations (e.g., inches, IQ, age, etc.) is also the unit of measurement for the standard deviation.;.*~Incorrect. The correct fill-in is 'same'."
+                        },
+                        "display": {
+                            "clozeText": "The units for the standard deviation statistic are the __________ units used to measure the observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "measure|represent|describe~Correct.;.*~Incorrect. The correct fill-in is 'measure'."
+                        },
+                        "display": {
+                            "clozeText": "The units for the standard deviation statistic are the same units used to __________ the observations."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "variance~Correct.;mean~Mean is incorrect. The correct response is variance. Your answer, mean, does involve adding values and then dividing values, but taking the mean involves adding the actual value of each observation, while here we are adding together the observation variances.;standard deviation~Standard deviation is incorrect. The correct response is variance. This fact refers to the calculation of a sample's variance. The standard deviation would be the square root of the variance.;.*~Incorrect. The correct fill-in is 'variance'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ for a sample is computed by dividing the sum of the observation __________s by 1 less than the total observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample~Correct.;mean~Mean is incorrect. The correct response is sample. A mean doesn't have a variance, rather they are both the mean and the variance are statistics used for summarizing and describing some sample;observation~Observation is incorrect. The correct response is sample. This calculation cannot be for the variance of a single observation, since we are dividing by the total observations minus one. Dividing by the total observations minus one indicates the variance is for a sample.;standard deviation~Standard deviation is incorrect. The correct response is sample. A standard deviation doesn't have a variance, rather a sample can be described by both variance and standard deviation. This sentence asks what variance describes, which is the sample.;statistic~Statistic is incorrect. The correct response is sample. A statistic doesn't have variance, rather variance is a statistic that describes a sample;.*~Incorrect. The correct fill-in is 'sample'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for a __________ is computed by dividing the sum of the observation variances by 1 less than the total observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dividing~Correct.;adding~Adding is incorrect. The correct response is dividing. Similar to how we calculate the average, calculating the variance requires division. Adding is part of the calculation as well, but is already accounted for by the sum of the observation variances. To obtain the variance you need to divide that sum by 1 less than the total number of observations.;.*~Incorrect. The correct fill-in is 'dividing'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for a sample is computed by __________ the sum of the observation variances by 1 less than the total observations."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1|one~Correct.;.*~Incorrect. The correct fill-in is '1'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for a sample is computed by dividing the sum of the observation variances by __________ less than the total observations."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "variance~Correct.;standard deviation~Standard deviation is incorrect. The correct response is variance. Standard deviation would be approximately the difference from the mean. If we then square that value (the standard deviation) we get the variance.;.*~Incorrect. The correct fill-in is 'variance'."
+                        },
+                        "display": {
+                            "clozeText": "The __________ for an observation is the squared difference from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "squared~Correct.;average~Average is incorrect. The correct response is squared. We cannot obtain an average based on a single observation, which is what we are discussing here. To calculate the variance of a single observation, you subtract the observed value from the sample mean, and then square that number. Actually, average difference from the mean is more similar to the standard deviation.;standard~Standard is incorrect. The correct response is squared. To calculate the variance of a single observation, you subtract the observed value from the sample mean, and then square that number. Actually, standard difference from the mean, while not common statistical terminology, sounds like it is more similar to the standard deviation, not variance.;.*~Incorrect. The correct fill-in is 'squared'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for an observation is the __________ difference from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference~Correct.;root~Root is incorrect. The correct response is difference. You cannot take the squared root 'from' the mean. Rather, the variance for an observation is the difference from the mean, squared. You could then square root the variance to obtain the standard deviation, but that is not the point of this fact.;variance~Variance is incorrect. The correct response is difference The variance is a statistic that describes the dispersion or degree of clustering of scores around the mean by subtracting the value of the observation from the mean (i.e., using the difference), then squaring it. The variance from the mean sort of sounds like the same thing, but is confusing since variance has a more precise meaning in statistics.;.*~Incorrect. The correct fill-in is 'difference'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for an observation is the squared __________ from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mean~Correct.;root~Root is incorrect. The correct response is mean. To calculate the variance of a single observation, you subtract the observed value from the sample mean, and then square that number. In other words, the squared difference from the mean. It is unclear what your response, root, refers to.;sample~Sample is incorrect. The correct response is mean. The variance is a statistic that describes the dispersion or degree of clustering of scores around the mean. To obtain the variance for an observation we need the difference from the mean. The difference from the sample implies this, but is ultimately incorrect because the sample itself has many values, and we need a single difference for each observation variance.;sum~Sum is incorrect. The correct response is mean. The variance is a statistic that describes the dispersion or degree of clustering of scores around the mean. To obtain the variance for an observation we need the difference from the mean, squared. We don't take differences from a sum, and it is not clear what sum is referred to.;.*~Incorrect. The correct fill-in is 'mean'."
+                        },
+                        "display": {
+                            "clozeText": "The variance for an observation is the squared difference from the __________."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Variability~Correct.;standard deviation~Standard deviation is incorrect. The correct response is variability. While the standard deviation statistic is a measure of variability, it is a very specific measure of variability, not well captured by this definition. Rather, this sentence is describing the general concept of variability.;variance~Variance is incorrect. The correct response is variability. While the variance statistic is a measure of variability, it is a very specific measure of variability, not well captured by this definition. Rather, this sentence is describing the general concept of variability.;.*~Incorrect. The correct fill-in is 'Variability'."
+                        },
+                        "display": {
+                            "clozeText": "__________ refers to how different the observations are from each other and sometimes from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "different|far|variable~Correct.;.*~Incorrect. The correct fill-in is 'different'."
+                        },
+                        "display": {
+                            "clozeText": "Variability refers to how __________ the observations are from each other and sometimes from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observations~Correct.;sample~Sample is incorrect. The correct response is observations. Variability here refers to differences within a single sample. Although samples are variable, usually when we talk about sample comparisons we talk about making inferences.;samples~Samples is incorrect. The correct response is observations. Variability here refers to differences within a single sample. Although samples are variable, usually when we talk about sample comparisons we talk about making inferences.;.*~Incorrect. The correct fill-in is 'observations'."
+                        },
+                        "display": {
+                            "clozeText": "Variability refers to how different the __________ are from each other and sometimes from the mean."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mean~Correct.;sample~Sample is incorrect. The correct response is mean. The term sample here is too vague, since variability is often computed as difference from the mean. The observations are part of a sample so the response is inappropriate.;.*~Incorrect. The correct fill-in is 'mean'."
+                        },
+                        "display": {
+                            "clozeText": "Variability refers to how different the observations are from each other and sometimes from the __________."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "involves|uses|includes|observes~Correct.;.*~Incorrect. The correct fill-in is 'involves'."
+                        },
+                        "display": {
+                            "clozeText": "When a study __________ human subjects, the sample is the group of people who participated in the study."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "subject|participant|participants~Correct.;sample~Sample is incorrect. The correct response is subject. Answering 'sample' makes the sentence redundant. Answering 'subject' allows the sentence to convey that the sample is made up of individual subjects.;samples~Samples is incorrect. The correct response is subject. Answering 'samples' makes the sentence redundant. Answering 'subject' allows the sentence to convey that the sample is made up of individual subjects.;.*~Incorrect. The correct fill-in is 'subject'."
+                        },
+                        "display": {
+                            "clozeText": "When a study involves human __________s, the sample is the group of people who participated in the study."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample~Correct.;control~Control is incorrect. The correct response is sample. A control group is included within a sample, but the sample also includes the experimental group(s). Since this fact is referring to everyone who participated in the study, regardless of which group they were in, it's referring to the entire group, i.e. the sample.;subject~Subject is incorrect. The correct response is sample. A subject would refer to a single person that participated. Here, we are referring to the entire group of subjects that participated, i.e. the sample.;.*~Incorrect. The correct fill-in is 'sample'."
+                        },
+                        "display": {
+                            "clozeText": "When a study involves human subjects, the __________ is the group of people who participated in the study."
+                        },
+                        "parameter": "0,.72"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "participated~Correct.;sample~Sample is incorrect. The correct response is participated. Using the word sample to describe a sample doesn't add much explanation. Therefore, we want to say generally what the sample did, which is to say that they participated.;.*~Incorrect. The correct fill-in is 'participated'."
+                        },
+                        "display": {
+                            "clozeText": "When a study involves human subjects, the sample is the group of people who __________ in the study."
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Did you have a high school statistics class?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "0",
+                            "incorrectResponses": [
+                                "1",
+                                "2",
+                                "3 or more"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many college statistics classes have you taken?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -1,0 +1,4799 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "one"
+                        },
+                        "display": {
+                            "text": "一 in English"
+                        },
+                        "parameter": "-2.47864999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yi1"
+                        },
+                        "display": {
+                            "text": "一 in pinyin"
+                        },
+                        "parameter": "-2.47869999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "line"
+                        },
+                        "display": {
+                            "text": "丨 in English"
+                        },
+                        "parameter": "-2.47874999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gun3"
+                        },
+                        "display": {
+                            "text": "丨 in pinyin"
+                        },
+                        "parameter": "-2.47879999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dot"
+                        },
+                        "display": {
+                            "text": "丶 in English"
+                        },
+                        "parameter": "-2.47884999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhu3"
+                        },
+                        "display": {
+                            "text": "丶 in pinyin"
+                        },
+                        "parameter": "-2.47889999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "slash"
+                        },
+                        "display": {
+                            "text": "丿 in English"
+                        },
+                        "parameter": "-2.47894999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pie3"
+                        },
+                        "display": {
+                            "text": "丿 in pinyin"
+                        },
+                        "parameter": "-2.47899999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "second"
+                        },
+                        "display": {
+                            "text": "乙 in English"
+                        },
+                        "parameter": "-2.47904999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yi4"
+                        },
+                        "display": {
+                            "text": "乙 in pinyin"
+                        },
+                        "parameter": "-2.47909999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hook"
+                        },
+                        "display": {
+                            "text": "亅 in English"
+                        },
+                        "parameter": "-2.47914999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jue2"
+                        },
+                        "display": {
+                            "text": "亅 in pinyin"
+                        },
+                        "parameter": "-2.47919999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two"
+                        },
+                        "display": {
+                            "text": "二 in English"
+                        },
+                        "parameter": "-2.47924999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "er4"
+                        },
+                        "display": {
+                            "text": "二 in pinyin"
+                        },
+                        "parameter": "-2.47929999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lid"
+                        },
+                        "display": {
+                            "text": "亠 in English"
+                        },
+                        "parameter": "-2.47934999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tou2"
+                        },
+                        "display": {
+                            "text": "亠 in pinyin"
+                        },
+                        "parameter": "-2.47939999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "man"
+                        },
+                        "display": {
+                            "text": "人 in English"
+                        },
+                        "parameter": "-2.47944999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ren2"
+                        },
+                        "display": {
+                            "text": "人 in pinyin"
+                        },
+                        "parameter": "-2.47949999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "legs"
+                        },
+                        "display": {
+                            "text": "儿 in English"
+                        },
+                        "parameter": "-2.47954999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "er2"
+                        },
+                        "display": {
+                            "text": "儿 in pinyin"
+                        },
+                        "parameter": "-2.47959999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "enter"
+                        },
+                        "display": {
+                            "text": "入 in English"
+                        },
+                        "parameter": "-2.47964999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ru4"
+                        },
+                        "display": {
+                            "text": "入 in pinyin"
+                        },
+                        "parameter": "-2.47969999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eight"
+                        },
+                        "display": {
+                            "text": "八 in English"
+                        },
+                        "parameter": "-2.47974999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ba1"
+                        },
+                        "display": {
+                            "text": "八 in pinyin"
+                        },
+                        "parameter": "-2.47979999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "down box"
+                        },
+                        "display": {
+                            "text": "冂 in English"
+                        },
+                        "parameter": "-2.47984999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jiong3"
+                        },
+                        "display": {
+                            "text": "冂 in pinyin"
+                        },
+                        "parameter": "-2.47989999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "over"
+                        },
+                        "display": {
+                            "text": "冖 in English"
+                        },
+                        "parameter": "-2.47994999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mi4"
+                        },
+                        "display": {
+                            "text": "冖 in pinyin"
+                        },
+                        "parameter": "-2.47999999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ice"
+                        },
+                        "display": {
+                            "text": "冫 in English"
+                        },
+                        "parameter": "-2.48004999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bing1"
+                        },
+                        "display": {
+                            "text": "冫 in pinyin"
+                        },
+                        "parameter": "-2.48009999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "table"
+                        },
+                        "display": {
+                            "text": "几 in English"
+                        },
+                        "parameter": "-2.48014999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ji1"
+                        },
+                        "display": {
+                            "text": "几 in pinyin"
+                        },
+                        "parameter": "-2.48019999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "open box"
+                        },
+                        "display": {
+                            "text": "凵 in English"
+                        },
+                        "parameter": "-2.48024999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qu3"
+                        },
+                        "display": {
+                            "text": "凵 in pinyin"
+                        },
+                        "parameter": "-2.48029999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "knife"
+                        },
+                        "display": {
+                            "text": "刀 in English"
+                        },
+                        "parameter": "-2.48034999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dao1"
+                        },
+                        "display": {
+                            "text": "刀 in pinyin"
+                        },
+                        "parameter": "-2.48039999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "power"
+                        },
+                        "display": {
+                            "text": "力 in English"
+                        },
+                        "parameter": "-2.48044999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "li4"
+                        },
+                        "display": {
+                            "text": "力 in pinyin"
+                        },
+                        "parameter": "-2.48049999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wrap"
+                        },
+                        "display": {
+                            "text": "勹 in English"
+                        },
+                        "parameter": "-2.48054999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bao1"
+                        },
+                        "display": {
+                            "text": "勹 in pinyin"
+                        },
+                        "parameter": "-2.48059999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "spoon"
+                        },
+                        "display": {
+                            "text": "匕 in English"
+                        },
+                        "parameter": "-2.48064999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bi3"
+                        },
+                        "display": {
+                            "text": "匕 in pinyin"
+                        },
+                        "parameter": "-2.48069999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "right open box"
+                        },
+                        "display": {
+                            "text": "匚 in English"
+                        },
+                        "parameter": "-2.48074999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fang1"
+                        },
+                        "display": {
+                            "text": "匚 in pinyin"
+                        },
+                        "parameter": "-2.48079999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hiding enclo­sure"
+                        },
+                        "display": {
+                            "text": "匸 in English"
+                        },
+                        "parameter": "-2.48084999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xi3"
+                        },
+                        "display": {
+                            "text": "匸 in pinyin"
+                        },
+                        "parameter": "-2.48089999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ten"
+                        },
+                        "display": {
+                            "text": "十 in English"
+                        },
+                        "parameter": "-2.48094999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi2"
+                        },
+                        "display": {
+                            "text": "十 in pinyin"
+                        },
+                        "parameter": "-2.48099999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mysti­cism"
+                        },
+                        "display": {
+                            "text": "卜 in English"
+                        },
+                        "parameter": "-2.48104999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bu3"
+                        },
+                        "display": {
+                            "text": "卜 in pinyin"
+                        },
+                        "parameter": "-2.48109999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "seal"
+                        },
+                        "display": {
+                            "text": "卩 in English"
+                        },
+                        "parameter": "-2.48114999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jie2"
+                        },
+                        "display": {
+                            "text": "卩 in pinyin"
+                        },
+                        "parameter": "-2.48119999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cliff"
+                        },
+                        "display": {
+                            "text": "厂 in English"
+                        },
+                        "parameter": "-2.48124999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "han4"
+                        },
+                        "display": {
+                            "text": "厂 in pinyin"
+                        },
+                        "parameter": "-2.48129999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "private"
+                        },
+                        "display": {
+                            "text": "厶 in English"
+                        },
+                        "parameter": "-2.48134999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "si1"
+                        },
+                        "display": {
+                            "text": "厶 in pinyin"
+                        },
+                        "parameter": "-2.48139999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "again"
+                        },
+                        "display": {
+                            "text": "又 in English"
+                        },
+                        "parameter": "-2.48144999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "you4"
+                        },
+                        "display": {
+                            "text": "又 in pinyin"
+                        },
+                        "parameter": "-2.48149999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mouth"
+                        },
+                        "display": {
+                            "text": "口 in English"
+                        },
+                        "parameter": "-2.48154999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "kou3"
+                        },
+                        "display": {
+                            "text": "口 in pinyin"
+                        },
+                        "parameter": "-2.48159999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "enclo­sure"
+                        },
+                        "display": {
+                            "text": "囗 in English"
+                        },
+                        "parameter": "-2.48164999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wei2"
+                        },
+                        "display": {
+                            "text": "囗 in pinyin"
+                        },
+                        "parameter": "-2.48169999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "earth"
+                        },
+                        "display": {
+                            "text": "土 in English"
+                        },
+                        "parameter": "-2.48174999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tu3"
+                        },
+                        "display": {
+                            "text": "土 in pinyin"
+                        },
+                        "parameter": "-2.48179999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "scholar"
+                        },
+                        "display": {
+                            "text": "士 in English"
+                        },
+                        "parameter": "-2.48184999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi4"
+                        },
+                        "display": {
+                            "text": "士 in pinyin"
+                        },
+                        "parameter": "-2.48189999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "go"
+                        },
+                        "display": {
+                            "text": "夂 in English"
+                        },
+                        "parameter": "-2.48194999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi3 (top)"
+                        },
+                        "display": {
+                            "text": "夂 in pinyin"
+                        },
+                        "parameter": "-2.48199999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "go slowly"
+                        },
+                        "display": {
+                            "text": "夊 in English"
+                        },
+                        "parameter": "-2.48204999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sui1 (bot­tom)"
+                        },
+                        "display": {
+                            "text": "夊 in pinyin"
+                        },
+                        "parameter": "-2.48209999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "evening"
+                        },
+                        "display": {
+                            "text": "夕 in English"
+                        },
+                        "parameter": "-2.48214999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xi1"
+                        },
+                        "display": {
+                            "text": "夕 in pinyin"
+                        },
+                        "parameter": "-2.48219999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "big"
+                        },
+                        "display": {
+                            "text": "大 in English"
+                        },
+                        "parameter": "-2.48224999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "da4"
+                        },
+                        "display": {
+                            "text": "大 in pinyin"
+                        },
+                        "parameter": "-2.48229999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "woman"
+                        },
+                        "display": {
+                            "text": "女 in English"
+                        },
+                        "parameter": "-2.48234999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nü3"
+                        },
+                        "display": {
+                            "text": "女 in pinyin"
+                        },
+                        "parameter": "-2.48239999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "child"
+                        },
+                        "display": {
+                            "text": "子 in English"
+                        },
+                        "parameter": "-2.48244999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zi3"
+                        },
+                        "display": {
+                            "text": "子 in pinyin"
+                        },
+                        "parameter": "-2.48249999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "roof"
+                        },
+                        "display": {
+                            "text": "宀 in English"
+                        },
+                        "parameter": "-2.48254999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mian2"
+                        },
+                        "display": {
+                            "text": "宀 in pinyin"
+                        },
+                        "parameter": "-2.48259999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "inch"
+                        },
+                        "display": {
+                            "text": "寸 in English"
+                        },
+                        "parameter": "-2.48264999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cun4"
+                        },
+                        "display": {
+                            "text": "寸 in pinyin"
+                        },
+                        "parameter": "-2.48269999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "small"
+                        },
+                        "display": {
+                            "text": "小 in English"
+                        },
+                        "parameter": "-2.48274999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xiao3"
+                        },
+                        "display": {
+                            "text": "小 in pinyin"
+                        },
+                        "parameter": "-2.48279999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lame"
+                        },
+                        "display": {
+                            "text": "尢 in English"
+                        },
+                        "parameter": "-2.48284999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wang1"
+                        },
+                        "display": {
+                            "text": "尢 in pinyin"
+                        },
+                        "parameter": "-2.48289999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "corpse"
+                        },
+                        "display": {
+                            "text": "尸 in English"
+                        },
+                        "parameter": "-2.48294999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi1"
+                        },
+                        "display": {
+                            "text": "尸 in pinyin"
+                        },
+                        "parameter": "-2.48299999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sprout"
+                        },
+                        "display": {
+                            "text": "屮 in English"
+                        },
+                        "parameter": "-2.48304999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "che4"
+                        },
+                        "display": {
+                            "text": "屮 in pinyin"
+                        },
+                        "parameter": "-2.48309999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "moun­tain"
+                        },
+                        "display": {
+                            "text": "山 in English"
+                        },
+                        "parameter": "-2.48314999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shan1"
+                        },
+                        "display": {
+                            "text": "山 in pinyin"
+                        },
+                        "parameter": "-2.48319999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "river"
+                        },
+                        "display": {
+                            "text": "川 in English"
+                        },
+                        "parameter": "-2.48324999999996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chuan1"
+                        },
+                        "display": {
+                            "text": "川 in pinyin"
+                        },
+                        "parameter": "-2.48329999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "work"
+                        },
+                        "display": {
+                            "text": "工 in English"
+                        },
+                        "parameter": "-2.48334999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gong1"
+                        },
+                        "display": {
+                            "text": "工 in pinyin"
+                        },
+                        "parameter": "-2.48339999999996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oneself"
+                        },
+                        "display": {
+                            "text": "己 in English"
+                        },
+                        "parameter": "-2.48344999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ji3"
+                        },
+                        "display": {
+                            "text": "己 in pinyin"
+                        },
+                        "parameter": "-2.48349999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "turban"
+                        },
+                        "display": {
+                            "text": "巾 in English"
+                        },
+                        "parameter": "-2.48354999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jin1"
+                        },
+                        "display": {
+                            "text": "巾 in pinyin"
+                        },
+                        "parameter": "-2.48359999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dry"
+                        },
+                        "display": {
+                            "text": "干 in English"
+                        },
+                        "parameter": "-2.48364999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gan1"
+                        },
+                        "display": {
+                            "text": "干 in pinyin"
+                        },
+                        "parameter": "-2.48369999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "short thread"
+                        },
+                        "display": {
+                            "text": "幺 in English"
+                        },
+                        "parameter": "-2.48374999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yao1"
+                        },
+                        "display": {
+                            "text": "幺 in pinyin"
+                        },
+                        "parameter": "-2.48379999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dotted cliff"
+                        },
+                        "display": {
+                            "text": "广 in English"
+                        },
+                        "parameter": "-2.48384999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "guan3"
+                        },
+                        "display": {
+                            "text": "广 in pinyin"
+                        },
+                        "parameter": "-2.48389999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "long stride"
+                        },
+                        "display": {
+                            "text": "廴 in English"
+                        },
+                        "parameter": "-2.48394999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yin3"
+                        },
+                        "display": {
+                            "text": "廴 in pinyin"
+                        },
+                        "parameter": "-2.48399999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two hands"
+                        },
+                        "display": {
+                            "text": "廾 in English"
+                        },
+                        "parameter": "-2.48404999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gong3"
+                        },
+                        "display": {
+                            "text": "廾 in pinyin"
+                        },
+                        "parameter": "-2.48409999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shoot"
+                        },
+                        "display": {
+                            "text": "弋 in English"
+                        },
+                        "parameter": "-2.48414999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yi4"
+                        },
+                        "display": {
+                            "text": "弋 in pinyin"
+                        },
+                        "parameter": "-2.48419999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bow"
+                        },
+                        "display": {
+                            "text": "弓 in English"
+                        },
+                        "parameter": "-2.48424999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gong1"
+                        },
+                        "display": {
+                            "text": "弓 in pinyin"
+                        },
+                        "parameter": "-2.48429999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "snout"
+                        },
+                        "display": {
+                            "text": "彐 in English"
+                        },
+                        "parameter": "-2.48434999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ji4"
+                        },
+                        "display": {
+                            "text": "彐 in pinyin"
+                        },
+                        "parameter": "-2.48439999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bristle"
+                        },
+                        "display": {
+                            "text": "彡 in English"
+                        },
+                        "parameter": "-2.48444999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shan1"
+                        },
+                        "display": {
+                            "text": "彡 in pinyin"
+                        },
+                        "parameter": "-2.48449999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "step"
+                        },
+                        "display": {
+                            "text": "彳 in English"
+                        },
+                        "parameter": "-2.48454999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chi4"
+                        },
+                        "display": {
+                            "text": "彳 in pinyin"
+                        },
+                        "parameter": "-2.48459999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "heart"
+                        },
+                        "display": {
+                            "text": "心 in English"
+                        },
+                        "parameter": "-2.48464999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xin1"
+                        },
+                        "display": {
+                            "text": "心 in pinyin"
+                        },
+                        "parameter": "-2.48469999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "halberd"
+                        },
+                        "display": {
+                            "text": "戈 in English"
+                        },
+                        "parameter": "-2.48474999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ge1"
+                        },
+                        "display": {
+                            "text": "戈 in pinyin"
+                        },
+                        "parameter": "-2.48479999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "door"
+                        },
+                        "display": {
+                            "text": "戶 in English"
+                        },
+                        "parameter": "-2.48484999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "hu4"
+                        },
+                        "display": {
+                            "text": "戶 in pinyin"
+                        },
+                        "parameter": "-2.48489999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hand"
+                        },
+                        "display": {
+                            "text": "手 in English"
+                        },
+                        "parameter": "-2.48494999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shou3"
+                        },
+                        "display": {
+                            "text": "手 in pinyin"
+                        },
+                        "parameter": "-2.48499999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "branch"
+                        },
+                        "display": {
+                            "text": "支 in English"
+                        },
+                        "parameter": "-2.48504999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi1"
+                        },
+                        "display": {
+                            "text": "支 in pinyin"
+                        },
+                        "parameter": "-2.48509999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rap"
+                        },
+                        "display": {
+                            "text": "攴 in English"
+                        },
+                        "parameter": "-2.48514999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pu1"
+                        },
+                        "display": {
+                            "text": "攴 in pinyin"
+                        },
+                        "parameter": "-2.48519999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "script"
+                        },
+                        "display": {
+                            "text": "文 in English"
+                        },
+                        "parameter": "-2.48524999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wen2"
+                        },
+                        "display": {
+                            "text": "文 in pinyin"
+                        },
+                        "parameter": "-2.48529999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dipper"
+                        },
+                        "display": {
+                            "text": "斗 in English"
+                        },
+                        "parameter": "-2.48534999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dou3"
+                        },
+                        "display": {
+                            "text": "斗 in pinyin"
+                        },
+                        "parameter": "-2.48539999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axe"
+                        },
+                        "display": {
+                            "text": "斤 in English"
+                        },
+                        "parameter": "-2.48544999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jin1"
+                        },
+                        "display": {
+                            "text": "斤 in pinyin"
+                        },
+                        "parameter": "-2.48549999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "square"
+                        },
+                        "display": {
+                            "text": "方 in English"
+                        },
+                        "parameter": "-2.48554999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fang1"
+                        },
+                        "display": {
+                            "text": "方 in pinyin"
+                        },
+                        "parameter": "-2.48559999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "not"
+                        },
+                        "display": {
+                            "text": "无 in English"
+                        },
+                        "parameter": "-2.48564999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wu2"
+                        },
+                        "display": {
+                            "text": "无 in pinyin"
+                        },
+                        "parameter": "-2.48569999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sun"
+                        },
+                        "display": {
+                            "text": "日 in English"
+                        },
+                        "parameter": "-2.48574999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ri4"
+                        },
+                        "display": {
+                            "text": "日 in pinyin"
+                        },
+                        "parameter": "-2.48579999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "say"
+                        },
+                        "display": {
+                            "text": "曰 in English"
+                        },
+                        "parameter": "-2.48584999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yue1"
+                        },
+                        "display": {
+                            "text": "曰 in pinyin"
+                        },
+                        "parameter": "-2.48589999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "moon"
+                        },
+                        "display": {
+                            "text": "月 in English"
+                        },
+                        "parameter": "-2.48594999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yue4"
+                        },
+                        "display": {
+                            "text": "月 in pinyin"
+                        },
+                        "parameter": "-2.48599999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tree"
+                        },
+                        "display": {
+                            "text": "木 in English"
+                        },
+                        "parameter": "-2.48604999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mu4"
+                        },
+                        "display": {
+                            "text": "木 in pinyin"
+                        },
+                        "parameter": "-2.48609999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lack"
+                        },
+                        "display": {
+                            "text": "欠 in English"
+                        },
+                        "parameter": "-2.48614999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qian4"
+                        },
+                        "display": {
+                            "text": "欠 in pinyin"
+                        },
+                        "parameter": "-2.48619999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "stop"
+                        },
+                        "display": {
+                            "text": "止 in English"
+                        },
+                        "parameter": "-2.48624999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi3"
+                        },
+                        "display": {
+                            "text": "止 in pinyin"
+                        },
+                        "parameter": "-2.48629999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "death"
+                        },
+                        "display": {
+                            "text": "歹 in English"
+                        },
+                        "parameter": "-2.48634999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dai3"
+                        },
+                        "display": {
+                            "text": "歹 in pinyin"
+                        },
+                        "parameter": "-2.48639999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "weapon"
+                        },
+                        "display": {
+                            "text": "殳 in English"
+                        },
+                        "parameter": "-2.48644999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shu1"
+                        },
+                        "display": {
+                            "text": "殳 in pinyin"
+                        },
+                        "parameter": "-2.48649999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "do not"
+                        },
+                        "display": {
+                            "text": "毋 in English"
+                        },
+                        "parameter": "-2.48654999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wu2"
+                        },
+                        "display": {
+                            "text": "毋 in pinyin"
+                        },
+                        "parameter": "-2.48659999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "compare"
+                        },
+                        "display": {
+                            "text": "比 in English"
+                        },
+                        "parameter": "-2.48664999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bi3"
+                        },
+                        "display": {
+                            "text": "比 in pinyin"
+                        },
+                        "parameter": "-2.48669999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fur"
+                        },
+                        "display": {
+                            "text": "毛 in English"
+                        },
+                        "parameter": "-2.48674999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mao2"
+                        },
+                        "display": {
+                            "text": "毛 in pinyin"
+                        },
+                        "parameter": "-2.48679999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "clan"
+                        },
+                        "display": {
+                            "text": "氏 in English"
+                        },
+                        "parameter": "-2.48684999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi4"
+                        },
+                        "display": {
+                            "text": "氏 in pinyin"
+                        },
+                        "parameter": "-2.48689999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "steam"
+                        },
+                        "display": {
+                            "text": "气 in English"
+                        },
+                        "parameter": "-2.48694999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qi4"
+                        },
+                        "display": {
+                            "text": "气 in pinyin"
+                        },
+                        "parameter": "-2.48699999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "water"
+                        },
+                        "display": {
+                            "text": "水 in English"
+                        },
+                        "parameter": "-2.48704999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shui3"
+                        },
+                        "display": {
+                            "text": "水 in pinyin"
+                        },
+                        "parameter": "-2.48709999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fire"
+                        },
+                        "display": {
+                            "text": "火 in English"
+                        },
+                        "parameter": "-2.48714999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "huo3"
+                        },
+                        "display": {
+                            "text": "火 in pinyin"
+                        },
+                        "parameter": "-2.48719999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "claw"
+                        },
+                        "display": {
+                            "text": "爪 in English"
+                        },
+                        "parameter": "-2.48724999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhao3"
+                        },
+                        "display": {
+                            "text": "爪 in pinyin"
+                        },
+                        "parameter": "-2.48729999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "father"
+                        },
+                        "display": {
+                            "text": "父 in English"
+                        },
+                        "parameter": "-2.48734999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fu4"
+                        },
+                        "display": {
+                            "text": "父 in pinyin"
+                        },
+                        "parameter": "-2.48739999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "double x"
+                        },
+                        "display": {
+                            "text": "爻 in English"
+                        },
+                        "parameter": "-2.48744999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yao2"
+                        },
+                        "display": {
+                            "text": "爻 in pinyin"
+                        },
+                        "parameter": "-2.48749999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "half tree trunk"
+                        },
+                        "display": {
+                            "text": "爿 in English"
+                        },
+                        "parameter": "-2.48754999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pan2, qiang2"
+                        },
+                        "display": {
+                            "text": "爿 in pinyin"
+                        },
+                        "parameter": "-2.48759999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "slice"
+                        },
+                        "display": {
+                            "text": "片 in English"
+                        },
+                        "parameter": "-2.48764999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pian4"
+                        },
+                        "display": {
+                            "text": "片 in pinyin"
+                        },
+                        "parameter": "-2.48769999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fang"
+                        },
+                        "display": {
+                            "text": "牙 in English"
+                        },
+                        "parameter": "-2.48774999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ya2"
+                        },
+                        "display": {
+                            "text": "牙 in pinyin"
+                        },
+                        "parameter": "-2.48779999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cow"
+                        },
+                        "display": {
+                            "text": "牛 in English"
+                        },
+                        "parameter": "-2.48784999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "niu2"
+                        },
+                        "display": {
+                            "text": "牛 in pinyin"
+                        },
+                        "parameter": "-2.48789999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dog"
+                        },
+                        "display": {
+                            "text": "犬 in English"
+                        },
+                        "parameter": "-2.48794999999997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "quan3"
+                        },
+                        "display": {
+                            "text": "犬 in pinyin"
+                        },
+                        "parameter": "-2.48799999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pro­found"
+                        },
+                        "display": {
+                            "text": "玄 in English"
+                        },
+                        "parameter": "-2.48804999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xuan2"
+                        },
+                        "display": {
+                            "text": "玄 in pinyin"
+                        },
+                        "parameter": "-2.48809999999997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "jade"
+                        },
+                        "display": {
+                            "text": "玉 in English"
+                        },
+                        "parameter": "-2.48814999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yu4"
+                        },
+                        "display": {
+                            "text": "玉 in pinyin"
+                        },
+                        "parameter": "-2.48819999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "melon"
+                        },
+                        "display": {
+                            "text": "瓜 in English"
+                        },
+                        "parameter": "-2.48824999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gua1"
+                        },
+                        "display": {
+                            "text": "瓜 in pinyin"
+                        },
+                        "parameter": "-2.48829999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tile"
+                        },
+                        "display": {
+                            "text": "瓦 in English"
+                        },
+                        "parameter": "-2.48834999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wa3"
+                        },
+                        "display": {
+                            "text": "瓦 in pinyin"
+                        },
+                        "parameter": "-2.48839999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sweet"
+                        },
+                        "display": {
+                            "text": "甘 in English"
+                        },
+                        "parameter": "-2.48844999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gan1"
+                        },
+                        "display": {
+                            "text": "甘 in pinyin"
+                        },
+                        "parameter": "-2.48849999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "life"
+                        },
+                        "display": {
+                            "text": "生 in English"
+                        },
+                        "parameter": "-2.48854999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sheng1"
+                        },
+                        "display": {
+                            "text": "生 in pinyin"
+                        },
+                        "parameter": "-2.48859999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "use"
+                        },
+                        "display": {
+                            "text": "用 in English"
+                        },
+                        "parameter": "-2.48864999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yong4"
+                        },
+                        "display": {
+                            "text": "用 in pinyin"
+                        },
+                        "parameter": "-2.48869999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "field"
+                        },
+                        "display": {
+                            "text": "田 in English"
+                        },
+                        "parameter": "-2.48874999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tian2"
+                        },
+                        "display": {
+                            "text": "田 in pinyin"
+                        },
+                        "parameter": "-2.48879999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bolt of cloth"
+                        },
+                        "display": {
+                            "text": "疋 in English"
+                        },
+                        "parameter": "-2.48884999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pi3"
+                        },
+                        "display": {
+                            "text": "疋 in pinyin"
+                        },
+                        "parameter": "-2.48889999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sick­ness"
+                        },
+                        "display": {
+                            "text": "疒 in English"
+                        },
+                        "parameter": "-2.48894999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chuang2"
+                        },
+                        "display": {
+                            "text": "疒 in pinyin"
+                        },
+                        "parameter": "-2.48899999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dotted tent"
+                        },
+                        "display": {
+                            "text": "癶 in English"
+                        },
+                        "parameter": "-2.48904999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bo4"
+                        },
+                        "display": {
+                            "text": "癶 in pinyin"
+                        },
+                        "parameter": "-2.48909999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "white"
+                        },
+                        "display": {
+                            "text": "白 in English"
+                        },
+                        "parameter": "-2.48914999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bai2"
+                        },
+                        "display": {
+                            "text": "白 in pinyin"
+                        },
+                        "parameter": "-2.48919999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "skin"
+                        },
+                        "display": {
+                            "text": "皮 in English"
+                        },
+                        "parameter": "-2.48924999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "pi2"
+                        },
+                        "display": {
+                            "text": "皮 in pinyin"
+                        },
+                        "parameter": "-2.48929999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dish"
+                        },
+                        "display": {
+                            "text": "皿 in English"
+                        },
+                        "parameter": "-2.48934999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "min3"
+                        },
+                        "display": {
+                            "text": "皿 in pinyin"
+                        },
+                        "parameter": "-2.48939999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eye"
+                        },
+                        "display": {
+                            "text": "目 in English"
+                        },
+                        "parameter": "-2.48944999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mu4"
+                        },
+                        "display": {
+                            "text": "目 in pinyin"
+                        },
+                        "parameter": "-2.48949999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "spear"
+                        },
+                        "display": {
+                            "text": "矛 in English"
+                        },
+                        "parameter": "-2.48954999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mao2"
+                        },
+                        "display": {
+                            "text": "矛 in pinyin"
+                        },
+                        "parameter": "-2.48959999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "arrow"
+                        },
+                        "display": {
+                            "text": "矢 in English"
+                        },
+                        "parameter": "-2.48964999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi3"
+                        },
+                        "display": {
+                            "text": "矢 in pinyin"
+                        },
+                        "parameter": "-2.48969999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "stone"
+                        },
+                        "display": {
+                            "text": "石 in English"
+                        },
+                        "parameter": "-2.48974999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi2"
+                        },
+                        "display": {
+                            "text": "石 in pinyin"
+                        },
+                        "parameter": "-2.48979999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "spirit"
+                        },
+                        "display": {
+                            "text": "示 in English"
+                        },
+                        "parameter": "-2.48984999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi4"
+                        },
+                        "display": {
+                            "text": "示 in pinyin"
+                        },
+                        "parameter": "-2.48989999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "track"
+                        },
+                        "display": {
+                            "text": "禸 in English"
+                        },
+                        "parameter": "-2.48994999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "rou3"
+                        },
+                        "display": {
+                            "text": "禸 in pinyin"
+                        },
+                        "parameter": "-2.48999999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "grain"
+                        },
+                        "display": {
+                            "text": "禾 in English"
+                        },
+                        "parameter": "-2.49004999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "he2"
+                        },
+                        "display": {
+                            "text": "禾 in pinyin"
+                        },
+                        "parameter": "-2.49009999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cave"
+                        },
+                        "display": {
+                            "text": "穴 in English"
+                        },
+                        "parameter": "-2.49014999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xue4"
+                        },
+                        "display": {
+                            "text": "穴 in pinyin"
+                        },
+                        "parameter": "-2.49019999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "stand"
+                        },
+                        "display": {
+                            "text": "立 in English"
+                        },
+                        "parameter": "-2.49024999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "li4"
+                        },
+                        "display": {
+                            "text": "立 in pinyin"
+                        },
+                        "parameter": "-2.49029999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bamboo"
+                        },
+                        "display": {
+                            "text": "竹 in English"
+                        },
+                        "parameter": "-2.49034999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhu2"
+                        },
+                        "display": {
+                            "text": "竹 in pinyin"
+                        },
+                        "parameter": "-2.49039999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rice"
+                        },
+                        "display": {
+                            "text": "米 in English"
+                        },
+                        "parameter": "-2.49044999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mi3"
+                        },
+                        "display": {
+                            "text": "米 in pinyin"
+                        },
+                        "parameter": "-2.49049999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "silk"
+                        },
+                        "display": {
+                            "text": "糸 in English"
+                        },
+                        "parameter": "-2.49054999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mi4"
+                        },
+                        "display": {
+                            "text": "糸 in pinyin"
+                        },
+                        "parameter": "-2.49059999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "jar"
+                        },
+                        "display": {
+                            "text": "缶 in English"
+                        },
+                        "parameter": "-2.49064999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fou3"
+                        },
+                        "display": {
+                            "text": "缶 in pinyin"
+                        },
+                        "parameter": "-2.49069999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "net"
+                        },
+                        "display": {
+                            "text": "网 in English"
+                        },
+                        "parameter": "-2.49074999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wang3"
+                        },
+                        "display": {
+                            "text": "网 in pinyin"
+                        },
+                        "parameter": "-2.49079999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sheep"
+                        },
+                        "display": {
+                            "text": "羊 in English"
+                        },
+                        "parameter": "-2.49084999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yang2"
+                        },
+                        "display": {
+                            "text": "羊 in pinyin"
+                        },
+                        "parameter": "-2.49089999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "feather"
+                        },
+                        "display": {
+                            "text": "羽 in English"
+                        },
+                        "parameter": "-2.49094999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yu3"
+                        },
+                        "display": {
+                            "text": "羽 in pinyin"
+                        },
+                        "parameter": "-2.49099999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "old"
+                        },
+                        "display": {
+                            "text": "老 in English"
+                        },
+                        "parameter": "-2.49104999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lao3"
+                        },
+                        "display": {
+                            "text": "老 in pinyin"
+                        },
+                        "parameter": "-2.49109999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "and"
+                        },
+                        "display": {
+                            "text": "而 in English"
+                        },
+                        "parameter": "-2.49114999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "er2"
+                        },
+                        "display": {
+                            "text": "而 in pinyin"
+                        },
+                        "parameter": "-2.49119999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "plow"
+                        },
+                        "display": {
+                            "text": "耒 in English"
+                        },
+                        "parameter": "-2.49124999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lei3"
+                        },
+                        "display": {
+                            "text": "耒 in pinyin"
+                        },
+                        "parameter": "-2.49129999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ear"
+                        },
+                        "display": {
+                            "text": "耳 in English"
+                        },
+                        "parameter": "-2.49134999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "er3"
+                        },
+                        "display": {
+                            "text": "耳 in pinyin"
+                        },
+                        "parameter": "-2.49139999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "brush"
+                        },
+                        "display": {
+                            "text": "聿 in English"
+                        },
+                        "parameter": "-2.49144999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yu4"
+                        },
+                        "display": {
+                            "text": "聿 in pinyin"
+                        },
+                        "parameter": "-2.49149999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "meat"
+                        },
+                        "display": {
+                            "text": "肉 in English"
+                        },
+                        "parameter": "-2.49154999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "rou4"
+                        },
+                        "display": {
+                            "text": "肉 in pinyin"
+                        },
+                        "parameter": "-2.49159999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "minis­ter"
+                        },
+                        "display": {
+                            "text": "臣 in English"
+                        },
+                        "parameter": "-2.49164999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chen2"
+                        },
+                        "display": {
+                            "text": "臣 in pinyin"
+                        },
+                        "parameter": "-2.49169999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "self"
+                        },
+                        "display": {
+                            "text": "自 in English"
+                        },
+                        "parameter": "-2.49174999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zi4"
+                        },
+                        "display": {
+                            "text": "自 in pinyin"
+                        },
+                        "parameter": "-2.49179999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "arrive"
+                        },
+                        "display": {
+                            "text": "至 in English"
+                        },
+                        "parameter": "-2.49184999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi4"
+                        },
+                        "display": {
+                            "text": "至 in pinyin"
+                        },
+                        "parameter": "-2.49189999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mortar"
+                        },
+                        "display": {
+                            "text": "臼 in English"
+                        },
+                        "parameter": "-2.49194999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jiu4"
+                        },
+                        "display": {
+                            "text": "臼 in pinyin"
+                        },
+                        "parameter": "-2.49199999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tongue"
+                        },
+                        "display": {
+                            "text": "舌 in English"
+                        },
+                        "parameter": "-2.49204999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "she2"
+                        },
+                        "display": {
+                            "text": "舌 in pinyin"
+                        },
+                        "parameter": "-2.49209999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oppose"
+                        },
+                        "display": {
+                            "text": "舛 in English"
+                        },
+                        "parameter": "-2.49214999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chuan3"
+                        },
+                        "display": {
+                            "text": "舛 in pinyin"
+                        },
+                        "parameter": "-2.49219999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "boat"
+                        },
+                        "display": {
+                            "text": "舟 in English"
+                        },
+                        "parameter": "-2.49224999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhou1"
+                        },
+                        "display": {
+                            "text": "舟 in pinyin"
+                        },
+                        "parameter": "-2.49229999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "stop­ping"
+                        },
+                        "display": {
+                            "text": "艮 in English"
+                        },
+                        "parameter": "-2.49234999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gen4"
+                        },
+                        "display": {
+                            "text": "艮 in pinyin"
+                        },
+                        "parameter": "-2.49239999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "color"
+                        },
+                        "display": {
+                            "text": "色 in English"
+                        },
+                        "parameter": "-2.49244999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "se4"
+                        },
+                        "display": {
+                            "text": "色 in pinyin"
+                        },
+                        "parameter": "-2.49249999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "grass"
+                        },
+                        "display": {
+                            "text": "艸 in English"
+                        },
+                        "parameter": "-2.49254999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cao3"
+                        },
+                        "display": {
+                            "text": "艸 in pinyin"
+                        },
+                        "parameter": "-2.49259999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tiger"
+                        },
+                        "display": {
+                            "text": "虍 in English"
+                        },
+                        "parameter": "-2.49264999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "hu1"
+                        },
+                        "display": {
+                            "text": "虍 in pinyin"
+                        },
+                        "parameter": "-2.49269999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "insect"
+                        },
+                        "display": {
+                            "text": "虫 in English"
+                        },
+                        "parameter": "-2.49274999999998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chong2"
+                        },
+                        "display": {
+                            "text": "虫 in pinyin"
+                        },
+                        "parameter": "-2.49279999999998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blood"
+                        },
+                        "display": {
+                            "text": "血 in English"
+                        },
+                        "parameter": "-2.49284999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xue3"
+                        },
+                        "display": {
+                            "text": "血 in pinyin"
+                        },
+                        "parameter": "-2.49289999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "walk enclo­sure"
+                        },
+                        "display": {
+                            "text": "行 in English"
+                        },
+                        "parameter": "-2.49294999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xing2"
+                        },
+                        "display": {
+                            "text": "行 in pinyin"
+                        },
+                        "parameter": "-2.49299999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "clothes"
+                        },
+                        "display": {
+                            "text": "衣 in English"
+                        },
+                        "parameter": "-2.49304999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yi1"
+                        },
+                        "display": {
+                            "text": "衣 in pinyin"
+                        },
+                        "parameter": "-2.49309999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "west"
+                        },
+                        "display": {
+                            "text": "襾 in English"
+                        },
+                        "parameter": "-2.49314999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ya4"
+                        },
+                        "display": {
+                            "text": "襾 in pinyin"
+                        },
+                        "parameter": "-2.49319999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "see"
+                        },
+                        "display": {
+                            "text": "見 in English"
+                        },
+                        "parameter": "-2.49324999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jian4"
+                        },
+                        "display": {
+                            "text": "見 in pinyin"
+                        },
+                        "parameter": "-2.49329999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "horn"
+                        },
+                        "display": {
+                            "text": "角 in English"
+                        },
+                        "parameter": "-2.49334999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jue2"
+                        },
+                        "display": {
+                            "text": "角 in pinyin"
+                        },
+                        "parameter": "-2.49339999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "speech"
+                        },
+                        "display": {
+                            "text": "言 in English"
+                        },
+                        "parameter": "-2.49344999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yan2"
+                        },
+                        "display": {
+                            "text": "言 in pinyin"
+                        },
+                        "parameter": "-2.49349999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "valley"
+                        },
+                        "display": {
+                            "text": "谷 in English"
+                        },
+                        "parameter": "-2.49354999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gu3"
+                        },
+                        "display": {
+                            "text": "谷 in pinyin"
+                        },
+                        "parameter": "-2.49359999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bean"
+                        },
+                        "display": {
+                            "text": "豆 in English"
+                        },
+                        "parameter": "-2.49364999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dou4"
+                        },
+                        "display": {
+                            "text": "豆 in pinyin"
+                        },
+                        "parameter": "-2.49369999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "pig"
+                        },
+                        "display": {
+                            "text": "豕 in English"
+                        },
+                        "parameter": "-2.49374999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi3"
+                        },
+                        "display": {
+                            "text": "豕 in pinyin"
+                        },
+                        "parameter": "-2.49379999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "badger"
+                        },
+                        "display": {
+                            "text": "豸 in English"
+                        },
+                        "parameter": "-2.49384999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi4"
+                        },
+                        "display": {
+                            "text": "豸 in pinyin"
+                        },
+                        "parameter": "-2.49389999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shell"
+                        },
+                        "display": {
+                            "text": "貝 in English"
+                        },
+                        "parameter": "-2.49394999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bei4"
+                        },
+                        "display": {
+                            "text": "貝 in pinyin"
+                        },
+                        "parameter": "-2.49399999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "red"
+                        },
+                        "display": {
+                            "text": "赤 in English"
+                        },
+                        "parameter": "-2.49404999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chi4"
+                        },
+                        "display": {
+                            "text": "赤 in pinyin"
+                        },
+                        "parameter": "-2.49409999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "run"
+                        },
+                        "display": {
+                            "text": "走 in English"
+                        },
+                        "parameter": "-2.49414999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zou3"
+                        },
+                        "display": {
+                            "text": "走 in pinyin"
+                        },
+                        "parameter": "-2.49419999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "foot"
+                        },
+                        "display": {
+                            "text": "足 in English"
+                        },
+                        "parameter": "-2.49424999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zu2"
+                        },
+                        "display": {
+                            "text": "足 in pinyin"
+                        },
+                        "parameter": "-2.49429999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "body"
+                        },
+                        "display": {
+                            "text": "身 in English"
+                        },
+                        "parameter": "-2.49434999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shen1"
+                        },
+                        "display": {
+                            "text": "身 in pinyin"
+                        },
+                        "parameter": "-2.49439999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cart"
+                        },
+                        "display": {
+                            "text": "車 in English"
+                        },
+                        "parameter": "-2.49444999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "che1"
+                        },
+                        "display": {
+                            "text": "車 in pinyin"
+                        },
+                        "parameter": "-2.49449999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bitter"
+                        },
+                        "display": {
+                            "text": "辛 in English"
+                        },
+                        "parameter": "-2.49454999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xin1"
+                        },
+                        "display": {
+                            "text": "辛 in pinyin"
+                        },
+                        "parameter": "-2.49459999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "morning"
+                        },
+                        "display": {
+                            "text": "辰 in English"
+                        },
+                        "parameter": "-2.49464999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chen2"
+                        },
+                        "display": {
+                            "text": "辰 in pinyin"
+                        },
+                        "parameter": "-2.49469999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "walk"
+                        },
+                        "display": {
+                            "text": "辵 in English"
+                        },
+                        "parameter": "-2.49474999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chuo4"
+                        },
+                        "display": {
+                            "text": "辵 in pinyin"
+                        },
+                        "parameter": "-2.49479999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "city"
+                        },
+                        "display": {
+                            "text": "邑 in English"
+                        },
+                        "parameter": "-2.49484999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yi4"
+                        },
+                        "display": {
+                            "text": "邑 in pinyin"
+                        },
+                        "parameter": "-2.49489999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wine"
+                        },
+                        "display": {
+                            "text": "酉 in English"
+                        },
+                        "parameter": "-2.49494999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "you3"
+                        },
+                        "display": {
+                            "text": "酉 in pinyin"
+                        },
+                        "parameter": "-2.49499999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distin­guish"
+                        },
+                        "display": {
+                            "text": "釆 in English"
+                        },
+                        "parameter": "-2.49504999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bian4"
+                        },
+                        "display": {
+                            "text": "釆 in pinyin"
+                        },
+                        "parameter": "-2.49509999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "village"
+                        },
+                        "display": {
+                            "text": "里 in English"
+                        },
+                        "parameter": "-2.49514999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "li3"
+                        },
+                        "display": {
+                            "text": "里 in pinyin"
+                        },
+                        "parameter": "-2.49519999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "gold"
+                        },
+                        "display": {
+                            "text": "金 in English"
+                        },
+                        "parameter": "-2.49524999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jin1"
+                        },
+                        "display": {
+                            "text": "金 in pinyin"
+                        },
+                        "parameter": "-2.49529999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "long"
+                        },
+                        "display": {
+                            "text": "長 in English"
+                        },
+                        "parameter": "-2.49534999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chang2"
+                        },
+                        "display": {
+                            "text": "長 in pinyin"
+                        },
+                        "parameter": "-2.49539999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "gate"
+                        },
+                        "display": {
+                            "text": "門 in English"
+                        },
+                        "parameter": "-2.49544999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "men2"
+                        },
+                        "display": {
+                            "text": "門 in pinyin"
+                        },
+                        "parameter": "-2.49549999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mound"
+                        },
+                        "display": {
+                            "text": "阜 in English"
+                        },
+                        "parameter": "-2.49554999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fu4"
+                        },
+                        "display": {
+                            "text": "阜 in pinyin"
+                        },
+                        "parameter": "-2.49559999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "slave"
+                        },
+                        "display": {
+                            "text": "隶 in English"
+                        },
+                        "parameter": "-2.49564999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dai4"
+                        },
+                        "display": {
+                            "text": "隶 in pinyin"
+                        },
+                        "parameter": "-2.49569999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "short tailed bird"
+                        },
+                        "display": {
+                            "text": "隹 in English"
+                        },
+                        "parameter": "-2.49574999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhui1"
+                        },
+                        "display": {
+                            "text": "隹 in pinyin"
+                        },
+                        "parameter": "-2.49579999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rain"
+                        },
+                        "display": {
+                            "text": "雨 in English"
+                        },
+                        "parameter": "-2.49584999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yu3"
+                        },
+                        "display": {
+                            "text": "雨 in pinyin"
+                        },
+                        "parameter": "-2.49589999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "blue"
+                        },
+                        "display": {
+                            "text": "青 in English"
+                        },
+                        "parameter": "-2.49594999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qing1"
+                        },
+                        "display": {
+                            "text": "青 in pinyin"
+                        },
+                        "parameter": "-2.49599999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wrong"
+                        },
+                        "display": {
+                            "text": "非 in English"
+                        },
+                        "parameter": "-2.49604999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fei1"
+                        },
+                        "display": {
+                            "text": "非 in pinyin"
+                        },
+                        "parameter": "-2.49609999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "face"
+                        },
+                        "display": {
+                            "text": "面 in English"
+                        },
+                        "parameter": "-2.49614999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mian4"
+                        },
+                        "display": {
+                            "text": "面 in pinyin"
+                        },
+                        "parameter": "-2.49619999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "leather"
+                        },
+                        "display": {
+                            "text": "革 in English"
+                        },
+                        "parameter": "-2.49624999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ge2"
+                        },
+                        "display": {
+                            "text": "革 in pinyin"
+                        },
+                        "parameter": "-2.49629999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tanned leather"
+                        },
+                        "display": {
+                            "text": "韋 in English"
+                        },
+                        "parameter": "-2.49634999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "wei2"
+                        },
+                        "display": {
+                            "text": "韋 in pinyin"
+                        },
+                        "parameter": "-2.49639999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "leek"
+                        },
+                        "display": {
+                            "text": "韭 in English"
+                        },
+                        "parameter": "-2.49644999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "jiu3"
+                        },
+                        "display": {
+                            "text": "韭 in pinyin"
+                        },
+                        "parameter": "-2.49649999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sound"
+                        },
+                        "display": {
+                            "text": "音 in English"
+                        },
+                        "parameter": "-2.49654999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yin1"
+                        },
+                        "display": {
+                            "text": "音 in pinyin"
+                        },
+                        "parameter": "-2.49659999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "leaf"
+                        },
+                        "display": {
+                            "text": "頁 in English"
+                        },
+                        "parameter": "-2.49664999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ye4"
+                        },
+                        "display": {
+                            "text": "頁 in pinyin"
+                        },
+                        "parameter": "-2.49669999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wind"
+                        },
+                        "display": {
+                            "text": "風 in English"
+                        },
+                        "parameter": "-2.49674999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "feng1"
+                        },
+                        "display": {
+                            "text": "風 in pinyin"
+                        },
+                        "parameter": "-2.49679999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fly"
+                        },
+                        "display": {
+                            "text": "飛 in English"
+                        },
+                        "parameter": "-2.49684999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fei1"
+                        },
+                        "display": {
+                            "text": "飛 in pinyin"
+                        },
+                        "parameter": "-2.49689999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "eat"
+                        },
+                        "display": {
+                            "text": "食 in English"
+                        },
+                        "parameter": "-2.49694999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shi2"
+                        },
+                        "display": {
+                            "text": "食 in pinyin"
+                        },
+                        "parameter": "-2.49699999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "head"
+                        },
+                        "display": {
+                            "text": "首 in English"
+                        },
+                        "parameter": "-2.49704999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shou3"
+                        },
+                        "display": {
+                            "text": "首 in pinyin"
+                        },
+                        "parameter": "-2.49709999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fragrant"
+                        },
+                        "display": {
+                            "text": "香 in English"
+                        },
+                        "parameter": "-2.49714999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "xiang1"
+                        },
+                        "display": {
+                            "text": "香 in pinyin"
+                        },
+                        "parameter": "-2.49719999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "horse"
+                        },
+                        "display": {
+                            "text": "馬 in English"
+                        },
+                        "parameter": "-2.49724999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ma3"
+                        },
+                        "display": {
+                            "text": "馬 in pinyin"
+                        },
+                        "parameter": "-2.49729999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bone"
+                        },
+                        "display": {
+                            "text": "骨 in English"
+                        },
+                        "parameter": "-2.49734999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gu3"
+                        },
+                        "display": {
+                            "text": "骨 in pinyin"
+                        },
+                        "parameter": "-2.49739999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tall"
+                        },
+                        "display": {
+                            "text": "高 in English"
+                        },
+                        "parameter": "-2.49744999999999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gao1"
+                        },
+                        "display": {
+                            "text": "高 in pinyin"
+                        },
+                        "parameter": "-2.49749999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hair"
+                        },
+                        "display": {
+                            "text": "髟 in English"
+                        },
+                        "parameter": "-2.49755"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "biao1"
+                        },
+                        "display": {
+                            "text": "髟 in pinyin"
+                        },
+                        "parameter": "-2.49759999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fight"
+                        },
+                        "display": {
+                            "text": "鬥 in English"
+                        },
+                        "parameter": "-2.49765"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dou4"
+                        },
+                        "display": {
+                            "text": "鬥 in pinyin"
+                        },
+                        "parameter": "-2.4977"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sacri­ficial wine"
+                        },
+                        "display": {
+                            "text": "鬯 in English"
+                        },
+                        "parameter": "-2.49775"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chang4"
+                        },
+                        "display": {
+                            "text": "鬯 in pinyin"
+                        },
+                        "parameter": "-2.4978"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "caul­dron"
+                        },
+                        "display": {
+                            "text": "鬲 in English"
+                        },
+                        "parameter": "-2.49785"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "li4"
+                        },
+                        "display": {
+                            "text": "鬲 in pinyin"
+                        },
+                        "parameter": "-2.4979"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ghost"
+                        },
+                        "display": {
+                            "text": "鬼 in English"
+                        },
+                        "parameter": "-2.49795"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gui3"
+                        },
+                        "display": {
+                            "text": "鬼 in pinyin"
+                        },
+                        "parameter": "-2.498"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fish"
+                        },
+                        "display": {
+                            "text": "魚 in English"
+                        },
+                        "parameter": "-2.49805"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yu2"
+                        },
+                        "display": {
+                            "text": "魚 in pinyin"
+                        },
+                        "parameter": "-2.4981"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bird"
+                        },
+                        "display": {
+                            "text": "鳥 in English"
+                        },
+                        "parameter": "-2.49815"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "niao3"
+                        },
+                        "display": {
+                            "text": "鳥 in pinyin"
+                        },
+                        "parameter": "-2.4982"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "salt"
+                        },
+                        "display": {
+                            "text": "鹵 in English"
+                        },
+                        "parameter": "-2.49825"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lu3"
+                        },
+                        "display": {
+                            "text": "鹵 in pinyin"
+                        },
+                        "parameter": "-2.4983"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "deer"
+                        },
+                        "display": {
+                            "text": "鹿 in English"
+                        },
+                        "parameter": "-2.49835"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lu4"
+                        },
+                        "display": {
+                            "text": "鹿 in pinyin"
+                        },
+                        "parameter": "-2.4984"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wheat"
+                        },
+                        "display": {
+                            "text": "麥 in English"
+                        },
+                        "parameter": "-2.49845"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mai4"
+                        },
+                        "display": {
+                            "text": "麥 in pinyin"
+                        },
+                        "parameter": "-2.4985"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hemp"
+                        },
+                        "display": {
+                            "text": "麻 in English"
+                        },
+                        "parameter": "-2.49855"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ma2"
+                        },
+                        "display": {
+                            "text": "麻 in pinyin"
+                        },
+                        "parameter": "-2.4986"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yellow"
+                        },
+                        "display": {
+                            "text": "黃 in English"
+                        },
+                        "parameter": "-2.49865"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "huang2"
+                        },
+                        "display": {
+                            "text": "黃 in pinyin"
+                        },
+                        "parameter": "-2.4987"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "millet"
+                        },
+                        "display": {
+                            "text": "黍 in English"
+                        },
+                        "parameter": "-2.49875"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shu3"
+                        },
+                        "display": {
+                            "text": "黍 in pinyin"
+                        },
+                        "parameter": "-2.4988"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "black"
+                        },
+                        "display": {
+                            "text": "黑 in English"
+                        },
+                        "parameter": "-2.49885"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "hei1"
+                        },
+                        "display": {
+                            "text": "黑 in pinyin"
+                        },
+                        "parameter": "-2.4989"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "embroi­dery"
+                        },
+                        "display": {
+                            "text": "黹 in English"
+                        },
+                        "parameter": "-2.49895"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zhi3"
+                        },
+                        "display": {
+                            "text": "黹 in pinyin"
+                        },
+                        "parameter": "-2.499"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "frog"
+                        },
+                        "display": {
+                            "text": "黽 in English"
+                        },
+                        "parameter": "-2.49905"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "min3"
+                        },
+                        "display": {
+                            "text": "黽 in pinyin"
+                        },
+                        "parameter": "-2.4991"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tripod"
+                        },
+                        "display": {
+                            "text": "鼎 in English"
+                        },
+                        "parameter": "-2.49915"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ding3"
+                        },
+                        "display": {
+                            "text": "鼎 in pinyin"
+                        },
+                        "parameter": "-2.4992"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "drum"
+                        },
+                        "display": {
+                            "text": "鼓 in English"
+                        },
+                        "parameter": "-2.49925"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gu3"
+                        },
+                        "display": {
+                            "text": "鼓 in pinyin"
+                        },
+                        "parameter": "-2.4993"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "rat"
+                        },
+                        "display": {
+                            "text": "鼠 in English"
+                        },
+                        "parameter": "-2.49935"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "shu3"
+                        },
+                        "display": {
+                            "text": "鼠 in pinyin"
+                        },
+                        "parameter": "-2.4994"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nose"
+                        },
+                        "display": {
+                            "text": "鼻 in English"
+                        },
+                        "parameter": "-2.49945"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "bi2"
+                        },
+                        "display": {
+                            "text": "鼻 in pinyin"
+                        },
+                        "parameter": "-2.4995"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "even"
+                        },
+                        "display": {
+                            "text": "齊 in English"
+                        },
+                        "parameter": "-2.49955"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "qi2"
+                        },
+                        "display": {
+                            "text": "齊 in pinyin"
+                        },
+                        "parameter": "-2.4996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tooth"
+                        },
+                        "display": {
+                            "text": "齒 in English"
+                        },
+                        "parameter": "-2.49965"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "chi3"
+                        },
+                        "display": {
+                            "text": "齒 in pinyin"
+                        },
+                        "parameter": "-2.4997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dragon"
+                        },
+                        "display": {
+                            "text": "龍 in English"
+                        },
+                        "parameter": "-2.49975"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "long2"
+                        },
+                        "display": {
+                            "text": "龍 in pinyin"
+                        },
+                        "parameter": "-2.4998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "turtle"
+                        },
+                        "display": {
+                            "text": "龜 in English"
+                        },
+                        "parameter": "-2.49985"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gui1"
+                        },
+                        "display": {
+                            "text": "龜 in pinyin"
+                        },
+                        "parameter": "-2.4999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "flute"
+                        },
+                        "display": {
+                            "text": "龠 in English"
+                        },
+                        "parameter": "-2.49995"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "yue4"
+                        },
+                        "display": {
+                            "text": "龠 in pinyin"
+                        },
+                        "parameter": "-2.5"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Did you have a high school Chinese class?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "0",
+                            "incorrectResponses": [
+                                "1",
+                                "2",
+                                "3 or more"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many college Chinese classes have you taken?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

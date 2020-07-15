@@ -40,10 +40,24 @@ setCurrentClusterIndex = function(newIdx) {
     Session.set("clusterIndex", newIdx);
 };
 
+getCurrentClusterAndStimIndices = function(){
+  let curClusterIndex = null;
+  let curStimIndex = null;
+
+  if(!engine){
+    curClusterIndex = Session.get("clusterIndex");
+  }else{
+    let currentQuest = engine.findCurrentCardInfo();
+    curClusterIndex = currentQuest.clusterIndex;
+    curStimIndex = currentQuest.whichStim;
+  }
+
+  return {curClusterIndex,curStimIndex};
+}
+
 //Return the total number of stim clusters
 getStimClusterCount = function() {
-    return Stimuli.findOne({fileName: getCurrentStimName()})
-        .stimuli.setspec.clusters[0].cluster.length;
+    return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters.length;
 };
 
 // Return the stim file cluster matching the index AFTER mapping it per the
@@ -66,11 +80,7 @@ getStimCluster = function (index, cachedStimuli) {
     if (!cachedStimuli) {
         cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
     }
-    var cluster = cachedStimuli
-        .stimuli
-        .setspec
-        .clusters[0]
-        .cluster[mappedIndex];
+    let cluster = cachedStimuli.stimuli.setspec.clusters[mappedIndex];
 
     //When we log, we want to be able to record the origin index as shufIndex
     //and the mapped index as clusterIndex
@@ -80,66 +90,45 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
-curStimIsSoundDisplayType = function(){
-  var foundSoundDisplayType = false;
-  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.cluster.displayType":"Sound"}).forEach(function(entry){
+curStimHasSoundDisplayType = function(){
+  let foundSoundDisplayType = false;
+  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.stims.display.audioSrc":{"$exists":true}}).forEach(function(entry){
     foundSoundDisplayType = true;
   });
 
   return foundSoundDisplayType;
 }
 
-getCurStimImageSrcs = function(){
-  var imageSrcs = [];
-  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters;
-  for(var index in clusters){
-    var clusterCollection = clusters[index];
-    for(var clusterIndex in clusterCollection){
-      var cluster = clusterCollection[clusterIndex];
-      for(var dtIndex in cluster){
-        var displayType = cluster[dtIndex];
-        if(!!displayType && !!displayType.displayType && displayType.displayType[0] === "Image"){
-          imageSrcs.push(displayType.display[0]);
-        }
-      }
-    }
-  }
-  return imageSrcs;
+curStimHasAudioDisplayType = function(){
+  let foundAudioDisplayType = false;
+  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.stims.display.imgSrc":{"$exists":true}}).forEach(function(entry){
+    foundAudioDisplayType = true;
+  });
+
+  return foundAudioDisplayType;
 }
 
-getAllStimQuestions = function(){
-  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
-  var allQuestions = [];
-  var exclusionList = ["18-25","Male","Less than High School"];
-
-  for(clusterIndex in clusters){
-    for(displayIndex in clusters[clusterIndex].display){
-      var question = clusters[clusterIndex].display[displayIndex];
-      if(exclusionList.indexOf(question) == -1){
-        allQuestions.push(question);
+getCurrentStimDisplaySources = function(filterPropertyName = "clozeText"){
+  let displaySrcs = [];
+  let clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters;
+  for(let cluster of clusters){
+    for(let stim of cluster.stims){
+      if(typeof(stim.display[filterPropertyName]) != "undefined"){
+        displaySrcs.push(stim.display[filterPropertyName]);
       }
     }
   }
-
-  return allQuestions;
+  return displaySrcs;
 }
 
 getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
-  var currentClusterIndex = getOriginalCurrentClusterIndex();
+  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
+  let clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters
+  let allAnswers = new Set;
 
-  var clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters[0].cluster
-  var allAnswers = new Set;
-  var exclusionList = [];//["18-25","Male","Less than High School"];
-
-  for(clusterIndex in clusters){
-    //Grab the response phrases we want to exclude if this is the current cluster
-    if(clusterIndex == currentClusterIndex){
-      if(!!clusters[clusterIndex].speechHintExclusionList){
-          exclusionList = exclusionList.concat(("" + clusters[clusterIndex].speechHintExclusionList).split(','));
-      }
-    }
-    for(responseIndex in clusters[clusterIndex].response){
-      var responseParts = clusters[clusterIndex].response[responseIndex].toLowerCase().split(";");
+  for(cluster of clusters){
+    for(stim of cluster.stims){
+      var responseParts = stim.response.correctResponse.toLowerCase().split(";");
       var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
       if(answerArray.length > 0){
         var singularAnswer = answerArray[0].split("~")[0];
@@ -151,6 +140,8 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   allAnswers = Array.from(allAnswers);
 
   if(removeExcludedPhraseHints){
+    let curSpeechHintExclusionListText = clusters[curClusterIndex].stims[curStimIndex].speechHintExclusionList || "";
+    let exclusionList = curSpeechHintExclusionListText.split(',');
     //Remove the optional phrase hint exclusions
     allAnswers = allAnswers.filter( function (el){
       return exclusionList.indexOf(el) < 0;
@@ -160,123 +151,100 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   return allAnswers;
 }
 
-//Return the current question type
-getQuestionType = function () {
-    var type = "text"; //Default type
+getPopulatedQuestionDisplayTypes = function() {
+  let types = {};
+  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
 
-    //If we get called too soon, we just use the first cluster
-    var clusterIndex = getCurrentClusterIndex();
-    if (!clusterIndex && clusterIndex !== 0)
-        clusterIndex = 0;
+  if (!curClusterIndex)
+    curClusterIndex = 0;
 
-    var cluster = getStimCluster(clusterIndex);
-    if (cluster.displayType && cluster.displayType.length) {
-        type = cluster.displayType[0];
+  if(!curStimIndex)
+    curStimIndex = 0;
+
+  let cluster = getStimCluster(curClusterIndex);
+  let curDisplay = cluster.stims[curStimIndex].display;
+
+  for(let key in curDisplay){
+    switch(key){
+      case "clozeText":
+        types["cloze"] = true;
+        break;
+      case "text":
+        types["text"] = true;
+        break;
+      case "audioSrc":
+        types["sound"] = true;
+        break;
+      case "imgSrc":
+        types["image"] = true;
+        break;
+      case "videoSrc":
+        types["video"] = true;
+        break;
     }
+  }
 
-    return ("" + type).toLowerCase();
-};
+  return types;
+}
 
 getResponseType = function () {
-  var type = "text"; //Default type
 
   //If we get called too soon, we just use the first cluster
-  var clusterIndex = getCurrentClusterIndex();
-  if (!clusterIndex && clusterIndex !== 0)
+  let clusterIndex = getCurrentClusterIndex();
+  if (!clusterIndex)
       clusterIndex = 0;
 
-  var cluster = getStimCluster(clusterIndex);
-  if (cluster.responseType && cluster.responseType.length) {
-      type = cluster.responseType[0];
-  }
+  let cluster = getStimCluster(clusterIndex);
+  let type = cluster.responseType || "text"; //Default type
 
   return ("" + type).toLowerCase();
 }
 
 findQTypeSimpified = function () {
-    var QType = getQuestionType();
+  let populatedDisplayTypes = getPopulatedQuestionDisplayTypes();
+  let QTypes = "";
 
-    if      (QType === "text")  QType = "T";    //T for Text
-    else if (QType === "image") QType = "I";    //I for Image
-    else if (QType === "sound") QType = "A";    //A for Audio
-    else if (QType === "cloze") QType = "C";    //C for Cloze
-    else if (QType === "video") QType = "V";    //V for video
-    else                        QType = "NA";   //NA for Not Applicable
+  if(populatedDisplayTypes.text)  QTypes = QTypes + "T";    //T for Text
+  if(populatedDisplayTypes.image)  QTypes = QTypes + "I";   //I for Image
+  if(populatedDisplayTypes.sound)  QTypes = QTypes + "A";   //A for Audio
+  if(populatedDisplayTypes.cloze)  QTypes = QTypes + "C";   //C for Cloze
+  if(populatedDisplayTypes.video)  QTypes = QTypes + "V";   //V for video
 
-    return QType;
+  if(QTypes == "") QTypes = "NA"; //NA for Not Applicable
+
+  return QTypes;
 };
 
 getTestType = function () {
     return _.trim(Session.get("testType")).toLowerCase();
 };
 
-//get the question at this index - note that the cluster index will be mapped
-//in getStimCluster
-getStimQuestion = function (index, whichQuestion) {
-    return getStimCluster(index).display[whichQuestion];
-};
-
 //get the answer at this index - note that the cluster index will be mapped
 //in getStimCluster
 getStimAnswer = function (index, whichAnswer) {
-    return getStimCluster(index).response[whichAnswer];
+    return getStimCluster(index).stims[whichAnswer].display.response.correctResponse;
 };
 
 //get the parameter at this index - this works using the same semantics as
-//getStimAnswer and getStimQuestion above. Note that we default to return 0
+//getStimAnswer above. Note that we default to return 0
 getStimParameter = function (index, whichParameter) {
     return _.chain(getStimCluster(index))
-        .prop("parameter")
+        .prop("stims")
         .prop(_.intval(whichParameter))
+        .prop("parameter")
         .floatval()
         .value();
 };
 
-//Simplified Q/A getters
-getCurrentStimQuestion = function(whichQuestion) {
-    return getStimQuestion(getCurrentClusterIndex(), whichQuestion);
-};
-getCurrentStimAnswer = function(whichAnswer) {
-      return getStimAnswer(getCurrentClusterIndex(), whichAnswer);
-};
-getCurrentStimParameter = function(whichParameter) {
-    return getStimParameter(getCurrentClusterIndex(), whichParameter);
-};
-
 //Return the list of false responses corresponding to the current question/answer
-getCurrentFalseResponses = function(whichAnswer) {
-  var cluster = getStimCluster(getCurrentClusterIndex());
+getCurrentFalseResponses = function() {
+  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
+  let cluster = getStimCluster(curClusterIndex);
 
-    if (!cluster || !cluster.falseResponse || cluster.falseResponse.length < 1) {
-        return []; //No false responses
-    }
-
-    //If we have the same number of response and falseResponse, then the stim file
-    //is using the "new" formatted false response per display/response pair.
-    //Otherwise, we assume the "old" style and they get everything
-    //Additionally, if the stim file uses false response feedback, map across the false response (array of dicts)
-    //to get the false response values out.
-  if (cluster.response.length === cluster.falseResponse.length) {
-    return _.trim(cluster.falseResponse[whichAnswer]).split(';');
-  }
-  else if (!!cluster.falseResponse[0]['feedback']) {
-    return _.map(cluster.falseResponse, function(response){ return response['value']; });
-  }
-  else {
-    return cluster.falseResponse;
-  }
-};
-
-getFeedbackForFalseResponse = function(whichAnswer) {
-  var cluster = getStimCluster(getCurrentClusterIndex());
-  if(!cluster.falseResponse){
-    return null;
-  }
-  if(!cluster.falseResponse[0]['feedback']){
-    return null;
-  } else {
-    var response = _.filter(cluster.falseResponse, function(res){ return res['value'] == whichAnswer; })[0];
-    return response['feedback'];
+  if (typeof(cluster) == "undefined" || typeof(cluster.stims[curStimIndex].response.incorrectResponses) == "undefined" || cluster.stims[curStimIndex].response.incorrectResponses.length < 1) {
+      return []; //No false responses
+  }else{
+    return cluster.stims[curStimIndex].response.incorrectResponses;
   }
 };
 
@@ -375,7 +343,6 @@ getCurrentDeliveryParams = function (currUnit) {
         'timeuntilstimulus' : 0,
         'forcecorrectprompt':'',
         'forcecorrecttimeout':0,
-        'unitMode': 'default',
         'studyFirst':false,
         'enhancedFeedback':false,
         'checkOtherAnswers':false,

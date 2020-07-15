@@ -15,6 +15,7 @@
  * clusterIndex
  * clusterMapping            - For an entire experiment
  * currentAnswer
+ * currentDisplay            - Entire display json structure with clozeText, text, imgSrc, audioSrc, videoSrc
  * currentQuestion
  * currentRootTdfName
  * currentTdfName
@@ -66,6 +67,7 @@ sessionCleanUp = function() {
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("originalAnswer",undefined);
+    Session.set("currentDisplay", undefined);
     Session.set("currentQuestion", undefined);
     Session.set("currentQuestionPart2",undefined);
     Session.set("originalQuestion",undefined);

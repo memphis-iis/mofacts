@@ -1,0 +1,849 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "explanatory"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our __________ variable X is categorical."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "X"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our explanatory variable __________ is categorical."
+                        },
+                        "parameter": "-0.00011"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "categorical"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our explanatory variable X is __________."
+                        },
+                        "parameter": "-0.00012"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "response"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our __________ variable Y is quantitative."
+                        },
+                        "parameter": "-0.00013"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Y"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our response variable __________ is quantitative."
+                        },
+                        "parameter": "-0.00014"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "quantitative"
+                        },
+                        "display": {
+                            "clozeText": "In the case of C &#8594; Q, our response variable Y is __________."
+                        },
+                        "parameter": "-0.00015"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dependent"
+                        },
+                        "display": {
+                            "clozeText": "Samples are __________ when each observation in one sample is matched with an observation in the other sample."
+                        },
+                        "parameter": "-0.00016"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "matched"
+                        },
+                        "display": {
+                            "clozeText": "Samples are dependent when each observation in one sample is __________ with an observation in the other sample."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observation"
+                        },
+                        "display": {
+                            "clozeText": "Samples are dependent when each __________ in one sample is matched with an __________ in the other sample."
+                        },
+                        "parameter": "-0.00018"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two|2"
+                        },
+                        "display": {
+                            "clozeText": "When comparing __________ independent sample means, we use a __________-sample t-test."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "independent"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two __________ sample means, we use a two-sample t-test."
+                        },
+                        "parameter": "-0.00020"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "two-sample"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two independent sample means, we use a __________ t-test."
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "t-test"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two independent sample means, we use a two-sample __________."
+                        },
+                        "parameter": "-0.00022"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two-sample"
+                        },
+                        "display": {
+                            "clozeText": "A __________ t-test looks at the effect of a two-valued categorical explanatory variable on a quantitative response variable. "
+                        },
+                        "parameter": "-0.00023"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "categorical"
+                        },
+                        "display": {
+                            "clozeText": "A two-sample t-test looks at the effect of a two-valued __________ explanatory variable on a quantitative response variable. "
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "quantitative"
+                        },
+                        "display": {
+                            "clozeText": "A two-sample t-test looks at the effect of a two-valued categorical explanatory variable on a __________ response variable. "
+                        },
+                        "parameter": "-0.00025"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "The __________ hypothesis of a two-sample t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>."
+                        },
+                        "parameter": "-0.00026"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "two-sample"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of a __________ t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>."
+                        },
+                        "parameter": "-0.00027"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of a two-sample t-test states that the __________ between &mu;<sub>1</sub> and &mu;<sub>2</sub> is 0, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>."
+                        },
+                        "parameter": "-0.00028"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "0|zero"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of a two-sample t-test states that the difference between &mu;<sub>1</sub> and &mu;<sub>2</sub> is __________, or that &mu;<sub>1</sub>  = &mu;<sub>2</sub>."
+                        },
+                        "parameter": "-0.00029"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null value"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a two-sample t-test is zero."
+                        },
+                        "parameter": "-0.00030"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "0|zero"
+                        },
+                        "display": {
+                            "clozeText": "The null value of a two-sample t-test is __________."
+                        },
+                        "parameter": "-0.00031"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "The __________ for a two-sample t-test measures the difference between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in standard errors."
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "The test statistic for a two-sample t-test measures the __________ between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in standard errors."
+                        },
+                        "parameter": "-0.00022"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard errors"
+                        },
+                        "display": {
+                            "clozeText": "The test statistic for a two-sample t-test measures the difference between what the data tells us about the parameter &mu;<sub>1</sub> - &mu;<sub>2</sub> and the null value measured in __________."
+                        },
+                        "parameter": "-0.00034"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "0.95|95%"
+                        },
+                        "display": {
+                            "clozeText": "By using a __________ confidence interval we can quantify the effect of the explanatory categorical variable on the quantitative response variable."
+                        },
+                        "parameter": "-0.00035"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "quantify"
+                        },
+                        "display": {
+                            "clozeText": "By using a 0.95 confidence interval we can __________ the effect of the explanatory categorical variable on the quantitative response variable."
+                        },
+                        "parameter": "-0.00036"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "effect"
+                        },
+                        "display": {
+                            "clozeText": "By using a 0.95 confidence interval we can quantify the __________ of the explanatory categorical variable on the quantitative response variable."
+                        },
+                        "parameter": "-0.00037"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null value"
+                        },
+                        "display": {
+                            "clozeText": "If the __________ of 0 is outside of the 95% confidence interval, we have significant evidence to reject H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00038"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "0|zero"
+                        },
+                        "display": {
+                            "clozeText": "If the null value of __________ is outside of the 95% confidence interval, we have significant evidence to reject H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00039"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "significant"
+                        },
+                        "display": {
+                            "clozeText": "If the null value of 0 is outside of the 95% confidence interval, we have __________ evidence to reject H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00040"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "reject"
+                        },
+                        "display": {
+                            "clozeText": "If the null value of 0 is outside of the 95% confidence interval, we have significant evidence to __________ H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00041"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null value"
+                        },
+                        "display": {
+                            "clozeText": "If the __________ of 0 is inside of the 95% confidence interval, we do not have enough evidence to reject H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00042"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "inside"
+                        },
+                        "display": {
+                            "clozeText": "If the null value of 0 is __________ of the 95% confidence interval, we do not have enough evidence to reject H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00043"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "reject"
+                        },
+                        "display": {
+                            "clozeText": "If the null value of 0 is inside of the 95% confidence interval, we do not have enough evidence to __________ H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00044"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "matched"
+                        },
+                        "display": {
+                            "clozeText": "When comparing __________ pairs from dependent samples, we conduct a paired t-test."
+                        },
+                        "parameter": "-0.00045"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dependent"
+                        },
+                        "display": {
+                            "clozeText": "When comparing matched pairs from __________ samples, we conduct a paired t-test."
+                        },
+                        "parameter": "-0.00046"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "paired"
+                        },
+                        "display": {
+                            "clozeText": "When comparing matched pairs from dependent samples, we conduct a __________ t-test."
+                        },
+                        "parameter": "-0.00047"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "t-test"
+                        },
+                        "display": {
+                            "clozeText": "When comparing matched pairs from dependent samples, we conduct a paired __________."
+                        },
+                        "parameter": "-0.00048"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "paired"
+                        },
+                        "display": {
+                            "clozeText": "If two samples are __________ by subject, both samples have the same subject pool and have measured their subjects twice. "
+                        },
+                        "parameter": "-0.00049"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "subject"
+                        },
+                        "display": {
+                            "clozeText": "If two samples are paired by __________, both samples have the same __________ pool and have measured their __________s twice. "
+                        },
+                        "parameter": "-0.00050"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "twice"
+                        },
+                        "display": {
+                            "clozeText": "If two samples are paired by subject, both samples have the same subject pool and have measured their subjects __________. "
+                        },
+                        "parameter": "-0.00051"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dependent"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from __________ samples, we are making an inference about a single mean: the mean of differences."
+                        },
+                        "parameter": "-0.00052"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "single"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we are making an inference about a __________ mean: the mean of differences."
+                        },
+                        "parameter": "-0.00053"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "differences"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we are making an inference about a single mean: the mean of __________."
+                        },
+                        "parameter": "-0.00054"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "inference"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we are making an __________ about a single mean: the mean of differences."
+                        },
+                        "parameter": "-0.00055"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dependent"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from __________ samples, we reduce the two samples to one by calculating the difference between the observations of each pair."
+                        },
+                        "parameter": "-0.00056"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one|1"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we reduce the two samples to __________ by calculating the difference between the observations of each pair."
+                        },
+                        "parameter": "-0.00057"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we reduce the two samples to one by calculating the __________ between the observations of each pair."
+                        },
+                        "parameter": "-0.00058"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "observations"
+                        },
+                        "display": {
+                            "clozeText": "When comparing two means from dependent samples, we reduce the two samples to one by calculating the difference between the __________ of each pair."
+                        },
+                        "parameter": "-0.00059"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "The __________ hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals zero. "
+                        },
+                        "parameter": "-0.00060"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "paired"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis for a __________ t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals zero. "
+                        },
+                        "parameter": "-0.00061"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the __________ between the means equals zero. "
+                        },
+                        "parameter": "-0.00062"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "zero|0"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis for a paired t-test will be H<sub>0</sub>: &mu;<sub>d</sub> = 0, stating that the difference between the means equals __________. "
+                        },
+                        "parameter": "-0.00063"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ANOVA"
+                        },
+                        "display": {
+                            "clozeText": "__________, or analysis of variance, is used when we have more than two independent samples."
+                        },
+                        "parameter": "-0.00064"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variance"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA, or analysis of __________, is used when we have more than two independent samples."
+                        },
+                        "parameter": "-0.00065"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA, or analysis of variance, is used when we have __________ than two independent samples."
+                        },
+                        "parameter": "-0.00066"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "independent"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA, or analysis of variance, is used when we have more than two __________ samples."
+                        },
+                        "parameter": "-0.00067"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "two"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA, or analysis of variance, is used when we have more than __________ independent samples."
+                        },
+                        "parameter": "-0.00068"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "The __________ hypothesis of an ANOVA F-test states that all means are equal."
+                        },
+                        "parameter": "-0.00069"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ANOVA"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of an __________ F-test states that all means are equal."
+                        },
+                        "parameter": "-0.00070"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "means"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of an ANOVA F-test states that all __________ are equal."
+                        },
+                        "parameter": "-0.00071"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "equal"
+                        },
+                        "display": {
+                            "clozeText": "The null hypothesis of an ANOVA F-test states that all means are __________."
+                        },
+                        "parameter": "-0.00072"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "alternative"
+                        },
+                        "display": {
+                            "clozeText": "The __________ hypothesis of an ANOVA F-test states that not all means are equal, but does not specify where the difference may be."
+                        },
+                        "parameter": "-0.00073"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ANOVA"
+                        },
+                        "display": {
+                            "clozeText": "The alternative hypothesis of an __________ F-test states that not all means are equal, but does not specify where the difference may be."
+                        },
+                        "parameter": "-0.00074"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "equal"
+                        },
+                        "display": {
+                            "clozeText": "The alternative hypothesis of an ANOVA F-test states that not all means are __________, but does not specify where the difference may be."
+                        },
+                        "parameter": "-0.00075"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "The alternative hypothesis of an ANOVA F-test states that not all means are equal, but does not specify where the __________ may be."
+                        },
+                        "parameter": "-0.00076"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ANOVA"
+                        },
+                        "display": {
+                            "clozeText": "__________ measures variation between the sample means."
+                        },
+                        "parameter": "-0.00077"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variation|variability"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA measures __________ between the sample means."
+                        },
+                        "parameter": "-0.00078"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "means"
+                        },
+                        "display": {
+                            "clozeText": "ANOVA measures variation between the sample __________."
+                        },
+                        "parameter": "-0.00079"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "F"
+                        },
+                        "display": {
+                            "clozeText": "The __________ test statistic of an ANOVA compares the variation among sample means to the variation within each sample."
+                        },
+                        "parameter": "-0.00080"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variation|variability"
+                        },
+                        "display": {
+                            "clozeText": "The F test statistic of an ANOVA compares the __________ among sample means to the __________ within each sample."
+                        },
+                        "parameter": "-0.00081"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "The F __________ of an ANOVA compares the variation among sample means to the variation within each sample."
+                        },
+                        "parameter": "-0.00082"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "larger"
+                        },
+                        "display": {
+                            "clozeText": "The __________ F we have, the more evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00083"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "F"
+                        },
+                        "display": {
+                            "clozeText": "The larger __________ we have, the more evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00084"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "The larger F we have, the __________ evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00085"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "against"
+                        },
+                        "display": {
+                            "clozeText": "The larger F we have, the more evidence we have __________ H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00086"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "F"
+                        },
+                        "display": {
+                            "clozeText": "A large __________ value will occur when there is more variation among the sample means than there is within the samples themselves."
+                        },
+                        "parameter": "-0.00087"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "A large F value will occur when there is __________ variation among the sample means than there is within the samples themselves."
+                        },
+                        "parameter": "-0.00088"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variation|variability"
+                        },
+                        "display": {
+                            "clozeText": "A large F value will occur when there is more __________ among the sample means than there is within the samples themselves."
+                        },
+                        "parameter": "-0.00089"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "F-test"
+                        },
+                        "display": {
+                            "clozeText": "We can only use an __________ when the populations have relatively equal &sigma;."
+                        },
+                        "parameter": "-0.00090"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "populations"
+                        },
+                        "display": {
+                            "clozeText": "We can only use an F-test when the __________ have relatively equal &sigma;."
+                        },
+                        "parameter": "-0.00091"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "equal"
+                        },
+                        "display": {
+                            "clozeText": "We can only use an F-test when the populations have relatively __________ &sigma;."
+                        },
+                        "parameter": "-0.00092"
+                    }
+                ]
+            }
+        ]
+    }
+}

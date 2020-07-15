@@ -1,9 +1,9 @@
 <tutor>
     <setspec>
         <name>Statistics Practice</name>
-        <lessonname>SVOranfor3tdf.xml</lessonname>
+        <lessonname>SVOranfor3tdf.json</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <stimulusfile>SVO4stims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <shuffleclusters>0-17 18-35</shuffleclusters>

@@ -72,12 +72,14 @@ export class DynamicTdfGenerator {
     let clusterListString = '';
     let start = -1;
     let end = -1;
-    let [weightStart, weightEnd] 
-        = this.getWeightValues(spec.criteria[0]) || [-1, -1];
+    let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
     let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
     this.stimFileClusters_.forEach((cluster, idx) => {
-      let isIncludedInStimCluster = this.isIncludedCluster(
-          cluster.tags, weightStart, weightEnd, orderGroup);
+      let allClusterTags = [];
+      for(let stim of cluster.stims){
+        allClusterTags.push(stim.tags);
+      }
+      let isIncludedInStimCluster = this.isIncludedCluster(allClusterTags, weightStart, weightEnd, orderGroup);
       if (start === -1 && isIncludedInStimCluster) {
         start = idx;
       } else if (start > -1 && isIncludedInStimCluster) {
@@ -156,8 +158,8 @@ export class DynamicTdfGenerator {
    */
   setOrderGroupValuesMap() {
     this.stimFileClusters_.forEach(cluster => {
-      if (cluster.tags && cluster.tags[0].orderGroup) {
-        let orderGroupValueKey = cluster.tags[0].orderGroup[0].toString();
+      if (cluster.stims[0].tags && cluster.stims[0].tags.orderGroup) {
+        let orderGroupValueKey = cluster.tags.orderGroup[0].toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;
@@ -176,8 +178,7 @@ export class DynamicTdfGenerator {
   getStimFileClusters(stimFileName) {
     let clusters = [];
     try {
-      clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec
-          .clusters[0].cluster;
+      clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
     } catch (error) {
       throw new Error('Unable to find clusters with stim file: ' 
         + stimFileName + ' ' + error);
