@@ -3,7 +3,7 @@
         <name>Internal Testing with SVO and Models</name>
         <lessonname>Optimized Drill Practice of Multiplication and Division Facts</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>MultDivstims.xml</stimulusfile>
+        <stimulusfile>MultDivstims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>

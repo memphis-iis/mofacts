@@ -3,7 +3,7 @@
         <name>Disorders</name>
         <lessonname>Psychological Disorders Bs</lessonname><experimentTarget>disordersbs</experimentTarget>
         <userselect>false</userselect>
-        <stimulusfile>Disorders2stimsfake.xml</stimulusfile>
+        <stimulusfile>Disorders2stimsfake.json</stimulusfile>
         <clustermodel>structuralpairs</clustermodel>
         <clustersize>1</clustersize>
         <shuffleclusters>0-5 6-11 12-17 18-23 24-29 30-35</shuffleclusters>

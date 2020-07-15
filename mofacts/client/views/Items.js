@@ -37,8 +37,7 @@ Template.Items.helpers({
         var cluster = _.chain(Stimuli.findOne({fileName: getCurrentStimName()}))
             .prop("stimuli")
             .prop("setspec")
-            .prop("clusters").first()
-            .prop("cluster")
+            .prop("clusters")
             .value();
 
         var buttons = [];
@@ -47,8 +46,8 @@ Template.Items.helpers({
 
             item.itemId = itemId;
             item.buttonColor = determineButtonColor(item.score);
-            item.display = item.display[0];
-            item.response = item.response[0];
+            item.display = item.stims[0].display.clozeText || item.stims.display.text;
+            item.response = item.stims[0].response.correctResponse;
             if (isNaN(item.score)){
                 item.clickable = false;
             }

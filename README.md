@@ -223,7 +223,3 @@ Then simply run meteor as normal with
 * MoFaCTs must be built for Linux 64-bit architecture (`os.linux.x86_64`) _without_ Node being installed on the
   vagrant host machine. With Node host conflicts or the wrong architecture specified, a `unexpected token { const pause ...`
   error can be seen at build time.
-
-## Special thanks to [CrossBrowserTesting](https://crossbrowsertesting.com)
-
-![](./media/CBT_OS-logo_2Color-H.png)

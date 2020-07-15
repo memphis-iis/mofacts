@@ -1,0 +1,1899 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "1 × 1 ="
+                        },
+                        "parameter": "-0.490050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "1 ÷ 1 ="
+                        },
+                        "parameter": "-0.490100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "1 × 2 ="
+                        },
+                        "parameter": "-0.490150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "2 ÷ 1 ="
+                        },
+                        "parameter": "-0.490200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "1 × 3 ="
+                        },
+                        "parameter": "-0.490250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "3 ÷ 1 ="
+                        },
+                        "parameter": "-0.490300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "1 × 4 ="
+                        },
+                        "parameter": "-0.490350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "4 ÷ 1 ="
+                        },
+                        "parameter": "-0.490400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "1 × 5 ="
+                        },
+                        "parameter": "-0.490450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "5 ÷ 1 ="
+                        },
+                        "parameter": "-0.490500000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "1 × 6 ="
+                        },
+                        "parameter": "-0.490550000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "6 ÷ 1 ="
+                        },
+                        "parameter": "-0.490600000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "1 × 7 ="
+                        },
+                        "parameter": "-0.490650000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "7 ÷ 1 ="
+                        },
+                        "parameter": "-0.490700000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "1 × 8 ="
+                        },
+                        "parameter": "-0.490750000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "8 ÷ 1 ="
+                        },
+                        "parameter": "-0.490800000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "1 × 9 ="
+                        },
+                        "parameter": "-0.490850000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "9 ÷ 1 ="
+                        },
+                        "parameter": "-0.490900000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "1 × 10 ="
+                        },
+                        "parameter": "-0.490950000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "10 ÷ 1 ="
+                        },
+                        "parameter": "-0.491000000000001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "2 × 1 ="
+                        },
+                        "parameter": "-0.491050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "2 ÷ 2 ="
+                        },
+                        "parameter": "-0.491100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "2 × 2 ="
+                        },
+                        "parameter": "-0.491150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "4 ÷ 2 ="
+                        },
+                        "parameter": "-0.491200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "2 × 3 ="
+                        },
+                        "parameter": "-0.491250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "6 ÷ 2 ="
+                        },
+                        "parameter": "-0.491300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "2 × 4 ="
+                        },
+                        "parameter": "-0.491350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "8 ÷ 2 ="
+                        },
+                        "parameter": "-0.491400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "2 × 5 ="
+                        },
+                        "parameter": "-0.491450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "10 ÷ 2 ="
+                        },
+                        "parameter": "-0.491500000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "12"
+                        },
+                        "display": {
+                            "text": "2 × 6 ="
+                        },
+                        "parameter": "-0.491550000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "12 ÷ 2 ="
+                        },
+                        "parameter": "-0.491600000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "14"
+                        },
+                        "display": {
+                            "text": "2 × 7 ="
+                        },
+                        "parameter": "-0.491650000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "14 ÷ 2 ="
+                        },
+                        "parameter": "-0.491700000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "16"
+                        },
+                        "display": {
+                            "text": "2 × 8 ="
+                        },
+                        "parameter": "-0.491750000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "16 ÷ 2 ="
+                        },
+                        "parameter": "-0.491800000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "18"
+                        },
+                        "display": {
+                            "text": "2 × 9 ="
+                        },
+                        "parameter": "-0.491850000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "18 ÷ 2 ="
+                        },
+                        "parameter": "-0.491900000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "20"
+                        },
+                        "display": {
+                            "text": "2 × 10 ="
+                        },
+                        "parameter": "-0.491950000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "20 ÷ 2 ="
+                        },
+                        "parameter": "-0.492000000000001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "3 × 1 ="
+                        },
+                        "parameter": "-0.492050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "3 ÷ 3 ="
+                        },
+                        "parameter": "-0.492100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "3 × 2 ="
+                        },
+                        "parameter": "-0.492150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "6 ÷ 3 ="
+                        },
+                        "parameter": "-0.492200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "3 × 3 ="
+                        },
+                        "parameter": "-0.492250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "9 ÷ 3 ="
+                        },
+                        "parameter": "-0.492300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "12"
+                        },
+                        "display": {
+                            "text": "3 × 4 ="
+                        },
+                        "parameter": "-0.492350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "12 ÷ 3 ="
+                        },
+                        "parameter": "-0.492400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "15"
+                        },
+                        "display": {
+                            "text": "3 × 5 ="
+                        },
+                        "parameter": "-0.492450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "15 ÷ 3 ="
+                        },
+                        "parameter": "-0.492500000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "18"
+                        },
+                        "display": {
+                            "text": "3 × 6 ="
+                        },
+                        "parameter": "-0.492550000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "18 ÷ 3 ="
+                        },
+                        "parameter": "-0.492600000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "21"
+                        },
+                        "display": {
+                            "text": "3 × 7 ="
+                        },
+                        "parameter": "-0.492650000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "21 ÷ 3 ="
+                        },
+                        "parameter": "-0.492700000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "24"
+                        },
+                        "display": {
+                            "text": "3 × 8 ="
+                        },
+                        "parameter": "-0.492750000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "24 ÷ 3 ="
+                        },
+                        "parameter": "-0.492800000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "27"
+                        },
+                        "display": {
+                            "text": "3 × 9 ="
+                        },
+                        "parameter": "-0.492850000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "27 ÷ 3 ="
+                        },
+                        "parameter": "-0.492900000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "30"
+                        },
+                        "display": {
+                            "text": "3 × 10 ="
+                        },
+                        "parameter": "-0.492950000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "30 ÷ 3 ="
+                        },
+                        "parameter": "-0.493000000000001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "4 × 1 ="
+                        },
+                        "parameter": "-0.493050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "4 ÷ 4 ="
+                        },
+                        "parameter": "-0.493100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "4 × 2 ="
+                        },
+                        "parameter": "-0.493150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "8 ÷ 4 ="
+                        },
+                        "parameter": "-0.493200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "12"
+                        },
+                        "display": {
+                            "text": "4 × 3 ="
+                        },
+                        "parameter": "-0.493250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "12 ÷ 4 ="
+                        },
+                        "parameter": "-0.493300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "16"
+                        },
+                        "display": {
+                            "text": "4 × 4 ="
+                        },
+                        "parameter": "-0.493350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "16 ÷ 4 ="
+                        },
+                        "parameter": "-0.493400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "20"
+                        },
+                        "display": {
+                            "text": "4 × 5 ="
+                        },
+                        "parameter": "-0.493450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "20 ÷ 4 ="
+                        },
+                        "parameter": "-0.493500000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "24"
+                        },
+                        "display": {
+                            "text": "4 × 6 ="
+                        },
+                        "parameter": "-0.493550000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "24 ÷ 4 ="
+                        },
+                        "parameter": "-0.493600000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "28"
+                        },
+                        "display": {
+                            "text": "4 × 7 ="
+                        },
+                        "parameter": "-0.493650000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "28 ÷ 4 ="
+                        },
+                        "parameter": "-0.493700000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "32"
+                        },
+                        "display": {
+                            "text": "4 × 8 ="
+                        },
+                        "parameter": "-0.493750000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "32 ÷ 4 ="
+                        },
+                        "parameter": "-0.493800000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "36"
+                        },
+                        "display": {
+                            "text": "4 × 9 ="
+                        },
+                        "parameter": "-0.493850000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "36 ÷ 4 ="
+                        },
+                        "parameter": "-0.493900000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "40"
+                        },
+                        "display": {
+                            "text": "4 × 10 ="
+                        },
+                        "parameter": "-0.493950000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "40 ÷ 4 ="
+                        },
+                        "parameter": "-0.494000000000001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "5 × 1 ="
+                        },
+                        "parameter": "-0.494050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "5 ÷ 5 ="
+                        },
+                        "parameter": "-0.494100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "5 × 2 ="
+                        },
+                        "parameter": "-0.494150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "10 ÷ 5 ="
+                        },
+                        "parameter": "-0.494200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "15"
+                        },
+                        "display": {
+                            "text": "5 × 3 ="
+                        },
+                        "parameter": "-0.494250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "15 ÷ 5 ="
+                        },
+                        "parameter": "-0.494300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "20"
+                        },
+                        "display": {
+                            "text": "5 × 4 ="
+                        },
+                        "parameter": "-0.494350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "20 ÷ 5 ="
+                        },
+                        "parameter": "-0.494400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "25"
+                        },
+                        "display": {
+                            "text": "5 × 5 ="
+                        },
+                        "parameter": "-0.494450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "25 ÷ 5 ="
+                        },
+                        "parameter": "-0.494500000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "30"
+                        },
+                        "display": {
+                            "text": "5 × 6 ="
+                        },
+                        "parameter": "-0.494550000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "30 ÷ 5 ="
+                        },
+                        "parameter": "-0.494600000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "35"
+                        },
+                        "display": {
+                            "text": "5 × 7 ="
+                        },
+                        "parameter": "-0.494650000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "35 ÷ 5 ="
+                        },
+                        "parameter": "-0.494700000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "40"
+                        },
+                        "display": {
+                            "text": "5 × 8 ="
+                        },
+                        "parameter": "-0.494750000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "40 ÷ 5 ="
+                        },
+                        "parameter": "-0.494800000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "45"
+                        },
+                        "display": {
+                            "text": "5 × 9 ="
+                        },
+                        "parameter": "-0.494850000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "45 ÷ 5 ="
+                        },
+                        "parameter": "-0.494900000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "50"
+                        },
+                        "display": {
+                            "text": "5 × 10 ="
+                        },
+                        "parameter": "-0.494950000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "50 ÷ 5 ="
+                        },
+                        "parameter": "-0.495000000000001"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "6 × 1 ="
+                        },
+                        "parameter": "-0.495050000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "6 ÷ 6 ="
+                        },
+                        "parameter": "-0.495100000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "12"
+                        },
+                        "display": {
+                            "text": "6 × 2 ="
+                        },
+                        "parameter": "-0.495150000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "12 ÷ 6 ="
+                        },
+                        "parameter": "-0.495200000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "18"
+                        },
+                        "display": {
+                            "text": "6 × 3 ="
+                        },
+                        "parameter": "-0.495250000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "18 ÷ 6 ="
+                        },
+                        "parameter": "-0.495300000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "24"
+                        },
+                        "display": {
+                            "text": "6 × 4 ="
+                        },
+                        "parameter": "-0.495350000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "24 ÷ 6 ="
+                        },
+                        "parameter": "-0.495400000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "30"
+                        },
+                        "display": {
+                            "text": "6 × 5 ="
+                        },
+                        "parameter": "-0.495450000000001"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "30 ÷ 6 ="
+                        },
+                        "parameter": "-0.4955"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "36"
+                        },
+                        "display": {
+                            "text": "6 × 6 ="
+                        },
+                        "parameter": "-0.49555"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "36 ÷ 6 ="
+                        },
+                        "parameter": "-0.4956"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "42"
+                        },
+                        "display": {
+                            "text": "6 × 7 ="
+                        },
+                        "parameter": "-0.49565"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "42 ÷ 6 ="
+                        },
+                        "parameter": "-0.4957"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "48"
+                        },
+                        "display": {
+                            "text": "6 × 8 ="
+                        },
+                        "parameter": "-0.49575"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "48 ÷ 6 ="
+                        },
+                        "parameter": "-0.4958"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "54"
+                        },
+                        "display": {
+                            "text": "6 × 9 ="
+                        },
+                        "parameter": "-0.49585"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "54 ÷ 6 ="
+                        },
+                        "parameter": "-0.4959"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "60"
+                        },
+                        "display": {
+                            "text": "6 × 10 ="
+                        },
+                        "parameter": "-0.49595"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "60 ÷ 6 ="
+                        },
+                        "parameter": "-0.496"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "7 × 1 ="
+                        },
+                        "parameter": "-0.49605"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "7 ÷ 7 ="
+                        },
+                        "parameter": "-0.4961"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "14"
+                        },
+                        "display": {
+                            "text": "7 × 2 ="
+                        },
+                        "parameter": "-0.49615"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "14 ÷ 7 ="
+                        },
+                        "parameter": "-0.4962"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "21"
+                        },
+                        "display": {
+                            "text": "7 × 3 ="
+                        },
+                        "parameter": "-0.49625"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "21 ÷ 7 ="
+                        },
+                        "parameter": "-0.4963"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "28"
+                        },
+                        "display": {
+                            "text": "7 × 4 ="
+                        },
+                        "parameter": "-0.49635"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "28 ÷ 7 ="
+                        },
+                        "parameter": "-0.4964"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "35"
+                        },
+                        "display": {
+                            "text": "7 × 5 ="
+                        },
+                        "parameter": "-0.49645"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "35 ÷ 7 ="
+                        },
+                        "parameter": "-0.4965"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "42"
+                        },
+                        "display": {
+                            "text": "7 × 6 ="
+                        },
+                        "parameter": "-0.49655"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "42 ÷ 7 ="
+                        },
+                        "parameter": "-0.4966"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "49"
+                        },
+                        "display": {
+                            "text": "7 × 7 ="
+                        },
+                        "parameter": "-0.49665"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "49 ÷ 7 ="
+                        },
+                        "parameter": "-0.4967"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "56"
+                        },
+                        "display": {
+                            "text": "7 × 8 ="
+                        },
+                        "parameter": "-0.49675"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "56 ÷ 7 ="
+                        },
+                        "parameter": "-0.4968"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "63"
+                        },
+                        "display": {
+                            "text": "7 × 9 ="
+                        },
+                        "parameter": "-0.49685"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "63 ÷ 7 ="
+                        },
+                        "parameter": "-0.4969"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "70"
+                        },
+                        "display": {
+                            "text": "7 × 10 ="
+                        },
+                        "parameter": "-0.49695"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "70 ÷ 7 ="
+                        },
+                        "parameter": "-0.497"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "8 × 1 ="
+                        },
+                        "parameter": "-0.49705"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "8 ÷ 8 ="
+                        },
+                        "parameter": "-0.4971"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "16"
+                        },
+                        "display": {
+                            "text": "8 × 2 ="
+                        },
+                        "parameter": "-0.49715"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "16 ÷ 8 ="
+                        },
+                        "parameter": "-0.4972"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "24"
+                        },
+                        "display": {
+                            "text": "8 × 3 ="
+                        },
+                        "parameter": "-0.49725"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "24 ÷ 8 ="
+                        },
+                        "parameter": "-0.4973"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "32"
+                        },
+                        "display": {
+                            "text": "8 × 4 ="
+                        },
+                        "parameter": "-0.49735"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "32 ÷ 8 ="
+                        },
+                        "parameter": "-0.4974"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "40"
+                        },
+                        "display": {
+                            "text": "8 × 5 ="
+                        },
+                        "parameter": "-0.49745"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "40 ÷ 8 ="
+                        },
+                        "parameter": "-0.4975"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "48"
+                        },
+                        "display": {
+                            "text": "8 × 6 ="
+                        },
+                        "parameter": "-0.49755"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "48 ÷ 8 ="
+                        },
+                        "parameter": "-0.4976"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "56"
+                        },
+                        "display": {
+                            "text": "8 × 7 ="
+                        },
+                        "parameter": "-0.49765"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "56 ÷ 8 ="
+                        },
+                        "parameter": "-0.4977"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "64"
+                        },
+                        "display": {
+                            "text": "8 × 8 ="
+                        },
+                        "parameter": "-0.49775"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "64 ÷ 8 ="
+                        },
+                        "parameter": "-0.4978"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "72"
+                        },
+                        "display": {
+                            "text": "8 × 9 ="
+                        },
+                        "parameter": "-0.49785"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "72 ÷ 8 ="
+                        },
+                        "parameter": "-0.4979"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "80"
+                        },
+                        "display": {
+                            "text": "8 × 10 ="
+                        },
+                        "parameter": "-0.49795"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "80 ÷ 8 ="
+                        },
+                        "parameter": "-0.498"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "9 × 1 ="
+                        },
+                        "parameter": "-0.49805"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "9 ÷ 9 ="
+                        },
+                        "parameter": "-0.4981"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "18"
+                        },
+                        "display": {
+                            "text": "9 × 2 ="
+                        },
+                        "parameter": "-0.49815"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "18 ÷ 9 ="
+                        },
+                        "parameter": "-0.4982"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "27"
+                        },
+                        "display": {
+                            "text": "9 × 3 ="
+                        },
+                        "parameter": "-0.49825"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "27 ÷ 9 ="
+                        },
+                        "parameter": "-0.4983"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "36"
+                        },
+                        "display": {
+                            "text": "9 × 4 ="
+                        },
+                        "parameter": "-0.49835"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "36 ÷ 9 ="
+                        },
+                        "parameter": "-0.4984"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "45"
+                        },
+                        "display": {
+                            "text": "9 × 5 ="
+                        },
+                        "parameter": "-0.49845"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "45 ÷ 9 ="
+                        },
+                        "parameter": "-0.4985"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "54"
+                        },
+                        "display": {
+                            "text": "9 × 6 ="
+                        },
+                        "parameter": "-0.49855"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "54 ÷ 9 ="
+                        },
+                        "parameter": "-0.4986"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "63"
+                        },
+                        "display": {
+                            "text": "9 × 7 ="
+                        },
+                        "parameter": "-0.49865"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "63 ÷ 9 ="
+                        },
+                        "parameter": "-0.4987"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "72"
+                        },
+                        "display": {
+                            "text": "9 × 8 ="
+                        },
+                        "parameter": "-0.49875"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "72 ÷ 9 ="
+                        },
+                        "parameter": "-0.4988"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "81"
+                        },
+                        "display": {
+                            "text": "9 × 9 ="
+                        },
+                        "parameter": "-0.49885"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "81 ÷ 9 ="
+                        },
+                        "parameter": "-0.4989"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "90"
+                        },
+                        "display": {
+                            "text": "9 × 10 ="
+                        },
+                        "parameter": "-0.49895"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "90 ÷ 9 ="
+                        },
+                        "parameter": "-0.499"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "10 × 1 ="
+                        },
+                        "parameter": "-0.49905"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "text": "10 ÷ 10 ="
+                        },
+                        "parameter": "-0.4991"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "20"
+                        },
+                        "display": {
+                            "text": "10 × 2 ="
+                        },
+                        "parameter": "-0.49915"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "text": "20 ÷ 10 ="
+                        },
+                        "parameter": "-0.4992"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "30"
+                        },
+                        "display": {
+                            "text": "10 × 3 ="
+                        },
+                        "parameter": "-0.49925"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "text": "30 ÷ 10 ="
+                        },
+                        "parameter": "-0.4993"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "40"
+                        },
+                        "display": {
+                            "text": "10 × 4 ="
+                        },
+                        "parameter": "-0.49935"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "4"
+                        },
+                        "display": {
+                            "text": "40 ÷ 10 ="
+                        },
+                        "parameter": "-0.4994"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "50"
+                        },
+                        "display": {
+                            "text": "10 × 5 ="
+                        },
+                        "parameter": "-0.49945"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "5"
+                        },
+                        "display": {
+                            "text": "50 ÷ 10 ="
+                        },
+                        "parameter": "-0.4995"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "60"
+                        },
+                        "display": {
+                            "text": "10 × 6 ="
+                        },
+                        "parameter": "-0.49955"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "6"
+                        },
+                        "display": {
+                            "text": "60 ÷ 10 ="
+                        },
+                        "parameter": "-0.4996"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "70"
+                        },
+                        "display": {
+                            "text": "10 × 7 ="
+                        },
+                        "parameter": "-0.49965"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "7"
+                        },
+                        "display": {
+                            "text": "70 ÷ 10 ="
+                        },
+                        "parameter": "-0.4997"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "80"
+                        },
+                        "display": {
+                            "text": "10 × 8 ="
+                        },
+                        "parameter": "-0.49975"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "8"
+                        },
+                        "display": {
+                            "text": "80 ÷ 10 ="
+                        },
+                        "parameter": "-0.4998"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "90"
+                        },
+                        "display": {
+                            "text": "10 × 9 ="
+                        },
+                        "parameter": "-0.49985"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "9"
+                        },
+                        "display": {
+                            "text": "90 ÷ 10 ="
+                        },
+                        "parameter": "-0.4999"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "100"
+                        },
+                        "display": {
+                            "text": "10 × 10 ="
+                        },
+                        "parameter": "-0.49995"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "10"
+                        },
+                        "display": {
+                            "text": "100 ÷ 10 ="
+                        },
+                        "parameter": "-0.5"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Swahili Vocabulary test</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>Swahilistims.xml</stimulusfile>
+        <stimulusfile>Swahilistims.json</stimulusfile>
         <shuffleclusters>0-16</shuffleclusters>
         <lfparameter>0.80</lfparameter>
         <isModeled>false</isModeled>

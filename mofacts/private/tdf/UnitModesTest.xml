@@ -3,7 +3,7 @@
         <name>Unit Mode Testing</name>
         <lessonname>Optimized Drill Practice of Unit Mode Testing</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>UnitModesTest.xml</stimulusfile>
+        <stimulusfile>UnitModesTest.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>

@@ -3,7 +3,7 @@
         <name>Internal Testing with SVO and Models</name>
         <lessonname>Optimized Drill Practice for Bridge Play</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Bridgestims.xml</stimulusfile>
+        <stimulusfile>Bridgestims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <simTimeout>3500</simTimeout>

@@ -1,0 +1,2517 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-20",
+                            "incorrectResponses": [
+                                "21-25",
+                                "26-40",
+                                "41-60",
+                                "61 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "American Indian or Alaska Native",
+                            "incorrectResponses": [
+                                "Asian",
+                                "Black or African American",
+                                "Hispanic or Latino",
+                                "Native Hawaiian or Other Pacific Islander",
+                                "White",
+                                "Other"
+                            ]
+                        },
+                        "display": {
+                            "text": "Please pick your racial/ethnic category?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Are you a 1st generation college student?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Native speaker",
+                            "incorrectResponses": [
+                                "0-2 years",
+                                "3-7 years",
+                                "8-15 years",
+                                "more than 15 years"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many years have you been speaking English?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Nursing",
+                            "incorrectResponses": [
+                                "Physical Therapy Assistant",
+                                "Medical Lab Technician",
+                                "Other"
+                            ]
+                        },
+                        "display": {
+                            "text": "What program are you in at Southwest?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "1st year",
+                            "incorrectResponses": [
+                                "2nd year"
+                            ]
+                        },
+                        "display": {
+                            "text": "What year are you in your program?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "15 or below",
+                            "incorrectResponses": [
+                                "15-18",
+                                "19-21",
+                                "22-25",
+                                "26 or above",
+                                "did not take"
+                            ]
+                        },
+                        "display": {
+                            "text": "What did you score on your ACT?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "850 or below",
+                            "incorrectResponses": [
+                                "851-1000",
+                                "1001-1150",
+                                "1151-1250",
+                                "1251 or above",
+                                "did not take"
+                            ]
+                        },
+                        "display": {
+                            "text": "What did you score on your SAT?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Only the prerequisites for this course",
+                            "incorrectResponses": [
+                                "1 additional course",
+                                "2 additional courses",
+                                "3 additional courses",
+                                "4 or more additional courses"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many sciences courses have you taken before A&P?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Have you taken a biology course before?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Have you taken an A&P course before?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Have you taken any other science courses before?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More of less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "A&P class is boring."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I find studying A&P to be fun."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am taking A&P primarily because it is required."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "A&P is a subject I really enjoy."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "A&P course is relatively easy."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "A&P is a very challenging subject."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I find studying for A&P is difficult."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I have to spend a lot of time studying for my A&P course."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "The content in A&P is hard."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school to prove to myself that I am capable of completing my college degree."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school because of the fact that when I succeed in school I feel important."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school to show myself that I am intelligent person."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school because I want to show myself that I can succeed in my studies."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school because I need at least a college degree in order to find a high-paying job later on."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school in order to obtain a more prestigious job later on."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school because I want to have “the good life” later on."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Strongly agree",
+                            "incorrectResponses": [
+                                "Agree",
+                                "More or less agree",
+                                "Neither agree nor disagree",
+                                "More or less disagree",
+                                "Disagree",
+                                "Strongly disagree"
+                            ]
+                        },
+                        "display": {
+                            "text": "I am in school in order to have a better salary later on."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Patrick Banville"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Kristen Steinke"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ernest Hemingway"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Clive Cussler"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Hiroyuki Oshita"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Kurt Vonnegut"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Anne McCaffrey"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Elinor Harring"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Sue Grafton"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Lisa Woodward"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "David Harper Townsend"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Anna Tsing"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "T.C. Boyle"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jonathan Kellerman"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Cameron McGrath"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "F. Scott Fitzgerald"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "A.C. Kelly"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Peter Flaegerty"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Kazuo Ishiguro"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jane Smiley"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "James Patterson"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Martha Farah"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Craig DeLord"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Nora Ephron"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ann Beattie"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Stewart Simon"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Danielle Steel"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Dick Francis"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ted Mantel"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "I.K. Nachbar"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Judith Krantz"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Thoman Pynchon"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Wayne Fillback"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Harry Coltheart"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gary Curwen"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Herman Wouk"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Geoffrey Pritchett"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ray Bradbury"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jay Peter Holmes"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Christina Johnson"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jean M. Auel"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Judith Stanley"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gloria McCumber"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "James Joyce"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Robert Ludlum"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Larry Applegate"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Keith Cartwright"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jackie Collins"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Umberto Eco"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "David Ashley"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jack London"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Seth Bakis"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Padraig O’seaghdha"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "E.B. White"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Giles Mallon"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Raymond Chandler"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Isabel Allende"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Amy Graham"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Marion Coles Snow"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "George Orwell"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Maya Angelou"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Bernard Malamud"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "John Grisham"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Erich Fagles"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Walter Dorris"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gabriel Garcia Marquez"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Virginia Woolf"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "John Landau"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Toni Morrison"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Harriet Troudeau"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Roswell Strong"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "J.R.R. Tolkien"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Margaret Atwood"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Seamus Huneven"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Harper Lee"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Chris Schwartz"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Walter LeMour"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Alice Walker"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Elizabeth Engle"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "T.S. Elliot"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Marvin Benoit"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Joyce Carol Oates"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jessica Ann Lewis"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Nelson Demille"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Arturo Garcia Perez"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "S.L. Holloway"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "John Irving"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Stephen Houston"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Marcus Lecherou"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Valerie Cooper"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Tom Clancy"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Vladimir Nabokov"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Pamela Lovejoy"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Vikram Roy"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Saul Bellow "
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Stephen King"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Elizabeth May Kenyon"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Frederick Mundow"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Tony Hillerman"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Amy R. Baskin"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "James Clavell"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Salmon Rushdie"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Maryann Phillips"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Scott Alexander"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ayn Rand"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Alex D. Miles"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Margaret Mitchell"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Leslie Kraus"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Ralph Ellison"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Sidney Sheldon"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Brian Herbert"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Sue Hammond"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jared Gibbons"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Michael Ondaatje"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Thomas Wolfe"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Jeremy Weissman"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Willa Cather"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "J.D. Salinger"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Antonia Cialdini"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Lisa Hong Chan"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Samuel Beckett"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Beatrice Dobkin"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Wally Lamb"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Katherine Kreutz"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "James Michener"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "William Faulkner"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Isaac Asimov"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Lindsey Carter"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "True",
+                            "incorrectResponses": [
+                                "False"
+                            ]
+                        },
+                        "display": {
+                            "text": "Paul Theroux"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "False",
+                            "incorrectResponses": [
+                                "True"
+                            ]
+                        },
+                        "display": {
+                            "text": "Francine Preston"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
