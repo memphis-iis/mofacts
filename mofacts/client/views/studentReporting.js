@@ -23,7 +23,7 @@ getLearningSessionItems = function(tdfFileName){
     if(tdfObject.isMultiTdf){
       learningSessionItems[tdfQueryName] = {};
       let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile[0];
-      let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters[0].cluster.length - 1;
+      let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
       for(let i=0;i<lastStim -1;i++){ //for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
         learningSessionItems[tdfQueryName][i] = true;
       }
@@ -846,6 +846,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("currentUnitNumber", instructUnit);
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
+                Session.set("currentDisplay", undefined);
                 Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -867,6 +868,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
 
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
+                Session.set("currentDisplay", undefined);
                 Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -926,6 +928,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
 
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
+            Session.set("currentDisplay", undefined);
             Session.set("currentQuestion", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
@@ -953,6 +956,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("clusterIndex",         cardIndex);
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
+            Session.set("currentDisplay",       entry.selectedDisplay);
             Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);

@@ -1,0 +1,1287 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "a"
+                        },
+                        "display": {
+                            "text": "あ"
+                        },
+                        "parameter": "-2.49549999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "a"
+                        },
+                        "display": {
+                            "text": "ア"
+                        },
+                        "parameter": "-2.49549499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ka"
+                        },
+                        "display": {
+                            "text": "か"
+                        },
+                        "parameter": "-2.49559999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ka"
+                        },
+                        "display": {
+                            "text": "カ"
+                        },
+                        "parameter": "-2.49559499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sa"
+                        },
+                        "display": {
+                            "text": "さ"
+                        },
+                        "parameter": "-2.49569999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sa"
+                        },
+                        "display": {
+                            "text": "サ"
+                        },
+                        "parameter": "-2.49569499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "た"
+                        },
+                        "parameter": "-2.49579999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ta"
+                        },
+                        "display": {
+                            "text": "タ"
+                        },
+                        "parameter": "-2.49579499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "na"
+                        },
+                        "display": {
+                            "text": "な"
+                        },
+                        "parameter": "-2.49589999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "na"
+                        },
+                        "display": {
+                            "text": "ナ"
+                        },
+                        "parameter": "-2.49589499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "は"
+                        },
+                        "parameter": "-2.49599999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ha"
+                        },
+                        "display": {
+                            "text": "ハ"
+                        },
+                        "parameter": "-2.49599499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ma"
+                        },
+                        "display": {
+                            "text": "ま"
+                        },
+                        "parameter": "-2.49609999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ma"
+                        },
+                        "display": {
+                            "text": "マ"
+                        },
+                        "parameter": "-2.49609499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "や"
+                        },
+                        "parameter": "-2.49619999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ya"
+                        },
+                        "display": {
+                            "text": "ヤ"
+                        },
+                        "parameter": "-2.49619499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ら"
+                        },
+                        "parameter": "-2.49629999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ra"
+                        },
+                        "display": {
+                            "text": "ラ"
+                        },
+                        "parameter": "-2.49629499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wa"
+                        },
+                        "display": {
+                            "text": "わ"
+                        },
+                        "parameter": "-2.49639999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wa"
+                        },
+                        "display": {
+                            "text": "ワ"
+                        },
+                        "parameter": "-2.49639499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "n"
+                        },
+                        "display": {
+                            "text": "ん"
+                        },
+                        "parameter": "-2.49649999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "n"
+                        },
+                        "display": {
+                            "text": "ン"
+                        },
+                        "parameter": "-2.49649499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "i"
+                        },
+                        "display": {
+                            "text": "い"
+                        },
+                        "parameter": "-2.49659999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "i"
+                        },
+                        "display": {
+                            "text": "イ"
+                        },
+                        "parameter": "-2.49659499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ki"
+                        },
+                        "display": {
+                            "text": "き"
+                        },
+                        "parameter": "-2.49669999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ki"
+                        },
+                        "display": {
+                            "text": "キ"
+                        },
+                        "parameter": "-2.49669499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shi"
+                        },
+                        "display": {
+                            "text": "し"
+                        },
+                        "parameter": "-2.49679999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "shi"
+                        },
+                        "display": {
+                            "text": "シ"
+                        },
+                        "parameter": "-2.49679499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chi"
+                        },
+                        "display": {
+                            "text": "ち"
+                        },
+                        "parameter": "-2.49689999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "chi"
+                        },
+                        "display": {
+                            "text": "チ"
+                        },
+                        "parameter": "-2.49689499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ni"
+                        },
+                        "display": {
+                            "text": "に"
+                        },
+                        "parameter": "-2.49699999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ni"
+                        },
+                        "display": {
+                            "text": "ニ"
+                        },
+                        "parameter": "-2.49699499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hi"
+                        },
+                        "display": {
+                            "text": "ひ"
+                        },
+                        "parameter": "-2.49709999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hi"
+                        },
+                        "display": {
+                            "text": "ヒ"
+                        },
+                        "parameter": "-2.49709499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mi"
+                        },
+                        "display": {
+                            "text": "み"
+                        },
+                        "parameter": "-2.49719999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mi"
+                        },
+                        "display": {
+                            "text": "ミ"
+                        },
+                        "parameter": "-2.49719499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ri"
+                        },
+                        "display": {
+                            "text": "り"
+                        },
+                        "parameter": "-2.49729999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ri"
+                        },
+                        "display": {
+                            "text": "リ"
+                        },
+                        "parameter": "-2.49729499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "u"
+                        },
+                        "display": {
+                            "text": "う"
+                        },
+                        "parameter": "-2.49739999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "u"
+                        },
+                        "display": {
+                            "text": "ウ"
+                        },
+                        "parameter": "-2.49739499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ku"
+                        },
+                        "display": {
+                            "text": "く"
+                        },
+                        "parameter": "-2.49749999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ku"
+                        },
+                        "display": {
+                            "text": "ク"
+                        },
+                        "parameter": "-2.49749499999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "su"
+                        },
+                        "display": {
+                            "text": "す"
+                        },
+                        "parameter": "-2.49759999999999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "su"
+                        },
+                        "display": {
+                            "text": "ス"
+                        },
+                        "parameter": "-2.497595"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tsu"
+                        },
+                        "display": {
+                            "text": "つ"
+                        },
+                        "parameter": "-2.4977"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "tsu"
+                        },
+                        "display": {
+                            "text": "ツ"
+                        },
+                        "parameter": "-2.497695"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nu"
+                        },
+                        "display": {
+                            "text": "ぬ"
+                        },
+                        "parameter": "-2.4978"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nu"
+                        },
+                        "display": {
+                            "text": "ヌ"
+                        },
+                        "parameter": "-2.497795"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fu"
+                        },
+                        "display": {
+                            "text": "ふ"
+                        },
+                        "parameter": "-2.4979"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "fu"
+                        },
+                        "display": {
+                            "text": "フ"
+                        },
+                        "parameter": "-2.497895"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mu"
+                        },
+                        "display": {
+                            "text": "む"
+                        },
+                        "parameter": "-2.498"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mu"
+                        },
+                        "display": {
+                            "text": "ム"
+                        },
+                        "parameter": "-2.497995"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yu"
+                        },
+                        "display": {
+                            "text": "ゆ"
+                        },
+                        "parameter": "-2.4981"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yu"
+                        },
+                        "display": {
+                            "text": "ユ"
+                        },
+                        "parameter": "-2.498095"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ru"
+                        },
+                        "display": {
+                            "text": "る"
+                        },
+                        "parameter": "-2.4982"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ru"
+                        },
+                        "display": {
+                            "text": "ル"
+                        },
+                        "parameter": "-2.498195"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "e"
+                        },
+                        "display": {
+                            "text": "え"
+                        },
+                        "parameter": "-2.4983"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "e"
+                        },
+                        "display": {
+                            "text": "エ"
+                        },
+                        "parameter": "-2.498295"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ke"
+                        },
+                        "display": {
+                            "text": "け"
+                        },
+                        "parameter": "-2.4984"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ke"
+                        },
+                        "display": {
+                            "text": "ケ"
+                        },
+                        "parameter": "-2.498395"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "se"
+                        },
+                        "display": {
+                            "text": "せ"
+                        },
+                        "parameter": "-2.4985"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "se"
+                        },
+                        "display": {
+                            "text": "セ"
+                        },
+                        "parameter": "-2.498495"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "te"
+                        },
+                        "display": {
+                            "text": "て"
+                        },
+                        "parameter": "-2.4986"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "te"
+                        },
+                        "display": {
+                            "text": "テ"
+                        },
+                        "parameter": "-2.498595"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ne"
+                        },
+                        "display": {
+                            "text": "ね"
+                        },
+                        "parameter": "-2.4987"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ne"
+                        },
+                        "display": {
+                            "text": "ネ"
+                        },
+                        "parameter": "-2.498695"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "he"
+                        },
+                        "display": {
+                            "text": "へ"
+                        },
+                        "parameter": "-2.4988"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "he"
+                        },
+                        "display": {
+                            "text": "ヘ"
+                        },
+                        "parameter": "-2.498795"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "me"
+                        },
+                        "display": {
+                            "text": "め"
+                        },
+                        "parameter": "-2.4989"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "me"
+                        },
+                        "display": {
+                            "text": "メ"
+                        },
+                        "parameter": "-2.498895"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "re"
+                        },
+                        "display": {
+                            "text": "れ"
+                        },
+                        "parameter": "-2.499"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "re"
+                        },
+                        "display": {
+                            "text": "レ"
+                        },
+                        "parameter": "-2.498995"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "o"
+                        },
+                        "display": {
+                            "text": "お"
+                        },
+                        "parameter": "-2.4991"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "o"
+                        },
+                        "display": {
+                            "text": "オ"
+                        },
+                        "parameter": "-2.499095"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ko"
+                        },
+                        "display": {
+                            "text": "こ"
+                        },
+                        "parameter": "-2.4992"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ko"
+                        },
+                        "display": {
+                            "text": "コ"
+                        },
+                        "parameter": "-2.499195"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "so"
+                        },
+                        "display": {
+                            "text": "そ"
+                        },
+                        "parameter": "-2.4993"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "so"
+                        },
+                        "display": {
+                            "text": "ソ"
+                        },
+                        "parameter": "-2.499295"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "to"
+                        },
+                        "display": {
+                            "text": "と"
+                        },
+                        "parameter": "-2.4994"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "to"
+                        },
+                        "display": {
+                            "text": "ト"
+                        },
+                        "parameter": "-2.499395"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "no"
+                        },
+                        "display": {
+                            "text": "の"
+                        },
+                        "parameter": "-2.4995"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "no"
+                        },
+                        "display": {
+                            "text": "ノ"
+                        },
+                        "parameter": "-2.499495"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ho"
+                        },
+                        "display": {
+                            "text": "ほ"
+                        },
+                        "parameter": "-2.4996"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ho"
+                        },
+                        "display": {
+                            "text": "ホ"
+                        },
+                        "parameter": "-2.499595"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mo"
+                        },
+                        "display": {
+                            "text": "も"
+                        },
+                        "parameter": "-2.4997"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mo"
+                        },
+                        "display": {
+                            "text": "モ"
+                        },
+                        "parameter": "-2.499695"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yo"
+                        },
+                        "display": {
+                            "text": "よ"
+                        },
+                        "parameter": "-2.4998"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "yo"
+                        },
+                        "display": {
+                            "text": "ヨ"
+                        },
+                        "parameter": "-2.499795"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ro"
+                        },
+                        "display": {
+                            "text": "ろ"
+                        },
+                        "parameter": "-2.4999"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ro"
+                        },
+                        "display": {
+                            "text": "ロ"
+                        },
+                        "parameter": "-2.499895"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wo"
+                        },
+                        "display": {
+                            "text": "を"
+                        },
+                        "parameter": "-2.5"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wo"
+                        },
+                        "display": {
+                            "text": "ヲ"
+                        },
+                        "parameter": "-2.499995"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "18-25",
+                            "incorrectResponses": [
+                                "26-34",
+                                "35-54",
+                                "55-64",
+                                "65 and over"
+                            ]
+                        },
+                        "display": {
+                            "text": "Age?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Male",
+                            "incorrectResponses": [
+                                "Female",
+                                "Other",
+                                "Prefer not to answer"
+                            ]
+                        },
+                        "display": {
+                            "text": "Gender?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Less than High School",
+                            "incorrectResponses": [
+                                "High School or GED",
+                                "Some College",
+                                "4-year College Degree/ Bachelors",
+                                "Graduate Degree"
+                            ]
+                        },
+                        "display": {
+                            "text": "Which is the highest level of education you have completed?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes",
+                            "incorrectResponses": [
+                                "No"
+                            ]
+                        },
+                        "display": {
+                            "text": "Did you have a high school Japanese class?"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "0",
+                            "incorrectResponses": [
+                                "1",
+                                "2",
+                                "3 or more"
+                            ]
+                        },
+                        "display": {
+                            "text": "How many college Japanese classes have you taken?"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}

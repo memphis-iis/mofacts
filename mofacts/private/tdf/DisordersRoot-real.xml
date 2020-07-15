@@ -1,12 +1,12 @@
 <tutor>
     <setspec>
         <lessonname>Psychological Disorders A</lessonname>
-        <stimulusfile>Disorders2stimsreal.xml</stimulusfile>
+        <stimulusfile>Disorders2stimsreal.json</stimulusfile>
         <experimentTarget>disordersa</experimentTarget>
         <randomizedDelivery>1</randomizedDelivery>
         <userselect>false</userselect>
-        <condition>Disorders2real-massed.xml</condition>
-        <condition>Disorders2real-spaced.xml</condition>
+        <condition>Disorders2real-massed.json</condition>
+        <condition>Disorders2real-spaced.json</condition>
     </setspec>
 </tutor>
 

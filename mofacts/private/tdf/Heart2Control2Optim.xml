@@ -3,7 +3,7 @@
         <userselect>false</userselect>
         <name>Heart2Control2</name> 
         <lessonname>Heart-testing2</lessonname> 
-        <stimulusfile>HeartBaseStim.xml</stimulusfile> 
+        <stimulusfile>HeartBaseStim.json</stimulusfile> 
         <clustersize>1</clustersize> 
         <isModeled>false</isModeled> 
         <swapclusters>0-3 4-7 8-11 12-15 16-19 20-23 24-27 28-31 32-35 36-39 40-43 44-47 48-51 52-55 56-59 60-63</swapclusters> 

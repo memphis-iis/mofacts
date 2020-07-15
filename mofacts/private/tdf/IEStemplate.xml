@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Title of the unit goes here***</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>IESstimexample.xml</stimulusfile>
+        <stimulusfile>IESstimexample.json</stimulusfile>
         <lfparameter>.85</lfparameter>
         <speechAPIKey></speechAPIKey>
         <audioInputEnabled>true</audioInputEnabled>

@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Chapter 10 Nervous System 1</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>ch10-082619-clean-features-082819-machine-sentence-stims-2019-08-28.xml</stimulusfile>
+        <stimulusfile>ch10-082619-clean-features-082819-machine-sentence-stims-2019-08-28.json</stimulusfile>
         <lfparameter>.85</lfparameter>
         <speechAPIKey></speechAPIKey>
         <audioInputEnabled>true</audioInputEnabled>

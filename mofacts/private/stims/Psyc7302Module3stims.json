@@ -1,0 +1,242 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Conditional"
+                        },
+                        "display": {
+                            "clozeText": "__________ probability says that probabilities of events may be affected by whether or not other events have occurred."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "affected"
+                        },
+                        "display": {
+                            "clozeText": "Conditional probability says that probabilities of events may be __________ by whether or not other events have occurred."
+                        },
+                        "parameter": "-0.00011"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "occurred"
+                        },
+                        "display": {
+                            "clozeText": "Conditional probability says that probabilities of events may be affected by whether or not other events have __________."
+                        },
+                        "parameter": "-0.00012"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "conditional"
+                        },
+                        "display": {
+                            "clozeText": "P(A|B) is the notation for __________ probability."
+                        },
+                        "parameter": "-0.00013"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "A\\|B|B\\|A~Correct;.*~Incorrect. The correct answer is A|B."
+                        },
+                        "display": {
+                            "clozeText": "P(__________) is the notation for conditional probability."
+                        },
+                        "parameter": "-0.00014"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "conditional|dependent"
+                        },
+                        "display": {
+                            "clozeText": "P(A|B) is the probability of event A __________ upon event B."
+                        },
+                        "parameter": "-0.00015"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "event B|B"
+                        },
+                        "display": {
+                            "clozeText": "P(A|B) is the probability of event A conditional or dependent upon __________."
+                        },
+                        "parameter": "-0.00016"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "conditional"
+                        },
+                        "display": {
+                            "clozeText": "To find __________ probability of event B given event A, P(B|A) = P(A and B) / P(A)."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "B\\|A~Correct;.*~Incorrect. The correct answer is B|A"
+                        },
+                        "display": {
+                            "clozeText": "To find conditional probability of event B given event A, P(__________) = P(A and B) / P(A)."
+                        },
+                        "parameter": "-0.00018"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "A and B"
+                        },
+                        "display": {
+                            "clozeText": "To find conditional probability of event B given event A, P(B|A) = P(__________) / P(A)."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "A"
+                        },
+                        "display": {
+                            "clozeText": "To find conditional probability of event B given event A, P(B|A) = P(A and B) / P(__________)."
+                        },
+                        "parameter": "-0.00020"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "independent"
+                        },
+                        "display": {
+                            "clozeText": "To determine if events A and B are __________, we can compare P(B|A) and P(B). "
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "P(B)"
+                        },
+                        "display": {
+                            "clozeText": "To determine if events A and B are independent, we can compare P(B|A) and __________. "
+                        },
+                        "parameter": "-0.00022"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "equal"
+                        },
+                        "display": {
+                            "clozeText": "If P(B|A) and P(B) are __________, A and B are independent. "
+                        },
+                        "parameter": "-0.00023"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "independent"
+                        },
+                        "display": {
+                            "clozeText": "If P(B|A) and P(B) are equal, A and B are __________. "
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "B\\|A~Correct;.*~Incorrect. The correct answer is B|A."
+                        },
+                        "display": {
+                            "clozeText": "To determine if events A and B are independent, we can compare P(__________) and P(B|notA)."
+                        },
+                        "parameter": "-0.00025"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "not A"
+                        },
+                        "display": {
+                            "clozeText": "To determine if events A and B are independent, we can compare P(B|A) and P(B|__________)."
+                        },
+                        "parameter": "-0.00026"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "A and B"
+                        },
+                        "display": {
+                            "clozeText": "To determine if events  A and B are independent, we can compare P(__________) to P(A)*P(B)."
+                        },
+                        "parameter": "-0.00027"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "x|\\*|times~Correct;.*~Incorrect. The correct answer is times."
+                        },
+                        "display": {
+                            "clozeText": "To determine if events  A and B are independent, we can compare P(A and B) to P(A)__________P(B)."
+                        },
+                        "parameter": "-0.00028"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "independent"
+                        },
+                        "display": {
+                            "clozeText": "The general multiplication rule applies to events that are not necessarily __________."
+                        },
+                        "parameter": "-0.00029"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "general multiplication"
+                        },
+                        "display": {
+                            "clozeText": "The __________ rule applies to events that are not necessarily independent."
+                        },
+                        "parameter": "-0.00030"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "B\\|A~Correct;.*~Incorrect. The correct answer is B|A."
+                        },
+                        "display": {
+                            "clozeText": "The general multiplication rule states that for any two events A and B, P(A and B) = P(A) * P(__________)."
+                        },
+                        "parameter": "-0.00031"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "A and B"
+                        },
+                        "display": {
+                            "clozeText": "The general multiplication rule states that for any two events A and B, P(__________) = P(A) * P(B|A)."
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "P(A)"
+                        },
+                        "display": {
+                            "clozeText": "The general multiplication rule states that for any two events A and B, P(A and B) = __________ * P(B|A)."
+                        },
+                        "parameter": "-0.00033"
+                    }
+                ]
+            }
+        ]
+    }
+}

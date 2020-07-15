@@ -2,7 +2,7 @@
     <setspec>
         <lessonname>Final User Feedback Survey for A&amp;P Students</lessonname>
         <userselect>false</userselect>
-        <stimulusfile>AP_Final_Surveystims.xml</stimulusfile>
+        <stimulusfile>AP_Final_Surveystims.json</stimulusfile>
         <lfparameter>.85</lfparameter>
     </setspec>
     <unit>

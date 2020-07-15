@@ -1,0 +1,342 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/1.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/7.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/13.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/2.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/8.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/14.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/3.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/9.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/15.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/4.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/10.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/16.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/5.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/11.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/17.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/6.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/12.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/18.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/19.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/25.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Minor 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/31.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/20.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/26.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 3rd"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/32.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/21.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/27.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Tritone"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/33.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/22.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/28.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Perfect 5th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/34.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/23.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/29.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Major 7th"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/35.mp3"
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/24.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/30.mp3"
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Octave"
+                        },
+                        "display": {
+                            "audioSrc": "sounds/music2/36.mp3"
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+}
