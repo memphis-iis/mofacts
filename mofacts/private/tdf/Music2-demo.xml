@@ -1,4 +1,4 @@
-<!-- TAKEN FROM Music2-*.xml files - this is for demosntration purposes. The
+<!-- TAKEN FROM Music2-*.json files - this is for demosntration purposes. The
      original Music2 experiment is in private/old
 -->
 <tutor>
@@ -6,8 +6,7 @@
         <name>Music Intervals</name>
         <lessonname>Music Intervals Experiment (demo)</lessonname>
         <userselect>true</userselect>
-        <stimulusfile>Music2stim-demo.xml</stimulusfile>        
-        <soundExtension>.mp3</soundExtension>
+        <stimulusfile>Music2stim-demo.json</stimulusfile>
     </setspec>
     <unit>
         <unitname>Introduction</unitname>

@@ -4,7 +4,7 @@
         <lessonname>Multimedia (demo)</lessonname>
         <userselect>false</userselect>
         <experimentTarget>multimedia</experimentTarget>
-        <stimulusfile>MultiMediaStimDemo.xml</stimulusfile>
+        <stimulusfile>MultiMediaStimDemo.json</stimulusfile>
     </setspec>
     <unit>
         <unitname>Introduction</unitname>

@@ -1,0 +1,4118 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuromuscular junctions"
+                        },
+                        "display": {
+                            "clozeText": "In the time it took to do that, a decision made in a part of your brain that controls skeletal muscles resulted in impulses along motor neuron axons to the muscles in your hand, releasing acetylcholine at __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "motor neuron axons"
+                        },
+                        "display": {
+                            "clozeText": "In the time it took to do that, a decision made in a part of your brain that controls skeletal muscles resulted in impulses along __________ to the muscles in your hand, releasing acetylcholine at neuromuscular junctions."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "acetylcholine"
+                        },
+                        "display": {
+                            "clozeText": "In the time it took to do that, a decision made in a part of your brain that controls skeletal muscles resulted in impulses along motor neuron axons to the muscles in your hand, releasing __________ at neuromuscular junctions."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "An __________ is a cylindrical process that conducts impulses away from a neuron cell body."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron cell body"
+                        },
+                        "display": {
+                            "clozeText": "An axon is a cylindrical process that conducts impulses away from a __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "A bipolar __________ is a __________ with two processes extending from the cell body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ependyma"
+                        },
+                        "display": {
+                            "clozeText": "An __________ is a neuroglia that line spaces in the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "An ependyma is a __________ that line spaces in the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nerves"
+                        },
+                        "display": {
+                            "clozeText": "The peripheral nervous system is the portion of the nervous system that consists of the __________ branching from the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "node"
+                        },
+                        "display": {
+                            "clozeText": "A saltatory conduction is an impulse conduction in which the impulse seems to jump from __________ to __________ along the axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "A saltatory conduction is an impulse conduction in which the impulse seems to jump from node to node along the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impulse conduction"
+                        },
+                        "display": {
+                            "clozeText": "A saltatory conduction is an __________ in which the impulse seems to jump from node to node along the axon."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sensory receptor"
+                        },
+                        "display": {
+                            "clozeText": "A sensory neuron is a neuron that can be stimulated by a __________ and conducts impulses into the brain or spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "Unipolar means a __________ with only one process extending from the cell body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nervous system"
+                        },
+                        "display": {
+                            "clozeText": "The __________ oversees all that we do and determines who we are."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "vast communicating network"
+                        },
+                        "display": {
+                            "clozeText": "Through a __________ of cells and the information that they send and receive, the nervous system can detect changes affecting the body, make decisions, and stimulate muscles or glands to respond."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bioelectric signals"
+                        },
+                        "display": {
+                            "clozeText": "A longer process called an axon, or nerve fiber, carries the information away from the cell in the form of __________, called impulses, which allow the neuron to communicate with other neurons and with cells outside the nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "A longer process called an __________, or nerve fiber, carries the information away from the cell in the form of bioelectric signals, called impulses, which allow the neuron to communicate with other neurons and with cells outside the nervous system."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axons"
+                        },
+                        "display": {
+                            "clozeText": "Typically, __________ within the nervous system are not isolated, but bundled in groups."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axons"
+                        },
+                        "display": {
+                            "clozeText": "In the peripheral nervous system, such bundles of __________ are called nerves."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nervous system"
+                        },
+                        "display": {
+                            "clozeText": "In the __________, such bundles of axons are called nerves."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "such bundles"
+                        },
+                        "display": {
+                            "clozeText": "In the peripheral nervous system, __________ of axons are called nerves."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "The cells that form capillaries in the brain, in contrast, are much more tightly connected, thanks partly to neuroglia called __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "The cells that form capillaries in the brain, in contrast, are much more tightly connected, thanks partly to __________ called astrocytes."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Drug developers"
+                        },
+                        "display": {
+                            "clozeText": "__________ must consider the barrier when formulating drugs that act in the brain, including chemicals that let the drug through."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "synapse"
+                        },
+                        "display": {
+                            "clozeText": "An important part of the nervous system at the cellular level is not a cell at all, but the functional connection between a neuron and the cell with which it communicates, called a __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "synapses"
+                        },
+                        "display": {
+                            "clozeText": "Much of the work of the nervous system is to send and receive chemical messages at __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "central nervous system"
+                        },
+                        "display": {
+                            "clozeText": "One group, consisting of the brain and spinal cord, forms the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nervous system"
+                        },
+                        "display": {
+                            "clozeText": "The other group, the __________, includes the nerves that connect the central nervous system to other body parts."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "PNS"
+                        },
+                        "display": {
+                            "clozeText": "The __________ also includes ganglia, which are clusters of neuron cell bodies located outside the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ganglia"
+                        },
+                        "display": {
+                            "clozeText": "The PNS also includes __________, which are clusters of neuron cell bodies located outside the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "motor"
+                        },
+                        "display": {
+                            "clozeText": "The three general functions of the nervous system -- receiving information, deciding what to do, and acting on those decisions -- are termed sensory, integrative, and __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nervous system"
+                        },
+                        "display": {
+                            "clozeText": "Structures called sensory receptors at the ends of neurons in the __________ provide the sensory function of the nervous system."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeText": "These __________ gather information by detecting changes inside and outside the body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Sensory receptors convert their information into impulses, which are then conducted along peripheral nerves to the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nerves"
+                        },
+                        "display": {
+                            "clozeText": "Sensory receptors convert their information into impulses, which are then conducted along __________ to the CNS."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Neurons that conduct impulses from the __________ to responsive structures called effectors carry out the motor functions of the nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "effectors"
+                        },
+                        "display": {
+                            "clozeText": "Neurons that conduct impulses from the CNS to responsive structures called __________ carry out the motor functions of the nervous system."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "effectors"
+                        },
+                        "display": {
+                            "clozeText": "These __________ are outside the nervous system and include muscles and glands whose actions are either controlled or modified by nerve activity."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "The somatic nervous system communicates voluntary instructions originating in the __________ to skeletal muscles, causing contraction."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "skeletal muscles"
+                        },
+                        "display": {
+                            "clozeText": "The somatic nervous system communicates voluntary instructions originating in the CNS to __________, causing contraction."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "contraction"
+                        },
+                        "display": {
+                            "clozeText": "The somatic nervous system communicates voluntary instructions originating in the CNS to skeletal muscles, causing __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "voluntary instructions"
+                        },
+                        "display": {
+                            "clozeText": "The somatic nervous system communicates __________ originating in the CNS to skeletal muscles, causing contraction."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "involuntary , subconscious actions"
+                        },
+                        "display": {
+                            "clozeText": "The autonomic nervous system communicates instructions from the CNS that control viscera, such as the heart and various glands, and thus causes __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "viscera"
+                        },
+                        "display": {
+                            "clozeText": "The autonomic nervous system communicates instructions from the CNS that control __________, such as the heart and various glands, and thus causes involuntary, subconscious actions."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "The autonomic nervous system communicates instructions from the __________ that control viscera, such as the heart and various glands, and thus causes involuntary, subconscious actions."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurofilaments"
+                        },
+                        "display": {
+                            "clozeText": "A network of fine threads called __________ extends into the axon and supports it."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "A network of fine threads called neurofilaments extends into the __________ and supports it."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "large , spherical nucleus"
+                        },
+                        "display": {
+                            "clozeText": "Near the center of the neuron cell body is a __________ with a conspicuous nucleolus."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "conspicuous nucleolus"
+                        },
+                        "display": {
+                            "clozeText": "Near the center of the neuron cell body is a large, spherical nucleus with a __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "Near the center of the __________ cell body is a large, spherical nucleus with a conspicuous nucleolus."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurofibrils"
+                        },
+                        "display": {
+                            "clozeText": "The cytoplasm of the axon includes many mitochondria, microtubules, and __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "microtubules"
+                        },
+                        "display": {
+                            "clozeText": "The cytoplasm of the axon includes many mitochondria, __________, and neurofibrils."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "The cytoplasm of the __________ includes many mitochondria, microtubules, and neurofibrils."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mitochondria"
+                        },
+                        "display": {
+                            "clozeText": "The cytoplasm of the axon includes many __________, microtubules, and neurofibrils."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "many fine extensions"
+                        },
+                        "display": {
+                            "clozeText": "Near its end, an axon may have __________, each with a specialized ending called an axon terminal."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon terminal"
+                        },
+                        "display": {
+                            "clozeText": "Near its end, an axon may have many fine extensions, each with a specialized ending called an __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dendrites"
+                        },
+                        "display": {
+                            "clozeText": "The general pattern is that neurons receive input through the __________ and the cell body, and send output in the form of an impulse conducted away from the cell body, down the axon."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "In this activity, called axonal transport, movement occurs in both directions between the cell body and the ends of the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "lipid-rich sheaths"
+                        },
+                        "display": {
+                            "clozeText": "In the PNS, neuroglia called Schwann cells encase the large axons of peripheral neurons in __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "PNS"
+                        },
+                        "display": {
+                            "clozeText": "In the __________, neuroglia called Schwann cells encase the large axons of peripheral neurons in lipid-rich sheaths."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "In the PNS, __________ called Schwann cells encase the large axons of peripheral neurons in lipid-rich sheaths."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "In the PNS, neuroglia called __________ encase the large axons of peripheral neurons in lipid-rich sheaths."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "large axons"
+                        },
+                        "display": {
+                            "clozeText": "In the PNS, neuroglia called Schwann cells encase the __________ of peripheral neurons in lipid-rich sheaths."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral neurons"
+                        },
+                        "display": {
+                            "clozeText": "In the PNS, neuroglia called Schwann cells encase the large axons of __________ in lipid-rich sheaths."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "Myelin gives the cell membranes of __________ a higher proportion of lipid than other cell membranes."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Myelin"
+                        },
+                        "display": {
+                            "clozeText": "__________ gives the cell membranes of Schwann cells a higher proportion of lipid than other cell membranes."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "lipid"
+                        },
+                        "display": {
+                            "clozeText": "Myelin gives the cell membranes of Schwann cells a higher proportion of __________ than other cell membranes."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurilemma"
+                        },
+                        "display": {
+                            "clozeText": "The parts of the Schwann cells that contain most of the cytoplasm and the nuclei remain outside the myelin sheath and comprise a __________, or neurilemmal sheath, which surrounds the myelin sheath."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "The parts of the __________ that contain most of the cytoplasm and the nuclei remain outside the myelin sheath and comprise a neurilemma, or neurilemmal sheath, which surrounds the myelin sheath."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelin sheath"
+                        },
+                        "display": {
+                            "clozeText": "The parts of the Schwann cells that contain most of the cytoplasm and the nuclei remain outside the __________ and comprise a neurilemma, or neurilemmal sheath, which surrounds the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "unmyelinated axons"
+                        },
+                        "display": {
+                            "clozeText": "Axons that have myelin sheaths are called myelinated axons, and those that do not have these sheaths are __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelinated axons"
+                        },
+                        "display": {
+                            "clozeText": "Axons that have myelin sheaths are called __________, and those that do not have these sheaths are unmyelinated axons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelin sheaths"
+                        },
+                        "display": {
+                            "clozeText": "Axons that have __________ are called myelinated axons, and those that do not have these sheaths are unmyelinated axons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Axons"
+                        },
+                        "display": {
+                            "clozeText": "__________ that have myelin sheaths are called myelinated axons, and those that do not have these sheaths are unmyelinated axons."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "myelinated axons"
+                        },
+                        "display": {
+                            "clozeText": "The white matter in the brain and spinal cord gets its color from masses of __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oligodendrocyte"
+                        },
+                        "display": {
+                            "clozeText": "In the CNS, myelin is produced by a type of neuroglia called an __________ rather than by a Schwann cell."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "In the CNS, myelin is produced by a type of __________ called an oligodendrocyte rather than by a Schwann cell."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cell"
+                        },
+                        "display": {
+                            "clozeText": "In the CNS, myelin is produced by a type of neuroglia called an oligodendrocyte rather than by a __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "In the __________, myelin is produced by a type of neuroglia called an oligodendrocyte rather than by a Schwann cell."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sclerosis"
+                        },
+                        "display": {
+                            "clozeText": "Clinical Application 10.2 discusses multiple __________, a condition in which neurons in the brain and spinal cord lose their myelin."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "multipolar neuron"
+                        },
+                        "display": {
+                            "clozeText": "A __________ has many processes arising from its cell body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "multipolar neurons"
+                        },
+                        "display": {
+                            "clozeText": "Some __________ are in ganglia associated with the autonomic nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ganglia"
+                        },
+                        "display": {
+                            "clozeText": "Some multipolar neurons are in __________ associated with the autonomic nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "autonomic nervous system"
+                        },
+                        "display": {
+                            "clozeText": "Some multipolar neurons are in ganglia associated with the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Bipolar neurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ are found in specialized parts of the eyes, nose, and ears."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "unipolar neuron"
+                        },
+                        "display": {
+                            "clozeText": "Each __________ has a single process extending from its cell body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two processes"
+                        },
+                        "display": {
+                            "clozeText": "These are also called pseudounipolar, because they start out with __________ that merge into one during development."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dendrites"
+                        },
+                        "display": {
+                            "clozeText": "A short distance from the cell body, this process divides into two branches, which really function as a single axon : One branch has __________ near a peripheral body part."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Neurons can also be classified by functional differences into the following groups, depending on whether they carry information into the __________, completely within the __________, or out of the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "peripheral body parts"
+                        },
+                        "display": {
+                            "clozeText": "Sensory neurons conduct impulses from __________ into the brain or spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distal ends"
+                        },
+                        "display": {
+                            "clozeText": "At their __________, the dendrites of these neurons or specialized structures associated with them act as sensory receptors, detecting changes in the outside world or in the body."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dendrites"
+                        },
+                        "display": {
+                            "clozeText": "At their distal ends, the __________ of these neurons or specialized structures associated with them act as sensory receptors, detecting changes in the outside world or in the body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sensory neuron axons"
+                        },
+                        "display": {
+                            "clozeText": "When sufficiently stimulated, sensory receptors trigger impulses that travel on __________ into the brain or spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Interneurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ relay information from one part of the brain or spinal cord to another."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "secretions"
+                        },
+                        "display": {
+                            "clozeText": "For example, when motor neurons stimulate muscle cells, the muscle cells contract ; when motor neurons stimulate glands, the glands release __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Multipolar neurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ are the most common type of neuron in the brain and spinal cord ; also found in ganglia of the autonomic nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ganglia"
+                        },
+                        "display": {
+                            "clozeText": "Multipolar neurons are the most common type of neuron in the brain and spinal cord ; also found in __________ of the autonomic nervous system."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "autonomic nervous system"
+                        },
+                        "display": {
+                            "clozeText": "Multipolar neurons are the most common type of neuron in the brain and spinal cord ; also found in ganglia of the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Unipolar neurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ have a cell body with a single process that divides into two branches and functions as an axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "Unipolar neurons have a cell body with a single process that divides into two branches and functions as an __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Interneurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ replay information between neurons in the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "replay information"
+                        },
+                        "display": {
+                            "clozeText": "Interneurons __________ between neurons in the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "effectors"
+                        },
+                        "display": {
+                            "clozeText": "Motor neurons conduct impulses from the brain or spinal cord out to __________ -- muscles or glands."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "__________ were once thought to be mere bystanders to neural function, providing scaffolding and controlling the sites at which neurons contact one another."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "scaffolding"
+                        },
+                        "display": {
+                            "clozeText": "Neuroglia were once thought to be mere bystanders to neural function, providing __________ and controlling the sites at which neurons contact one another."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "__________ also produce the growth factors that nourish neurons and remove excess ions and neurotransmitters that accumulate between neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "Neuroglia also produce the growth factors that nourish neurons and remove excess ions and __________ that accumulate between neurons."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia signal neurons"
+                        },
+                        "display": {
+                            "clozeText": "In cell culture experiments, certain types of __________ to form and maintain synapses."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synapses"
+                        },
+                        "display": {
+                            "clozeText": "In cell culture experiments, certain types of neuroglia signal neurons to form and maintain __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "The four types of CNS neuroglia are __________, oligodendrocytes, microglia, and ependyma : As their name implies, __________ are star-shaped cells."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "microglia"
+                        },
+                        "display": {
+                            "clozeText": "The four types of CNS neuroglia are astrocytes, oligodendrocytes, __________, and ependyma : As their name implies, astrocytes are star-shaped cells."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "oligodendrocytes"
+                        },
+                        "display": {
+                            "clozeText": "The four types of CNS neuroglia are astrocytes, __________, microglia, and ependyma : As their name implies, astrocytes are star-shaped cells."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "The four types of __________ are astrocytes, oligodendrocytes, microglia, and ependyma : As their name implies, astrocytes are star-shaped cells."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "star-shaped cells"
+                        },
+                        "display": {
+                            "clozeText": "The four types of CNS neuroglia are astrocytes, oligodendrocytes, microglia, and ependyma : As their name implies, astrocytes are __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "__________ also respond to injury of brain tissue and form a special type of scar tissue, which fills spaces and closes gaps in the CNS."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes also respond to injury of brain tissue and form a special type of scar tissue, which fills spaces and closes gaps in the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gaps"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes also respond to injury of brain tissue and form a special type of scar tissue, which fills spaces and closes __________ in the CNS."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "__________ play a role in the formation of the blood-brain barrier, which restricts movement of substances between the blood and the CNS."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "blood-brain barrier"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes play a role in the formation of the __________, which restricts movement of substances between the blood and the CNS."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes play a role in the formation of the blood-brain barrier, which restricts movement of substances between the blood and the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "protein-lined channels"
+                        },
+                        "display": {
+                            "clozeText": "Gap junctions link astrocytes to one another, forming __________ through which calcium ions travel, possibly stimulating neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "Gap junctions link __________ to one another, forming protein-lined channels through which calcium ions travel, possibly stimulating neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Gap junctions"
+                        },
+                        "display": {
+                            "clozeText": "__________ link astrocytes to one another, forming protein-lined channels through which calcium ions travel, possibly stimulating neurons."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oligodendrocytes"
+                        },
+                        "display": {
+                            "clozeText": "Unlike the Schwann cells of the PNS, __________ can send out a number of processes, each of which forms a myelin sheath around a nearby axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "PNS"
+                        },
+                        "display": {
+                            "clozeText": "Unlike the Schwann cells of the __________, oligodendrocytes can send out a number of processes, each of which forms a myelin sheath around a nearby axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "Unlike the __________ of the PNS, oligodendrocytes can send out a number of processes, each of which forms a myelin sheath around a nearby axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelin sheath"
+                        },
+                        "display": {
+                            "clozeText": "Unlike the Schwann cells of the PNS, oligodendrocytes can send out a number of processes, each of which forms a __________ around a nearby axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nearby axon"
+                        },
+                        "display": {
+                            "clozeText": "Unlike the Schwann cells of the PNS, oligodendrocytes can send out a number of processes, each of which forms a myelin sheath around a __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "phagocytize"
+                        },
+                        "display": {
+                            "clozeText": "These cells are scattered throughout the CNS, where they help support neurons and __________ bacterial cells and cellular debris."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "These cells are scattered throughout the __________, where they help support neurons and phagocytize bacterial cells and cellular debris."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cord"
+                        },
+                        "display": {
+                            "clozeText": "They usually proliferate whenever the brain or spinal __________ is inflamed because of injury or disease."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "inner lining"
+                        },
+                        "display": {
+                            "clozeText": "They form the __________ of the central canal that extends downward through the spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "spinal cord"
+                        },
+                        "display": {
+                            "clozeText": "They form the inner lining of the central canal that extends downward through the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "one-cell-thick epithelial-like membrane"
+                        },
+                        "display": {
+                            "clozeText": "Ependymal cells also form a __________ that covers the inside of spaces in the brain called ventricles."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Ependymal cells"
+                        },
+                        "display": {
+                            "clozeText": "__________ also form a one-cell-thick epithelial-like membrane that covers the inside of spaces in the brain called ventricles."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ventricles"
+                        },
+                        "display": {
+                            "clozeText": "Ependymal cells also form a one-cell-thick epithelial-like membrane that covers the inside of spaces in the brain called __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ependymal cells"
+                        },
+                        "display": {
+                            "clozeText": "Here, gap junctions join __________, allowing free exchange between cells."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gap junctions"
+                        },
+                        "display": {
+                            "clozeText": "Here, __________ join ependymal cells, allowing free exchange between cells."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ependymal layer"
+                        },
+                        "display": {
+                            "clozeText": "The __________ itself is porous, allowing substances to diffuse freely between the interstitial fluid of the brain tissues and the fluid in the ventricles."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "interstitial fluid"
+                        },
+                        "display": {
+                            "clozeText": "The ependymal layer itself is porous, allowing substances to diffuse freely between the __________ of the brain tissues and the fluid in the ventricles."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ventricles"
+                        },
+                        "display": {
+                            "clozeText": "The ependymal layer itself is porous, allowing substances to diffuse freely between the interstitial fluid of the brain tissues and the fluid in the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "choroid plexuses"
+                        },
+                        "display": {
+                            "clozeText": "Ependymal cells also cover the specialized capillaries called __________ associated with the ventricles of the brain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Ependymal cells"
+                        },
+                        "display": {
+                            "clozeText": "__________ also cover the specialized capillaries called choroid plexuses associated with the ventricles of the brain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ventricles"
+                        },
+                        "display": {
+                            "clozeText": "Ependymal cells also cover the specialized capillaries called choroid plexuses associated with the __________ of the brain."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "__________, which comprise more than half of the volume of the brain and outnumber neurons 10 to 1, are critical to neuron function."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "In one familial form of amyotrophic lateral sclerosis, __________ release a toxin that destroys motor neurons, causing progressive weakness."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one familial form"
+                        },
+                        "display": {
+                            "clozeText": "In __________ of amyotrophic lateral sclerosis, astrocytes release a toxin that destroys motor neurons, causing progressive weakness."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "toxin"
+                        },
+                        "display": {
+                            "clozeText": "In one familial form of amyotrophic lateral sclerosis, astrocytes release a __________ that destroys motor neurons, causing progressive weakness."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "microglia"
+                        },
+                        "display": {
+                            "clozeText": "In Huntington disease, which causes uncontrollable movements and cognitive impairment, __________ in the brain release a toxin that damages neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Huntington disease"
+                        },
+                        "display": {
+                            "clozeText": "In __________, which causes uncontrollable movements and cognitive impairment, microglia in the brain release a toxin that damages neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "uncontrollable movements"
+                        },
+                        "display": {
+                            "clozeText": "In Huntington disease, which causes __________ and cognitive impairment, microglia in the brain release a toxin that damages neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "toxin"
+                        },
+                        "display": {
+                            "clozeText": "In Huntington disease, which causes uncontrollable movements and cognitive impairment, microglia in the brain release a __________ that damages neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impairment"
+                        },
+                        "display": {
+                            "clozeText": "In Huntington disease, which causes uncontrollable movements and cognitive __________, microglia in the brain release a toxin that damages neurons."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeText": "The two types of __________ in the peripheral nervous system are Schwann cells and satellite cells : Schwann cells produce the myelin on peripheral myelinated neurons, as described earlier."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "The two types of neuroglia in the peripheral nervous system are __________ and satellite cells : __________ produce the myelin on peripheral myelinated neurons, as described earlier."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral myelinated neurons"
+                        },
+                        "display": {
+                            "clozeText": "The two types of neuroglia in the peripheral nervous system are Schwann cells and satellite cells : Schwann cells produce the myelin on __________, as described earlier."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nervous system"
+                        },
+                        "display": {
+                            "clozeText": "The two types of neuroglia in the __________ are Schwann cells and satellite cells : Schwann cells produce the myelin on peripheral myelinated neurons, as described earlier."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentrations"
+                        },
+                        "display": {
+                            "clozeText": "Satellite cells provide nutritional support and help regulate the __________ of ions around neuron cell bodies within ganglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron cell bodies"
+                        },
+                        "display": {
+                            "clozeText": "Satellite cells provide nutritional support and help regulate the concentrations of ions around __________ within ganglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Satellite cells"
+                        },
+                        "display": {
+                            "clozeText": "__________ provide nutritional support and help regulate the concentrations of ions around neuron cell bodies within ganglia."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Astrocytes"
+                        },
+                        "display": {
+                            "clozeText": "__________ have the following functions : structural support, formation of scar tissue, transport of substances between blood vessels and neurons, communication with one another and with neurons, mopping up excess ions and neurotransmitters, inducing synapse formation."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes have the following functions : structural support, formation of scar tissue, transport of substances between blood vessels and neurons, communication with one another and with neurons, mopping up excess ions and __________, inducing synapse formation."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synapse formation"
+                        },
+                        "display": {
+                            "clozeText": "Astrocytes have the following functions : structural support, formation of scar tissue, transport of substances between blood vessels and neurons, communication with one another and with neurons, mopping up excess ions and neurotransmitters, inducing __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cerebrospinal fluid"
+                        },
+                        "display": {
+                            "clozeText": "Ependyma form a porous layer through which substances diffuse between the interstitial fluid of the brain and spinal cord and the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "interstitial fluid"
+                        },
+                        "display": {
+                            "clozeText": "Ependyma form a porous layer through which substances diffuse between the __________ of the brain and spinal cord and the cerebrospinal fluid."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "porous layer"
+                        },
+                        "display": {
+                            "clozeText": "Ependyma form a __________ through which substances diffuse between the interstitial fluid of the brain and spinal cord and the cerebrospinal fluid."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "abundant , lipid-rich membranes"
+                        },
+                        "display": {
+                            "clozeText": "Schwann cells are cells with __________ that wrap tightly around the axons of peripheral neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "__________ are cells with abundant, lipid-rich membranes that wrap tightly around the axons of peripheral neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axons"
+                        },
+                        "display": {
+                            "clozeText": "Schwann cells are cells with abundant, lipid-rich membranes that wrap tightly around the __________ of peripheral neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral neurons"
+                        },
+                        "display": {
+                            "clozeText": "Schwann cells are cells with abundant, lipid-rich membranes that wrap tightly around the axons of __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "small , cuboidal cells"
+                        },
+                        "display": {
+                            "clozeText": "Satellite cells are __________ that surround cell bodies of neurons in ganglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "Satellite cells are small, cuboidal cells that surround cell bodies of __________ in ganglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Satellite cells"
+                        },
+                        "display": {
+                            "clozeText": "__________ are small, cuboidal cells that surround cell bodies of neurons in ganglia."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neural stem cells"
+                        },
+                        "display": {
+                            "clozeText": "Injury to the cell body usually kills the neuron, and because mature neurons do not divide, the destroyed cell is not replaced unless __________ are stimulated to proliferate."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurilemma"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and its myelin sheath deteriorate within a few weeks, although the Schwann cells and __________ remain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and its myelin sheath deteriorate within a few weeks, although the __________ and neurilemma remain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelin sheath"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and its __________ deteriorate within a few weeks, although the Schwann cells and neurilemma remain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "distal portion"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the __________ of the axon and its myelin sheath deteriorate within a few weeks, although the Schwann cells and neurilemma remain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nerve"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an axon in a __________ from its cell body, the distal portion of the axon and its myelin sheath deteriorate within a few weeks, although the Schwann cells and neurilemma remain."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "For example, if injury or disease separates an __________ in a peripheral nerve from its cell body, the distal portion of the __________ and its myelin sheath deteriorate within a few weeks, although the Schwann cells and neurilemma remain."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "PNS"
+                        },
+                        "display": {
+                            "clozeText": "If an axon of a neuron within the CNS is separated from its cell body, the distal portion of the axon will degenerate, but more slowly than a separated axon in the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "If an axon of a neuron within the __________ is separated from its cell body, the distal portion of the axon will degenerate, but more slowly than a separated axon in the PNS."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "distal portion"
+                        },
+                        "display": {
+                            "clozeText": "If an axon of a neuron within the CNS is separated from its cell body, the __________ of the axon will degenerate, but more slowly than a separated axon in the PNS."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proximal end"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, the __________ of a damaged axon that begins to grow has no tube of sheath cells to guide it."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sheath cells"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, the proximal end of a damaged axon that begins to grow has no tube of __________ to guide it."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, the proximal end of a damaged __________ that begins to grow has no tube of sheath cells to guide it."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neural progenitor cells"
+                        },
+                        "display": {
+                            "clozeText": "New neural tissue arises from neural stem cells, which give rise to __________ that can give rise to neurons or neuroglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neural stem cells"
+                        },
+                        "display": {
+                            "clozeText": "New neural tissue arises from __________, which give rise to neural progenitor cells that can give rise to neurons or neuroglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neural tissue"
+                        },
+                        "display": {
+                            "clozeText": "New __________ arises from neural stem cells, which give rise to neural progenitor cells that can give rise to neurons or neuroglia."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "New neural tissue arises from neural stem cells, which give rise to neural progenitor cells that can give rise to __________ or neuroglia."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic neuron"
+                        },
+                        "display": {
+                            "clozeText": "The neuron receiving input at the synapse is the __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synapse"
+                        },
+                        "display": {
+                            "clozeText": "The neuron receiving input at the __________ is the postsynaptic neuron."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "presynaptic neuron signals"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism by which the impulse in the __________ the postsynaptic cell is called synaptic transmission."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic cell"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism by which the impulse in the presynaptic neuron signals the __________ is called synaptic transmission."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impulse"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism by which the __________ in the presynaptic neuron signals the postsynaptic cell is called synaptic transmission."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mechanism"
+                        },
+                        "display": {
+                            "clozeText": "The __________ by which the impulse in the presynaptic neuron signals the postsynaptic cell is called synaptic transmission."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "synaptic vesicles"
+                        },
+                        "display": {
+                            "clozeText": "The increased calcium concentration inside the cell initiates a series of events that fuses the __________ with the cell membrane, where they release their neurotransmitter by exocytosis."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "The increased calcium concentration inside the cell initiates a series of events that fuses the synaptic vesicles with the cell membrane, where they release their __________ by exocytosis."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic cell"
+                        },
+                        "display": {
+                            "clozeText": "Once the neurotransmitter binds to receptors on a __________, the action is either excitatory or inhibitory."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "Once the __________ binds to receptors on a postsynaptic cell, the action is either excitatory or inhibitory."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeText": "Once the neurotransmitter binds to __________ on a postsynaptic cell, the action is either excitatory or inhibitory."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "polarization"
+                        },
+                        "display": {
+                            "clozeText": "This __________ is due to an unequal distribution of positive and negative ions across the membrane."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "unequal distribution"
+                        },
+                        "display": {
+                            "clozeText": "This polarization is due to an __________ of positive and negative ions across the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sodium/potassium pump"
+                        },
+                        "display": {
+                            "clozeText": "The distribution is created largely by the __________, which actively transports sodium ions out of the cell and potassium ions into the cell."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane permeability"
+                        },
+                        "display": {
+                            "clozeText": "It is also in part due to channels in the cell membrane that determine __________ to these ions."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradients"
+                        },
+                        "display": {
+                            "clozeText": "Thus, even though __________ are present for sodium and potassium, the ability of these ions to diffuse across the cell membrane depends on the presence of channels."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "both a concentration gradient"
+                        },
+                        "display": {
+                            "clozeText": "For an ion to diffuse across the cell membrane requires __________ for that ion and membrane permeability to that ion."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane permeability"
+                        },
+                        "display": {
+                            "clozeText": "For an ion to diffuse across the cell membrane requires both a concentration gradient for that ion and __________ to that ion."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "phosphate"
+                        },
+                        "display": {
+                            "clozeText": "Also, the cytoplasm of these cells has many negatively charged ions, which include __________, sulfate, and proteins, that are synthesized inside the cell and can not diffuse through cell membranes."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "permeabilities"
+                        },
+                        "display": {
+                            "clozeText": "Because of the gradients and __________ for Na + and K +, we would expect potassium to diffuse out of the cell more rapidly than sodium could diffuse in."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gradients"
+                        },
+                        "display": {
+                            "clozeText": "Because of the __________ and permeabilities for Na + and K +, we would expect potassium to diffuse out of the cell more rapidly than sodium could diffuse in."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Na"
+                        },
+                        "display": {
+                            "clozeText": "Because of the gradients and permeabilities for __________ + and K +, we would expect potassium to diffuse out of the cell more rapidly than sodium could diffuse in."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "slight surplus"
+                        },
+                        "display": {
+                            "clozeText": "As a result, the outside of the membrane gains a __________ of positive charges, and the inside reflects a surplus of the impermeant negatively charged ions."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Na"
+                        },
+                        "display": {
+                            "clozeText": "A number of mechanisms move ions across cell membranes, but for our purposes we will consider the __________ + / K + pump responsible for maintaining this balance."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradients"
+                        },
+                        "display": {
+                            "clozeText": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the __________ for those ions responsible for their diffusion in the first place."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "typical neuron"
+                        },
+                        "display": {
+                            "clozeText": "In the case of a resting neuron, one that is not sending impulses or responding to other neurons, the membrane potential is termed the resting potential and for a __________ has a value of -LSB-? -RSB-"
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "To understand how the resting potential provides the energy for sending an impulse down the __________, we must first understand how neurons respond to signals called stimuli."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "potassium ions"
+                        },
+                        "display": {
+                            "clozeText": "With the resting membrane potential established, sodium ions and __________ continue to diffuse across the cell membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "potassium's higher permeability"
+                        },
+                        "display": {
+                            "clozeText": "The negative membrane potential helps the positively charged sodium ions enter the cell despite sodium's low permeability, but it hinders the positively charged potassium ions from leaving the cell despite __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sodium's low permeability"
+                        },
+                        "display": {
+                            "clozeText": "The negative membrane potential helps the positively charged sodium ions enter the cell despite __________, but it hinders the positively charged potassium ions from leaving the cell despite potassium's higher permeability."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "ions leak"
+                        },
+                        "display": {
+                            "clozeText": "The net effect is that three sodium __________ into the cell for every two potassium ions that leak out."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "K + pump balances"
+                        },
+                        "display": {
+                            "clozeText": "The Na + / K + pump balances these leaks by pumping three sodium ions out for every two potassium ions it pumps in."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Na"
+                        },
+                        "display": {
+                            "clozeText": "The __________ + / K + pump balances these leaks by pumping three sodium ions out for every two potassium ions it pumps in."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "leaks"
+                        },
+                        "display": {
+                            "clozeText": "The Na + / K + pump balances these __________ by pumping three sodium ions out for every two potassium ions it pumps in."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane potential"
+                        },
+                        "display": {
+                            "clozeText": "The key to understanding how this happens is the action potential, which is a rapid change in the __________, first in a positive direction, then in a negative direction, returning to the resting potential."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "action potentials"
+                        },
+                        "display": {
+                            "clozeText": "When a neuron conducts an electrical current, that current is in the form of a series of __________ occurring in sequence along the axon, from the cell body to the axon terminal."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neurons"
+                        },
+                        "display": {
+                            "clozeText": "__________ are excitable ; that is, they can respond to changes in their surroundings."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "Some __________, for example, detect changes in temperature, light, or pressure outside the body, whereas others respond to signals from inside the body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "stimuli"
+                        },
+                        "display": {
+                            "clozeText": "In either case, such changes or __________ usually affect the membrane potential in the region of the membrane exposed to the stimulus, causing a local potential change."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeText": "If, as a result, the __________ potential becomes more negative than the resting potential, the __________ is hyperpolarized."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeText": "If the __________ becomes less negative than the resting potential, the __________ is depolarized."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "depolarization"
+                        },
+                        "display": {
+                            "clozeText": "For example, if the membrane is being depolarized, the greater the stimulus, the greater the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "voltage-gated sodium channel"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism uses another type of ion channel, a __________ that opens when threshold is reached."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "threshold"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism uses another type of ion channel, a voltage-gated sodium channel that opens when __________ is reached."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ion channel"
+                        },
+                        "display": {
+                            "clozeText": "The mechanism uses another type of __________, a voltage-gated sodium channel that opens when threshold is reached."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "multipolar neuron"
+                        },
+                        "display": {
+                            "clozeText": "In a __________, the first part of the axon, the cone-shaped axon hillock or initial segment, is often referred to as the trigger zone because it contains many such voltage-gated sodium channels."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "many such voltage-gated sodium channels"
+                        },
+                        "display": {
+                            "clozeText": "In a multipolar neuron, the first part of the axon, the cone-shaped axon hillock or initial segment, is often referred to as the trigger zone because it contains __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cone-shaped axon hillock"
+                        },
+                        "display": {
+                            "clozeText": "In a multipolar neuron, the first part of the axon, the __________ or initial segment, is often referred to as the trigger zone because it contains many such voltage-gated sodium channels."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sodium permeability"
+                        },
+                        "display": {
+                            "clozeText": "At the resting membrane potential, these sodium channels remain closed, but when threshold is reached, they open for an instant, briefly increasing __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "threshold"
+                        },
+                        "display": {
+                            "clozeText": "At the resting membrane potential, these sodium channels remain closed, but when __________ is reached, they open for an instant, briefly increasing sodium permeability."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sodium channels"
+                        },
+                        "display": {
+                            "clozeText": "At the resting membrane potential, these __________ remain closed, but when threshold is reached, they open for an instant, briefly increasing sodium permeability."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradient"
+                        },
+                        "display": {
+                            "clozeText": "Sodium ions diffuse inward through the open sodium channels, down their __________, aided by the attraction of the sodium ions to the negative charges on the inside of the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "trigger zone changes"
+                        },
+                        "display": {
+                            "clozeText": "As the sodium ions diffuse inward, the membrane potential at the __________ from its resting value and momentarily becomes positive on the inside."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "voltage-gated sodium channels"
+                        },
+                        "display": {
+                            "clozeText": "The __________ quickly close, but at almost the same time, slower voltage-gated potassium channels open and briefly increase potassium permeability."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "close , but at almost the same time"
+                        },
+                        "display": {
+                            "clozeText": "The voltage-gated sodium channels quickly __________, slower voltage-gated potassium channels open and briefly increase potassium permeability."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "slower voltage-gated potassium channels"
+                        },
+                        "display": {
+                            "clozeText": "The voltage-gated sodium channels quickly close, but at almost the same time, __________ open and briefly increase potassium permeability."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "increase potassium permeability"
+                        },
+                        "display": {
+                            "clozeText": "The voltage-gated sodium channels quickly close, but at almost the same time, slower voltage-gated potassium channels open and briefly __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "briefly"
+                        },
+                        "display": {
+                            "clozeText": "The voltage-gated sodium channels quickly close, but at almost the same time, slower voltage-gated potassium channels open and __________ increase potassium permeability."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradient"
+                        },
+                        "display": {
+                            "clozeText": "As potassium ions diffuse outward, down their __________ and through the open potassium channels, the inside becomes negatively charged once more."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "potassium ions"
+                        },
+                        "display": {
+                            "clozeText": "As __________ diffuse outward, down their concentration gradient and through the open potassium channels, the inside becomes negatively charged once more."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "open potassium channels"
+                        },
+                        "display": {
+                            "clozeText": "As potassium ions diffuse outward, down their concentration gradient and through the __________, the inside becomes negatively charged once more."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bioelectric effect"
+                        },
+                        "display": {
+                            "clozeText": "The number of sodium and potassium ions crossing the membrane during an action potential is extremely small, although the __________ is quite significant."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Most voltage-gated channels"
+                        },
+                        "display": {
+                            "clozeText": "__________ in a neuron are along the axon, especially at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "Most voltage-gated channels in a neuron are along the __________, especially at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "An action potential at the trigger zone causes a bioelectric current to flow a short distance down the __________, which stimulates the adjacent membrane to reach its threshold level, triggering another action potential."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "The second action potential causes another electric current to flow farther down the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "This sequence of events results in the conduction of the action potential along the __________ without decreasing in amplitude, even if the __________ branches."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "propagation"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of an action potential continues to the end of the axon."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "The propagation of an action potential continues to the end of the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "Conduction of an impulse along an __________ is similar to conduction of an impulse in a muscle fiber mentioned in section 9.2, Skeletal Muscle Contraction, Stimulus for Contraction."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "conduction"
+                        },
+                        "display": {
+                            "clozeText": "Conduction of an impulse along an axon is similar to __________ of an impulse in a muscle fiber mentioned in section 9.2, Skeletal Muscle Contraction, Stimulus for Contraction."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Conduction"
+                        },
+                        "display": {
+                            "clozeText": "__________ of an impulse along an axon is similar to conduction of an impulse in a muscle fiber mentioned in section 9.2, Skeletal Muscle Contraction, Stimulus for Contraction."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "transverse tubules"
+                        },
+                        "display": {
+                            "clozeText": "In the muscle fiber, stimulation at the motor end plate triggers an action potential that spreads over the surface of the fiber and down into its __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "stimulation"
+                        },
+                        "display": {
+                            "clozeText": "In the muscle fiber, __________ at the motor end plate triggers an action potential that spreads over the surface of the fiber and down into its transverse tubules."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradients"
+                        },
+                        "display": {
+                            "clozeText": "Nerve cell membrane maintains resting potential by diffusion of Na + and K + down their __________ as the cell pumps them up the gradients."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Na"
+                        },
+                        "display": {
+                            "clozeText": "Nerve cell membrane maintains resting potential by diffusion of __________ + and K + down their concentration gradients as the cell pumps them up the gradients."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Sodium ions"
+                        },
+                        "display": {
+                            "clozeText": "__________ diffuse inward, depolarizing the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Potassium ions"
+                        },
+                        "display": {
+                            "clozeText": "__________ diffuse outward, repolarizing the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "adjacent portions"
+                        },
+                        "display": {
+                            "clozeText": "The resulting action potential causes an electric current that stimulates __________ of the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "In other words, if a __________ responds at all, it responds completely."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "Thus, an impulse is conducted whenever a stimulus of threshold intensity or above is applied to an __________ and all impulses conducted on that __________ are the same strength."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "threshold intensity"
+                        },
+                        "display": {
+                            "clozeText": "Thus, an impulse is conducted whenever a stimulus of __________ or above is applied to an axon and all impulses conducted on that axon are the same strength."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "axon"
+                        },
+                        "display": {
+                            "clozeText": "The number of action potentials per second that an __________ can generate is limited, because during an action potential, that part of the __________ becomes unresponsive to another threshold stimulus."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "refractory period"
+                        },
+                        "display": {
+                            "clozeText": "This brief period, called the __________, has two parts."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "relative refractory period"
+                        },
+                        "display": {
+                            "clozeText": "A __________ follows, as the membrane reestablishes its resting potential."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "relative refractory period"
+                        },
+                        "display": {
+                            "clozeText": "Remembering that the action potential takes about a millisecond, and adding the time of the __________, the maximum theoretical frequency of impulses in a neuron is about 700 per second."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "frequencies"
+                        },
+                        "display": {
+                            "clozeText": "In the body, this limit is rarely achieved -- __________ of about 100 impulses per second are common."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "refractory period"
+                        },
+                        "display": {
+                            "clozeText": "The __________ also ensures that an action potential is conducted in only one direction, down the axon, because the area upstream from where the action potential has just occurred is still in the __________ from the previous action potential."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "electrical insulator"
+                        },
+                        "display": {
+                            "clozeText": "Thus, myelin prevents almost all flow of ions through the membrane that it encloses and serves as an __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "myelin sheath"
+                        },
+                        "display": {
+                            "clozeText": "It might seem that the __________ would prevent conduction of an impulse, and this would be true if the sheath were continuous along the length of the axon."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "myelinated axon"
+                        },
+                        "display": {
+                            "clozeText": "When a __________ is stimulated to threshold, an action potential occurs at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "next node"
+                        },
+                        "display": {
+                            "clozeText": "As this local current reaches the first node, it stimulates the membrane to its threshold level, and an action potential occurs there, sending a bioelectric current to the __________ downstream."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "first node"
+                        },
+                        "display": {
+                            "clozeText": "As this local current reaches the __________, it stimulates the membrane to its threshold level, and an action potential occurs there, sending a bioelectric current to the next node downstream."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "myelinated axon"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, as an impulse is conducted along a __________, action potentials occur only at the nodes."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "action potentials"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, as an impulse is conducted along a myelinated axon, __________ occur only at the nodes."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "nodes"
+                        },
+                        "display": {
+                            "clozeText": "Consequently, as an impulse is conducted along a myelinated axon, action potentials occur only at the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "action potentials"
+                        },
+                        "display": {
+                            "clozeText": "Because the __________ appear to jump from node to node, this type of impulse conduction is called saltatory conduction."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impulse conduction"
+                        },
+                        "display": {
+                            "clozeText": "Because the action potentials appear to jump from node to node, this type of __________ is called saltatory conduction."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "unmyelinated axons"
+                        },
+                        "display": {
+                            "clozeText": "Conduction on myelinated axons is many times faster than conduction on __________ The diameter of the axon affects the speed of impulse conduction -- the greater the diameter, the faster the impulse."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "myelinated axons"
+                        },
+                        "display": {
+                            "clozeText": "Conduction on __________ is many times faster than conduction on unmyelinated axons The diameter of the axon affects the speed of impulse conduction -- the greater the diameter, the faster the impulse."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "thick , myelinated axon"
+                        },
+                        "display": {
+                            "clozeText": "An impulse on a comparatively __________, such as that of a motor neuron associated with a skeletal muscle, might travel 120 meters per second, whereas an impulse on a thin, unmyelinated axon, such as that of a sensory neuron associated with the skin, might move only 0.5 meter per second."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "thin , unmyelinated axon"
+                        },
+                        "display": {
+                            "clozeText": "An impulse on a comparatively thick, myelinated axon, such as that of a motor neuron associated with a skeletal muscle, might travel 120 meters per second, whereas an impulse on a __________, such as that of a sensory neuron associated with the skin, might move only 0.5 meter per second."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "0.5 meter"
+                        },
+                        "display": {
+                            "clozeText": "An impulse on a comparatively thick, myelinated axon, such as that of a motor neuron associated with a skeletal muscle, might travel 120 meters per second, whereas an impulse on a thin, unmyelinated axon, such as that of a sensory neuron associated with the skin, might move only __________ per second."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic cells"
+                        },
+                        "display": {
+                            "clozeText": "When neurotransmitters bind these receptors, they cause ion channels in the __________ to open."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "When __________ bind these receptors, they cause ion channels in the postsynaptic cells to open."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeText": "When neurotransmitters bind these __________, they cause ion channels in the postsynaptic cells to open."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "voltage-gated ion channels"
+                        },
+                        "display": {
+                            "clozeText": "Ion channels that respond to neurotransmitter molecules are called chemically gated, in contrast to the __________ that participate in action potentials."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter molecules"
+                        },
+                        "display": {
+                            "clozeText": "Ion channels that respond to __________ are called chemically gated, in contrast to the voltage-gated ion channels that participate in action potentials."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "action potentials"
+                        },
+                        "display": {
+                            "clozeText": "Ion channels that respond to neurotransmitter molecules are called chemically gated, in contrast to the voltage-gated ion channels that participate in __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Ion channels"
+                        },
+                        "display": {
+                            "clozeText": "__________ that respond to neurotransmitter molecules are called chemically gated, in contrast to the voltage-gated ion channels that participate in action potentials."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "synaptic potentials"
+                        },
+                        "display": {
+                            "clozeText": "Changes in chemically gated ion channels create local potentials, called __________, which enable one neuron to affect another."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "local potentials"
+                        },
+                        "display": {
+                            "clozeText": "Changes in chemically gated ion channels create __________, called synaptic potentials, which enable one neuron to affect another."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one neuron"
+                        },
+                        "display": {
+                            "clozeText": "Changes in chemically gated ion channels create local potentials, called synaptic potentials, which enable __________ to affect another."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "ion channels"
+                        },
+                        "display": {
+                            "clozeText": "Changes in chemically gated __________ create local potentials, called synaptic potentials, which enable one neuron to affect another."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "__________ that make reaching threshold less likely are called inhibitory, because they decrease the chance that an impulse will occur."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "threshold"
+                        },
+                        "display": {
+                            "clozeText": "Neurotransmitters that make reaching __________ less likely are called inhibitory, because they decrease the chance that an impulse will occur."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "electrical synapses"
+                        },
+                        "display": {
+                            "clozeText": "Some relatively uncommon synapses, called __________, are in certain parts of the brain and eyes."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "uncommon synapses"
+                        },
+                        "display": {
+                            "clozeText": "Some relatively __________, called electrical synapses, are in certain parts of the brain and eyes."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic receptor"
+                        },
+                        "display": {
+                            "clozeText": "For example, if a neurotransmitter binds to a __________ and opens sodium ion channels, the ions diffuse inward, depolarizing the membrane, possibly triggering an action potential."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "For example, if a __________ binds to a postsynaptic receptor and opens sodium ion channels, the ions diffuse inward, depolarizing the membrane, possibly triggering an action potential."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "different neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "If a __________ binds other receptors and increases membrane permeability to potassium ions, these ions diffuse outward, hyperpolarizing the membrane."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane permeability"
+                        },
+                        "display": {
+                            "clozeText": "If a different neurotransmitter binds other receptors and increases __________ to potassium ions, these ions diffuse outward, hyperpolarizing the membrane."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "inhibitory postsynaptic potential"
+                        },
+                        "display": {
+                            "clozeText": "Because an action potential is now less likely to occur, this change is called an __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "depolarization"
+                        },
+                        "display": {
+                            "clozeText": "In this case, negative chloride ions enter the cell opposing the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "synaptic knobs"
+                        },
+                        "display": {
+                            "clozeText": "In the brain and spinal cord, each neuron may receive the __________ of a thousand or more axons on its dendrites and cell body."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "thousand or more axons"
+                        },
+                        "display": {
+                            "clozeText": "In the brain and spinal cord, each neuron may receive the synaptic knobs of a __________ on its dendrites and cell body."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "dendrites"
+                        },
+                        "display": {
+                            "clozeText": "In the brain and spinal cord, each neuron may receive the synaptic knobs of a thousand or more axons on its __________ and cell body."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "net effect"
+                        },
+                        "display": {
+                            "clozeText": "Conversely, if the __________ is inhibitory, an action potential does not occur."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic potentials"
+                        },
+                        "display": {
+                            "clozeText": "Summation of the excitatory and inhibitory effects of the __________ commonly takes place at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Summation"
+                        },
+                        "display": {
+                            "clozeText": "__________ of the excitatory and inhibitory effects of the postsynaptic potentials commonly takes place at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "excitatory and inhibitory effects"
+                        },
+                        "display": {
+                            "clozeText": "Summation of the __________ of the postsynaptic potentials commonly takes place at the trigger zone."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "trigger zone"
+                        },
+                        "display": {
+                            "clozeText": "Summation of the excitatory and inhibitory effects of the postsynaptic potentials commonly takes place at the __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "decision-making part"
+                        },
+                        "display": {
+                            "clozeText": "In this way, the trigger zone, as its name implies, serves as a __________ of the neuron."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "Some __________ release only one type, whereas others produce two or three."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "monoamines"
+                        },
+                        "display": {
+                            "clozeText": "Neurotransmitters include acetylcholine, which stimulates skeletal muscle contractions ; a group of compounds called __________, which are modified amino acids ; a group of unmodified amino acids ; and a large group of peptides, which are short chains of amino acids."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "__________ include acetylcholine, which stimulates skeletal muscle contractions ; a group of compounds called monoamines, which are modified amino acids ; a group of unmodified amino acids ; and a large group of peptides, which are short chains of amino acids."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "acetylcholine"
+                        },
+                        "display": {
+                            "clozeText": "Neurotransmitters include __________, which stimulates skeletal muscle contractions ; a group of compounds called monoamines, which are modified amino acids ; a group of unmodified amino acids ; and a large group of peptides, which are short chains of amino acids."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "skeletal muscle contractions"
+                        },
+                        "display": {
+                            "clozeText": "Neurotransmitters include acetylcholine, which stimulates __________ ; a group of compounds called monoamines, which are modified amino acids ; a group of unmodified amino acids ; and a large group of peptides, which are short chains of amino acids."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane's permeability"
+                        },
+                        "display": {
+                            "clozeText": "When an action potential passes along the membrane of a synaptic knob, it increases the __________ to calcium ions by opening calcium ion channels."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synaptic knob"
+                        },
+                        "display": {
+                            "clozeText": "When an action potential passes along the membrane of a __________, it increases the membrane's permeability to calcium ions by opening calcium ion channels."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "PNS"
+                        },
+                        "display": {
+                            "clozeText": "Norepinephrine in the __________ may excite or inhibit autonomic nervous system actions, depending on receptors."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Norepinephrine"
+                        },
+                        "display": {
+                            "clozeText": "__________ in the PNS may excite or inhibit autonomic nervous system actions, depending on receptors."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "autonomic nervous system actions"
+                        },
+                        "display": {
+                            "clozeText": "Norepinephrine in the PNS may excite or inhibit __________, depending on receptors."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeText": "Norepinephrine in the PNS may excite or inhibit autonomic nervous system actions, depending on __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Dopamine"
+                        },
+                        "display": {
+                            "clozeText": "__________ in the CNS creates a sense of well-being ; deficiency in some brain areas associated with Parkinson disease."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Dopamine in the __________ creates a sense of well-being ; deficiency in some brain areas associated with Parkinson disease."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Parkinson disease"
+                        },
+                        "display": {
+                            "clozeText": "Dopamine in the CNS creates a sense of well-being ; deficiency in some brain areas associated with __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Enkephalins"
+                        },
+                        "display": {
+                            "clozeText": "__________ and endorphins in the CNS are generally inhibitory ; reduce pain by inhibiting substance P release."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Enkephalins and endorphins in the __________ are generally inhibitory ; reduce pain by inhibiting substance P release."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "endorphins"
+                        },
+                        "display": {
+                            "clozeText": "Enkephalins and __________ in the CNS are generally inhibitory ; reduce pain by inhibiting substance P release."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "vesicle"
+                        },
+                        "display": {
+                            "clozeText": "A __________ becomes part of the cell membrane after it releases its neurotransmitter."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "A vesicle becomes part of the cell membrane after it releases its __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Endocytosis"
+                        },
+                        "display": {
+                            "clozeText": "__________ eventually returns the membrane material to the cytoplasm, where it can provide material to form new secretory vesicles."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "new secretory vesicles"
+                        },
+                        "display": {
+                            "clozeText": "Endocytosis eventually returns the membrane material to the cytoplasm, where it can provide material to form __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cytoplasm"
+                        },
+                        "display": {
+                            "clozeText": "Endocytosis eventually returns the membrane material to the __________, where it can provide material to form new secretory vesicles."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuromodulators"
+                        },
+                        "display": {
+                            "clozeText": "These peptides act as neurotransmitters or as __________, which are substances that alter a neuron's response to a neurotransmitter or block the release of a neurotransmitter."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "peptides"
+                        },
+                        "display": {
+                            "clozeText": "These __________ act as neurotransmitters or as neuromodulators, which are substances that alter a neuron's response to a neurotransmitter or block the release of a neurotransmitter."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron's response"
+                        },
+                        "display": {
+                            "clozeText": "These peptides act as neurotransmitters or as neuromodulators, which are substances that alter a __________ to a neurotransmitter or block the release of a neurotransmitter."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitters"
+                        },
+                        "display": {
+                            "clozeText": "These peptides act as __________ or as neuromodulators, which are substances that alter a neuron's response to a neurotransmitter or block the release of a neurotransmitter."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "These peptides act as neurotransmitters or as neuromodulators, which are substances that alter a neuron's response to a __________ or block the release of a __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Enkephalins"
+                        },
+                        "display": {
+                            "clozeText": "__________ and endorphins may relieve pain by inhibiting the release of substance P from these neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "endorphins"
+                        },
+                        "display": {
+                            "clozeText": "Enkephalins and __________ may relieve pain by inhibiting the release of substance P from these neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "Enkephalins and endorphins may relieve pain by inhibiting the release of substance P from these __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurons"
+                        },
+                        "display": {
+                            "clozeText": "The way the nervous system collects, processes, and responds to information reflects, in part, the organization of __________ and axons in the brain and spinal cord."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Interneurons"
+                        },
+                        "display": {
+                            "clozeText": "__________, which are the neurons completely within the CNS, are organized into neuronal pools."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuronal pools"
+                        },
+                        "display": {
+                            "clozeText": "Interneurons, which are the neurons completely within the CNS, are organized into __________."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Interneurons, which are the neurons completely within the __________, are organized into neuronal pools."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "threshold"
+                        },
+                        "display": {
+                            "clozeText": "If the net effect is excitatory, __________ may be reached, and an impulse triggered."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "impulse"
+                        },
+                        "display": {
+                            "clozeText": "If the net effect is excitatory, but subthreshold, an __________ will not be triggered."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "excitatory presynaptic neuron"
+                        },
+                        "display": {
+                            "clozeText": "Repeated impulses on an __________ may cause that neuron to release more neurotransmitter in response to a single impulse, making it more likely to bring the postsynaptic cell to threshold."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "postsynaptic cell"
+                        },
+                        "display": {
+                            "clozeText": "Repeated impulses on an excitatory presynaptic neuron may cause that neuron to release more neurotransmitter in response to a single impulse, making it more likely to bring the __________ to threshold."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more neurotransmitter"
+                        },
+                        "display": {
+                            "clozeText": "Repeated impulses on an excitatory presynaptic neuron may cause that neuron to release __________ in response to a single impulse, making it more likely to bring the postsynaptic cell to threshold."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "single impulse"
+                        },
+                        "display": {
+                            "clozeText": "Repeated impulses on an excitatory presynaptic neuron may cause that neuron to release more neurotransmitter in response to a __________, making it more likely to bring the postsynaptic cell to threshold."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Convergence"
+                        },
+                        "display": {
+                            "clozeText": "__________ makes it possible for a neuron to sum impulses from different sources."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "Convergence makes it possible for a __________ to sum impulses from different sources."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "one or more additional presynaptic neurons"
+                        },
+                        "display": {
+                            "clozeText": "For example, if a neuron receives what would be subthreshold stimulation from one presynaptic neuron, it may reach threshold if it receives additional stimulation from __________ at the same time."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one presynaptic neuron"
+                        },
+                        "display": {
+                            "clozeText": "For example, if a neuron receives what would be subthreshold stimulation from __________, it may reach threshold if it receives additional stimulation from one or more additional presynaptic neurons at the same time."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neuronal pool"
+                        },
+                        "display": {
+                            "clozeText": "Therefore, a neuron of a __________ may exhibit divergence by forming synapses with several other neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "divergence"
+                        },
+                        "display": {
+                            "clozeText": "Therefore, a neuron of a neuronal pool may exhibit __________ by forming synapses with several other neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synapses"
+                        },
+                        "display": {
+                            "clozeText": "Therefore, a neuron of a neuronal pool may exhibit divergence by forming __________ with several other neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuron"
+                        },
+                        "display": {
+                            "clozeText": "Therefore, a __________ of a neuronal pool may exhibit divergence by forming synapses with several other neurons."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "several other neurons"
+                        },
+                        "display": {
+                            "clozeText": "Therefore, a neuron of a neuronal pool may exhibit divergence by forming synapses with __________."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "As a result of divergence, an impulse originating from a single motor neuron in the __________ may stimulate several muscle fibers in a skeletal muscle to contract."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "CNS"
+                        },
+                        "display": {
+                            "clozeText": "Similarly, an impulse originating from a sensory receptor may diverge and reach several different regions of the __________, where the information can be processed and evoke a response."
+                        },
+                        "parameter": "0,.71"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sensory receptor"
+                        },
+                        "display": {
+                            "clozeText": "Similarly, an impulse originating from a __________ may diverge and reach several different regions of the CNS, where the information can be processed and evoke a response."
+                        },
+                        "parameter": "0,.71"
+                    }
+                ]
+            }
+        ]
+    }
+}

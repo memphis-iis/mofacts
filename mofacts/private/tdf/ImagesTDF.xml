@@ -1,7 +1,7 @@
 <tutor>
     <setspec>
         <lessonname>Images</lessonname>
-        <stimulusfile>Imagestims.xml</stimulusfile>
+        <stimulusfile>Imagestims.json</stimulusfile>
         <!--<shuffleclusters>0-1 2-2</shuffleclusters>
         <swapclusters>0-1 2-2</swapclusters>-->
         <lfparameter>0.80</lfparameter>

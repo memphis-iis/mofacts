@@ -1,0 +1,928 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeText": "When conducting a hypothesis test for a population __________, we use a z-test."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "z-test"
+                        },
+                        "display": {
+                            "clozeText": "When conducting a hypothesis test for a population proportion, we use a __________."
+                        },
+                        "parameter": "-0.00011"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeText": "When conducting a hypothesis test for a population __________, the variable is categorical. "
+                        },
+                        "parameter": "-0.00012"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "categorical"
+                        },
+                        "display": {
+                            "clozeText": "When conducting a hypothesis test for a population proportion, the variable is __________. "
+                        },
+                        "parameter": "-0.00013"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "The value proposed in the __________ hypothesis of a hypothesis test is called the __________ value."
+                        },
+                        "parameter": "-0.00014"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "hypothesis"
+                        },
+                        "display": {
+                            "clozeText": "The value proposed in the null __________ of a __________ test is called the null value."
+                        },
+                        "parameter": "-0.00015"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "value"
+                        },
+                        "display": {
+                            "clozeText": "The __________ proposed in the null hypothesis of a hypothesis test is called the null __________."
+                        },
+                        "parameter": "-0.00016"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "alternative hypothesis"
+                        },
+                        "display": {
+                            "clozeText": "If our __________ is two-sided, we are looking for a difference from the null value in either direction."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "two-sided"
+                        },
+                        "display": {
+                            "clozeText": "If our alternative hypothesis is __________, we are looking for a difference from the null value in either direction."
+                        },
+                        "parameter": "-0.00018"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "difference"
+                        },
+                        "display": {
+                            "clozeText": "If our alternative hypothesis is two-sided, we are looking for a __________ from the null value in either direction."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null value"
+                        },
+                        "display": {
+                            "clozeText": "If our alternative hypothesis is two-sided, we are looking for a difference from the __________ in either direction."
+                        },
+                        "parameter": "-0.00020"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "When a __________ is random, it ensures that it is representative of the entire population."
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "random"
+                        },
+                        "display": {
+                            "clozeText": "When a sample is __________, it ensures that it is representative of the entire population."
+                        },
+                        "parameter": "-0.00022"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "When a sample is random, it ensures that it is representative of the entire __________."
+                        },
+                        "parameter": "-0.00023"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hypothesis testing"
+                        },
+                        "display": {
+                            "clozeText": "In __________, the test statistic is a measure of how far the sample proportion or mean is from the null value. "
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "test statistic "
+                        },
+                        "display": {
+                            "clozeText": "In hypothesis testing, the __________is a measure of how far the sample proportion or mean is from the null value. "
+                        },
+                        "parameter": "-0.00025"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null value"
+                        },
+                        "display": {
+                            "clozeText": "In hypothesis testing, the test statistic is a measure of how far the sample proportion or mean is from the __________. "
+                        },
+                        "parameter": "-0.00026"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "z-test"
+                        },
+                        "display": {
+                            "clozeText": "In a __________ for the population proportion, the test statistic measures the difference between P&#770; and p<sub>0</sub> in standard deviations ."
+                        },
+                        "parameter": "-0.00027"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "In a z-test for the population proportion, the __________ measures the difference between P&#770; and p<sub>0</sub> in standard deviations ."
+                        },
+                        "parameter": "-0.00028"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviations"
+                        },
+                        "display": {
+                            "clozeText": "In a z-test for the population proportion, the test statistic measures the difference between P&#770; and p<sub>0</sub> in __________ ."
+                        },
+                        "parameter": "-0.00029"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "We can also say that the __________ is a measure of evidence against the null hypothesis H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00030"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "evidence"
+                        },
+                        "display": {
+                            "clozeText": "We can also say that the test statistic is a measure of __________ against the null hypothesis H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00031"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "against"
+                        },
+                        "display": {
+                            "clozeText": "We can also say that the test statistic is a measure of evidence __________ the null hypothesis H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "We can also say that the test statistic is a measure of evidence against the __________ hypothesis H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00033"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "larger"
+                        },
+                        "display": {
+                            "clozeText": "The __________ test statistic we calculate, the more evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00034"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "The larger __________ we calculate, the more evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00035"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "more"
+                        },
+                        "display": {
+                            "clozeText": "The larger test statistic we calculate, the __________ evidence we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00036"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "evidence"
+                        },
+                        "display": {
+                            "clozeText": "The larger test statistic we calculate, the more __________ we have against H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00037"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "p-value"
+                        },
+                        "display": {
+                            "clozeText": "Assuming that H<sub>0</sub> is true, the __________ is the probability of observing a test statistic as extreme or more extreme as that observed."
+                        },
+                        "parameter": "-0.00038"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "test statistic"
+                        },
+                        "display": {
+                            "clozeText": "Assuming that H<sub>0</sub> is true, the p-value is the probability of observing a __________ as extreme or more extreme as that observed."
+                        },
+                        "parameter": "-0.00039"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "p-value"
+                        },
+                        "display": {
+                            "clozeText": "In a two-tailed or two-sided hypothesis test, the __________ will be twice as large as that of a one-sided test. "
+                        },
+                        "parameter": "-0.00040"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "twice"
+                        },
+                        "display": {
+                            "clozeText": "In a two-tailed or two-sided hypothesis test, the p-value will be __________ as large as that of a one-sided test. "
+                        },
+                        "parameter": "-0.00041"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "large"
+                        },
+                        "display": {
+                            "clozeText": "In a two-tailed or two-sided hypothesis test, the p-value will be twice as __________ as that of a one-sided test. "
+                        },
+                        "parameter": "-0.00042"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "one-sided"
+                        },
+                        "display": {
+                            "clozeText": "In a two-tailed or two-sided hypothesis test, the p-value will be twice as large as that of a __________ test. "
+                        },
+                        "parameter": "-0.00043"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "P-values"
+                        },
+                        "display": {
+                            "clozeText": "__________ correspond to areas and probabilities under the standard normal curve."
+                        },
+                        "parameter": "-0.00044"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "areas"
+                        },
+                        "display": {
+                            "clozeText": "P-values correspond to __________ and probabilities under the standard normal curve."
+                        },
+                        "parameter": "-0.00045"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "probabilities"
+                        },
+                        "display": {
+                            "clozeText": "P-values correspond to areas and __________ under the standard normal curve."
+                        },
+                        "parameter": "-0.00046"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "normal curve"
+                        },
+                        "display": {
+                            "clozeText": "P-values correspond to areas and probabilities under the standard __________."
+                        },
+                        "parameter": "-0.00047"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "larger"
+                        },
+                        "display": {
+                            "clozeText": "With a __________ sample size in a hypothesis test, we can expect a smaller margin of error and a narrower confidence interval."
+                        },
+                        "parameter": "-0.00048"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample size"
+                        },
+                        "display": {
+                            "clozeText": "With a larger __________ in a hypothesis test, we can expect a smaller margin of error and a narrower confidence interval."
+                        },
+                        "parameter": "-0.00049"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "margin of error"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size in a hypothesis test, we can expect a smaller __________ and a narrower confidence interval."
+                        },
+                        "parameter": "-0.00050"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "narrower"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size in a hypothesis test, we can expect a smaller margin of error and a __________ confidence interval."
+                        },
+                        "parameter": "-0.00051"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "confidence interval"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size in a hypothesis test, we can expect a smaller margin of error and a narrower __________."
+                        },
+                        "parameter": "-0.00052"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "two-sided"
+                        },
+                        "display": {
+                            "clozeText": "If a hypothesis test is __________, we can also use a 95% confidence interval to reach a conclusion."
+                        },
+                        "parameter": "-0.00053"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "95"
+                        },
+                        "display": {
+                            "clozeText": "If a hypothesis test is two-sided, we can also use a __________% confidence interval to reach a conclusion."
+                        },
+                        "parameter": "-0.00054"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "confidence interval"
+                        },
+                        "display": {
+                            "clozeText": "If a hypothesis test is two-sided, we can also use a 95% __________ to reach a conclusion."
+                        },
+                        "parameter": "-0.00055"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "sample size"
+                        },
+                        "display": {
+                            "clozeText": "As the __________ of a hypothesis test increases, the results become more statistically significant."
+                        },
+                        "parameter": "-0.00056"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "increases"
+                        },
+                        "display": {
+                            "clozeText": "As the sample size of a hypothesis test __________, the results become more statistically significant."
+                        },
+                        "parameter": "-0.00057"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "statistically significant"
+                        },
+                        "display": {
+                            "clozeText": "As the sample size of a hypothesis test increases, the results become more __________."
+                        },
+                        "parameter": "-0.00058"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population __________ &mu;, we will use a t-test when &sigma; is unknown."
+                        },
+                        "parameter": "-0.00059"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "t-test"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population mean &mu;, we will use a __________ when &sigma; is unknown."
+                        },
+                        "parameter": "-0.00060"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "unknown"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population mean &mu;, we will use a t-test when &sigma; is __________."
+                        },
+                        "parameter": "-0.00061"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population __________ &mu;, we will use a z-test when &sigma; is known."
+                        },
+                        "parameter": "-0.00062"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "z-test"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population mean &mu;, we will use a __________ when &sigma; is known."
+                        },
+                        "parameter": "-0.00063"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "known"
+                        },
+                        "display": {
+                            "clozeText": "When hypothesis testing for the population mean &mu;, we will use a z-test when &sigma; is __________."
+                        },
+                        "parameter": "-0.00064"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "z-test"
+                        },
+                        "display": {
+                            "clozeText": "In a __________ for &mu;, the test statistic is a z-score of x&#772; that tells us how far x&#772; is from &mu;<sub>0</sub> in standard deviations."
+                        },
+                        "parameter": "-0.00065"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "z-score"
+                        },
+                        "display": {
+                            "clozeText": "In a z-test for &mu;, the test statistic is a __________ of x&#772; that tells us how far x&#772; is from &mu;<sub>0</sub> in standard deviations."
+                        },
+                        "parameter": "-0.00066"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "standard deviations"
+                        },
+                        "display": {
+                            "clozeText": "In a z-test for &mu;, the test statistic is a z-score of x&#772; that tells us how far x&#772; is from &mu;<sub>0</sub> in __________."
+                        },
+                        "parameter": "-0.00067"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "unknown"
+                        },
+                        "display": {
+                            "clozeText": "When &sigma; is __________, we conduct a t-test and substitute s for &sigma;."
+                        },
+                        "parameter": "-0.00068"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "t-test"
+                        },
+                        "display": {
+                            "clozeText": "When &sigma; is unknown, we conduct a __________ and substitute s for &sigma;."
+                        },
+                        "parameter": "-0.00069"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "s"
+                        },
+                        "display": {
+                            "clozeText": "When &sigma; is unknown, we conduct a t-test and substitute __________ for &sigma;."
+                        },
+                        "parameter": "-0.00070"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "t-distribution"
+                        },
+                        "display": {
+                            "clozeText": "A __________ differs from the standard normal distribution because it has more area in the tails of the curve. "
+                        },
+                        "parameter": "-0.00071"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "normal"
+                        },
+                        "display": {
+                            "clozeText": "A t-distribution differs from the standard __________ distribution because it has more area in the tails of the curve. "
+                        },
+                        "parameter": "-0.00072"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "area"
+                        },
+                        "display": {
+                            "clozeText": "A t-distribution differs from the standard normal distribution because it has more __________ in the tails of the curve. "
+                        },
+                        "parameter": "-0.00073"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "tails"
+                        },
+                        "display": {
+                            "clozeText": "A t-distribution differs from the standard normal distribution because it has more area in the __________ of the curve. "
+                        },
+                        "parameter": "-0.00074"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "t-distribution"
+                        },
+                        "display": {
+                            "clozeText": "A __________ is more appropriate for cases with more variability."
+                        },
+                        "parameter": "-0.00075"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "variability"
+                        },
+                        "display": {
+                            "clozeText": "A t-distribution is more appropriate for cases with more __________."
+                        },
+                        "parameter": "-0.00076"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "t-distribution"
+                        },
+                        "display": {
+                            "clozeText": "The __________ has two sources of variation: from the sampling variability of x&#772; and from the sampling variability of s."
+                        },
+                        "parameter": "-0.00077"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sampling"
+                        },
+                        "display": {
+                            "clozeText": "The t-distribution has two sources of variation: from the __________ variability of x&#772; and from the __________ variability of s."
+                        },
+                        "parameter": "-0.00078"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "larger"
+                        },
+                        "display": {
+                            "clozeText": "With a __________ sample size, the t-distribution will approach the normal z-distribution."
+                        },
+                        "parameter": "-0.00079"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample size"
+                        },
+                        "display": {
+                            "clozeText": "With a larger __________, the t-distribution will approach the normal z-distribution."
+                        },
+                        "parameter": "-0.00080"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "t-distribution"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size, the __________ will approach the normal z-distribution."
+                        },
+                        "parameter": "-0.00081"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "normal"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size, the t-distribution will approach the __________ z-distribution."
+                        },
+                        "parameter": "-0.00082"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "z-distribution"
+                        },
+                        "display": {
+                            "clozeText": "With a larger sample size, the t-distribution will approach the normal __________."
+                        },
+                        "parameter": "-0.00083"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Type 1"
+                        },
+                        "display": {
+                            "clozeText": "A __________ error occurs when the null hypothesis is true but we reject it."
+                        },
+                        "parameter": "-0.00084"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "true "
+                        },
+                        "display": {
+                            "clozeText": "A Type 1 error occurs when the null hypothesis is __________but we reject it."
+                        },
+                        "parameter": "-0.00085"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "reject"
+                        },
+                        "display": {
+                            "clozeText": "A Type 1 error occurs when the null hypothesis is true but we __________ it."
+                        },
+                        "parameter": "-0.00086"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Type 2"
+                        },
+                        "display": {
+                            "clozeText": "A __________ error occurs when the null hypothesis is false but we fail to reject it."
+                        },
+                        "parameter": "-0.00087"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "false"
+                        },
+                        "display": {
+                            "clozeText": "A Type 2 error occurs when the null hypothesis is __________ but we fail to reject it."
+                        },
+                        "parameter": "-0.00088"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "fail to reject"
+                        },
+                        "display": {
+                            "clozeText": "A Type 2 error occurs when the null hypothesis is false but we __________ it."
+                        },
+                        "parameter": "-0.00089"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "probability"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of making a Type 1 error is our significance level &alpha;."
+                        },
+                        "parameter": "-0.00090"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Type 1"
+                        },
+                        "display": {
+                            "clozeText": "The probability of making a __________ error is our significance level &alpha;."
+                        },
+                        "parameter": "-0.00091"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "significance level"
+                        },
+                        "display": {
+                            "clozeText": "The probability of making a Type 1 error is our __________ &alpha;."
+                        },
+                        "parameter": "-0.00092"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Type 1"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a __________ error, we can decrease our significance level &alpha;."
+                        },
+                        "parameter": "-0.00093"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "decrease"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a Type 1 error, we can __________ our significance level &alpha;."
+                        },
+                        "parameter": "-0.00094"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "significance level"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a Type 1 error, we can decrease our __________ &alpha;."
+                        },
+                        "parameter": "-0.00095"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "reduce"
+                        },
+                        "display": {
+                            "clozeText": "To __________ the risk of making a Type 2 error, we can increase our sample size."
+                        },
+                        "parameter": "-0.00096"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Type 2"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a __________ error, we can increase our sample size."
+                        },
+                        "parameter": "-0.00097"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "increase"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a Type 2 error, we can __________ our sample size."
+                        },
+                        "parameter": "-0.00098"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample size"
+                        },
+                        "display": {
+                            "clozeText": "To reduce the risk of making a Type 2 error, we can increase our __________."
+                        },
+                        "parameter": "-0.00099"
+                    }
+                ]
+            }
+        ]
+    }
+}

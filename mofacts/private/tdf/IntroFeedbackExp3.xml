@@ -4,7 +4,7 @@
         <lessonname>Intro Explanatory 3</lessonname>
         <userselect>false</userselect>
         <experimentTarget>introexp3</experimentTarget>
-        <stimulusfile>IntroExplanatory3stims.xml</stimulusfile>
+        <stimulusfile>IntroExplanatory3stims.json</stimulusfile>
     </setspec>
     <unit>
         <unitname>Informed Consent</unitname>

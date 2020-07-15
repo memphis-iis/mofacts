@@ -1,0 +1,723 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Point estimation"
+                        },
+                        "display": {
+                            "clozeText": "__________ estimates an unknown parameter using a single number that has been calculated from the sample."
+                        },
+                        "parameter": "-0.00010"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "parameter"
+                        },
+                        "display": {
+                            "clozeText": "Point estimation estimates an unknown __________ using a single number that has been calculated from the sample."
+                        },
+                        "parameter": "-0.00011"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "Point estimation estimates an unknown parameter using a single number that has been calculated from the __________."
+                        },
+                        "parameter": "-0.00012"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Interval estimation"
+                        },
+                        "display": {
+                            "clozeText": "__________ estimates an unknown parameter using an interval of values that is likely to contain the true value of that parameter."
+                        },
+                        "parameter": "-0.00013"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "parameter"
+                        },
+                        "display": {
+                            "clozeText": "Interval estimation estimates an unknown __________ using an interval of values that is likely to contain the true value of that __________."
+                        },
+                        "parameter": "-0.00014"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "interval"
+                        },
+                        "display": {
+                            "clozeText": "Interval estimation estimates an unknown parameter using an __________ of values that is likely to contain the true value of that parameter."
+                        },
+                        "parameter": "-0.00015"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "true value"
+                        },
+                        "display": {
+                            "clozeText": "Interval estimation estimates an unknown parameter using an interval of values that is likely to contain the __________ of that parameter."
+                        },
+                        "parameter": "-0.00016"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Hypothesis testing"
+                        },
+                        "display": {
+                            "clozeText": "__________ involves checking data from a sample to see if it provides evidence for or against a given claim about a population."
+                        },
+                        "parameter": "-0.00017"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "Hypothesis testing involves checking data from a __________ to see if it provides evidence for or against a given claim about a population."
+                        },
+                        "parameter": "-0.00018"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "evidence"
+                        },
+                        "display": {
+                            "clozeText": "Hypothesis testing involves checking data from a sample to see if it provides __________ for or against a given claim about a population."
+                        },
+                        "parameter": "-0.00019"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "population"
+                        },
+                        "display": {
+                            "clozeText": "Hypothesis testing involves checking data from a sample to see if it provides evidence for or against a given claim about a __________."
+                        },
+                        "parameter": "-0.00020"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "categorical"
+                        },
+                        "display": {
+                            "clozeText": "When data is __________, we make inferences about the population proportion p."
+                        },
+                        "parameter": "-0.00021"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeText": "When data is categorical, we make inferences about the population __________ p."
+                        },
+                        "parameter": "-0.00022"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "quantitative"
+                        },
+                        "display": {
+                            "clozeText": "When data is __________, we make inferences about the population mean &mu;."
+                        },
+                        "parameter": "-0.00023"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "inferences"
+                        },
+                        "display": {
+                            "clozeText": "When data is quantitative, we make __________ about the population mean &mu;."
+                        },
+                        "parameter": "-0.00024"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "mean"
+                        },
+                        "display": {
+                            "clozeText": "When data is quantitative, we make inferences about the population __________ &mu;."
+                        },
+                        "parameter": "-0.00025"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "point"
+                        },
+                        "display": {
+                            "clozeText": "The __________ estimator for &mu; is x&#772;."
+                        },
+                        "parameter": "-0.00026"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "estimator"
+                        },
+                        "display": {
+                            "clozeText": "The point __________ for &mu; is x&#772;."
+                        },
+                        "parameter": "-0.00027"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "point estimator"
+                        },
+                        "display": {
+                            "clozeText": "The __________ for p is p&#770;."
+                        },
+                        "parameter": "-0.00028"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "p"
+                        },
+                        "display": {
+                            "clozeText": "The point estimator for __________ is p&#770;."
+                        },
+                        "parameter": "-0.00029"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "accuracy"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of point estimators x&#772; and p&#770; increases as the sample size increases."
+                        },
+                        "parameter": "-0.00030"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "estimators"
+                        },
+                        "display": {
+                            "clozeText": "The accuracy of point __________ x&#772; and p&#770; increases as the sample size increases."
+                        },
+                        "parameter": "-0.00031"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "increases"
+                        },
+                        "display": {
+                            "clozeText": "The accuracy of point estimators x&#772; and p&#770; __________ as the sample size __________."
+                        },
+                        "parameter": "-0.00032"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample size"
+                        },
+                        "display": {
+                            "clozeText": "The accuracy of point estimators x&#772; and p&#770; increases as the __________ increases."
+                        },
+                        "parameter": "-0.00033"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "point"
+                        },
+                        "display": {
+                            "clozeText": "The __________ estimator for &sigma;<sup>2</sup>is s<sup>2</sup>."
+                        },
+                        "parameter": "-0.00034"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "estimator"
+                        },
+                        "display": {
+                            "clozeText": "The point __________ for &sigma;<sup>2</sup>is s<sup>2</sup>."
+                        },
+                        "parameter": "-0.00035"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "multipliers"
+                        },
+                        "display": {
+                            "clozeText": "Depending on the given level of confidence, we use __________, notated z*, to find the margin of error."
+                        },
+                        "parameter": "-0.00036"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "margin of error"
+                        },
+                        "display": {
+                            "clozeText": "Depending on the given level of confidence, we use multipliers, notated z*, to find the __________."
+                        },
+                        "parameter": "-0.00037"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "margin of error"
+                        },
+                        "display": {
+                            "clozeText": "The __________, notated m, represents the maximum estimation error for a given level of confidence."
+                        },
+                        "parameter": "-0.00038"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "m"
+                        },
+                        "display": {
+                            "clozeText": "The margin of error, notated __________, represents the maximum estimation error for a given level of confidence."
+                        },
+                        "parameter": "-0.00039"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "maximum"
+                        },
+                        "display": {
+                            "clozeText": "The margin of error, notated m, represents the __________ estimation error for a given level of confidence."
+                        },
+                        "parameter": "-0.00040"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "68"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of __________% is 1."
+                        },
+                        "parameter": "-0.00041"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "1"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of 68% is __________."
+                        },
+                        "parameter": "-0.00042"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "95"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of __________% is 2."
+                        },
+                        "parameter": "-0.00043"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "2"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of 95% is __________."
+                        },
+                        "parameter": "-0.00044"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "99.7"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of __________% is 3."
+                        },
+                        "parameter": "-0.00045"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "3"
+                        },
+                        "display": {
+                            "clozeText": "The multiplier for a confidence level of 99.7% is __________."
+                        },
+                        "parameter": "-0.00046"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "wider"
+                        },
+                        "display": {
+                            "clozeText": "A __________ confidence interval will provide a less precise estimation of the true value of the population mean."
+                        },
+                        "parameter": "-0.00047"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "confidence interval"
+                        },
+                        "display": {
+                            "clozeText": "A wider __________ will provide a less precise estimation of the true value of the population mean."
+                        },
+                        "parameter": "-0.00048"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "less"
+                        },
+                        "display": {
+                            "clozeText": "A wider confidence interval will provide a __________ precise estimation of the true value of the population mean."
+                        },
+                        "parameter": "-0.00049"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "estimation"
+                        },
+                        "display": {
+                            "clozeText": "A wider confidence interval will provide a less precise __________ of the true value of the population mean."
+                        },
+                        "parameter": "-0.00050"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "increase"
+                        },
+                        "display": {
+                            "clozeText": "If we want to __________ the precision of our confidence interval without compromising the confidence level itself, we can __________ the size of our sample."
+                        },
+                        "parameter": "-0.00051"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "confidence interval"
+                        },
+                        "display": {
+                            "clozeText": "If we want to increase the precision of our __________ without compromising the confidence level itself, we can increase the size of our sample."
+                        },
+                        "parameter": "-0.00052"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "increase"
+                        },
+                        "display": {
+                            "clozeText": "If we want to __________ the precision of our confidence interval without compromising the confidence level itself, we can __________ the size of our sample."
+                        },
+                        "parameter": "-0.00053"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sample"
+                        },
+                        "display": {
+                            "clozeText": "If we want to increase the precision of our confidence interval without compromising the confidence level itself, we can increase the size of our __________."
+                        },
+                        "parameter": "-0.00054"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Confidence intervals"
+                        },
+                        "display": {
+                            "clozeText": "__________ apply to the population proportion when the variable is categorical."
+                        },
+                        "parameter": "-0.00055"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "categorical"
+                        },
+                        "display": {
+                            "clozeText": "Confidence intervals apply to the population proportion when the variable is __________."
+                        },
+                        "parameter": "-0.00056"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hypothesis testing"
+                        },
+                        "display": {
+                            "clozeText": "In __________, the first claim is the null hypothesis, notated H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00057"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "In hypothesis testing, the first claim is the __________ hypothesis, notated H<sub>0</sub>."
+                        },
+                        "parameter": "-0.00058"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "hypothesis"
+                        },
+                        "display": {
+                            "clozeText": "In __________ testing, the second claim, typically what we suspect is happening, is the alternative __________, notated H<sub>a</sub>."
+                        },
+                        "parameter": "-0.00059"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "second"
+                        },
+                        "display": {
+                            "clozeText": "In hypothesis testing, the __________claim, typically what we suspect is happening, is the alternative hypothesis, notated H<sub>a</sub>."
+                        },
+                        "parameter": "-0.00060"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "alternative"
+                        },
+                        "display": {
+                            "clozeText": "In hypothesis testing, the second claim, typically what we suspect is happening, is the __________ hypothesis, notated H<sub>a</sub>."
+                        },
+                        "parameter": "-0.00061"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "smaller"
+                        },
+                        "display": {
+                            "clozeText": "The __________ the p-value we are given after testing, the more evidence we have against the null hypothesis."
+                        },
+                        "parameter": "-0.00062"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "p-value"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the __________ we are given after testing, the more evidence we have against the null hypothesis."
+                        },
+                        "parameter": "-0.00063"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "against"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the p-value we are given after testing, the more evidence we have __________ the null hypothesis."
+                        },
+                        "parameter": "-0.00064"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null hypothesis"
+                        },
+                        "display": {
+                            "clozeText": "The smaller the p-value we are given after testing, the more evidence we have against the __________."
+                        },
+                        "parameter": "-0.00065"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "p-value"
+                        },
+                        "display": {
+                            "clozeText": "The __________ tells us how likely or unlikely it is to get data like that observed if the null hypothesis is true."
+                        },
+                        "parameter": "-0.00066"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null hypothesis"
+                        },
+                        "display": {
+                            "clozeText": "The p-value tells us how likely or unlikely it is to get data like that observed if the __________ is true."
+                        },
+                        "parameter": "-0.00067"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "true"
+                        },
+                        "display": {
+                            "clozeText": "The p-value tells us how likely or unlikely it is to get data like that observed if the null hypothesis is __________."
+                        },
+                        "parameter": "-0.00068"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "significance level"
+                        },
+                        "display": {
+                            "clozeText": "The __________ of a hypothesis test, notated &alpha;, is the cutoff value we use to determine how unlikely our data must be to be able to reject the null hypothesis."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cutoff"
+                        },
+                        "display": {
+                            "clozeText": "The significance level of a hypothesis test, notated &alpha;, is the __________ value we use to determine how unlikely our data must be to be able to reject the null hypothesis."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "reject"
+                        },
+                        "display": {
+                            "clozeText": "The significance level of a hypothesis test, notated &alpha;, is the cutoff value we use to determine how unlikely our data must be to be able to __________ the null hypothesis."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "null"
+                        },
+                        "display": {
+                            "clozeText": "The significance level of a hypothesis test, notated &alpha;, is the cutoff value we use to determine how unlikely our data must be to be able to reject the __________hypothesis."
+                        },
+                        "parameter": "-0.000"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "less"
+                        },
+                        "display": {
+                            "clozeText": "If our p-value is __________ than &alpha;, we reject the null hypothesis due to statistically significant results."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "reject"
+                        },
+                        "display": {
+                            "clozeText": "If our p-value is less than &alpha;, we __________ the null hypothesis due to statistically significant results."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "significant"
+                        },
+                        "display": {
+                            "clozeText": "If our p-value is less than &alpha;, we reject the null hypothesis due to statistically __________ results."
+                        },
+                        "parameter": "-0.000"
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "greater"
+                        },
+                        "display": {
+                            "clozeText": "If our p-value is __________ than &alpha;, we cannot reject the null hypothesis and our results are not statistically significant."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "statistically"
+                        },
+                        "display": {
+                            "clozeText": "If our p-value is greater than &alpha;, we cannot reject the null hypothesis and our results are not __________ significant."
+                        },
+                        "parameter": "-0.000"
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "p-value"
+                        },
+                        "display": {
+                            "clozeText": "If our __________is greater than &alpha;, we cannot reject the null hypothesis and our results are not statistically significant."
+                        },
+                        "parameter": "-0.000"
+                    }
+                ]
+            }
+        ]
+    }
+}

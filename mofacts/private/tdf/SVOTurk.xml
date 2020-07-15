@@ -5,7 +5,7 @@
         <userselect>false</userselect>
         <randomizedDelivery>3</randomizedDelivery>
         <experimentTarget>svoturktesting</experimentTarget>
-        <stimulusfile>SVO4stims.xml</stimulusfile>
+        <stimulusfile>SVO4stims.json</stimulusfile>
         <isModeled>false</isModeled>
         <lfparameter>.85</lfparameter>
         <shuffleclusters>20-35</shuffleclusters>
