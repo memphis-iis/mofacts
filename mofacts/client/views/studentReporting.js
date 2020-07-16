@@ -65,7 +65,7 @@ setCurrentStudentPerformance = function(){
         for(var index in tdfEntries){
           var tdfUserMetricsName = tdfEntries[index];
           var tdf = entry[tdfUserMetricsName];
-          var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
+          var curtdfFileName = tdfUserMetricsName.replace('_json','.json');
           for(var index in tdf){
             //Ignore assessment entries
             if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){

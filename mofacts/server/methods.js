@@ -11,7 +11,7 @@ import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 
 var Future = Npm.require("fibers/future");
 var fs = Npm.require("fs");
-var endOfLine = Npm.require("os").EOL;
+
 if(!!process.env.METEOR_SETTINGS_WORKAROUND){
   Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
 }
@@ -23,6 +23,8 @@ console.log("meteor settings: " + JSON.stringify(Meteor.settings));
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 var adminUsers = Meteor.settings.initRoles.admins;
 var ownerEmail = Meteor.settings.owner;
+let isProd = Meteor.settings.prod || false;
+console.log("isProd: " + isProd);
 
 var clozeGeneration = require('./lib/Process.js');
 
@@ -436,60 +438,62 @@ Meteor.startup(function () {
     var isJSON = function (fn) {
       return fn.indexOf('.json') >= 0;
     };
-    _.each(
-        _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
-        function (ele, idx, lst) {
-            serverConsole("Updating Stim in DB from ", ele);
-            var json = getStimJSON('stims/' + ele);
-            var rec = createStimRecord(ele, json, adminUserId, 'repo');
+    if(!isProd){
+        _.each(
+          _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
+          function (ele, idx, lst) {
+              serverConsole("Updating Stim in DB from ", ele);
+              var json = getStimJSON('stims/' + ele);
+              var rec = createStimRecord(ele, json, adminUserId, 'repo');
 
-            var prev = Stimuli.findOne({'fileName': ele});
-            if (prev) {
-                Stimuli.update({ _id: prev._id }, rec);
-            }
-            else {
-                Stimuli.insert(rec);
-            }
-        }
-    );
-
-    _.each(
-        _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-        function (ele, idx, lst) {
-            serverConsole("Updating TDF in DB from ", ele);
-            var json = getTdfJSON('tdf/' + ele);
-
-            var rec = createTdfRecord(ele, json, adminUserId, 'repo');
-
-            var prev = Tdfs.findOne({'fileName': ele});
-
-            if (prev && !hasGeneratedTdfs(json)) {
-              Tdfs.update({ _id: prev._id }, rec);
-            } else if (hasGeneratedTdfs(json)) {
-              let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
-                'repo');
-              let generatedTdf = tdfGenerator.getGeneratedTdf();
+              var prev = Stimuli.findOne({'fileName': ele});
               if (prev) {
-                try {
-                  Tdfs.update({_id: prev._id}, generatedTdf);
-                } catch (error) {
-                  throw new Error('Error updating generated TDF: ', error);
-                }
-              } else {
-                try {
-                  generatedTdf.createdAt = new Date();
-                  Tdfs.insert(generatedTdf);
-                } catch (error) {
-                  throw new Error('Error inserting generated TDF: ', error)
-                }
+                  Stimuli.update({ _id: prev._id }, rec);
               }
-              console.log(JSON.stringify(tdfGenerator.getGeneratedTdf()));
-            } else {
-              rec.createdAt = new Date();
-              Tdfs.insert(rec);
-            }
-        }
-    );
+              else {
+                  Stimuli.insert(rec);
+              }
+          }
+      );
+
+      _.each(
+          _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
+          function (ele, idx, lst) {
+              serverConsole("Updating TDF in DB from ", ele);
+              var json = getTdfJSON('tdf/' + ele);
+
+              var rec = createTdfRecord(ele, json, adminUserId, 'repo');
+
+              var prev = Tdfs.findOne({'fileName': ele});
+
+              if (prev && !hasGeneratedTdfs(json)) {
+                Tdfs.update({ _id: prev._id }, rec);
+              } else if (hasGeneratedTdfs(json)) {
+                let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
+                  'repo');
+                let generatedTdf = tdfGenerator.getGeneratedTdf();
+                if (prev) {
+                  try {
+                    Tdfs.update({_id: prev._id}, generatedTdf);
+                  } catch (error) {
+                    throw new Error('Error updating generated TDF: ', error);
+                  }
+                } else {
+                  try {
+                    generatedTdf.createdAt = new Date();
+                    Tdfs.insert(generatedTdf);
+                  } catch (error) {
+                    throw new Error('Error inserting generated TDF: ', error)
+                  }
+                }
+                console.log(JSON.stringify(tdfGenerator.getGeneratedTdf()));
+              } else {
+                rec.createdAt = new Date();
+                Tdfs.insert(rec);
+              }
+          }
+      );
+    }
 
     //Log this late so they're more prone to see it
     if (adminUserId) {
@@ -701,7 +705,7 @@ Meteor.startup(function () {
                   for(var index in tdfEntries){
                     var key = tdfEntries[index];
                     var tdf = entry[key];
-                    let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
+                    let tdfKey = usingAllTdfs ? key.replace('_json', '.json') : tdfFileName;
                     for(var index in tdf){
                       //Only count items in learning sessions
                       if(!!learningSessionItems[tdfKey] 
@@ -747,13 +751,11 @@ Meteor.startup(function () {
             var userMetrics = UserMetrics.find({_id:userId});
 
             userMetrics.forEach(function(entry){
-              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
+              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_json") != -1)
               for(var index in possibleTdfs){
                 var possibleTdf = possibleTdfs[index];
-                if(possibleTdf.indexOf("_xml") != -1){
+                if(possibleTdf.indexOf("_json") != -1){
                   var curTdfName = possibleTdf;
-                  // //Replace only last underscore with "." to reconstruct actual tdf name
-                  // curTdfName = curTdfName.replace("_xml",".xml");
                   allNamesOfTdfsAttempted.push(curTdfName);
                 }
               }
