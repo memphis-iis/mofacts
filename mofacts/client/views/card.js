@@ -951,11 +951,12 @@ function nextChar(c) {
 function newQuestionHandler() {
     console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
 
-    var textFocus = false; //We'll set to true if needed
+    let textFocus = false; //We'll set to true if needed
 
-    var unitNumber = getCurrentUnitNumber();
-    var file = getCurrentTdfFile();
-    var currUnit = file.tdfs.tutor.unit[unitNumber];
+    let unitNumber = getCurrentUnitNumber();
+    let file = getCurrentTdfFile();
+    let currUnit = file.tdfs.tutor.unit[unitNumber];
+    let deliveryParams = getCurrentDeliveryParams(currUnit);
 
     // Whatever happens next, no scolling history is "justAdded"
     scrollList.update(
@@ -973,23 +974,23 @@ function newQuestionHandler() {
     // "update miss" in our templating
     Session.set("buttonTrial", null);
 
-    // Buttons are determined by 3 options: buttonorder, wrongButtonOptions,
-    // wrongButtonCount:
+    // Buttons are determined by 3 options: buttonorder, buttonOptions,
+    // wrongButtonLimit:
     //
     // 1. buttonorder - can be "fixed" or "random" with a default of fixed.
     //
-    // 2. wrongButtonOptions - the list of button labels to use. If empty the
+    // 2. buttonOptions - the list of button labels to use. If empty the
     //    button labels will be taken from the current stim cluster.
     //
-    // 3. wrongButtonCount - The number of WRONG buttons to display (so final
-    //    button is wrongButtonCount + 1 for the correct answer). This is ONLY
+    // 3. wrongButtonLimit - The number of WRONG buttons to display (so final
+    //    button is wrongButtonLimit + 1 for the correct answer). This is ONLY
     //    used if buttonorder is random.
     //
     // For fixed order, we just use the button labels we find per #2 above. For
-    // random order, we take wrongButtonOptions random buttons from the wrong button
+    // random order, we take buttonOptions random buttons from the wrong button
     // labels, add in the correct answer, and shuffle the order of buttons.
     // IMPORTANT: the above implies that the correct answer must be in the button label
-    // list if you use fixed button order and wrongButtonOptions. See the Music
+    // list if you use fixed button order and buttonOptions. See the Music
     // TDF for an example.
     if (!getButtonTrial()) {
         //Not a button trial
@@ -998,73 +999,55 @@ function newQuestionHandler() {
         textFocus = true; //Need the text box focused
 
         $("#textEntryRow").show();
-    }
-    else {
+    }else {
         // Is a button trial - we need to figure out what to show
         Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
-        var buttonChoices = [];
+        let buttonChoices = [];
 
-        var buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
+        let buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
         if (buttonOrder !== "random") {
             //Only choices are random or fixed, and we def to fixed
             buttonOrder = "fixed";
         }
 
-        var wrongButtonOptions = _.chain(currUnit).prop("wrongButtonOptions").first().trim().value();
-        var optionsFromStim = null;
-        if (wrongButtonOptions) {
-            buttonChoices = wrongButtonOptions.split(",");
-            optionsFromStim = false;
-        }
-        if (!buttonChoices || buttonChoices.length < 1) {
-            buttonChoices = [];
+        let buttonOptions = _.chain(currUnit).prop("buttonOptions").first().trim().value();
+        let correctButtonPopulated = null;
+
+        if (buttonOptions) {
+            buttonChoices = buttonOptions.split(",");
+            correctButtonPopulated = true;
+        }else{
             _.each(getCurrentFalseResponses(), function(ele) {
                 buttonChoices.push(ele);
-                optionsFromStim = true;
+                correctButtonPopulated = false;
             });
         }
-        if (!buttonChoices || buttonChoices.length < 1) {
-            //Whoops - they didn't specify any alternate choices
-            console.log("A button trial requires some false responses");
-            throw new Error("Bad TDF or Stim file - no answers found");
-        }
-        if (optionsFromStim === null) {
+        if (correctButtonPopulated == null) {
             console.log("A button trial requires correct configuration");
             throw new Error("Bad TDF or Stim file - could not determine answer location");
         }
 
-        var wrongButtonCount = _.chain(currUnit).prop("wrongButtonOptions").first().intval().value();
-        if (wrongButtonCount < 1) {
-            wrongButtonCount = buttonChoices.length;
+        let wrongButtonLimit = deliveryParams.falseAnswerLimit;
+        if (wrongButtonLimit) {
+            let numberOfWrongButtonsToPrune = buttonChoices.length-wrongButtonLimit;
+            for(let i=0;i<numberOfWrongButtonsToPrune;i++){
+              let randomIndex = Math.floor(Math.random()*buttonChoices.length);
+              buttonChoices.splice(randomIndex,1);
+            }
         }
 
-        var correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+        if(!correctButtonPopulated){
+          let correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+          buttonChoices.unshift(correctAnswer);
+        }
 
         if (buttonOrder === "fixed") {
-            // the buttonChoices array should be correct UNLESS they didn't use
-            // wrongButtonOptions for this unit. In that case we are using the
-            // answers from the stim file, so we need to add the correct answer
-            if (optionsFromStim) {
-                // Correct answer goes first
-                buttonChoices.unshift(correctAnswer);
-            }
+            //Do nothing
         }
         else if (buttonOrder === "random") {
-            // Randomized buttons: remove the correct answer, shuffle, keep only
-            // wrongButtonCount options, add the correct answer back in, and
-            // reshuffle
-            var shuffled = _.reject(buttonChoices, function(one) {
-                return one === correctAnswer;
-            });
-            Helpers.shuffle(shuffled);
-            if (shuffled.length > wrongButtonCount) {
-                shuffled = shuffled.splice(0, wrongButtonCount);
-            }
-            shuffled.push(correctAnswer);
-            Helpers.shuffle(shuffled);
-            buttonChoices = shuffled;
+            Helpers.shuffle(buttonChoices);
         }
         else {
             throw new Error("Unknown buttonorder option " + buttonOrder);
@@ -1072,7 +1055,7 @@ function newQuestionHandler() {
 
         clearButtonList();
         Session.set("buttonTrial", true);
-        var curChar = 'a'
+        let curChar = 'a'
 
         _.each(buttonChoices, function(val, idx) {
             buttonList.insert({

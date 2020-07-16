@@ -5,11 +5,11 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "auction",
+                                "correctResponse": "correct",
                                 "incorrectResponses": [
-                                    "lighthouse",
-                                    "players",
-                                    "sailboat"
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
                                 ]
                             },
                             "display": {
@@ -23,18 +23,18 @@
                         },
                         {
                             "response": {
-                                "correctResponse": "parts",
+                                "correctResponse": "correct",
                                 "incorrectResponses": [
-                                    "lighthouse",
-                                    "players",
-                                    "sailboat"
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
                                 ]
                             },
                             "display": {
                                 "clozeText": "Each deal consists of two _____ – the auction, where the four players bid in a clockwise rotation describing their hands, the play, where the side that wins the bidding __________ tries to take the tricks necessary to fulfill their contract and scoring.",
                                 "text":"",
                                 "audioSrc":"sounds/toneresource/1.4ma/T1_400ms__vowel.wav",
-                                "imgSrc":"images/TNplants/6151_IMG00198.JPG",
+                                "imgSrc":"images/TNplants/6151_IMG00258.JPG",
                                 "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
                             },
                             "parameter": "-0.479299999999998"
@@ -45,13 +45,18 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "hamburger"
+                                "correctResponse": "correct",
+                                "incorrectResponses": [
+                                    "wrong 1",
+                                    "wrong 2",
+                                    "wrong 3"
+                                ]
                             },
                             "display": {
                                 "clozeText": "John ate a ____ because he was hungry.",
                                 "text":"",
                                 "audioSrc":"sounds/croatian/bolnica.mp3",
-                                "imgSrc":"images/TNplants/6151_IMG00198.JPG",
+                                "imgSrc":"images/TNplants/6151_IMG00293.JPG",
                                 "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
                             },
                             "parameter": "-0.479299999999998"
