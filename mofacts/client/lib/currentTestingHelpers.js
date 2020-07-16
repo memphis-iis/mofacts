@@ -222,7 +222,7 @@ getTestType = function () {
 //get the answer at this index - note that the cluster index will be mapped
 //in getStimCluster
 getStimAnswer = function (index, whichAnswer) {
-    return getStimCluster(index).stims[whichAnswer].display.response.correctResponse;
+    return getStimCluster(index).stims[whichAnswer].response.correctResponse;
 };
 
 //get the parameter at this index - this works using the same semantics as
@@ -241,7 +241,7 @@ getCurrentFalseResponses = function() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let cluster = getStimCluster(curClusterIndex);
 
-  if (typeof(cluster) == "undefined" || typeof(cluster.stims[curStimIndex].response.incorrectResponses) == "undefined" || cluster.stims[curStimIndex].response.incorrectResponses.length < 1) {
+  if (typeof(cluster) == "undefined" || typeof(cluster.stims[curStimIndex].response.incorrectResponses) == "undefined") {
       return []; //No false responses
   }else{
     return cluster.stims[curStimIndex].response.incorrectResponses;
@@ -346,7 +346,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'studyFirst':false,
         'enhancedFeedback':false,
         'checkOtherAnswers':false,
-        'feedbackType':''
+        'feedbackType':'',
+        'falseAnswerLimit':9999999
     };
 
     //We've defined defaults - also define translatations for values
@@ -367,7 +368,8 @@ getCurrentDeliveryParams = function (currUnit) {
         'timeuntilstimulus': _.intval,
         'studyFirst':xlateBool,
         'enhancedFeedback':xlateBool,
-        'checkOtherAnswers':xlateBool
+        'checkOtherAnswers':xlateBool,
+        'falseAnswerLimit': _.intval
     };
 
     var modified = false;
