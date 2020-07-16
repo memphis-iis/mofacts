@@ -1111,12 +1111,12 @@ Meteor.startup(function () {
                     throw "You are not authorized to upload files";
                 }
 
-                //Parse the XML contents to make sure we can acutally handle the file
-                var jsonContents = xml2js.parseStringSync(filecontents);
-
                 var rec, prev, collection;
 
                 if (type == "tdf") {
+                    //Parse the XML contents to make sure we can acutally handle the file
+                    var jsonContents = xml2js.parseStringSync(filecontents);
+
                     //Make sure the TDF looks valid-ish
                     var tutor = _.chain(jsonContents).prop("tutor").value();
 
@@ -1152,11 +1152,11 @@ Meteor.startup(function () {
                     collection = Tdfs;
                 }
                 else if (type === "stim") {
+                    let jsonContents = JSON.parse(filecontents);
                     //Make sure the stim looks valid-ish
                     var clusterCount = _.chain(jsonContents)
                         .prop("setspec")
-                        .prop("clusters").first()
-                        .prop("cluster").prop("length").value();
+                        .prop("clusters").prop("length").value();
                     if (clusterCount < 1) {
                         throw "Stimulus has no clusters - it cannot be valid";
                     }
