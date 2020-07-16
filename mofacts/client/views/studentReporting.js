@@ -742,7 +742,7 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
 
     //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
     //Ignore instruction type questions for overallOutcomeHistory
-    if(Session.get("testType") != "i"){
+    if(getTestType() !== "i"){
       prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
     }
 }

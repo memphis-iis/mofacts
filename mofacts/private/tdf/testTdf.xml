@@ -10,6 +10,35 @@
         <simCorrectProb>0.85</simCorrectProb>
     </setspec>
     <unit>
+        <unitinstructions>Here comes the test assessment session</unitinstructions>
+        <unitname>Schedule Unit</unitname>
+         <deliveryparams>
+            <practiceseconds>1000000</practiceseconds>
+            <drill>7000</drill>
+            <skipstudy>false</skipstudy>
+            <purestudy>5000</purestudy>
+            <reviewstudy>6000</reviewstudy>
+            <correctprompt>1000</correctprompt>
+            <fontsize>2</fontsize>
+            <correctscore>1</correctscore>
+            <incorrectscore>0</incorrectscore>
+            <timebeforefeedback>500</timebeforefeedback>
+            <timeuntilstimulus>500</timeuntilstimulus>
+        </deliveryparams>
+        <assessmentsession>
+            <conditiontemplatesbygroup>
+                <groupnames>A</groupnames>
+                <clustersrepeated>1</clustersrepeated>
+                <templatesrepeated>2</templatesrepeated>
+                <group>0,f,f,0 0,f,f,0</group>
+            </conditiontemplatesbygroup>
+            <initialpositions>A_1 A_2</initialpositions>
+            <randomizegroups>false</randomizegroups>
+            <clusterlist>0-1</clusterlist>
+            <assignrandomclusters>false</assignrandomclusters>
+        </assessmentsession>
+    </unit>
+    <unit>
         <unitinstructions>Here comes the testing learning session.</unitinstructions>
         <unitname>Model Unit</unitname>
         <learningsession>
