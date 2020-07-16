@@ -1178,7 +1178,7 @@ function scheduleUnitEngine() {
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
             setCurrentClusterIndex(curClusterIndex);
-            let currentDisplay = getStimCluster(curClusterIndex, curStimIndex).display;
+            let currentDisplay = getStimCluster(curClusterIndex).stims[curStimIndex].display;
             let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion.indexOf("|") != -1){

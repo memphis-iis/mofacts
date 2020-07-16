@@ -122,15 +122,12 @@ AssessmentSession = {
                     break;
                 }
 
-                //Choose random numbers to use throughout the template
-                var randOffset = Math.floor(Math.random());
-
                 //Work through the group elements
                 for (k = 0; k < templateSize; ++k) {
                     //"parts" is a comma-delimited entry with 4 components:
                     // 0 - the offset (whichStim) - can be numeric or "r" for random
                     // 1 - legacy was f/b, now "b" forces a button trial
-                    // 2 - trial type (t, d, s, m, n, i)
+                    // 2 - trial type (t, d, s, m, n, i, f)
                     // 3 - location (added to qidx)
                     var groupEntry = group[index * templateSize + k];
                     var parts = groupEntry.split(",");
@@ -141,9 +138,6 @@ AssessmentSession = {
                     }
 
                     var type = parts[2].toUpperCase()[0];
-                    //if (type === "T") {
-                    //    type = "D";
-                    //}
 
                     if (type === "Z") {
                         var stud = Math.floor(Math.random() * 10);

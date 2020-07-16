@@ -124,7 +124,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
 
     let userAnswerWithTimeout = null;
 
-    if (getTestType() === "s") {
+    if (getTestType() === "s" || getTestType() === "f") {
         //Study trial
         isCorrect = true;
         historyUserAnswer = "You answered " + _.trim(userAnswer) + ".";
@@ -463,8 +463,8 @@ Template.card.events({
     'keypress #userForceCorrect': function(e) {
         var key = e.keyCode || e.which;
         if (key == ENTER_KEY) {
-            // Enter key - see if gave us the correct answer
-            var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
+          // Enter key - see if gave us the correct answer
+          var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
           var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
           if (getTestType() === 'n') {
             if (entry.length < 4) {
@@ -709,21 +709,27 @@ Template.card.helpers({
     },
 
     'study': function() {
-        return getTestType() === "s";
+      let type = getTestType();
+      return type === "s" || type === "f";
     },
 
     'drill': function() {
-      return getTestType() === "d" || getTestType() === "m" || getTestType() === "n" || getTestType() === "i";
+      let type = getTestType();
+      return type === "d" || type === "m" || type === "n" || type === "i";
     },
 
     'trial': function() {
-        var type = getTestType();
-        return type === "d" || type === "s" || type === "t" || type === "m" || type === "n" || type === "i";
+      let type = getTestType();
+      return type === "d" || type === "s" || type === "f" || type === "t" || type === "m" || type === "n" || type === "i";
     },
 
     'testordrill': function() {
-        var type = getTestType();
-        return type === "d" || type === "t" || type === "m" || type === "n" || type === "i";
+      let type = getTestType();
+      return type === "d" || type === "t" || type === "m" || type === "n" || type === "i";
+    },
+
+    'hideResponse': function() {
+      return getTestType() === "f";
     },
 
     'fontSizeClass': function() {
@@ -1075,7 +1081,7 @@ function newQuestionHandler() {
     //construct the question to display the actual information. Note that we
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
-    if (getTestType() === "s" && (getPopulatedQuestionDisplayTypes().cloze)) {
+    if ((getTestType() === "s" || getTestType() === "f") && (getPopulatedQuestionDisplayTypes().cloze)) {
         Session.set("currentQuestion", Answers.clozeStudy(
             Session.get("currentQuestion"),
             Session.get("currentAnswer")
@@ -1305,18 +1311,20 @@ function handleUserInput(e, source, simAnswerCorrect) {
       var deliveryParams = getCurrentDeliveryParams();
       var timeout = 0;
 
-      if (getTestType() === "s") {
+      let testType = getTestType();
+
+      if (testType === "s" || testType === "f") {
           //Just a study - note that the purestudy timeout is used for the QUESTION
           //timeout, not the display timeout after the ANSWER. However, we need a
           //timeout for our logic below so just use the minimum
           timeout = 1;
       }
-      else if (getTestType() === "t" || getTestType() === "i") {
+      else if (testType === "t" || testType === "i") {
           //A test or instruction unit - we don't have timeouts since they don't get feedback about
           //how they did (that's what drills are for)
           timeout = 1;
       }
-      else if (getTestType() === "d" || getTestType() === "m" || getTestType() === "n") {
+      else if (testType === "d" || testType === "m" || testType === "n") {
           //Drill - the timeout depends on how they did
           if (isCorrect) {
               timeout = _.intval(deliveryParams.correctprompt);
@@ -1397,7 +1405,7 @@ getButtonTrial = function() {
 function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
     var isCorrect = null;
     //Nothing to evaluate for a study - just pretend they answered correctly
-    if (getTestType() === "s") {
+    if (getTestType() === "s" || getTestType() === "f") {
         isCorrect = true;
         isTimeout = false;
     }
@@ -1444,7 +1452,8 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
 
       isCorrect = goodNews;
 
-      var isDrill = (getTestType() === "d" || getTestType() === "m" || getTestType() === "n");
+      let testType = getTestType();
+      let isDrill = (testType === "d" || testType === "m" || testType === "n");
       if (isDrill) {
           showUserInteraction(goodNews, msg);
       }
@@ -1570,7 +1579,7 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
 
     //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
     //Ignore instruction type questions for overallOutcomeHistory
-    if(Session.get("testType") != "i"){
+    if(getTestType() !== "i"){
       prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
     }
 
@@ -1618,7 +1627,7 @@ function startQuestionTimeout(textFocus) {
 
   console.log("startQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
 
-  if (getTestType() === "s") {
+  if (getTestType() === "s" || getTestType() === "f") {
       //Study
       delayMs = _.intval(deliveryParams.purestudy);
   }
