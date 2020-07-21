@@ -44,12 +44,16 @@ getCurrentClusterAndStimIndices = function(){
   let curClusterIndex = null;
   let curStimIndex = null;
 
+  console.log("getCurrentClusterAndStimIndices: " + !engine);
+
   if(!engine){
+    console.log("getCurrentClusterAndStimIndices, no engine: " + Session.get("clusterIndex"));
     curClusterIndex = Session.get("clusterIndex");
   }else{
     let currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
+    console.log("getCurrentClusterAndStimIndices, engine: " + JSON.stringify(currentQuest));
   }
 
   return {curClusterIndex,curStimIndex};
@@ -151,42 +155,6 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   return allAnswers;
 }
 
-getPopulatedQuestionDisplayTypes = function() {
-  let types = {};
-  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
-
-  if (!curClusterIndex)
-    curClusterIndex = 0;
-
-  if(!curStimIndex)
-    curStimIndex = 0;
-
-  let cluster = getStimCluster(curClusterIndex);
-  let curDisplay = cluster.stims[curStimIndex].display;
-
-  for(let key in curDisplay){
-    switch(key){
-      case "clozeText":
-        types["cloze"] = true;
-        break;
-      case "text":
-        types["text"] = true;
-        break;
-      case "audioSrc":
-        types["sound"] = true;
-        break;
-      case "imgSrc":
-        types["image"] = true;
-        break;
-      case "videoSrc":
-        types["video"] = true;
-        break;
-    }
-  }
-
-  return types;
-}
-
 getResponseType = function () {
 
   //If we get called too soon, we just use the first cluster
@@ -201,14 +169,14 @@ getResponseType = function () {
 }
 
 findQTypeSimpified = function () {
-  let populatedDisplayTypes = getPopulatedQuestionDisplayTypes();
+  let currentDisplay = Session.get("currentDisplay");
   let QTypes = "";
 
-  if(populatedDisplayTypes.text)  QTypes = QTypes + "T";    //T for Text
-  if(populatedDisplayTypes.image)  QTypes = QTypes + "I";   //I for Image
-  if(populatedDisplayTypes.sound)  QTypes = QTypes + "A";   //A for Audio
-  if(populatedDisplayTypes.cloze)  QTypes = QTypes + "C";   //C for Cloze
-  if(populatedDisplayTypes.video)  QTypes = QTypes + "V";   //V for video
+  if(currentDisplay.text)       QTypes = QTypes + "T";    //T for Text
+  if(currentDisplay.imgSrc)     QTypes = QTypes + "I";   //I for Image
+  if(currentDisplay.audioSrc)   QTypes = QTypes + "A";   //A for Audio
+  if(currentDisplay.clozeText)  QTypes = QTypes + "C";   //C for Cloze
+  if(currentDisplay.videoSrc)   QTypes = QTypes + "V";   //V for video
 
   if(QTypes == "") QTypes = "NA"; //NA for Not Applicable
 

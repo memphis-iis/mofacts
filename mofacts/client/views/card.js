@@ -160,6 +160,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
       }
 
       var currCount = _.intval(Session.get("scrollListCount"));
+      let currentQuestion = Session.get("currentDisplay").text || Session.get("currentDisplay").clozeText;
 
       scrollList.insert({
           'temp': 1,                       // Deleted when clearing
@@ -168,7 +169,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
           'userAnswer': historyUserAnswer,
           'answer': trueAnswer,
           'shownToUser': historyCorrectMsg,
-          'question': Session.get("currentQuestion"),
+          'question': currentQuestion,
           'userCorrect': isCorrect
       }, function(err, newId) {
           if (!!err) {
@@ -434,7 +435,7 @@ Template.card.events({
           console.log("dialogue loop finished, restoring state");
           Session.set("dialogueLoopStage",undefined);
           //restore session state
-          Session.set("currentQuestion",dialogueCurrentQuestionSaver);
+          Session.set("currentDisplay",dialogueCurrentDisplaySaver);
           console.log("finished, exiting dialogue loop");
           Tracker.afterFlush(function(){
             $("#userAnswer").val(dialogueUserAnswerSaver);
@@ -670,33 +671,33 @@ Template.card.helpers({
     },
 
     'textCard': function() {
-      return getPopulatedQuestionDisplayTypes().text;
+      return !!(Session.get("currentDisplay").text);
     },
 
     'audioCard': function() {
-      return getPopulatedQuestionDisplayTypes().sound;
+      return !!(Session.get("currentDisplay").audioSrc);
     },
 
     'imageCard': function() {
-      return getPopulatedQuestionDisplayTypes().image;
+      return !!(Session.get("currentDisplay").imgSrc);
     },
 
     'videoCard': function() {
-      return getPopulatedQuestionDisplayTypes().video;
+      return !!(Session.get("currentDisplay").videoSrc);
     },
 
     'clozeCard': function() {
-      return getPopulatedQuestionDisplayTypes().cloze;
+      return !!(Session.get("currentDisplay").clozeText);
     },
 
     'textOrClozeCard': function() {
-      let populatedQuestionDisplayTypes = getPopulatedQuestionDisplayTypes();
-      return populatedQuestionDisplayTypes.text || populatedQuestionDisplayTypes.cloze;
+      let currentDisplay = Session.get("currentDisplay");
+      return !!(currentDisplay.text) || !!(currentDisplay.clozeText);
     },
 
     'anythingButAudioCard': function() {
-      let populatedQuestionDisplayTypes = getPopulatedQuestionDisplayTypes();
-      return populatedQuestionDisplayTypes.cloze || populatedQuestionDisplayTypes.text || populatedQuestionDisplayTypes.image || populatedQuestionDisplayTypes.video;
+      let currentDisplay = Session.get("currentDisplay");
+      return !!(currentDisplay.text) || !!(currentDisplay.clozeText) || !!(currentDisplay.imgSrc) || !!(currentDisplay.videoSrc);
     },
 
     'imageResponse' : function() {
@@ -1081,11 +1082,11 @@ function newQuestionHandler() {
     //construct the question to display the actual information. Note that we
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
-    if ((getTestType() === "s" || getTestType() === "f") && (getPopulatedQuestionDisplayTypes().cloze)) {
-        Session.set("currentQuestion", Answers.clozeStudy(
-            Session.get("currentQuestion"),
-            Session.get("currentAnswer")
-        ));
+    if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplay").clozeText)) {
+      let currentDisplay = Session.get("currentDisplay");
+      let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
+      currentDisplay.clozeText = clozeQuestionFilledIn;
+      Session.set("currentDisplay",currentDisplay);
     }
 
     startQuestionTimeout(textFocus);
@@ -1305,7 +1306,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
       //record progress in userProgress variable storage (note that this is
       //helpful and used on the stats page, but the user times log is the
       //"system of record")
-      recordProgress(Session.get("currentQuestion"), Session.get("currentAnswer"), userAnswer, isCorrect);
+      recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
 
       //Figure out timeout and reviewLatency
       var deliveryParams = getCurrentDeliveryParams();
@@ -1360,7 +1361,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
       //If incorrect answer for a drill on a sound, we need to replay the sound.
       //Otherwise, we can just use our reset logic directly
-      if (getPopulatedQuestionDisplayTypes().sound && !isCorrect && getTestType() === "d") {
+      if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect && getTestType() === "d") {
           playCurrentSound(resetAfterTimeout);
       }
       else {
@@ -1656,17 +1657,19 @@ function startQuestionTimeout(textFocus) {
     keypressTimestamp = 0;
     trialTimestamp = Date.now();
 
-    var questionDisplayTypes = getPopulatedQuestionDisplayTypes();
-    if(questionDisplayTypes.sound) {
+    let currentDisplay = Session.get("currentDisplay");
+
+    if(!!(currentDisplay.audioSrc)) {
         //We don't allow user input until the sound is finished playing
         playCurrentSound(function() {
             allowUserInput(textFocus);
             startMainCardTimeout();
         });
     }else {
+        let questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
         //Only speak the prompt if the question type makes sense
-        if(questionDisplayTypes.text || questionDisplayTypes.cloze){
-          speakMessageIfAudioPromptFeedbackEnabled(Session.get("currentQuestion"),true,"all");
+        if(!!(questionToSpeak)){
+          speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,true,"all");
         }
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
@@ -1680,25 +1683,27 @@ function startQuestionTimeout(textFocus) {
   //Swap out the current question with a pre question display as defined in the tdf file
   //then delay for the specified amount of time before setting back to the current question
   var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
-  console.log('++++ CURRENT QUESTION ++++');
-  console.log(Session.get('currentQuestion'));
-  var curQuestionTemp = Session.get("currentQuestion");
+  let curDisplayTemp = Session.get("currentDisplay");
+  console.log('++++ CURRENT DISPLAY ++++');
+  console.log(curDisplayTemp);
   var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
-  Session.set("currentQuestion",prestimulusDisplay);
+  let prestimulusDisplayWrapper = { 'text': prestimulusDisplay };
+  Session.set("currentDisplay",prestimulusDisplayWrapper);
 
   console.log("delaying for " + timeuntilstimulus + " ms then starting question");
   setTimeout(function(){
-    Session.set("currentQuestion",curQuestionTemp);
+    Session.set("currentDisplay",curDisplayTemp);
     console.log("past timeuntilstimulus, start question logic");
 
     //Handle two part questions
     var currentQuestionPart2 = Session.get("currentQuestionPart2");
     if(!!currentQuestionPart2){
+      let twoPartQuestionWrapper = { 'text': currentQuestionPart2 };
       var initialviewTimeDelay = deliveryParams.initialview;
       console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
       setTimeout(function(){
         console.log("after timeout");
-        Session.set("currentQuestion",currentQuestionPart2);
+        Session.set("currentDisplay",twoPartQuestionWrapper);
         Session.set("currentQuestionPart2",undefined);
         redoCardImage();
         beginQuestionAndInitiateUserInput();
@@ -1732,7 +1737,8 @@ function showUserInteraction(isGoodNews, news) {
     var doForceCorrect = (!isGoodNews && (getCurrentDeliveryParams().forceCorrection || isForceCorrectTrial) && !Session.get("runSimulation"));
     Tracker.afterFlush(function() {
         if (doForceCorrect) {
-            $("#forceCorrectionEntry").show();
+          $("#forceCorrectionEntry").show();
+
           if(getTestType() === "n"){
             var forceCorrectDelay = getCurrentDeliveryParams().forcecorrecttimeout;
             var prompt = getCurrentDeliveryParams().forcecorrectprompt;
@@ -1746,8 +1752,9 @@ function showUserInteraction(isGoodNews, news) {
 
             speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue",false,"feedback");
           }
-            $("#userForceCorrect").val("").focus();
-            startRecording();
+          
+          $("#userForceCorrect").val("").focus();
+          startRecording();
         }
         else {
             $("#forceCorrectGuidance").text("");
@@ -2325,7 +2332,6 @@ function resumeFromUserTimesLog() {
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentDisplay", undefined);
-    Session.set("currentQuestion", undefined);
     Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
@@ -2619,7 +2625,6 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
-                Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -2643,7 +2648,6 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
-                Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -2704,7 +2708,6 @@ processUserTimesLog = function(expKey) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
-            Session.set("currentQuestion", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
@@ -2733,7 +2736,6 @@ processUserTimesLog = function(expKey) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
             Session.set("currentDisplay",       entry.selectedDisplay);
-            Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
@@ -2777,7 +2779,7 @@ processUserTimesLog = function(expKey) {
 
             //The session variables should be set up correctly from the question
             recordProgress(
-                Session.get("currentQuestion"),
+                Session.get("currentDisplay"),
                 Session.get("currentAnswer"),
                 entry.answer,
                 wasCorrect
