@@ -74,7 +74,6 @@ recordUserTimeQuestion = function(extendedData) {
         originalQuestion:     Session.get("originalQuestion"),
         originalQuestion2:    Session.get("originalQuestion2"),
         selectedDisplay:      Session.get("currentDisplay"),
-        selectedQuestion:     Session.get("currentQuestion"),
         selectedQuestionPart2:Session.get("currentQuestionPart2"),
         selectedAnswer:       Session.get("currentAnswer"),
         originalAnswer:       Session.get("originalAnswer"),
