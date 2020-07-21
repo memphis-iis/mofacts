@@ -207,9 +207,9 @@ function modelUnitEngine() {
             .value();
     }
 
-    fastGetStimQuestion = function(index, whichQuestion) {
+    fastGetStimDisplay = function(index, whichQuestion) {
         let display = fastGetStimCluster(index).stims[whichQuestion].display;
-        return display.clozeText || display.Text; //We only care about texts that are displayed, media sources are handled elsewhere
+        return display;
     }
     function fastGetStimAnswer(index, whichAnswer) {
         return fastGetStimCluster(index).stims[whichAnswer].response.correctResponse;
@@ -542,7 +542,6 @@ function modelUnitEngine() {
         answerText = answerText.replace(/\./g,'_');
         
         if(probFunctionHasHintSylls){
-            console.log("probFunctionHasHintSylls");
             if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
                 console.log("no cached syllables for: " + curStimFile + "|" + answerText);
                 throw new Error("can't find syllable data in database");
@@ -783,7 +782,7 @@ function modelUnitEngine() {
             let currentDisplay = fastGetStimCluster(cardIndex).stims[whichStim].display;
             Session.set("currentDisplay", currentDisplay);
 
-            let currentQuestion = fastGetStimQuestion(cardIndex, whichStim);
+            let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
             let currentQuestionPart2 = undefined;
             let currentStimAnswer = fastGetStimAnswer(cardIndex, whichStim).toLowerCase();
             console.log("currentStimAnswer: " + currentStimAnswer);
@@ -828,7 +827,12 @@ function modelUnitEngine() {
                 }
             }
 
-            Session.set("currentQuestion",currentQuestion);
+            if(!!(currentDisplay.text)){
+                currentDisplay.text = currentQuestion;
+            }else if(!!(currentDisplay.clozeText)){
+                currentDisplay.clozeText = currentQuestion;
+            }
+            Session.set("currentDisplay",currentDisplay);
             Session.set("currentQuestionPart2",currentQuestionPart2);
 
             if(getCurrentDeliveryParams().studyFirst){
@@ -1201,8 +1205,12 @@ function scheduleUnitEngine() {
                 }
             }
 
+            if(!!(currentDisplay.text)){
+                currentDisplay.text = currentQuestion;
+            }else if(!!(currentDisplay.clozeText)){
+                currentDisplay.clozeText = currentQuestion;
+            }
             Session.set("currentDisplay", currentDisplay);
-            Session.set("currentQuestion", currentQuestion);
             Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);

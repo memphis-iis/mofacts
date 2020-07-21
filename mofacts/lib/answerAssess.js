@@ -289,8 +289,8 @@ Answers = {
                     Session.set("clozeQuestionParts",undefined);
                     Session.set("dialogueLoopStage","intro");
                     dialogueUserAnswerSaver = JSON.parse(JSON.stringify(userInput));
-                    dialogueCurrentQuestionSaver = JSON.parse(JSON.stringify(Session.get("currentQuestion")));
-                    let clozeItem = Session.get("originalQuestion") || dialogueCurrentQuestionSaver;
+                    dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+                    let clozeItem = Session.get("originalQuestion") || dialogueCurrentDisplaySaver;
                     let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
                     dialogueContext = {
                         "ClozeItem": clozeItem,
@@ -316,7 +316,7 @@ Answers = {
 dialogueUserPrompts = [];
 dialogueUserAnswers = [];
 dialogueContext = undefined;
-dialogueCurrentQuestionSaver = undefined;
+dialogueCurrentDisplaySaver = undefined;
 dialogueCallbackSaver = undefined;
 dialogueUserAnswerSaver = undefined;
 
@@ -328,7 +328,6 @@ let dialogueTransitionStatements = [
     "The right answer is different. To get you started learning it, let’s chat.",
     "Your answer was incorrect. Let’s talk about this some more.",
     "Not quite. I’m going to ask you some follow up questions."
-
 ]          
 
 let dialogueTransitionInstructions = "  Press the button to continue.";
@@ -337,7 +336,8 @@ let endDialogueNotice = " Press the button to continue practice.";
 
 function updateDialogueDisplay(newDisplay){
     //set prompt and feedback here
-    Session.set("currentQuestion",newDisplay);
+    let displayWrapper = { 'text': newDisplay }
+    Session.set("currentDisplay",displayWrapper);
     Tracker.afterFlush(function(){
         console.log("dialogue after flush");
         $("#dialogueUserAnswer").focus();

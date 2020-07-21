@@ -847,7 +847,6 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
-                Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -869,7 +868,6 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
-                Session.set("currentQuestion", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -929,7 +927,6 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
-            Session.set("currentQuestion", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
@@ -957,7 +954,6 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentDisplay",       entry.selectedDisplay);
-            Session.set("currentQuestion",      entry.selectedQuestion);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);
@@ -1001,7 +997,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
 
             //The session variables should be set up correctly from the question
             recordProgress(
-                Session.get("currentQuestion"),
+                Session.get("currentDisplay"),
                 Session.get("currentAnswer"),
                 entry.answer,
                 wasCorrect

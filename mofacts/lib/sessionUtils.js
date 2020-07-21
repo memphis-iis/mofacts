@@ -16,7 +16,6 @@
  * clusterMapping            - For an entire experiment
  * currentAnswer
  * currentDisplay            - Entire display json structure with clozeText, text, imgSrc, audioSrc, videoSrc
- * currentQuestion
  * currentRootTdfName
  * currentTdfName
  * currentScore
@@ -68,7 +67,6 @@ sessionCleanUp = function() {
     Session.set("currentAnswer", undefined);
     Session.set("originalAnswer",undefined);
     Session.set("currentDisplay", undefined);
-    Session.set("currentQuestion", undefined);
     Session.set("currentQuestionPart2",undefined);
     Session.set("originalQuestion",undefined);
     Session.set("originalQuestion2",undefined);
@@ -100,7 +98,7 @@ sessionCleanUp = function() {
     Session.set("statsTotal", undefined);
     Session.set("statsPercentage", undefined);
     Session.set("statsUserTimeLogView", undefined);
-    Session.get("subTdfIndex",undefined);
+    Session.set("subTdfIndex",undefined);
     Session.set("testType", undefined);
     Session.set("VADInitialized",false);
     Session.set("studentReportingTdfs",[]);
