@@ -12,7 +12,6 @@ writeUserLogEntries = function(experiment, objectsToLog, userId) {
         throw new Meteor.Error("No valid user ID found for User Log Entry");
     }
 
-    var objType = typeof objectsToLog;
     var valsToPush = [];
 
     if (typeof objectsToLog === "undefined") {
