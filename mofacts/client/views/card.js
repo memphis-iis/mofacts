@@ -437,9 +437,6 @@ Template.card.events({
           //restore session state
           Session.set("currentDisplay",dialogueCurrentDisplaySaver);
           console.log("finished, exiting dialogue loop");
-          Tracker.afterFlush(function(){
-            $("#userAnswer").val(dialogueUserAnswerSaver);
-          })
           dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
           dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
           dialogueUserPrompts = [];
@@ -1183,6 +1180,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
         userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
       }
     }
+    
+    let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue");
+    console.log("skipReviewAfterDialogueLoop: " + skipReviewAfterDialogueLoop);
 
     userAnswerFeedbackCallback = function(isCorrect){
       //Note that we must provide the client-side timestamp since we need it...
@@ -1346,6 +1346,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
           return;
       }
 
+      if(skipReviewAfterDialogueLoop) {
+        //After dialogue loop we want to fast forward through review
+        timeout = 1;
+      }
+
       //Stop previous timeout
       clearCardTimeout();
 
@@ -1359,9 +1364,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
           });
       };
 
-      //If incorrect answer for a drill on a sound, we need to replay the sound.
+      //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound.
       //Otherwise, we can just use our reset logic directly
-      if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect && getTestType() === "d") {
+      if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect && getTestType() === "d" && !skipReviewAfterDialogueLoop) {
           playCurrentSound(resetAfterTimeout);
       }
       else {
@@ -1372,7 +1377,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect,userAnswerFeedbackCallback);
+    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, skipReviewAfterDialogueLoop, userAnswerFeedbackCallback);
 }
 
 getButtonTrial = function() {
@@ -1403,7 +1408,7 @@ getButtonTrial = function() {
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question. simCorrect will usually be undefined/null BUT if
 //it is true or false we know this is part of a simulation call
-function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
+function userAnswerFeedback(userAnswer, isTimeout, simCorrect, skipReviewAfterDialogueLoop, callback) {
     var isCorrect = null;
     //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s" || getTestType() === "f") {
@@ -1455,7 +1460,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect,callback) {
 
       let testType = getTestType();
       let isDrill = (testType === "d" || testType === "m" || testType === "n");
-      if (isDrill) {
+      if (isDrill && !skipReviewAfterDialogueLoop) {
           showUserInteraction(goodNews, msg);
       }
 
@@ -1752,7 +1757,7 @@ function showUserInteraction(isGoodNews, news) {
 
             speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue",false,"feedback");
           }
-          
+
           $("#userForceCorrect").val("").focus();
           startRecording();
         }

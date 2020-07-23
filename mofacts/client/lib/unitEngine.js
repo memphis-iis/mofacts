@@ -1066,8 +1066,9 @@ function modelUnitEngine() {
                 if (wasCorrect) resp.responseSuccessCount += 1;
                 else            resp.responseFailureCount += 1;
 
-                console.log("resp.outcomeHistory before: " + JSON.stringify(resp.outcomeHistory))
+                console.log("resp.outcomeHistory before: " + JSON.stringify(resp.outcomeHistory));
                 resp.outcomeHistory.push(wasCorrect ? 1 : 0);
+                console.log("resp.outcomeHistory after: " + JSON.stringify(resp.outcomeHistory));
             }
             else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
@@ -1081,7 +1082,6 @@ function modelUnitEngine() {
             //Need a delay so that the outcomehistory arrays can be properly updated
             //before we use them in calculateCardProbabilities
             //Meteor.setTimeout(calculateCardProbabilities,20); //TODO: why did we need this?  Make sure we are calculating correct values now
-            console.log("resp.outcomeHistory after: " + JSON.stringify(resp.outcomeHistory))
             calculateCardProbabilities();
         },
 

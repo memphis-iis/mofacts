@@ -288,7 +288,6 @@ Answers = {
                 case "dialogue":
                     Session.set("clozeQuestionParts",undefined);
                     Session.set("dialogueLoopStage","intro");
-                    dialogueUserAnswerSaver = JSON.parse(JSON.stringify(userInput));
                     dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
                     let clozeItem = Session.get("originalQuestion") || dialogueCurrentDisplaySaver;
                     let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
@@ -318,7 +317,6 @@ dialogueUserAnswers = [];
 dialogueContext = undefined;
 dialogueCurrentDisplaySaver = undefined;
 dialogueCallbackSaver = undefined;
-dialogueUserAnswerSaver = undefined;
 
 let dialogueTransitionStatements = [
     "That wasn’t right, so to help you build the knowledge let’s chat about it for a little.",
