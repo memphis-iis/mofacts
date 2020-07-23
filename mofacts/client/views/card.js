@@ -1204,6 +1204,11 @@ function handleUserInput(e, source, simAnswerCorrect) {
           console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
       }
 
+      //Don't count test type trials in progress reporting
+      if(getTestType() === "t"){
+        endLatency = undefined;
+      }
+
       //Figure out button trial entries
       var buttonEntries = "";
       var wasButtonTrial = !!Session.get("buttonTrial");
