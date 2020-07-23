@@ -8,6 +8,8 @@ exports.DialogueMove$reflection = DialogueMove$reflection;
 exports.DialogueMove$$$GetRandom$$Z6391FD10 = DialogueMove$$$GetRandom$$Z6391FD10;
 exports.DialogueMove$$$Create$$Z29C2FE95 = DialogueMove$$$Create$$Z29C2FE95;
 exports.DialogueState$reflection = DialogueState$reflection;
+exports.DialogueState$$$Initialize = DialogueState$$$Initialize;
+exports.DialogueState$$$InitializeTest = DialogueState$$$InitializeTest;
 exports.GetDialogue = GetDialogue;
 exports.DialogueState = exports.DialogueMove = exports.random = exports.dialogueBags = void 0;
 
@@ -88,11 +90,19 @@ function DialogueState$reflection() {
   return (0, _Reflection.record)("TutorialDialogue.DialogueState", [], DialogueState, () => [["ClozeItem", _Reflection.string], ["ClozeAnswer", _Reflection.string], ["Questions", (0, _Reflection.option)((0, _Reflection.array)((0, _QuestionGenerator.Question$reflection)()))], ["LastQuestion", (0, _Reflection.option)((0, _QuestionGenerator.Question$reflection)())], ["LastStudentAnswer", (0, _Reflection.option)(_Reflection.string)], ["CurrentFeedback", (0, _Reflection.option)(DialogueMove$reflection())], ["CurrentElaboration", (0, _Reflection.option)((0, _Reflection.array)(DialogueMove$reflection()))], ["CurrentQuestion", (0, _Reflection.option)((0, _QuestionGenerator.Question$reflection)())], ["Display", (0, _Reflection.option)(_Reflection.string)], ["Finished", (0, _Reflection.option)(_Reflection.bool)]]);
 }
 
+function DialogueState$$$Initialize(clozeItem, clozeAnswer) {
+  return new DialogueState(clozeItem, clozeAnswer, null, null, null, null, null, null, null, null);
+}
+
+function DialogueState$$$InitializeTest() {
+  return DialogueState$$$Initialize("The supraspinatus is located in the depression above the spine of the scapula on its _______ _______.", "posterior surface");
+}
+
 function GetDialogue(state) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     var chunksJsonOption, input;
     const errors = [];
-    const text$$1 = (0, _RegExp.replace)(state.ClozeItem, "_+", state.ClozeAnswer);
+    const text$$1 = (0, _RegExp.replace)(state.ClozeItem, "(_ _|_)+", state.ClozeAnswer);
     return (state.Questions == null ? (chunksJsonOption = null, (0, _AllenNLP.GetNLP)(chunksJsonOption, text$$1)) : (input = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input)))).then(function (_arg1) {
       var input$$1;
       return ((state.LastQuestion != null ? state.LastStudentAnswer != null : false) ? (0, _AllenNLP.GetTextualEntailment)(state.LastQuestion.Answer, state.LastStudentAnswer) : (input$$1 = (0, _AllenNLP.Entailment$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$1)))).then(function (_arg2) {
@@ -133,7 +143,7 @@ function GetDialogue(state) {
               const da = daOption;
               let sa;
               sa = (0, _Array.head)(da.sentences);
-              questions = (0, _QuestionGenerator.GetQuestions)(sa);
+              questions = (0, _QuestionGenerator.GetQuotedQuestions)(state.ClozeAnswer, sa);
             } else {
               questions = new Array(0);
             }
@@ -151,28 +161,28 @@ function GetDialogue(state) {
           promptOption = (0, _Array.tryFind)(function predicate$$1(q$$2) {
             return q$$2.QuestionType === "prompt";
           }, questions);
-          var $target$$13, h, lastQ$$1, p$$1;
+          var $target$$15, h, lastQ$$1, p$$1;
 
           if (state.LastQuestion != null) {
             if (promptOption != null) {
               if (p = promptOption, (lastQ = state.LastQuestion, lastQ.QuestionType === "hint")) {
-                $target$$13 = 1;
+                $target$$15 = 1;
                 lastQ$$1 = state.LastQuestion;
                 p$$1 = promptOption;
               } else {
-                $target$$13 = 2;
+                $target$$15 = 2;
               }
             } else {
-              $target$$13 = 2;
+              $target$$15 = 2;
             }
           } else if (hintOption != null) {
-            $target$$13 = 0;
+            $target$$15 = 0;
             h = hintOption;
           } else {
-            $target$$13 = 2;
+            $target$$15 = 2;
           }
 
-          switch ($target$$13) {
+          switch ($target$$15) {
             case 0:
               {
                 patternInput = [(h), (questions.filter(function predicate$$2(q$$3) {
@@ -197,26 +207,26 @@ function GetDialogue(state) {
           }
 
           let feedbackOption;
-          var $target$$16, lq, sa$$1, te;
+          var $target$$18, lq, sa$$1, te;
 
           if (state.LastQuestion != null) {
             if (state.LastStudentAnswer != null) {
               if (teOption != null) {
-                $target$$16 = 0;
+                $target$$18 = 0;
                 lq = state.LastQuestion;
                 sa$$1 = state.LastStudentAnswer;
                 te = teOption;
               } else {
-                $target$$16 = 1;
+                $target$$18 = 1;
               }
             } else {
-              $target$$16 = 1;
+              $target$$18 = 1;
             }
           } else {
-            $target$$16 = 1;
+            $target$$18 = 1;
           }
 
-          switch ($target$$16) {
+          switch ($target$$18) {
             case 0:
               {
                 const polarity = (te.label_probs[0] > te.label_probs[1] ? 1 : -1) | 0;
@@ -243,19 +253,19 @@ function GetDialogue(state) {
           };
 
           let elaborationOption;
-          var $target$$18;
+          var $target$$20;
 
           if (feedbackOption != null) {
             if (x = feedbackOption, x.Type === "positiveFeedback") {
-              $target$$18 = 0;
+              $target$$20 = 0;
             } else {
-              $target$$18 = 1;
+              $target$$20 = 1;
             }
           } else {
-            $target$$18 = 1;
+            $target$$20 = 1;
           }
 
-          switch ($target$$18) {
+          switch ($target$$20) {
             case 0:
               {
                 const arg0$$3 = makeElaboration();
@@ -291,11 +301,11 @@ function GetDialogue(state) {
           }));
         } else {
           const errorPayload = [];
-          (0, _Array.addRangeInPlace)((list$$1 = (list = new _Types.List(_arg1, new _Types.List()), ((0, _List.choose)(resultToErrorOption, list))), (mapping$$1 = (clo1 = (0, _String.toText)((0, _String.printf)("document annotation error: %A")), function (arg10) {
-            return clo1(arg10);
+          (0, _Array.addRangeInPlace)((list$$1 = (list = new _Types.List(_arg1, new _Types.List()), ((0, _List.choose)(resultToErrorOption, list))), (mapping$$1 = (clo1 = (0, _String.toText)((0, _String.printf)("document annotation error: %A")), function (arg10$$1) {
+            return clo1(arg10$$1);
           }), (0, _List.map)(mapping$$1, list$$1))), errorPayload);
-          (0, _Array.addRangeInPlace)((list$$3 = (list$$2 = new _Types.List(_arg2, new _Types.List()), ((0, _List.choose)(resultToErrorOption, list$$2))), (mapping$$2 = (clo1$$1 = (0, _String.toText)((0, _String.printf)("textual entailment error: %A")), function (arg10$$1) {
-            return clo1$$1(arg10$$1);
+          (0, _Array.addRangeInPlace)((list$$3 = (list$$2 = new _Types.List(_arg2, new _Types.List()), ((0, _List.choose)(resultToErrorOption, list$$2))), (mapping$$2 = (clo1$$1 = (0, _String.toText)((0, _String.printf)("textual entailment error: %A")), function (arg10$$2) {
+            return clo1$$1(arg10$$2);
           }), (0, _List.map)(mapping$$2, list$$3))), errorPayload);
           return Promise.resolve(new _Option.Result(1, "Error", ((0, _String.join)("\n", errorPayload))));
         }
