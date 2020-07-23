@@ -30,7 +30,7 @@
                 <groupnames>A</groupnames>
                 <clustersrepeated>1</clustersrepeated>
                 <templatesrepeated>2</templatesrepeated>
-                <group>0,d,d,0 0,d,d,0</group>
+                <group>0,t,t,0 0,t,t,0</group>
             </conditiontemplatesbygroup>
             <initialpositions>A_1 A_2</initialpositions>
             <randomizegroups>false</randomizegroups>
