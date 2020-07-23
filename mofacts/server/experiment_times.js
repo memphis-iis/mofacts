@@ -69,9 +69,9 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         "Student Response Subtype", //qtype
         "Tutor Response Type", //trialType
         "Tutor Response Subtype", //qtype
-        "KC(Default)",
+        "KC (Default)",
         "KC Category(Default)",
-        "KC(Cluster)",
+        "KC (Cluster)",
         "KC Category(Cluster)",
         "CF (GUI Source)",
         "CF (Audio Input Enabled)",
@@ -337,9 +337,9 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Student Response Subtype": d(lasta.qtype, ''),
             "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
             "Tutor Response Subtype": '',
-            "KC(Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedDisplay, ''),
+            "KC (Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedDisplay, ''),
             "KC Category(Default)": '',
-            "KC(Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, correctAnswer), ''),
+            "KC (Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, correctAnswer), ''),
             "KC Category(Cluster)": '',
             "CF (GUI Source)":d(lasta.guiSource,''),
             "CF (Audio Input Enabled)":lasta.audioInputEnabled,
@@ -400,9 +400,9 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Student Response Subtype": '',
             "Tutor Response Type": "HINT_MSG", // or should be "RESULT"?
             "Tutor Response Subtype": '',
-            "KC(Default)": '',
+            "KC (Default)": '',
             "KC Category(Default)": '',
-            "KC(Cluster)": '',
+            "KC (Cluster)": '',
             "KC Category(Cluster)": '',
             "CF (Display Order)": -1,
             "CF (Stim File Index)": -1,
