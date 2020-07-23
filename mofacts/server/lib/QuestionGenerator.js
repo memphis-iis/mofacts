@@ -21,6 +21,7 @@ exports.questionCase = questionCase;
 exports.prompt = prompt;
 exports.hint = hint;
 exports.GetQuestions = GetQuestions;
+exports.GetQuotedQuestions = GetQuotedQuestions;
 exports.hintIndex = exports.Question = exports.Substitution = void 0;
 
 var _Types = require("./fable-library.2.8.4/Types");
@@ -42,6 +43,8 @@ var _Seq = require("./fable-library.2.8.4/Seq");
 var _Util = require("./fable-library.2.8.4/Util");
 
 var _Set = require("./fable-library.2.8.4/Set");
+
+var _RegExp = require("./fable-library.2.8.4/RegExp");
 
 const Substitution = (0, _Types.declare)(function QuestionGenerator_Substitution(arg1, arg2) {
   this.SourceIndices = arg1;
@@ -271,4 +274,13 @@ function GetQuestions(sa$$23) {
     return hint(sa$$23, sub$$3);
   }, plans)));
   return (0, _Array.ofList)(list$$3, Array);
+}
+
+function GetQuotedQuestions(clozeAnswer, sa$$25) {
+  let array$$10;
+  array$$10 = GetQuestions(sa$$25);
+  return (0, _Array.map)(function mapping$$10(q) {
+    const Text$ = (0, _RegExp.replace)(q.Text, "\\b" + clozeAnswer + "\\b", "\"" + clozeAnswer + "\"");
+    return new Question(q.QuestionType, Text$, q.Answer);
+  }, array$$10, Array);
 }
