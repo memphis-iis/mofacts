@@ -1,28 +1,6 @@
 <template name="signInSouthwest">
-  <h1 class="text-center">The system is currently down for maintenance.  Please check back later.</h1>
     <div class="container">
         <br />
-
-        <!-- <div class="row" id="initialInstructorSelection">
-          <label>Please click on the link corresponding to your instructor</label>
-          {{#each teachers}}
-            <ul>
-              <li><a href="#" onclick="setTeacher({_id:'{{this._id}}',username:'{{this.username}}'})">{{this.username}}</a></li>
-            </ul>
-          {{/each}}
-        </div>
-
-        <div class="row" hidden="true" id="classSelection">
-          <label>Please click on the link corresponding to your class</label>
-          {{#each curTeacherClasses}}
-            <ul>
-              <li><a href="#" onclick="setClass('{{this.name}}')">{{this.name}}</a></li>
-            </ul>
-          {{/each}}
-        </div>  -->
-
-
-        {{#if showTestLogins}}
 
         <div class="row" id="initialInstructorSelection">
           <label>Please click on the link corresponding to your instructor</label>
@@ -40,22 +18,23 @@
               <li><a href="#" onclick="setClass('{{this.name}}')">{{this.name}}</a></li>
             </ul>
           {{/each}}
-        </div> 
-
-        <div class="row login" id="loginDiv" hidden="true">
-            <div class="col-xs-12 col-sm-10 col-md-3 col-lg-3">
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input class="form-control accept-enter-key" type="text" id="username" value="" placeholder="Username">
-                </div>
-                <div class="form-group">
-                    <a class="btn btn-default btn-danger" id="signInButton" href="#">
-                         Sign In
-                    </a>
-                </div>
-                <br>
-            </div>
         </div>
+
+        {{#if showTestLogins}}
+          <div class="row login" id="loginDiv" hidden="true">
+              <div class="col-xs-12 col-sm-10 col-md-3 col-lg-3">
+                  <div class="form-group">
+                      <label for="username">Username</label>
+                      <input class="form-control accept-enter-key" type="text" id="username" value="" placeholder="Username">
+                  </div>
+                  <div class="form-group">
+                      <a class="btn btn-default btn-danger" id="signInButton" href="#">
+                          Sign In
+                      </a>
+                  </div>
+                  <br>
+              </div>
+          </div>
         {{else}}
           <a href="#" hidden="true" class="saml-login login" data-provider="adfs">Southwest SSO Click Here</a>
         {{/if}} 
