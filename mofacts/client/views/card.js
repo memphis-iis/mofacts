@@ -87,7 +87,6 @@ var buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
 cachedSyllables = null;
-let ENTER_KEY = 13;
 
 function clearButtonList() {
     //In theory, they could put something without temp defined and we would
@@ -422,29 +421,7 @@ Template.card.events({
     },
 
     'click #dialogueIntroExit' : function(e){
-      let dialogueLoopStage = Session.get("dialogueLoopStage");
-
-      switch(dialogueLoopStage){
-        case "intro":
-          //Enter dialogue loop
-          Session.set("dialogueLoopStage","insideLoop");
-          Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
-        break;
-        case "exit":
-          //Exit dialogue loop
-          console.log("dialogue loop finished, restoring state");
-          Session.set("dialogueLoopStage",undefined);
-          //restore session state
-          Session.set("currentDisplay",dialogueCurrentDisplaySaver);
-          console.log("finished, exiting dialogue loop");
-          dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
-          dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
-          dialogueUserPrompts = [];
-          dialogueUserAnswers = [];
-          Session.set("dialogueHistory",dialogueContext);
-          dialogueCallbackSaver();
-        break;
-      }
+      dialogueContinue();
     },
 
     'keypress #dialogueUserAnswer' : function(e){
@@ -1178,9 +1155,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
         userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
       }
     }
-    
-    let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue");
-    console.log("skipReviewAfterDialogueLoop: " + skipReviewAfterDialogueLoop);
 
     userAnswerFeedbackCallback = function(isCorrect){
       //Note that we must provide the client-side timestamp since we need it...
@@ -1348,6 +1322,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
           failNoDeliveryParams("No correct timeout specified");
           return;
       }
+    
+      let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect);
+      console.log("skipReviewAfterDialogueLoop: " + skipReviewAfterDialogueLoop);
 
       if(skipReviewAfterDialogueLoop) {
         //After dialogue loop we want to fast forward through review
@@ -1380,7 +1357,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, skipReviewAfterDialogueLoop, userAnswerFeedbackCallback);
+    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, userAnswerFeedbackCallback);
 }
 
 getButtonTrial = function() {
@@ -1411,7 +1388,7 @@ getButtonTrial = function() {
 //Take care of user feedback - and return whether or not the user correctly
 //answered the question. simCorrect will usually be undefined/null BUT if
 //it is true or false we know this is part of a simulation call
-function userAnswerFeedback(userAnswer, isTimeout, simCorrect, skipReviewAfterDialogueLoop, callback) {
+function userAnswerFeedback(userAnswer, isTimeout, simCorrect, callback) {
     var isCorrect = null;
     //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s" || getTestType() === "f") {
@@ -1463,6 +1440,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect, skipReviewAfterDi
 
       let testType = getTestType();
       let isDrill = (testType === "d" || testType === "m" || testType === "n");
+      let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect);
       if (isDrill && !skipReviewAfterDialogueLoop) {
           showUserInteraction(goodNews, msg);
       }
@@ -2173,37 +2151,16 @@ function stopUserInput() {
   console.log("stop user input");
   inputDisabled = true;
   stopRecording();
-   //Handle this being called before the page finishes loading by setting up
-  //polling check to recheck until page has loaded, then disable
-  var count = 0;
-  // if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-  //   stopInputInterval = setInterval(function(){
-  //     count += 1;
-  //     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-  //       console.log("stop input finally loaded, inputDisabled: " + inputDisabled);
-  //       if(typeof inputDisabled != "undefined"){
-  //         //Use inputDisabled variable so that successive calls of stop and allow
-  //         //are resolved synchronously i.e. whoever last set the inputDisabled variable
-  //         //should win
-  //         $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
-  //         inputDisabled = undefined;
-  //       }
-  //       clearInterval(stopInputInterval);
-  //     }
-  //   },500);
-  // }else{
 
-    //Need a delay here so we can wait for the DOM to load before manipulating it
-    setTimeout(function(){
-        console.log('after delay, stopping user input');
-        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
-    },200);
-  // }
+  //Need a delay here so we can wait for the DOM to load before manipulating it
+  setTimeout(function(){
+      console.log('after delay, stopping user input');
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", true);
+  },200);
 }
 
 var allowInputInterval;
 function allowUserInput(textFocus) {
-
   console.log("allow user input");
   inputDisabled = false;
   var enableUserInput = function(){
@@ -2232,24 +2189,8 @@ function allowUserInput(textFocus) {
         }
       }
     },200);
-
   }
-
-  //Handle this being called before the page finishes loading by setting up a
-  //polling check to recheck until page has loaded, then enable
-  var count = 0;
-  // if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") == undefined){
-  //   allowInputInterval = setInterval(function(){
-  //     count += 1;
-  //     if($("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled") != undefined || count > 20){
-  //       console.log("allow input finally loaded, inputDisabled: " + inputDisabled);
-  //       enableUserInput();
-  //       clearInterval(allowInputInterval);
-  //     }
-  //   },500);
-  // }else{
-    enableUserInput();
-  // }
+  enableUserInput();
 }
 
 

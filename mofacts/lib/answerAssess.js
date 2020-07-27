@@ -370,3 +370,29 @@ dialogueLoop = function(err,res){
         //wait for user input
     }  
 }
+
+dialogueContinue = function(){
+    let dialogueLoopStage = Session.get("dialogueLoopStage");
+
+    switch(dialogueLoopStage){
+        case "intro":
+            //Enter dialogue loop
+            Session.set("dialogueLoopStage","insideLoop");
+            Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        break;
+        case "exit":
+            //Exit dialogue loop
+            console.log("dialogue loop finished, restoring state");
+            Session.set("dialogueLoopStage",undefined);
+            //restore session state
+            Session.set("currentDisplay",dialogueCurrentDisplaySaver);
+            console.log("finished, exiting dialogue loop");
+            dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
+            dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
+            dialogueUserPrompts = [];
+            dialogueUserAnswers = [];
+            Session.set("dialogueHistory",dialogueContext);
+            dialogueCallbackSaver();
+        break;
+    }
+}
