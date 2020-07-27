@@ -288,7 +288,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         if (typeof state.stepNameSeen === "undefined") {
             state.stepNameSeen = {};
         }
-        var stepName = _.trim(d(lastq.selectedDisplay, ''));
+        var stepName = _.trim(d(lastq.originalSelectedDisplay, ''));
         var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
         state.stepNameSeen[stepName] = stepCount;
         stepName = stepCount + " " + stepName;
@@ -326,7 +326,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Condition Typee": 'button trial',
             "Level (Unit)": unitNum,
             "Level (Unitname)": d(unitName, ''),
-            "Problem Name": d(lastq.selectedDisplay, ''),
+            "Problem Name": d(lastq.originalSelectedDisplay, ''),
             "Step Name": stepName,
             "Time": d(lastq.clientSideTimeStamp, 0),
             "Selection": '',
@@ -337,7 +337,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Student Response Subtype": d(lasta.qtype, ''),
             "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
             "Tutor Response Subtype": '',
-            "KC (Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedDisplay, ''),
+            "KC (Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.originalSelectedDisplay, ''),
             "KC Category(Default)": '',
             "KC (Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, correctAnswer), ''),
             "KC Category(Cluster)": '',

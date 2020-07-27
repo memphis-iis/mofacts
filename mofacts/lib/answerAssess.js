@@ -289,7 +289,7 @@ Answers = {
                     Session.set("clozeQuestionParts",undefined);
                     Session.set("dialogueLoopStage","intro");
                     dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
-                    let clozeItem = Session.get("originalQuestion") || dialogueCurrentDisplaySaver;
+                    let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
                     let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
                     dialogueContext = {
                         "ClozeItem": clozeItem,
