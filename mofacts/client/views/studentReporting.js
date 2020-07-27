@@ -65,7 +65,7 @@ setCurrentStudentPerformance = function(){
         for(var index in tdfEntries){
           var tdfUserMetricsName = tdfEntries[index];
           var tdf = entry[tdfUserMetricsName];
-          var curtdfFileName = tdfUserMetricsName.replace('_json','.json');
+          var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
           for(var index in tdf){
             //Ignore assessment entries
             if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){
@@ -242,7 +242,8 @@ getcardProbs = function(){
         var cardIndex = mycardProbs[i].cardIndex;
         if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
           var stimIndex = mycardProbs[i].stimIndex;
-          var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
+          let currentDisplay = fastGetStimDisplay(cardIndex,stimIndex);
+          var currentQuestion = currentDisplay.text || currentDisplay.clozeText || currentDisplay.imgSrc || currentDisplay.audioSrc || currentDisplay.videoSrc;
           if(mycardProbs[i].probFunctionsParameters.stimOutcomeHistory && mycardProbs[i].probFunctionsParameters.stimOutcomeHistory.length > 0){
             console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
             cardProbsLabels.push(currentQuestion);
