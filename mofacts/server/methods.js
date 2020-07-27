@@ -705,7 +705,7 @@ Meteor.startup(function () {
                   for(var index in tdfEntries){
                     var key = tdfEntries[index];
                     var tdf = entry[key];
-                    let tdfKey = usingAllTdfs ? key.replace('_json', '.json') : tdfFileName;
+                    let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
                     for(var index in tdf){
                       //Only count items in learning sessions
                       if(!!learningSessionItems[tdfKey] 
@@ -751,10 +751,10 @@ Meteor.startup(function () {
             var userMetrics = UserMetrics.find({_id:userId});
 
             userMetrics.forEach(function(entry){
-              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_json") != -1)
+              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
               for(var index in possibleTdfs){
                 var possibleTdf = possibleTdfs[index];
-                if(possibleTdf.indexOf("_json") != -1){
+                if(possibleTdf.indexOf("_xml") != -1){
                   var curTdfName = possibleTdf;
                   allNamesOfTdfsAttempted.push(curTdfName);
                 }
