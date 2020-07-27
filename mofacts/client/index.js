@@ -1,3 +1,5 @@
+ENTER_KEY = 13;
+
 //This will be setup for window resize, but is made global so that the
 //card template page can hook it up as well
 redoCardImage = function() {
@@ -83,6 +85,28 @@ Template.body.onRendered(function(){
   $('#errorReportingModal').on('hidden.bs.modal', function () {
     console.log("error reporting modal hidden");
     restartMainCardTimeoutIfNecessary();
+  });
+
+  //Global handler for continue buttons
+  $(window).keypress(function(e) {
+    let key = e.keyCode || e.which;
+    if (key == ENTER_KEY && e.target.tagName != "INPUT") {
+      window.keypressEvent = e;
+      let curPage = document.location.pathname;
+      console.log("global enter key, curPage: " + curPage);
+      console.log(e);
+
+      switch(curPage){
+        case "/instructions":
+          e.preventDefault();
+          instructContinue();
+          break;
+        case "/card":
+          //TODO: add in code for enter key progressing skipstudy/continueStudy button
+          dialogueContinue();
+          break;
+      }
+    }
   });
 })
 
