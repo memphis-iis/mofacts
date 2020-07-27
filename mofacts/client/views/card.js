@@ -688,13 +688,11 @@ Template.card.helpers({
     },
 
     'textOrClozeCard': function() {
-      let currentDisplay = Session.get("currentDisplay");
-      return !!(currentDisplay.text) || !!(currentDisplay.clozeText);
+      return !!(Session.get("currentDisplay").text) || !!(Session.get("currentDisplay").clozeText);
     },
 
     'anythingButAudioCard': function() {
-      let currentDisplay = Session.get("currentDisplay");
-      return !!(currentDisplay.text) || !!(currentDisplay.clozeText) || !!(currentDisplay.imgSrc) || !!(currentDisplay.videoSrc);
+      return !!(Session.get("currentDisplay").text) || !!(Session.get("currentDisplay").clozeText) || !!(Session.get("currentDisplay").imgSrc) || !!(Session.get("currentDisplay").videoSrc);
     },
 
     'imageResponse' : function() {
@@ -2746,6 +2744,7 @@ processUserTimesLog = function(expKey) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
             Session.set("currentDisplay",       entry.selectedDisplay);
+            Session.set("originalDisplay",      entry.originalSelectedDisplay);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);

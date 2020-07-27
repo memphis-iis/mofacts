@@ -516,6 +516,10 @@ function modelUnitEngine() {
         // Store parameters in an object for easy logging/debugging
         var p = {};
 
+        //Current Indices
+        p.clusterIndex = prob.cardIndex;
+        p.stimIndex = prob.stimIndex;
+
         // Top-level metrics
         p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
         p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
@@ -779,7 +783,7 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
 
-            let currentDisplay = fastGetStimCluster(cardIndex).stims[whichStim].display;
+            let currentDisplay = JSON.parse(JSON.stringify(fastGetStimCluster(cardIndex).stims[whichStim].display));
             Session.set("currentDisplay", currentDisplay);
 
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
@@ -810,7 +814,7 @@ function modelUnitEngine() {
                 Session.set("clozeQuestionParts",clozeQuestionParts);
                 let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(
                     currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
-                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
+                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
             }else{
                 Session.set("currentAnswer",currentStimAnswer);
                 Session.set("originalAnswer",undefined);
