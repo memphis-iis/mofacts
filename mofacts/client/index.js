@@ -1,4 +1,5 @@
 ENTER_KEY = 13;
+enterKeyLock = false;
 
 //This will be setup for window resize, but is made global so that the
 //card template page can hook it up as well
@@ -96,15 +97,19 @@ Template.body.onRendered(function(){
       console.log("global enter key, curPage: " + curPage);
       console.log(e);
 
-      switch(curPage){
-        case "/instructions":
-          e.preventDefault();
-          instructContinue();
-          break;
-        case "/card":
-          //TODO: add in code for enter key progressing skipstudy/continueStudy button
-          dialogueContinue();
-          break;
+      if(!enterKeyLock){
+        enterKeyLock = true;
+        console.log("grabbed enterKeyLock on global enter handler");
+        switch(curPage){
+          case "/instructions":
+            e.preventDefault();
+            instructContinue();
+            break;
+          case "/card":
+            //TODO: add in code for enter key progressing skipstudy/continueStudy button
+            dialogueContinue();
+            break;
+        }   
       }
     }
   });

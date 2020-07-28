@@ -282,6 +282,8 @@ instructContinue = function () {
             //We know they'll need to resume now
             Session.set("needResume", true);
             leavePage("/card");
+            enterKeyLock = false;
+            console.log("releasing enterKeyLock in instructContinue");
         });
     }, 1);
 };
