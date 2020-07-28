@@ -133,6 +133,7 @@
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
             <falseAnswerLimit>2</falseAnswerLimit>
+            <timeuntilstimulus>1000</timeuntilstimulus>
         </deliveryparams>
     </unit>
     <unit>

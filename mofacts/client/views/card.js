@@ -427,11 +427,14 @@ Template.card.events({
     'keypress #dialogueUserAnswer' : function(e){
       let key = e.keyCode || e.which;
       if (key == ENTER_KEY) {
-        let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
-        $("#dialogueUserAnswer").val("");
-        dialogueUserAnswers.push(answer);
-        dialogueContext.LastStudentAnswer = answer;
-        Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        if(!enterKeyLock){
+          enterKeyLock = true;
+          let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
+          $("#dialogueUserAnswer").val("");
+          dialogueUserAnswers.push(answer);
+          dialogueContext.LastStudentAnswer = answer;
+          Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        }
       }
     },
 

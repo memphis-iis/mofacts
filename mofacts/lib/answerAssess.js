@@ -347,7 +347,7 @@ function partialApplication(func,arg){
 }
 
 dialogueLoop = function(err,res){
-    window.test = res;
+    console.log("dialogue loop");
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
         console.log(res);
@@ -368,10 +368,15 @@ dialogueLoop = function(err,res){
         dialogueContext = result;
         dialogueUserPrompts.push(newDisplay);
         //wait for user input
-    }  
+    }
+    Meteor.setTimeout(() => {
+        enterKeyLock = false; 
+        console.log("releasing enterKeyLock in dialogueLoop");
+    }, 2000); 
 }
 
 dialogueContinue = function(){
+    console.log("dialogueContinue");
     let dialogueLoopStage = Session.get("dialogueLoopStage");
 
     switch(dialogueLoopStage){
@@ -393,6 +398,8 @@ dialogueContinue = function(){
             dialogueUserAnswers = [];
             Session.set("dialogueHistory",dialogueContext);
             dialogueCallbackSaver();
-        break;
+        default:
+            enterKeyLock = false;
+            console.log("releasing enterKeyLock in dialogueContinue");
     }
 }
