@@ -848,6 +848,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -869,6 +870,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -928,6 +930,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
+            Session.set("originalDisplay", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
@@ -955,6 +958,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentDisplay",       entry.selectedDisplay);
+            Session.set("originalDisplay",      entry.originalSelectedDisplay);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);

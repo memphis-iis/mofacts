@@ -785,6 +785,7 @@ function modelUnitEngine() {
 
             let currentDisplay = JSON.parse(JSON.stringify(fastGetStimCluster(cardIndex).stims[whichStim].display));
             Session.set("currentDisplay", currentDisplay);
+            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
 
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
             let currentQuestionPart2 = undefined;
@@ -1215,6 +1216,7 @@ function scheduleUnitEngine() {
                 currentDisplay.clozeText = currentQuestion;
             }
             Session.set("currentDisplay", currentDisplay);
+            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
             Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
