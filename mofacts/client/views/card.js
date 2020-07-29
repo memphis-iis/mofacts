@@ -2284,6 +2284,7 @@ function resumeFromUserTimesLog() {
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentDisplay", undefined);
+    Session.set("originalDisplay", undefined);
     Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
@@ -2577,6 +2578,7 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -2600,6 +2602,7 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -2660,6 +2663,7 @@ processUserTimesLog = function(expKey) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
+            Session.set("originalDisplay", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
