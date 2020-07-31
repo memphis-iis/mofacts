@@ -37,38 +37,38 @@
         {{#if trial}}
             <div class="row">
                 <div class="container-fluid" id="displayContainer">
-                    {{#if anythingButAudioCard}}
-                        <div id="leftPanel" class="col-md-11">
-                            {{#if textOrClozeCard}}
-                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                    <div id="leftPanel" class="col-md-11">
+                        {{#if anythingButAudioCard}}
+                            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                {{#if textOrClozeCard}}
                                     {{#if subWordClozeCurrentQuestionExists}}
                                         {{{subWordParts.[0]}}}<u>{{{subWordParts.[1]}}}</u>{{{subWordParts.[2]}}}
                                     {{else}}
                                         {{{clozeText}}}
                                         {{{text}}}
                                     {{/if}}
-                                </div>
-                            {{/if}}
-                            {{#if imageCard}}
-                                <div class="marginLeftAndRight h2" id="imageDisplay">
+                                {{/if}}
+                            </div>
+                            <div class="marginLeftAndRight h2" id="imageDisplay">
+                                {{#if imageCard}}
                                     <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
-                                </div>
-                            {{/if}}
-                            {{#if videoCard}}
-                                <div class="marginLeftAndRight h2" id="videoDisplay">
+                                {{/if}}
+                            </div>
+                            <div class="marginLeftAndRight h2" id="videoDisplay">
+                                {{#if videoCard}}
                                     <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
                                         <source src="{{curVideoSrc}}">
                                         Your browser does not support the video tag.
                                     </video>
-                                </div>
-                            {{/if}}
-                        </div>
-                    {{/if}}
-                    {{#if audioCard}}
-                        <div id="rightmostPanel" class="col-md-1">
+                                {{/if}}
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div id="rightmostPanel" class="col-md-1">
+                        {{#if audioCard}}
                             <img src="images/speaker.png" class="marginLeftAndRight h2 sound-img">
-                        </div>
-                    {{/if}}
+                        {{/if}}
+                    </div>
                 </div>
             </div>
         {{/if}}
@@ -94,15 +94,15 @@
 
         {{#if testordrill}}
             {{#unless buttonTrial}}
-            <div class="row" id="textEntryRow">
-                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                    {{#if inDialogueLoop}}
-                        {{> dialogueLoop}}
-                    {{else}}
-                        {{> inputF}}
-                    {{/if}}
-                </div>
-            </div>  <!-- close row -->
+                <div class="row" id="textEntryRow">
+                    <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                        {{#if inDialogueLoop}}
+                            {{> dialogueLoop}}
+                        {{else}}
+                            {{> inputF}}
+                        {{/if}}
+                    </div>
+                </div>  <!-- close row -->
             {{/unless}}
 
             <div class="row">
@@ -146,7 +146,6 @@
                                   </tr>
                                 {{/each}}
                               {{/if}}
-
                           </table>
                         {{/if}}
                     </div>

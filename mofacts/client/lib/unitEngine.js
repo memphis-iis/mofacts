@@ -784,7 +784,6 @@ function modelUnitEngine() {
             setCurrentClusterIndex(cardIndex);
 
             let currentDisplay = JSON.parse(JSON.stringify(fastGetStimCluster(cardIndex).stims[whichStim].display));
-            Session.set("currentDisplay", currentDisplay);
             Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
 
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
@@ -794,7 +793,7 @@ function modelUnitEngine() {
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
 
             //If we have a dual prompt question populate the spare data field
-            if(currentQuestion.indexOf("|") != -1){
+            if(currentQuestion && currentQuestion.indexOf("|") != -1){
                 var prompts = currentQuestion.split("|");
                 currentQuestion = prompts[0];
                 currentQuestionPart2 = prompts[1];
@@ -837,7 +836,8 @@ function modelUnitEngine() {
             }else if(!!(currentDisplay.clozeText)){
                 currentDisplay.clozeText = currentQuestion;
             }
-            Session.set("currentDisplay",currentDisplay);
+
+            Session.set("currentDisplayEngine",currentDisplay);
             Session.set("currentQuestionPart2",currentQuestionPart2);
 
             if(getCurrentDeliveryParams().studyFirst){
@@ -1215,7 +1215,7 @@ function scheduleUnitEngine() {
             }else if(!!(currentDisplay.clozeText)){
                 currentDisplay.clozeText = currentQuestion;
             }
-            Session.set("currentDisplay", currentDisplay);
+            Session.set("currentDisplayEngine", currentDisplay);
             Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
             Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
