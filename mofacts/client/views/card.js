@@ -955,6 +955,7 @@ function newQuestionHandler() {
     // Change buttonTrial to neither true nor false to try and stop a spurious
     // "update miss" in our templating
     Session.set("buttonTrial", null);
+    Session.set("currentDisplay", null);
 
     // Buttons are determined by 3 options: buttonorder, buttonOptions,
     // wrongButtonLimit:
@@ -977,13 +978,13 @@ function newQuestionHandler() {
     if (!getButtonTrial()) {
         //Not a button trial
         clearButtonList();
-        Session.set("buttonTrial", false);
+        //Session.set("buttonTrial", false);
         textFocus = true; //Need the text box focused
 
         $("#textEntryRow").show();
     }else {
         // Is a button trial - we need to figure out what to show
-        Session.set("buttonTrial", true);
+        //Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
         let buttonChoices = [];
@@ -1036,7 +1037,7 @@ function newQuestionHandler() {
         }
 
         clearButtonList();
-        Session.set("buttonTrial", true);
+        //Session.set("buttonTrial", true);
         let curChar = 'a'
 
         _.each(buttonChoices, function(val, idx) {
@@ -1058,10 +1059,10 @@ function newQuestionHandler() {
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
     if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplay").clozeText)) {
-      let currentDisplay = Session.get("currentDisplay");
+      let currentDisplay = Session.get("currentDisplayEngine");
       let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
       currentDisplay.clozeText = clozeQuestionFilledIn;
-      Session.set("currentDisplay",currentDisplay);
+      Session.set("currentDisplayEngine",currentDisplay);
     }
 
     startQuestionTimeout(textFocus);
@@ -1647,6 +1648,8 @@ function startQuestionTimeout(textFocus) {
     trialTimestamp = Date.now();
 
     let currentDisplay = Session.get("currentDisplay");
+    console.log("current display!!!:");
+    console.log(JSON.parse(JSON.stringify(currentDisplay)));
 
     if(!!(currentDisplay.audioSrc)) {
         //We don't allow user input until the sound is finished playing
@@ -1668,6 +1671,10 @@ function startQuestionTimeout(textFocus) {
 
   //No user input (re-enabled below) and reset keypress timestamp.
   stopUserInput();
+
+  //We do this little shuffle of session variables so the display will update all at the same time
+  Session.set("currentDisplay",Session.get("currentDisplayEngine"));
+  Session.set("buttonTrial", getButtonTrial());
 
   //Swap out the current question with a pre question display as defined in the tdf file
   //then delay for the specified amount of time before setting back to the current question
@@ -2284,6 +2291,7 @@ function resumeFromUserTimesLog() {
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentDisplay", undefined);
+    Session.set("currentDisplayEngine", undefined);
     Session.set("originalDisplay", undefined);
     Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
@@ -2578,6 +2586,7 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("currentDisplayEngine", undefined);
                 Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -2602,6 +2611,7 @@ processUserTimesLog = function(expKey) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("currentDisplayEngine", undefined);
                 Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
@@ -2663,6 +2673,7 @@ processUserTimesLog = function(expKey) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
+            Session.set("currentDisplayEngine", undefined);
             Session.set("originalDisplay", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
