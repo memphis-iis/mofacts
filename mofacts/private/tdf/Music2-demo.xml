@@ -21,12 +21,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -55,12 +53,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -89,12 +85,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -123,12 +117,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -157,12 +149,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -191,12 +181,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -227,12 +215,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -296,12 +282,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>120000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -389,12 +373,10 @@
         <wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>3000</reviewstudy>
+                        <reviewstudy>3000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>10000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>

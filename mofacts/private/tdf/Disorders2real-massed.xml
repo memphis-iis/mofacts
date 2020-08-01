@@ -27,12 +27,10 @@
         <deliveryparams>
             <fontsize>4</fontsize>
             <purestudy>30000</purestudy>
-            <readyprompt>1000</readyprompt>
-            <reviewstudy>0</reviewstudy>
+                        <reviewstudy>0</reviewstudy>
             <correctprompt>0</correctprompt>
             <drill>30000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <buttontrial>true</buttontrial>
         <assessmentsession>
@@ -73,8 +71,7 @@
         <buttonorder>fixed</buttonorder> 
         <deliveryparams>
          <purestudy>30000</purestudy>
-            <readyprompt>200</readyprompt>
-            <reviewstudy>1000</reviewstudy>
+                        <reviewstudy>1000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>30000</drill> 
         </deliveryparams>	
@@ -115,8 +112,7 @@
         <deliveryparams>
             <fontsize>4</fontsize>
             <purestudy>12000000</purestudy>
-            <readyprompt>200</readyprompt>
-            <reviewstudy>15000</reviewstudy>
+                        <reviewstudy>15000</reviewstudy>
             <correctprompt>1000</correctprompt>
             <drill>12000000</drill>
         </deliveryparams>
