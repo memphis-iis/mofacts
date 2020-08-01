@@ -22,8 +22,7 @@
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
         <assessmentsession>
             <conditiontemplatesbygroup>
