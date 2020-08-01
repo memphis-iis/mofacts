@@ -67,6 +67,8 @@ sessionCleanUp = function() {
     Session.set("currentAnswer", undefined);
     Session.set("originalAnswer",undefined);
     Session.set("currentDisplay", undefined);
+    Session.set("currentDisplayEngine", undefined);
+    Session.set("originalDisplay", undefined);
     Session.set("currentQuestionPart2",undefined);
     Session.set("originalQuestion",undefined);
     Session.set("originalQuestion2",undefined);

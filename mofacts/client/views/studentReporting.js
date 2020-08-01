@@ -65,7 +65,7 @@ setCurrentStudentPerformance = function(){
         for(var index in tdfEntries){
           var tdfUserMetricsName = tdfEntries[index];
           var tdf = entry[tdfUserMetricsName];
-          var curtdfFileName = tdfUserMetricsName.replace('_json','.json');
+          var curtdfFileName = tdfUserMetricsName.replace('_xml','.xml');
           for(var index in tdf){
             //Ignore assessment entries
             if(!!learningSessionItems[curtdfFileName] && !!learningSessionItems[curtdfFileName][index]){
@@ -242,7 +242,8 @@ getcardProbs = function(){
         var cardIndex = mycardProbs[i].cardIndex;
         if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
           var stimIndex = mycardProbs[i].stimIndex;
-          var currentQuestion = fastGetStimQuestion(cardIndex,stimIndex);
+          let currentDisplay = fastGetStimDisplay(cardIndex,stimIndex);
+          var currentQuestion = currentDisplay.text || currentDisplay.clozeText || currentDisplay.imgSrc || currentDisplay.audioSrc || currentDisplay.videoSrc;
           if(mycardProbs[i].probFunctionsParameters.stimOutcomeHistory && mycardProbs[i].probFunctionsParameters.stimOutcomeHistory.length > 0){
             console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
             cardProbsLabels.push(currentQuestion);
@@ -847,6 +848,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -868,6 +870,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
                 Session.set("questionIndex", 0);
                 Session.set("clusterIndex", undefined);
                 Session.set("currentDisplay", undefined);
+                Session.set("originalDisplay", undefined);
                 Session.set("currentQuestionPart2",undefined);
                 Session.set("currentAnswer", undefined);
                 Session.set("testType", undefined);
@@ -927,6 +930,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             //Blank out things that should restart with a schedule
             Session.set("clusterIndex", undefined);
             Session.set("currentDisplay", undefined);
+            Session.set("originalDisplay", undefined);
             Session.set("currentQuestionPart2",undefined);
             Session.set("currentAnswer", undefined);
             Session.set("testType", undefined);
@@ -954,6 +958,7 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentDisplay",       entry.selectedDisplay);
+            Session.set("originalDisplay",      entry.originalSelectedDisplay);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
             Session.set("showOverlearningText", entry.showOverlearningText);

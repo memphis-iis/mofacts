@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "sarcomeres",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -13,17 +13,13 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "Each deal consists of two parts – the __________, where the four players bid in a clockwise rotation describing their hands, the play, where the side that wins the bidding __________ tries to take the tricks necessary to fulfill their contract and scoring.",
-                                "text":"",
-                                "audioSrc":"sounds/music2/1.mp3",
-                                "imgSrc":"images/TNplants/6151_IMG00198.JPG",
-                                "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
+                                "clozeText": "The myofibrils are essentially __________ joined end to end."
                             },
                             "parameter": "-0.479299999999998"
                         },
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "sarcomeres",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -31,11 +27,7 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "Each deal consists of two _____ – the auction, where the four players bid in a clockwise rotation describing their hands, the play, where the side that wins the bidding __________ tries to take the tricks necessary to fulfill their contract and scoring.",
-                                "text":"",
-                                "audioSrc":"sounds/toneresource/1.4ma/T1_400ms__vowel.wav",
-                                "imgSrc":"images/TNplants/6151_IMG00258.JPG",
-                                "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
+                                "clozeText": "The myofibrils are essentially __________ joined end to end."
                             },
                             "parameter": "-0.479299999999998"
                         }

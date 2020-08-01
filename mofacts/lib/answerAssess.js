@@ -289,7 +289,7 @@ Answers = {
                     Session.set("clozeQuestionParts",undefined);
                     Session.set("dialogueLoopStage","intro");
                     dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
-                    let clozeItem = Session.get("originalQuestion") || dialogueCurrentDisplaySaver;
+                    let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
                     let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
                     dialogueContext = {
                         "ClozeItem": clozeItem,
@@ -347,7 +347,7 @@ function partialApplication(func,arg){
 }
 
 dialogueLoop = function(err,res){
-    window.test = res;
+    console.log("dialogue loop");
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
         console.log(res);
@@ -368,5 +368,38 @@ dialogueLoop = function(err,res){
         dialogueContext = result;
         dialogueUserPrompts.push(newDisplay);
         //wait for user input
-    }  
+    }
+    Meteor.setTimeout(() => {
+        enterKeyLock = false; 
+        console.log("releasing enterKeyLock in dialogueLoop");
+    }, 2000); 
+}
+
+dialogueContinue = function(){
+    console.log("dialogueContinue");
+    let dialogueLoopStage = Session.get("dialogueLoopStage");
+
+    switch(dialogueLoopStage){
+        case "intro":
+            //Enter dialogue loop
+            Session.set("dialogueLoopStage","insideLoop");
+            Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
+        break;
+        case "exit":
+            //Exit dialogue loop
+            console.log("dialogue loop finished, restoring state");
+            Session.set("dialogueLoopStage",undefined);
+            //restore session state
+            Session.set("currentDisplay",dialogueCurrentDisplaySaver);
+            console.log("finished, exiting dialogue loop");
+            dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
+            dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
+            dialogueUserPrompts = [];
+            dialogueUserAnswers = [];
+            Session.set("dialogueHistory",dialogueContext);
+            dialogueCallbackSaver();
+        default:
+            enterKeyLock = false;
+            console.log("releasing enterKeyLock in dialogueContinue");
+    }
 }

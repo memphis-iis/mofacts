@@ -27,8 +27,6 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-import { last } from "./lib/fable-library.2.8.4/Seq";
-
 (function () { //Begin IIFE pattern
 
     // Define an ordering for the fields and the column name we'll put in the
@@ -128,8 +126,16 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         return fields[0] + "_" + (num + 1).toString();
     }
 
+    function stringifyIfExists(json){
+        if(json){
+            return JSON.stringify(json);
+        }else{
+            return "";
+        }
+    }
+
     //Create our output record
-    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq) {
+    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, dynamicStimTags) {
         // Return the default value if the given value isn't "truthy" BUT numeric
         // zero (0) is considered "truthy". Note that the default value is always
         // the last argument
@@ -288,7 +294,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         if (typeof state.stepNameSeen === "undefined") {
             state.stepNameSeen = {};
         }
-        var stepName = _.trim(d(lastq.selectedDisplay, ''));
+        var stepName = _.trim(d(stringifyIfExists(lastq.originalSelectedDisplay), ''));
         var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
         state.stepNameSeen[stepName] = stepCount;
         stepName = stepCount + " " + stepName;
@@ -311,7 +317,14 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             currentAnswerSyllableCount = lasta.currentAnswerSyllables.count;
         }
 
-        return {
+
+        let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay));
+        if(lastq.selectedDisplay.clozeText){
+            filledInDisplay.clozeText =  filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
+        }
+        let kcCluster = d(lastq.clusterIndex + " " + stringifyIfExists(filledInDisplay), '');
+
+        let populatedRecord = {
             "Anon Student Id": d(username, ''),
             "Session ID": (new Date(d(lastq.clientSideTimeStamp, 0))).toUTCString().substr(0, 16) + " " + tdfName, //hack
             "Condition Namea": tdfName,
@@ -326,7 +339,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Condition Typee": 'button trial',
             "Level (Unit)": unitNum,
             "Level (Unitname)": d(unitName, ''),
-            "Problem Name": d(lastq.selectedDisplay, ''),
+            "Problem Name": d(stringifyIfExists(lastq.originalSelectedDisplay), ''),
             "Step Name": stepName,
             "Time": d(lastq.clientSideTimeStamp, 0),
             "Selection": '',
@@ -337,9 +350,9 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "Student Response Subtype": d(lasta.qtype, ''),
             "Tutor Response Type": isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
             "Tutor Response Subtype": '',
-            "KC (Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(lastq.selectedDisplay, ''),
+            "KC (Default)": d(lastq.clusterIndex, -1) + "-" + d(lastq.whichStim, -1) + " " + d(stringifyIfExists(lastq.originalSelectedDisplay), ''),
             "KC Category(Default)": '',
-            "KC (Cluster)": d(lastq.clusterIndex + " " + lastq.selectedQuestion.replace(/___+/g, correctAnswer), ''),
+            "KC (Cluster)": kcCluster,
             "KC Category(Cluster)": '',
             "CF (GUI Source)":d(lasta.guiSource,''),
             "CF (Audio Input Enabled)":lasta.audioInputEnabled,
@@ -361,7 +374,15 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             "CF (Button Order)": d(lasta.buttonOrder, ''),
             "CF (Note)": d(note, ''),
             "Feedback Text": d(lasta.displayedSystemResponse, ''),
-        };
+        }
+
+        if(Object.keys(dynamicStimTags).length > 0){
+            for(let tag of Object.keys(dynamicStimTags)){
+                populatedRecord["CF (" + tag + ")"] = dynamicStimTags[tag];
+            }
+        }
+
+        return populatedRecord;
     }
 
     function populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct) {
@@ -435,7 +456,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
 
     //Iterate over a user times log cursor and call the callback function with a
     //record populated with current information in log
-    function processUserLog(username, userTimesDoc, expName, callback) {
+    function processUserLog(username, userTimesDoc, expName, listOfDynamicStimTags, callback) {
         var expKey = ('' + expName).replace(/\./g, "_");
         if (!(expKey in userTimesDoc)) {
             return;
@@ -541,7 +562,8 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
                 //FINALLY have enough to populate the record
                 populated = null;
                 try {
-                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq);
+                    let dynamicStimTagValues = getValuesOfStimTagList(expName, lastq.clusterIndex, lastq.whichStim, listOfDynamicStimTags);
+                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, dynamicStimTagValues);
                 }
                 catch (e) {
                     serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
@@ -561,6 +583,49 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         }
     }
 
+    getValuesOfStimTagList = function(tdfFileName, clusterIndex,stimIndex,tagList){
+        let stimFileName = getStimFileNameForTdf(tdfFileName);
+        let curStimuliFile = Stimuli.findOne({fileName:stimFileName});
+        let curStim = curStimuliFile.stimuli.setspec.clusters[clusterIndex].stims[stimIndex];
+        let valueDict = {};
+
+        for(var tag of tagList){
+            if(curStim.tags){
+                valueDict[tag] = curStim.tags[tag] || "";
+            }else{
+                valueDict[tag] = "";
+            }
+        }
+
+        return valueDict;
+    }
+
+    getListOfStimTags = function(tdfFileName){
+        serverConsole("getListOfStimTags, tdfFileName: " + tdfFileName);
+        let stimFileName = getStimFileNameForTdf(tdfFileName);
+        serverConsole("getListOfStimTags, stimFileName: " + stimFileName);
+        let curStimFile = Stimuli.findOne({fileName:stimFileName});
+        let allTagsInStimFile = new Set();
+
+        for(let cluster of curStimFile.stimuli.setspec.clusters){
+            for(let stim of cluster.stims){
+                if(stim.tags){
+                    for(let tagName of Object.keys(stim.tags)){
+                        allTagsInStimFile.add(tagName);
+                    }
+                }
+            }
+        }
+
+        return Array.from(allTagsInStimFile);
+    }
+
+    getStimFileNameForTdf = function(tdfName){
+        let tdf = Tdfs.findOne({fileName:tdfName});
+
+        return tdf.tdfs.tutor.setspec[0].stimulusfile[0];
+    }
+
     // Exported main function: call recordAcceptor with each record generated
     // for expName in datashop format. We do NOT terminate our records.
     // We return the number of records written
@@ -573,6 +638,14 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
         } else {
             expNames = expName;
         }
+
+        let listOfDynamicStimTags = getListOfStimTags(expName);
+        let listOfDynamicStimTagsWithColumnNames = [];
+        for(let tag of listOfDynamicStimTags){
+            listOfDynamicStimTagsWithColumnNames.push("CF (" + tag + ")");
+        }
+
+        FIELDSDS = FIELDSDS.concat(listOfDynamicStimTagsWithColumnNames);
 
         // We currently just ignore format
 
@@ -606,7 +679,7 @@ import { last } from "./lib/fable-library.2.8.4/Seq";
             var username = userRec.username;
 
             expNames.forEach(function(expName) {
-                processUserLog(username, entry, expName, function (rec) {
+                processUserLog(username, entry, expName, listOfDynamicStimTags, function (rec) {
                     recordCount++;
                     recordAcceptor(delimitedRecord(rec));
                 });

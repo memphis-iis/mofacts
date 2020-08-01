@@ -331,7 +331,7 @@ Template.profile.rendered = function () {
             userselect = false;
 
         if (!userselect) {
-            console.log("Skipping due to userselect=false for ", name);
+            //console.log("Skipping due to userselect=false for ", name);
             return;
         }
 
