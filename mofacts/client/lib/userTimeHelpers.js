@@ -66,19 +66,20 @@ recordUserTimeQuestion = function(extendedData) {
     var currCluster = getStimCluster(getCurrentClusterIndex());
 
     var dataRec = _.extend({
-        clusterIndex:         currCluster.clusterIndex,
-        shufIndex:            currCluster.shufIndex,
-        questionIndex:        Session.get("questionIndex"),
-        currentUnit:          Session.get("currentUnitNumber"),
-        curSubTdfIndex:       Session.get("subTdfIndex"),
-        originalQuestion:     Session.get("originalQuestion"),
-        originalQuestion2:    Session.get("originalQuestion2"),
-        selectedDisplay:      Session.get("currentDisplay"),
-        selectedQuestionPart2:Session.get("currentQuestionPart2"),
-        selectedAnswer:       Session.get("currentAnswer"),
-        originalAnswer:       Session.get("originalAnswer"),
-        showOverlearningText: Session.get("showOverlearningText"),
-        testType:             Session.get("testType"),
+        clusterIndex:               currCluster.clusterIndex,
+        shufIndex:                  currCluster.shufIndex,
+        questionIndex:              Session.get("questionIndex"),
+        currentUnit:                Session.get("currentUnitNumber"),
+        curSubTdfIndex:             Session.get("subTdfIndex"),
+        originalQuestion:           Session.get("originalQuestion"),
+        originalQuestion2:          Session.get("originalQuestion2"),
+        originalSelectedDisplay:    Session.get("originalDisplay"),
+        selectedDisplay:            Session.get("currentDisplay") || Session.get("currentDisplayEngine"),
+        selectedQuestionPart2:      Session.get("currentQuestionPart2"),
+        selectedAnswer:             Session.get("currentAnswer"),
+        originalAnswer:             Session.get("originalAnswer"),
+        showOverlearningText:       Session.get("showOverlearningText"),
+        testType:                   Session.get("testType"),
     }, extendedData || {});
 
     recordUserTime("question", dataRec);

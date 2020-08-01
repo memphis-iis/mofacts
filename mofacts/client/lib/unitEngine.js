@@ -516,6 +516,10 @@ function modelUnitEngine() {
         // Store parameters in an object for easy logging/debugging
         var p = {};
 
+        //Current Indices
+        p.clusterIndex = prob.cardIndex;
+        p.stimIndex = prob.stimIndex;
+
         // Top-level metrics
         p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
         p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
@@ -779,8 +783,8 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
 
-            let currentDisplay = fastGetStimCluster(cardIndex).stims[whichStim].display;
-            Session.set("currentDisplay", currentDisplay);
+            let currentDisplay = JSON.parse(JSON.stringify(fastGetStimCluster(cardIndex).stims[whichStim].display));
+            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
 
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
             let currentQuestionPart2 = undefined;
@@ -789,7 +793,7 @@ function modelUnitEngine() {
             let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
 
             //If we have a dual prompt question populate the spare data field
-            if(currentQuestion.indexOf("|") != -1){
+            if(currentQuestion && currentQuestion.indexOf("|") != -1){
                 var prompts = currentQuestion.split("|");
                 currentQuestion = prompts[0];
                 currentQuestionPart2 = prompts[1];
@@ -810,7 +814,7 @@ function modelUnitEngine() {
                 Session.set("clozeQuestionParts",clozeQuestionParts);
                 let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(
                     currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
-                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two party questions for now
+                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
             }else{
                 Session.set("currentAnswer",currentStimAnswer);
                 Session.set("originalAnswer",undefined);
@@ -832,7 +836,8 @@ function modelUnitEngine() {
             }else if(!!(currentDisplay.clozeText)){
                 currentDisplay.clozeText = currentQuestion;
             }
-            Session.set("currentDisplay",currentDisplay);
+
+            Session.set("currentDisplayEngine",currentDisplay);
             Session.set("currentQuestionPart2",currentQuestionPart2);
 
             if(getCurrentDeliveryParams().studyFirst){
@@ -1210,7 +1215,8 @@ function scheduleUnitEngine() {
             }else if(!!(currentDisplay.clozeText)){
                 currentDisplay.clozeText = currentQuestion;
             }
-            Session.set("currentDisplay", currentDisplay);
+            Session.set("currentDisplayEngine", currentDisplay);
+            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
             Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);

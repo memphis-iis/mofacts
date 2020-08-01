@@ -13,6 +13,8 @@ navigateToStudentReporting = function(studentUsername){
 }
 
 setCurClassStudents = function(curClassName,currentTdf){
+  Session.set("curClassStudents",[]);
+  Session.set("curClassStudentTotals",[]);
   var classes = Session.get("classes");
   var curClass = search(curClassName,"name",classes);
   var classID = curClass._id;
