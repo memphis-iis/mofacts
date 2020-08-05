@@ -129,6 +129,159 @@ function defaultUnitEngine(extensionData) {
                     this.createQuestionLogEntry()
                 )
             );
+        },
+
+        getSubClozeAnswerSyllables: function(answer,displaySyllableIndices,cachedSyllables){
+            console.log("!!!displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
+            if(typeof(displaySyllableIndices) === "undefined" || !cachedSyllables || displaySyllableIndices.length == 0){
+                console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
+                return undefined;
+            }else{
+                answer = answer.replace(/\./g,'_');
+                let syllableArray = cachedSyllables.data[answer].syllables;
+                return {syllableArray,displaySyllableIndices};
+            }    
+        },
+    
+        replaceClozeWithSyllables: function(question,currentAnswerSyllables, origAnswer){
+            console.log("replaceClozeWithSyllables: " + question);
+            if(!question){
+                return {
+                    clozeQuestion: undefined,
+                    clozeMissingSyllables: undefined
+                }
+            }
+    
+            let clozeAnswer = "";
+            let clozeMissingSyllables = ""
+            let syllablesArray = currentAnswerSyllables.syllableArray;
+            let syllableIndices = currentAnswerSyllables.displaySyllableIndices;
+            let reconstructedAnswer = "";
+            let clozeAnswerOnlyUnderscores = "";
+            let clozeAnswerNoUnderscores = "";
+    
+            for(let index in syllablesArray){
+                index = parseInt(index);
+                if(syllableIndices.indexOf(index) != -1){
+                    clozeAnswer += syllablesArray[index];
+                    clozeAnswerNoUnderscores += syllablesArray[index];
+                }else{
+                    // Handle underscores for syllable array elements that contain whitespace
+                    if (syllablesArray[index].indexOf(' ') >= 0) {
+                        clozeAnswer += "__ __";
+                        clozeAnswerOnlyUnderscores += "__ __"
+                        clozeMissingSyllables += syllablesArray[index];
+                    } else {
+                        clozeAnswer += "____";
+                        clozeAnswerOnlyUnderscores += "____";
+                        clozeMissingSyllables += syllablesArray[index];
+                    }
+                }
+    
+                reconstructedAnswer += syllablesArray[index];
+                let nextChar = reconstructedAnswer.length;
+                while(origAnswer.charAt(nextChar) == " "){
+                    clozeAnswer += " ";
+                    reconstructedAnswer += " ";
+                    clozeMissingSyllables += " ";
+                    clozeAnswerOnlyUnderscores += " ";
+                    clozeAnswerNoUnderscores += " ";
+                    nextChar = reconstructedAnswer.length;
+                }
+            }
+    
+            let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
+            clozeQuestionParts.splice(1,1);
+            clozeQuestionParts.splice(1,0,clozeAnswerNoUnderscores.trim());
+            clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + " " + clozeQuestionParts[2];
+    
+            // If our third cloze part begins with an underscore,
+            // our second cloze part should be our syllables, so
+            // if the answer sans underscores doesn't end in whitespace,
+            // remove leading whitespace from part 3
+            if (clozeQuestionParts[2].trim().charAt(0) === "_"
+                && clozeAnswerNoUnderscores.slice(-1) != " ") {
+                clozeQuestionParts[2] = clozeQuestionParts[2].trim();
+            }
+            
+            return {
+                clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
+                clozeMissingSyllables: clozeMissingSyllables,
+                clozeQuestionParts: clozeQuestionParts
+            };
+        },
+
+        setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2, currentStimAnswer,prob){
+            let currentAnswer = currentStimAnswer;
+            let clozeQuestionParts = undefined;
+            let currentAnswerSyllables = undefined;
+
+            //For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
+            if(prob){
+                currentAnswerSyllables = this.getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
+                
+                if(currentAnswerSyllables){
+                    let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = this.replaceClozeWithSyllables(
+                        currentQuestion,currentAnswerSyllables,currentStimAnswer);
+                    currentQuestion = clozeQuestion;
+                    currentAnswer = clozeMissingSyllables;
+                    console.log("clozeQuestionParts: " + JSON.stringify(clozeQuestionParts));
+                    let {clozeQuestion2,clozeMissingSyllables2} = this.replaceClozeWithSyllables(
+                        currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
+                    currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
+                }
+            }          
+
+            return {currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
+        },
+
+        setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
+            let curStim = getStimCluster(cardIndex).stims[whichStim];
+            let currentDisplay = JSON.parse(JSON.stringify(curStim.display));
+            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
+    
+            let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
+            let currentQuestionPart2 = undefined;
+            let currentStimAnswer = getStimAnswer(cardIndex, whichStim).toLowerCase();
+            Session.set("originalAnswer",currentStimAnswer);
+    
+            //If we have a dual prompt question populate the spare data field
+            if(currentQuestion && currentQuestion.indexOf("|") != -1){
+                var prompts = currentQuestion.split("|");
+                currentQuestion = prompts[0];
+                currentQuestionPart2 = prompts[1];
+            }
+            Session.set("originalQuestion",currentQuestion);
+            Session.set("originalQuestion2",currentQuestionPart2);
+            
+            let currentAnswerSyllables, clozeQuestionParts, currentAnswer;
+            ({currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer} = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob));
+
+            if(currentAnswerSyllables){
+                curStim.answerSyllables = currentAnswerSyllables;
+            }
+            Session.set("currentAnswerSyllables",currentAnswerSyllables);
+            Session.set("currentAnswer",currentAnswer);
+            Session.set("clozeQuestionParts",clozeQuestionParts);
+            Session.set("currentQuestionPart2",currentQuestionPart2);
+    
+            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
+            if(imageFilteringConditionGroup){
+                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
+                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
+                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
+                }
+            }
+    
+            if(!!(currentDisplay.text)){
+                currentDisplay.text = currentQuestion;
+            }else if(!!(currentDisplay.clozeText)){
+                currentDisplay.clozeText = currentQuestion;
+            }
+    
+            Session.set("currentDisplayEngine",currentDisplay);
         }
     };
     console.log("extension data: " + JSON.stringify(extensionData));
@@ -211,88 +364,9 @@ function modelUnitEngine() {
         let display = fastGetStimCluster(index).stims[whichQuestion].display;
         return display;
     }
+
     function fastGetStimAnswer(index, whichAnswer) {
         return fastGetStimCluster(index).stims[whichAnswer].response.correctResponse;
-    }
-
-    getSubClozeAnswerSyllables = function(answer,displaySyllableIndices,cachedSyllables){
-        console.log("!!!displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
-        if(typeof(displaySyllableIndices) === "undefined" || !cachedSyllables || displaySyllableIndices.length == 0){
-            console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
-            return undefined;
-        }else{
-            answer = answer.replace(/\./g,'_');
-            let syllableArray = cachedSyllables.data[answer].syllables;
-            return {syllableArray,displaySyllableIndices};
-        }    
-    }
-
-    replaceClozeWithSyllables = function(question,currentAnswerSyllables, origAnswer){
-        console.log("replaceClozeWithSyllables: " + question);
-        if(!question){
-            return {
-                clozeQuestion: undefined,
-                clozeMissingSyllables: undefined
-            }
-        }
-
-        let clozeAnswer = "";
-        let clozeMissingSyllables = ""
-        let syllablesArray = currentAnswerSyllables.syllableArray;
-        let syllableIndices = currentAnswerSyllables.displaySyllableIndices;
-        let reconstructedAnswer = "";
-        let clozeAnswerOnlyUnderscores = "";
-        let clozeAnswerNoUnderscores = "";
-
-        for(let index in syllablesArray){
-            index = parseInt(index);
-            if(syllableIndices.indexOf(index) != -1){
-                clozeAnswer += syllablesArray[index];
-                clozeAnswerNoUnderscores += syllablesArray[index];
-            }else{
-                // Handle underscores for syllable array elements that contain whitespace
-                if (syllablesArray[index].indexOf(' ') >= 0) {
-                    clozeAnswer += "__ __";
-                    clozeAnswerOnlyUnderscores += "__ __"
-                    clozeMissingSyllables += syllablesArray[index];
-                } else {
-                    clozeAnswer += "____";
-                    clozeAnswerOnlyUnderscores += "____";
-                    clozeMissingSyllables += syllablesArray[index];
-                }
-            }
-
-            reconstructedAnswer += syllablesArray[index];
-            let nextChar = reconstructedAnswer.length;
-            while(origAnswer.charAt(nextChar) == " "){
-                clozeAnswer += " ";
-                reconstructedAnswer += " ";
-                clozeMissingSyllables += " ";
-                clozeAnswerOnlyUnderscores += " ";
-                clozeAnswerNoUnderscores += " ";
-                nextChar = reconstructedAnswer.length;
-            }
-        }
-
-        let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-        clozeQuestionParts.splice(1,1);
-        clozeQuestionParts.splice(1,0,clozeAnswerNoUnderscores.trim());
-        clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + " " + clozeQuestionParts[2];
-
-        // If our third cloze part begins with an underscore,
-        // our second cloze part should be our syllables, so
-        // if the answer sans underscores doesn't end in whitespace,
-        // remove leading whitespace from part 3
-        if (clozeQuestionParts[2].trim().charAt(0) === "_"
-            && clozeAnswerNoUnderscores.slice(-1) != " ") {
-            clozeQuestionParts[2] = clozeQuestionParts[2].trim();
-        }
-        
-        return {
-            clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
-            clozeMissingSyllables: clozeMissingSyllables,
-            clozeQuestionParts: clozeQuestionParts
-        };
     }
 
     var currentCardInfo = {
@@ -302,6 +376,7 @@ function modelUnitEngine() {
         whichStim : -1,
         forceButtonTrial: false
     };
+
     function setCurrentCardInfo(clusterIndex, whichStim) {
         currentCardInfo.clusterIndex = clusterIndex;
         currentCardInfo.whichStim = whichStim;
@@ -702,6 +777,57 @@ function modelUnitEngine() {
       return indexToReturn;
     }
 
+    function updateCardAndStimData(cardIndex, whichStim, resumeData){
+        let card = cardProbabilities.cards[cardIndex];
+        let stim = card.stims[whichStim];
+        let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).stims[whichStim].response.correctResponse));
+
+        // About to show a card - record any times necessary
+        card.lastShownTimestamp = Date.now();
+        if (card.firstShownTimestamp < 1 && card.lastShownTimestamp > 0) {
+            card.firstShownTimestamp = card.lastShownTimestamp;
+        }
+
+        stim.lastShownTimestamp = Date.now();
+        if(stim.firstShownTimestamp < 1 && stim.lastTimestamp > 0) {
+          stim.firstShownTimestamp = stim.lastShownTimestamp;
+        }
+
+        if (responseText && responseText in cardProbabilities.responses) {
+            resp = cardProbabilities.responses[responseText];
+            resp.lastShownTimestamp = Date.now();
+            if(resumeData && resumeData.responseData.responseText == responseText){
+                resp.lastShownTimestamp = Math.max(resumeData.responseData.lastShownTimestamp,resp.lastShownTimestamp);
+            }
+        }
+
+        // If this is a resume, we've been given originally logged data
+        // that we need to grab
+        if (!!resumeData) {
+            _.extend(card, resumeData.cardModelData);
+            _.extend(currentCardInfo, resumeData.currentCardInfo);
+
+            if (currentCardInfo.clusterIndex != cardIndex) {
+                console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, cardIndex,
+                    "selectVal=", selectVal,
+                    "currentCardInfo=", displayify(currentCardInfo),
+                    "card=", displayify(card),
+                    "prob=", displayify(prob)
+                );
+            }
+        }
+        else {
+            // If this is NOT a resume (and is just normal display mode for
+            // a learner) then we need to update stats for the card
+            card.trialsSinceLastSeen = 0;
+            card.hasBeenIntroduced = true;
+            stim.hasBeenIntroduced = true;
+            if (getTestType() === 's') {
+                card.studyTrialCount += 1;
+            }
+        }
+    }
+
     //Our actual implementation
     return {
         getCardProbabilitiesNoCalc: function(){
@@ -710,6 +836,10 @@ function modelUnitEngine() {
 
         getCardProbs: function(){
           return calculateCardProbabilities();
+        },
+
+        findCurrentCardInfo: function() {
+            return currentCardInfo;
         },
 
         reinitializeClusterListsFromCurrentSessionData: function(){
@@ -735,11 +865,9 @@ function modelUnitEngine() {
             // whether or not we should show the overlearning text is determined
             // here. See calculateCardProbabilities for how prob.probability is
             // calculated
-            var newProbIndex;
-            var showOverlearningText = false;
-
-            var cards = cardProbabilities.cards;
-            var probs = cardProbabilities.probs;
+            let newProbIndex;
+            let cards = cardProbabilities.cards;
+            let probs = cardProbabilities.probs;
 
             console.log("selectNextCard unitMode: " + this.unitMode);
 
@@ -768,9 +896,9 @@ function modelUnitEngine() {
             }
 
             // Found! Update everything and grab a reference to the card and stim
-            let prob = probs[newProbIndex];
+            let prob = cardProbabilities.probs[newProbIndex];
             let cardIndex = prob.cardIndex;
-            let card = cards[cardIndex];
+            let card = cardProbabilities.cards[cardIndex];
             let whichStim = prob.stimIndex;
             let stim = card.stims[whichStim];
 
@@ -783,95 +911,33 @@ function modelUnitEngine() {
             // Note that we always take the first stimulus and it's always a drill
             setCurrentClusterIndex(cardIndex);
 
-            let currentDisplay = JSON.parse(JSON.stringify(fastGetStimCluster(cardIndex).stims[whichStim].display));
-            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
+            //Save for returning the info later (since we don't have a schedule)
+            setCurrentCardInfo(cardIndex, whichStim);
 
-            let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
-            let currentQuestionPart2 = undefined;
-            let currentStimAnswer = fastGetStimAnswer(cardIndex, whichStim).toLowerCase();
-            console.log("currentStimAnswer: " + currentStimAnswer);
-            let currentAnswerSyllables = getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
+            this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
 
-            //If we have a dual prompt question populate the spare data field
-            if(currentQuestion && currentQuestion.indexOf("|") != -1){
-                var prompts = currentQuestion.split("|");
-                currentQuestion = prompts[0];
-                currentQuestionPart2 = prompts[1];
-            }
-            Session.set("originalQuestion",currentQuestion);
-            Session.set("originalQuestion2",currentQuestionPart2);
-            Session.set("currentAnswerSyllables",currentAnswerSyllables);
-            
-            if(!!currentAnswerSyllables){
-                stim.answerSyllables = currentAnswerSyllables;
-                let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = replaceClozeWithSyllables(
-                    currentQuestion,currentAnswerSyllables,currentStimAnswer);
-                currentQuestion = clozeQuestion;
-                Session.set("currentAnswer",clozeMissingSyllables);
-                console.log("setting original answer to: " + currentStimAnswer);
-                Session.set("originalAnswer",currentStimAnswer);
-                console.log("clozeQuestionParts: " + JSON.stringify(clozeQuestionParts));
-                Session.set("clozeQuestionParts",clozeQuestionParts);
-                let {clozeQuestion2,clozeMissingSyllables2} = replaceClozeWithSyllables(
-                    currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
-                currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
-            }else{
-                Session.set("currentAnswer",currentStimAnswer);
-                Session.set("originalAnswer",undefined);
-                Session.set("clozeQuestionParts",undefined);
-            }
+            return newProbIndex; //Must return index for call to cardSelected
+        },
 
-            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
-            if(imageFilteringConditionGroup){
-                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
-                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }
-            }
+        cardSelected: function(selectVal, resumeData) {
+            // Find objects we'll be touching
+            let probIndex = _.intval(selectVal);  // See selectNextCard
+            let prob = cardProbabilities.probs[probIndex];
+            let cardIndex = prob.cardIndex;
+            let whichStim = prob.stimIndex;
+            let card = cardProbabilities.cards[cardIndex];
+            let stim = card.stims[whichStim];
 
-            if(!!(currentDisplay.text)){
-                currentDisplay.text = currentQuestion;
-            }else if(!!(currentDisplay.clozeText)){
-                currentDisplay.clozeText = currentQuestion;
-            }
-
-            Session.set("currentDisplayEngine",currentDisplay);
-            Session.set("currentQuestionPart2",currentQuestionPart2);
-
-            if(getCurrentDeliveryParams().studyFirst){
-              if(card.studyTrialCount == 0){
-                console.log("!!! STUDY FOR FIRST TRIAL");
-                Session.set("testType",'s');
-              }else{
-                Session.set("testType", "d");
-              }
+            if(getCurrentDeliveryParams().studyFirst && card.studyTrialCount == 0){
+              console.log("!!! STUDY FOR FIRST TRIAL");
+              Session.set("testType",'s');
             }else{
               Session.set("testType", "d");
             }
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
-            Session.set("showOverlearningText", showOverlearningText);
+            Session.set("showOverlearningText", false);
 
-            // About to show a card - record any times necessary
-            card.lastShownTimestamp = Date.now();
-            if (card.firstShownTimestamp < 1 && card.lastShownTimestamp > 0) {
-                card.firstShownTimestamp = card.lastShownTimestamp;
-            }
-
-            stim.lastShownTimestamp = Date.now();
-            if(stim.firstShownTimestamp < 1 && stim.lastTimestamp > 0) {
-              stim.firstShownTimestamp = stim.lastShownTimestamp;
-            }
-
-            //Save for returning the info later (since we don't have a schedule)
-            setCurrentCardInfo(cardIndex, whichStim);
-
-            let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).stims[whichStim].response.correctResponse));
-            if (responseText && responseText in cardProbabilities.responses) {
-                resp = cardProbabilities.responses[responseText];
-                resp.lastShownTimestamp = Date.now();
-            }
+            updateCardAndStimData(cardIndex, whichStim, resumeData);
 
             // only log this for teachers/admins
             if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]) || Meteor.user().username.startsWith('debug')) {
@@ -886,7 +952,7 @@ function modelUnitEngine() {
                 // Log selections - note that the card output will also include the stim
                 console.log("Model selected prob:", displayify(prob));
                 console.log("Model selected card:", displayify(card));
-                console.log("Model selected stim:", displayify(card.stims[whichStim]));
+                console.log("Model selected stim:", displayify(stim));
 
                 // Log time stats in human-readable form
                 var secsStr = function(t) { return secs(t) + ' secs'; };
@@ -908,66 +974,14 @@ function modelUnitEngine() {
                 console.log("<<<END   METRICS<<<<<<<");
             }
 
-            return newProbIndex; //Must return index for call to cardSelected
-        },
-
-        findCurrentCardInfo: function() {
-            return currentCardInfo;
-        },
-
-        cardSelected: function(selectVal, resumeData) {
-            // Find objects we'll be touching
-            var probIndex = _.intval(selectVal);  // See selectNextCard
-
-            var prob = cardProbabilities.probs[probIndex];
-            var indexForNewCard = prob.cardIndex;
-            var cards = cardProbabilities.cards;
-            var card = cards[indexForNewCard];
-            var stim = card.stims[prob.stimIndex];
-            var responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(indexForNewCard).stims[prob.stimIndex].response.correctResponse));
-            var resp = {};
-            if (responseText && responseText in cardProbabilities.responses) {
-                resp = cardProbabilities.responses[responseText];
-            }
-
             // Update our top-level stats
             cardProbabilities.numQuestionsIntroduced += 1;
-
-            // If this is a resume, we've been given originally logged data
-            // that we need to grab
-            if (!!resumeData) {
-                _.extend(card, resumeData.cardModelData);
-                _.extend(currentCardInfo, resumeData.currentCardInfo);
-
-                if(resumeData.responseData.responseText == responseText){
-                  resp.lastShownTimestamp = Math.max(resumeData.responseData.lastShownTimestamp,resp.lastShownTimestamp);
-                }
-
-                if (currentCardInfo.clusterIndex != indexForNewCard) {
-                    console.log("Resume cluster index mismatch", currentCardInfo.clusterIndex, indexForNewCard,
-                        "selectVal=", selectVal,
-                        "currentCardInfo=", displayify(currentCardInfo),
-                        "card=", displayify(card),
-                        "prob=", displayify(prob)
-                    );
-                }
-            }
-            else {
-                // If this is NOT a resume (and is just normal display mode for
-                // a learner) then we need to update stats for the card
-                card.trialsSinceLastSeen = 0;
-                card.hasBeenIntroduced = true;
-                stim.hasBeenIntroduced = true;
-                if (getTestType() === 's') {
-                    card.studyTrialCount += 1;
-                }
-            }
 
             // It has now been officially one more trial since all the other cards
             // have been seen - and we need to do this whether or NOT we are in
             // resume mode
-            _.each(cards, function(card, index) {
-                if (index != indexForNewCard) {
+            _.each(cardProbabilities.cards, function(card, index) {
+                if (index != cardIndex) {
                     card.trialsSinceLastSeen += 1;
                 }
             });
@@ -1187,37 +1201,9 @@ function scheduleUnitEngine() {
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
             setCurrentClusterIndex(curClusterIndex);
-            let currentDisplay = getStimCluster(curClusterIndex).stims[curStimIndex].display;
-            let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
-            //If we have a dual prompt question populate the spare data field
-            if(currentQuestion.indexOf("|") != -1){
-              var prompts = currentQuestion.split("|");
-              currentQuestion = prompts[0];
-              Session.set("currentQuestionPart2",prompts[1]);
-              console.log("two part question detected: " + prompts[0] + ",,," + prompts[1]);
-            }else{
-              console.log("one part question detected");
-              Session.set("currentQuestionPart2",undefined);
-            }
 
-            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
-            if(imageFilteringConditionGroup){
-                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
-                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }
-            }
+            this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined);
 
-            if(!!(currentDisplay.text)){
-                currentDisplay.text = currentQuestion;
-            }else if(!!(currentDisplay.clozeText)){
-                currentDisplay.clozeText = currentQuestion;
-            }
-            Session.set("currentDisplayEngine", currentDisplay);
-            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
-            Session.set("currentAnswer", getStimAnswer(curClusterIndex, curStimIndex));
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
             Session.set("showOverlearningText", false);  //No overlearning in a schedule
