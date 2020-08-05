@@ -1,10 +1,11 @@
 Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClassStudentTotals",null);
+Session.set("curInstructorReportingTdfs",[]);
 
 const INVALID_TDF = "invalid";
 curTdf = INVALID_TDF;
-curClassName = "";
+curClass = {_id:""};
 
 navigateToStudentReporting = function(studentUsername){
   console.log("navigateToStudentReporting: " + studentUsername);
@@ -13,16 +14,13 @@ navigateToStudentReporting = function(studentUsername){
   Router.go("/studentReporting");
 }
 
-setCurClassStudents = function(curClassName,currentTdf){
+setCurClassStudents = function(curClass,currentTdf){
   Session.set("curClassStudents",[]);
   Session.set("curClassStudentTotals",[]);
-  var classes = Session.get("classes");
-  var curClass = search(curClassName,"name",classes);
-  var classID = curClass._id;
 
   Session.set("performanceLoading", true);
 
-  Meteor.call('getStudentPerformanceForClassAndTdf',classID,currentTdf,function(err,res){
+  Meteor.call('getStudentPerformanceForClassAndTdf',curClass._id,currentTdf,function(err,res){
     Session.set("performanceLoading", false);
     if(!!err){
       console.log("error getting student performance for class and tdf: " + JSON.stringify(err));
@@ -36,7 +34,7 @@ setCurClassStudents = function(curClassName,currentTdf){
 
 Template.instructorReporting.helpers({
   tdfs: function(){
-    return Session.get("instructorReportingTdfs");
+    return Session.get("curInstructorReportingTdfs");
   },
 
   classes: function(){
@@ -67,8 +65,12 @@ Template.instructorReporting.events({
     //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
     setTimeout(function(){
       //Need to strip newlines because chrome appends them for some reason
-      curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-      console.log("click nav tabs after timeout, curClassName: " + curClassName);
+      let curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
+      var classes = Session.get("classes");
+      curClass = search(curClassName,"name",classes);
+      let curClassTdfs = Session.get("instructorReportingTdfs")[curClass._id];
+      Session.set("curInstructorReportingTdfs",curClassTdfs);
+      console.log("click nav tabs after timeout, curClass: ", curClass);
       curTdf = INVALID_TDF;
       $("#tdf-select").val(INVALID_TDF);
     },200);
@@ -77,8 +79,8 @@ Template.instructorReporting.events({
   "change #tdf-select": function(event, template){
     curTdf = $(event.currentTarget).val();
     console.log("tdf change: " + curTdf);
-    if(curClassName){
-      setCurClassStudents(curClassName,curTdf);
+    if(curClass){
+      setCurClassStudents(curClass,curTdf);
     }else {
       alert('Please select a class');
     }
