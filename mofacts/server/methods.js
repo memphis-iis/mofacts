@@ -772,14 +772,11 @@ Meteor.startup(function () {
           }else{
             instructorClasses = Classes.find({"instructor":instructorID}).fetch();
           }
-          var tdfs = new Set();
-          _.each(instructorClasses,function(curClass){
-            var tdfsInClass = curClass.tdfs;
-            _.each(tdfsInClass,function(curTdf){
-              tdfs.add(curTdf);
-            });
-          });
-          return Array.from(tdfs);
+          var tdfs = {};
+          for(let curClass of instructorClasses){
+            tdfs[curClass._id] = curClass.tdfs;
+          }
+          return tdfs;
         },
 
         insertClozeEditHistory:function(history){
