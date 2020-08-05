@@ -2,7 +2,8 @@ Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClassStudentTotals",null);
 
-curTdf = "invalid";
+const INVALID_TDF = "invalid";
+curTdf = INVALID_TDF;
 curClassName = "";
 
 navigateToStudentReporting = function(studentUsername){
@@ -61,27 +62,26 @@ Template.instructorReporting.helpers({
 });
 
 Template.instructorReporting.events({
-  "change #tdf-select": function(event, template){
-    var myNavTabs = $(".myNavTab");
-    for(var i=0;i<myNavTabs.length;i++){
-      myNavTabs[i].setAttribute('data-toggle','tab')
-    }
-    curTdf = $(event.currentTarget).val();
-    if(!!curClassName){
-      setCurClassStudents(curClassName,curTdf);
-    } else {
-      alert('Please select a class');
-    }
-  },
+
   "click .nav-tabs": function(event, template){
     //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
     setTimeout(function(){
       //Need to strip newlines because chrome appends them for some reason
       curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
       console.log("click nav tabs after timeout, curClassName: " + curClassName);
-      setCurClassStudents(curClassName,curTdf);
-      $("#")
+      curTdf = INVALID_TDF;
+      $("#tdf-select").val(INVALID_TDF);
     },200);
+  },
+  
+  "change #tdf-select": function(event, template){
+    curTdf = $(event.currentTarget).val();
+    console.log("tdf change: " + curTdf);
+    if(curClassName){
+      setCurClassStudents(curClassName,curTdf);
+    }else {
+      alert('Please select a class');
+    }
   }
 });
 
