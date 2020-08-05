@@ -21,8 +21,7 @@
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
          <buttontrial>true</buttontrial>
          <learningsession>
@@ -135,8 +134,7 @@ console.log(p.probability )
             <fontsize>2</fontsize>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
         </deliveryparams>
          <buttontrial>true</buttontrial>
         <assessmentsession>

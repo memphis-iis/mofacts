@@ -35,12 +35,10 @@
         <buttonorder>random</buttonorder>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>12000</reviewstudy>
+                        <reviewstudy>12000</reviewstudy>
             <correctprompt>750</correctprompt>
             <drill>25000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
@@ -104,12 +102,10 @@ We will check your completion and approve your assignment for the $3 payment. Yo
         <buttonorder>random</buttonorder>
         <deliveryparams>
             <purestudy>3000</purestudy>
-            <readyprompt>0</readyprompt>
-            <reviewstudy>12000</reviewstudy>
+                        <reviewstudy>12000</reviewstudy>
             <correctprompt>750</correctprompt>
             <drill>25000</drill>
-            <timebeforefeedback>500</timebeforefeedback>
-            <timeuntilstimulus>500</timeuntilstimulus>
+             <timeuntilstimulus>500</timeuntilstimulus>
             <correctscore>1</correctscore>
             <incorrectscore>0</incorrectscore>
         </deliveryparams>
