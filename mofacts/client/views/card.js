@@ -1058,7 +1058,7 @@ function newQuestionHandler() {
     //construct the question to display the actual information. Note that we
     //use a regex so that we can do a global(all matches) replace on 3 or
     //more underscores
-    if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplay").clozeText)) {
+    if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplayEngine").clozeText)) {
       let currentDisplay = Session.get("currentDisplayEngine");
       let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
       currentDisplay.clozeText = clozeQuestionFilledIn;
@@ -1648,8 +1648,6 @@ function startQuestionTimeout(textFocus) {
     trialTimestamp = Date.now();
 
     let currentDisplay = Session.get("currentDisplay");
-    console.log("current display!!!:");
-    console.log(JSON.parse(JSON.stringify(currentDisplay)));
 
     if(!!(currentDisplay.audioSrc)) {
         //We don't allow user input until the sound is finished playing
@@ -1673,7 +1671,8 @@ function startQuestionTimeout(textFocus) {
   stopUserInput();
 
   //We do this little shuffle of session variables so the display will update all at the same time
-  Session.set("currentDisplay",Session.get("currentDisplayEngine"));
+  let currentDisplayEngine = Session.get("currentDisplayEngine");
+  Session.set("currentDisplay",currentDisplayEngine);
   Session.set("buttonTrial", getButtonTrial());
 
   //Swap out the current question with a pre question display as defined in the tdf file
@@ -2699,17 +2698,20 @@ processUserTimesLog = function(expKey) {
             //isn't a shufIndex, we just use the clusterIndex
             var cardIndex = entry.shufIndex || entry.clusterIndex;
 
-            Session.set("clusterIndex",         cardIndex);
-            Session.set("questionIndex",        entry.questionIndex);
-            Session.set("currentUnitNumber",    entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
-            Session.set("currentDisplay",       entry.selectedDisplay);
-            Session.set("originalDisplay",      entry.originalSelectedDisplay);
-            Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
-            Session.set("currentAnswer",        entry.selectedAnswer);
-            Session.set("showOverlearningText", entry.showOverlearningText);
-            Session.set("testType",             entry.testType);
-            Session.set("originalAnswer", entry.originalAnswer);
-            Session.set("originalQuestion",entry.originalQuestion);
+            Session.set("clusterIndex",           cardIndex);
+            Session.set("questionIndex",          entry.questionIndex);
+            Session.set("currentUnitNumber",      entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
+            Session.set("currentDisplayEngine",   entry.selectedDisplay);
+            Session.set("currentQuestionPart2",   entry.selectedQuestionPart2);
+            Session.set("currentAnswer",          entry.selectedAnswer);
+            Session.set("currentAnswerSyllables", entry.currentAnswerSyllables);
+            Session.set("clozeQuestionParts",     entry.clozeQuestionParts);
+            Session.set("showOverlearningText",   entry.showOverlearningText);
+            Session.set("testType",               entry.testType);
+            Session.set("originalDisplay",        entry.originalSelectedDisplay);
+            Session.set("originalAnswer",         entry.originalAnswer);
+            Session.set("originalQuestion",       entry.originalQuestion);
+            Session.set("originalQuestion2",      entry.originalQuestion2);
 
             // Notify the current engine about the card selection (and note that
             // the engine knows that this is a resume because we're passing the

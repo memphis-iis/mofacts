@@ -74,10 +74,12 @@ recordUserTimeQuestion = function(extendedData) {
         originalQuestion:           Session.get("originalQuestion"),
         originalQuestion2:          Session.get("originalQuestion2"),
         originalSelectedDisplay:    Session.get("originalDisplay"),
-        selectedDisplay:            Session.get("currentDisplay") || Session.get("currentDisplayEngine"),
+        selectedDisplay:            Session.get("currentDisplayEngine"),
         selectedQuestionPart2:      Session.get("currentQuestionPart2"),
         selectedAnswer:             Session.get("currentAnswer"),
         originalAnswer:             Session.get("originalAnswer"),
+        currentAnswerSyllables:     Session.set("currentAnswerSyllables"),
+        clozeQuestionParts:         Session.get("clozeQuestionParts"),
         showOverlearningText:       Session.get("showOverlearningText"),
         testType:                   Session.get("testType"),
     }, extendedData || {});
