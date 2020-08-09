@@ -1,72 +1,72 @@
 <tutor>
-    <setspec>
-        <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Drill Practice of Arabic letter names</lessonname>
-        <userselect>true</userselect>
-        <stimulusfile>ArabicAlphstims.json</stimulusfile>
-        <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter>
-        <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.85</simCorrectProb>
-        <speechAPIKey></speechAPIKey>
-        <audioInputEnabled>true</audioInputEnabled>
-        <audioInputSensitivity>15</audioInputSensitivity>
-        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
-        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
-        <textToSpeechAPIKey></textToSpeechAPIKey>
-    </setspec>
-    <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[Demographic Survey<br><br>
+	<setspec>
+		<name>Internal Testing with SVO and Models</name>
+		<lessonname>Optimized Drill Practice of Arabic letter names</lessonname>
+		<userselect>true</userselect>
+		<stimulusfile>ArabicAlphstims.json</stimulusfile>
+		<isModeled>false</isModeled>
+		<lfparameter>.85</lfparameter>
+		<simTimeout>3500</simTimeout>
+		<simCorrectProb>0.85</simCorrectProb>
+		<speechAPIKey/>
+		<audioInputEnabled>true</audioInputEnabled>
+		<audioInputSensitivity>15</audioInputSensitivity>
+		<speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
+		<speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+		<audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+		<textToSpeechAPIKey/>
+	</setspec>
+	<unit>
+		<unitname>Show the questions</unitname>
+		<unitinstructions><![CDATA[Demographic Survey<br><br>
 Please answer the following 3 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
-        <buttonorder>fixed</buttonorder>
-        <deliveryparams>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>3</templatesrepeated>
-                <group>0,b,i,0 0,b,i,0 0,b,i,0                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>                A_1 A_2 A_3            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>28-30</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitinstructions>Here comes the optimized learning of Arabic letter names.</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-            <clusterlist>0-27</clusterlist>
-        </learningsession>
-        <deliveryparams>
-            <practiceseconds>1000000</practiceseconds>
-            <drill>8000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions>You are all done.</unitinstructions>
-    </unit>
+		<buttonorder>fixed</buttonorder>
+		<deliveryparams>
+			<drill>12000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>16000</reviewstudy>
+			<correctprompt>500</correctprompt>
+			<fontsize>3</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+		<buttontrial>false</buttontrial>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>3</templatesrepeated>
+				<group>0,b,i,0 0,b,i,0 0,b,i,0                </group>
+			</conditiontemplatesbygroup>
+			<initialpositions>                A_1 A_2 A_3            </initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>28-30</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+	</unit>
+	<unit>
+		<unitinstructions>Here comes the optimized learning of Arabic letter names.</unitinstructions>
+		<unitname>Model Unit</unitname>
+		<learningsession>
+			<clusterlist>0-27</clusterlist>
+		</learningsession>
+		<deliveryparams>
+			<practiceseconds>1000000</practiceseconds>
+			<drill>8000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>5000</reviewstudy>
+			<correctprompt>750</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions>You are all done.</unitinstructions>
+	</unit>
 </tutor>

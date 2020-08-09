@@ -1,37 +1,37 @@
 <tutor>
-    <setspec>
-        <name>Internal Testing with SVO and Models</name>
-        <lessonname>Optimized Drill Practice of Two Part Questions</lessonname>
-        <userselect>false</userselect>
-        <stimulusfile>TwoPartStim.json</stimulusfile>
-        <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter>
-        <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.85</simCorrectProb>
-        <prestimulusDisplay>Loading...</prestimulusDisplay>
-    </setspec>
-    <unit>
-        <unitinstructions>Here comes the optimized learning of two part test.</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-            <clusterlist>0-3</clusterlist>
-        </learningsession>
-        <deliveryparams>
-            <practiceseconds>1000000</practiceseconds>
-            <initialview>10000</initialview>
-            <drill>8000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-            <timeuntilstimulus>5000</timeuntilstimulus>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions>You are all done.</unitinstructions>
-    </unit>
+	<setspec>
+		<name>Internal Testing with SVO and Models</name>
+		<lessonname>Optimized Drill Practice of Two Part Questions</lessonname>
+		<userselect>false</userselect>
+		<stimulusfile>TwoPartStim.json</stimulusfile>
+		<isModeled>false</isModeled>
+		<lfparameter>.85</lfparameter>
+		<simTimeout>3500</simTimeout>
+		<simCorrectProb>0.85</simCorrectProb>
+		<prestimulusDisplay>Loading...</prestimulusDisplay>
+	</setspec>
+	<unit>
+		<unitinstructions>Here comes the optimized learning of two part test.</unitinstructions>
+		<unitname>Model Unit</unitname>
+		<learningsession>
+			<clusterlist>0-3</clusterlist>
+		</learningsession>
+		<deliveryparams>
+			<practiceseconds>1000000</practiceseconds>
+			<initialview>10000</initialview>
+			<drill>8000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>5000</reviewstudy>
+			<correctprompt>750</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+			<timeuntilstimulus>5000</timeuntilstimulus>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions>You are all done.</unitinstructions>
+	</unit>
 </tutor>

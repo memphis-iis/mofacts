@@ -1,37 +1,31 @@
 <tutor>
-    <setspec>
-        <lessonname>Optimized Drill Practice of World Countries: Version 2</lessonname>
-        <stimulusfile>Worldstim.json</stimulusfile>
-        <shuffleclusters>0-175</shuffleclusters>
-        <lfparameter>0.80</lfparameter>
-        <simTimeout>1500</simTimeout>
-        <simCorrectProb>0.75</simCorrectProb>
-    </setspec>
-
-    <unit>
-        <unitname>Instructions</unitname>
-        <unitinstructions>Do your best to identify the country shown</unitinstructions>
-    </unit>
-
-    <unit>
-        <unitname>Model Practice</unitname>
-        <unitinstructions></unitinstructions>
-        <instructionminseconds></instructionminseconds>
-        <instructionmaxseconds></instructionmaxseconds>
-        <learningsession>
-            <displayminseconds></displayminseconds>
-            <displaymaxseconds></displaymaxseconds>
-            <clusterlist>0-175</clusterlist>
-            <calculateProbability><![CDATA[
-
+	<setspec>
+		<lessonname>Optimized Drill Practice of World Countries: Version 2</lessonname>
+		<stimulusfile>Worldstim.json</stimulusfile>
+		<shuffleclusters>0-175</shuffleclusters>
+		<lfparameter>0.80</lfparameter>
+		<simTimeout>1500</simTimeout>
+		<simCorrectProb>0.75</simCorrectProb>
+	</setspec>
+	<unit>
+		<unitname>Instructions</unitname>
+		<unitinstructions>Do your best to identify the country shown</unitinstructions>
+	</unit>
+	<unit>
+		<unitname>Model Practice</unitname>
+		<unitinstructions/>
+		<instructionminseconds/>
+		<instructionmaxseconds/>
+		<learningsession>
+			<displayminseconds/>
+			<displaymaxseconds/>
+			<clusterlist>0-175</clusterlist>
+			<calculateProbability><![CDATA[
                 // A demonstration of a variable that will be shown in the console
                 p.CUSTOM_MSG = "In our custom function";
-
                 // Calculated metrics
                 p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.037),  0.31);
-
                 p.meanSpacing = 0;
-
                 if (p.questionStudyTrialCount + p.questionTotalTests == 1) {
                     p.meanspacing = 3;
                 } else {
@@ -40,9 +34,7 @@
                                 1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.31)
                                 );
                     }}
-
                 p.intbs = p.meanSpacing * p.baseLevel;
-
                 // Helpful to be able to see our y parameter for debugging
                 p.y = p.stimParameters[0] -.0324+
                 .3744*(p.stimSuccessCount- p.stimFailureCount)+
@@ -50,24 +42,23 @@
                 1.63* p.intbs * Math.log(1+p.stimSuccessCount + p.stimFailureCount)+
                 1.77* p.baseLevel * Math.log(1 +p.questionTotalTests ) +
                 .283* p.baseLevel * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);
-
          // At a minimum we need to set p.probability and return p
                 p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability
                 return p;
             ]]></calculateProbability>
-        </learningsession>
-        <deliveryparams>
-            <autostopTimeoutThreshold></autostopTimeoutThreshold>
-            <purestudy>10000</purestudy>
-            <drill>10000</drill>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-            <practiceseconds>1000000</practiceseconds>
-            <finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
-        </deliveryparams>
-    </unit>
+		</learningsession>
+		<deliveryparams>
+			<autostopTimeoutThreshold/>
+			<purestudy>10000</purestudy>
+			<drill>10000</drill>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>5000</reviewstudy>
+			<correctprompt>500</correctprompt>
+			<fontsize>3</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+			<practiceseconds>1000000</practiceseconds>
+			<finalInstructions>You are done practicing Countries of the World. Thank you for using this tutor.</finalInstructions>
+		</deliveryparams>
+	</unit>
 </tutor>
