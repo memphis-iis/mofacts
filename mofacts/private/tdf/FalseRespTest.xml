@@ -1,40 +1,41 @@
 <tutor>
-    <setspec>
-        <lessonname>Response Types test</lessonname>
-        <stimulusfile>FalseRespTest.json</stimulusfile>
-        <shuffleclusters>0-0</shuffleclusters>
-        <lfparameter>0.80</lfparameter>
-        <isModeled>false</isModeled>
-        <userselect>false</userselect> <!-- Change to false when done testing -->
-    </setspec>
-    <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[
+	<setspec>
+		<lessonname>Response Types test</lessonname>
+		<stimulusfile>FalseRespTest.json</stimulusfile>
+		<shuffleclusters>0-0</shuffleclusters>
+		<lfparameter>0.80</lfparameter>
+		<isModeled>false</isModeled>
+		<userselect>false</userselect>
+		<!-- Change to false when done testing -->
+	</setspec>
+	<unit>
+		<unitname>Show the questions</unitname>
+		<unitinstructions><![CDATA[
             You should see both kinds of false responses
         ]]></unitinstructions>
-        <deliveryparams>
-            <drill>10000</drill>
-            <purestudy>10000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>6000</reviewstudy>
-            <correctprompt>500</correctprompt>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>2</clustersrepeated>
-                <templatesrepeated>2</templatesrepeated>
-                <group>0,f,d,0 1,b,d,1 0,f,s,0 1,b,s,1
-                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>
-                A_1 A_1 A_2 A_2
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>0-1</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
+		<deliveryparams>
+			<drill>10000</drill>
+			<purestudy>10000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>6000</reviewstudy>
+			<correctprompt>500</correctprompt>
+		</deliveryparams>
+		<buttontrial>false</buttontrial>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>2</clustersrepeated>
+				<templatesrepeated>2</templatesrepeated>
+				<group>0,f,d,0 1,b,d,1 0,f,s,0 1,b,s,1
+				</group>
+			</conditiontemplatesbygroup>
+			<initialpositions>
+				A_1 A_1 A_2 A_2
+			</initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>0-1</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+	</unit>
 </tutor>

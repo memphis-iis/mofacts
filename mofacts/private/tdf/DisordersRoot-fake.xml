@@ -1,11 +1,11 @@
 <tutor>
-    <setspec>
-        <lessonname>Psychological Disorders B</lessonname>
-        <stimulusfile>Disorders2stimsfake.json</stimulusfile>
-        <experimentTarget>disordersb</experimentTarget>
-        <randomizedDelivery>1</randomizedDelivery>
-        <userselect>false</userselect>
-        <condition>Disorders2fake-massed.json</condition>
-        <condition>Disorders2fake-spaced.json</condition>
-    </setspec>
+	<setspec>
+		<lessonname>Psychological Disorders B</lessonname>
+		<stimulusfile>Disorders2stimsfake.json</stimulusfile>
+		<experimentTarget>disordersb</experimentTarget>
+		<randomizedDelivery>1</randomizedDelivery>
+		<userselect>false</userselect>
+		<condition>Disorders2fake-massed.json</condition>
+		<condition>Disorders2fake-spaced.json</condition>
+	</setspec>
 </tutor>
