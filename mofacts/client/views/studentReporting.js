@@ -1,3 +1,5 @@
+import { ALL_TDFS } from "../../common/Definitions";
+
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
 Session.set("curSelectedTdf","");
@@ -10,7 +12,7 @@ tempModelUnitEngine = undefined;
 
 getLearningSessionItems = function(tdfFileName){
   var tdfQueryNames = [];
-  if(tdfFileName === "xml"){
+  if(tdfFileName === ALL_TDFS){
     tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
   }else if(tdfFileName){
     tdfQueryNames = [tdfFileName];
@@ -168,9 +170,22 @@ checkIfNeedSubTdfName = function(rootTDF){
   }
 }
 
-getcardProbs = function(){
-  console.log('getCardProbs');
-  var studentID = Session.get("curStudentID");
+recreateEngineFinalState = function(){
+  console.log("recreateEngineFinalState");
+  checkIfNeedSubTdfName(getCurrentTdfFile());
+  let curStimFile = getCurrentStimName().replace(/\./g,'_');
+  console.log("recreateEngineFinalState, curStimFile: " + curStimFile);
+  cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+  //console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
+  let expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
+  let userTimesLog = getUserTimesLog(expKey);
+  setUpClusterMapping(userTimesLog);
+  tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
+  processUserTimesLogStudentReporting(tempModelUnitEngine,userTimesLog);
+}
+
+getTdfProbsAndLabels = function(){
+  console.log('getTdfProbsAndLabels');
   //We've selected the "All" tdf option
   if(Session.get("currentStimName") === null){
     var allTdfProbs = [];
@@ -185,23 +200,14 @@ getcardProbs = function(){
       console.log("curTdfFileName: " + curTdfFileName);
       if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
-        checkIfNeedSubTdfName(getCurrentTdfFile());
-        let curStimFile = getCurrentStimName().replace(/\./g,'_');
-        console.log("getCardprobs, curStimFile: " + curStimFile);
-        cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-        console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
-        tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
-        var expKey = Session.get("currentTdfName").replace(/[.]/g,'_');
-        var learningSessionItems = getLearningSessionItems(curTdfFileName);
-        let userTimesLog = getUserTimesLog(expKey);
-        setUpClusterMapping(userTimesLog);
-        processUserTimesLogStudentReporting(tempModelUnitEngine,userTimesLog);
-        var totalStimProb = 0;
-        var cardProbs = tempModelUnitEngine.getCardProbs();
-        console.log("past getCardProbs");
-        var numProbs = 0;
-        for(var j=0;j<cardProbs.length;j++){
-          var cardIndex = cardProbs[j].cardIndex;
+        
+        recreateEngineFinalState();
+        let learningSessionItems = getLearningSessionItems(curTdfFileName);
+        let totalStimProb = 0;
+        let cardProbs = tempModelUnitEngine.getCardProbs();
+        let numProbs = 0;
+        for(let j=0;j<cardProbs.length;j++){
+          let cardIndex = cardProbs[j].cardIndex;
           if(!!cardProbs[j].probability && (!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex])){
             totalStimProb += cardProbs[j].probability;
             numProbs += 1;
@@ -209,7 +215,7 @@ getcardProbs = function(){
         }
 
         if(numProbs > 0){
-          var avgStimProbForTdf = totalStimProb / numProbs;
+          let avgStimProbForTdf = totalStimProb / numProbs;
           allTdfProbLabels.push(curTdfDisplayName.replace(" ",'_'));
           allTdfProbs.push(avgStimProbForTdf);
         }
@@ -220,36 +226,25 @@ getcardProbs = function(){
     Session.set("currentTdfName",null);
     return [allTdfProbLabels,allTdfProbs];
   }else{
-    checkIfNeedSubTdfName(getCurrentTdfFile());
-    let curStimFile = getCurrentStimName().replace(/\./g,'_');
-    console.log("getCardprobs, curStimFile: " + curStimFile);
-    cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-    console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
-    tempModelUnitEngine = createModelUnit({cachedSyllables:cachedSyllables});
-    var curTdfFileName = Session.get("currentTdfName");
-    var expKey = curTdfFileName.replace(/[.]/g,'_');
-    var learningSessionItems = getLearningSessionItems(curTdfFileName);
-    let userTimesLog = getUserTimesLog(expKey);
-    setUpClusterMapping(userTimesLog);
-    processUserTimesLogStudentReporting(tempModelUnitEngine,userTimesLog);
-    var cardProbs = [];
-    var cardProbsLabels = [];
-    var mycardProbs =tempModelUnitEngine.getCardProbs();
-    for(var i=0;i<mycardProbs.length;i++){
-      if(i==245){
-        console.log("245: " + JSON.stringify(mycardProbs[i]));
-      }
-        var cardIndex = mycardProbs[i].cardIndex;
-        if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
-          var stimIndex = mycardProbs[i].stimIndex;
-          let currentDisplay = fastGetStimDisplay(cardIndex,stimIndex);
-          var currentQuestion = currentDisplay.text || currentDisplay.clozeText || currentDisplay.imgSrc || currentDisplay.audioSrc || currentDisplay.videoSrc;
-          if(mycardProbs[i].probFunctionsParameters.stimOutcomeHistory && mycardProbs[i].probFunctionsParameters.stimOutcomeHistory.length > 0){
-            console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
-            cardProbsLabels.push(currentQuestion);
-            cardProbs.push(mycardProbs[i].probability);
-          }
+    recreateEngineFinalState();
+
+    let curTdfFileName = Session.get("currentTdfName");
+    let learningSessionItems = getLearningSessionItems(curTdfFileName);
+    let cardProbs = [];
+    let cardProbsLabels = [];
+    let mycardProbs =tempModelUnitEngine.getCardProbs();
+    for(let i=0;i<mycardProbs.length;i++){
+      let cardIndex = mycardProbs[i].cardIndex;
+      if(!!learningSessionItems[curTdfFileName] && !!learningSessionItems[curTdfFileName][cardIndex]){
+        let stimIndex = mycardProbs[i].stimIndex;
+        let currentDisplay = fastGetStimDisplay(cardIndex,stimIndex);
+        let currentQuestion = currentDisplay.text || currentDisplay.clozeText || currentDisplay.imgSrc || currentDisplay.audioSrc || currentDisplay.videoSrc;
+        if(mycardProbs[i].probFunctionsParameters.stimOutcomeHistory && mycardProbs[i].probFunctionsParameters.stimOutcomeHistory.length > 0){
+          console.log("pushing card prob!!!" + JSON.stringify(mycardProbs[i]) + ", " + i);
+          cardProbsLabels.push(currentQuestion);
+          cardProbs.push(mycardProbs[i].probability);
         }
+      }
     }
 
     return [cardProbsLabels,cardProbs];
@@ -257,6 +252,7 @@ getcardProbs = function(){
 }
 
 setUpClusterMapping = function(userTimesLog){
+  console.log("setUpClusterMapping");
   var clusterMapping = _.find(userTimesLog, function(entry) {
     return entry && entry.action && entry.action === "cluster-mapping";
   });
@@ -278,9 +274,8 @@ setUpClusterMapping = function(userTimesLog){
   Session.set("clusterMapping", clusterMapping);
 }
 
-getAvgCorrectnessAcrossKCsLearningCurve = function(){
+getAvgCorrectnessAcrossKCsLearningCurve = function(selectedTdf){
   console.log("getAvgCorrectnessAcrossKCsLearningCurve");
-  var studentID = Session.get("curStudentID");
   var avgCorrectnessAcrossKCsLearningCurve = [];
 
   countAndNumCorrectPerTrialNum = {};
@@ -291,14 +286,14 @@ getAvgCorrectnessAcrossKCsLearningCurve = function(){
 
   tdfQueryNames = [];
 
-  if(curTdf == "xml"){
+  if(selectedTdf == ALL_TDFS){
     //NOTE: this line is dependent on timing, specifically the page should have been mostly set up before we get to here
     var allTdfsAttempted = Session.get("studentReportingTdfs");
     _.each(allTdfsAttempted,function(tdf){
       tdfQueryNames.push(tdf.fileName);
     });
   }else{
-    tdfQueryNames.push(curTdf);
+    tdfQueryNames.push(selectedTdf);
   }
 
   _.each(tdfQueryNames,function(tdfQueryName){
@@ -396,34 +391,46 @@ Template.studentReporting.helpers({
 
 setTdfFileNamesAndDisplayValues = function(){
   console.log("setTdfFileNamesAndDisplayValues");
-  var studentID = Session.get("curStudentID");
-  Meteor.call('namesOfTdfsAttempted',studentID,function(err,res){
-    if(!!err){
-      console.log("Error getting names of tdfs attempted: " + JSON.stringify(err));
-    }else{
-      console.log("tdfs attempted: " + JSON.stringify(res));
-      namesOfTdfsAttempted = res;
-      studentReportingTdfs = [];
-      Meteor.subscribe('tdfs',function(){
-        console.log("tdfs subscribe back");
-        Meteor.subscribe('Stimuli',function(){
-          console.log("stimuli subscribe back");
-          Tdfs.find({}).forEach(function(entry){
-            var fileName = entry.fileName;
-            var fileNameAllNoPeriods = fileName.replace(/[.]/g,'_');
-            var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-            if(namesOfTdfsAttempted.indexOf(fileNameAllNoPeriods) != -1 && !!getLearningSessionItems(fileName)[fileName]){
-              studentReportingTdfs.push({'fileName':fileName,'displayName':displayName});
-            }
-          });
-  
-          console.log("studentReportingTdfs: " + JSON.stringify(studentReportingTdfs));
-          Session.set('studentReportingTdfs',studentReportingTdfs);
-          selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
-        })
-      });
+  let tdfsInScopeForReporting = [];
+  let curClassTdfs;
+  let studentClass = Session.get("curClass");
+  if(studentClass && studentClass.tdfs){
+    curClassTdfs = [];
+    for(let tdf of studentClass.tdfs){
+      curClassTdfs.push(tdf.fileName);
     }
-  })
+    console.log("curClassTdfs: " + curClassTdfs);
+  }
+
+  let studentID = Session.get("curStudentID");
+  Meteor.subscribe('specificUserMetrics',studentID,function(){
+    UserMetrics.find({_id:studentID}).forEach(function(entry){
+      let candidateTdfs = Object.keys(entry).filter(x => x.indexOf(ALL_TDFS) != -1);
+      candidateTdfs = candidateTdfs.map(x => x.replace("_xml",".xml"));
+      if(curClassTdfs){
+        candidateTdfs = candidateTdfs.filter(x => curClassTdfs.indexOf(x) != -1);
+      }
+      tdfsInScopeForReporting.push(...candidateTdfs);
+    });
+    
+    studentReportingTdfs = [];
+    Meteor.subscribe('tdfs',function(){
+      console.log("tdfs subscribe back");
+      Meteor.subscribe('Stimuli',function(){
+        console.log("stimuli subscribe back");
+        Tdfs.find({}).forEach(function(entry){
+          var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+          if(tdfsInScopeForReporting.indexOf(entry.fileName) != -1 && !!getLearningSessionItems(entry.fileName)[entry.fileName]){
+            studentReportingTdfs.push({'fileName':entry.fileName,'displayName':displayName});
+          }
+        });
+  
+        console.log("studentReportingTdfs: " + JSON.stringify(studentReportingTdfs));
+        Session.set('studentReportingTdfs',studentReportingTdfs);
+        selectFirstOptionByDefaultAndUpdateCharts(studentReportingTdfs);
+      })
+    });
+  });
 }
 
 selectFirstOptionByDefaultAndUpdateCharts = function(tdfs){
@@ -433,15 +440,16 @@ selectFirstOptionByDefaultAndUpdateCharts = function(tdfs){
    Tracker.afterFlush(function(){
      console.log("selectFirstOptionByDefaultAndUpdateCharts, tdfs: " + JSON.stringify(tdfs));
      if(!!tdfs[0]){
-       var firstIndividualTdf = tdfs[0].fileName;
-       $("#tdf-select").val(firstIndividualTdf);
-       console.log("selectFirstOptionByDefaultAndUpdateCharts: " + $("#tdf-select").val());
-       if($("#tdf-select").val() != null){
-        curTdf = $("#tdf-select").val().replace(".","_");
-        var curTdfFileName = $("#tdf-select").val();
+      let instructorSelectedTdf = Session.get("instructorSelectedTdf");
+      let tdfToSelect = instructorSelectedTdf || tdfs[0].fileName;
+      $("#tdf-select").val(tdfToSelect);
+      console.log("selectFirstOptionByDefaultAndUpdateCharts: " + $("#tdf-select").val());
+      if($("#tdf-select").val() != null){
+        let selectedTdf = $("#tdf-select").val().replace(".","_");
+        let curTdfFileName = $("#tdf-select").val();
         Session.set("curSelectedTdf",curTdfFileName);
-        updateDataAndCharts(curTdf,curTdfFileName);
-       }
+        updateDataAndCharts(selectedTdf,curTdfFileName);
+      }
      }
    });
 }
@@ -460,7 +468,7 @@ Template.studentReporting.rendered = function(){
       Router.go("/profile");
     }
   }
-  console.log("rendered!!!");
+  console.log("studentReporting rendered!!!");
   curTracker = Tracker.autorun(function(thisTracker){
     console.log("autorun");
     if(document.location.pathname != "/studentReporting"){
@@ -515,21 +523,21 @@ Template.studentReporting.rendered = function(){
 Template.studentReporting.events({
   "change #tdf-select": function(event, template){
     console.log("change tdf select");
-    curTdf = $(event.currentTarget).val().replace(/[.]/g,"_");
+    let selectedTdf = $(event.currentTarget).val().replace(/[.]/g,"_");
     var curTdfFileName = $(event.currentTarget).val();
     Session.set("curSelectedTdf",curTdfFileName);
-    updateDataAndCharts(curTdf,curTdfFileName);
+    updateDataAndCharts(selectedTdf,curTdfFileName);
   }
 });
 
-updateDataAndCharts = function(curTdf,curTdfFileName){
+updateDataAndCharts = function(selectedTdf,curTdfFileName){
   console.log("curTdfFileName: " + curTdfFileName);
   var studentUsername = Session.get("curStudentUsername");
   $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
   $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
 
   $("#cardProbsChart").attr('data-x-axis-label','Correctness (%)');
-  if(curTdf === "xml" || !curTdf){
+  if(selectedTdf === ALL_TDFS || !selectedTdf){
     console.log("updateDataAndCharts, setting currentStimName to null");
     Session.set("currentStimName",null);
     Session.set("currentTdfName",curTdfFileName);
@@ -555,14 +563,14 @@ updateDataAndCharts = function(curTdf,curTdfFileName){
         "numCorrect":"N/A",
         "totalTime":"N/A"
       });
-      drawCharts(true);
+      drawCharts(true,selectedTdf);
       return;
     }
   }
 
   setCurrentStudentPerformance();
 
-  drawCharts(false);
+  drawCharts(false,selectedTdf);
 }
 
 safeSeries = function(series) {
@@ -649,16 +657,16 @@ var drawProbBars = function(targetSelector, labels, series, dataDescrip, chartCo
 
 test = "";
 
-drawCharts = function (drawWithoutData) {
+drawCharts = function (drawWithoutData,selectedTdf) {
     if(!!drawWithoutData){
       drawCorrectnessLine('#correctnessChart', [], [], "repetition", {});
 
       drawProbBars('#cardProbsChart', [], [], "probabilities", {});
     }else{
       // Get our series and populate a range array for chart labeling
-      var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve());
+      var correctSeries = safeSeries(getAvgCorrectnessAcrossKCsLearningCurve(selectedTdf));
       correctSeries = correctSeries.map(function(val){return val*100});
-      var rawProbs = getcardProbs();
+      var rawProbs = getTdfProbsAndLabels();
       probSeries = safeSeries(rawProbs[1]);
       probSeries = probSeries.map(function(val){return val*100}).reverse();
 
@@ -667,7 +675,7 @@ drawCharts = function (drawWithoutData) {
       var cardProbsChartAxisYOffset;
 
       //"All" selected, so we should make room for labels bigger than just numbers
-      if(Session.get("curSelectedTdf") === "xml"){
+      if(Session.get("curSelectedTdf") === ALL_TDFS){
           cardProbsChartAxisYOffset = 250;
           showYAxisLabel = true
       }else{
@@ -958,10 +966,12 @@ processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
             Session.set("questionIndex",        entry.questionIndex);
             Session.set("currentUnitNumber",    entry.currentUnit);
             Session.set("currentDisplay",       entry.selectedDisplay);
-            Session.set("originalDisplay",      entry.originalSelectedDisplay);
             Session.set("currentQuestionPart2", entry.selectedQuestionPart2);
             Session.set("currentAnswer",        entry.selectedAnswer);
-            Session.set("showOverlearningText", entry.showOverlearningText);
+            Session.set("currentAnswerSyllables", entry.currentAnswerSyllables);
+            Session.set("clozeQuestionParts",     entry.clozeQuestionParts);
+            Session.set("showOverlearningText",   entry.showOverlearningText);
+            Session.set("originalDisplay",      entry.originalSelectedDisplay);
             Session.set("testType",             entry.testType);
             Session.set("originalAnswer", entry.originalAnswer);
             Session.set("originalQuestion",entry.originalQuestion);

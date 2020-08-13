@@ -1,6 +1,8 @@
+import { curSemester } from '../../common/Definitions';
+
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
-Session.set("curClass","");
+Session.set("curClass",{});
 
 function getUrlVars()
 {
@@ -31,7 +33,7 @@ function testLogin(){
   var testPassword = Helpers.blankPassword(testUserName);
 
 
-  Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass"), function(err, result){
+  Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass").name, function(err, result){
     if(!!err){
       console.log("error adding user to teacher class: " + err);
     }
@@ -83,7 +85,6 @@ function testLogin(){
   })
 }
 
-import { curSemester } from '../lib/viewHelpers';
 setTeacher = function(teacher){
   console.log(teacher);
   Session.set("curTeacher",teacher);
@@ -105,8 +106,10 @@ setTeacher = function(teacher){
   });
 }
 
-setClass = function(curClass){
+setClass = function(curClassID){
   $("#classSelection").prop('hidden','true');
+  let allClasses = Session.get("curTeacherClasses");
+  let curClass = allClasses.find((aClass) => aClass._id == curClassID);
   Session.set("curClass",curClass);
   $(".login").prop('hidden','');
 }
@@ -178,7 +181,7 @@ Template.signInSouthwest.events({
         if(!!data && !!data.error){
           alert("Problem logging in: " + data.error);
         }else{
-          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass"), function(err, result){
+          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass").name, function(err, result){
             if(!!err){
               console.log("error adding user to teacher class: " + err);
             }

@@ -1,4 +1,5 @@
 import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+import { curSemester, ALL_TDFS } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
@@ -30,8 +31,6 @@ var clozeGeneration = require('./lib/Process.js');
 
 // Open file stream for active user log
 var activeUserLogStream = fs.createWriteStream("activeUserLog.csv", {flags: 'a'});
-
-const ALL_TDFS = "xml";
 
 //For Southwest SSO with ADFS/SAML 2.0
 for (i = 0; i < Meteor.settings.saml.length; i++) {
@@ -570,198 +569,183 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
-          getClozesFromText:function(inputText){
-            let clozes = ClozeAPI.GetSelectCloze(null,null,null,true,null,inputText);
-            return clozes;
-          },
+        getClozesFromText:function(inputText){
+          let clozes = ClozeAPI.GetSelectCloze(null,null,null,true,null,inputText);
+          return clozes;
+        },
 
-          getSimpleFeedbackForAnswer:function(userAnswer,correctAnswer){
-            let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
-            console.log("result: " + JSON.stringify(result));
-            return result;
-          },
+        getSimpleFeedbackForAnswer:function(userAnswer,correctAnswer){
+          let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
+          console.log("result: " + JSON.stringify(result));
+          return result;
+        },
 
-          getDialogFeedbackForAnswer:function(state){
-            let feedback = TutorialDialogue.GetDialogue(state);
-            return feedback;
-            // Display: text to show the student. Show this always.
-            // Finished: if true, continue normal MoFaCTS operation; if false, get a student input
-            // LastStudentAnswer: Mutate this with student input you just got
-          },
+        getDialogFeedbackForAnswer:function(state){
+          let feedback = TutorialDialogue.GetDialogue(state);
+          return feedback;
+          // Display: text to show the student. Show this always.
+          // Finished: if true, continue normal MoFaCTS operation; if false, get a student input
+          // LastStudentAnswer: Mutate this with student input you just got
+        },
 
-          updateStimSyllableCache:function(stimFileName,answers){
-            console.log("updateStimSyllableCache");
-            let curStimSyllables = StimSyllables.findOne({filename:stimFileName});
-            console.log("curStimSyllables: " + JSON.stringify(curStimSyllables));
-            if(!curStimSyllables){
-              let data = {};
-              for(let answer of answers){
-                let syllableArray;
-                let syllableGenerationError;
-                let safeAnswer = answer.replace(/\./g,'_')
-                try{
-                  syllableArray = getSyllablesForWord(safeAnswer);
-                }catch(e){
-                  console.log("error fetching syllables for " + answer + ": " + JSON.stringify(e));
-                  syllableArray = [answer];
-                  syllableGenerationError = e;
-                }
-                data[safeAnswer] = {
-                  count: syllableArray.length,
-                  syllables: syllableArray,
-                  error:syllableGenerationError
-                }
+        updateStimSyllableCache:function(stimFileName,answers){
+          console.log("updateStimSyllableCache");
+          let curStimSyllables = StimSyllables.findOne({filename:stimFileName});
+          console.log("curStimSyllables: " + JSON.stringify(curStimSyllables));
+          if(!curStimSyllables){
+            let data = {};
+            for(let answer of answers){
+              let syllableArray;
+              let syllableGenerationError;
+              let safeAnswer = answer.replace(/\./g,'_')
+              try{
+                syllableArray = getSyllablesForWord(safeAnswer);
+              }catch(e){
+                console.log("error fetching syllables for " + answer + ": " + JSON.stringify(e));
+                syllableArray = [answer];
+                syllableGenerationError = e;
               }
-              StimSyllables.insert({filename:stimFileName,data:data});
-              console.log("after updateStimSyllableCache");
-            }
-          },
-
-          getUsageReportData:function(){
-            const numDaysToQuery = 7;
-            var startQueryDate = new Date(Date.now() - (1000*60*60*24*numDaysToQuery));
-
-          },
-
-          getClozeEditAuthors:function(){
-            var authorIDs = {};
-            ClozeEditHistory.find({}).forEach(function(entry){
-              authorIDs[entry.user] = Meteor.users.findOne({_id:entry.user}).username;
-            });
-            return authorIDs;
-          },
-
-          sendErrorReportSummaries:function(){
-            sendErrorReportSummaries();
-          },
-          sendEmail:function(to,from,subject,text){
-            this.unblock();
-            sendEmail(to,from,subject,text);
-          },
-
-          sendUserErrorReport:function(userID,description,curPage,sessionVars,userAgent,logs){
-            var errorReport = {
-              user:userID,
-              description:description,
-              page:curPage,
-              time:new Date(),
-              sessionVars:sessionVars,
-              userAgent:userAgent,
-              logs:logs,
-              emailed:false
-            };
-            return ErrorReports.insert(errorReport);
-          },
-
-          logUserAgentAndLoginTime:function(userID,userAgent){
-            var loginTime = new Date();
-            return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
-          },
-          generateUnusedIDs:function(numIDsToGen){
-            var newIDs = [];
-            var idMap = {};
-            var allUsers = Meteor.users.find({}).fetch();
-            _.each(allUsers,function(user){
-              var id = user.username;
-              idMap[id] = true;
-            })
-            for(var i=0;i<numIDsToGen;i++){
-              var newID = genID(lengthOfNewGeneratedIDs);
-              while(idMap[newID]){
-                newID = genID(lengthOfNewGeneratedIDs);
+              data[safeAnswer] = {
+                count: syllableArray.length,
+                syllables: syllableArray,
+                error:syllableGenerationError
               }
-              newIDs.push(newID);
-              idMap[newID] = true;
             }
+            StimSyllables.insert({filename:stimFileName,data:data});
+            console.log("after updateStimSyllableCache");
+          }
+        },
 
-            return newIDs;
-          },
+        getUsageReportData:function(){
+          const numDaysToQuery = 7;
+          var startQueryDate = new Date(Date.now() - (1000*60*60*24*numDaysToQuery));
 
-          getStudentPerformanceForClassAndTdf: function(classID, tdfFileName){
-            var curClass = Classes.findOne({_id:classID});
-            studentTotals = {
-              numCorrect: 0,
-              count: 0,
-              totalTime: 0
+        },
+
+        getClozeEditAuthors:function(){
+          var authorIDs = {};
+          ClozeEditHistory.find({}).forEach(function(entry){
+            authorIDs[entry.user] = Meteor.users.findOne({_id:entry.user}).username;
+          });
+          return authorIDs;
+        },
+
+        sendErrorReportSummaries:function(){
+          sendErrorReportSummaries();
+        },
+        sendEmail:function(to,from,subject,text){
+          this.unblock();
+          sendEmail(to,from,subject,text);
+        },
+
+        sendUserErrorReport:function(userID,description,curPage,sessionVars,userAgent,logs){
+          var errorReport = {
+            user:userID,
+            description:description,
+            page:curPage,
+            time:new Date(),
+            sessionVars:sessionVars,
+            userAgent:userAgent,
+            logs:logs,
+            emailed:false
+          };
+          return ErrorReports.insert(errorReport);
+        },
+
+        logUserAgentAndLoginTime:function(userID,userAgent){
+          var loginTime = new Date();
+          return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
+        },
+        generateUnusedIDs:function(numIDsToGen){
+          var newIDs = [];
+          var idMap = {};
+          var allUsers = Meteor.users.find({}).fetch();
+          _.each(allUsers,function(user){
+            var id = user.username;
+            idMap[id] = true;
+          })
+          for(var i=0;i<numIDsToGen;i++){
+            var newID = genID(lengthOfNewGeneratedIDs);
+            while(idMap[newID]){
+              newID = genID(lengthOfNewGeneratedIDs);
             }
-            var students = [];
-            if(!!curClass){
-              curClass.students.forEach(function(studentUsername){
-                if(studentUsername.indexOf("@") == -1){
-                  studentUsername = studentUsername.toUpperCase();
-                }
-                var student = Meteor.users.findOne({"username":studentUsername}) || {};
-                var studentID = student._id;
-                var count = 0;
-                var numCorrect = 0;
-                var totalTime = 0;
-                assessmentItems = {};
-                let learningSessionItems = getLearningSessionItems(tdfFileName);
+            newIDs.push(newID);
+            idMap[newID] = true;
+          }
 
-                var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-                let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
-                UserMetrics.find({_id: studentID}).forEach(function(entry){
-                  var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-                  for(var index in tdfEntries){
-                    var key = tdfEntries[index];
-                    var tdf = entry[key];
-                    let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
-                    for(var index in tdf){
-                      //Only count items in learning sessions
-                      if(!!learningSessionItems[tdfKey] 
-                          && !!learningSessionItems[tdfKey][index]){
-                        var stim = tdf[index];
-                        count += stim.questionCount || 0;
-                        numCorrect += stim.correctAnswerCount || 0;
-                        var answerTimes = stim.answerTimes;
-                        for(var index in answerTimes){
-                          var time = answerTimes[index];
-                          totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-                        }
+          return newIDs;
+        },
+
+        getStudentPerformanceForClassAndTdf: function(classID, tdfFileName){
+          let curClass = Classes.findOne({_id:classID});
+          studentTotals = {
+            numCorrect: 0,
+            count: 0,
+            totalTime: 0
+          }
+          let students = [];
+          if(!!curClass){
+            let curClassTdfs = [];
+            for(let tdf of curClass.tdfs){
+              curClassTdfs.push(tdf.fileName);
+            }
+            curClass.students.forEach(function(studentUsername){
+              if(studentUsername.indexOf("@") == -1){
+                studentUsername = studentUsername.toUpperCase();
+              }
+              let student = Meteor.users.findOne({"username":studentUsername}) || {};
+              let studentID = student._id;
+              let count = 0;
+              let numCorrect = 0;
+              let totalTime = 0;
+              assessmentItems = {};
+              let learningSessionItems = getLearningSessionItems(tdfFileName);
+              let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
+              let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
+              UserMetrics.find({_id: studentID}).forEach(function(entry){
+                let tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+                tdfEntries = tdfEntries.filter(x => curClassTdfs.indexOf(x.replace("_xml",".xml")) != -1);
+                for(var index in tdfEntries){
+                  var key = tdfEntries[index];
+                  var tdf = entry[key];
+                  let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
+                  for(var index in tdf){
+                    //Only count items in learning sessions
+                    if(!!learningSessionItems[tdfKey] 
+                        && !!learningSessionItems[tdfKey][index]){
+                      var stim = tdf[index];
+                      count += stim.questionCount || 0;
+                      numCorrect += stim.correctAnswerCount || 0;
+                      var answerTimes = stim.answerTimes;
+                      for(var index in answerTimes){
+                        var time = answerTimes[index];
+                        totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
                       }
                     }
                   }
-                });
-                var percentCorrect = "N/A";
-                if(count != 0){
-                  percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
                 }
-                totalTime = totalTime.toFixed(1);
-                var studentPerformance = {
-                  "username":studentUsername,
-                  "count":count,
-                  "percentCorrect":percentCorrect,
-                  "numCorrect":numCorrect,
-                  "totalTime":totalTime
-                }
-                studentTotals.count += studentPerformance.count;
-                studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
-                studentTotals.numCorrect += studentPerformance.numCorrect;
-                students.push(studentPerformance);
-              })
-            }
-            studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
-            studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
-            return [students,studentTotals];
-          },
-
-          namesOfTdfsAttempted:function(userId){
-            var allNamesOfTdfsAttempted = [];
-
-            var userMetrics = UserMetrics.find({_id:userId});
-
-            userMetrics.forEach(function(entry){
-              var possibleTdfs = _.filter(_.keys(entry), x => x.indexOf("_xml") != -1)
-              for(var index in possibleTdfs){
-                var possibleTdf = possibleTdfs[index];
-                if(possibleTdf.indexOf("_xml") != -1){
-                  var curTdfName = possibleTdf;
-                  allNamesOfTdfsAttempted.push(curTdfName);
-                }
+              });
+              var percentCorrect = "N/A";
+              if(count != 0){
+                percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
               }
-            });
-
-            return allNamesOfTdfsAttempted;
+              totalTime = totalTime.toFixed(1);
+              var studentPerformance = {
+                "username":studentUsername,
+                "count":count,
+                "percentCorrect":percentCorrect,
+                "numCorrect":numCorrect,
+                "totalTime":totalTime
+              }
+              studentTotals.count += studentPerformance.count;
+              studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+              studentTotals.numCorrect += studentPerformance.numCorrect;
+              students.push(studentPerformance);
+            })
+          }
+          studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
+          studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
+          return [students,studentTotals];
         },
 
         getTdfNamesAssignedByInstructor:function(instructorID){
@@ -770,7 +754,7 @@ Meteor.startup(function () {
           if(Roles.userIsInRole(user, ['admin'])){
             instructorClasses = Classes.find({}).fetch();
           }else{
-            instructorClasses = Classes.find({"instructor":instructorID}).fetch();
+            instructorClasses = Classes.find({"instructor":instructorID,"curSemester":curSemester}).fetch();
           }
           var tdfs = {};
           for(let curClass of instructorClasses){

@@ -104,6 +104,7 @@ sessionCleanUp = function() {
     Session.set("testType", undefined);
     Session.set("VADInitialized",false);
     Session.set("studentReportingTdfs",[]);
+    Session.set("studentUsername",undefined);
     Session.set("curStudentPerformance",{});
 
     //Special: we reset card probs and user progress when we reset the session

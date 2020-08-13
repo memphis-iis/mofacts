@@ -132,17 +132,9 @@ Template.body.events({
       //Clear out studentUsername in case we are a teacher/admin who previously
       //navigated to this page for a particular student and want to see our own progress
       Session.set("studentUsername",null);
+      Session.set("curClass",undefined);
+      Session.set("instructorSelectedTdf",undefined);
       Router.go("/studentReporting");
-
-      //If we have no tdf selected from a prior navigation clear out the data
-      if(!curTdf){
-        Session.set("curStudentPerformance",{});
-      //Otherwise populate the data with the new information (for the current user
-      //and not the user from instructorReporting)
-      }else{
-        Session.set("curStudentID",Meteor.userId());
-        setCurrentStudentPerformance();
-      }
   },
 
   'click #errorReportButton' : function (event) {

@@ -448,8 +448,6 @@ function modelUnitEngine() {
     // this is to speed up calculations and make iteration below easier
     function initializeActRModel() {
         var i, j;
-
-        
         var numQuestions = getStimClusterCount();
         var initCards = [];
         var initResponses = {};
@@ -780,7 +778,7 @@ function modelUnitEngine() {
     function updateCardAndStimData(cardIndex, whichStim, resumeData){
         let card = cardProbabilities.cards[cardIndex];
         let stim = card.stims[whichStim];
-        let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimCluster(cardIndex).stims[whichStim].response.correctResponse));
+        let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(cardIndex,whichStim)));
 
         // About to show a card - record any times necessary
         card.lastShownTimestamp = Date.now();
@@ -969,8 +967,11 @@ function modelUnitEngine() {
                 );
 
                 // Display response and current response stats
-                console.log("Response is", responseText, displayify(cardProbabilities.responses[responseText]));
-
+                let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(cardIndex,whichStim)));
+                if(responseText && responseText in cardProbabilities.responses){
+                    console.log("Response is", responseText, displayify(cardProbabilities.responses[responseText]));
+                }
+                
                 console.log("<<<END   METRICS<<<<<<<");
             }
 
