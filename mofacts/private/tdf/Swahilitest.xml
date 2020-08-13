@@ -1,91 +1,92 @@
 <tutor>
-    <setspec>
-        <lessonname>Swahili Vocabulary test</lessonname>
-        <userselect>false</userselect>
-        <stimulusfile>Swahilistims.json</stimulusfile>
-        <shuffleclusters>0-16</shuffleclusters>
-        <lfparameter>0.80</lfparameter>
-        <isModeled>false</isModeled>
-        <experimentTarget>swa</experimentTarget>
-        <experimentPasswordRequired>true</experimentPasswordRequired>
-    </setspec>
-    <unit>
-        <unitname>Instructions</unitname>
-        <unitinstructions>
-            Welcome to a basic lesson on Swahili!
-        </unitinstructions>
-    </unit>
-    <unit>
-        <unitname>Swahili Training</unitname>
-        <unitinstructions><![CDATA[
+	<setspec>
+		<lessonname>Swahili Vocabulary test</lessonname>
+		<userselect>false</userselect>
+		<stimulusfile>Swahilistims.json</stimulusfile>
+		<shuffleclusters>0-16</shuffleclusters>
+		<lfparameter>0.80</lfparameter>
+		<isModeled>false</isModeled>
+		<experimentTarget>swa</experimentTarget>
+		<experimentPasswordRequired>true</experimentPasswordRequired>
+	</setspec>
+	<unit>
+		<unitname>Instructions</unitname>
+		<unitinstructions>
+			Welcome to a basic lesson on Swahili!
+		</unitinstructions>
+	</unit>
+	<unit>
+		<unitname>Swahili Training</unitname>
+		<unitinstructions><![CDATA[
             Enter answer in the prompt box below each question.  Please
             attempt to answer all questions presented.
         ]]></unitinstructions>
-        <deliveryparams>
-            <drill>10000</drill>
-            <purestudy>10000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>2000</reviewstudy>
-            <correctprompt>500</correctprompt>
-        </deliveryparams>
-        <buttontrial>true</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>17</templatesrepeated>
-                <group>0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,s,0 0,s,d,0</group>
-            </conditiontemplatesbygroup>
-            <initialpositions>
-                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
-                A_15 A_16 A_17
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>0-16</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-16</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitname>Swahili Post-test</unitname>
-        <unitinstructions>
-            Let's see if you can remember the answers!
-        </unitinstructions>
-        <deliveryparams>
-            <drill>10000</drill>
-            <purestudy>10000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>2000</reviewstudy>
-            <correctprompt>500</correctprompt>
-        </deliveryparams>
-        <buttontrial>false</buttontrial> <!-- fill in the blank -->
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>17</templatesrepeated>
-                <group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
-                    0,f,d,0 0,f,d,0</group>
-            </conditiontemplatesbygroup>
-            <initialpositions>
-                A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
-                A_15 A_16 A_17
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>0-16</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-16</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitname>Final</unitname>
-        <unitinstructions>
-            You have completed all the units that are available
-        </unitinstructions>
-    </unit>
+		<deliveryparams>
+			<drill>10000</drill>
+			<purestudy>10000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>2000</reviewstudy>
+			<correctprompt>500</correctprompt>
+		</deliveryparams>
+		<buttontrial>true</buttontrial>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>17</templatesrepeated>
+				<group>0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,s,0 0,s,d,0</group>
+			</conditiontemplatesbygroup>
+			<initialpositions>
+				A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
+				A_15 A_16 A_17
+			</initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>0-16</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-16</permutefinalresult>
+		</assessmentsession>
+	</unit>
+	<unit>
+		<unitname>Swahili Post-test</unitname>
+		<unitinstructions>
+			Let's see if you can remember the answers!
+		</unitinstructions>
+		<deliveryparams>
+			<drill>10000</drill>
+			<purestudy>10000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>2000</reviewstudy>
+			<correctprompt>500</correctprompt>
+		</deliveryparams>
+		<buttontrial>false</buttontrial>
+		<!-- fill in the blank -->
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>17</templatesrepeated>
+				<group>0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0
+					0,f,d,0 0,f,d,0</group>
+			</conditiontemplatesbygroup>
+			<initialpositions>
+				A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14
+				A_15 A_16 A_17
+			</initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>0-16</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-16</permutefinalresult>
+		</assessmentsession>
+	</unit>
+	<unit>
+		<unitname>Final</unitname>
+		<unitinstructions>
+			You have completed all the units that are available
+		</unitinstructions>
+	</unit>
 </tutor>

@@ -1,20 +1,20 @@
 <tutor>
-    <setspec>
-        <lessonname>Title of the unit goes here***</lessonname>
-        <userselect>true</userselect>
-        <stimulusfile>IESstimexample.json</stimulusfile>
-        <lfparameter>.85</lfparameter>
-        <speechAPIKey></speechAPIKey>
-        <audioInputEnabled>true</audioInputEnabled>
-        <audioInputSensitivity>15</audioInputSensitivity>
-        <speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
-        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>1</audioPromptSpeakingRate>
-    </setspec>
-    <unit>
-        <unitname>Informed Consent</unitname>
-        <unitinstructions><![CDATA[
+	<setspec>
+		<lessonname>Title of the unit goes here***</lessonname>
+		<userselect>true</userselect>
+		<stimulusfile>IESstimexample.json</stimulusfile>
+		<lfparameter>.85</lfparameter>
+		<speechAPIKey/>
+		<audioInputEnabled>true</audioInputEnabled>
+		<audioInputSensitivity>15</audioInputSensitivity>
+		<speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
+		<speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+		<audioPromptSpeakingRate>1</audioPromptSpeakingRate>
+	</setspec>
+	<unit>
+		<unitname>Informed Consent</unitname>
+		<unitinstructions><![CDATA[
           <center><table width="738" cellspacing="0" cellpadding="0" border="2">
   	<tbody>
   		<tr>
@@ -29,7 +29,6 @@
   				<p>
   					<strong>Title</strong>
   				</p>
-
   			</td>
   			<td width="358" valign="top">
   				<p>
@@ -166,7 +165,6 @@
   		Philip Pavlik of the University of Memphis, Institute of Intelligent
   		Systems and Department of Psychology is in charge of the study. There
   		may be other research team members assisting during the study.
-
   </p>
   <h3>
   	What happens if I agree to participate in this Research?
@@ -267,39 +265,36 @@
   	may print a copy of this form.
   </p>
   <br clear="all"/>
-
-
-
           ]]> </unitinstructions>
-    </unit>
-    <unit>
-        <unitname>Reading competed</unitname>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>1</templatesrepeated>
-                <group>0,f,d,0</group>
-            </conditiontemplatesbygroup>
-            <initialpositions> A_1     </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>18-18</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-        <deliveryparams>
-            <drill>10000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>8000</reviewstudy>
-            <correctprompt>8000</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitinstructions><![CDATA[
+	</unit>
+	<unit>
+		<unitname>Reading competed</unitname>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>1</templatesrepeated>
+				<group>0,f,d,0</group>
+			</conditiontemplatesbygroup>
+			<initialpositions> A_1     </initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>18-18</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+		<deliveryparams>
+			<drill>10000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>8000</reviewstudy>
+			<correctprompt>8000</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitinstructions><![CDATA[
           <center><h3>Anatomy & Physiology Practice Instructions</h3></center><br>
 Our MoFaCTS system has chosen some of the most important sentences from your textbook and they are presented here for your practice. This practice assumes you have read the textbook first, so that you understand the basic layout. For each sentence we remove keywords and the practice is to fill-in-the-blank for each sentence. Such quizzing has been proven to be an powerful aid to memory, and the system focuses on items you get wrong to make sure you learn all the items thouroughly. The system  pronounces keywords to help you memorize them if you turn that on in the main menu. The system also provides the progress button above to check how much practice you have done, and how well our AI system thinks you have learned the words. We hope you will be able to use this progress information to decide if you want to continue the practice after you have completed the required amount.
 <br>
@@ -311,11 +306,11 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
           margin-right: auto;
           autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>  </center>
         ]]></unitinstructions>
-        <unitname>Title of the unit goes here***</unitname>
-        <learningsession>
-             <clusterlist>0-17</clusterlist>
-             <unitMode>thresholdCeiling</unitMode>
-             <calculateProbability><![CDATA[
+		<unitname>Title of the unit goes here***</unitname>
+		<learningsession>
+			<clusterlist>0-17</clusterlist>
+			<unitMode>thresholdCeiling</unitMode>
+			<calculateProbability><![CDATA[
           function mul(m1, m2) {
             var result = 0;
             var len = m1.length;
@@ -324,7 +319,6 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
             }
             return result
           }
-
           function logitdec(outcomes, decay) {
             if (outcomes) {
                 var outcomessuc = JSON.parse(JSON.stringify(outcomes));
@@ -341,30 +335,25 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
             }
             return 0
           }
-
           function recency(age, d) {
           if (age==0) { return 0;
           } else
             {return Math.pow(1 + age, -d);
             }
           }
-
           function quaddiffcor(seq, probs) {
             return mul(seq, probs.map(function(value) {
                 return value * value
             }))
           }
-
           function linediffcor(seq, probs) {
             return mul(seq, probs)
           }
-
           function linediffincor(seq, probs) {
             return mul(seq.map(function(value) {
                 return Math.abs(value - 1)
             }), probs)
           }
-
                     p.y = -0.86820+
                     0.57548 * logitdec(
                         p.overallOutcomeHistory.slice(Math.max(p.overallOutcomeHistory.length-60,1),
@@ -377,22 +366,19 @@ Our MoFaCTS system has chosen some of the most important sentences from your tex
                     -0.52084 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities)+
                      0.13108 * (p.stimSuccessCount+p.stimFailureCount);
                     p.probability = 1.0 / (1.0 + Math.exp(-p.y));
-
                   // console.log(p.overallOutcomeHistory+" - "+p.responseOutcomeHistory +" - "+p.stimSecsSinceLastShown+" - "+p.stimOutcomeHistory+" - "+p.stimPreviousCalculatedProbabilities);
                     return p
                        ]]></calculateProbability>
-                   </learningsession>
-
-        <deliveryparams>
-            <drill>30000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-
+		</learningsession>
+		<deliveryparams>
+			<drill>30000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>16000</reviewstudy>
+			<correctprompt>750</correctprompt>
+			<fontsize>3</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
 </tutor>

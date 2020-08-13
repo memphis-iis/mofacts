@@ -1,25 +1,25 @@
 <tutor>
-    <setspec>
-        <lessonname>Statistics Cloze Sentence Experiment (demo)</lessonname>
-        <stimulusfile>SVO4stims.json</stimulusfile>
-        <experimentTarget>svo</experimentTarget>
-        <randomizedDelivery>3</randomizedDelivery>
-        <userselect>true</userselect>
-        <condition>SVOnumbak0tdf.json</condition>
-        <condition>SVOnumbak1tdf.json</condition>
-        <condition>SVOnumbak2tdf.json</condition>
-        <condition>SVOnumbak3tdf.json</condition>
-        <condition>SVOnumfor0tdf.json</condition>
-        <condition>SVOnumfor1tdf.json</condition>
-        <condition>SVOnumfor2tdf.json</condition>
-        <condition>SVOnumfor3tdf.json</condition>
-        <condition>SVOranbak0tdf.json</condition>
-        <condition>SVOranbak1tdf.json</condition>
-        <condition>SVOranbak2tdf.json</condition>
-        <condition>SVOranbak3tdf.json</condition>
-        <condition>SVOranfor0tdf.json</condition>
-        <condition>SVOranfor1tdf.json</condition>
-        <condition>SVOranfor2tdf.json</condition>
-        <condition>SVOranfor3tdf.json</condition>
-    </setspec>
+	<setspec>
+		<lessonname>Statistics Cloze Sentence Experiment (demo)</lessonname>
+		<stimulusfile>SVO4stims.json</stimulusfile>
+		<experimentTarget>svo</experimentTarget>
+		<randomizedDelivery>3</randomizedDelivery>
+		<userselect>true</userselect>
+		<condition>SVOnumbak0tdf.json</condition>
+		<condition>SVOnumbak1tdf.json</condition>
+		<condition>SVOnumbak2tdf.json</condition>
+		<condition>SVOnumbak3tdf.json</condition>
+		<condition>SVOnumfor0tdf.json</condition>
+		<condition>SVOnumfor1tdf.json</condition>
+		<condition>SVOnumfor2tdf.json</condition>
+		<condition>SVOnumfor3tdf.json</condition>
+		<condition>SVOranbak0tdf.json</condition>
+		<condition>SVOranbak1tdf.json</condition>
+		<condition>SVOranbak2tdf.json</condition>
+		<condition>SVOranbak3tdf.json</condition>
+		<condition>SVOranfor0tdf.json</condition>
+		<condition>SVOranfor1tdf.json</condition>
+		<condition>SVOranfor2tdf.json</condition>
+		<condition>SVOranfor3tdf.json</condition>
+	</setspec>
 </tutor>

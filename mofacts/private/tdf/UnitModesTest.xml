@@ -1,42 +1,42 @@
 <tutor>
-    <setspec>
-        <name>Unit Mode Testing</name>
-        <lessonname>Optimized Drill Practice of Unit Mode Testing</lessonname>
-        <userselect>false</userselect>
-        <stimulusfile>UnitModesTest.json</stimulusfile>
-        <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter>
-        <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.85</simCorrectProb>
-        <speechAPIKey></speechAPIKey>
-        <audioInputEnabled>true</audioInputEnabled>
-        <audioInputSensitivity>15</audioInputSensitivity>
-        <speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
-        <speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
-    </setspec>
-    <unit>
-        <unitinstructions>Here comes the optimized learning of Arabic letter names.</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-            <clusterlist>0-1</clusterlist>
-            <unitMode>distance</unitMode>
-        </learningsession>
-        <deliveryparams>
-            <practiceseconds>1000000</practiceseconds>
-            <drill>8000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>5000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions>You are all done.</unitinstructions>
-    </unit>
+	<setspec>
+		<name>Unit Mode Testing</name>
+		<lessonname>Optimized Drill Practice of Unit Mode Testing</lessonname>
+		<userselect>false</userselect>
+		<stimulusfile>UnitModesTest.json</stimulusfile>
+		<isModeled>false</isModeled>
+		<lfparameter>.85</lfparameter>
+		<simTimeout>3500</simTimeout>
+		<simCorrectProb>0.85</simCorrectProb>
+		<speechAPIKey/>
+		<audioInputEnabled>true</audioInputEnabled>
+		<audioInputSensitivity>15</audioInputSensitivity>
+		<speechIgnoreOutOfGrammarResponses>true</speechIgnoreOutOfGrammarResponses>
+		<speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
+		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+		<audioPromptSpeakingRate>2</audioPromptSpeakingRate>
+	</setspec>
+	<unit>
+		<unitinstructions>Here comes the optimized learning of Arabic letter names.</unitinstructions>
+		<unitname>Model Unit</unitname>
+		<learningsession>
+			<clusterlist>0-1</clusterlist>
+			<unitMode>distance</unitMode>
+		</learningsession>
+		<deliveryparams>
+			<practiceseconds>1000000</practiceseconds>
+			<drill>8000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>5000</reviewstudy>
+			<correctprompt>750</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions>You are all done.</unitinstructions>
+	</unit>
 </tutor>

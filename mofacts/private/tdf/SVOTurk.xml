@@ -1,75 +1,75 @@
 <tutor>
-    <setspec>
-        <name>Statistics Practice</name>
-        <lessonname>Statistics Cloze Sentence Experiment test</lessonname>
-        <userselect>false</userselect>
-        <randomizedDelivery>3</randomizedDelivery>
-        <experimentTarget>svoturktesting</experimentTarget>
-        <stimulusfile>SVO4stims.json</stimulusfile>
-        <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter>
-        <shuffleclusters>20-35</shuffleclusters>
-        <swapclusters>0-19 20-35</swapclusters>
-        <swapclusters>0-4 5-9 10-14 15-19</swapclusters>
-    </setspec>
-    <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[Demographic Survey<br><br>
+	<setspec>
+		<name>Statistics Practice</name>
+		<lessonname>Statistics Cloze Sentence Experiment test</lessonname>
+		<userselect>false</userselect>
+		<randomizedDelivery>3</randomizedDelivery>
+		<experimentTarget>svoturktesting</experimentTarget>
+		<stimulusfile>SVO4stims.json</stimulusfile>
+		<isModeled>false</isModeled>
+		<lfparameter>.85</lfparameter>
+		<shuffleclusters>20-35</shuffleclusters>
+		<swapclusters>0-19 20-35</swapclusters>
+		<swapclusters>0-4 5-9 10-14 15-19</swapclusters>
+	</setspec>
+	<unit>
+		<unitname>Show the questions</unitname>
+		<unitinstructions><![CDATA[Demographic Survey<br><br>
 Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
-        <buttonorder>fixed</buttonorder>
-        <deliveryparams>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>5</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>36-40</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <turkpay>true</turkpay>
-        <turkminscore>4</turkminscore>
-        <turkemailsubject>MOFACTS: Lockout End for TEST</turkemailsubject>
-        <turkemail><![CDATA[
+		<buttonorder>fixed</buttonorder>
+		<deliveryparams>
+			<drill>12000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>16000</reviewstudy>
+			<correctprompt>500</correctprompt>
+			<fontsize>3</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+		<buttontrial>false</buttontrial>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>5</templatesrepeated>
+				<group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
+			</conditiontemplatesbygroup>
+			<initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>36-40</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+	</unit>
+	<unit>
+		<turkpay>true</turkpay>
+		<turkminscore>4</turkminscore>
+		<turkemailsubject>MOFACTS: Lockout End for TEST</turkemailsubject>
+		<turkemail><![CDATA[
 Thank you for your patience. The lockout time has expired, so it's time to
 return to Mofacts! A bonus of $3.00 will be paid if you do.
 Here's the link in case you forgot: http://mofacts.optimallearning.org/experiment/svo
 Thanks!
 The Mofacts System
         ]]></turkemail>
-        <unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
-            If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
-            If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions>
-        <unitname>Lockout unit</unitname>
-        <deliveryparams>
-            <lockoutminutes>2</lockoutminutes>
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>2</lockoutminutes>
-        </deliveryparams>
-        <deliveryparams>
-            <lockoutminutes>2</lockoutminutes>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <turkbonus>3.00</turkbonus>
-        <unitname>last</unitname>
-        <unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions>
-    </unit>
+		<unitinstructions>You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.
+			If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.
+			If the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.</unitinstructions>
+		<unitname>Lockout unit</unitname>
+		<deliveryparams>
+			<lockoutminutes>2</lockoutminutes>
+		</deliveryparams>
+		<deliveryparams>
+			<lockoutminutes>2</lockoutminutes>
+		</deliveryparams>
+		<deliveryparams>
+			<lockoutminutes>2</lockoutminutes>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<turkbonus>3.00</turkbonus>
+		<unitname>last</unitname>
+		<unitinstructions>You have now completed the posttest. We will check your completion and confirm the $3 bonus.</unitinstructions>
+	</unit>
 </tutor>

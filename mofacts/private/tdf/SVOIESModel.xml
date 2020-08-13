@@ -1,21 +1,21 @@
 <tutor>
-    <setspec>
-        <lessonname>IES Optimized Cloze Practice of Basic Statistics</lessonname>
-        <userselect>false</userselect>
-        <stimulusfile>SVOIESstims.json</stimulusfile>
-        <isModeled>false</isModeled>
-        <lfparameter>.85</lfparameter>
-        <shuffleclusters>0-17</shuffleclusters>
-        <simTimeout>3500</simTimeout>
-        <simCorrectProb>0.75</simCorrectProb>
-    </setspec>
-    <unit>
-        <unitinstructions>Here comes the optimized learning.</unitinstructions>
-        <unitname>Model Unit</unitname>
-        <learningsession>
-             <clusterlist>0-17</clusterlist>
-             <unitMode>thresholdCeiling</unitMode>
-             <calculateProbability><![CDATA[
+	<setspec>
+		<lessonname>IES Optimized Cloze Practice of Basic Statistics</lessonname>
+		<userselect>false</userselect>
+		<stimulusfile>SVOIESstims.json</stimulusfile>
+		<isModeled>false</isModeled>
+		<lfparameter>.85</lfparameter>
+		<shuffleclusters>0-17</shuffleclusters>
+		<simTimeout>3500</simTimeout>
+		<simCorrectProb>0.75</simCorrectProb>
+	</setspec>
+	<unit>
+		<unitinstructions>Here comes the optimized learning.</unitinstructions>
+		<unitname>Model Unit</unitname>
+		<learningsession>
+			<clusterlist>0-17</clusterlist>
+			<unitMode>thresholdCeiling</unitMode>
+			<calculateProbability><![CDATA[
           function mul(m1, m2) {
             var result = 0;
             var len = m1.length;
@@ -24,7 +24,6 @@
             }
             return result
           }
-
           function logitdec(outcomes, decay) {
             if (outcomes) {
                 var outcomessuc = JSON.parse(JSON.stringify(outcomes));
@@ -41,30 +40,25 @@
             }
             return 0
           }
-
           function recency(age, d) {
           if (age==0) { return 0;
           } else
             {return Math.pow(1 + age, -d);
             }
           }
-
           function quaddiffcor(seq, probs) {
             return mul(seq, probs.map(function(value) {
                 return value * value
             }))
           }
-
           function linediffcor(seq, probs) {
             return mul(seq, probs)
           }
-
           function linediffincor(seq, probs) {
             return mul(seq.map(function(value) {
                 return Math.abs(value - 1)
             }), probs)
           }
-
           p.y = -0.72159+
           .58150 *
             logitdec(
@@ -77,8 +71,6 @@
           -1.96012 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +
           -0.27823 * linediffincor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities);
           p.probability = 1.0 / (1.0 + Math.exp(-p.y));
-
-
          console.log(
           p.overallOutcomeHistory+" - "+
         p.responseOutcomeHistory +" - "+
@@ -86,52 +78,51 @@
     p.stimOutcomeHistory+" - "+
   p.stimPreviousCalculatedProbabilities);
           return p
-
              ]]></calculateProbability>
-         </learningsession>
-        <deliveryparams>
-            <drill>60000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>12000</reviewstudy>
-            <correctprompt>750</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>1</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>Show the questions</unitname>
-        <unitinstructions><![CDATA[Demographic Survey<br><br>
+		</learningsession>
+		<deliveryparams>
+			<drill>60000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>12000</reviewstudy>
+			<correctprompt>750</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>1</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitname>Show the questions</unitname>
+		<unitinstructions><![CDATA[Demographic Survey<br><br>
 Please answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.]]></unitinstructions>
-        <buttonorder>fixed</buttonorder>
-        <deliveryparams>
-            <drill>12000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>16000</reviewstudy>
-            <correctprompt>500</correctprompt>
-            <fontsize>3</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-        <buttontrial>false</buttontrial>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>5</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
-            </conditiontemplatesbygroup>
-            <initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>18-22</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions>You are all done.</unitinstructions>
-    </unit>
+		<buttonorder>fixed</buttonorder>
+		<deliveryparams>
+			<drill>12000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>16000</reviewstudy>
+			<correctprompt>500</correctprompt>
+			<fontsize>3</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+		<buttontrial>false</buttontrial>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>5</templatesrepeated>
+				<group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                </group>
+			</conditiontemplatesbygroup>
+			<initialpositions>                A_1 A_2 A_3 A_4 A_5            </initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>18-22</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions>You are all done.</unitinstructions>
+	</unit>
 </tutor>
