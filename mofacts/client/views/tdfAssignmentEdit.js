@@ -1,4 +1,4 @@
-import { curSemester } from '../lib/viewHelpers';
+import { curSemester } from '../../common/Definitions';
 
 Session.set("classes",[]);
 Session.set("allTdfFilenamesAndDisplayNames",[]);

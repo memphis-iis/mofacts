@@ -1,4 +1,4 @@
-import { curSemester } from '../lib/viewHelpers';
+import { curSemester } from '../../common/Definitions';
 import { Tracker } from 'meteor/tracker';
 
 Session.set("curClozeSentencePairItemId", "");
@@ -188,7 +188,7 @@ generateAndSubmitTDFAndStimFiles = function(){
   var curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g,"_");
   var curDateTime = new Date().toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
   var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_TDF.xml";
-  var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_Stim.xml";
+  var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_Stim.json";
 
   let isMultiTdf = false;
   if(clozesComeFromTemplate){

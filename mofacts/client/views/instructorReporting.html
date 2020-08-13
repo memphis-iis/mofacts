@@ -37,7 +37,7 @@
           <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade"> -->
             <table border="1">
               <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th></tr>
-              {{#each getCurClassStudents}}
+              {{#each curClassStudents}}
                 <tr>
                   <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
                   <td>{{this.percentCorrect}}</td>

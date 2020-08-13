@@ -1,5 +1,6 @@
 Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
+Session.set("curClass",undefined);
 Session.set("curClassStudentTotals",null);
 Session.set("curInstructorReportingTdfs",[]);
 
@@ -10,6 +11,8 @@ curClass = {_id:""};
 navigateToStudentReporting = function(studentUsername){
   console.log("navigateToStudentReporting: " + studentUsername);
   Session.set("studentUsername",studentUsername);
+  Session.set("curClass",curClass);
+  Session.set("instructorSelectedTdf",curTdf);
   Session.set("curStudentPerformance",{});
   Router.go("/studentReporting");
 }
@@ -42,7 +45,7 @@ Template.instructorReporting.helpers({
   },
 
 //Session var index by curClassName?
-  getCurClassStudents: function(){
+  curClassStudents: function(){
     return Session.get("curClassStudents");
   },
 
@@ -62,6 +65,9 @@ Template.instructorReporting.helpers({
 Template.instructorReporting.events({
 
   "click .nav-tabs": function(event, template){
+    Session.set("curClassStudents",[]);
+    Session.set("curClassStudentTotals",[]);
+
     //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
     setTimeout(function(){
       //Need to strip newlines because chrome appends them for some reason
@@ -88,6 +94,16 @@ Template.instructorReporting.events({
 });
 
 Template.instructorReporting.onRendered(function(){
+  curClass = {_id:""};
+  Session.set("curClass",undefined);
+  Session.set("studentUsername",undefined);
+  Session.set("instructorSelectedTdf",undefined);
+  Session.set("instructorReportingTdfs",[]);
+  Session.set("classes",[]);
+  Session.set("curClassStudents",[]);
+  Session.set("curClassStudentTotals",null);
+  Session.set("curInstructorReportingTdfs",[]);
+
   console.log("instructorReporting rendered");
   Meteor.call('getTdfNamesAssignedByInstructor',Meteor.userId(),function (err,res) {
     if(!!err){
@@ -97,7 +113,7 @@ Template.instructorReporting.onRendered(function(){
     }
   });
 
-  var classes = getAllClassesForCurrentInstructor(Meteor.userId());
+  let classes = getAllClassesForCurrentInstructor(Meteor.userId());
   console.log("userID: " + Meteor.userId());
   console.log("classes: " + JSON.stringify(classes));
   Session.set("classes",classes);
