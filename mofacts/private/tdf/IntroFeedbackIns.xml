@@ -1,30 +1,27 @@
 <tutor>
-    <setspec>
-       
-        <name>Intro Practice</name>
-        <lessonname>Intro Instructive</lessonname>
-        <userselect>false</userselect>
-        <experimentTarget>introins</experimentTarget>
-        <stimulusfile>IntroCorrectivestims.json</stimulusfile>
-    </setspec>  
-    <unit>
-        <unitname>Informed Consent</unitname>
-        <unitinstructions><![CDATA[<p>The experiment is designed to compare various degrees of corrective feedback while studying for an upcoming exam. You have been randomly assigned to this condition. Whatever condition you are in, please try to do your best, as this is a useful study tool. 
+	<setspec>
+		<name>Intro Practice</name>
+		<lessonname>Intro Instructive</lessonname>
+		<userselect>false</userselect>
+		<experimentTarget>introins</experimentTarget>
+		<stimulusfile>IntroCorrectivestims.json</stimulusfile>
+	</setspec>
+	<unit>
+		<unitname>Informed Consent</unitname>
+		<unitinstructions><![CDATA[<p>The experiment is designed to compare various degrees of corrective feedback while studying for an upcoming exam. You have been randomly assigned to this condition. Whatever condition you are in, please try to do your best, as this is a useful study tool. 
 <p>If you should have any questions about this research study please feel free to contact your course instructor, or Kaitlyn Peperone at kpperone@memphis.edu. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2705.
 <p>All efforts, within the limits allowed by law, will be made to keep the personal information in your research record private but total privacy cannot be promised. We will deidentify your data after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by University of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.
 <br><br><p align="center">By clicking this continue button, I consent to the above terms.]]> </unitinstructions>
-
-    </unit>
-   
-    <unit>
-        <unitname>Text Instuctions</unitname>
-        <unitinstructions><![CDATA[<p>The terms and facts you are about to see are representative of those you will tested on for the exam. You must review the terms and facts for a minimum of 15 minutes to receive extra credit. You may return to the review after the 15 minutes is up. You may find it useful to take notes on the topics throughout the 15 minutes. <br><br> If you have any questions about the system, please contact your course instructor. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
-    </unit>
-    <unit>
-        <unitname>Text</unitname>
-        <instructionminseconds>900</instructionminseconds>
-        <instructionmaxseconds>900</instructionmaxseconds>
-        <unitinstructions><![CDATA[Operational definitions are an exact set of procedures used to represent a particular concept.
+	</unit>
+	<unit>
+		<unitname>Text Instuctions</unitname>
+		<unitinstructions><![CDATA[<p>The terms and facts you are about to see are representative of those you will tested on for the exam. You must review the terms and facts for a minimum of 15 minutes to receive extra credit. You may return to the review after the 15 minutes is up. You may find it useful to take notes on the topics throughout the 15 minutes. <br><br> If you have any questions about the system, please contact your course instructor. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
+	</unit>
+	<unit>
+		<unitname>Text</unitname>
+		<instructionminseconds>900</instructionminseconds>
+		<instructionmaxseconds>900</instructionmaxseconds>
+		<unitinstructions><![CDATA[Operational definitions are an exact set of procedures used to represent a particular concept.
 <br><br>
 Gestalt psychologists studied thinking, learning, and perception in whole units, as opposed to analyzing these experiences in smaller units.
 <br><br>
@@ -93,19 +90,17 @@ Sleeping after studying can increase memory because there is less interference d
 Interference is the tendency for new memories to get in the way of recalling old memories, or for old memories to get in the way of recalling new memories.
 <br><br>
 Consolidation is the formation of long-term memories in the brain. ]]>
-
-
-</unitinstructions>
-    </unit>
-      <unit>
-        <unitname>Continuation</unitname>
-        <unitinstructions><![CDATA[<p>You have completed the extra credit. Please continue practicing if you want. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
-    </unit>
-    <unit>
-        <unitname>Text-2</unitname>
-        <instructionminseconds>1000000</instructionminseconds>
-        <instructionmaxseconds>1000000</instructionmaxseconds>
-        <unitinstructions><![CDATA[Operational definitions are an exact set of procedures used to represent a particular concept.
+		</unitinstructions>
+	</unit>
+	<unit>
+		<unitname>Continuation</unitname>
+		<unitinstructions><![CDATA[<p>You have completed the extra credit. Please continue practicing if you want. <br><br> Please remember to email your course instructor the 4 digit sequence that you used to log into the system.</p>]]></unitinstructions>
+	</unit>
+	<unit>
+		<unitname>Text-2</unitname>
+		<instructionminseconds>1000000</instructionminseconds>
+		<instructionmaxseconds>1000000</instructionmaxseconds>
+		<unitinstructions><![CDATA[Operational definitions are an exact set of procedures used to represent a particular concept.
 <br><br>
 Gestalt psychologists studied thinking, learning, and perception in whole units, as opposed to analyzing these experiences in smaller units.
 <br><br>
@@ -174,13 +169,10 @@ Sleeping after studying can increase memory because there is less interference d
 Interference is the tendency for new memories to get in the way of recalling old memories, or for old memories to get in the way of recalling new memories.
 <br><br>
 Consolidation is the formation of long-term memories in the brain. ]]>
-
-
-</unitinstructions>
-    </unit>
-    <unit>
-       
-        <unitname>last</unitname>
-        <unitinstructions><![CDATA[You have now completed the practice. ]]></unitinstructions>
-    </unit>
+		</unitinstructions>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions><![CDATA[You have now completed the practice. ]]></unitinstructions>
+	</unit>
 </tutor>

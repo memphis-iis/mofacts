@@ -1,15 +1,14 @@
 <tutor>
-    <setspec>
-        <lessonname>Survey for A&amp;P Students</lessonname>
-        <userselect>true</userselect>
-        <stimulusfile>IESsurveystims.json</stimulusfile>
-        <lfparameter>.85</lfparameter>
-
-        <shuffleclusters>30-159</shuffleclusters>
-    </setspec>
-    <unit>
-        <unitname>Informed Consent</unitname>
-        <unitinstructions><![CDATA[
+	<setspec>
+		<lessonname>Survey for A&amp;P Students</lessonname>
+		<userselect>true</userselect>
+		<stimulusfile>IESsurveystims.json</stimulusfile>
+		<lfparameter>.85</lfparameter>
+		<shuffleclusters>30-159</shuffleclusters>
+	</setspec>
+	<unit>
+		<unitname>Informed Consent</unitname>
+		<unitinstructions><![CDATA[
           <center><table width="738" cellspacing="0" cellpadding="0" border="2">
   	<tbody>
   		<tr>
@@ -156,7 +155,6 @@
             be other research team members assisting during the study.
           </p>
             <h3>What happens if I agree to participate in this Research?</h3>
-
           <p>
             If you agree you will be asked to answer 30 quick demographics questions
             and then try to identify authors from a list of 65 authors that will be
@@ -190,9 +188,7 @@
             deidentify your data (remove your ID) after the experiment before storing
             it on our computers long-term..
           </p>
-
             <h3>What if I want to stop participating in this research?</h3>
-
           <p>
             It is up to you to decide whether you want to volunteer for this study. It
             is also ok to decide to end your participation at any time. There is no
@@ -241,90 +237,86 @@
             in this research. I understand that I am not waiving any legal rights. I
             may print a copy of this form.
           </p>
-
-
-
-
           ]]> </unitinstructions>
-    </unit>
-    <unit>
-        <unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 30 questions and second with 65 questions. Be sure you have logged in with the special ID
+	</unit>
+	<unit>
+		<unitinstructions><![CDATA[This is the survey to get the 10$ gift certificate. There are 2 parts, first with 30 questions and second with 65 questions. Be sure you have logged in with the special ID
         your instructor gave you. These random ID allow us to match data to grades without knowing who you are.]]></unitinstructions>
-        <unitname>Survey for A&amp;P Students</unitname>
-          <buttonorder>fixed</buttonorder>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>30</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-                0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>
-            </conditiontemplatesbygroup>
-            <initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10
-A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 A_19 A_20
-A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>0-29</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-        <deliveryparams>
-            <drill>10000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>0</reviewstudy>
-            <correctprompt>0</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitinstructions><![CDATA[The following survey tests your recall of authors. Please pick TRUE if you are sure it is a real author and pick FALSE if you are not sure or know it is fake.]]></unitinstructions>
-        <unitname>Author Recognition Survey for A&amp;P Students</unitname>
-          <buttonorder>fixed</buttonorder>
-          <wrongButtonOptions>True, False</wrongButtonOptions>
-        <assessmentsession>
-            <conditiontemplatesbygroup>
-                <groupnames>A</groupnames>
-                <clustersrepeated>1</clustersrepeated>
-                <templatesrepeated>65</templatesrepeated>
-                <group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-                  0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-                  0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-              0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
-            0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
-            </conditiontemplatesbygroup>
-            <initialpositions> A_1	A_2	A_3	A_4	A_5	A_6	A_7	A_8	A_9	A_10
-              A_11	A_12	A_13	A_14	A_15	A_16	A_17	A_18	A_19	A_20
-              A_21	A_22	A_23	A_24	A_25	A_26	A_27	A_28	A_29	A_30
-              A_31	A_32	A_33	A_34	A_35	A_36	A_37	A_38	A_39	A_40
-              A_41	A_42	A_43	A_44	A_45	A_46	A_47	A_48	A_49	A_50
-              A_51	A_52	A_53	A_54	A_55	A_56	A_57	A_58	A_59	A_60
-              A_61	A_62	A_63	A_64	A_65
-            </initialpositions>
-            <randomizegroups>false</randomizegroups>
-            <clusterlist>30-94</clusterlist>
-            <assignrandomclusters>false</assignrandomclusters>
-            <permutefinalresult>0-0</permutefinalresult>
-        </assessmentsession>
-        <deliveryparams>
-            <drill>10000000</drill>
-            <purestudy>16000</purestudy>
-            <skipstudy>false</skipstudy>
-            <reviewstudy>0</reviewstudy>
-            <correctprompt>0</correctprompt>
-            <fontsize>2</fontsize>
-            <correctscore>0</correctscore>
-            <incorrectscore>0</incorrectscore>
-        </deliveryparams>
-    </unit>
-    <unit>
-        <unitname>last</unitname>
-        <unitinstructions><![CDATA[Thanks for the information, we hope it will help us to understand the results of our research. Your instructor will tell you when the gift cards are available, (after chapter 12 exam is completed).]]></unitinstructions>
-    </unit>
+		<unitname>Survey for A&amp;P Students</unitname>
+		<buttonorder>fixed</buttonorder>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>30</templatesrepeated>
+				<group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0</group>
+			</conditiontemplatesbygroup>
+			<initialpositions> A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10
+				A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18 A_19 A_20
+				A_21 A_22 A_23 A_24 A_25 A_26 A_27 A_28 A_29 A_30
+			</initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>0-29</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+		<deliveryparams>
+			<drill>10000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>0</reviewstudy>
+			<correctprompt>0</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitinstructions><![CDATA[The following survey tests your recall of authors. Please pick TRUE if you are sure it is a real author and pick FALSE if you are not sure or know it is fake.]]></unitinstructions>
+		<unitname>Author Recognition Survey for A&amp;P Students</unitname>
+		<buttonorder>fixed</buttonorder>
+		<wrongButtonOptions>True, False</wrongButtonOptions>
+		<assessmentsession>
+			<conditiontemplatesbygroup>
+				<groupnames>A</groupnames>
+				<clustersrepeated>1</clustersrepeated>
+				<templatesrepeated>65</templatesrepeated>
+				<group>0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0
+					0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 </group>
+			</conditiontemplatesbygroup>
+			<initialpositions> A_1	A_2	A_3	A_4	A_5	A_6	A_7	A_8	A_9	A_10
+				A_11	A_12	A_13	A_14	A_15	A_16	A_17	A_18	A_19	A_20
+				A_21	A_22	A_23	A_24	A_25	A_26	A_27	A_28	A_29	A_30
+				A_31	A_32	A_33	A_34	A_35	A_36	A_37	A_38	A_39	A_40
+				A_41	A_42	A_43	A_44	A_45	A_46	A_47	A_48	A_49	A_50
+				A_51	A_52	A_53	A_54	A_55	A_56	A_57	A_58	A_59	A_60
+				A_61	A_62	A_63	A_64	A_65
+			</initialpositions>
+			<randomizegroups>false</randomizegroups>
+			<clusterlist>30-94</clusterlist>
+			<assignrandomclusters>false</assignrandomclusters>
+			<permutefinalresult>0-0</permutefinalresult>
+		</assessmentsession>
+		<deliveryparams>
+			<drill>10000000</drill>
+			<purestudy>16000</purestudy>
+			<skipstudy>false</skipstudy>
+			<reviewstudy>0</reviewstudy>
+			<correctprompt>0</correctprompt>
+			<fontsize>2</fontsize>
+			<correctscore>0</correctscore>
+			<incorrectscore>0</incorrectscore>
+		</deliveryparams>
+	</unit>
+	<unit>
+		<unitname>last</unitname>
+		<unitinstructions><![CDATA[Thanks for the information, we hope it will help us to understand the results of our research. Your instructor will tell you when the gift cards are available, (after chapter 12 exam is completed).]]></unitinstructions>
+	</unit>
 </tutor>

@@ -1,48 +1,41 @@
 <tutor>
-    <setspec>
-        <lessonname>Heart 2 Experiment (demo)</lessonname>
-        <experimentTarget>heart2</experimentTarget>
-        <userselect>false</userselect>
-        <randomizedDelivery>1</randomizedDelivery>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Control1Optim.json</condition>
-        <condition>Heart2Control2Optim.json</condition>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Control1Optim.json</condition>
-        <condition>Heart2Control2Optim.json</condition>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Control1Optim.json</condition>
-        <condition>Heart2Control2Optim.json</condition>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Control1Optim.json</condition>
-        <condition>Heart2Control2Optim.json</condition>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Control1Optim.json</condition>
-        <condition>Heart2Control2Optim.json</condition>
-        <condition>Heart2HumOptim.json</condition>
-        <condition>Heart2MachOptim.json</condition>
-
-        <condition>Heart2Ran1Optim.json</condition>
-        <condition>Heart2Ran2Optim.json</condition>
-        <condition>Heart2Ran3Optim.json</condition>
-        <condition>Heart2Ran4Optim.json</condition>
-        <condition>Heart2Ran5Optim.json</condition>
-        <condition>Heart2Ran6Optim.json</condition>
-
-        <enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
-        <speechAPIKey></speechAPIKey>
-        <audioInputSensitivity>15</audioInputSensitivity>
-        <audioInputEnabled>true</audioInputEnabled>
-        <audioPromptSpeakingRate>2</audioPromptSpeakingRate>
-    </setspec>
+	<setspec>
+		<lessonname>Heart 2 Experiment (demo)</lessonname>
+		<experimentTarget>heart2</experimentTarget>
+		<userselect>false</userselect>
+		<randomizedDelivery>1</randomizedDelivery>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Control1Optim.json</condition>
+		<condition>Heart2Control2Optim.json</condition>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Control1Optim.json</condition>
+		<condition>Heart2Control2Optim.json</condition>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Control1Optim.json</condition>
+		<condition>Heart2Control2Optim.json</condition>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Control1Optim.json</condition>
+		<condition>Heart2Control2Optim.json</condition>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Control1Optim.json</condition>
+		<condition>Heart2Control2Optim.json</condition>
+		<condition>Heart2HumOptim.json</condition>
+		<condition>Heart2MachOptim.json</condition>
+		<condition>Heart2Ran1Optim.json</condition>
+		<condition>Heart2Ran2Optim.json</condition>
+		<condition>Heart2Ran3Optim.json</condition>
+		<condition>Heart2Ran4Optim.json</condition>
+		<condition>Heart2Ran5Optim.json</condition>
+		<condition>Heart2Ran6Optim.json</condition>
+		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+		<speechAPIKey/>
+		<audioInputSensitivity>15</audioInputSensitivity>
+		<audioInputEnabled>true</audioInputEnabled>
+		<audioPromptSpeakingRate>2</audioPromptSpeakingRate>
+	</setspec>
 </tutor>
