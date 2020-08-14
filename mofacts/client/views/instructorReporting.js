@@ -1,7 +1,7 @@
 Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClass",undefined);
-Session.set("curClassStudentTotals",null);
+Session.set("curClassStudentTotals",undefined);
 Session.set("curInstructorReportingTdfs",[]);
 
 const INVALID_TDF = "invalid";
@@ -19,7 +19,7 @@ navigateToStudentReporting = function(studentUsername){
 
 setCurClassStudents = function(curClass,currentTdf){
   Session.set("curClassStudents",[]);
-  Session.set("curClassStudentTotals",[]);
+  Session.set("curClassStudentTotals",undefined);
 
   Session.set("performanceLoading", true);
 
@@ -66,7 +66,7 @@ Template.instructorReporting.events({
 
   "click .nav-tabs": function(event, template){
     Session.set("curClassStudents",[]);
-    Session.set("curClassStudentTotals",[]);
+    Session.set("curClassStudentTotals",undefined);
 
     //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
     setTimeout(function(){
@@ -101,7 +101,7 @@ Template.instructorReporting.onRendered(function(){
   Session.set("instructorReportingTdfs",[]);
   Session.set("classes",[]);
   Session.set("curClassStudents",[]);
-  Session.set("curClassStudentTotals",null);
+  Session.set("curClassStudentTotals",undefined);
   Session.set("curInstructorReportingTdfs",[]);
 
   console.log("instructorReporting rendered");

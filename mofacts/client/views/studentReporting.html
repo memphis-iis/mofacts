@@ -22,11 +22,19 @@
       <h2>Progress Data</h2>
       <table border="0" class="halfWidth centerForDesktop">
         <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (minutes)</th></tr>
+        <tr>
+          <td>{{curStudentPerformance.percentCorrect}}</td>
+          <td>{{curStudentPerformance.count}}</td>
+          <td>{{curStudentPerformance.totalTime}}</td>
+        </tr>
+        {{#if curClassStudentTotals}}
+          <tr><th class="thWide">{{curClass.name}} - Average % Correct</th><th class="thWide">{{curClass.name}} - Average Count</th><th class="thWide">{{curClass.name}} - Average Total Time (minutes)</th></tr>
           <tr>
-            <td>{{curStudentPerformance.percentCorrect}}</td>
-            <td>{{curStudentPerformance.count}}</td>
-            <td>{{curStudentPerformance.totalTime}}</td>
+            <td>{{curClassStudentTotals.averagePercentCorrect}}</td>
+            <td>{{curClassStudentTotals.averageCount}}</td>
+            <td>{{curClassStudentTotals.averageTotalTime}}</td>
           </tr>
+        {{/if}}
       </table>
     </div>
     <div>
