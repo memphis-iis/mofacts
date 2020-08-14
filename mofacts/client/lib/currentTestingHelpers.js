@@ -1,3 +1,5 @@
+import { curSemester } from '../../common/Definitions';
+
 /* client/lib/currentTestingHelpers.js
  *
  * Client-side helper functions for getting current information about testing
