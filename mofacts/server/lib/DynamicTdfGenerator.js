@@ -77,7 +77,9 @@ export class DynamicTdfGenerator {
     this.stimFileClusters_.forEach((cluster, idx) => {
       let allClusterTags = [];
       for(let stim of cluster.stims){
-        allClusterTags.push(stim.tags);
+        if(stim.tags){
+          allClusterTags.push(stim.tags);
+        }
       }
       let isIncludedInStimCluster = this.isIncludedCluster(allClusterTags, weightStart, weightEnd, orderGroup);
       if (start === -1 && isIncludedInStimCluster) {
@@ -114,10 +116,10 @@ export class DynamicTdfGenerator {
     let isIncludedStimCluster = false;
     if (tags && tags.length) {
       tags.forEach(tag => {
-        let tagOrderGroup = this.isValidOrderGroup(tag.orderGroup[0]) 
-          ? parseInt(tag.orderGroup[0]) : -1;
+        let tagOrderGroup = this.isValidOrderGroup((tag.orderGroup[0]||tag.orderGroup)) 
+          ? parseInt((tag.orderGroup[0]||tag.orderGroup)) : -1;
         let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
-          ? parseInt(tag.weightGroup[0]) : -1;
+          ? parseInt((tag.weightGroup[0]||tag.weightGroup)) : -1;
         if (tagOrderGroup > -1) {
           if (tagOrderGroup === orderGroup) {
             isIncludedStimCluster = true;
@@ -129,7 +131,7 @@ export class DynamicTdfGenerator {
               isIncludedStimCluster = true;
           }
         }
-      });
+      });      
     }
     return isIncludedStimCluster;
   }
@@ -159,7 +161,7 @@ export class DynamicTdfGenerator {
   setOrderGroupValuesMap() {
     this.stimFileClusters_.forEach(cluster => {
       if (cluster.stims[0].tags && cluster.stims[0].tags.orderGroup) {
-        let orderGroupValueKey = cluster.tags.orderGroup[0].toString();
+        let orderGroupValueKey = cluster.stims[0].tags.orderGroup[0].toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;

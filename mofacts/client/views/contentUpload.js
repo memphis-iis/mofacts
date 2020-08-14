@@ -67,13 +67,21 @@ Template.contentUpload.events({
     },
 
     'change #upload-tdf': function(event) {
-        var input = $(event.currentTarget);
-        $("#tdf-file-info").html(input.val());
+        let curFiles = Array.from($("#upload-tdf").prop("files"));
+        let outputLabel = curFiles[0].name;
+        if(curFiles.length > 1){
+            outputLabel += " + " + (curFiles.length-1) + " more...";
+        }
+        $("#tdf-file-info").html(outputLabel);
     },
 
     'change #upload-stim': function(event) {
-        var input = $(event.currentTarget);
-        $("#stim-file-info").html(input.val());
+        let curFiles = Array.from($("#upload-stim").prop("files"));
+        let outputLabel = curFiles[0].name;
+        if(curFiles.length > 1){
+            outputLabel += " + " + (curFiles.length-1) + " more...";
+        }
+        $("#stim-file-info").html(outputLabel);
     }
 });
 

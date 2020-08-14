@@ -3,30 +3,30 @@
 <template name="contentUpload">
     <div>
         <div class="col-md-3">
-            <legend class="text-center">Upload TDF File</legend>
+            <legend class="text-center">Upload Stimulus File(s)</legend>
             <div class="form-group">
                 <span class="btn btn-default btn-file">
                     Browse
-                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File">
-                    <span class='label label-info file-info' id="tdf-file-info"></span>
-                </span>
-            </div>
-            <button type='button' id='doUploadTDF' class='btn btn-fix'>
-                Upload TDF File
-            </button>
-        </div>
-
-        <div class="col-md-3">
-            <legend class="text-center">Upload Stimulus File</legend>
-            <div class="form-group">
-                <span class="btn btn-default btn-file">
-                    Browse
-                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File">
+                    <input type="file" class="form-control" name="upload-stim" id="upload-stim" value="" placeholder="Stimulus File" multiple>
                     <span class='label label-info file-info' id="stim-file-info"></span>
                 </span>
             </div>
             <button type='button' id='doUploadStim' class='btn btn-fix'>
-                Upload Stimulus File
+                Upload Stimulus File(s)
+            </button>
+        </div>
+
+        <div class="col-md-3">
+            <legend class="text-center">Upload TDF File(s)</legend>
+            <div class="form-group">
+                <span class="btn btn-default btn-file">
+                    Browse
+                    <input type="file" class="form-control" name="upload-tdf" id="upload-tdf" value="" placeholder="TDF File" multiple>
+                    <span class='label label-info file-info' id="tdf-file-info"></span>
+                </span>
+            </div>
+            <button type='button' id='doUploadTDF' class='btn btn-fix'>
+                Upload TDF File(s)
             </button>
         </div>
 
