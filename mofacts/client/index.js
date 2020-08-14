@@ -134,6 +134,7 @@ Template.body.events({
       Session.set("studentUsername",null);
       Session.set("curClass",undefined);
       Session.set("instructorSelectedTdf",undefined);
+      Session.set("curClassStudentTotals",undefined);
       Router.go("/studentReporting");
   },
 

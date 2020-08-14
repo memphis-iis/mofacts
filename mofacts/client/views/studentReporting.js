@@ -377,6 +377,14 @@ Template.studentReporting.helpers({
     return Session.get("studentReportingTdfs");
   },
 
+  curClassStudentTotals: function(){
+    return Session.get("curClassStudentTotals");
+  },
+
+  curClass: function(){
+    return Session.get("curClass");
+  },
+
   curStudentPerformance: function(){
     return Session.get("curStudentPerformance");
   },

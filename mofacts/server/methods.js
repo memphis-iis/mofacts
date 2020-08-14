@@ -681,7 +681,9 @@ Meteor.startup(function () {
           studentTotals = {
             numCorrect: 0,
             count: 0,
-            totalTime: 0
+            totalTime: 0,
+            percentCorrectsSum: 0,
+            numStudentsWithData: 0
           }
           let students = [];
           if(!!curClass){
@@ -727,7 +729,10 @@ Meteor.startup(function () {
               });
               var percentCorrect = "N/A";
               if(count != 0){
-                percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
+                percentCorrect = ((numCorrect / count)*100);
+                studentTotals.percentCorrectsSum  += percentCorrect;
+                studentTotals.numStudentsWithData += 1;
+                percentCorrect = percentCorrect.toFixed(2) + "%";
               }
               totalTime = totalTime.toFixed(1);
               var studentPerformance = {
@@ -745,6 +750,11 @@ Meteor.startup(function () {
           }
           studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
           studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
+
+          studentTotals.averageCount = studentTotals.count / studentTotals.numStudentsWithData;
+          studentTotals.averageTotalTime = (studentTotals.totalTime / studentTotals.numStudentsWithData).toFixed(1);
+          studentTotals.averagePercentCorrect = (studentTotals.percentCorrectsSum / studentTotals.numStudentsWithData).toFixed(4) + "%";
+
           return [students,studentTotals];
         },
 
