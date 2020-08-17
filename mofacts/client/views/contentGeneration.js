@@ -75,23 +75,30 @@ getTdfOwnersMap = function(ownerIds) {
 
 setClozesFromStimObject = function(stimObject,isMultiTdf){
   console.log("setClozesFromStimObject");
+  const LOWER_BOUND_RANDOM = -9999999999;
+  const UPPER_BOUND_RANDOM = 9999999999;
   var allClozes = [];
   var allClusters = stimObject.stimuli.setspec.clusters;
   for(var index in allClusters){
     if(isMultiTdf){
       if(index < allClusters.length -1){
-        var cluster = allClusters[index];
-        var fakeSentenceId = _.random(-9999999999,9999999999);
-        for(var stim of cluster.stims){
-          var clozeDisplay = stim.display;
-          var correctResponse = stim.response;
-          var clozeId = _.random(-9999999999,9999999999);
+        let cluster = allClusters[index];
+        let sentenceId;
+        if(cluster.stims && cluster.stims[0] && cluster.stims[0].tags && cluster.stims[0].tags.itemId){
+          sentenceId = cluster.stims[0].tags.itemId;
+        }else{
+          sentenceId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
+        }
+        for(let stim of cluster.stims){
+          let cloze = stim.display.clozeText;
+          let correctResponse = stim.response.correctResponse;
+          let clozeId = stim.tags && stim.tags.clozeId ? stim.tags.clozeId : _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
           allClozes.push({
             unitIndex:2,
-            cloze:clozeDisplay,
+            cloze:cloze,
             correctResponse:correctResponse,
             clozeId:clozeId,
-            itemId:fakeSentenceId,
+            itemId:sentenceId,
             origStimIndex: index
           })
           if(!origClusterIndexToClozeIDsMap[index]){
@@ -115,29 +122,35 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
   
       if (inLearningSession) {
         var cluster = allClusters[index];
-        var fakeSentenceId = _.random(-9999999999,9999999999);
+        let sentenceId;
+        if(cluster.stims && cluster.stims[0] && cluster.stims[0].tags && cluster.stims[0].tags.itemId){
+          sentenceId = cluster.stims[0].tags.itemId;
+        }else{
+          sentenceId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
+        }
         for(var stim of cluster.stims){
-          var clozeDisplay = stim.display;
-          var correctResponse = stim.response;
-          var clozeId = _.random(-9999999999,9999999999);
+          let cloze = stim.display.clozeText;
+          let correctResponse = stim.response.correctResponse;
+          let clozeId = stim.tags && stim.tags.clozeId ? stim.tags.clozeId : _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
           allClozes.push({
             unitIndex:clusterUnitIndex,
-            cloze:clozeDisplay,
+            cloze:cloze,
             correctResponse:correctResponse,
             clozeId:clozeId,
-            itemId:fakeSentenceId,
+            itemId:sentenceId,
             origStimIndex: index
           })
         }
       }
     }
   }
+  let sourceSentences = stimObject.sourceSentences || [];
   Session.set("clozeSentencePairs", {
-    "sentences":[],
+    "sentences":sourceSentences,
     "clozes":allClozes
   });
   originalClozes = JSON.parse(JSON.stringify(allClozes));
-  fillOutItemLookupMaps([],allClozes);
+  fillOutItemLookupMaps(sourceSentences,allClozes);
 }
 
 fillOutItemLookupMaps = function(sentences,clozes){
@@ -278,6 +291,11 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
     curStim.source = "content_generation";
   }
 
+  let sourceSentences = Session.get("clozeSentencePairs").sentences;
+  if(sourceSentences && sourceSentences.length > 0){
+    curStim.sourceSentences = sourceSentences;
+  }
+
   curStim.fileName = stimFileName;
   curStim.owner = Meteor.userId();
   return curStim;
@@ -403,7 +421,7 @@ function deleteCloze(clozeID,itemID){
 
   var prevClozeSentencePairs = Session.get("clozeSentencePairs");
 
-  var oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId']);
+  var oldCloze = clozeIDToClozeMap[clozeID];
   
   recordClozeEditHistory(oldCloze,{});
   deletedClozeIds.push(oldCloze.clozeId);
@@ -510,7 +528,7 @@ Template.contentGeneration.events({
       alert("Please enter a correct response");
     }else{
       let unitIndex = clozeIDToClozeMap[clozeID].unitIndex;
-      let oldCloze = _.pick(clozeIDToClozeMap[clozeID],['cloze','correctResponse','itemId','clozeId','origStimIndex']);
+      let oldCloze = clozeIDToClozeMap[clozeID];
       let newCloze = {cloze:newClozeText,correctResponse:response,itemId:sentenceID,clozeId:clozeID,origStimIndex:oldCloze.origStimIndex};
       recordClozeEditHistory(oldCloze,newCloze);
       newCloze = Object.assign({unitIndex:unitIndex},newCloze);
