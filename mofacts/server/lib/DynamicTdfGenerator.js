@@ -74,6 +74,7 @@ export class DynamicTdfGenerator {
     let end = -1;
     let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
     let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
+
     this.stimFileClusters_.forEach((cluster, idx) => {
       let allClusterTags = [];
       for(let stim of cluster.stims){
@@ -82,6 +83,7 @@ export class DynamicTdfGenerator {
         }
       }
       let isIncludedInStimCluster = this.isIncludedCluster(allClusterTags, weightStart, weightEnd, orderGroup);
+      
       if (start === -1 && isIncludedInStimCluster) {
         start = idx;
       } else if (start > -1 && isIncludedInStimCluster) {
@@ -106,20 +108,22 @@ export class DynamicTdfGenerator {
   /**
    * Determine if a cluster is eligible for selection based on weight
    * or order group criteria
-   * @param {object} tags 
+   * @param {object} stimTagsList 
    * @param {number} weightStart 
    * @param {number} weightEnd 
    * @param {number} orderGroup
    * @returns {boolean} isIncludedStimCluster
    */
-  isIncludedCluster(tags, weightStart, weightEnd, orderGroup) {
+  isIncludedCluster(stimTagsList, weightStart, weightEnd, orderGroup) {
     let isIncludedStimCluster = false;
-    if (tags && tags.length) {
-      tags.forEach(tag => {
-        let tagOrderGroup = this.isValidOrderGroup((tag.orderGroup[0]||tag.orderGroup)) 
-          ? parseInt((tag.orderGroup[0]||tag.orderGroup)) : -1;
-        let tagWeightGroup = !_.isEmpty(tag.weightGroup[0]) 
-          ? parseInt((tag.weightGroup[0]||tag.weightGroup)) : -1;
+    if (stimTagsList && stimTagsList.length) {
+      stimTagsList.forEach(stimTags => {
+        let tagOrderGroupProperty = stimTags.orderGroup[0]||stimTags.orderGroup;
+        let tagOrderGroup = this.isValidOrderGroup(tagOrderGroupProperty) 
+          ? parseInt(tagOrderGroupProperty) : -1;
+        let tagWeightGroupProperty = stimTags.weightGroup[0]||stimTags.weightGroup;
+        let tagWeightGroup = tagWeightGroupProperty || tagWeightGroupProperty == 0
+          ? parseInt(tagWeightGroupProperty) : -1;
         if (tagOrderGroup > -1) {
           if (tagOrderGroup === orderGroup) {
             isIncludedStimCluster = true;
@@ -143,7 +147,7 @@ export class DynamicTdfGenerator {
    * @param {boolean}
    */
   isValidOrderGroup(orderGroupTag) {
-    if (_.isEmpty(orderGroupTag)) return false;
+    if (!orderGroupTag && orderGroupTag != 0) return false;
 
     let orderGroup = parseInt(orderGroupTag);
     if (this.orderGroupValuesMap_[orderGroup] 
@@ -161,7 +165,7 @@ export class DynamicTdfGenerator {
   setOrderGroupValuesMap() {
     this.stimFileClusters_.forEach(cluster => {
       if (cluster.stims[0].tags && cluster.stims[0].tags.orderGroup) {
-        let orderGroupValueKey = cluster.stims[0].tags.orderGroup[0].toString();
+        let orderGroupValueKey = (cluster.stims[0].tags.orderGroup[0] || cluster.stims[0].tags.orderGroup).toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;

@@ -441,7 +441,7 @@ Meteor.startup(function () {
         _.each(
           _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
           function (ele, idx, lst) {
-              serverConsole("Updating Stim in DB from ", ele);
+              //serverConsole("Updating Stim in DB from ", ele);
               var json = getStimJSON('stims/' + ele);
               var rec = createStimRecord(ele, json, adminUserId, 'repo');
 
@@ -458,7 +458,7 @@ Meteor.startup(function () {
       _.each(
           _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
           function (ele, idx, lst) {
-              serverConsole("Updating TDF in DB from ", ele);
+              //serverConsole("Updating TDF in DB from ", ele);
               var json = getTdfJSON('tdf/' + ele);
 
               var rec = createTdfRecord(ele, json, adminUserId, 'repo');
