@@ -75,7 +75,7 @@ getTdfOwnersMap = function(ownerIds) {
   });
 }
 
-getStimsFromCluster = function(cluster,clusterUnitIndex,index){
+getStimsFromCluster = function(cluster,clusterUnitIndex,index,originalOrderIndex){
   const LOWER_BOUND_RANDOM = -9999999999;
   const UPPER_BOUND_RANDOM = 9999999999;
   let stimsForCluster = [];
@@ -103,8 +103,10 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index){
       isParaphrase: false,
       paraphraseId: paraphraseId,
       tags:stim.tags,
-      sourceSentence:sourceSentence
+      sourceSentence:sourceSentence,
+      originalOrderIndex:originalOrderIndex
     });
+    originalOrderIndex += 1;
     if(stim.alternateDisplays){
       for(let altDisplay of stim.alternateDisplays){
         paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
@@ -119,8 +121,10 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index){
           isParaphrase: true,
           paraphraseId: paraphraseId,
           tags:stim.tags,
-          sourceSentence:sourceSentence
+          sourceSentence:sourceSentence,
+          originalOrderIndex:originalOrderIndex
         });
+        originalOrderIndex += 1;
       }
     }
   }
@@ -150,6 +154,7 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
   let allClozes = [];
   let sourceSentences = stimObject.sourceSentences || [];
   fillOutSentenceLookupMap(sourceSentences);
+  let originalOrderIndex = 0;
 
   let allClusters = stimObject.stimuli.setspec.clusters;
   for(let index in allClusters){
@@ -160,13 +165,15 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
     }
 
     if(isMultiTdf){
-      let curClusterClozes = getStimsFromCluster(cluster,MULTITDF_MAIN_CLUSTER_UNIT,index);
+      let curClusterClozes = getStimsFromCluster(cluster,MULTITDF_MAIN_CLUSTER_UNIT,index,originalOrderIndex);
+      originalOrderIndex += curClusterClozes.length;
       allClozes = allClozes.concat(curClusterClozes);
     }else{
       let {inLearningSession, clusterUnitIndex} = findClusterUnitData(index);
   
       if (inLearningSession) {        
-        let curClusterClozes = getStimsFromCluster(cluster,clusterUnitIndex,index);
+        let curClusterClozes = getStimsFromCluster(cluster,clusterUnitIndex,index,originalOrderIndex);
+        originalOrderIndex += curClusterClozes.length;
         allClozes = allClozes.concat(curClusterClozes);
       }
     }
@@ -269,6 +276,33 @@ generateAndSubmitTDFAndStimFiles = function(){
   console.log("newTDFJSON: " + JSON.stringify(newTDFJSON));
 }
 
+getStimForCloze = function(clozeID,cloze){
+  let stim = {display:{"clozeText":""},response:{},parameter:STIM_PARAMETER,tags:[]};
+  let curStimClozes = clozeIDToClozesMap[clozeID];
+  stim.response = curStimClozes[0].correctResponse;
+  stim.tags = curStimClozes[0].tags;
+  if(curStimClozes.length > 1){ //this means there are paraphrases as they share the same cloze id
+    stim.alternateDisplays = [];
+    for(let cloze2 of curStimClozes){
+      if(cloze2.isParaphrase){
+        stim.alternateDisplays.push({"clozeText":cloze2.cloze});
+      }else{
+        stim.display.clozeText = cloze2.cloze;
+      }
+    }
+    if(!stim.display.clozeText){
+      stim.display.clozeText = stim.alternateDisplays.pop();
+      if(stim.alternateDisplays.length == 0){
+        delete stim.alternateDisplays;
+      }
+    }
+  }else{
+    stim.display.clozeText = cloze.cloze;
+  }
+
+  return stim;
+}
+
 generateStimJSON = function(clozes,stimFileName,isMultiTdf){
   origStim = tdfFileNameToStimfileMap[origTdfFileName];
   curStim = JSON.parse(JSON.stringify(templateStimJSON));
@@ -277,7 +311,6 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
   for(var index in clozes){
     let sentenceID = clozes[index].itemId;
     if(!completedSentenceIDs[sentenceID]){
-      let completedClozeIDs = {};
       let curClusterIndex = curStim.stimuli.setspec.clusters.length;
       if(!isMultiTdf){
         let unitIndex = clozes[index].unitIndex;
@@ -289,32 +322,11 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
 
       let cluster = {stims:[]};
       let curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
+      let completedClozeIDs = {};
       for(let cloze of curSentenceClozes){
         let clozeID = cloze.clozeId;
         if(!completedClozeIDs[clozeID]){
-          let stim = {display:{"clozeText":""},response:{},parameter:STIM_PARAMETER,tags:[]};
-          let curStimClozes = clozeIDToClozesMap[clozeID];
-          stim.response = curStimClozes[0].correctResponse;
-          stim.tags = curStimClozes[0].tags;
-          if(curStimClozes.length > 1){ //this means there are paraphrases as they share the same cloze id
-            stim.alternateDisplays = [];
-            for(let cloze2 of curStimClozes){
-              if(cloze2.isParaphrase){
-                stim.alternateDisplays.push({"clozeText":cloze.cloze});
-              }else{
-                stim.display.clozeText = cloze.cloze;
-              }
-            }
-            if(!stim.display.clozeText){
-              stim.display.clozeText = stim.alternateDisplays.pop();
-              if(stim.alternateDisplays.length == 0){
-                delete stim.alternateDisplays;
-              }
-            }
-          }else{
-            stim.display.clozeText = cloze.cloze;
-          }
-          
+          let stim = getStimForCloze(clozeID,cloze);
           cluster.stims.push(stim);
           completedClozeIDs[clozeID] = true;
         }
@@ -435,6 +447,38 @@ function deleteCloze(clozeID,itemID,paraphraseId){
   });
 }
 
+sortClozes = function(sortingMethod){
+  console.log("sorting clozes by: " + sortingMethod);
+  let clozeSentencePairs = JSON.parse(JSON.stringify(Session.get("clozeSentencePairs")));
+  let clozes = clozeSentencePairs.clozes;
+
+  switch(sortingMethod){
+    case "originalOrderIndex":
+      clozes = clozes.sort((a,b) => a.originalOrderIndex > b.originalOrderIndex);
+      break;
+    case "sentenceWeight":
+      clozes = clozes.sort((a,b) => a.tags.sentenceWeight > b.tags.sentenceWeight);
+      break;
+    case "coreference":
+      clozes = clozes.sort(function(a,b){
+        if(a.tags.clozeCorefTransformation) return -1;
+        if(b.tags.clozeCorefTransformation) return 1;
+        return -1;
+      });
+      break;
+    case "paraphrase":
+      clozes = clozes.sort(function(a,b){
+        if(a.isParaphrase) return -1;
+        if(b.isParaphrase) return 1;
+        return -1;
+      });
+      break;
+  }
+
+  clozeSentencePairs.clozes = clozes;
+  Session.set("clozeSentencePairs",clozeSentencePairs);
+}
+
 Template.contentGeneration.onRendered(function(){
   Session.set("curClozeSentencePairItemId", "");
   Session.set("clozeSentencePairs", {});
@@ -478,6 +522,11 @@ Template.contentGeneration.events({
     if(!!parsedSentencesMatchingSentence){
       parsedSentencesMatchingSentence.scrollIntoView();
     }
+  },
+
+  'click .sortingBtn': function(event){
+    let sortProperty = event.currentTarget.getAttribute('sortProperty');
+    sortClozes(sortProperty);
   },
 
   'click .sentence-with-cloze': function(event){

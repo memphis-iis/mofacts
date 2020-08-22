@@ -127,6 +127,16 @@
     </div>
 
     <div class="row">
+      <div class="col-md-12">
+        <h3>Reorder clozes</h3>
+        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="originalOrderIndex">Sort by original order</button></div>
+        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="sentenceWeight">Sort by sentence importance</button></div>
+        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="coreference">Sort by coreference</button></div>
+        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="paraphrase"> Sort by paraphrase</button></div>
+      </div>
+    </div>
+
+    <div class="row">
       <div class="col-md-12" id="clozes-div">
         {{#if clozesSelected}}
           <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
