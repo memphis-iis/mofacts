@@ -127,23 +127,7 @@
     </div>
 
     <div class="row">
-      <div class="col-md-5" id="sentences-div">
-        <h3>Sentences</h3>
-        <div id="parsed-sentences">
-          {{#each sentences}}
-            {{#if this.hasCloze}}
-              {{#if isCurrentPair this.itemId}}
-                <span id="sentence" class="cur-sentence sentence-with-cloze" uid="{{this.itemId}}">{{this.sentence}}</span>
-              {{else}}
-                <span id="sentence" class="sentence-with-cloze" uid="{{this.itemId}}">{{this.sentence}}</span>
-              {{/if}}
-            {{else}}
-            <span id="sentence" uid="{{this.itemId}}" class="sentence-no-cloze">{{this.sentence}}</span>
-            {{/if}}
-          {{/each}}
-        </div>
-      </div>
-      <div class="col-md-7" id="clozes-div">
+      <div class="col-md-12" id="clozes-div">
         {{#if clozesSelected}}
           <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
         {{/if}}
@@ -158,6 +142,7 @@
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
                 <span class="cur-sentence">{{this.cloze}}</span>
                 <span class="cloze-answers"> {{this.correctResponse}}</span>
+                Original Text: <span class="source-sentence"> {{this.sourceSentence}} </span>
                 <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
                 <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
               </div>
@@ -165,6 +150,7 @@
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
                 <span>{{this.cloze}}</span>
                 <span class="cloze-answers"> {{this.correctResponse}}</span>
+                Original Text: <span class="source-sentence"> {{this.sourceSentence}} </span>
                 <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
                 <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
               </div>

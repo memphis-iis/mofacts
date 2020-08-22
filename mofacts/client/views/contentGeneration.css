@@ -25,6 +25,10 @@ textarea {
   color: red;
 }
 
+.source-sentence {
+  font-style: italic;
+}
+
 #clozeTextEdit{
   height:100%;
   width:100%;

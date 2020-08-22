@@ -80,8 +80,10 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index){
   const UPPER_BOUND_RANDOM = 9999999999;
   let stimsForCluster = [];
   let sentenceId;
+  let sourceSentence;
   if(cluster.stims && cluster.stims[0] && cluster.stims[0].tags && cluster.stims[0].tags.itemId){
     sentenceId = cluster.stims[0].tags.itemId;
+    sourceSentence = sentenceIDtoSentenceMap[sentenceId].sentence;
   }else{
     sentenceId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
   }
@@ -100,7 +102,8 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index){
       origStimIndex: index,
       isParaphrase: false,
       paraphraseId: paraphraseId,
-      tags:stim.tags
+      tags:stim.tags,
+      sourceSentence:sourceSentence
     });
     if(stim.alternateDisplays){
       for(let altDisplay of stim.alternateDisplays){
@@ -115,7 +118,8 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index){
           origStimIndex: index,
           isParaphrase: true,
           paraphraseId: paraphraseId,
-          tags:stim.tags
+          tags:stim.tags,
+          sourceSentence:sourceSentence
         });
       }
     }
@@ -144,6 +148,9 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
   console.log("setClozesFromStimObject");
   const MULTITDF_MAIN_CLUSTER_UNIT = 2;
   let allClozes = [];
+  let sourceSentences = stimObject.sourceSentences || [];
+  fillOutSentenceLookupMap(sourceSentences);
+
   let allClusters = stimObject.stimuli.setspec.clusters;
   for(let index in allClusters){
     let cluster = allClusters[index];
@@ -164,26 +171,27 @@ setClozesFromStimObject = function(stimObject,isMultiTdf){
       }
     }
   }
-  
-  let sourceSentences = stimObject.sourceSentences || [];
+
   Session.set("clozeSentencePairs", {
     "sentences":sourceSentences,
     "clozes":allClozes
   });
   originalClozes = JSON.parse(JSON.stringify(allClozes));
-  fillOutItemLookupMaps(sourceSentences,allClozes);
+  fillOutItemLookupMaps(allClozes);
 }
 
-fillOutItemLookupMaps = function(sentences,clozes){
+fillOutSentenceLookupMap = function(sentences){
   sentenceIDtoSentenceMap = {};
-  clozeIDToClozesMap = {};
-  sentenceIDtoClozesMap = {};
-
   for(var sentenceIndex in sentences){
     var sentence = sentences[sentenceIndex];
     var sentenceID = parseInt(sentence.itemId);
     sentenceIDtoSentenceMap[sentenceID] = sentence;
   }
+}
+
+fillOutItemLookupMaps = function(clozes){
+  clozeIDToClozesMap = {};
+  sentenceIDtoClozesMap = {};
 
   _.map(clozes,function(cloze){
       if(!clozeIDToClozesMap[cloze.clozeId]){
@@ -284,7 +292,7 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
       for(let cloze of curSentenceClozes){
         let clozeID = cloze.clozeId;
         if(!completedClozeIDs[clozeID]){
-          let stim = {display:{"clozeText":""},response:{},parameter:STIM_PARAMETER};
+          let stim = {display:{"clozeText":""},response:{},parameter:STIM_PARAMETER,tags:[]};
           let curStimClozes = clozeIDToClozesMap[clozeID];
           stim.response = curStimClozes[0].correctResponse;
           stim.tags = curStimClozes[0].tags;
