@@ -279,7 +279,7 @@ generateAndSubmitTDFAndStimFiles = function(){
 getStimForCloze = function(clozeID,cloze){
   let stim = {display:{"clozeText":""},response:{},parameter:STIM_PARAMETER,tags:[]};
   let curStimClozes = clozeIDToClozesMap[clozeID];
-  stim.response = curStimClozes[0].correctResponse;
+  stim.response = {"correctResponse":curStimClozes[0].correctResponse};
   stim.tags = curStimClozes[0].tags;
   if(curStimClozes.length > 1){ //this means there are paraphrases as they share the same cloze id
     stim.alternateDisplays = [];
