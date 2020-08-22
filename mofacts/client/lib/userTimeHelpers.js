@@ -78,6 +78,7 @@ recordUserTimeQuestion = function(extendedData) {
         selectedQuestionPart2:      Session.get("currentQuestionPart2"),
         selectedAnswer:             Session.get("currentAnswer"),
         originalAnswer:             Session.get("originalAnswer"),
+        alternateDisplayIndex:      Session.get("alternateDisplayIndex"),
         currentAnswerSyllables:     Session.set("currentAnswerSyllables"),
         clozeQuestionParts:         Session.get("clozeQuestionParts"),
         showOverlearningText:       Session.get("showOverlearningText"),
