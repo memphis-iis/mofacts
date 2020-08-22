@@ -1,4 +1,4 @@
-import { DynamicTdfGenerator } from "../server/lib/DynamicTdfGenerator";
+import { DynamicTdfGenerator } from "../common/DynamicTdfGenerator";
 import { curSemester, ALL_TDFS } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
@@ -473,13 +473,13 @@ Meteor.startup(function () {
                 let generatedTdf = tdfGenerator.getGeneratedTdf();
                 if (prev) {
                   try {
+                    delete generatedTdf.createdAt;
                     Tdfs.update({_id: prev._id}, generatedTdf);
                   } catch (error) {
                     throw new Error('Error updating generated TDF: ', error);
                   }
                 } else {
                   try {
-                    generatedTdf.createdAt = new Date();
                     Tdfs.insert(generatedTdf);
                   } catch (error) {
                     throw new Error('Error inserting generated TDF: ', error)
@@ -783,7 +783,6 @@ Meteor.startup(function () {
 
         insertStimTDFPair:function(newStimJSON,newTDFJSON){
           Stimuli.insert(newStimJSON);
-          newTDFJSON.createdAt = new Date();
           Tdfs.insert(newTDFJSON);
         },
 

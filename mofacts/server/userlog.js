@@ -141,6 +141,7 @@ userLogGetTdfId = function(userid, experiment) {
 };
 
 //Return the current score for the current user on the specified experiment
+//TODO: remove?  Seems to not be used anywhere
 userLogCurrentScore = function(experiment) {
     var i, rec, action;
 

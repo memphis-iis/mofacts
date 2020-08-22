@@ -1,5 +1,5 @@
 export class DynamicTdfGenerator {
-  constructor(parentTdfJson, fileName, ownerId, source) {
+  constructor(parentTdfJson, fileName, ownerId, source, stimJson) {
     /** @private {object} */
     this.parentTdfJson_ = parentTdfJson;
 
@@ -28,7 +28,7 @@ export class DynamicTdfGenerator {
     this.source_ = source;
 
     /** @private @const {array} */
-    this.stimFileClusters_ = this.getStimFileClusters(this.parentStimFileName_);
+    this.stimFileClusters_ = this.getStimFileClusters(this.parentStimFileName_, stimJson);
 
     /** @private {object} **/
     this.orderGroupValuesMap_ = {};
@@ -60,6 +60,7 @@ export class DynamicTdfGenerator {
         })
       }
     });
+    this.generatedTdf_.createdAt = new Date();
     return this.generatedTdf_;
   }
 
@@ -181,13 +182,15 @@ export class DynamicTdfGenerator {
    * @param {string} stimFileName
    * @returns {object} clusters 
    */
-  getStimFileClusters(stimFileName) {
+  getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
     try {
-      clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
+      clusters = stimJson ? stimJson.stimuli.setspec.clusters : Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
+      // clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
+      // console.log(clusters);
     } catch (error) {
-      throw new Error('Unable to find clusters with stim file: ' 
-        + stimFileName + ' ' + error);
+     throw new Error('Unable to find clusters with stim file: ' 
+       + stimFileName + ' ' + error);
     }
     return clusters;
   }

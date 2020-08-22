@@ -214,17 +214,6 @@ getStimAnswer = function (index, whichAnswer) {
     return getStimCluster(index).stims[whichAnswer].response.correctResponse;
 };
 
-//get the parameter at this index - this works using the same semantics as
-//getStimAnswer above. Note that we default to return 0
-getStimParameter = function (index, whichParameter) {
-    return _.chain(getStimCluster(index))
-        .prop("stims")
-        .prop(_.intval(whichParameter))
-        .prop("parameter")
-        .floatval()
-        .value();
-};
-
 //Return the list of false responses corresponding to the current question/answer
 getCurrentFalseResponses = function() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();

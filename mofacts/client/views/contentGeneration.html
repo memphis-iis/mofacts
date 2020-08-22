@@ -153,20 +153,20 @@
         <div id="extracted-clozes">
           {{#each clozes}}
             <div id="cloze-display">
-            <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" />
+            <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
             {{#if isCurrentPair this.itemId}}
-              <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
+              <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
                 <span class="cur-sentence">{{this.cloze}}</span>
                 <span class="cloze-answers"> {{this.correctResponse}}</span>
-                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/trash.svg" />
-                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/edit.svg" />
+                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
               </div>
             {{else}}
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
                 <span>{{this.cloze}}</span>
                 <span class="cloze-answers"> {{this.correctResponse}}</span>
-                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/trash.svg" />
-                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" src="images/edit.svg" />
+                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
               </div>
             {{/if}}
             </div>
