@@ -1211,8 +1211,7 @@ function scheduleUnitEngine() {
 
             console.log("SCHEDULE UNIT card selection => ",
                 "cluster-idx-unmapped:", curClusterIndex,
-                "whichStim:", curStimIndex,
-                "parameter", getStimParameter(curClusterIndex,curStimIndex)
+                "whichStim:", curStimIndex
             );
 
             return curClusterIndex;
