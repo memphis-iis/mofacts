@@ -360,6 +360,7 @@
             "CF (Display Order)": d(lastq.questionIndex, -1),
             "CF (Stim File Index)": d(lastq.clusterIndex, -1),
             "CF (Set Shuffled Index)": d(lastq.shufIndex, d(lastq.clusterIndex, -1)), //why?
+            "CF (Alternate Display Index)": lastq.alternateDisplayIndex,
             "CF (Stimulus Version)": whichStim,
             "CF (Correct Answer)": correctAnswer,
             "CF (Correct Answer Syllables)": currentAnswerSyllablesArray, 

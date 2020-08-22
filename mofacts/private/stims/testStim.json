@@ -15,6 +15,23 @@
                             "display": {
                                 "clozeText": "The myofibrils are essentially __________ joined end to end."
                             },
+                            "alternateDisplays": [
+                                {
+                                    "clozeText": "Alt 0"
+                                },{
+                                    "clozeText": "Alt 1"
+                                },{
+                                    "clozeText": "Alt 2"
+                                },{
+                                    "clozeText": "Alt 3"
+                                },{
+                                    "clozeText": "Alt 4"
+                                },{
+                                    "clozeText": "Alt 5"
+                                },{
+                                    "clozeText": "Alt 6"
+                                }
+                            ],
                             "parameter": "-0.479299999999998"
                         },
                         {

@@ -236,8 +236,17 @@ function defaultUnitEngine(extensionData) {
         },
 
         setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
+            Session.set("alternateDisplayIndex",undefined);
             let curStim = getStimCluster(cardIndex).stims[whichStim];
             let currentDisplay = JSON.parse(JSON.stringify(curStim.display));
+            if(curStim.alternateDisplays){
+                let numPotentialDisplays = curStim.alternateDisplays.length + 1;
+                let displayIndex = Math.floor(numPotentialDisplays * Math.random());
+                if(displayIndex < curStim.alternateDisplays.length){
+                    Session.set("alternateDisplayIndex",displayIndex);
+                    currentDisplay = JSON.parse(JSON.stringify(curStim.alternateDisplays[displayIndex]));
+                }
+            }
             Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
     
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
