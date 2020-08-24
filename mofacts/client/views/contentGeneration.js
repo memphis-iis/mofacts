@@ -93,7 +93,6 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index,originalOrderIndex
     let correctResponse = stim.response.correctResponse;
     let clozeId = stim.tags && stim.tags.clozeId ? stim.tags.clozeId : _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
-    console.log("stim: ",stim);
     let isCoreference = !!(stim.tags.clozeCorefTransformation);
     stimsForCluster.push({
       unitIndex:clusterUnitIndex,
@@ -425,32 +424,45 @@ generateTDFJSON = function(tdfFileName,displayName,stimFileName,newStimJSON){
   return curTdf;
 }
 
-function deleteCloze(clozeID,itemID,paraphraseId){
-  sentenceIDtoClozesMap[itemID] = sentenceIDtoClozesMap[itemID].filter((clozeItem) => clozeItem.paraphraseId != paraphraseId);
-
-  let oldCloze = clozeIDToClozesMap[clozeID].find((elem) => elem.paraphraseId == paraphraseId);
-
-  clozeIDToClozesMap[clozeID] = clozeIDToClozesMap[clozeID].filter((clozeItem) => clozeItem.paraphraseId != paraphraseId);
-  
-  recordClozeEditHistory(oldCloze,{});
-  deletedClozeIds.push(oldCloze.clozeId);
+function updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,newCloze){
+  console.log("updateLookupMaps: ",oldCloze,newCloze);
+  recordClozeEditHistory(oldCloze,newCloze);
+  clozeIDToClozesMap[clozeID] = clozeIDToClozesMap[clozeID].filter((clozeItem) => clozeItem.clozeId == clozeID && clozeItem.paraphraseId != paraphraseId);
+  sentenceIDtoClozesMap[itemID] = sentenceIDtoClozesMap[itemID].filter((clozeItem) => clozeItem.clozeId == clozeID && clozeItem.paraphraseId != paraphraseId);
 
   let prevClozeSentencePairs = Session.get("clozeSentencePairs");
-  var newClozes = _.filter(prevClozeSentencePairs.clozes, function(c) {return c.paraphraseId != paraphraseId});
-  var newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
-    if(s.itemId === itemID) {
-      var matchingClozes = _.filter(newClozes, function(c) {
-        return c.itemId === s.itemId;
-      });
-      if(matchingClozes.length == 0) s.hasCloze = false;
-    }
-    
-    return s;
-  });
+  let newSentences = prevClozeSentencePairs.sentences;
+  let newClozes = prevClozeSentencePairs.clozes;
+  let curClozeIndex = prevClozeSentencePairs.clozes.findIndex(function(c) {return c.clozeId == clozeID && c.paraphraseId == paraphraseId});
+
+  if(newCloze && Object.keys(newCloze).length > 0){
+    clozeIDToClozesMap[clozeID].push(newCloze);
+    sentenceIDtoClozesMap[itemID].push(newCloze);
+    newClozes.splice(curClozeIndex,1,newCloze);
+  }else{ //We've delete a cloze so we should make sure to check if a sentence no longer has a cloze
+    newClozes.splice(curClozeIndex,1);
+    newSentences = _.map(prevClozeSentencePairs.sentences, function(s) {
+      if(s.itemId === itemID) {
+        var matchingClozes = _.filter(newClozes, function(c) {
+          return c.itemId === s.itemId;
+        });
+        if(matchingClozes.length == 0) s.hasCloze = false;
+      }
+      
+      return s;
+    });
+  }
+
   Session.set('clozeSentencePairs', {
     'sentences':newSentences,
     'clozes':newClozes
   });
+}
+
+function deleteCloze(clozeID,itemID,paraphraseId){
+  let oldCloze = clozeIDToClozesMap[clozeID].find((elem) => elem.paraphraseId == paraphraseId);
+  deletedClozeIds.push(oldCloze.clozeId);
+  updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,{});
 }
 
 sortClozes = function(sortingMethod){
@@ -531,6 +543,38 @@ Template.contentGeneration.onRendered(function(){
 });
 
 Template.contentGeneration.events({
+  'click #revertCoreference': function(event){
+    let cloze_uid = parseInt(event.currentTarget.getAttribute('cloze-uid'));
+    let curItemId = parseInt(event.currentTarget.getAttribute('uid'));
+    let curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
+    let clozeSentencePairs =Session.get("clozeSentencePairs");
+
+    let oldCloze = clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == curParaphraseId);
+    let newCloze = JSON.parse(JSON.stringify(oldCloze));
+
+    let originalText = JSON.parse(JSON.stringify(newCloze.tags.originalItem));
+    delete newCloze.tags.originalItem;
+    newCloze.cloze = originalText;
+
+    updateLookupMaps(cloze_uid,curItemId,curParaphraseId,oldCloze,newCloze);
+  },
+
+  'click #redoCoreference': function(event){
+    let cloze_uid = parseInt(event.currentTarget.getAttribute('cloze-uid'));
+    let curItemId = parseInt(event.currentTarget.getAttribute('uid'));
+    let curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
+    let clozeSentencePairs = Session.get("clozeSentencePairs");
+
+    let oldCloze = JSON.parse(JSON.stringify(clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == curParaphraseId)));
+    let newCloze = JSON.parse(JSON.stringify(oldCloze));
+
+    let originalText = JSON.parse(JSON.stringify(newCloze.cloze));
+    newCloze.tags.originalItem = originalText;
+    newCloze.cloze = JSON.parse(JSON.stringify(newCloze.tags.clozeCorefTransformation));
+
+    updateLookupMaps(cloze_uid,curItemId,curParaphraseId,oldCloze,newCloze);
+  },
+
   'click #cloze': function(event){
     var cloze_uid = parseInt(event.currentTarget.getAttribute('uid'));
     Session.set("curClozeSentencePairItemId", cloze_uid);
@@ -637,6 +681,8 @@ Template.contentGeneration.events({
     let cloze_uid = parseInt(event.currentTarget.getAttribute('cloze-uid'));
     let curItemId = parseInt(event.currentTarget.getAttribute('uid'));
     let curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
+
+    console.log("cloze_uid: " + cloze_uid + ", curItemId: " + curItemId + ", curParaphraseId: " + curParaphraseId);
 
     Session.set("curClozeSentencePairItemId", curItemId);
     Session.set("editingClozeUID",cloze_uid);
@@ -762,6 +808,16 @@ Template.contentGeneration.helpers({
 
   isCurrentPair: function(itemId) {
     return itemId === Session.get("curClozeSentencePairItemId");
+  },
+
+  isCoreference: function(paraphraseId){
+    let cloze = Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
+    return cloze.isCoreference;
+  },
+
+  isCorefReverted: function(paraphraseId){
+    let cloze = Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
+    return !(cloze.tags.originalItem);
   },
 
   convertBoolToYesNo: function(mybool){

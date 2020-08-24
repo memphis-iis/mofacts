@@ -34,7 +34,7 @@
                 {{editingCloze}}&nbsp;/&nbsp;{{editingClozeResponse}}
               </div>
               <div class="col-md-4">
-                <textarea id="clozeTextEdit">{{editingSentence}}</textarea>
+                <textarea id="clozeTextEdit">{{editingCloze}}</textarea>
               </div>
               <div class="col-md-4">
                 <input id="clozeResponseEdit" type="text" />
@@ -148,7 +148,7 @@
           {{#each clozes}}
             <div id="cloze-display">
             <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
-              <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
+              <div class="row" id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
                 <ul class="ul-no-bullets">
                   {{#if isCurrentPair this.itemId}}
                     <li><span class="cur-sentence">Current Version: {{this.cloze}}</span></li>
@@ -158,12 +158,21 @@
                   <li><span>Original Version: {{this.originalVersion}}</span></li>
                   <li><span class="source-sentence">Source Text:  {{this.sourceSentence}}</span></li>
                   <li>
-                    <span class="cloze-answers">Answer: {{this.correctResponse}}</span>
-                    <span>Sentence Weight: {{this.tags.sentenceWeight}}</span>
-                    <span>Coreference: {{convertBoolToYesNo this.isCoreference}}</span>
-                    <span>Paraphrase: {{convertBoolToYesNo this.isParaphrase}}</span>
+                    <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
+                    <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
+                    <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
+                    <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}}</span>
                   </li>
                   <li>
+                    {{#if isCoreference this.paraphraseId}}
+                      <div class="col-md-2">
+                        {{#if isCorefReverted this.paraphraseId}}
+                        <button type="button" id="redoCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
+                        {{else}}
+                        <button type="button" id="revertCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
+                        {{/if}}
+                      </div>
+                    {{/if}}
                     <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
                     <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
                   </li>
