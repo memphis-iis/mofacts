@@ -13,6 +13,10 @@ textarea {
     overflow: auto;
 }
 
+#cloze {
+  padding-bottom: 7px;
+}
+
 .cur-sentence {
     color: #a834eb;
 }
