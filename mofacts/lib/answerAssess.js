@@ -299,7 +299,7 @@ Answers = {
                     let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
                     updateDialogueDisplay(transitionStatement);
 
-                    dialogueCallbackSaver = partialApplication(callback,fullTextIsCorrect);
+                    dialogueCallbackSaver = callback.bind(null,fullTextIsCorrect);
                     //wait for user to hit enter to make sure they read the transition statement
                 break;
                 default:
@@ -340,10 +340,6 @@ function updateDialogueDisplay(newDisplay){
         console.log("dialogue after flush");
         $("#dialogueUserAnswer").focus();
     });
-}
-
-function partialApplication(func,arg){
-  return () => func(arg);
 }
 
 dialogueLoop = function(err,res){

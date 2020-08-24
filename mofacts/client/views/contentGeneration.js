@@ -454,23 +454,25 @@ sortClozes = function(sortingMethod){
 
   switch(sortingMethod){
     case "originalOrderIndex":
-      clozes = clozes.sort((a,b) => a.originalOrderIndex > b.originalOrderIndex);
+      clozes = clozes.sort((a,b) => a.originalOrderIndex >= b.originalOrderIndex ? 1 : -1);
       break;
     case "sentenceWeight":
-      clozes = clozes.sort((a,b) => a.tags.sentenceWeight > b.tags.sentenceWeight);
+      clozes = clozes.sort((a,b) => a.tags.sentenceWeight >= b.tags.sentenceWeight ? 1 : -1);
       break;
     case "coreference":
       clozes = clozes.sort(function(a,b){
+        if(a.tags.clozeCorefTransformation && b.tags.clozeCorefTransformation) return 0;
         if(a.tags.clozeCorefTransformation) return -1;
         if(b.tags.clozeCorefTransformation) return 1;
-        return -1;
+        return 0;
       });
       break;
     case "paraphrase":
       clozes = clozes.sort(function(a,b){
+        if(a.isParaphrase && b.isParaphrase) return 0;
         if(a.isParaphrase) return -1;
         if(b.isParaphrase) return 1;
-        return -1;
+        return 0;
       });
       break;
   }
