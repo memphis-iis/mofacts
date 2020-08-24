@@ -279,7 +279,7 @@ Answers = {
                             let refutationalFeedback = res.fields[0].feedback;
                             
                             if(typeof(refutationalFeedback) != "undefined" && refutationalFeedback != null){
-                                fullTextIsCorrect.matchText = res;
+                                fullTextIsCorrect.matchText = refutationalFeedback;
                             }
                             callback(fullTextIsCorrect);
                         }  
