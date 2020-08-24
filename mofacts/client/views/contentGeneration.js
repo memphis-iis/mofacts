@@ -93,6 +93,8 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index,originalOrderIndex
     let correctResponse = stim.response.correctResponse;
     let clozeId = stim.tags && stim.tags.clozeId ? stim.tags.clozeId : _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
+    console.log("stim: ",stim);
+    let isCoreference = !!(stim.tags.clozeCorefTransformation);
     stimsForCluster.push({
       unitIndex:clusterUnitIndex,
       cloze:cloze,
@@ -104,16 +106,18 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index,originalOrderIndex
       paraphraseId: paraphraseId,
       tags:stim.tags,
       sourceSentence:sourceSentence,
-      originalOrderIndex:originalOrderIndex
+      originalOrderIndex:originalOrderIndex,
+      originalVersion:  isCoreference ? stim.tags.originalItem : "Same",
+      isCoreference: isCoreference 
     });
     originalOrderIndex += 1;
     if(stim.alternateDisplays){
       for(let altDisplay of stim.alternateDisplays){
         paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
-        cloze = altDisplay.clozeText;
+        let altCloze = altDisplay.clozeText;
         stimsForCluster.push({
           unitIndex:clusterUnitIndex,
-          cloze:cloze,
+          cloze:altCloze,
           correctResponse:correctResponse,
           clozeId:clozeId,
           itemId:sentenceId,
@@ -122,7 +126,9 @@ getStimsFromCluster = function(cluster,clusterUnitIndex,index,originalOrderIndex
           paraphraseId: paraphraseId,
           tags:stim.tags,
           sourceSentence:sourceSentence,
-          originalOrderIndex:originalOrderIndex
+          originalOrderIndex:originalOrderIndex,
+          originalVersion: cloze,
+          isCoreference: false, //for now we don't layer coref resolution and paraphrasing
         });
         originalOrderIndex += 1;
       }
@@ -454,10 +460,18 @@ sortClozes = function(sortingMethod){
 
   switch(sortingMethod){
     case "originalOrderIndex":
-      clozes = clozes.sort((a,b) => a.originalOrderIndex >= b.originalOrderIndex ? 1 : -1);
+      clozes = clozes.sort(function(a,b){
+        if(a.originalOrderIndex == b.originalOrderIndex) return 0;
+        if(a.originalOrderIndex < b.originalOrderIndex) return -1;
+        return 1;
+      });
       break;
     case "sentenceWeight":
-      clozes = clozes.sort((a,b) => a.tags.sentenceWeight >= b.tags.sentenceWeight ? 1 : -1);
+      clozes = clozes.sort(function(a,b){
+        if(a.tags.sentenceWeight == b.tags.sentenceWeight) return 0;
+        if(a.tags.sentenceWeight < b.tags.sentenceWeight) return -1;
+        return 1;
+      });
       break;
     case "coreference":
       clozes = clozes.sort(function(a,b){
@@ -748,6 +762,10 @@ Template.contentGeneration.helpers({
 
   isCurrentPair: function(itemId) {
     return itemId === Session.get("curClozeSentencePairItemId");
+  },
+
+  convertBoolToYesNo: function(mybool){
+    return mybool ? "Yes" : "No";
   },
 
   currentCloze: function() {
