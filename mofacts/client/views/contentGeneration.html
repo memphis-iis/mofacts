@@ -148,23 +148,27 @@
           {{#each clozes}}
             <div id="cloze-display">
             <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
-            {{#if isCurrentPair this.itemId}}
               <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
-                <span class="cur-sentence">{{this.cloze}}</span>
-                <span class="cloze-answers"> {{this.correctResponse}}</span>
-                Original Text: <span class="source-sentence"> {{this.sourceSentence}} </span>
-                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
+                <ul class="ul-no-bullets">
+                  {{#if isCurrentPair this.itemId}}
+                    <li><span class="cur-sentence">Current Version: {{this.cloze}}</span></li>
+                  {{else}}
+                    <li><span>Current Version: {{this.cloze}}</span></li>
+                  {{/if}}
+                  <li><span>Original Version: {{this.originalVersion}}</span></li>
+                  <li><span class="source-sentence">Source Text:  {{this.sourceSentence}}</span></li>
+                  <li>
+                    <span class="cloze-answers">Answer: {{this.correctResponse}}</span>
+                    <span>Sentence Weight: {{this.tags.sentenceWeight}}</span>
+                    <span>Coreference: {{convertBoolToYesNo this.isCoreference}}</span>
+                    <span>Paraphrase: {{convertBoolToYesNo this.isParaphrase}}</span>
+                  </li>
+                  <li>
+                    <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                    <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
+                  </li>
+                </ul>
               </div>
-            {{else}}
-              <div id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}">
-                <span>{{this.cloze}}</span>
-                <span class="cloze-answers"> {{this.correctResponse}}</span>
-                Original Text: <span class="source-sentence"> {{this.sourceSentence}} </span>
-                <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
-              </div>
-            {{/if}}
             </div>
           {{/each}}
         </div>

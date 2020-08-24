@@ -29,6 +29,10 @@ textarea {
   font-style: italic;
 }
 
+.ul-no-bullets {
+  list-style: none;
+}
+
 #clozeTextEdit{
   height:100%;
   width:100%;
