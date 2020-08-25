@@ -20,7 +20,6 @@ originalClozes = undefined;
 origTdfFileName = undefined;
 clusterListMappings = {};
 clozeEdits = [];
-deletedClozeIds = [];
 clozesComeFromTemplate = undefined;
 
 finalDidYouReadQuestion = undefined;
@@ -327,6 +326,10 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
 
       let cluster = {stims:[]};
       let curSentenceClozes = sentenceIDtoClozesMap[sentenceID];
+      completedSentenceIDs[sentenceID] = true;
+      if(curSentenceClozes.length == 0){
+        continue;
+      }
       let completedClozeIDs = {};
       for(let cloze of curSentenceClozes){
         let clozeID = cloze.clozeId;
@@ -337,7 +340,6 @@ generateStimJSON = function(clozes,stimFileName,isMultiTdf){
         }
       }
       curStim.stimuli.setspec.clusters.push(cluster);
-      completedSentenceIDs[sentenceID] = true;
     }
   }
 
@@ -434,7 +436,7 @@ function updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,newCloze){
   let newSentences = prevClozeSentencePairs.sentences;
   let newClozes = prevClozeSentencePairs.clozes;
   let curClozeIndex = prevClozeSentencePairs.clozes.findIndex(function(c) {return c.clozeId == clozeID && c.paraphraseId == paraphraseId});
-
+  
   if(newCloze && Object.keys(newCloze).length > 0){
     clozeIDToClozesMap[clozeID].push(newCloze);
     sentenceIDtoClozesMap[itemID].push(newCloze);
@@ -460,8 +462,7 @@ function updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,newCloze){
 }
 
 function deleteCloze(clozeID,itemID,paraphraseId){
-  let oldCloze = clozeIDToClozesMap[clozeID].find((elem) => elem.paraphraseId == paraphraseId);
-  deletedClozeIds.push(oldCloze.clozeId);
+  let oldCloze = JSON.parse(JSON.stringify(clozeIDToClozesMap[clozeID].find((elem) => elem.paraphraseId == paraphraseId)));
   updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,{});
 }
 
@@ -526,7 +527,6 @@ Template.contentGeneration.onRendered(function(){
   origTdfFileName = undefined;
   clusterListMappings = {};
   clozeEdits = [];
-  deletedClozeIds = [];
   clozesComeFromTemplate = undefined;
   finalDidYouReadQuestion = undefined;
 
@@ -610,7 +610,6 @@ Template.contentGeneration.events({
       }else{
         console.log(JSON.stringify(result));
         alert("Successfully generated clozes!");
-        deletedClozeIds = [];
         origTdfFileName = "";
         let sentences = result.fields[0].sentences;
         let clozes = result.fields[0].clozes;
@@ -753,7 +752,6 @@ Template.contentGeneration.events({
     finalDidYouReadQuestion = undefined;
     clozesComeFromTemplate = true;
     clusterListMappings = {};
-    deletedClozeIds = [];
     origTdfFileName = $(event.currentTarget).val();
     console.log("origTdfFileName: " + origTdfFileName);
     var stimObject = tdfFileNameToStimfileMap[origTdfFileName];
@@ -812,12 +810,14 @@ Template.contentGeneration.helpers({
 
   isCoreference: function(paraphraseId){
     let cloze = Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
-    return cloze.isCoreference;
+    if(!cloze) console.log("isCoreference, not found: " + paraphraseId)
+    return !!(cloze) ? cloze.isCoreference : false;
   },
 
   isCorefReverted: function(paraphraseId){
     let cloze = Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
-    return !(cloze.tags.originalItem);
+    if(!cloze) console.log("isCorefReverted, not found: " + paraphraseId)
+    return !!(cloze) ? !(cloze.tags.originalItem) : false;
   },
 
   convertBoolToYesNo: function(mybool){
