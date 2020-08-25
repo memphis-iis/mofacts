@@ -147,7 +147,7 @@
         <div id="extracted-clozes">
           {{#each clozes}}
             <div id="cloze-display">
-            <input type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
+              <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
               <div class="row" id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
                 <ul class="ul-no-bullets">
                   {{#if isCurrentPair this.itemId}}
