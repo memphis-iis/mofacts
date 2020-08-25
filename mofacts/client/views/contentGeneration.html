@@ -156,25 +156,22 @@
                     <li><span>Current Version: {{this.cloze}}</span></li>
                   {{/if}}
                   <li><span>Original Version: {{this.originalVersion}}</span></li>
-                  <li><span class="source-sentence">Source Text:  {{this.sourceSentence}}</span></li>
                   <li>
                     <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
                     <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
                     <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
-                    <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}}</span>
-                  </li>
-                  <li>
+                    <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
+                    <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                    <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
                     {{#if isCoreference this.paraphraseId}}
-                      <div class="col-md-2">
+                      <span class="col-md-2">
                         {{#if isCorefReverted this.paraphraseId}}
                         <button type="button" id="redoCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
                         {{else}}
                         <button type="button" id="revertCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
                         {{/if}}
-                      </div>
+                      </span>
                     {{/if}}
-                    <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                    <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
                   </li>
                 </ul>
               </div>
