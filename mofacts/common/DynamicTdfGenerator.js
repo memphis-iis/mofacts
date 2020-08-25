@@ -185,7 +185,7 @@ export class DynamicTdfGenerator {
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
     try {
-      clusters = stimJson ? stimJson.stimuli.setspec.clusters : Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
+      clusters = !!(stimJson) ? stimJson.stimuli.setspec.clusters : Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
       // clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
       // console.log(clusters);
     } catch (error) {
