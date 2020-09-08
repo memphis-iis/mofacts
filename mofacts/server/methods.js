@@ -176,7 +176,8 @@ function sendErrorReportSummaries(){
       for(var index2 in unsentErrorReports){
         var unsentErrorReport = unsentErrorReports[index2];
         var userWhoReportedError = Meteor.users.findOne({_id:unsentErrorReport.user});
-        text = text + "User: " + userWhoReportedError.username + ", page: " + unsentErrorReport.page + ", time: " + unsentErrorReport.time + ", description: " + unsentErrorReport.description + ", userAgent: " + unsentErrorReport.userAgent + " \n";
+        var userWhoReportedErrorUsername = userWhoReportedError ? userWhoReportedError.username : "UNKNOWN";
+        text = text + "User: " + userWhoReportedErrorUsername + ", page: " + unsentErrorReport.page + ", time: " + unsentErrorReport.time + ", description: " + unsentErrorReport.description + ", userAgent: " + unsentErrorReport.userAgent + " \n";
         sentErrorReports.add(unsentErrorReport._id);
       }
       
