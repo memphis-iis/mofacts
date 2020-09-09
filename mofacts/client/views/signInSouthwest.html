@@ -1,5 +1,9 @@
 <template name="signInSouthwest">
     <div class="container">
+      <h1>The system is currently down for maintenance.</h1>
+      <h1>Monday, September 14th is when we expect to have everything fixed and the system up again.</h1>
+      <h1>We apologize for the inconvenience.</h1>
+      {{#if showTestLogins}}
         <div class="row" id="initialInstructorSelection">
           <label>Please click on the link corresponding to your instructor</label>
           {{#each teachers}}
@@ -18,7 +22,7 @@
           {{/each}}
         </div>
 
-        {{#if showTestLogins}}
+        <!-- {{#if showTestLogins}} -->
 
           <div class="row login" id="loginDiv" hidden="true">
               <div class="col-xs-12 col-sm-10 col-md-3 col-lg-3">
