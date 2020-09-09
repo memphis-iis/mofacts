@@ -2,9 +2,9 @@
 Session.set("versionInfo",
 {
 "commitID":"52a88a015984c67f9d9d4fd65987ebeb05c4998b",
-"buildTimestamp":"Tue Aug 25 13:27:08 CDT 2020",
-"buildersUsername":"Andrew Tackett",
+"buildTimestamp":"Mon 31 Aug 2020 10:22:40 AM CDT",
+"buildersUsername":"wscarter",
 "branch":"master",
-"repoURL":"git@github.com:memphis-iis/mofacts-ies.git"
+"repoURL":"https://github.com/memphis-iis/mofacts-ies.git"
 }
 );

@@ -509,6 +509,7 @@ sortClozes = function(sortingMethod){
 }
 
 Template.contentGeneration.onRendered(function(){
+  $('html,body').scrollTop(0);
   Session.set("curClozeSentencePairItemId", "");
   Session.set("clozeSentencePairs", {});
   Session.set("clozeHistory", []);
@@ -540,6 +541,8 @@ Template.contentGeneration.onRendered(function(){
       $('.cloze-checkbox').shiftSelectable();
     });
   });
+
+  $("#templateTDFSelect").select2();
 });
 
 Template.contentGeneration.events({

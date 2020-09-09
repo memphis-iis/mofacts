@@ -63,3 +63,7 @@ textarea {
 #fileTemplateLabel{
   margin-top: 0px;
 }
+
+#templateTDFSelect {
+  width: 50%;
+}
