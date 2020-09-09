@@ -71,6 +71,7 @@ mongo@1.7.0
 mongo-decimal@0.1.1
 mongo-dev-server@1.1.0
 mongo-id@1.0.7
+natestrauser:select2@4.0.3
 npm-bcrypt@0.9.3
 npm-mongo@3.2.0
 oauth@1.2.8
