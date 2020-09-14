@@ -203,15 +203,16 @@ function defaultUnitEngine(extensionData) {
                 && clozeAnswerNoUnderscores.slice(-1) != " ") {
                 clozeQuestionParts[2] = clozeQuestionParts[2].trim();
             }
+
+            let clozeQuestion = question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
+
+            console.log("replaceClozeWithSyllables:",clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
             
-            return {
-                clozeQuestion: question.replace(/([_]+[ ]?)+/,clozeAnswer + " "),
-                clozeMissingSyllables: clozeMissingSyllables,
-                clozeQuestionParts: clozeQuestionParts
-            };
+            return { clozeQuestion, clozeMissingSyllables, clozeQuestionParts };
         },
 
         setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2, currentStimAnswer,prob){
+            console.log("setUpCardQuestionSyllables: ",currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
             let currentAnswer = currentStimAnswer;
             let clozeQuestionParts = undefined;
             let currentAnswerSyllables = undefined;
@@ -221,17 +222,19 @@ function defaultUnitEngine(extensionData) {
                 currentAnswerSyllables = this.getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
                 
                 if(currentAnswerSyllables){
-                    let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts} = this.replaceClozeWithSyllables(
+                    let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts:cQuestionParts} = this.replaceClozeWithSyllables(
                         currentQuestion,currentAnswerSyllables,currentStimAnswer);
                     currentQuestion = clozeQuestion;
                     currentAnswer = clozeMissingSyllables;
-                    console.log("clozeQuestionParts: " + JSON.stringify(clozeQuestionParts));
-                    let {clozeQuestion2,clozeMissingSyllables2} = this.replaceClozeWithSyllables(
+                    clozeQuestionParts = cQuestionParts;
+                    console.log("clozeQuestionParts:",cQuestionParts);
+                    let {clozeQuestion2,clozeMissingSyllables2,...rest} = this.replaceClozeWithSyllables(
                         currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
                     currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
                 }
             }          
 
+            console.log("setUpCardQuestionSyllables:",currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer);
             return {currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
         },
 

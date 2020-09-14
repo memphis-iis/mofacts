@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "supercalifragilistic",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -13,7 +13,7 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "The first cloze is __________ ."
+                                "clozeText": "The first cloze is __________ here."
                             },
                             "alternateDisplays": [
                                 {
@@ -24,7 +24,7 @@
                         },
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "supercalifragilistic",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -42,7 +42,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "supercalifragilistic",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
