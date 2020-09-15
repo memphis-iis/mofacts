@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2015",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "lib": [
+      "esnext",
+      "dom"
+    ],
+    "pretty": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowUnreachableCode": false,
+    "alwaysStrict": false,
+    "noUnusedLocals": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "allowJs": true,
+    "checkJs": false
+  },
+  "files": [
+    "mofacts-load-testing.perf.js"
+  ]
+}
