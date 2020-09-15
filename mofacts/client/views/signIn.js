@@ -64,6 +64,8 @@ function signinNotify() {
         var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
         console.log(currentUser + " was logged in successfully! Current route is ", Router.current().route.getName());
         Meteor.call("debugLog", "Sign in was successful");
+        Meteor.call("updatePerformanceData","login","signin.signinNotify",Meteor.userId());
+        Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
     }
     Router.go("/profile");
 }
@@ -140,7 +142,6 @@ function UserPasswordCheck() {
                       $("#signInButton").prop("disabled",false);
                   }
                   else {
-                      Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
                       signinNotify();
                   }
               });
@@ -170,7 +171,6 @@ function UserPasswordCheck() {
                 $("#signInButton").prop("disabled",false);
                 return;
             }
-            Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
             signinNotify();
         }
     });

@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "supercalifragilistic",
+                                "correctResponse": "correctresponse",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -17,14 +17,14 @@
                             },
                             "alternateDisplays": [
                                 {
-                                    "clozeText": "Alt 0"
+                                    "clozeText": "Alt 0 ____ here"
                                 }
                             ],
                             "parameter": "-0.479299999999998"
                         },
                         {
                             "response": {
-                                "correctResponse": "supercalifragilistic",
+                                "correctResponse": "correctresponse",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -42,7 +42,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "supercalifragilistic",
+                                "correctResponse": "correctresponse",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",

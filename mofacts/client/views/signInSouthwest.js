@@ -1,8 +1,9 @@
-import { curSemester } from '../../common/Definitions';
+import { curSemester, SYSTEM_DOWN } from '../../common/Definitions';
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
 Session.set("curClass",{});
+Session.set("systemOverloaded",false);
 
 function getUrlVars()
 {
@@ -78,6 +79,7 @@ function testLogin(){
                     console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
                 }
                 Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+                Meteor.call("updatePerformanceData","login","signinSouthwest.testLogin",Meteor.userId());
                 Router.go("/profileSouthwest");
             }
         });
@@ -113,6 +115,13 @@ setClass = function(curClassID){
   Session.set("curClass",curClass);
   $(".login").prop('hidden','');
 }
+
+Template.signInSouthwest.onCreated(function(){
+  Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
+    console.log("systemOverloaded?",res,err);
+    Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
+  });
+});
 
 Template.signInSouthwest.onRendered(function(){
   Session.set("loginMode","southwest");
@@ -152,6 +161,14 @@ Template.signInSouthwest.onRendered(function(){
 });
 
 Template.signInSouthwest.helpers({
+    'systemDown': function(){
+      return SYSTEM_DOWN && !Session.get("showTestLogins");
+    },
+
+    'systemOverloaded': function(){
+      return Session.get("systemOverloaded");
+    },
+
     'showTestLogins': function(){
       return Session.get("showTestLogins");
     },
@@ -187,6 +204,7 @@ Template.signInSouthwest.events({
             }
             console.log("addUserToTeachersClass result: " + result);
             Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+            Meteor.call("updatePerformanceData","login","signinSouthwest.clickSamlLogin",Meteor.userId());
             Router.go("/profileSouthwest");
           });
         }

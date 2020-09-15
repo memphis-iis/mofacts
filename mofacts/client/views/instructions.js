@@ -242,17 +242,17 @@ instructContinue = function () {
         feedbackText = _.chain(unit).prop("picture").trim().value();
     }
 
-    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-    var expKey = userTimesExpKey(true);
+    // var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+    // var expKey = userTimesExpKey(true);
 
-    var entries = _.prop(userLog, expKey) || [];
+    // var entries = _.prop(userLog, expKey) || [];
 
-    var dup = _.find(entries, function(rec){
-        return (
-            _.prop(rec, "action") === "instructions" &&
-            _.prop(rec, "currentUnit") === currUnit
-        );
-    });
+    // var dup = _.find(entries, function(rec){
+    //     return (
+    //         _.prop(rec, "action") === "instructions" &&
+    //         _.prop(rec, "currentUnit") === currUnit
+    //     );
+    // });
 
     // Record the fact that we just showed instruction. Also - we use a call
     // back to redirect to the card display screen to make sure that everything
@@ -266,11 +266,11 @@ instructContinue = function () {
         var instructStart = _.intval(Session.get("instructionClientStart"));
         Session.set("instructionClientStart", 0);
 
-        if (!!dup) {
-            console.log("Found dup instruction", dup);
-            Meteor.call("debugLog", "Found dup instruction. Entry:", displayify(dup));
-            logAction = "instructions-dup";
-        }
+        // if (!!dup) {
+        //     console.log("Found dup instruction", dup);
+        //     Meteor.call("debugLog", "Found dup instruction. Entry:", displayify(dup));
+        //     logAction = "instructions-dup";
+        // }
 
         recordUserTime(logAction, {
             'currentUnit': currUnit,

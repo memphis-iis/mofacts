@@ -671,6 +671,8 @@
         recordAcceptor(delimitedRecord(header));
         var recordCount = 1;
 
+        Meteor.call("updatePerformanceData","utlQuery","experiment_times.createExperimentExport","SERVER_REPORT");
+
         UserTimesLog.find({}).forEach(function (entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
             if (!userRec || !userRec.username) {

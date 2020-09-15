@@ -107,6 +107,7 @@ routeToSignin = function() {
 Router.route('/experiment/:target?/:xcond?', {
     name: "client.experiment",
     action: function() {
+        Session.set("curModule","experiment");
         // We set our session variable and also set a cookie (so that we still
         // know they're an experimental participant after browser refresh)
         var target = this.params.target || "";
@@ -138,6 +139,7 @@ Router.route('/experiment/:target?/:xcond?', {
 Router.route('/signin', {
     name: "client.signin",
     action: function () {
+        Session.set("curModule","signin");
         console.log("SIGNIN ROUTE");
         this.render('signIn');
     }
@@ -146,6 +148,7 @@ Router.route('/signin', {
 Router.route('/signInSouthwest', {
     name: "client.signinSouthwest",
     action: function () {
+        Session.set("curModule","signinsouthwest");
         console.log("signin southwest");
         this.render('signInSouthwest');
     }
@@ -154,6 +157,7 @@ Router.route('/signInSouthwest', {
 Router.route('/signup', {
     name: "client.signup",
     action: function () {
+        Session.set("curModule","signup");
         this.render('signUp');
     }
 });
@@ -166,6 +170,7 @@ Router.route('/', {
         Cookie.set("isExperiment", "0", 1);  // 1 day
         Cookie.set("experimentTarget", "", 1);
         Cookie.set("experimentXCond", "", 1);
+        Session.set("curModule","signinoauth");
         this.render('signInOauth');
     }
 });
@@ -182,9 +187,11 @@ Router.route('/profile', {
 
           if(loginMode === "southwest"){
             console.log("southwest login, routing to southwest profile");
+            Session.set("curModule","profileSouthwest");
             this.render("/profileSouthwest");
           }else{ //Normal login mode
             console.log("else, progress");
+            Session.set("curModule","profile");
             this.render('profile');
           }
         }else{
@@ -196,6 +203,7 @@ Router.route('/profile', {
 Router.route('/profileSouthwest',{
   name: "client.profileSouthwest",
   action: function(){
+    Session.set("curModule","profilesouthwest");
     this.render('profileSouthwest');
   }
 });
@@ -203,6 +211,7 @@ Router.route('/profileSouthwest',{
 Router.route('/multiTdfSelect',{
   name: "client.multiTdfSelect",
   action: function(){
+    Session.set("curModule","multiTdfSelect");
     this.render('multiTdfSelect');
   }
 });
@@ -210,6 +219,7 @@ Router.route('/multiTdfSelect',{
 Router.route('/turkWorkflow',{
   name: "client.turkWorkflow",
   action: function(){
+    Session.set("curModule","turkWorkflow");
     this.render('turkWorkflow');
   }
 });
@@ -217,6 +227,7 @@ Router.route('/turkWorkflow',{
 Router.route('/contentUpload',{
   name: "client.contentUpload",
   action: function(){
+    Session.set("curModule","contentUpload");
     this.render('contentUpload');
   }
 });
@@ -224,6 +235,7 @@ Router.route('/contentUpload',{
 Router.route('/dataDownload',{
   name: "client.dataDownload",
   action: function(){
+    Session.set("curModule","dataDownload");
     this.render('dataDownload');
   }
 });
@@ -231,6 +243,7 @@ Router.route('/dataDownload',{
 Router.route('/userProfileEdit',{
   name: "client.userProfileEdit",
   action: function(){
+    Session.set("curModule","userProfileEdit");
     this.render('userProfileEdit');
   }
 });
@@ -238,6 +251,7 @@ Router.route('/userProfileEdit',{
 Router.route('/userAdmin',{
   name: "client.userAdmin",
   action: function(){
+    Session.set("curModule","userAdmin");
     this.render('userAdmin');
   }
 });
@@ -245,6 +259,7 @@ Router.route('/userAdmin',{
 Router.route('/contentGeneration',{
   name: "client.contentGeneration",
   action: function(){
+    Session.set("curModule","contentGeneration");
     this.render('contentGeneration');
   }
 });
@@ -253,6 +268,7 @@ Router.route('/card', {
     name: "client.card",
     action: function () {
       if(Meteor.user()){
+        Session.set("curModule","card");
         this.render('card');
       }else{
         this.redirect('/');
@@ -260,16 +276,10 @@ Router.route('/card', {
     }
 });
 
-Router.route('/soundTest', {
-    name: "client.soundTest",
-    action: function () {
-        this.render('soundTest');
-    }
-});
-
 Router.route('/classEdit', {
     name: "client.classEdit",
     action: function () {
+        Session.set("curModule","classEdit");
         this.render('classEdit');
     }
 });
@@ -277,6 +287,7 @@ Router.route('/classEdit', {
 Router.route('/tdfAssignmentEdit',{
     name: "client.tdfAssignmentEdit",
     action: function () {
+        Session.set("curModule","tdfAssignmentEdit");
         this.render('tdfAssignmentEdit');
     }
 })
@@ -284,6 +295,7 @@ Router.route('/tdfAssignmentEdit',{
 Router.route('/instructorReporting',{
     name: "client.instructorReporting",
     action: function () {
+        Session.set("curModule","instructorReporting");
         this.render('instructorReporting');
     }
 });
@@ -291,21 +303,8 @@ Router.route('/instructorReporting',{
 Router.route('/studentReporting',{
     name: "client.studentReporting",
     action: function () {
+        Session.set("curModule","studentReporting");
         this.render('studentReporting');
-    }
-});
-
-//Sends the user to the choose page where the user can choose
-//between viewing all of the items or all of the students for the system.
-Router.route('/choose', {
-    name: "client.teacher.choose",
-    action: function () {
-        if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-            this.render('/choose');
-        }
-        else {
-            this.redirect('/student');
-        }
     }
 });
 
@@ -316,6 +315,7 @@ Router.route('/instructions', {
     name: "client.instructions",
     action: function () {
         Session.set("instructionClientStart", Date.now());
+        Session.set("curModule","instructions");
         this.render('instructions');
     },
     onAfterAction: function() {
@@ -338,65 +338,12 @@ Router.route('/instructions', {
     },
 });
 
-Router.route('/stats', {
-    name: "client.stats",
-    action: function () {
-        this.render('statsPage');
-    }
-});
-
-//Graph pages
-Router.route('/itemStats', {
-    name: "client.teacher.itemStats",
-    action: function () {
-        this.render('itemStats');
-    }
-});
-
-//Used for all of the students on the system
-Router.route('/allStudents', {
-    name: "client.teacher.allstudents",
-    action: function() {
-        this.subscribe('allUsers').wait();
-        if (this.ready()) {
-            this.render('allStudents');
-        }
-        else {
-            this.render('');
-        }
-    }
-});
-
-//Individual student page
-Router.route('/student',  {
-    name: "client.teacher.student",
-    action: function () {
-        this.render('student');
-    }
-});
-
-//The item page that houses all the items for a system
-Router.route('/Items',  {
-    name: "client.teacher.items",
-    action:  function () {
-        this.render('Items');
-    }
-});
-
-//A listing of all of the systems/tests
-Router.route('/allItems',  {
-    name: "client.teacher.allitems",
-    action:  function () {
-        Session.set("clusterMapping", "");
-        this.render('allItems');
-    }
-});
-
 //Voice interstitial to delay the user until voice input can recognize voice start
 //and voice stop with VAD.js
 Router.route('/voice', {
     name: "client.voice",
     action: function () {
+        Session.set("curModule","voice");
         this.render('voice');
     }
 });

@@ -12,3 +12,5 @@ GoogleSpeechAPIKeys = new Mongo.Collection("googleSpeechAPIKeys");
 Classes = new Mongo.Collection("classes");
 ClozeEditHistory = new Mongo.Collection("clozeEditHistory");
 ErrorReports = new Mongo.Collection("errorReports");
+LoginTimes = new Mongo.Collection("loginTimes");
+UtlQueryTimes = new Mongo.Collection("utlQueryTimes");
