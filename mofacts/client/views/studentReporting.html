@@ -25,7 +25,7 @@
         <tr>
           <td>{{curStudentPerformance.percentCorrect}}</td>
           <td>{{curStudentPerformance.count}}</td>
-          <td>{{curStudentPerformance.totalTime}}</td>
+          <td>{{curStudentPerformance.totalTimeDisplay}}</td>
         </tr>
         {{#if curClassStudentTotals}}
           <tr><th class="thWide">{{curClass.name}} - Average % Correct</th><th class="thWide">{{curClass.name}} - Average Count</th><th class="thWide">{{curClass.name}} - Average Total Time (minutes)</th></tr>
@@ -37,7 +37,7 @@
         {{/if}}
       </table>
     </div>
-    <div>
+    <!-- <div>
       <h2>Progress Charts</h2>
       <div>
         <h3>Corrrectness Across Repetitions of the Same Fill-in</h3>
@@ -49,11 +49,11 @@
          <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="cardProbsChart"></div>
         </div>
       </div>
-    </div>
+    </div> -->
     <div>
       <p>To see progress on a given chapter, you may select it from the "Select Chapter" dropdown.  If you don't see a chapter in the dropdown, that means you haven't practiced it.</p>
-      <p>On a desktop machine you can see the item names and values for the bottom chart by hovering over the individual bars on the chart with your mouse.</p>
-      <p>On mobile, to see item names and values for the bottom chart tap the individual bars on the chart.</p>
+      <!-- <p>On a desktop machine you can see the item names and values for the bottom chart by hovering over the individual bars on the chart with your mouse.</p>
+      <p>On mobile, to see item names and values for the bottom chart tap the individual bars on the chart.</p> -->
     </div> 
   </div>
 </template>

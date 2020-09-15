@@ -63,6 +63,7 @@ function testLogin(){
                   Meteor.call("debugLog", "TEST Sign in was successful - YOU SHOULD NOT SEE THIS IN PRODUCTION");
               }
               Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+              Meteor.call("updatePerformanceData","login","signinOauth.testLogin",Meteor.userId());
               Router.go("/profile");
           }
       });
@@ -121,6 +122,7 @@ Template.signInOauth.events({
                 Meteor.call("debugLog", "Sign in was successful");
             }
             Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+            Meteor.call("updatePerformanceData","login","signinOauth.clickSigninButton",Meteor.userId());
             Router.go("/profile");
         });
     },

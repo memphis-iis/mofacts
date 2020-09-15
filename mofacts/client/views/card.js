@@ -516,8 +516,8 @@ Template.card.events({
 ////////////////////////////////////////////////////////////////////////////
 // Template helpers and meteor events
 
-var soundsDict = {};
-var imagesDict = {};
+soundsDict = {};
+imagesDict = {};
 var onEndCallbackDict = {};
 
 Template.card.rendered = function() {
@@ -525,7 +525,7 @@ Template.card.rendered = function() {
   window.onpopstate = function(event){
     //console.log("back button pressed?" + document.location.pathname);
     if(document.location.pathname == "/card"){
-      leavePage(document.location.pathname);
+      leavePage("/card");
     }
   }
   console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
@@ -800,6 +800,7 @@ clearAudioContextAndRelatedVariables = function(){
   streamSource = null;
   Meteor.clearInterval(pollMediaDevicesInterval);
   pollMediaDevicesInterval = null;
+  Session.get("VADInitialized",false);
 }
 
 reinitializeMediaDueToDeviceChange = function(){
@@ -1218,6 +1219,15 @@ function handleUserInput(e, source, simAnswerCorrect) {
           displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
         };
       }
+
+      //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
+      let curUserPerformance = Session.get("curStudentPerformance");
+      curUserPerformance.count = curUserPerformance.count + 1;
+      if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+      curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
+      curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
+      curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
+      Session.set("curStudentPerformance",curUserPerformance);
 
       let feedbackType = getCurrentDeliveryParams().feedbackType || "simple";
       let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
@@ -2209,6 +2219,7 @@ function allowUserInput(textFocus) {
 //Helper for getting the relevant user times log
 getCurrentUserTimesLog = function(expKey) {
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
+    Meteor.call("updatePerformanceData","utlQuery","card.getCurrentUserTimesLog",Meteor.userId());
     var expKey = expKey || userTimesExpKey(true);
 
     var entries = [];
@@ -2276,218 +2287,227 @@ function resumeFromUserTimesLog() {
 
     console.log("Resuming from previous User Times info (if any)");
 
-    //Clear any previous permutation and/or timeout call
-    timeoutsSeen = 0;
-    clearCardTimeout();
-    keypressTimestamp = 0;
-    trialTimestamp = 0;
-    unitStartTimestamp = Date.now();
-    clearScrollList();
-
-    //Clear any previous session data about unit/question/answer
-    Session.set("clusterMapping", undefined);
-    Session.set("currentUnitNumber", undefined);
-    Session.set("questionIndex", undefined);
-    Session.set("clusterIndex", undefined);
-    Session.set("currentDisplay", undefined);
-    Session.set("currentDisplayEngine", undefined);
-    Session.set("originalDisplay", undefined);
-    Session.set("currentQuestionPart2", undefined);
-    Session.set("currentAnswer", undefined);
-    Session.set("testType", undefined);
-    Session.set("lastTimestamp", 0);
-
-    //Disallow continuing (it will be turned on somewhere else)
-    setDispTimeoutText("");
-    $("#continueButton").prop("disabled", true);
-
-    //So here's the place where we'll use the ROOT tdf instead of just the
-    //current TDF. It's how we'll find out if we need to perform experimental
-    //condition selection. It will be our responsibility to update
-    //currentTdfName and currentStimName based on experimental conditions
-    //(if necessary)
-    var rootTDF = Tdfs.findOne({fileName: Session.get("currentRootTdfName")});
-    if (!rootTDF) {
-        console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
-        alert("Unfortunately, something is broken and this lesson cannot continue");
-        leavePage("/profile");
-        return;
-    }
-
-    var setspec = rootTDF.tdfs.tutor.setspec[0];
-    var needExpCondition = (setspec.condition && setspec.condition.length);
-    var conditionAction;
-    var conditionData = {};
-
-    var userTimesLog = getCurrentUserTimesLog();
-
-    //We must always check for experiment condition
-    if (needExpCondition) {
-        console.log("Experimental condition is required: searching");
-        var prevCondition = _.find(userTimesLog, function(entry) {
-            return entry && entry.action && entry.action === "expcondition";
-        });
-
-        var subTdf = null;
-
-        if (prevCondition) {
-            //Use previous condition and log a notification that we did so
-            console.log("Found previous experimental condition: using that");
-            subTdf = prevCondition.selectedTdf;
-            conditionAction = "condition-notify";
-            conditionData.note = "Using previous condition: " + subTdf;
-        }
-        else {
-            //Select condition and save it
-            console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
-            subTdf = _.sample(setspec.condition);
-            conditionAction = "expcondition";
-            conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
-        }
-
-        if (!subTdf) {
-            console.log("No experimental condition could be selected!");
-            alert("Unfortunately, something is broken and this lesson cannot continue");
-            leavePage("/profile");
-            return;
-        }
-
-        conditionData.selectedTdf = subTdf;
-        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
-
-        //Now we have a different current TDF (but root stays the same)
-        Session.set("currentTdfName", subTdf);
-
-        //Also need to read new stimulus file (and note that we allow an exception
-        //to kill us if the current tdf is broken and has no stimulus file)
-        Session.set("currentStimName", getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
-    }
-    else {
-        //Just notify that we're skipping
-        console.log("No Experimental condition is required: continuing");
-        conditionAction = "condition-notify";
-        conditionData.note = "No exp condition necessary";
-    }
-
-    //Pre-load sounds to be played into soundsDict to avoid audio lag issues
-    if(curStimHasSoundDisplayType()){
-      console.log("Sound type questions detected, pre-loading sounds");
-      preloadAudioFiles();
+    //Short circuit and don't replay all of the userTimesLog's for the experiment if we already have a perfectly up to date engine
+    if(false && engine && //disable this for now as it'll take a lot more work
+      engine.currentRootTdfName == Session.get("currentRootTdfName") && 
+      engine.currentTdfName == Session.get("currentTdfName") &&
+      engine.subTdfIndex == Session.get("subTdfIndex")){
+      Session.set('inResume', false);
+      prepareCard();
     }else{
-      console.log("Non sound type detected");
-    }
-    if(curStimHasAudioDisplayType()){
-      console.log("image type questions detected, pre-loading images");
-      preloadImages();
-    }else{
-      console.log("Non image type detected");
-    }
+      //Clear any previous permutation and/or timeout call
+      timeoutsSeen = 0;
+      clearCardTimeout();
+      keypressTimestamp = 0;
+      trialTimestamp = 0;
+      unitStartTimestamp = Date.now();
+      clearScrollList();
 
-    //Add some session data to the log message we're sending
-    conditionData = _.extend(conditionData, {
-        currentRootTdfName: Session.get("currentRootTdfName"),
-        currentTdfName: Session.get("currentTdfName"),
-        currentStimName: Session.get("currentStimName")
-    });
+      //Clear any previous session data about unit/question/answer
+      Session.set("clusterMapping", undefined);
+      Session.set("currentUnitNumber", undefined);
+      Session.set("questionIndex", undefined);
+      Session.set("clusterIndex", undefined);
+      Session.set("currentDisplay", undefined);
+      Session.set("currentDisplayEngine", undefined);
+      Session.set("originalDisplay", undefined);
+      Session.set("currentQuestionPart2", undefined);
+      Session.set("currentAnswer", undefined);
+      Session.set("testType", undefined);
+      Session.set("lastTimestamp", 0);
 
-    //Now we can create our record for the server - note that we use an array
-    //since we might add other records below
-    var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
+      //Disallow continuing (it will be turned on somewhere else)
+      setDispTimeoutText("");
+      $("#continueButton").prop("disabled", true);
 
-    //In addition to experimental condition, we allow a root TDF to specify
-    //that the xcond parameter used for selecting from multiple deliveryParms's
-    //is to be system assigned (as opposed to URL-specified)
-    if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
-        console.log("xcond for delivery params is sys assigned: searching");
-        var prevXCond = _.find(userTimesLog, function(entry) {
-            return entry && entry.action && entry.action === "xcondassign";
-        });
+      //So here's the place where we'll use the ROOT tdf instead of just the
+      //current TDF. It's how we'll find out if we need to perform experimental
+      //condition selection. It will be our responsibility to update
+      //currentTdfName and currentStimName based on experimental conditions
+      //(if necessary)
+      var rootTDF = Tdfs.findOne({fileName: Session.get("currentRootTdfName")});
+      if (!rootTDF) {
+          console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
+          alert("Unfortunately, something is broken and this lesson cannot continue");
+          leavePage("/profile");
+          return;
+      }
 
-        var xcondAction, xcondValue;
+      var setspec = rootTDF.tdfs.tutor.setspec[0];
+      var needExpCondition = (setspec.condition && setspec.condition.length);
+      var conditionAction;
+      var conditionData = {};
 
-        if (prevXCond) {
-            //Found it!
-            console.log("Found previous xcond for delivery");
-            xcondAction = "xcondnotify";
-            xcondValue = prevXCond.xcond;
-        }
-        else {
-            //Not present - we need to select one
-            console.log("NO previous xcond for delivery - selecting one");
-            xcondAction = "xcondassign";
-            var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
-            xcondValue = Math.floor(Math.random() * xcondCount);
-        }
+      var userTimesLog = getCurrentUserTimesLog();
 
-        console.log("Setting XCond from sys-selection", xcondValue);
-        Session.set("experimentXCond", xcondValue);
+      //We must always check for experiment condition
+      if (needExpCondition) {
+          console.log("Experimental condition is required: searching");
+          var prevCondition = _.find(userTimesLog, function(entry) {
+              return entry && entry.action && entry.action === "expcondition";
+          });
 
-        serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
-    }
+          var subTdf = null;
 
-    //Find previous cluster mapping (or create if it's missing)
-    //Note that we need to wait until the exp condition is selected above so
-    //that we go to the correct TDF
-    var clusterMapping = _.find(userTimesLog, function(entry) {
-        return entry && entry.action && entry.action === "cluster-mapping";
-    });
-    if (!clusterMapping) {
-        //No cluster mapping! Need to create it and store for resume
-        //We process each pair of shuffle/swap together and keep processing
-        //until we have nothing left
-        var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+          if (prevCondition) {
+              //Use previous condition and log a notification that we did so
+              console.log("Found previous experimental condition: using that");
+              subTdf = prevCondition.selectedTdf;
+              conditionAction = "condition-notify";
+              conditionData.note = "Using previous condition: " + subTdf;
+          }
+          else {
+              //Select condition and save it
+              console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
+              subTdf = _.sample(setspec.condition);
+              conditionAction = "expcondition";
+              conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
+          }
 
-        //Note our default of a single no-op to insure we at least build a
-        //default cluster mapping
-        var shuffles = setSpec.shuffleclusters || [""];
-        var swaps = setSpec.swapclusters || [""];
-        clusterMapping = [];
+          if (!subTdf) {
+              console.log("No experimental condition could be selected!");
+              alert("Unfortunately, something is broken and this lesson cannot continue");
+              leavePage("/profile");
+              return;
+          }
 
-        while(shuffles.length > 0 || swaps.length > 0) {
-            clusterMapping = createStimClusterMapping(
-                getStimClusterCount(),
-                shuffles.shift() || "",
-                swaps.shift() || "",
-                clusterMapping
-            );
-        }
+          conditionData.selectedTdf = subTdf;
+          console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
 
-        serverRecords.push(createUserTimeRecord("cluster-mapping", {
-            clusterMapping: clusterMapping
-        }));
+          //Now we have a different current TDF (but root stays the same)
+          Session.set("currentTdfName", subTdf);
 
-        console.log("Cluster mapping created", clusterMapping);
-    }
-    else {
-        //Found the cluster mapping record - extract the embedded mapping
-        clusterMapping = clusterMapping.clusterMapping;
-        console.log("Cluster mapping found", clusterMapping);
-    }
+          //Also need to read new stimulus file (and note that we allow an exception
+          //to kill us if the current tdf is broken and has no stimulus file)
+          Session.set("currentStimName", getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+      }
+      else {
+          //Just notify that we're skipping
+          console.log("No Experimental condition is required: continuing");
+          conditionAction = "condition-notify";
+          conditionData.note = "No exp condition necessary";
+      }
 
-    if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
-        console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
-        throw "The cluster mapping is invalid - can not continue";
-    }
+      //Pre-load sounds to be played into soundsDict to avoid audio lag issues
+      if(curStimHasSoundDisplayType()){
+        console.log("Sound type questions detected, pre-loading sounds");
+        preloadAudioFiles();
+      }else{
+        console.log("Non sound type detected");
+      }
+      if(curStimHasAudioDisplayType()){
+        console.log("image type questions detected, pre-loading images");
+        preloadImages();
+      }else{
+        console.log("Non image type detected");
+      }
 
-    //Go ahead and save the cluster mapping we found/created
-    Session.set("clusterMapping", clusterMapping);
-
-    //Notice that no matter what, we log something about condition data
-    //ALSO NOTICE that we'll be calling processUserTimesLog after the server
-    //returns and we know we've logged what happened
-    cb = function(){
-        recordUserTimeMulti(serverRecords, function() {
-          processUserTimesLog();
-          Session.set('inResume', false);
+      //Add some session data to the log message we're sending
+      conditionData = _.extend(conditionData, {
+          currentRootTdfName: Session.get("currentRootTdfName"),
+          currentTdfName: Session.get("currentTdfName"),
+          currentStimName: Session.get("currentStimName")
       });
-    }
 
-    checkSyllableCacheForCurrentStimFile(cb);
+      //Now we can create our record for the server - note that we use an array
+      //since we might add other records below
+      var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
+
+      //In addition to experimental condition, we allow a root TDF to specify
+      //that the xcond parameter used for selecting from multiple deliveryParms's
+      //is to be system assigned (as opposed to URL-specified)
+      if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
+          console.log("xcond for delivery params is sys assigned: searching");
+          var prevXCond = _.find(userTimesLog, function(entry) {
+              return entry && entry.action && entry.action === "xcondassign";
+          });
+
+          var xcondAction, xcondValue;
+
+          if (prevXCond) {
+              //Found it!
+              console.log("Found previous xcond for delivery");
+              xcondAction = "xcondnotify";
+              xcondValue = prevXCond.xcond;
+          }
+          else {
+              //Not present - we need to select one
+              console.log("NO previous xcond for delivery - selecting one");
+              xcondAction = "xcondassign";
+              var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
+              xcondValue = Math.floor(Math.random() * xcondCount);
+          }
+
+          console.log("Setting XCond from sys-selection", xcondValue);
+          Session.set("experimentXCond", xcondValue);
+
+          serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
+      }
+
+      //Find previous cluster mapping (or create if it's missing)
+      //Note that we need to wait until the exp condition is selected above so
+      //that we go to the correct TDF
+      var clusterMapping = _.find(userTimesLog, function(entry) {
+          return entry && entry.action && entry.action === "cluster-mapping";
+      });
+      if (!clusterMapping) {
+          //No cluster mapping! Need to create it and store for resume
+          //We process each pair of shuffle/swap together and keep processing
+          //until we have nothing left
+          var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+
+          //Note our default of a single no-op to insure we at least build a
+          //default cluster mapping
+          var shuffles = setSpec.shuffleclusters || [""];
+          var swaps = setSpec.swapclusters || [""];
+          clusterMapping = [];
+
+          while(shuffles.length > 0 || swaps.length > 0) {
+              clusterMapping = createStimClusterMapping(
+                  getStimClusterCount(),
+                  shuffles.shift() || "",
+                  swaps.shift() || "",
+                  clusterMapping
+              );
+          }
+
+          serverRecords.push(createUserTimeRecord("cluster-mapping", {
+              clusterMapping: clusterMapping
+          }));
+
+          console.log("Cluster mapping created", clusterMapping);
+      }
+      else {
+          //Found the cluster mapping record - extract the embedded mapping
+          clusterMapping = clusterMapping.clusterMapping;
+          console.log("Cluster mapping found", clusterMapping);
+      }
+
+      if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
+          console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
+          throw "The cluster mapping is invalid - can not continue";
+      }
+
+      //Go ahead and save the cluster mapping we found/created
+      Session.set("clusterMapping", clusterMapping);
+
+      //Notice that no matter what, we log something about condition data
+      //ALSO NOTICE that we'll be calling processUserTimesLog after the server
+      //returns and we know we've logged what happened
+      cb = function(){
+          recordUserTimeMulti(serverRecords, function() {
+            processUserTimesLog(userTimesLog);
+            Session.set('inResume', false);
+        });
+      }
+
+      checkSyllableCacheForCurrentStimFile(cb);
+    }
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
 //set up the TDF/Stim session variables
-processUserTimesLog = function(expKey) {
+processUserTimesLog = function(userTimesLogs) {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
@@ -2526,7 +2546,10 @@ processUserTimesLog = function(expKey) {
     //Reset current engine
     var resetEngine = function(currUnit) {
         let extensionData = {
-          cachedSyllables: cachedSyllables
+          cachedSyllables: cachedSyllables,
+          currentRootTdfName: Session.get("currentRootTdfName"),
+          currentTdfName: Session.get("currentTdfName"),
+          subTdfIndex: Session.get("subTdfIndex")
         }
 
         if (unitHasOption(currUnit, "assessmentsession")) {
@@ -2551,7 +2574,7 @@ processUserTimesLog = function(expKey) {
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
 
-    _.each(getCurrentUserTimesLog(expKey), function(entry) {
+    _.each(userTimesLogs, function(entry) {
         // IMPORTANT: this won't really work since we're in a tight loop. If we really
         // want to get this to work, we would need asynch loop processing (see
         // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
@@ -2786,6 +2809,12 @@ processUserTimesLog = function(expKey) {
     //If we make it here, then we know we won't need a resume until something
     //else happens
     Session.set("needResume", false);
+
+    //Initialize client side student performance
+    let curUser = Meteor.user();
+    let curTdf = Session.get("currentTdfName");
+    setStudentPerformance(curUser._id,curUser.username,curTdf);
+
     if (needFirstUnitInstructions) {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");

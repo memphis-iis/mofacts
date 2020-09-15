@@ -183,12 +183,13 @@ Template.registerHelper('isLoggedIn', function (){
 });
 
 Template.registerHelper('inPracticeModule', function(){
-  var curLocation = Router.current().location.get().path;
-  if(curLocation == "/card" || curLocation == "/instructions"){
-    return true;
-  }else{
-    return false;
-  }
+  return Session.get("curModule") == "card" || Session.get("curModule") == "instructions";
+  // var curLocation = Router.current().location.get().path;
+  // if(curLocation == "/card" || curLocation == "/instructions"){
+  //   return true;
+  // }else{
+  //   return false;
+  // }
 });
 
 Template.registerHelper('currentScore', function() {
@@ -197,4 +198,8 @@ Template.registerHelper('currentScore', function() {
 
 Template.registerHelper('isNormal', function() {
     return Session.get("loginMode") !== "experiment";
+});
+
+Template.registerHelper('curStudentPerformance', function() {
+  return Session.get("curStudentPerformance");
 });

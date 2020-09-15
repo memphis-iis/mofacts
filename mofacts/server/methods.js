@@ -336,6 +336,7 @@ Meteor.publish('Stimuli', function(){
 })
 
 Meteor.publish('specificUserTimesLog',function(userId){
+  Meteor.call("updatePerformanceData","utlQuery","server.specificUserTimesLog",this.userId);
   return UserTimesLog.find({_id:userId});
 })
 
@@ -657,6 +658,7 @@ Meteor.startup(function () {
           var loginTime = new Date();
           return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
         },
+
         generateUnusedIDs:function(numIDsToGen){
           var newIDs = [];
           var idMap = {};
@@ -1189,6 +1191,42 @@ Meteor.startup(function () {
         userTime: function (experiment, objectsToLog) {
             // No serverConsole call - it's handled by writeUserLogEntries
             writeUserLogEntries(experiment, objectsToLog);
+        },
+
+        updatePerformanceData: function(type,codeLocation,userId){
+          let timestamp = new Date();
+          let record = { userId, timestamp, codeLocation };
+          switch(type){
+            case "login":
+              LoginTimes.insert(record);
+            break;
+            case "utlQuery":
+              UtlQueryTimes.insert(record);
+            break;
+          }
+        },
+
+        isCurrentServerLoadTooHigh: function(){
+          let last50Logins = LoginTimes.find({},{sort:{$natural:-1},limit:50});
+          let last50UtlQueries = UtlQueryTimes.find({},{sort:{$natural:-1},limit:50}).fetch();
+
+          let loginsWithinAnHour = new Set();
+          let utlQueriesWithinFiveMin = [];
+          let now = new Date();
+          let oneHourAgo = new Date(now - (60*60*1000));
+          let fiveMinAgo = new Date(now - (5*60*1000));
+
+          for(var loginData of last50Logins){
+            if(loginData.timestamp > oneHourAgo){
+              loginsWithinAnHour.add(loginData.userId);
+            }
+          }
+
+          utlQueriesWithinFiveMin = last50UtlQueries.filter(x => x.timestamp > fiveMinAgo);
+
+          serverConsole("isCurrentServerLoadTooHigh, loginsWithinAnHour:" + loginsWithinAnHour.size + ", utlQueriesWithinFiveMin: " + utlQueriesWithinFiveMin.length);
+
+          return (loginsWithinAnHour.size > 10 || utlQueriesWithinFiveMin.length > 3);
         },
 
         //Let client code send console output up to server
