@@ -121,6 +121,14 @@ Template.signInSouthwest.onCreated(function(){
     console.log("systemOverloaded?",res,err);
     Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
   });
+  Meteor.call("getAltServerUrl",function(err,res){
+    if(!(err || !res)){
+      console.log("altServerUrl: " + res);
+      Session.set("altServerUrl",res);
+    }else{
+      console.log("can't get alt server url:",err,res);
+    }
+  })
 });
 
 Template.signInSouthwest.onRendered(function(){
@@ -161,6 +169,10 @@ Template.signInSouthwest.onRendered(function(){
 });
 
 Template.signInSouthwest.helpers({
+    'altServerUrl': function(){
+      return Session.get("altServerUrl");
+    },
+
     'systemDown': function(){
       return SYSTEM_DOWN && !Session.get("showTestLogins");
     },

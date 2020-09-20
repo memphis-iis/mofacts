@@ -27,6 +27,12 @@ var ownerEmail = Meteor.settings.owner;
 let isProd = Meteor.settings.prod || false;
 console.log("isProd: " + isProd);
 
+const thisServerUrl = Meteor.settings.ROOT_URL;
+console.log("thisServerUrl: " + thisServerUrl);
+
+const altServerUrl = Meteor.settings.ALT_URL;
+console.log("altServerUrl: " + altServerUrl);
+
 var clozeGeneration = require('./lib/Process.js');
 
 // Open file stream for active user log
@@ -571,6 +577,10 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+        getAltServerUrl:function(){
+          return altServerUrl;
+        },
+
         getClozesFromText:function(inputText){
           let clozes = ClozeAPI.GetSelectCloze(null,null,null,true,null,inputText);
           return clozes;
