@@ -1223,20 +1223,20 @@ Meteor.startup(function () {
           let loginsWithinAnHour = new Set();
           let utlQueriesWithinFiveMin = [];
           let now = new Date();
-          let oneHourAgo = new Date(now - (60*60*1000));
-          let fiveMinAgo = new Date(now - (5*60*1000));
+          let thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
+          let fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
 
           for(var loginData of last50Logins){
-            if(loginData.timestamp > oneHourAgo){
+            if(loginData.timestamp > thirtyMinAgo){
               loginsWithinAnHour.add(loginData.userId);
             }
           }
 
-          utlQueriesWithinFiveMin = last50UtlQueries.filter(x => x.timestamp > fiveMinAgo);
+          utlQueriesWithinFiveMin = last50UtlQueries.filter(x => x.timestamp > fifteenMinAgo);
 
           serverConsole("isCurrentServerLoadTooHigh, loginsWithinAnHour:" + loginsWithinAnHour.size + ", utlQueriesWithinFiveMin: " + utlQueriesWithinFiveMin.length);
 
-          return (loginsWithinAnHour.size > 10 || utlQueriesWithinFiveMin.length > 3);
+          return (loginsWithinAnHour.size > 10 || utlQueriesWithinFiveMin.length > 8);
         },
 
         //Let client code send console output up to server
