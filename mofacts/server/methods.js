@@ -177,7 +177,7 @@ function sendErrorReportSummaries(){
     for(var index in adminUsers){
       var admin = adminUsers[index];
       var from = ownerEmail;
-      var subject = "Error Reports Summary";
+      var subject = "Error Reports Summary - " + thisServerUrl;
       var text = "";
       for(var index2 in unsentErrorReports){
         var unsentErrorReport = unsentErrorReports[index2];
