@@ -20,88 +20,25 @@ var updateProfile = function(profile, newValues) {
     return result;
 }
 
-Meteor.methods({
-    samlLogout: function(provider) {
-        console.log("samlLogout");
-        // Make sure the user is logged in before initiate SAML SLO
-        if (!Meteor.userId()) {
-            throw new Meteor.Error("not-authorized");
-        }
-        var samlProvider = function(element) {
-            return (element.provider == provider)
-        }
-        providerConfig = Meteor.settings.saml.filter(samlProvider)[0];
-
-        if (Meteor.settings.debug) {
-            console.log("Logout request from " + JSON.stringify(providerConfig));
-        }
-        // This query should respect upcoming array of SAML logins
-        var user = Meteor.users.findOne({
-            _id: Meteor.userId(),
-            "services.saml.provider": provider
-        }, {
-            "services.saml": 1
-        });
-        var nameID = user.services.saml.nameID;
-        var nameIDFormat = user.services.saml.nameIDFormat;
-        var nameIDNameQualifier = user.services.saml.nameIDNameQualifier;
-        var sessionIndex = nameID = user.services.saml.idpSession;
-        if (Meteor.settings.debug) {
-            console.log("NameID for user " + Meteor.userId() + " found: " + JSON.stringify(nameID));
-        }
-
-        _saml = new SAML(providerConfig);
-
-        var request = _saml.generateLogoutRequest({
-            nameID: nameID,
-            nameIDFormat: nameIDFormat,
-            nameIDNameQualifier: nameIDNameQualifier,
-            sessionIndex: sessionIndex
-        });
-
-        // request.request: actual XML SAML Request
-        // request.id: communication id which will be mentioned in the ResponseTo field of SAMLResponse
-
-        Meteor.users.update({
-            _id: Meteor.userId()
-        }, {
-            $set: {
-                'services.saml.inResponseTo': request.id
-            }
-        });
-
-        var _syncRequestToUrl = Meteor.wrapAsync(_saml.requestToUrl, _saml);
-        var result = _syncRequestToUrl(request.request, "logout");
-        if (Meteor.settings.debug) {
-            console.log("SAML Logout Request " + result);
-        }
-
-
-        return result;
-    }
-})
-
 Accounts.registerLoginHandler(function(loginRequest) {
     if (!loginRequest.saml || !loginRequest.credentialToken) {
         console.log("not saml login request");
         return undefined;
     }
-    console.log("saml login handler, request: " + JSON.stringify(loginRequest));
+    serverConsole("samlLoginHandler, request:",loginRequest);
     var loginResult = Accounts.saml.retrieveCredential(loginRequest.credentialToken);
-    if (Meteor.settings.debug) {
-        console.log("RESULT42 :" + JSON.stringify(loginResult));
-    }
+    serverConsole("samlLoginHandler, result:" + JSON.stringify(loginResult));
     try{
         if (loginResult && loginResult.profile) {
-            console.log("Profile: " + JSON.stringify(loginResult.profile));
+            serverConsole("samlLoginHandler, profile: " + JSON.stringify(loginResult.profile));
             var localProfileMatchAttribute = Meteor.settings.saml[0].localProfileMatchAttribute.replace(/\./g,'_');
             var localFindStructure;
             var nameIDFormat;
             // Default nameIDFormat is emailAddress
             if (!(Meteor.settings.saml[0].identifierFormat)) {
-            nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+                nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
             } else {
-            nameIDFormat = Meteor.settings.saml[0].identifierFormat;
+                nameIDFormat = Meteor.settings.saml[0].identifierFormat;
             }
 
             if (nameIDFormat == "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" ) {
@@ -120,18 +57,15 @@ Accounts.registerLoginHandler(function(loginRequest) {
                 localFindStructure = 'profile.' + localProfileMatchAttribute;
                 }
             }
-            if (Meteor.settings.debug) {
-                console.log("Looking for user with " + localFindStructure + "=" + loginResult.profile[localProfileMatchAttribute]);
-            }
+            serverConsole("Looking for user with " + localFindStructure + "=" + loginResult.profile[localProfileMatchAttribute]);
             var user = Meteor.users.findOne({
                 //profile[Meteor.settings.saml[0].localProfileMatchAttribute]: loginResult.profile.nameID
                 [localFindStructure]: profileOrEmailValue
             });
 
             if (!user) {
-                console.log("no existing user found");
+                serverConsole("no existing user found");
                 if (Meteor.settings.saml[0].dynamicProfile) {
-                    
                     var newUser = {
                         password: Helpers.blankPassword(profileOrEmailValue),
                         username: profileOrEmailValue,
@@ -139,82 +73,57 @@ Accounts.registerLoginHandler(function(loginRequest) {
                             [localProfileMatchAttribute]: profileOrEmailValue
                         }
                     }
-                    if (Meteor.settings.debug) {
-                        console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[localProfileMatchAttribute]);
-                        console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
-                        console.log("Create user: " + JSON.stringify(newUser));
-                    }
+                    // console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[localProfileMatchAttribute]);
+                    // console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
+                    // console.log("Create user: " + JSON.stringify(newUser));
+
                     Accounts.createUser(newUser);
-                    console.log("#################");
-                    if (Meteor.settings.debug) {
-                        console.log("Trying to find user");
-                    }
+
+                    // console.log("#################");
+                    // console.log("Trying to find user");
+
                     user = Meteor.users.findOne({
                         "username": profileOrEmailValue
                     });
+
                     // update user profile w attrs from SAML Attr Satement
-                    //Meteor.user.update(user, )
-                    if (Meteor.settings.debug) {
-                        console.log("Profile for attributes: " + JSON.stringify(loginResult.profile));
-                        console.log("Created User: " + JSON.stringify(user));
-                    }
+                    //console.log("Profile for attributes: " + JSON.stringify(loginResult.profile));
+                    serverConsole("samlLoginHandler, Created User: " + JSON.stringify(user));
+
                     var attributeNames = Meteor.settings.saml[0].attributesSAML;
                     var meteorProfile = {};
                     if (attributeNames) {
-                    attributeNames.forEach(function(attribute) {
-                        meteorProfile[attribute] = loginResult.profile[attribute];
-                    });
+                        attributeNames.forEach(function(attribute) {
+                            meteorProfile[attribute] = loginResult.profile[attribute];
+                        });
                     }
-                    if (Meteor.settings.debug) {
-                        console.log("Profile for Meteor: " + JSON.stringify(meteorProfile));
-                    }
+                    serverConsole("samlLoginHandler, Profile for Meteor: " + JSON.stringify(meteorProfile));
                     Meteor.users.update(user, {
                         $set: {
                             "profile": updateProfile(user.profile, meteorProfile)
                         }
                     });
-                    if (Meteor.settings.debug) {
-                        console.log("Created new user");
-                    }
+                    // console.log("Created new user");
                 } else {
                     throw new Error("Could not find an existing user with supplied attribute  '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' and value:" + loginResult.profile[Meteor.settings.saml[0].localProfileMatchAttribute]);
                 }
             } else {
-                if (Meteor.settings.debug) {
-                    console.log("Meteor User Found. Will try to update profile with values from SAML Response.");
-                }
+                //console.log("Meteor User Found. Will try to update profile with values from SAML Response.");
                 var attributeNames = Meteor.settings.saml[0].attributesSAML;
                 var meteorProfile = {};
                 if (attributeNames) {
-                attributeNames.forEach(function(attribute) {
-                    meteorProfile[attribute] = loginResult.profile[attribute];
-                });
+                    attributeNames.forEach(function(attribute) {
+                        meteorProfile[attribute] = loginResult.profile[attribute];
+                    });
                 }
-                if (Meteor.settings.debug) {
-                    console.log("Profile Update for Meteor: " + JSON.stringify(meteorProfile));
-                }
-                if (Meteor.settings.debug) {
-                    var newProfile = updateProfile(user.profile, meteorProfile);
-                    console.log("New Profile: " + JSON.stringify(newProfile));
-                }
-                Meteor.users.update({
-                    _id: user._id
-                }, {
+                var newProfile = updateProfile(user.profile, meteorProfile);
+                serverConsole("samlLoginHandler, New Profile: " + JSON.stringify(newProfile));
+                Meteor.users.update({ _id: user._id },{
                     $set: {
-                        'profile': updateProfile(user.profile, meteorProfile)
+                        'profile': newProfile
                     }
                 });
             }
-
-
-
-            //creating the token and adding to the user
-            var stampedToken = Accounts._generateStampedLoginToken();
-            // Meteor.users.update(user, {
-            //     $push: {
-            //         'services.resume.loginTokens': stampedToken
-            //     }
-            // });
 
             var samlLogin = {
                 provider: Accounts.saml.RelayState,
@@ -225,41 +134,31 @@ Accounts.registerLoginHandler(function(loginRequest) {
                 nameIDNameQualifier: loginResult.profile.nameIDNameQualifier
             };
 
-            console.log("samlLogin: " + JSON.stringify(samlLogin));
+            serverConsole("samlLoginHandler, samlLogin: " + JSON.stringify(samlLogin));
 
-            Meteor.users.update({
-                _id: user._id
-            }, {
+            Meteor.users.update({ _id: user._id },{
                 $set: {
-                    // TBD this should be pushed, otherwise we're only able to SSO into a single IDP at a time
                     'services.saml': samlLogin
                 }
             });
 
             if (loginResult.profile.uid) {
-                Meteor.users.update({
-                    _id: user._id
-                }, {
+                Meteor.users.update({ _id: user._id },{
                     $set: {
-                        // TBD this should be pushed, otherwise we're only able to SSO into a single IDP at a time
                         'uid': loginResult.profile.uid
                     }
                 });
             }
 
-            //sending token along with the userId
-            var result = {
-                userId: user._id//,
-                //token: stampedToken.token
-            };
+            var result = { userId: user._id };
 
-            console.log("result: " + JSON.stringify(result));
+            serverConsole("samlLoginHandler, result: " + JSON.stringify(result));
 
             //loginRequest.userCallback(null,result);
 
             return result;
         } else {
-            console.log("error in saml login handler");
+            serverConsole("samlLoginHandler, error in saml login handler");
             throw new Error("SAML Assertion did not contain a proper SAML subject value");
         }
     }catch(err){
@@ -270,21 +169,18 @@ Accounts.registerLoginHandler(function(loginRequest) {
 
 Accounts.saml._loginResultForCredentialToken = {};
 
-Accounts.saml.hasCredential = function(credentialToken) {
-    return _.has(Accounts.saml._loginResultForCredentialToken, credentialToken);
-}
+// Accounts.saml.hasCredential = function(credentialToken) {
+//     return _.has(Accounts.saml._loginResultForCredentialToken, credentialToken);
+// }
 
 Accounts.saml.retrieveCredential = function(credentialToken) {
-    console.log("retrieve credential: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
+    serverConsole("retrieveCredential: ",credentialToken,JSON.stringify(Accounts.saml._loginResultForCredentialToken));
     // The credentialToken in all these functions corresponds to SAMLs inResponseTo field and is mandatory to check.
-    var result = JSON.parse(JSON.stringify(Accounts.saml._loginResultForCredentialToken[credentialToken]));
-    console.log("result, retrieve credential: " + JSON.stringify(result));
+    var result = JSON.parse(JSON.stringify((Accounts.saml._loginResultForCredentialToken[credentialToken] || {})));
+    serverConsole("retrieveCredential, result: " + JSON.stringify(result));
     delete Accounts.saml._loginResultForCredentialToken[credentialToken];
-    console.log("result, retrieve credential2: " + JSON.stringify(result));
     return result;
 }
-
-
 
 // Listen to incoming SAML http requests
 WebApp.connectHandlers.use(bodyParser.urlencoded({
@@ -325,11 +221,12 @@ middleware = function(req, res, next) {
             throw new Error("Unexpected SAML service " + samlObject.serviceName);
         }
 
-        console.log("request, body: " + JSON.stringify(req.body) + ", query: " + JSON.stringify(req.query) + ", headers: " + JSON.stringify(req.headers));
+        serverConsole("saml_server,middleware","request, body: " + JSON.stringify(req.body) + ", query: " + JSON.stringify(req.query) + ", headers: " + JSON.stringify(req.headers));
+        serverConsole("saml_server,middleware","request2, body: ",req.body,", query: ",req.query,", headers: ",req.headers);
             
         switch (samlObject.actionName) {
             case "metadata":
-                console.log("metadata");
+                serverConsole("saml_server,middleware","metadata");
                 _saml = new SAML(service);
                 service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");
                 res.writeHead(200);
@@ -337,35 +234,25 @@ middleware = function(req, res, next) {
                 res.end();
                 break;
             case "logout":
-                console.log("logout");
                 // This is where we receive SAML LogoutResponse
-                if (Meteor.settings.debug) {
-                    console.log("Handling call to 'logout' endpoint." + req.query.SAMLResponse);
-                }
+                serverConsole("saml_server,middleware","Handling call to logout endpoint." + req.query.SAMLResponse);
                 _saml = new SAML(service);
                 _saml.validateLogoutResponse(req.query.SAMLResponse, function(err, result) {
                     if (!err) {
                         var logOutUser = function(inResponseTo) {
-                            if (Meteor.settings.debug) {
-                                console.log("Logging Out user via inResponseTo " + inResponseTo);
-                            }
-                            var loggedOutUser = Meteor.users.find({
-                                'services.saml.inResponseTo': inResponseTo
-                            }).fetch();
+                            serverConsole("saml_server,middleware","Logging Out user via inResponseTo " + inResponseTo);
+                            var loggedOutUser = Meteor.users.find({'services.saml.inResponseTo': inResponseTo}).fetch();
                             if (loggedOutUser.length == 1) {
-                                if (Meteor.settings.debug) {
-                                    console.log("Found user " + loggedOutUser[0]._id);
-                                }
-                                Meteor.users.update({
-                                    _id: loggedOutUser[0]._id
-                                }, {
+                                var loggedOutUserID = loggedOutUser[0]._id
+                                serverConsole("saml_server,middleware","Found user " + loggedOutUserID);
+
+                                Meteor.users.update({ _id: loggedOutUserID }, {
                                     $set: {
                                         "services.resume.loginTokens": []
                                     }
                                 });
-                                Meteor.users.update({
-                                    _id: loggedOutUser[0]._id
-                                }, {
+
+                                Meteor.users.update({ _id: loggedOutUserID }, {
                                     $unset: {
                                         "services.saml": ""
                                     }
@@ -379,21 +266,17 @@ middleware = function(req, res, next) {
                             logOutUser(result);
                         }).run();
 
-
                         res.writeHead(302, {
                             'Location': req.query.RelayState
                         });
                         res.end();
                     } else {
-                        console.log("error validating logout response: " + JSON.stringify(err));
-                      if (Meteor.settings.debug) {
-                          console.log("Couldn't validate SAML Logout Response..");
-                      }
+                        serverConsole("error validating logout response: " + JSON.stringify(err));
                     }
                 })
                 break;
             case "sloRedirect":
-                console.log("sloRedirect: " + idpLogout);
+                serverConsole("saml_server,middleware","sloRedirect: " + idpLogout);
                 var idpLogout = req.query.redirect
                 res.writeHead(302, {
                     // credentialToken here is the SAML LogOut Request that we'll send back to IDP
@@ -402,55 +285,53 @@ middleware = function(req, res, next) {
                 res.end();
                 break;
             case "authorize":
-                console.log("authorize");
+                serverConsole("saml_server,middleware","authorize");
                 service.callbackUrl = Meteor.absoluteUrl("sw-adfs/postResponse");
                 service.credentialToken = samlObject.credentialToken;
                 _saml = new SAML(service);
                 _saml.getAuthorizeForm(req, function(err, data) {
                     if (err){
-                        console.log("error in authorize: " + JSON.stringify(err) + ", url: " + url);
+                        serverConsole("saml_server,middleware","error in authorize: " + JSON.stringify(err) + ", url: " + url);
                         throw new Error("Unable to generate authorize url");
                     }
-                    console.log("obj keys: " + Object.keys(req));
+                    serverConsole("saml_server,middleware","obj keys: " + Object.keys(req));
                     res.writeHead(200, {
                         'Content-Type': 'text/html; charset=UTF-8'
                     });
                     res.write(data);
                     res.end();
-                    console.log("finished authorize successfully!");
+                    serverConsole("saml_server,middleware","finished authorize successfully!");
                 });
                 break;
             //case "validate":
             case "postResponse":
-                console.log("postResponse");
+                serverConsole("saml_server,middleware","postResponse");
                 _saml = new SAML(service);
-                if (Meteor.settings.debug) {
-                  console.log("Service: " + JSON.stringify(service));
-                };
                 Accounts.saml.RelayState = req.body.RelayState;
                 _saml.validateResponse(req.body.SAMLResponse, req.body.RelayState, function(err, profile, loggedOut) {
                     if (err){
-                        console.log("error validating response: " + JSON.stringify(err));
+                        serverConsole("saml_server,middleware","error validating response: " + JSON.stringify(err));
                         throw new Error("Unable to validate response url: " + err);
                     }
-                        
 
                     var credentialToken = profile.inResponseToId || profile.InResponseTo || samlObject.credentialToken;
                     if (!credentialToken){
-                        console.log("no credential token");
-                        throw new Error("Unable to determine credentialToken");
+                        serverConsole("saml_server,middleware","no credential token");
+                        closePopup(res,"Unable to determine credentialToken");
+                        serverConsole("saml_server,middleware","Unable to determine credentialToken",profile,samlObject,Accounts.saml._loginResultForCredentialToken);
+                        return;
+                        //throw new Error("Unable to determine credentialToken");
                     }
                         
                     Accounts.saml._loginResultForCredentialToken[credentialToken] = {
                         profile: profile
                     };
-                    console.log("postResponse, validateResponse closePopup: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
+                    serverConsole("saml_server,middleware","postResponse, validateResponse closePopup: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
                     closePopup(res);
                 });
                 break;
             default:
                 throw new Error("Unexpected SAML action " + samlObject.actionName);
-
         }
     // } catch (err) {
     //     console.log("middleware close popup");
@@ -463,9 +344,9 @@ var samlUrlToObject = function(url) {
         return null;
 
     var splitPath = url.split('/');
+    serverConsole("samlUrlToObject: ",JSON.stringify(url),JSON.stringify(splitPath));
 
-    // Any non-saml request will continue down the default
-    // middlewares.
+    // Any non-saml request will continue down the default middlewares.
     if (splitPath[1] !== 'sw-adfs')
         return null;
 
@@ -474,10 +355,6 @@ var samlUrlToObject = function(url) {
         serviceName: splitPath[3],
         credentialToken: splitPath[4]
     };
-    if (Meteor.settings.debug) {
-        console.log(result);
-    }
-    console.log("samlUrlToObject: " + JSON.stringify(url) + ", object: " + JSON.stringify(result));
     return result;
 };
 
@@ -488,8 +365,8 @@ var closePopup = function(res, err) {
     var content =
         '<html><head><script>window.close()</script></head><body><H1>Verified</H1></body></html>';
     if (err){
-        content = '<html><body><h2>Sorry, an annoying error occured</h2><div>' + err + '</div><a onclick="window.close();">Close Window</a></body></html>';
+        content = '<html><body><h2>Sorry, an error occured</h2><div>' + err + '</div><a onclick="window.close();">Close Window</a></body></html>';
+        serverConsole("closePopupError:",JSON.stringify(err));
     }
-    console.log("error: " + JSON.stringify(err));
     res.end(content, 'utf-8');
 };

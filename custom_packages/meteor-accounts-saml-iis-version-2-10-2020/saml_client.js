@@ -91,6 +91,7 @@ clientGenerateUniqueID = function() {
 Meteor.loginWithSaml = function (options, callback) {
     options = options || {};
     var credentialToken = clientGenerateUniqueID();
+    console.log("credentialToken:",credentialToken);
     options.credentialToken = credentialToken;
 
     Accounts.saml.initiateLogin(options, function (error, result) {
@@ -103,16 +104,4 @@ Meteor.loginWithSaml = function (options, callback) {
             userCallback: callback
         });
     });
-};
-
-Meteor.logoutWithSaml = function (options, callback) {
-    //Accounts.saml.idpInitiatedSLO(options, callback); 
-    Meteor.call("samlLogout", options.provider, function (err, result) {
-        console.log("LOC " + result);
-                // A nasty bounce: 'result' has the SAML LogoutRequest but we need a proper 302 to redirected from the server.
-        //window.location.replace(Meteor.absoluteUrl("_saml/sloRedirect/" + options.provider + "/?redirect="+result));
-        window.location.replace(Meteor.absoluteUrl("sw-adfs/sloRedirect/" + options.provider + "/?redirect="+encodeURIComponent(result)));
-    });
-
-
 };
