@@ -4,6 +4,7 @@
 .project
 .settings
 mofacts/build/*.tar.gz
+mofacts/build/mof*
 .pyc
 .test_results
 .test*.sh
