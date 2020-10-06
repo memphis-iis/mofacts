@@ -537,13 +537,8 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
 
 };
 
-let decryptionCert;
 SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
-    console.log("SAML.generateServiceProviderMetadata",JSON.stringify(decryptionCert));
-    if (!decryptionCert) {
-        decryptionCert = this.options.privateCert;
-        console.log("generateServiceProviderMetadata, 2: " + JSON.stringify(decryptionCert));
-    }
+    console.log("SAML.generateServiceProviderMetadata");
 
     if (!this.options.callbackUrl && !callbackUrl) {
         throw new Error('Unable to generate service provider metadata when callbackUrl option is not set');
@@ -563,7 +558,7 @@ SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
                 },
                 'NameIDFormat': this.options.identifierFormat,
                 'AssertionConsumerService': {
-                    '@index': '1',
+                    '@index': '0',
                     '@isDefault': 'true',
                     '@Binding': 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
                     '@Location': callbackUrl
@@ -572,24 +567,43 @@ SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
         }
     };
 
-    if (this.options.privateKey) {
-        if (!decryptionCert) {
-            throw new Error(
-                'Missing decryptionCert while generating metadata for decrypting service provider');
-        }
+    metadata.EntityDescriptor.SPSSODescriptor.KeyDescriptor=[];
+
+    // if (this.options.privateCert) {
+    //   let signingCert = JSON.parse(JSON.stringify(this.options.privateCert));
+    //   signingCert = signingCert.replace( /-+BEGIN CERTIFICATE-+\r?\n?/, '' );
+    //   signingCert = signingCert.replace( /-+END CERTIFICATE-+\r?\n?/, '' );
+    //   signingCert = signingCert.replace( /\r\n/g, '\n' );
+
+    //   metadata.EntityDescriptor.SPSSODescriptor.KeyDescriptor.push({
+    //     '@use': 'signing',
+    //     'ds:KeyInfo' : {
+    //       'ds:X509Data' : {
+    //         'ds:X509Certificate': {
+    //           '#text': signingCert
+    //         }
+    //       }
+    //     }
+    //   });
+    // }
+
+    if (this.options.privateCert) {
+        let decryptionCert = JSON.parse(JSON.stringify(this.options.privateCert));
 
         decryptionCert = decryptionCert.replace(/-+BEGIN CERTIFICATE-+\r?\n?/, '');
         decryptionCert = decryptionCert.replace(/-+END CERTIFICATE-+\r?\n?/, '');
         decryptionCert = decryptionCert.replace(/\n/g, '');
 
-        metadata['EntityDescriptor']['SPSSODescriptor']['KeyDescriptor'] = {
+        metadata['EntityDescriptor']['SPSSODescriptor']['KeyDescriptor'].push({
+            '@use':'encryption',
             'ds:KeyInfo': {
                 'ds:X509Data': {
                     'ds:X509Certificate': {
                         '#text': decryptionCert
                     }
                 }
-            },
+            }
+            ,
             'EncryptionMethod': [
                 // this should be the set that the xmlenc library supports
                 {
@@ -602,7 +616,18 @@ SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
                     '@Algorithm': 'http://www.w3.org/2001/04/xmlenc#tripledes-cbc'
                 }
             ]
-        };
+        });
+
+        metadata.EntityDescriptor.SPSSODescriptor.KeyDescriptor.push({
+            '@use': 'signing',
+            'ds:KeyInfo' : {
+              'ds:X509Data' : {
+                'ds:X509Certificate': {
+                  '#text': decryptionCert
+                }
+              }
+            }
+          });
     }
 
     return xmlbuilder.create(metadata).end({
