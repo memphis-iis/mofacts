@@ -254,8 +254,9 @@ function defaultUnitEngine(extensionData) {
     
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
             let currentQuestionPart2 = undefined;
-            let currentStimAnswer = getStimAnswer(cardIndex, whichStim).toLowerCase();
+            let currentStimAnswer = getStimAnswer(cardIndex, whichStim);
             Session.set("originalAnswer",currentStimAnswer);
+            currentStimAnswer = currentStimAnswer.toLowerCase();
     
             //If we have a dual prompt question populate the spare data field
             if(currentQuestion && currentQuestion.indexOf("|") != -1){

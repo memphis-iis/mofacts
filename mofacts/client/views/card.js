@@ -1023,7 +1023,9 @@ function newQuestionHandler() {
         }
 
         if(!correctButtonPopulated){
-          let correctAnswer = Answers.getDisplayAnswerText(Session.get("currentAnswer"));
+          //If we're using button images we need to get the answer string (aka image url) in its original case, in case part of the path is capitalized
+          let currentAnswer = getResponseType() == "image" ? Session.get("originalAnswer") : Session.get("currentAnswer");
+          let correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
           buttonChoices.unshift(correctAnswer);
         }
 
@@ -1721,13 +1723,20 @@ function startQuestionTimeout(textFocus) {
 }
 
 function showUserInteraction(isGoodNews, news) {
-    // We know we always do this regardless of settings
-    $("#UserInteraction")
-        .removeClass("alert-success alert-danger")
-        .addClass("text-align alert")
-        .addClass(isGoodNews ? "alert-success" : "alert-danger")
-        .text(news)
-        .show();
+    //For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
+    if(!isGoodNews && getButtonTrial() && getResponseType() == "image"){
+      $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
+      let buttonImageFeedback = "Incorrect.  The correct response is displayed below.";
+      let correctImageSrc = Session.get("originalAnswer");
+      $("#UserInteraction").html('<p class="text-align alert alert-danger">' + buttonImageFeedback + '</p><img id="userInteractionImage" src="' + correctImageSrc + '" style="width: 150px;height:150px;">').show();
+    }else{
+      $("#UserInteraction")
+      .removeClass("alert-success alert-danger")
+      .addClass("text-align alert")
+      .addClass(isGoodNews ? "alert-success" : "alert-danger")
+      .text(news)
+      .show();
+    }    
 
     speakMessageIfAudioPromptFeedbackEnabled(news,false,"feedback");
 
