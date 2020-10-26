@@ -1,9 +1,10 @@
-import { curSemester, SYSTEM_DOWN } from '../../common/Definitions';
+import { curSemester } from '../../common/Definitions';
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
 Session.set("curClass",{});
 Session.set("systemOverloaded",false);
+Session.set("systemDown",true);
 
 function getUrlVars()
 {
@@ -117,6 +118,11 @@ setClass = function(curClassID){
 }
 
 Template.signInSouthwest.onCreated(function(){
+  Session.set("loginMode","southwest");
+  Meteor.call('isSystemDown',function(err, systemDown){
+    console.log("SYSTEM_DOWN:",systemDown);
+    Session.set("systemDown",systemDown);
+  });
   Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
     console.log("systemOverloaded?",res,err);
     Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
@@ -128,21 +134,8 @@ Template.signInSouthwest.onCreated(function(){
     }else{
       console.log("can't get alt server url:",err,res);
     }
-  })
-});
+  });
 
-Template.signInSouthwest.onRendered(function(){
-  Session.set("loginMode","southwest");
-  window.onpopstate = function(event){
-    console.log("window popstate signin southwest");
-    if(document.location.pathname == "/signInSouthwest"){
-      Session.set("curTeacher",{});
-      Session.set("curClass",{});
-      $("#initialInstructorSelection").prop('hidden','');
-      $("#classSelection").prop('hidden','true');
-      $(".login").prop('hidden','true');
-    }
-  }
   Meteor.subscribe('allTeachers',function () {
     var teachers = Meteor.users.find({}).fetch();
     var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
@@ -168,13 +161,26 @@ Template.signInSouthwest.onRendered(function(){
   });
 });
 
+Template.signInSouthwest.onRendered(function(){
+  window.onpopstate = function(event){
+    console.log("window popstate signin southwest");
+    if(document.location.pathname == "/signInSouthwest"){
+      Session.set("curTeacher",{});
+      Session.set("curClass",{});
+      $("#initialInstructorSelection").prop('hidden','');
+      $("#classSelection").prop('hidden','true');
+      $(".login").prop('hidden','true');
+    }
+  }
+});
+
 Template.signInSouthwest.helpers({
     'altServerUrl': function(){
       return Session.get("altServerUrl");
     },
 
     'systemDown': function(){
-      return SYSTEM_DOWN && !Session.get("showTestLogins");
+      return Session.get("systemDown") && !Session.get("showTestLogins");
     },
 
     'systemOverloaded': function(){

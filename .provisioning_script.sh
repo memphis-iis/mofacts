@@ -52,6 +52,9 @@ sudo systemctl restart mongod
 # Install Java 8
 sudo apt-get install -y openjdk-8-jre
 
+# Set up dynamic config
+mofacts/scripts/server/setDynamicConfig.sh
+
 # Set up syllable systemd service
 sudo cp /vagrant/syllables_subsystem/syllable.service /etc/systemd/system/
 sudo systemctl daemon-reload
