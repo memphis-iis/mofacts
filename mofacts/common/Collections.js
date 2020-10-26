@@ -14,3 +14,4 @@ ClozeEditHistory = new Mongo.Collection("clozeEditHistory");
 ErrorReports = new Mongo.Collection("errorReports");
 LoginTimes = new Mongo.Collection("loginTimes");
 UtlQueryTimes = new Mongo.Collection("utlQueryTimes");
+DynamicConfig = new Mongo.Collection("dynamicConfig");

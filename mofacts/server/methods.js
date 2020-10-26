@@ -1216,24 +1216,27 @@ Meteor.startup(function () {
       isCurrentServerLoadTooHigh: function(){
         let last50Logins = LoginTimes.find({},{sort:{$natural:-1},limit:50});
         let last50UtlQueries = UtlQueryTimes.find({},{sort:{$natural:-1},limit:50}).fetch();
+        let curConfig = DynamicConfig.findOne({});
+        let { loginsWithinAHalfHourLimit,utlQueriesWithinFifteenMinLimit } = curConfig.serverLoadConstants;//10,8
 
-        let loginsWithinAnHour = new Set();
-        let utlQueriesWithinFiveMin = [];
+        let loginsWithinAHalfHour = new Set();
+        let utlQueriesWithinFifteenMin = [];
         let now = new Date();
         let thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
         let fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
 
         for(var loginData of last50Logins){
           if(loginData.timestamp > thirtyMinAgo){
-            loginsWithinAnHour.add(loginData.userId);
+            loginsWithinAHalfHour.add(loginData.userId);
           }
         }
 
-        utlQueriesWithinFiveMin = last50UtlQueries.filter(x => x.timestamp > fifteenMinAgo);
+        utlQueriesWithinFifteenMin = last50UtlQueries.filter(x => x.timestamp > fifteenMinAgo);
+        let currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit || utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
-        serverConsole("isCurrentServerLoadTooHigh, loginsWithinAnHour:" + loginsWithinAnHour.size + ", utlQueriesWithinFiveMin: " + utlQueriesWithinFiveMin.length);
+        serverConsole("isCurrentServerLoadTooHigh:" + currentServerLoadIsTooHigh + ", loginsWithinAHalfHour:" + loginsWithinAHalfHour.size + "/" + loginsWithinAHalfHourLimit + ", utlQueriesWithinFifteenMin:" + utlQueriesWithinFifteenMin.length + "/" + utlQueriesWithinFifteenMinLimit);
 
-        return (loginsWithinAnHour.size > 10 || utlQueriesWithinFiveMin.length > 8);
+        return currentServerLoadIsTooHigh;
       },
 
       //Let client code send console output up to server
