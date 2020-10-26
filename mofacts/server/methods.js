@@ -1213,6 +1213,11 @@ Meteor.startup(function () {
         }
       },
 
+      isSystemDown: function(){
+        let curConfig = DynamicConfig.findOne({});
+        return curConfig.isSystemDown;
+      },
+
       isCurrentServerLoadTooHigh: function(){
         let last50Logins = LoginTimes.find({},{sort:{$natural:-1},limit:50});
         let last50UtlQueries = UtlQueryTimes.find({},{sort:{$natural:-1},limit:50}).fetch();
