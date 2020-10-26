@@ -17,9 +17,7 @@
 		<unitinstructions> Click the OK button to hear one example of a minor 3rd as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -50,9 +48,7 @@
 		<unitinstructions> Click the OK button to hear one example of a major 3rd as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -83,9 +79,7 @@
 		<unitinstructions> Click the OK button to hear one example of a tritone as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -116,9 +110,7 @@
 		<unitinstructions> Click the OK button to hear one example of a perfect 5th as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -149,9 +141,7 @@
 		<unitinstructions> Click the OK button to hear one example of a major 7th as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -182,9 +172,7 @@
 		<unitinstructions> Click the OK button to hear one example of an octave as a harmony and as a melody (not necessarily in that order).
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -217,9 +205,7 @@
 			This pretest will get an initial measure of your skill in the task, and will be followed by 108 practice sounds, and (either 2 minutes, 1 day, or 7 days later) a posttest of 72 sounds.
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -285,9 +271,7 @@
 			Listen to each sound and indicate which musical interval you just heard.
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
@@ -380,9 +364,7 @@
 			Listen to each sound, then click on the name of the interval you just heard. After a correct response, you will be shown the next interval. After each incorrect response, you will be provided with review to help you learn.
 		</unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</wrongButtonOptions>
+		<buttonOptions>Octave, Major 7th, Perfect 5th, Tritone, Major 3rd, Minor 3rd</buttonOptions>
 		<deliveryparams>
 			<purestudy>3000</purestudy>
 			<reviewstudy>3000</reviewstudy>
