@@ -36,21 +36,26 @@ console.log("altServerUrl: " + altServerUrl);
 var clozeGeneration = require('./lib/Process.js');
 
 //For Southwest SSO with ADFS/SAML 2.0
-for (i = 0; i < Meteor.settings.saml.length; i++) {
-  // privateCert is weird name, I know. spCert is better one. Will need to refactor
-  if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
-      console.log("Set keys/certs for " + Meteor.settings.saml[i].provider);
-      Meteor.settings.saml[i].privateCert = Assets.getText(Meteor.settings.saml[i].publicCertFile);
-      Meteor.settings.saml[i].privateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
-  } else {
-      console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
+if(Meteor.settings.saml){
+  console.log("reading SAML settings");
+  for (i = 0; i < Meteor.settings.saml.length; i++) {
+    // privateCert is weird name, I know. spCert is better one. Will need to refactor
+    if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
+        console.log("Set keys/certs for " + Meteor.settings.saml[i].provider);
+        Meteor.settings.saml[i].privateCert = Assets.getText(Meteor.settings.saml[i].publicCertFile);
+        Meteor.settings.saml[i].privateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
+    } else {
+        console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
+    }
   }
 }
 
-console.log("reading feedbackdata");
-var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
-console.log("initializing feedback");
-DefinitionalFeedback.Initialize(feedbackData);
+if(Meteor.settings.definitionalFeedbackDataLocation){
+  console.log("reading feedbackdata");
+  var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
+  console.log("initializing feedback");
+  DefinitionalFeedback.Initialize(feedbackData);
+}
 
 //Helper functions
 
