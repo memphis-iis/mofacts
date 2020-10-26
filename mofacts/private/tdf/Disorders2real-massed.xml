@@ -19,9 +19,7 @@
 		<unitname>Psychological Disorders Study Phase</unitname>
 		<unitinstructions><![CDATA[Study Phase<br><br> Read the following case studies and diagnoses.<br><br>Each slide will advance for you automatically after a set period of time.]]></unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Obsessive Compulsive Disorder, Anxiety, Schizophrenia, Bipolar, Dissociative Identity Disorder, Depression</wrongButtonOptions>
+		<buttonOptions>Obsessive Compulsive Disorder, Anxiety, Schizophrenia, Bipolar, Dissociative Identity Disorder, Depression</buttonOptions>
 		<deliveryparams>
 			<fontsize>4</fontsize>
 			<purestudy>30000</purestudy>
@@ -104,9 +102,7 @@
 		<unitname>Post-Test</unitname>
 		<unitinstructions><![CDATA[For the following portion of the experiment, you will be given case studies of the psychological disorders you have previously studied in the beginning of this experiment.<br><br>In this section, each case study will be presented on screen and you will be asked to identify the appropriate diagnosis by clicking on the corresponding button.<br><br> If you identify the correct diagnosis you will receive feedback that it is correct, if the diagnosis is incorrect you will be given a review period to re read the case study and learn the correct disorder.]]></unitinstructions>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>Obsessive Compulsive Disorder, Anxiety, Schizophrenia, Bipolar, Dissociative Identity Disorder, Depression</wrongButtonOptions>
+		<buttonOptions>Obsessive Compulsive Disorder, Anxiety, Schizophrenia, Bipolar, Dissociative Identity Disorder, Depression</buttonOptions>
 		<deliveryparams>
 			<fontsize>4</fontsize>
 			<purestudy>12000000</purestudy>

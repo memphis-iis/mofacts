@@ -277,7 +277,7 @@
 		<unitinstructions><![CDATA[The following survey tests your recall of authors. Please pick TRUE if you are sure it is a real author and pick FALSE if you are not sure or know it is fake.]]></unitinstructions>
 		<unitname>Author Recognition Survey for A&amp;P Students</unitname>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonOptions>True, False</wrongButtonOptions>
+		<buttonOptions>True, False</buttonOptions>
 		<assessmentsession>
 			<conditiontemplatesbygroup>
 				<groupnames>A</groupnames>

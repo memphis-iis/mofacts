@@ -9,9 +9,7 @@
 		<unitinstructions>Here comes the optim test.</unitinstructions>
 		<unitname>Tone pre-test</unitname>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>tone 1, tone 2, tone 3, tone 4</wrongButtonOptions>
+		<buttonOptions>tone 1, tone 2, tone 3, tone 4</buttonOptions>
 		<deliveryparams>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>7000</drill>
@@ -110,9 +108,7 @@ console.log(p.probability )
 		<unitinstructions>Here comes the post-test.</unitinstructions>
 		<unitname>Tone post-test</unitname>
 		<buttonorder>fixed</buttonorder>
-		<wrongButtonCount/>
-		<!-- Default to len of wrongButtonOptions -->
-		<wrongButtonOptions>tone 1, tone 2, tone 3, tone 4</wrongButtonOptions>
+		<buttonOptions>tone 1, tone 2, tone 3, tone 4</buttonOptions>
 		<deliveryparams>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>7000</drill>
