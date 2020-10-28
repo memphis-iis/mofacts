@@ -1728,7 +1728,7 @@ function showUserInteraction(isGoodNews, news) {
       $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
       let buttonImageFeedback = "Incorrect.  The correct response is displayed below.";
       let correctImageSrc = Session.get("originalAnswer");
-      $("#UserInteraction").html('<p class="text-align alert alert-danger">' + buttonImageFeedback + '</p><img id="userInteractionImage" src="' + correctImageSrc + '" style="width: 150px;height:150px;">').show();
+      $("#UserInteraction").html('<p class="text-align alert alert-danger">' + buttonImageFeedback + '</p><img style="background: url(' + correctImageSrc + '); background-size:100%; background-repeat: no-repeat;" disabled="" class="btn-alt btn-block btn-image btn-responsive">').show();
     }else{
       $("#UserInteraction")
       .removeClass("alert-success alert-danger")
