@@ -1,3 +1,5 @@
+import { DialogueUtils } from '../../lib/DialogueUtils';
+
 /*
 card.js - the implementation behind card.html (and thus
 the main GUI implementation for MoFaCTS).
@@ -1867,7 +1869,7 @@ processLINEAR16 = function(data){
   recorder.clear();
   var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
 
-  if(userAnswer || getButtonTrial()){
+  if(userAnswer || getButtonTrial() || DialogueUtils.isUserInDialogueLoop()){
     var sampleRate = Session.get("sampleRate");
     var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
@@ -1887,16 +1889,20 @@ processLINEAR16 = function(data){
         phraseHints.push(curChar);
       }
     }else{
-      userAnswer.value = "waiting for transcription";
-      phraseHints = getAllCurrentStimAnswers(true);
+      if (DialogueUtils.isUserInDialogueLoop()) {
+        DialogueUtils.setDialogueUserAnswerValue('waiting for transcription');
+      } else {
+        userAnswer.value = "waiting for transcription";
+        phraseHints = getAllCurrentStimAnswers(true);
+      }
     }
 
     var request = generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data);
 
     var answerGrammar;
-    if(getButtonTrial()){
+    if(getButtonTrial()) {
       answerGrammar = phraseHints;
-    }else{
+    } else if (!DialogueUtils.isUserInDialogueLoop()){
       //We call getAllCurrentStimAnswers again but not excluding phrase hints that
       //may confuse the speech api so that we can check if what the api returns
       //is within the realm of reasonable responses before transcribing it
@@ -1980,35 +1986,47 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         ignoredOrSilent = true;
       }
 
-      if(getButtonTrial()){
+      if (getButtonTrial()) {
         console.log("button trial, setting user answer to verbalChoice");
         userAnswer = $("[verbalChoice='" + transcript + "']")[0];
-        if(!userAnswer){
+        if (!userAnswer) {
           console.log("Choice couldn't be found");
           ignoredOrSilent = true;
         }
-      }else{
+      } else if (DialogueUtils.isUserInDialogueLoop()) {
+        console.log("dialogue loop -> transcribe to dialogue user answer");
+        DialogueUtils.setDialogueUserAnswerValue(transcript);
+      } else {
         userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
         console.log("regular trial, transcribing user response to user answer box");
         userAnswer.value = transcript;
       }
-      if(ignoredOrSilent){
+      if (ignoredOrSilent) {
         //Reset recording var so we can try again since we didn't get anything good
         Session.set('recording',true);
         recorder.record();
         //If answer is out of grammar or we pick up silence wait 5 seconds for
         //user to read feedback then clear the answer value
-        if(!getButtonTrial()){
-          setTimeout(function(){
-            userAnswer.value = "";
-          }, 5000);
+        if (!getButtonTrial()) {
+          if (DialogueUtils.isUserInDialogueLoop()) {
+
+          } else {
+            setTimeout(function(){
+              userAnswer.value = "";
+            }, 5000);
+          }
         }
-      }else{
+      } else {
         //Only simulate enter key press if we picked up transcribable/in grammar
         //audio for better UX
-        if(getButtonTrial()){
+        if (getButtonTrial()) {
             handleUserInput({answer:userAnswer},"voice");
-        }else{
+        } else if (DialogueUtils.isUserInDialogueLoop()) {
+          const answer = DialogueUtils.getDialogueUserAnswerValue();
+          dialogueUserAnswers.push(answer);
+          dialogueContext.LastStudentAnswer = answer;
+          Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+        } else {
             handleUserInput({},"voice");
         }
       }
@@ -2106,7 +2124,7 @@ startUserMedia = function(stream) {
   Router.go("/voice");
 };
 
-function startRecording(){
+startRecording = function() {
   if (recorder){
     Session.set('recording',true);
     recorder.record();
@@ -2116,7 +2134,7 @@ function startRecording(){
   }
 }
 
-function stopRecording(){
+stopRecording = function() {
   if(recorder && Session.get('recording'))
   {
     recorder.stop();

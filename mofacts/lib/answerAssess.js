@@ -343,6 +343,7 @@ function updateDialogueDisplay(newDisplay){
 }
 
 dialogueLoop = function(err,res){
+    startRecording();
     console.log("dialogue loop");
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
@@ -372,9 +373,9 @@ dialogueLoop = function(err,res){
 }
 
 dialogueContinue = function(){
+    stopRecording();
     console.log("dialogueContinue");
     let dialogueLoopStage = Session.get("dialogueLoopStage");
-
     switch(dialogueLoopStage){
         case "intro":
             //Enter dialogue loop
