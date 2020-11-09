@@ -1817,17 +1817,22 @@ speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPrompt
       //Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       //UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g,'blank');
-      var ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
-      var audioPromptSpeakingRate = Session.get("audioPromptSpeakingRate");
-      makeGoogleTTSApiCall(msg,ttsAPIKey,audioPromptSpeakingRate,function(audioObj){
-        if(!!window.currentAudioObj){
-          window.currentAudioObj.pause();
-        }
-        window.currentAudioObj = audioObj;
-        console.log("inside callback, playing audioObj:");
-        audioObj.play();
-      });
-      console.log("providing audio feedback");
+      var ttsAPIKey = "";
+      if (getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey) {
+        ttsAPIKey = getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+        var audioPromptSpeakingRate = Session.get("audioPromptSpeakingRate");
+        makeGoogleTTSApiCall(msg,ttsAPIKey,audioPromptSpeakingRate,function(audioObj){
+          if(!!window.currentAudioObj){
+            window.currentAudioObj.pause();
+          }
+          window.currentAudioObj = audioObj;
+          console.log("inside callback, playing audioObj:");
+          audioObj.play();
+        });
+        console.log("providing audio feedback");
+      } else {
+        console.log("Text-to-Speech API key not found")
+      }
     }
   }else{
     console.log("audio feedback disabled");

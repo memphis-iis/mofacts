@@ -298,6 +298,8 @@ Answers = {
 
                     let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
                     updateDialogueDisplay(transitionStatement);
+                    speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
+                    
 
                     dialogueCallbackSaver = callback.bind(null,fullTextIsCorrect);
                     //wait for user to hit enter to make sure they read the transition statement
@@ -362,6 +364,7 @@ dialogueLoop = function(err,res){
             Session.set("dialogueLoopStage","exit");
         }
         updateDialogueDisplay(newDisplay);
+        speakMessageIfAudioPromptFeedbackEnabled(newDisplay, false, "dialogue");
         dialogueContext = result;
         dialogueUserPrompts.push(newDisplay);
         //wait for user input
