@@ -42,27 +42,27 @@ exports.Auto$$$toString$$5A41365E = Auto$$$toString$$5A41365E;
 exports.encode = encode;
 exports.Auto = exports.nil = void 0;
 
-var _Seq = require("../fable-library.2.8.4/Seq");
+var _Seq = require("../fable-library.2.10.2/Seq");
 
-var _Map = require("../fable-library.2.8.4/Map");
+var _Map = require("../fable-library.2.10.2/Map");
 
-var _Date = require("../fable-library.2.8.4/Date");
+var _Date = require("../fable-library.2.10.2/Date");
 
-var _TimeSpan = require("../fable-library.2.8.4/TimeSpan");
+var _TimeSpan = require("../fable-library.2.10.2/TimeSpan");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
-var _Option = require("../fable-library.2.8.4/Option");
+var _Option = require("../fable-library.2.10.2/Option");
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
 var _Types2 = require("./Types");
 
-var _Array = require("../fable-library.2.8.4/Array");
+var _Array = require("../fable-library.2.10.2/Array");
 
-var _String = require("../fable-library.2.8.4/String");
+var _String = require("../fable-library.2.10.2/String");
 
 function guid(value) {
   return value;
@@ -230,6 +230,8 @@ function autoEncodeRecordsAndUnions(extra, caseStrategy, skipNullField, t) {
 
           if (!skipNullField ? true : skipNullField ? !(value$$36 == null) : false) {
             target[targetKey] = encode$$1(value$$36);
+          } else {
+            void null;
           }
 
           return target;
@@ -477,7 +479,7 @@ const Auto = (0, _Types.declare)(function Thoth_Json_Encode_Auto() {});
 exports.Auto = Auto;
 
 function Auto$reflection() {
-  return (0, _Reflection.type)("Thoth.Json.Encode.Auto");
+  return (0, _Reflection.class_type)("Thoth.Json.Encode.Auto", undefined, Auto);
 }
 
 function Auto$$$generateEncoderCached$$Z127D9D79(caseStrategy$$2, extra$$4, skipNullField$$2, resolver) {

@@ -10,30 +10,34 @@ exports.tryFetch = tryFetch;
 exports.tryOptionsRequest = tryOptionsRequest;
 exports.Types$002ERequestProperties = exports.Types$002EHttpRequestHeaders = void 0;
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
 var _Promise = require("../Fable.Promise.2.1.0/Promise");
 
 const Types$002EHttpRequestHeaders = (0, _Types.declare)(function Fetch_Types_HttpRequestHeaders(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.Types$002EHttpRequestHeaders = Types$002EHttpRequestHeaders;
 
 function Types$002EHttpRequestHeaders$reflection() {
-  return (0, _Reflection.union)("Fetch.Types.HttpRequestHeaders", [], Types$002EHttpRequestHeaders, () => [["Accept", [["Item", _Reflection.string]]], ["Accept-Charset", [["Item", _Reflection.string]]], ["Accept-Encoding", [["Item", _Reflection.string]]], ["Accept-Language", [["Item", _Reflection.string]]], ["Accept-Datetime", [["Item", _Reflection.string]]], ["Authorization", [["Item", _Reflection.string]]], ["Cache-Control", [["Item", _Reflection.string]]], ["Connection", [["Item", _Reflection.string]]], ["Cookie", [["Item", _Reflection.string]]], ["Content-Length", [["Item", _Reflection.string]]], ["Content-MD5", [["Item", _Reflection.string]]], ["Content-Type", [["Item", _Reflection.string]]], ["Date", [["Item", _Reflection.string]]], ["Expect", [["Item", _Reflection.string]]], ["Forwarded", [["Item", _Reflection.string]]], ["From", [["Item", _Reflection.string]]], ["Host", [["Item", _Reflection.string]]], ["If-Match", [["Item", _Reflection.string]]], ["If-Modified-Since", [["Item", _Reflection.string]]], ["If-None-Match", [["Item", _Reflection.string]]], ["If-Range", [["Item", _Reflection.string]]], ["If-Unmodified-Since", [["Item", _Reflection.string]]], ["Max-Forwards", [["Item", _Reflection.int32]]], ["Origin", [["Item", _Reflection.string]]], ["Pragma", [["Item", _Reflection.string]]], ["Proxy-Authorization", [["Item", _Reflection.string]]], ["Range", [["Item", _Reflection.string]]], ["Referer", [["Item", _Reflection.string]]], ["SOAPAction", [["Item", _Reflection.string]]], ["TE", [["Item", _Reflection.string]]], ["User-Agent", [["Item", _Reflection.string]]], ["Upgrade", [["Item", _Reflection.string]]], ["Via", [["Item", _Reflection.string]]], ["Warning", [["Item", _Reflection.string]]], ["X-Requested-With", [["Item", _Reflection.string]]], ["DNT", [["Item", _Reflection.string]]], ["X-Forwarded-For", [["Item", _Reflection.string]]], ["X-Forwarded-Host", [["Item", _Reflection.string]]], ["X-Forwarded-Proto", [["Item", _Reflection.string]]], ["Front-End-Https", [["Item", _Reflection.string]]], ["X-Http-Method-Override", [["Item", _Reflection.string]]], ["X-ATT-DeviceId", [["Item", _Reflection.string]]], ["X-Wap-Profile", [["Item", _Reflection.string]]], ["Proxy-Connection", [["Item", _Reflection.string]]], ["X-UIDH", [["Item", _Reflection.string]]], ["X-Csrf-Token", [["Item", _Reflection.string]]], ["Custom", [["key", _Reflection.string], ["value", _Reflection.obj]]]]);
+  return (0, _Reflection.union_type)("Fetch.Types.HttpRequestHeaders", [], Types$002EHttpRequestHeaders, () => [["Accept", [["Item", _Reflection.string_type]]], ["Accept-Charset", [["Item", _Reflection.string_type]]], ["Accept-Encoding", [["Item", _Reflection.string_type]]], ["Accept-Language", [["Item", _Reflection.string_type]]], ["Accept-Datetime", [["Item", _Reflection.string_type]]], ["Authorization", [["Item", _Reflection.string_type]]], ["Cache-Control", [["Item", _Reflection.string_type]]], ["Connection", [["Item", _Reflection.string_type]]], ["Cookie", [["Item", _Reflection.string_type]]], ["Content-Length", [["Item", _Reflection.string_type]]], ["Content-MD5", [["Item", _Reflection.string_type]]], ["Content-Type", [["Item", _Reflection.string_type]]], ["Date", [["Item", _Reflection.string_type]]], ["Expect", [["Item", _Reflection.string_type]]], ["Forwarded", [["Item", _Reflection.string_type]]], ["From", [["Item", _Reflection.string_type]]], ["Host", [["Item", _Reflection.string_type]]], ["If-Match", [["Item", _Reflection.string_type]]], ["If-Modified-Since", [["Item", _Reflection.string_type]]], ["If-None-Match", [["Item", _Reflection.string_type]]], ["If-Range", [["Item", _Reflection.string_type]]], ["If-Unmodified-Since", [["Item", _Reflection.string_type]]], ["Max-Forwards", [["Item", _Reflection.int32_type]]], ["Origin", [["Item", _Reflection.string_type]]], ["Pragma", [["Item", _Reflection.string_type]]], ["Proxy-Authorization", [["Item", _Reflection.string_type]]], ["Range", [["Item", _Reflection.string_type]]], ["Referer", [["Item", _Reflection.string_type]]], ["SOAPAction", [["Item", _Reflection.string_type]]], ["TE", [["Item", _Reflection.string_type]]], ["User-Agent", [["Item", _Reflection.string_type]]], ["Upgrade", [["Item", _Reflection.string_type]]], ["Via", [["Item", _Reflection.string_type]]], ["Warning", [["Item", _Reflection.string_type]]], ["X-Requested-With", [["Item", _Reflection.string_type]]], ["DNT", [["Item", _Reflection.string_type]]], ["X-Forwarded-For", [["Item", _Reflection.string_type]]], ["X-Forwarded-Host", [["Item", _Reflection.string_type]]], ["X-Forwarded-Proto", [["Item", _Reflection.string_type]]], ["Front-End-Https", [["Item", _Reflection.string_type]]], ["X-Http-Method-Override", [["Item", _Reflection.string_type]]], ["X-ATT-DeviceId", [["Item", _Reflection.string_type]]], ["X-Wap-Profile", [["Item", _Reflection.string_type]]], ["Proxy-Connection", [["Item", _Reflection.string_type]]], ["X-UIDH", [["Item", _Reflection.string_type]]], ["X-Csrf-Token", [["Item", _Reflection.string_type]]], ["Custom", [["key", _Reflection.string_type], ["value", _Reflection.obj_type]]]]);
 }
 
 const Types$002ERequestProperties = (0, _Types.declare)(function Fetch_Types_RequestProperties(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.Types$002ERequestProperties = Types$002ERequestProperties;
 
 function Types$002ERequestProperties$reflection() {
-  return (0, _Reflection.union)("Fetch.Types.RequestProperties", [], Types$002ERequestProperties, () => [["Method", [["Item", _Reflection.string]]], ["Headers", [["Item", (0, _Reflection.type)("Fetch.Types.IHttpRequestHeaders")]]], ["Body", [["Item", _Reflection.obj]]], ["Mode", [["Item", _Reflection.string]]], ["Credentials", [["Item", _Reflection.string]]], ["Cache", [["Item", _Reflection.string]]], ["Redirect", [["Item", _Reflection.string]]], ["Referrer", [["Item", _Reflection.string]]], ["ReferrerPolicy", [["Item", _Reflection.string]]], ["Integrity", [["Item", _Reflection.string]]], ["KeepAlive", [["Item", _Reflection.bool]]], ["Signal", [["Item", (0, _Reflection.type)("Fetch.Types.AbortSignal")]]]]);
+  return (0, _Reflection.union_type)("Fetch.Types.RequestProperties", [], Types$002ERequestProperties, () => [["Method", [["Item", _Reflection.string_type]]], ["Headers", [["Item", (0, _Reflection.class_type)("Fetch.Types.IHttpRequestHeaders")]]], ["Body", [["Item", _Reflection.obj_type]]], ["Mode", [["Item", _Reflection.string_type]]], ["Credentials", [["Item", _Reflection.string_type]]], ["Cache", [["Item", _Reflection.string_type]]], ["Redirect", [["Item", _Reflection.string_type]]], ["Referrer", [["Item", _Reflection.string_type]]], ["ReferrerPolicy", [["Item", _Reflection.string_type]]], ["Integrity", [["Item", _Reflection.string_type]]], ["KeepAlive", [["Item", _Reflection.bool_type]]], ["Signal", [["Item", (0, _Reflection.class_type)("Fetch.Types.AbortSignal")]]]]);
 }
 
 function errorString(response) {

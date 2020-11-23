@@ -42,7 +42,7 @@
 		<unitinstructions>Here comes the testing learning session.</unitinstructions>
 		<unitname>Model Unit</unitname>
 		<learningsession>
-			<clusterlist>2-2</clusterlist>
+			<clusterlist>1-1</clusterlist>
 			<calculateProbability><![CDATA[
           function mul(m1, m2) {
             var result = 0;
@@ -111,10 +111,10 @@
           return p
              ]]></calculateProbability>
 		</learningsession>
-		<buttontrial>true</buttontrial>
+		<buttontrial>false</buttontrial>
 		<buttonorder>random</buttonorder>
 		<deliveryparams>
-			<feedbackType>simple</feedbackType>
+			<feedbackType>dialogue</feedbackType>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>8000</drill>
 			<purestudy>16000</purestudy>

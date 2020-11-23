@@ -19,19 +19,19 @@ exports.GenerateFeedback = GenerateFeedback;
 exports.HarnessGenerateFeedback = HarnessGenerateFeedback;
 exports.FeedbackRequest = exports.wordSet = exports.determinerMap = exports.definitionMap = exports.EntryGloss = exports.Feedback = void 0;
 
-var _Types = require("./fable-library.2.8.4/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.8.4/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
-var _String = require("./fable-library.2.8.4/String");
+var _String = require("./fable-library.2.10.2/String");
 
-var _Util = require("./fable-library.2.8.4/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
-var _Map = require("./fable-library.2.8.4/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
-var _Set = require("./fable-library.2.8.4/Set");
+var _Set = require("./fable-library.2.10.2/Set");
 
-var _Option = require("./fable-library.2.8.4/Option");
+var _Option = require("./fable-library.2.10.2/Option");
 
 var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
 
@@ -39,31 +39,31 @@ var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
 var _Decode = require("./Thoth.Json.4.0.0/Decode");
 
-var _Array = require("./fable-library.2.8.4/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
-var _Seq = require("./fable-library.2.8.4/Seq");
+var _Seq = require("./fable-library.2.10.2/Seq");
 
-var _RegExp = require("./fable-library.2.8.4/RegExp");
+var _RegExp = require("./fable-library.2.10.2/RegExp");
 
-const Feedback = (0, _Types.declare)(function DefinitionalFeedback_Feedback(arg1) {
-  this.feedback = arg1;
+const Feedback = (0, _Types.declare)(function DefinitionalFeedback_Feedback(feedback) {
+  this.feedback = feedback;
 }, _Types.Record);
 exports.Feedback = Feedback;
 
 function Feedback$reflection() {
-  return (0, _Reflection.record)("DefinitionalFeedback.Feedback", [], Feedback, () => [["feedback", _Reflection.string]]);
+  return (0, _Reflection.record_type)("DefinitionalFeedback.Feedback", [], Feedback, () => [["feedback", _Reflection.string_type]]);
 }
 
-const EntryGloss = (0, _Types.declare)(function DefinitionalFeedback_EntryGloss(arg1, arg2, arg3, arg4) {
-  this.entry = arg1;
-  this.entryTag = arg2;
-  this.gloss = arg3;
-  this.glossTag = arg4;
+const EntryGloss = (0, _Types.declare)(function DefinitionalFeedback_EntryGloss(entry, entryTag, gloss, glossTag) {
+  this.entry = entry;
+  this.entryTag = entryTag;
+  this.gloss = gloss;
+  this.glossTag = glossTag;
 }, _Types.Record);
 exports.EntryGloss = EntryGloss;
 
 function EntryGloss$reflection() {
-  return (0, _Reflection.record)("DefinitionalFeedback.EntryGloss", [], EntryGloss, () => [["entry", (0, _Reflection.array)(_Reflection.string)], ["entryTag", (0, _Reflection.array)(_Reflection.string)], ["gloss", (0, _Reflection.array)(_Reflection.string)], ["glossTag", (0, _Reflection.array)(_Reflection.string)]]);
+  return (0, _Reflection.record_type)("DefinitionalFeedback.EntryGloss", [], EntryGloss, () => [["entry", (0, _Reflection.array_type)(_Reflection.string_type)], ["entryTag", (0, _Reflection.array_type)(_Reflection.string_type)], ["gloss", (0, _Reflection.array_type)(_Reflection.string_type)], ["glossTag", (0, _Reflection.array_type)(_Reflection.string_type)]]);
 }
 
 function firstLetterUpper(input) {
@@ -91,9 +91,9 @@ function Initialize(jsonDictionary) {
   var elements, source, table, elements$$2, source$$8, source$$5, source$$4, source$$3, source$$2, table$$2;
 
   try {
-    definitionMap(((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(jsonDictionary, null, null, {
+    definitionMap(((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(jsonDictionary, undefined, undefined, {
       ResolveType() {
-        return (0, _Reflection.type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string, EntryGloss$reflection()]);
+        return (0, _Reflection.class_type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string_type, EntryGloss$reflection()]);
       }
 
     })));
@@ -137,7 +137,7 @@ function Initialize(jsonDictionary) {
 
         case 1:
           {
-            return null;
+            return undefined;
           }
       }
     }, source$$4))), ((0, _Map.groupBy)(function projection(tuple) {
@@ -261,14 +261,14 @@ function getPredicate(entry) {
   return verb + " " + (0, _String.trim)(completion, " ", ".");
 }
 
-const FeedbackRequest = (0, _Types.declare)(function DefinitionalFeedback_FeedbackRequest(arg1, arg2) {
-  this.CorrectAnswer = arg1;
-  this.IncorrectAnswer = arg2;
+const FeedbackRequest = (0, _Types.declare)(function DefinitionalFeedback_FeedbackRequest(CorrectAnswer, IncorrectAnswer) {
+  this.CorrectAnswer = CorrectAnswer;
+  this.IncorrectAnswer = IncorrectAnswer;
 }, _Types.Record);
 exports.FeedbackRequest = FeedbackRequest;
 
 function FeedbackRequest$reflection() {
-  return (0, _Reflection.record)("DefinitionalFeedback.FeedbackRequest", [], FeedbackRequest, () => [["CorrectAnswer", _Reflection.string], ["IncorrectAnswer", _Reflection.string]]);
+  return (0, _Reflection.record_type)("DefinitionalFeedback.FeedbackRequest", [], FeedbackRequest, () => [["CorrectAnswer", _Reflection.string_type], ["IncorrectAnswer", _Reflection.string_type]]);
 }
 
 function GenerateFeedback(incorrectAnswer, correctAnswer) {
@@ -309,7 +309,7 @@ function GenerateFeedback(incorrectAnswer, correctAnswer) {
 
 function HarnessGenerateFeedback(jsonFeedbackRequest) {
   let fr;
-  fr = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(jsonFeedbackRequest, null, null, {
+  fr = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(jsonFeedbackRequest, undefined, undefined, {
     ResolveType() {
       return FeedbackRequest$reflection();
     }

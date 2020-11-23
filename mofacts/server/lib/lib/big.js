@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = exports.Big = void 0;
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
 // https://github.com/MikeMcl/big.js/blob/01b3ce3a6b0ba7b42442ea48ec4ffc88d1669ec4/big.mjs
 

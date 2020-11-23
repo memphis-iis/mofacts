@@ -27,19 +27,19 @@ exports.Fetch$$$delete$$5760677E = Fetch$$$delete$$5760677E;
 exports.Fetch$$$tryDelete$$5760677E = Fetch$$$tryDelete$$5760677E;
 exports.Fetch = exports.FetchError = void 0;
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
 var _Fetch = require("../Fable.Fetch.2.2.0/Fetch");
 
 var _Encode = require("../Thoth.Json.4.0.0/Encode");
 
-var _Option = require("../fable-library.2.8.4/Option");
+var _Option = require("../fable-library.2.10.2/Option");
 
-var _List = require("../fable-library.2.8.4/List");
+var _List = require("../fable-library.2.10.2/List");
 
 var _Decode = require("../Thoth.Json.4.0.0/Decode");
 
@@ -48,12 +48,14 @@ var _PromiseImpl = require("../Fable.Promise.2.1.0/PromiseImpl");
 var _Promise = require("../Fable.Promise.2.1.0/Promise");
 
 const FetchError = (0, _Types.declare)(function Thoth_Fetch_FetchError(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.FetchError = FetchError;
 
 function FetchError$reflection() {
-  return (0, _Reflection.union)("Thoth.Fetch.FetchError", [], FetchError, () => [["PreparingRequestFailed", [["Item", (0, _Reflection.type)("System.Exception")]]], ["DecodingFailed", [["Item", _Reflection.string]]], ["FetchFailed", [["Item", (0, _Reflection.type)("Fetch.Types.Response")]]], ["NetworkError", [["Item", (0, _Reflection.type)("System.Exception")]]]]);
+  return (0, _Reflection.union_type)("Thoth.Fetch.FetchError", [], FetchError, () => [["PreparingRequestFailed", [["Item", (0, _Reflection.class_type)("System.Exception")]]], ["DecodingFailed", [["Item", _Reflection.string_type]]], ["FetchFailed", [["Item", (0, _Reflection.class_type)("Fetch.Types.Response")]]], ["NetworkError", [["Item", (0, _Reflection.class_type)("System.Exception")]]]]);
 }
 
 function Helper$$$fetch(url, init) {
@@ -69,7 +71,7 @@ function Helper$$$withContentTypeJson(data, headers) {
 }
 
 function Helper$$$encode(data$$1, caseStrategy, extra, dataResolver) {
-  const encoder = (0, _Encode.Auto$$$generateEncoderCached$$Z127D9D79)(caseStrategy, extra, null, dataResolver);
+  const encoder = (0, _Encode.Auto$$$generateEncoderCached$$Z127D9D79)(caseStrategy, extra, undefined, dataResolver);
   const value = encoder(data$$1);
   return (0, _Encode.toString)(0, value);
 }
@@ -97,7 +99,7 @@ function Helper$$$withProperties(custom, properties$$1) {
 
 function Helper$$$eitherUnit(responseResolver, cont) {
   if ((0, _Reflection.fullName)(responseResolver.ResolveType()) === "Microsoft.FSharp.Core.Unit") {
-    return new _Option.Result(0, "Ok", null);
+    return new _Option.Result(0, "Ok", void null);
   } else {
     return cont();
   }
@@ -164,7 +166,7 @@ const Fetch = (0, _Types.declare)(function Thoth_Fetch_Fetch() {});
 exports.Fetch = Fetch;
 
 function Fetch$reflection() {
-  return (0, _Reflection.type)("Thoth.Fetch.Fetch");
+  return (0, _Reflection.class_type)("Thoth.Fetch.Fetch", undefined, Fetch);
 }
 
 function Fetch$$$tryFetchAs$$25B10BBE(url$$1, decoder$$2, data$$4, httpMethod, properties$$2, headers$$1, caseStrategy$$3, extra$$3, responseResolver$$3, dataResolver$$2) {
@@ -212,11 +214,11 @@ function Fetch$$$fetchAs$$25B10BBE(url$$2, decoder$$3, data$$5, httpMethod$$1, p
 }
 
 function Fetch$$$get$$5760677E(url$$3, data$$6, properties$$7, headers$$5, caseStrategy$$5, extra$$5, decoder$$4, responseResolver$$5, dataResolver$$4) {
-  return Fetch$$$fetchAs$$25B10BBE(url$$3, decoder$$4, data$$6, null, properties$$7, headers$$5, caseStrategy$$5, extra$$5, responseResolver$$5, dataResolver$$4);
+  return Fetch$$$fetchAs$$25B10BBE(url$$3, decoder$$4, data$$6, undefined, properties$$7, headers$$5, caseStrategy$$5, extra$$5, responseResolver$$5, dataResolver$$4);
 }
 
 function Fetch$$$tryGet$$5760677E(url$$4, data$$7, properties$$8, headers$$6, caseStrategy$$6, extra$$6, decoder$$5, responseResolver$$6, dataResolver$$5) {
-  return Fetch$$$tryFetchAs$$25B10BBE(url$$4, decoder$$5, data$$7, null, properties$$8, headers$$6, caseStrategy$$6, extra$$6, responseResolver$$6, dataResolver$$5);
+  return Fetch$$$tryFetchAs$$25B10BBE(url$$4, decoder$$5, data$$7, undefined, properties$$8, headers$$6, caseStrategy$$6, extra$$6, responseResolver$$6, dataResolver$$5);
 }
 
 function Fetch$$$post$$5760677E(url$$5, data$$8, properties$$9, headers$$7, caseStrategy$$7, extra$$7, decoder$$6, responseResolver$$7, dataResolver$$6) {
