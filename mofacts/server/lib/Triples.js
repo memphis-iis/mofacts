@@ -11,57 +11,59 @@ exports.triplesFromSentence = triplesFromSentence;
 exports.GetTriples = GetTriples;
 exports.InternalAPI = exports.Triple = exports.Tag = void 0;
 
-var _Types = require("./fable-library.2.8.4/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.8.4/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
 var _AllenNLP = require("./AllenNLP");
 
-var _Map = require("./fable-library.2.8.4/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
-var _Array = require("./fable-library.2.8.4/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
-var _Util = require("./fable-library.2.8.4/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
 var _Decode = require("./Thoth.Json.4.0.0/Decode");
 
-var _Option = require("./fable-library.2.8.4/Option");
+var _Option = require("./fable-library.2.10.2/Option");
 
 var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
 
 var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
 const Tag = (0, _Types.declare)(function Triples_Tag(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.Tag = Tag;
 
 function Tag$reflection() {
-  return (0, _Reflection.union)("Triples.Tag", [], Tag, () => [["Trace", [["Item", _Reflection.string]]]]);
+  return (0, _Reflection.union_type)("Triples.Tag", [], Tag, () => [["Trace", [["Item", _Reflection.string_type]]]]);
 }
 
-const Triple = (0, _Types.declare)(function Triples_Triple(arg1, arg2, arg3, arg4, arg5) {
-  this.start = arg1;
-  this.edge = arg2;
-  this.stop = arg3;
-  this.negated = arg4;
-  this.trace = arg5;
+const Triple = (0, _Types.declare)(function Triples_Triple(start, edge, stop, negated, trace) {
+  this.start = start;
+  this.edge = edge;
+  this.stop = stop;
+  this.negated = negated;
+  this.trace = trace;
 }, _Types.Record);
 exports.Triple = Triple;
 
 function Triple$reflection() {
-  return (0, _Reflection.record)("Triples.Triple", [], Triple, () => [["start", (0, _Reflection.array)(_Reflection.int32)], ["edge", (0, _Reflection.array)(_Reflection.int32)], ["stop", (0, _Reflection.array)(_Reflection.int32)], ["negated", _Reflection.bool], ["trace", (0, _Reflection.list)(Tag$reflection())]]);
+  return (0, _Reflection.record_type)("Triples.Triple", [], Triple, () => [["start", (0, _Reflection.array_type)(_Reflection.int32_type)], ["edge", (0, _Reflection.array_type)(_Reflection.int32_type)], ["stop", (0, _Reflection.array_type)(_Reflection.int32_type)], ["negated", _Reflection.bool_type], ["trace", (0, _Reflection.list_type)(Tag$reflection())]]);
 }
 
-const InternalAPI = (0, _Types.declare)(function Triples_InternalAPI(arg1, arg2, arg3) {
-  this.sentences = arg1;
-  this.coreference = arg2;
-  this.triples = arg3;
+const InternalAPI = (0, _Types.declare)(function Triples_InternalAPI(sentences, coreference, triples) {
+  this.sentences = sentences;
+  this.coreference = coreference;
+  this.triples = triples;
 }, _Types.Record);
 exports.InternalAPI = InternalAPI;
 
 function InternalAPI$reflection() {
-  return (0, _Reflection.record)("Triples.InternalAPI", [], InternalAPI, () => [["sentences", (0, _Reflection.array)((0, _AllenNLP.SentenceAnnotation$reflection)())], ["coreference", (0, _AllenNLP.Coreference$reflection)()], ["triples", (0, _Reflection.array)((0, _Reflection.array)(Triple$reflection()))]]);
+  return (0, _Reflection.record_type)("Triples.InternalAPI", [], InternalAPI, () => [["sentences", (0, _Reflection.array_type)((0, _AllenNLP.SentenceAnnotation$reflection)())], ["coreference", (0, _AllenNLP.Coreference$reflection)()], ["triples", (0, _Reflection.array_type)((0, _Reflection.array_type)(Triple$reflection()))]]);
 }
 
 function tripleIndicesFromSrlTags(srlTags) {
@@ -81,7 +83,7 @@ function tripleIndicesFromSrlTags(srlTags) {
   if (sortedArgs.length >= 2) {
     return [(0, _Map.FSharpMap$$get_Item$$2B595)(map, sortedArgs[0]), (0, _Map.FSharpMap$$TryFind$$2B595)(map, "V"), (0, _Map.FSharpMap$$get_Item$$2B595)(map, sortedArgs[0])];
   } else {
-    return [null, null, null];
+    return [undefined, undefined, undefined];
   }
 }
 
@@ -140,13 +142,13 @@ function triplesFromSentence(sa) {
               arg0 = new Triple(start$$1, edge$$1, stop$$1, false, trace);
               return arg0;
             } else {
-              return null;
+              return undefined;
             }
           }
 
         case 1:
           {
-            return null;
+            return undefined;
           }
       }
     }, candidateTriples, Array);
@@ -156,7 +158,7 @@ function triplesFromSentence(sa) {
 function GetTriples(nlpJsonOption, chunksJsonOption, inputText) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     var nlpJson, input;
-    return (nlpJsonOption == null ? (0, _AllenNLP.GetNLP)(chunksJsonOption, inputText) : (nlpJson = nlpJsonOption, (input = ((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(nlpJson, null, null, {
+    return (nlpJsonOption == null ? (0, _AllenNLP.GetNLP)(chunksJsonOption, inputText) : (nlpJson = nlpJsonOption, (input = ((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(nlpJson, undefined, undefined, {
       ResolveType() {
         return (0, _AllenNLP.DocumentAnnotation$reflection)();
       }

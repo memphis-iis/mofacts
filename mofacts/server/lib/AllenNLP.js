@@ -29,6 +29,7 @@ exports.RegexReplace = RegexReplace;
 exports.Split = Split;
 exports.CleanText = CleanText;
 exports.GetNLP = GetNLP;
+exports.removePrePunctuationSpaces = removePrePunctuationSpaces;
 exports.collapseDependencies = collapseDependencies;
 exports.getDependentIndices = getDependentIndices;
 exports.srlArgToIndexMap = srlArgToIndexMap;
@@ -36,43 +37,46 @@ exports.getSubjectIndex = getSubjectIndex;
 exports.getBeRootIndex = getBeRootIndex;
 exports.getInvertAuxIndex = getInvertAuxIndex;
 exports.getPredicateIndex = getPredicateIndex;
-exports.endpoints = exports.EntailmentRequest = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.Entailment = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
+exports.resolveReferents = resolveReferents;
+exports.prePunctuationSpaceRegex = exports.endpoints = exports.EntailmentRequest = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.Entailment = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
 
 require("isomorphic-fetch");
 
-var _Option = require("./fable-library.2.8.4/Option");
+var _Option = require("./fable-library.2.10.2/Option");
 
 var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
 
 var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
-var _Types = require("./fable-library.2.8.4/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.8.4/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
 var _Types2 = require("./Thoth.Json.4.0.0/Types");
 
-var _Util = require("./fable-library.2.8.4/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
 var _Fetch = require("./Thoth.Fetch.2.0.0/Fetch");
 
-var _Seq = require("./fable-library.2.8.4/Seq");
+var _Seq = require("./fable-library.2.10.2/Seq");
 
-var _RegExp = require("./fable-library.2.8.4/RegExp");
+var _RegExp = require("./fable-library.2.10.2/RegExp");
 
 var transliteration = _interopRequireWildcard(require("transliteration"));
 
 var _Decode = require("./Thoth.Json.4.0.0/Decode");
 
-var _Array = require("./fable-library.2.8.4/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
-var _String = require("./fable-library.2.8.4/String");
+var _String = require("./fable-library.2.10.2/String");
 
-var _Map = require("./fable-library.2.8.4/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
 var _DependencyCollapser = require("./DependencyCollapser");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function Promisify(input) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
@@ -80,160 +84,160 @@ function Promisify(input) {
   }));
 }
 
-const Endpoints = (0, _Types.declare)(function AllenNLP_Endpoints(arg1, arg2, arg3, arg4, arg5) {
-  this.SRL = arg1;
-  this.Coreference = arg2;
-  this.DependencyParser = arg3;
-  this.SentenceSplitter = arg4;
-  this.TextualEntailment = arg5;
+const Endpoints = (0, _Types.declare)(function AllenNLP_Endpoints(SRL, Coreference, DependencyParser, SentenceSplitter, TextualEntailment) {
+  this.SRL = SRL;
+  this.Coreference = Coreference;
+  this.DependencyParser = DependencyParser;
+  this.SentenceSplitter = SentenceSplitter;
+  this.TextualEntailment = TextualEntailment;
 }, _Types.Record);
 exports.Endpoints = Endpoints;
 
 function Endpoints$reflection() {
-  return (0, _Reflection.record)("AllenNLP.Endpoints", [], Endpoints, () => [["SRL", _Reflection.string], ["Coreference", _Reflection.string], ["DependencyParser", _Reflection.string], ["SentenceSplitter", _Reflection.string], ["TextualEntailment", _Reflection.string]]);
+  return (0, _Reflection.record_type)("AllenNLP.Endpoints", [], Endpoints, () => [["SRL", _Reflection.string_type], ["Coreference", _Reflection.string_type], ["DependencyParser", _Reflection.string_type], ["SentenceSplitter", _Reflection.string_type], ["TextualEntailment", _Reflection.string_type]]);
 }
 
-const SRLVerb = (0, _Types.declare)(function AllenNLP_SRLVerb(arg1, arg2, arg3) {
-  this.verb = arg1;
-  this.description = arg2;
-  this.tags = arg3;
+const SRLVerb = (0, _Types.declare)(function AllenNLP_SRLVerb(verb, description, tags) {
+  this.verb = verb;
+  this.description = description;
+  this.tags = tags;
 }, _Types.Record);
 exports.SRLVerb = SRLVerb;
 
 function SRLVerb$reflection() {
-  return (0, _Reflection.record)("AllenNLP.SRLVerb", [], SRLVerb, () => [["verb", _Reflection.string], ["description", _Reflection.string], ["tags", (0, _Reflection.array)(_Reflection.string)]]);
+  return (0, _Reflection.record_type)("AllenNLP.SRLVerb", [], SRLVerb, () => [["verb", _Reflection.string_type], ["description", _Reflection.string_type], ["tags", (0, _Reflection.array_type)(_Reflection.string_type)]]);
 }
 
-const SRL = (0, _Types.declare)(function AllenNLP_SRL(arg1, arg2) {
-  this.words = arg1;
-  this.verbs = arg2;
+const SRL = (0, _Types.declare)(function AllenNLP_SRL(words, verbs) {
+  this.words = words;
+  this.verbs = verbs;
 }, _Types.Record);
 exports.SRL = SRL;
 
 function SRL$reflection() {
-  return (0, _Reflection.record)("AllenNLP.SRL", [], SRL, () => [["words", (0, _Reflection.array)(_Reflection.string)], ["verbs", (0, _Reflection.array)(SRLVerb$reflection())]]);
+  return (0, _Reflection.record_type)("AllenNLP.SRL", [], SRL, () => [["words", (0, _Reflection.array_type)(_Reflection.string_type)], ["verbs", (0, _Reflection.array_type)(SRLVerb$reflection())]]);
 }
 
-const DependencyParse = (0, _Types.declare)(function AllenNLP_DependencyParse(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-  this.arc_loss = arg1;
-  this.loss = arg2;
-  this.pos = arg3;
-  this.predicted_dependencies = arg4;
-  this.predicted_heads = arg5;
-  this.tag_loss = arg6;
-  this.words = arg7;
+const DependencyParse = (0, _Types.declare)(function AllenNLP_DependencyParse(arc_loss, loss, pos, predicted_dependencies, predicted_heads, tag_loss, words) {
+  this.arc_loss = arc_loss;
+  this.loss = loss;
+  this.pos = pos;
+  this.predicted_dependencies = predicted_dependencies;
+  this.predicted_heads = predicted_heads;
+  this.tag_loss = tag_loss;
+  this.words = words;
 }, _Types.Record);
 exports.DependencyParse = DependencyParse;
 
 function DependencyParse$reflection() {
-  return (0, _Reflection.record)("AllenNLP.DependencyParse", [], DependencyParse, () => [["arc_loss", _Reflection.float64], ["loss", _Reflection.float64], ["pos", (0, _Reflection.array)(_Reflection.string)], ["predicted_dependencies", (0, _Reflection.array)(_Reflection.string)], ["predicted_heads", (0, _Reflection.array)(_Reflection.int32)], ["tag_loss", _Reflection.float64], ["words", (0, _Reflection.array)(_Reflection.string)]]);
+  return (0, _Reflection.record_type)("AllenNLP.DependencyParse", [], DependencyParse, () => [["arc_loss", _Reflection.float64_type], ["loss", _Reflection.float64_type], ["pos", (0, _Reflection.array_type)(_Reflection.string_type)], ["predicted_dependencies", (0, _Reflection.array_type)(_Reflection.string_type)], ["predicted_heads", (0, _Reflection.array_type)(_Reflection.int32_type)], ["tag_loss", _Reflection.float64_type], ["words", (0, _Reflection.array_type)(_Reflection.string_type)]]);
 }
 
-const Coreference = (0, _Types.declare)(function AllenNLP_Coreference(arg1, arg2, arg3, arg4) {
-  this.clusters = arg1;
-  this.document = arg2;
-  this.predicted_antecedents = arg3;
-  this.top_spans = arg4;
+const Coreference = (0, _Types.declare)(function AllenNLP_Coreference(clusters, document$, predicted_antecedents, top_spans) {
+  this.clusters = clusters;
+  this.document = document$;
+  this.predicted_antecedents = predicted_antecedents;
+  this.top_spans = top_spans;
 }, _Types.Record);
 exports.Coreference = Coreference;
 
 function Coreference$reflection() {
-  return (0, _Reflection.record)("AllenNLP.Coreference", [], Coreference, () => [["clusters", (0, _Reflection.array)((0, _Reflection.array)((0, _Reflection.array)(_Reflection.int32)))], ["document", (0, _Reflection.array)(_Reflection.string)], ["predicted_antecedents", (0, _Reflection.array)(_Reflection.int32)], ["top_spans", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.int32))]]);
+  return (0, _Reflection.record_type)("AllenNLP.Coreference", [], Coreference, () => [["clusters", (0, _Reflection.array_type)((0, _Reflection.array_type)((0, _Reflection.array_type)(_Reflection.int32_type)))], ["document", (0, _Reflection.array_type)(_Reflection.string_type)], ["predicted_antecedents", (0, _Reflection.array_type)(_Reflection.int32_type)], ["top_spans", (0, _Reflection.array_type)((0, _Reflection.array_type)(_Reflection.int32_type))]]);
 }
 
-const SentenceCoreference = (0, _Types.declare)(function AllenNLP_SentenceCoreference(arg1, arg2, arg3) {
-  this.offset = arg1 | 0;
-  this.spans = arg2;
-  this.clusters = arg3;
+const SentenceCoreference = (0, _Types.declare)(function AllenNLP_SentenceCoreference(offset, spans, clusters) {
+  this.offset = offset | 0;
+  this.spans = spans;
+  this.clusters = clusters;
 }, _Types.Record);
 exports.SentenceCoreference = SentenceCoreference;
 
 function SentenceCoreference$reflection() {
-  return (0, _Reflection.record)("AllenNLP.SentenceCoreference", [], SentenceCoreference, () => [["offset", _Reflection.int32], ["spans", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.int32))], ["clusters", (0, _Reflection.array)(_Reflection.int32)]]);
+  return (0, _Reflection.record_type)("AllenNLP.SentenceCoreference", [], SentenceCoreference, () => [["offset", _Reflection.int32_type], ["spans", (0, _Reflection.array_type)((0, _Reflection.array_type)(_Reflection.int32_type))], ["clusters", (0, _Reflection.array_type)(_Reflection.int32_type)]]);
 }
 
-const SentenceAnnotation = (0, _Types.declare)(function AllenNLP_SentenceAnnotation(arg1, arg2, arg3, arg4, arg5, arg6) {
-  this.id = arg1 | 0;
-  this.tags = arg2;
-  this.sen = arg3;
-  this.srl = arg4;
-  this.dep = arg5;
-  this.cor = arg6;
+const SentenceAnnotation = (0, _Types.declare)(function AllenNLP_SentenceAnnotation(id, tags, sen, srl, dep, cor) {
+  this.id = id | 0;
+  this.tags = tags;
+  this.sen = sen;
+  this.srl = srl;
+  this.dep = dep;
+  this.cor = cor;
 }, _Types.Record);
 exports.SentenceAnnotation = SentenceAnnotation;
 
 function SentenceAnnotation$reflection() {
-  return (0, _Reflection.record)("AllenNLP.SentenceAnnotation", [], SentenceAnnotation, () => [["id", _Reflection.int32], ["tags", (0, _Reflection.array)(_Reflection.string)], ["sen", _Reflection.string], ["srl", SRL$reflection()], ["dep", DependencyParse$reflection()], ["cor", SentenceCoreference$reflection()]]);
+  return (0, _Reflection.record_type)("AllenNLP.SentenceAnnotation", [], SentenceAnnotation, () => [["id", _Reflection.int32_type], ["tags", (0, _Reflection.array_type)(_Reflection.string_type)], ["sen", _Reflection.string_type], ["srl", SRL$reflection()], ["dep", DependencyParse$reflection()], ["cor", SentenceCoreference$reflection()]]);
 }
 
-const DocumentAnnotation = (0, _Types.declare)(function AllenNLP_DocumentAnnotation(arg1, arg2) {
-  this.sentences = arg1;
-  this.coreference = arg2;
+const DocumentAnnotation = (0, _Types.declare)(function AllenNLP_DocumentAnnotation(sentences, coreference) {
+  this.sentences = sentences;
+  this.coreference = coreference;
 }, _Types.Record);
 exports.DocumentAnnotation = DocumentAnnotation;
 
 function DocumentAnnotation$reflection() {
-  return (0, _Reflection.record)("AllenNLP.DocumentAnnotation", [], DocumentAnnotation, () => [["sentences", (0, _Reflection.array)(SentenceAnnotation$reflection())], ["coreference", Coreference$reflection()]]);
+  return (0, _Reflection.record_type)("AllenNLP.DocumentAnnotation", [], DocumentAnnotation, () => [["sentences", (0, _Reflection.array_type)(SentenceAnnotation$reflection())], ["coreference", Coreference$reflection()]]);
 }
 
 function DocumentAnnotation$$$CreateEmpty() {
   return new DocumentAnnotation([], null);
 }
 
-const Entailment = (0, _Types.declare)(function AllenNLP_Entailment(arg1, arg2, arg3, arg4, arg5, arg6) {
-  this.h2p_attention = arg1;
-  this.hypothesis_tokens = arg2;
-  this.label_logits = arg3;
-  this.label_probs = arg4;
-  this.p2h_attention = arg5;
-  this.premise_tokens = arg6;
+const Entailment = (0, _Types.declare)(function AllenNLP_Entailment(h2p_attention, hypothesis_tokens, label_logits, label_probs, p2h_attention, premise_tokens) {
+  this.h2p_attention = h2p_attention;
+  this.hypothesis_tokens = hypothesis_tokens;
+  this.label_logits = label_logits;
+  this.label_probs = label_probs;
+  this.p2h_attention = p2h_attention;
+  this.premise_tokens = premise_tokens;
 }, _Types.Record);
 exports.Entailment = Entailment;
 
 function Entailment$reflection() {
-  return (0, _Reflection.record)("AllenNLP.Entailment", [], Entailment, () => [["h2p_attention", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.float64))], ["hypothesis_tokens", (0, _Reflection.array)(_Reflection.string)], ["label_logits", (0, _Reflection.array)(_Reflection.float64)], ["label_probs", (0, _Reflection.array)(_Reflection.float64)], ["p2h_attention", (0, _Reflection.array)((0, _Reflection.array)(_Reflection.float64))], ["premise_tokens", (0, _Reflection.array)(_Reflection.string)]]);
+  return (0, _Reflection.record_type)("AllenNLP.Entailment", [], Entailment, () => [["h2p_attention", (0, _Reflection.array_type)((0, _Reflection.array_type)(_Reflection.float64_type))], ["hypothesis_tokens", (0, _Reflection.array_type)(_Reflection.string_type)], ["label_logits", (0, _Reflection.array_type)(_Reflection.float64_type)], ["label_probs", (0, _Reflection.array_type)(_Reflection.float64_type)], ["p2h_attention", (0, _Reflection.array_type)((0, _Reflection.array_type)(_Reflection.float64_type))], ["premise_tokens", (0, _Reflection.array_type)(_Reflection.string_type)]]);
 }
 
 function Entailment$$$CreateEmpty() {
   return new Entailment([], [], new Float64Array([]), new Float64Array([]), [], []);
 }
 
-const SentenceRequest = (0, _Types.declare)(function AllenNLP_SentenceRequest(arg1) {
-  this.sentence = arg1;
+const SentenceRequest = (0, _Types.declare)(function AllenNLP_SentenceRequest(sentence) {
+  this.sentence = sentence;
 }, _Types.Record);
 exports.SentenceRequest = SentenceRequest;
 
 function SentenceRequest$reflection() {
-  return (0, _Reflection.record)("AllenNLP.SentenceRequest", [], SentenceRequest, () => [["sentence", _Reflection.string]]);
+  return (0, _Reflection.record_type)("AllenNLP.SentenceRequest", [], SentenceRequest, () => [["sentence", _Reflection.string_type]]);
 }
 
-const DocumentRequest = (0, _Types.declare)(function AllenNLP_DocumentRequest(arg1) {
-  this.document = arg1;
+const DocumentRequest = (0, _Types.declare)(function AllenNLP_DocumentRequest(document$) {
+  this.document = document$;
 }, _Types.Record);
 exports.DocumentRequest = DocumentRequest;
 
 function DocumentRequest$reflection() {
-  return (0, _Reflection.record)("AllenNLP.DocumentRequest", [], DocumentRequest, () => [["document", _Reflection.string]]);
+  return (0, _Reflection.record_type)("AllenNLP.DocumentRequest", [], DocumentRequest, () => [["document", _Reflection.string_type]]);
 }
 
-const TextRequest = (0, _Types.declare)(function AllenNLP_TextRequest(arg1, arg2) {
-  this.text = arg1;
-  this.model = arg2;
+const TextRequest = (0, _Types.declare)(function AllenNLP_TextRequest(text, model) {
+  this.text = text;
+  this.model = model;
 }, _Types.Record);
 exports.TextRequest = TextRequest;
 
 function TextRequest$reflection() {
-  return (0, _Reflection.record)("AllenNLP.TextRequest", [], TextRequest, () => [["text", _Reflection.string], ["model", _Reflection.string]]);
+  return (0, _Reflection.record_type)("AllenNLP.TextRequest", [], TextRequest, () => [["text", _Reflection.string_type], ["model", _Reflection.string_type]]);
 }
 
-const EntailmentRequest = (0, _Types.declare)(function AllenNLP_EntailmentRequest(arg1, arg2) {
-  this.hypothesis = arg1;
-  this.premise = arg2;
+const EntailmentRequest = (0, _Types.declare)(function AllenNLP_EntailmentRequest(hypothesis, premise) {
+  this.hypothesis = hypothesis;
+  this.premise = premise;
 }, _Types.Record);
 exports.EntailmentRequest = EntailmentRequest;
 
 function EntailmentRequest$reflection() {
-  return (0, _Reflection.record)("AllenNLP.EntailmentRequest", [], EntailmentRequest, () => [["hypothesis", _Reflection.string], ["premise", _Reflection.string]]);
+  return (0, _Reflection.record_type)("AllenNLP.EntailmentRequest", [], EntailmentRequest, () => [["hypothesis", _Reflection.string_type], ["premise", _Reflection.string_type]]);
 }
 
 const endpoints = new Endpoints("https://allennlp.olney.ai/predict/semantic-role-labeling", "https://allennlp.olney.ai/predict/coreference-resolution", "https://allennlp.olney.ai/predict/dependency-parsing", "https://spacy.olney.ai/sents", "https://allennlp.olney.ai/predict/textual-entailment");
@@ -241,7 +245,7 @@ exports.endpoints = endpoints;
 
 function GetCoreference(input$$1) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.Coreference, new DocumentRequest(input$$1), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.Coreference, new DocumentRequest(input$$1), undefined, undefined, new _Types2.CaseStrategy(2, "SnakeCase"), undefined, (0, _Util.uncurry)(2, undefined), {
       ResolveType() {
         return Coreference$reflection();
       }
@@ -257,7 +261,7 @@ function GetCoreference(input$$1) {
 
 function GetSRL(input$$2) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.SRL, new SentenceRequest(input$$2), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.SRL, new SentenceRequest(input$$2), undefined, undefined, new _Types2.CaseStrategy(2, "SnakeCase"), undefined, (0, _Util.uncurry)(2, undefined), {
       ResolveType() {
         return SRL$reflection();
       }
@@ -273,7 +277,7 @@ function GetSRL(input$$2) {
 
 function GetDependencyParse(input$$3) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.DependencyParser, new SentenceRequest(input$$3), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.DependencyParser, new SentenceRequest(input$$3), undefined, undefined, new _Types2.CaseStrategy(2, "SnakeCase"), undefined, (0, _Util.uncurry)(2, undefined), {
       ResolveType() {
         return DependencyParse$reflection();
       }
@@ -289,9 +293,9 @@ function GetDependencyParse(input$$3) {
 
 function GetSentences(input$$4) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.SentenceSplitter, new TextRequest(input$$4, "en"), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.SentenceSplitter, new TextRequest(input$$4, "en"), undefined, undefined, new _Types2.CaseStrategy(2, "SnakeCase"), undefined, (0, _Util.uncurry)(2, undefined), {
       ResolveType() {
-        return (0, _Reflection.array)(_Reflection.string);
+        return (0, _Reflection.array_type)(_Reflection.string_type);
       }
 
     }, {
@@ -313,7 +317,7 @@ function GetForSentences(service, sentences) {
 
 function GetTextualEntailment(premise, hypothesis) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.TextualEntailment, new EntailmentRequest(hypothesis, premise), null, null, new _Types2.CaseStrategy(2, "SnakeCase"), null, (0, _Util.uncurry)(2, null), {
+    return (0, _Fetch.Fetch$$$tryPost$$5760677E)(endpoints.TextualEntailment, new EntailmentRequest(hypothesis, premise), undefined, undefined, new _Types2.CaseStrategy(2, "SnakeCase"), undefined, (0, _Util.uncurry)(2, undefined), {
       ResolveType() {
         return Entailment$reflection();
       }
@@ -337,6 +341,8 @@ function Split(pattern$$1, input$$6) {
 
 function CleanText(input$$7) {
   let arg00;
+  let input$$16;
+  let input$$15;
   let input$$14;
   let input$$13;
   let input$$12;
@@ -348,34 +354,36 @@ function CleanText(input$$7) {
   input$$11 = RegexReplace("\\(see[^\\)]+\\)", "", input$$10);
   input$$12 = RegexReplace("\\(note[^\\)]+\\)", "", input$$11);
   input$$13 = RegexReplace("\\([^\\)]+\\)", "", input$$12);
-  input$$14 = RegexReplace("\\s+", " ", input$$13);
-  arg00 = RegexReplace(" \\.$", ".", input$$14);
+  input$$14 = RegexReplace("\\[[^\\]]+\\]", "", input$$13);
+  input$$15 = RegexReplace("\\{[^\\}]+\\}", "", input$$14);
+  input$$16 = RegexReplace("\\s+", " ", input$$15);
+  arg00 = RegexReplace(" \\.$", ".", input$$16);
   return transliteration.transliterate(arg00);
 }
 
-function GetNLP(chunksJsonOption, inputText) {
+function GetNLP(stringArrayJsonOption, inputText) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
     var pr$$1;
     let chunks;
 
-    if (chunksJsonOption == null) {
+    if (stringArrayJsonOption == null) {
       chunks = [inputText];
     } else {
-      const chunksJson = chunksJsonOption;
-      chunks = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, null, null, {
+      const chunksJson = stringArrayJsonOption;
+      chunks = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, undefined, undefined, {
         ResolveType() {
-          return (0, _Reflection.array)(_Reflection.string);
+          return (0, _Reflection.array_type)(_Reflection.string_type);
         }
 
       });
     }
 
     return (pr$$1 = ((0, _Array.map)(function mapping$$1(chunk) {
-      let input$$16;
-      input$$16 = CleanText(chunk);
-      return GetSentences(input$$16);
+      let input$$18;
+      input$$18 = CleanText(chunk);
+      return GetSentences(input$$18);
     }, chunks, Array)), (Promise.all(pr$$1))).then(function (_arg1) {
-      var input$$17;
+      var input$$19;
 
       const allOK = function allOK(resultsArr) {
         return resultsArr.every(function predicate(r) {
@@ -390,7 +398,7 @@ function GetNLP(chunksJsonOption, inputText) {
       const resultsToType = function resultsToType(resultsArr$$1) {
         return (0, _Array.choose)(function chooser(r$$2) {
           if (r$$2.tag === 1) {
-            return null;
+            return undefined;
           } else {
             return (0, _Option.some)(r$$2.fields[0]);
           }
@@ -402,7 +410,7 @@ function GetNLP(chunksJsonOption, inputText) {
           if (r$$4.tag === 1) {
             return (0, _Option.some)(r$$4.fields[0]);
           } else {
-            return null;
+            return undefined;
           }
         }, resultsArr$$2, Array);
       };
@@ -414,14 +422,14 @@ function GetNLP(chunksJsonOption, inputText) {
         const array$$5 = resultsToType(_arg1);
         array$$6 = (0, _Array.mapIndexed)(function mapping$$3(i, chunk$$1) {
           return (0, _Array.map)(function mapping$$2(sen) {
-            return [["OrderGroup:" + (0, _Util.int32ToString)(i)], sen];
+            return [["orderGroup:" + (0, _Util.int32ToString)(i)], sen];
           }, chunk$$1, Array);
         }, array$$5, Array);
         array$$7 = (0, _Array.collect)(function mapping$$4(x) {
           return x;
         }, array$$6, Array);
         patternInput = (0, _Array.unzip)(array$$7);
-        return (input$$17 = ((0, _String.join)(" ", patternInput[1])), (GetCoreference(input$$17))).then(function (_arg2) {
+        return (input$$19 = ((0, _String.join)(" ", patternInput[1])), (GetCoreference(input$$19))).then(function (_arg2) {
           return (GetForSentences(GetSRL, patternInput[1])).then(function (_arg3) {
             return (GetForSentences(GetDependencyParse, patternInput[1])).then(function (_arg4) {
               var array$$10, array$$9, mapping$$8, clo1, array$$12, array$$11, mapping$$9, clo1$$1, array$$14, array$$13, mapping$$10, clo1$$2;
@@ -458,6 +466,7 @@ function GetNLP(chunksJsonOption, inputText) {
                       const matchValue = (0, _Map.FSharpMap$$TryFind$$2B595)(tokenIdCorefMap, j + wordIndexOffset);
 
                       if (matchValue == null) {
+                        void null;
                         return (0, _Seq.empty)();
                       } else {
                         const span$$1 = matchValue[0];
@@ -536,6 +545,13 @@ function GetNLP(chunksJsonOption, inputText) {
   }));
 }
 
+const prePunctuationSpaceRegex = (0, _RegExp.create)(" ([^\\w\\s]+)");
+exports.prePunctuationSpaceRegex = prePunctuationSpaceRegex;
+
+function removePrePunctuationSpaces(input$$22) {
+  return (0, _RegExp.replace)(prePunctuationSpaceRegex, input$$22, "$1");
+}
+
 function collapseDependencies(sa) {
   let ruleTokens;
   let array$$18;
@@ -548,6 +564,7 @@ function collapseDependencies(sa) {
 }
 
 function getDependentIndices(start, sa$$1) {
+  var value, i$$7;
   const dependents = [];
 
   for (let i$$4 = 0; i$$4 <= sa$$1.dep.predicted_heads.length - 1; i$$4++) {
@@ -559,17 +576,55 @@ function getDependentIndices(start, sa$$1) {
 
     if (hbar === start ? true : i$$4 === start) {
       void dependents.push(i$$4);
+    } else {
+      void null;
     }
   }
 
-  return dependents.slice();
+  if (sa$$1.dep.predicted_heads[start] === 0 ? (value = sa$$1.dep.pos[start].indexOf("VB") === 0, (!value)) : false) {
+    let copulaIndex;
+    let source$$6;
+    source$$6 = (0, _Seq.mapIndexed)(function mapping$$13(i$$5, d) {
+      return [i$$5, d];
+    }, dependents);
+    copulaIndex = (0, _Seq.tryFindIndex)(function predicate$$1(tupledArg) {
+      return sa$$1.dep.predicted_dependencies[tupledArg[0]] === "cop";
+    }, source$$6);
+    var $target$$67;
+
+    if (copulaIndex != null) {
+      if (i$$7 = copulaIndex | 0, i$$7 < dependents.length - 1) {
+        $target$$67 = 0;
+      } else {
+        $target$$67 = 1;
+      }
+    } else {
+      $target$$67 = 1;
+    }
+
+    switch ($target$$67) {
+      case 0:
+        {
+          let source$$8;
+          source$$8 = (0, _Seq.skip)(1, dependents);
+          return (0, _Array.ofSeq)(source$$8, Int32Array);
+        }
+
+      case 1:
+        {
+          return new Int32Array(0);
+        }
+    }
+  } else {
+    return dependents.slice();
+  }
 }
 
 function srlArgToIndexMap(srlTags) {
   let elements$$1;
   let array$$20;
-  array$$20 = (0, _Array.mapIndexed)(function mapping$$13(i$$5, t) {
-    return [(0, _String.substring)(t, t.indexOf("-") + 1), i$$5];
+  array$$20 = (0, _Array.mapIndexed)(function mapping$$14(i$$9, t) {
+    return [(0, _String.substring)(t, t.indexOf("-") + 1), i$$9];
   }, srlTags, Array);
   elements$$1 = (0, _Array.groupBy)(function projection(tuple) {
     return tuple[0];
@@ -587,21 +642,21 @@ function srlArgToIndexMap(srlTags) {
 
 function getSubjectIndex(sa$$2) {
   let rootIndex;
-  rootIndex = sa$$2.dep.predicted_heads.findIndex(function predicate$$1(h) {
+  rootIndex = sa$$2.dep.predicted_heads.findIndex(function predicate$$2(h) {
     return h === 0;
   });
   const array$$22 = sa$$2.dep.predicted_dependencies.slice(0, rootIndex + 1);
-  return (0, _Array.tryFindIndexBack)(function predicate$$2(h$$1) {
-    return h$$1 === "nsubj";
+  return (0, _Array.tryFindIndexBack)(function predicate$$3(h$$1) {
+    return h$$1.indexOf("nsubj") === 0;
   }, array$$22);
 }
 
 function getBeRootIndex(sa$$3) {
   let rootIndex$$1;
-  rootIndex$$1 = sa$$3.dep.predicted_heads.findIndex(function predicate$$3(h$$2) {
+  rootIndex$$1 = sa$$3.dep.predicted_heads.findIndex(function predicate$$4(h$$2) {
     return h$$2 === 0;
   });
-  return (0, _Array.tryFindIndex)(function predicate$$4(h$$3) {
+  return (0, _Array.tryFindIndex)(function predicate$$5(h$$3) {
     if (h$$3 === rootIndex$$1) {
       return sa$$3.dep.predicted_dependencies[h$$3] === "cop";
     } else {
@@ -612,10 +667,10 @@ function getBeRootIndex(sa$$3) {
 
 function getInvertAuxIndex(sa$$4) {
   let rootIndex$$2;
-  rootIndex$$2 = sa$$4.dep.predicted_heads.findIndex(function predicate$$5(h$$4) {
+  rootIndex$$2 = sa$$4.dep.predicted_heads.findIndex(function predicate$$6(h$$4) {
     return h$$4 === 0;
   });
-  return (0, _Array.tryFindIndex)(function predicate$$6(h$$5) {
+  return (0, _Array.tryFindIndex)(function predicate$$7(h$$5) {
     if (h$$5 === rootIndex$$2) {
       return sa$$4.dep.predicted_dependencies[h$$5] === "aux";
     } else {
@@ -626,18 +681,18 @@ function getInvertAuxIndex(sa$$4) {
 
 function getPredicateIndex(sa$$5) {
   let rootIndex$$3;
-  rootIndex$$3 = sa$$5.dep.predicted_heads.findIndex(function predicate$$7(h$$6) {
+  rootIndex$$3 = sa$$5.dep.predicted_heads.findIndex(function predicate$$8(h$$6) {
     return h$$6 === 0;
   });
 
   if (sa$$5.dep.pos[rootIndex$$3].indexOf("VB") === 0) {
     let array$$29;
-    array$$29 = (0, _Array.mapIndexed)(function mapping$$14(i$$6, h$$7) {
-      return [i$$6, h$$7 - 1];
+    array$$29 = (0, _Array.mapIndexed)(function mapping$$15(i$$10, h$$7) {
+      return [i$$10, h$$7 - 1];
     }, sa$$5.dep.predicted_heads, Array);
-    return (0, _Array.tryFindIndex)(function predicate$$8(tupledArg) {
-      if (tupledArg[1] === rootIndex$$3) {
-        return sa$$5.dep.predicted_dependencies[tupledArg[0]] === "dobj";
+    return (0, _Array.tryFindIndex)(function predicate$$9(tupledArg$$1) {
+      if (tupledArg$$1[1] === rootIndex$$3) {
+        return sa$$5.dep.predicted_dependencies[tupledArg$$1[0]] === "dobj";
       } else {
         return false;
       }
@@ -645,4 +700,126 @@ function getPredicateIndex(sa$$5) {
   } else {
     return rootIndex$$3;
   }
+}
+
+function resolveReferents(da) {
+  let clusterSentenceMap;
+  let elements$$2;
+  let array$$33;
+  let array$$32;
+  array$$32 = (0, _Array.mapIndexed)(function mapping$$17(i$$12, s) {
+    return (0, _Array.mapIndexed)(function mapping$$16(j$$1, c$$1) {
+      return [c$$1, i$$12, j$$1];
+    }, s.cor.clusters, Array);
+  }, da.sentences, Array);
+  array$$33 = (0, _Array.collect)(function mapping$$18(x$$2) {
+    return x$$2;
+  }, array$$32, Array);
+  elements$$2 = (0, _Array.groupBy)(function projection$$1(tupledArg$$2) {
+    return tupledArg$$2[0];
+  }, array$$33, Array, {
+    Equals($x$$15, $y$$16) {
+      return $x$$15 === $y$$16;
+    },
+
+    GetHashCode: _Util.structuralHash
+  });
+  clusterSentenceMap = (0, _Map.ofArray)(elements$$2, {
+    Compare: _Util.comparePrimitives
+  });
+  const demonstrativeRegex = (0, _RegExp.create)("(this|that|these|those)", 1);
+
+  const spanIsPronominal = function spanIsPronominal(sa$$6, span$$2) {
+    if (sa$$6.dep.pos[span$$2[0]].indexOf("PRP") === 0) {
+      return true;
+    } else {
+      return (0, _RegExp.isMatch)(demonstrativeRegex, sa$$6.dep.words[span$$2[0]]);
+    }
+  };
+
+  let resolvedSentences;
+  resolvedSentences = (0, _Array.map)(function mapping$$22(sa$$7) {
+    let clusterReferents;
+    clusterReferents = (0, _Array.map)(function mapping$$20(clusterId) {
+      let nominalReferents;
+      let array$$36;
+      let array$$35;
+      const array$$34 = (0, _Map.FSharpMap$$get_Item$$2B595)(clusterSentenceMap, clusterId);
+      array$$35 = (0, _Array.map)(function mapping$$19(tupledArg$$3) {
+        return [tupledArg$$3[1], tupledArg$$3[2]];
+      }, array$$34, Array);
+      array$$36 = (0, _Array.sortBy)(function projection$$2(tuple$$1) {
+        return tuple$$1[0];
+      }, array$$35, {
+        Compare: _Util.comparePrimitives
+      });
+      nominalReferents = (0, _Array.choose)(function chooser$$2(tupledArg$$4) {
+        var strings$$3;
+        const span$$3 = da.sentences[tupledArg$$4[0]].cor.spans[tupledArg$$4[1]];
+
+        if (spanIsPronominal(da.sentences[tupledArg$$4[0]], span$$3)) {
+          return undefined;
+        } else {
+          return [tupledArg$$4[0], (strings$$3 = da.sentences[tupledArg$$4[0]].dep.words.slice(span$$3[0], span$$3[1] + 1), ((0, _String.join)(" ", strings$$3)))];
+        }
+      }, array$$36, Array);
+
+      if (!(0, _Array.equalsWith)(_Util.compareArrays, nominalReferents, null) ? nominalReferents.length === 0 : false) {
+        return undefined;
+      } else {
+        let matchValue$$1;
+        let array$$38;
+        array$$38 = (0, _Array.sortBy)(function projection$$3(tuple$$2) {
+          return tuple$$2[0];
+        }, nominalReferents, {
+          Compare: _Util.comparePrimitives
+        });
+        matchValue$$1 = (0, _Array.tryFindBack)(function predicate$$10(tupledArg$$5) {
+          return tupledArg$$5[0] < sa$$7.id;
+        }, array$$38);
+
+        if (matchValue$$1 != null) {
+          const w$$2 = matchValue$$1[1];
+          return w$$2;
+        } else {
+          return undefined;
+        }
+      }
+    }, sa$$7.cor.clusters, Array);
+    let indexedWords;
+    indexedWords = (0, _Array.copy)(sa$$7.dep.words, Array);
+
+    for (let i$$14 = 0; i$$14 <= sa$$7.cor.spans.length - 1; i$$14++) {
+      let originalWords;
+      const strings$$4 = sa$$7.dep.words.slice(sa$$7.cor.spans[i$$14][0], sa$$7.cor.spans[i$$14][1] + 1);
+      originalWords = (0, _String.join)(" ", strings$$4);
+
+      if (spanIsPronominal(sa$$7, sa$$7.cor.spans[i$$14]) ? clusterReferents[i$$14] != null : false) {
+        indexedWords[sa$$7.cor.spans[i$$14][0]] = clusterReferents[i$$14];
+
+        for (let j$$2 = sa$$7.cor.spans[i$$14][0] + 1; j$$2 <= sa$$7.cor.spans[i$$14][1]; j$$2++) {
+          indexedWords[j$$2] = "";
+        }
+      } else {
+        void null;
+      }
+    }
+
+    let str;
+    let input$$23;
+    let strings$$5;
+    strings$$5 = indexedWords.filter(function predicate$$11(w$$3) {
+      return w$$3.length > 0;
+    });
+    input$$23 = (0, _String.join)(" ", strings$$5);
+    str = removePrePunctuationSpaces(input$$23);
+    return Array.from((0, _Seq.mapIndexed)(function mapping$$21(i$$15, c$$3) {
+      if (i$$15 === 0) {
+        return c$$3.toLocaleUpperCase();
+      } else {
+        return c$$3;
+      }
+    }, str.split(""))).join("");
+  }, da.sentences, Array);
+  return resolvedSentences;
 }

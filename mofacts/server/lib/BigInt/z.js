@@ -67,31 +67,33 @@ exports.BigInteger$$$FromInt64$$Z524259C1 = BigInteger$$$FromInt64$$Z524259C1;
 exports.BigInteger$$$FromInt32$$Z524259A4 = BigInteger$$$FromInt32$$Z524259A4;
 exports.BigInteger = void 0;
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
 var _n = require("./n");
 
-var _Array = require("../fable-library.2.8.4/Array");
+var _Array = require("../fable-library.2.10.2/Array");
 
-var _Long = require("../fable-library.2.8.4/Long");
+var _Long = require("../fable-library.2.10.2/Long");
 
-var _Int = require("../fable-library.2.8.4/Int32");
+var _Int = require("../fable-library.2.10.2/Int32");
 
-var _Decimal = _interopRequireDefault(require("../fable-library.2.8.4/Decimal"));
+var _Decimal = _interopRequireDefault(require("../fable-library.2.10.2/Decimal"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const BigInteger = (0, _Types.declare)(function BigInt_BigInteger(signInt, v) {
   const $this$$1 = this;
+  void null;
   $this$$1.signInt = signInt;
   $this$$1.v = v;
+  void null;
 }, _Types.Record);
 exports.BigInteger = BigInteger;
 
 function BigInteger$reflection() {
-  return (0, _Reflection.type)("BigInt.BigInteger");
+  return (0, _Reflection.class_type)("BigInt.BigInteger", undefined, BigInteger);
 }
 
 function BigInteger$$$$002Ector$$Z2BE94A1(signInt, v) {
@@ -104,6 +106,7 @@ function BigInteger$$$$002Ector$$Z2BE94A1(signInt, v) {
   BigInteger.one = BigInteger$$$$002Ector$$Z524259A4(1);
   BigInteger.two = BigInteger$$$$002Ector$$Z524259A4(2);
   BigInteger.zero = BigInteger$$$$002Ector$$Z524259A4(0);
+  void null;
 })();
 
 function BigInteger$$$nat$$Z67CCE57D(n$$1) {
@@ -708,6 +711,8 @@ function BigInteger$$$op_Multiply$$56F059C0(x$$14, y$$6) {
 function BigInteger$$$DivRem$$56F059C0(x$$15, y$$7) {
   if (BigInteger$$get_IsZero(y$$7)) {
     throw new Error();
+  } else {
+    void null;
   }
 
   if (BigInteger$$get_IsZero(x$$15)) {
@@ -1029,6 +1034,8 @@ function BigInteger$$$op_GreaterThanOrEqual$$56F059C0(x$$28, y$$17) {
 function BigInteger$$$Pow$$62E082A2(x$$29, y$$18) {
   if (y$$18 < 0) {
     throw new Error("y");
+  } else {
+    void null;
   }
 
   const matchValue$$11 = [BigInteger$$get_IsZero(x$$29), y$$18];
@@ -1146,6 +1153,8 @@ function BigInteger$$get_ToDecimal(x$$40) {
 function BigInteger$$$Parse$$Z721C83C5(text) {
   if (text == null) {
     throw new Error("text");
+  } else {
+    void null;
   }
 
   const text$$1 = text.trim();
@@ -1153,6 +1162,8 @@ function BigInteger$$$Parse$$Z721C83C5(text) {
 
   if (len === 0) {
     throw new Error();
+  } else {
+    void null;
   }
 
   const matchValue$$13 = [text$$1[0], len];
@@ -1185,6 +1196,8 @@ function BigInteger$$get_IsSmall(x$$41) {
 function BigInteger$$$Factorial$$Z665282C2(x$$42) {
   if (BigInteger$$get_IsNegative(x$$42)) {
     throw new Error("mustBeNonNegative\\nParameter name: x");
+  } else {
+    void null;
   }
 
   if (BigInteger$$get_IsPositive(x$$42)) {

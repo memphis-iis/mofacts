@@ -34,29 +34,29 @@ exports.Collapser$$$StanfordFormat = Collapser$$$StanfordFormat;
 exports.Collapser$$$CollapseTokens = Collapser$$$CollapseTokens;
 exports.Rules$$$stageRuleList = exports.Rules$002EStage = exports.Rules$002ERule = exports.Rules$002EModel = exports.Rules$002ERelation = exports.Rules$002EProperty = exports.Rules$002ERelationType = exports.Rules$002ESpecifierType = exports.Rules$002ERuleToken = exports.Rules$002EDependency = exports.Rules$002EToken = void 0;
 
-var _Util = require("./fable-library.2.8.4/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
-var _Option = require("./fable-library.2.8.4/Option");
+var _Option = require("./fable-library.2.10.2/Option");
 
-var _Types = require("./fable-library.2.8.4/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.8.4/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
-var _Seq = require("./fable-library.2.8.4/Seq");
+var _Seq = require("./fable-library.2.10.2/Seq");
 
-var _List = require("./fable-library.2.8.4/List");
+var _List = require("./fable-library.2.10.2/List");
 
-var _String = require("./fable-library.2.8.4/String");
+var _String = require("./fable-library.2.10.2/String");
 
-var _RegExp = require("./fable-library.2.8.4/RegExp");
+var _RegExp = require("./fable-library.2.10.2/RegExp");
 
-var _Map = require("./fable-library.2.8.4/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
-var _Int = require("./fable-library.2.8.4/Int32");
+var _Int = require("./fable-library.2.10.2/Int32");
 
-var _Set = require("./fable-library.2.8.4/Set");
+var _Set = require("./fable-library.2.10.2/Set");
 
-var _Array = require("./fable-library.2.8.4/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
 function Rules$$$tryGetValue(collection, key) {
   const matchValue = (0, _Util.tryGetValue)(collection, key, null);
@@ -64,7 +64,7 @@ function Rules$$$tryGetValue(collection, key) {
   if (matchValue[0]) {
     return (0, _Option.some)(matchValue[1]);
   } else {
-    return null;
+    return undefined;
   }
 }
 
@@ -72,18 +72,18 @@ function Rules$$$toLower(s) {
   return s.toLocaleLowerCase();
 }
 
-const Rules$002EToken = (0, _Types.declare)(function DependencyCollapser_Rules_Token(arg1, arg2, arg3, arg4, arg5, arg6) {
-  this.Index = arg1 | 0;
-  this.Word = arg2;
-  this.POS = arg3;
-  this.Lemma = arg4;
-  this.DependencyType = arg5;
-  this.Head = arg6 | 0;
+const Rules$002EToken = (0, _Types.declare)(function DependencyCollapser_Rules_Token(Index, Word, POS, Lemma, DependencyType, Head) {
+  this.Index = Index | 0;
+  this.Word = Word;
+  this.POS = POS;
+  this.Lemma = Lemma;
+  this.DependencyType = DependencyType;
+  this.Head = Head | 0;
 }, _Types.Record);
 exports.Rules$002EToken = Rules$002EToken;
 
 function Rules$002EToken$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Token", [], Rules$002EToken, () => [["Index", _Reflection.int32], ["Word", _Reflection.string], ["POS", _Reflection.string], ["Lemma", _Reflection.string], ["DependencyType", _Reflection.string], ["Head", _Reflection.int32]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Token", [], Rules$002EToken, () => [["Index", _Reflection.int32_type], ["Word", _Reflection.string_type], ["POS", _Reflection.string_type], ["Lemma", _Reflection.string_type], ["DependencyType", _Reflection.string_type], ["Head", _Reflection.int32_type]]);
 }
 
 function Rules$002EToken$$$Create$$Z2BAB6A85(index, word, pos, depType, head) {
@@ -94,29 +94,29 @@ function Rules$002EToken$$$Create$$Z27166B40(index$$1, word$$1, pos$$1, lemma, d
   return new Rules$002EToken(index$$1, word$$1, pos$$1, lemma, depType$$1, head$$1);
 }
 
-const Rules$002EDependency = (0, _Types.declare)(function DependencyCollapser_Rules_Dependency(arg1, arg2, arg3) {
-  this.Type = arg1;
-  this.Governor = arg2;
-  this.Dependent = arg3;
+const Rules$002EDependency = (0, _Types.declare)(function DependencyCollapser_Rules_Dependency(Type, Governor, Dependent) {
+  this.Type = Type;
+  this.Governor = Governor;
+  this.Dependent = Dependent;
 }, _Types.Record);
 exports.Rules$002EDependency = Rules$002EDependency;
 
 function Rules$002EDependency$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Dependency", [], Rules$002EDependency, () => [["Type", _Reflection.string], ["Governor", Rules$002EToken$reflection()], ["Dependent", Rules$002EToken$reflection()]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Dependency", [], Rules$002EDependency, () => [["Type", _Reflection.string_type], ["Governor", Rules$002EToken$reflection()], ["Dependent", Rules$002EToken$reflection()]]);
 }
 
-const Rules$002ERuleToken = (0, _Types.declare)(function DependencyCollapser_Rules_RuleToken(arg1, arg2, arg3, arg4, arg5, arg6) {
-  this.Index = arg1 | 0;
-  this.Token = arg2;
-  this.TargetIndex = arg3 | 0;
-  this.TargetToken = arg4;
-  this.DependencyType = arg5;
-  this.Durable = arg6;
+const Rules$002ERuleToken = (0, _Types.declare)(function DependencyCollapser_Rules_RuleToken(Index, Token, TargetIndex, TargetToken, DependencyType, Durable) {
+  this.Index = Index | 0;
+  this.Token = Token;
+  this.TargetIndex = TargetIndex | 0;
+  this.TargetToken = TargetToken;
+  this.DependencyType = DependencyType;
+  this.Durable = Durable;
 }, _Types.Record);
 exports.Rules$002ERuleToken = Rules$002ERuleToken;
 
 function Rules$002ERuleToken$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.RuleToken", [], Rules$002ERuleToken, () => [["Index", _Reflection.int32], ["Token", Rules$002EToken$reflection()], ["TargetIndex", _Reflection.int32], ["TargetToken", Rules$002EToken$reflection()], ["DependencyType", _Reflection.string], ["Durable", _Reflection.bool]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.RuleToken", [], Rules$002ERuleToken, () => [["Index", _Reflection.int32_type], ["Token", Rules$002EToken$reflection()], ["TargetIndex", _Reflection.int32_type], ["TargetToken", Rules$002EToken$reflection()], ["DependencyType", _Reflection.string_type], ["Durable", _Reflection.bool_type]]);
 }
 
 function Rules$002ERuleToken$$Signature(this$) {
@@ -125,44 +125,48 @@ function Rules$002ERuleToken$$Signature(this$) {
 }
 
 const Rules$002ESpecifierType = (0, _Types.declare)(function DependencyCollapser_Rules_SpecifierType(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.Rules$002ESpecifierType = Rules$002ESpecifierType;
 
 function Rules$002ESpecifierType$reflection() {
-  return (0, _Reflection.union)("DependencyCollapser.Rules.SpecifierType", [], Rules$002ESpecifierType, () => ["Word", "POS", "Lemma"]);
+  return (0, _Reflection.union_type)("DependencyCollapser.Rules.SpecifierType", [], Rules$002ESpecifierType, () => ["Word", "POS", "Lemma"]);
 }
 
 const Rules$002ERelationType = (0, _Types.declare)(function DependencyCollapser_Rules_RelationType(tag, name, ...fields) {
-  _Types.Union.call(this, tag, name, ...fields);
+  this.tag = tag | 0;
+  this.name = name;
+  this.fields = fields;
 }, _Types.Union);
 exports.Rules$002ERelationType = Rules$002ERelationType;
 
 function Rules$002ERelationType$reflection() {
-  return (0, _Reflection.union)("DependencyCollapser.Rules.RelationType", [], Rules$002ERelationType, () => ["Relation", "DurableRelation"]);
+  return (0, _Reflection.union_type)("DependencyCollapser.Rules.RelationType", [], Rules$002ERelationType, () => ["Relation", "DurableRelation"]);
 }
 
-const Rules$002EProperty = (0, _Types.declare)(function DependencyCollapser_Rules_Property(arg1, arg2, arg3) {
-  this.Type = arg1;
-  this.Reference = arg2 | 0;
-  this.Regex = arg3;
+const Rules$002EProperty = (0, _Types.declare)(function DependencyCollapser_Rules_Property(Type, Reference, Regex) {
+  this.Type = Type;
+  this.Reference = Reference | 0;
+  this.Regex = Regex;
 }, _Types.Record);
 exports.Rules$002EProperty = Rules$002EProperty;
 
 function Rules$002EProperty$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Property", [], Rules$002EProperty, () => [["Type", Rules$002ESpecifierType$reflection()], ["Reference", _Reflection.int32], ["Regex", _Reflection.string]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Property", [], Rules$002EProperty, () => [["Type", Rules$002ESpecifierType$reflection()], ["Reference", _Reflection.int32_type], ["Regex", _Reflection.string_type]]);
 }
 
-const Rules$002ERelation = (0, _Types.declare)(function DependencyCollapser_Rules_Relation(arg1, arg2, arg3, arg4) {
-  this.Type = arg1;
-  this.From = arg2 | 0;
-  this.To = arg3 | 0;
-  this.Regex = arg4;
+const Rules$002ERelation = (0, _Types.declare)(function DependencyCollapser_Rules_Relation(Type, From, To, Regex) {
+  this.Type = Type;
+  this.From = From | 0;
+  this.To = To | 0;
+  this.Regex = Regex;
 }, _Types.Record);
 exports.Rules$002ERelation = Rules$002ERelation;
 
 function Rules$002ERelation$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Relation", [], Rules$002ERelation, () => [["Type", Rules$002ERelationType$reflection()], ["From", _Reflection.int32], ["To", _Reflection.int32], ["Regex", _Reflection.string]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Relation", [], Rules$002ERelation, () => [["Type", Rules$002ERelationType$reflection()], ["From", _Reflection.int32_type], ["To", _Reflection.int32_type], ["Regex", _Reflection.string_type]]);
 }
 
 function Rules$002ERelation$$Signature(this$$$1) {
@@ -184,6 +188,8 @@ function Rules$$$spannedText(token, tokens) {
       (0, _Seq.iterate)(function (t) {
         if (frontier.has(t.Head)) {
           notDone = (0, _Util.addToSet)(t.Index + 1, frontier);
+        } else {
+          void null;
         }
       }, tokens);
     }, inputSequence);
@@ -220,7 +226,7 @@ function Rules$$$doMatch(retVal, pattern, input) {
   if (m != null) {
     return (0, _Option.some)(retVal);
   } else {
-    return null;
+    return undefined;
   }
 }
 
@@ -234,17 +240,17 @@ function Rules$$$propertyMatch(property, token$$4) {
   }
 }
 
-const Rules$002EModel = (0, _Types.declare)(function DependencyCollapser_Rules_Model(arg1, arg2, arg3, arg4, arg5) {
-  this.From = arg1 | 0;
-  this.To = arg2 | 0;
-  this.Tokens = arg3;
-  this.Relations = arg4;
-  this.AddedTokens = arg5;
+const Rules$002EModel = (0, _Types.declare)(function DependencyCollapser_Rules_Model(From, To, Tokens, Relations, AddedTokens) {
+  this.From = From | 0;
+  this.To = To | 0;
+  this.Tokens = Tokens;
+  this.Relations = Relations;
+  this.AddedTokens = AddedTokens;
 }, _Types.Record);
 exports.Rules$002EModel = Rules$002EModel;
 
 function Rules$002EModel$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Model", [], Rules$002EModel, () => [["From", _Reflection.int32], ["To", _Reflection.int32], ["Tokens", (0, _Reflection.type)("System.Collections.Generic.Dictionary`2", [_Reflection.int32, Rules$002EToken$reflection()])], ["Relations", (0, _Reflection.array)(Rules$002ERuleToken$reflection())], ["AddedTokens", (0, _Reflection.type)("System.Collections.Generic.HashSet`1", [_Reflection.string])]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Model", [], Rules$002EModel, () => [["From", _Reflection.int32_type], ["To", _Reflection.int32_type], ["Tokens", (0, _Reflection.class_type)("System.Collections.Generic.Dictionary`2", [_Reflection.int32_type, Rules$002EToken$reflection()])], ["Relations", (0, _Reflection.array_type)(Rules$002ERuleToken$reflection())], ["AddedTokens", (0, _Reflection.class_type)("System.Collections.Generic.HashSet`1", [_Reflection.string_type])]]);
 }
 
 function Rules$002EModel$$$Create$$Z37302880(from, To) {
@@ -323,6 +329,8 @@ function Rules$002EModel$$AddRuleToken$$7BB8F29B(this$$$2, ruleToken) {
                 (0, _Seq.iterate)(function (relation) {
                   if ((0, _Util.equals)(relation, ruleToken)) {
                     void newModel.Relations.push(ruleToken);
+                  } else {
+                    void null;
                   }
                 }, this$$$2.Relations);
                 let newModelString;
@@ -333,7 +341,7 @@ function Rules$002EModel$$AddRuleToken$$7BB8F29B(this$$$2, ruleToken) {
                 thisString = clo1$$2(this$$$2);
 
                 if (newModelString === thisString) {
-                  return null;
+                  return undefined;
                 } else {
                   return newModel;
                 }
@@ -342,21 +350,21 @@ function Rules$002EModel$$AddRuleToken$$7BB8F29B(this$$$2, ruleToken) {
         }
     }
   } else {
-    return null;
+    return undefined;
   }
 }
 
-const Rules$002ERule = (0, _Types.declare)(function DependencyCollapser_Rules_Rule(arg1, arg2, arg3, arg4, arg5) {
-  this.Properties = arg1;
-  this.Relations = arg2;
-  this.From = arg3 | 0;
-  this.To = arg4 | 0;
-  this.RelationName = arg5;
+const Rules$002ERule = (0, _Types.declare)(function DependencyCollapser_Rules_Rule(Properties, Relations, From, To, RelationName) {
+  this.Properties = Properties;
+  this.Relations = Relations;
+  this.From = From | 0;
+  this.To = To | 0;
+  this.RelationName = RelationName;
 }, _Types.Record);
 exports.Rules$002ERule = Rules$002ERule;
 
 function Rules$002ERule$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Rule", [], Rules$002ERule, () => [["Properties", (0, _Reflection.type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.int32, Rules$002EProperty$reflection()])], ["Relations", (0, _Reflection.list)(Rules$002ERelation$reflection())], ["From", _Reflection.int32], ["To", _Reflection.int32], ["RelationName", _Reflection.string]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Rule", [], Rules$002ERule, () => [["Properties", (0, _Reflection.class_type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.int32_type, Rules$002EProperty$reflection()])], ["Relations", (0, _Reflection.list_type)(Rules$002ERelation$reflection())], ["From", _Reflection.int32_type], ["To", _Reflection.int32_type], ["RelationName", _Reflection.string_type]]);
 }
 
 function Rules$002ERule$$ResolvedRelationName$$Z711AA79F(this$$$3, model) {
@@ -369,7 +377,9 @@ function Rules$002ERule$$ResolvedRelationName$$Z711AA79F(this$$$3, model) {
     const token$$10 = (0, _Util.getItemFromDict)(model.Tokens, tupledArg[0]);
     matchValue$$5 = Rules$$$propertyMatch(tupledArg[1], token$$10);
 
-    if (matchValue$$5 == null) {} else {
+    if (matchValue$$5 == null) {
+      void null;
+    } else {
       const matchedWords = matchValue$$5;
       (0, _Util.addToDict)(matchDictionary, (clo1$$3 = (0, _String.toText)((0, _String.printf)("%A")), clo1$$3(tupledArg[1])), matchedWords);
     }
@@ -382,11 +392,17 @@ function Rules$002ERule$$ResolvedRelationName$$Z711AA79F(this$$$3, model) {
         let matchValue$$6;
         matchValue$$6 = Rules$$$doMatch(ruleToken$$1.DependencyType, relation$$1.Regex, ruleToken$$1.DependencyType);
 
-        if (matchValue$$6 == null) {} else {
+        if (matchValue$$6 == null) {
+          void null;
+        } else {
           const matchedWords$$1 = matchValue$$6;
           (0, _Util.addToDict)(matchDictionary, (clo1$$4 = (0, _String.toText)((0, _String.printf)("%A")), clo1$$4(relation$$1)), matchedWords$$1);
         }
+      } else {
+        void null;
       }
+
+      void null;
     }, model.Relations);
   }, this$$$3.Relations);
   let retVal$$4 = this$$$3.RelationName;
@@ -406,7 +422,7 @@ function Rules$002ERule$$ResolvedRelationName$$Z711AA79F(this$$$3, model) {
       }, this$$$3.Relations);
 
       if (matchValue$$7 == null) {
-        return null;
+        return undefined;
       } else {
         const r = matchValue$$7;
         let key$$1;
@@ -429,14 +445,14 @@ function Rules$002ERule$$ResolvedRelationName$$Z711AA79F(this$$$3, model) {
   return Rules$$$toLower(s$$2);
 }
 
-const Rules$002EStage = (0, _Types.declare)(function DependencyCollapser_Rules_Stage(arg1, arg2) {
-  this.Id = arg1 | 0;
-  this.Rules = arg2;
+const Rules$002EStage = (0, _Types.declare)(function DependencyCollapser_Rules_Stage(Id, Rules) {
+  this.Id = Id | 0;
+  this.Rules = Rules;
 }, _Types.Record);
 exports.Rules$002EStage = Rules$002EStage;
 
 function Rules$002EStage$reflection() {
-  return (0, _Reflection.record)("DependencyCollapser.Rules.Stage", [], Rules$002EStage, () => [["Id", _Reflection.int32], ["Rules", (0, _Reflection.list)(Rules$002ERule$reflection())]]);
+  return (0, _Reflection.record_type)("DependencyCollapser.Rules.Stage", [], Rules$002EStage, () => [["Id", _Reflection.int32_type], ["Rules", (0, _Reflection.list_type)(Rules$002ERule$reflection())]]);
 }
 
 const Rules$$$stageRuleList = (0, _List.ofArray)([new Rules$002EStage(1, (0, _List.ofArray)([new Rules$002ERule((() => {
@@ -728,10 +744,14 @@ function Collapser$$$getCandidatesAndIndices(rule, dependencies) {
 
             if (value$$1 = ruleTokens.has(patternInput[0]), (!value$$1)) {
               (0, _Util.addToDict)(ruleTokens, patternInput[0], []);
+            } else {
+              void null;
             }
 
             if (value$$2 = targetRuleTokens.has(patternInput[1]), (!value$$2)) {
               (0, _Util.addToDict)(targetRuleTokens, patternInput[1], []);
+            } else {
+              void null;
             }
 
             const ruleToken$$2 = new Rules$002ERuleToken(patternInput[0], dep$$1.Governor, patternInput[1], dep$$1.Dependent, dep$$1.Type, (0, _Util.equals)((0, _List.item)(i$$1, rule.Relations).Type, new Rules$002ERelationType(1, "DurableRelation")));
@@ -742,12 +762,15 @@ function Collapser$$$getCandidatesAndIndices(rule, dependencies) {
 
         case 1:
           {
+            void null;
             break;
           }
       }
     }, inputSequence$$2);
+    void null;
   }
 
+  void null;
   return [confirmedCandidates, ruleTokens, targetRuleTokens];
 }
 
@@ -765,16 +788,22 @@ function Collapser$$$createModels(rule$$1, ruleTokens$$1, targetRuleTokens$$1) {
           for (let i$$2 = 0; i$$2 <= modelCount; i$$2++) {
             const matchValue$$9 = Rules$002EModel$$AddRuleToken$$7BB8F29B(models[i$$2], fromRuleToken);
 
-            if (matchValue$$9 == null) {} else {
+            if (matchValue$$9 == null) {
+              void null;
+            } else {
               const model$$1 = matchValue$$9;
               void models.push(model$$1);
             }
           }
         }, inputSequence$$4);
+      } else {
+        void null;
       }
     }, rule$$1.Relations);
+    void null;
   }
 
+  void null;
   return models;
 }
 
@@ -829,8 +858,14 @@ function Collapser$$$selectDependenciesWithModels(rule$$2, models$$1, dependenci
               if (dependencyType$$1 !== "void") {
                 const value$$5 = (0, _Util.addToSet)(new Rules$002EDependency(dependencyType$$1, matchValue$$10[0][1], matchValue$$10[1][1]), dependenciesToAdd);
                 void value$$5;
+              } else {
+                void null;
               }
+            } else {
+              void null;
             }
+          } else {
+            void null;
           }
 
           break;
@@ -838,6 +873,7 @@ function Collapser$$$selectDependenciesWithModels(rule$$2, models$$1, dependenci
 
       case 1:
         {
+          void null;
           break;
         }
     }
@@ -874,6 +910,8 @@ function Collapser$$$CollapseTokens(tokens$$3) {
       }, patternInput$$1[0])) {
         const models$$2 = Collapser$$$createModels(rule$$3, patternInput$$1[1], patternInput$$1[2]);
         Collapser$$$selectDependenciesWithModels(rule$$3, models$$2, dependenciesToRemove$$1, dependenciesToAdd$$1);
+      } else {
+        void null;
       }
     }, stage.Rules);
     let list$$6;
@@ -882,6 +920,8 @@ function Collapser$$$CollapseTokens(tokens$$3) {
       if (dependenciesToRemove$$1.has([dep$$2.Governor, dep$$2.Dependent])) {
         const value$$6 = (0, _Array.removeInPlace)(dep$$2, dependencies$$1);
         void value$$6;
+      } else {
+        void null;
       }
     }, list$$6);
     (0, _Array.addRangeInPlace)(dependenciesToAdd$$1, dependencies$$1);

@@ -19,15 +19,15 @@ exports.PromiseBuilder$$Run$$212F1D4B = PromiseBuilder$$Run$$212F1D4B;
 exports.PromiseBuilder$$Using$$74F7E79D = PromiseBuilder$$Using$$74F7E79D;
 exports.PromiseBuilder = void 0;
 
-var _Option = require("../fable-library.2.8.4/Option");
+var _Option = require("../fable-library.2.10.2/Option");
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
-var _Seq = require("../fable-library.2.8.4/Seq");
+var _Seq = require("../fable-library.2.10.2/Seq");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
 function reject(reason) {
   return Promise.reject(reason);
@@ -74,11 +74,13 @@ function tap(fn$$3, a$$9) {
   });
 }
 
-const PromiseBuilder = (0, _Types.declare)(function Promise_PromiseBuilder() {});
+const PromiseBuilder = (0, _Types.declare)(function Promise_PromiseBuilder() {
+  void null;
+});
 exports.PromiseBuilder = PromiseBuilder;
 
 function PromiseBuilder$reflection() {
-  return (0, _Reflection.type)("Promise.PromiseBuilder");
+  return (0, _Reflection.class_type)("Promise.PromiseBuilder", undefined, PromiseBuilder);
 }
 
 function PromiseBuilder$$$$002Ector() {

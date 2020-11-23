@@ -13,29 +13,29 @@ exports.DialogueState$$$InitializeTest = DialogueState$$$InitializeTest;
 exports.GetDialogue = GetDialogue;
 exports.DialogueState = exports.DialogueMove = exports.random = exports.dialogueBags = void 0;
 
-var _List = require("./fable-library.2.8.4/List");
+var _List = require("./fable-library.2.10.2/List");
 
-var _Util = require("./fable-library.2.8.4/Util");
+var _Util = require("./fable-library.2.10.2/Util");
 
-var _Map = require("./fable-library.2.8.4/Map");
+var _Map = require("./fable-library.2.10.2/Map");
 
-var _Types = require("./fable-library.2.8.4/Types");
+var _Types = require("./fable-library.2.10.2/Types");
 
-var _Reflection = require("./fable-library.2.8.4/Reflection");
+var _Reflection = require("./fable-library.2.10.2/Reflection");
 
 var _QuestionGenerator = require("./QuestionGenerator");
 
-var _RegExp = require("./fable-library.2.8.4/RegExp");
+var _RegExp = require("./fable-library.2.10.2/RegExp");
 
 var _AllenNLP = require("./AllenNLP");
 
-var _Option = require("./fable-library.2.8.4/Option");
+var _Option = require("./fable-library.2.10.2/Option");
 
-var _Array = require("./fable-library.2.8.4/Array");
+var _Array = require("./fable-library.2.10.2/Array");
 
 var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
 
-var _String = require("./fable-library.2.8.4/String");
+var _String = require("./fable-library.2.10.2/String");
 
 var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
@@ -54,14 +54,14 @@ function getRandomMove(dm) {
   return (0, _List.item)((0, _Util.randomNext)(0, (0, _List.length)((0, _Map.FSharpMap$$get_Item$$2B595)(dialogueBags, dm)) - 1), (0, _Map.FSharpMap$$get_Item$$2B595)(dialogueBags, dm));
 }
 
-const DialogueMove = (0, _Types.declare)(function TutorialDialogue_DialogueMove(arg1, arg2) {
-  this.Text = arg1;
-  this.Type = arg2;
+const DialogueMove = (0, _Types.declare)(function TutorialDialogue_DialogueMove(Text$, Type) {
+  this.Text = Text$;
+  this.Type = Type;
 }, _Types.Record);
 exports.DialogueMove = DialogueMove;
 
 function DialogueMove$reflection() {
-  return (0, _Reflection.record)("TutorialDialogue.DialogueMove", [], DialogueMove, () => [["Text", _Reflection.string], ["Type", _Reflection.string]]);
+  return (0, _Reflection.record_type)("TutorialDialogue.DialogueMove", [], DialogueMove, () => [["Text", _Reflection.string_type], ["Type", _Reflection.string_type]]);
 }
 
 function DialogueMove$$$GetRandom$$Z6391FD10(aType) {
@@ -72,38 +72,38 @@ function DialogueMove$$$Create$$Z29C2FE95(text, aType$$1) {
   return new DialogueMove(text, aType$$1);
 }
 
-const DialogueState = (0, _Types.declare)(function TutorialDialogue_DialogueState(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
-  this.ClozeItem = arg1;
-  this.ClozeAnswer = arg2;
-  this.Questions = arg3;
-  this.LastQuestion = arg4;
-  this.LastStudentAnswer = arg5;
-  this.CurrentFeedback = arg6;
-  this.CurrentElaboration = arg7;
-  this.CurrentQuestion = arg8;
-  this.Display = arg9;
-  this.Finished = arg10;
+const DialogueState = (0, _Types.declare)(function TutorialDialogue_DialogueState(ClozeItem, ClozeAnswer, Questions, LastQuestion, LastStudentAnswer, CurrentFeedback, CurrentElaboration, CurrentQuestion, Display, Finished) {
+  this.ClozeItem = ClozeItem;
+  this.ClozeAnswer = ClozeAnswer;
+  this.Questions = Questions;
+  this.LastQuestion = LastQuestion;
+  this.LastStudentAnswer = LastStudentAnswer;
+  this.CurrentFeedback = CurrentFeedback;
+  this.CurrentElaboration = CurrentElaboration;
+  this.CurrentQuestion = CurrentQuestion;
+  this.Display = Display;
+  this.Finished = Finished;
 }, _Types.Record);
 exports.DialogueState = DialogueState;
 
 function DialogueState$reflection() {
-  return (0, _Reflection.record)("TutorialDialogue.DialogueState", [], DialogueState, () => [["ClozeItem", _Reflection.string], ["ClozeAnswer", _Reflection.string], ["Questions", (0, _Reflection.option)((0, _Reflection.array)((0, _QuestionGenerator.Question$reflection)()))], ["LastQuestion", (0, _Reflection.option)((0, _QuestionGenerator.Question$reflection)())], ["LastStudentAnswer", (0, _Reflection.option)(_Reflection.string)], ["CurrentFeedback", (0, _Reflection.option)(DialogueMove$reflection())], ["CurrentElaboration", (0, _Reflection.option)((0, _Reflection.array)(DialogueMove$reflection()))], ["CurrentQuestion", (0, _Reflection.option)((0, _QuestionGenerator.Question$reflection)())], ["Display", (0, _Reflection.option)(_Reflection.string)], ["Finished", (0, _Reflection.option)(_Reflection.bool)]]);
+  return (0, _Reflection.record_type)("TutorialDialogue.DialogueState", [], DialogueState, () => [["ClozeItem", _Reflection.string_type], ["ClozeAnswer", _Reflection.string_type], ["Questions", (0, _Reflection.option_type)((0, _Reflection.array_type)((0, _QuestionGenerator.Question$reflection)()))], ["LastQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["LastStudentAnswer", (0, _Reflection.option_type)(_Reflection.string_type)], ["CurrentFeedback", (0, _Reflection.option_type)(DialogueMove$reflection())], ["CurrentElaboration", (0, _Reflection.option_type)((0, _Reflection.array_type)(DialogueMove$reflection()))], ["CurrentQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["Display", (0, _Reflection.option_type)(_Reflection.string_type)], ["Finished", (0, _Reflection.option_type)(_Reflection.bool_type)]]);
 }
 
 function DialogueState$$$Initialize(clozeItem, clozeAnswer) {
-  return new DialogueState(clozeItem, clozeAnswer, null, null, null, null, null, null, null, null);
+  return new DialogueState(clozeItem, clozeAnswer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 }
 
 function DialogueState$$$InitializeTest() {
-  return DialogueState$$$Initialize("The supraspinatus is located in the depression above the spine of the scapula on its _______ _______.", "posterior surface");
+  return DialogueState$$$Initialize("The interstitial fluid, which bathes cells in the body, is the environment to which those cells are most directly exposed, but the composition of the interstitial fluid is in equilibrium with the composition of the blood plasma, so both contribute to the ______ ______", "internal environment");
 }
 
 function GetDialogue(state) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    var chunksJsonOption, input;
+    var stringArrayJsonOption, input;
     const errors = [];
     const text$$1 = (0, _RegExp.replace)(state.ClozeItem, "(_ _|_)+", state.ClozeAnswer);
-    return (state.Questions == null ? (chunksJsonOption = null, (0, _AllenNLP.GetNLP)(chunksJsonOption, text$$1)) : (input = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input)))).then(function (_arg1) {
+    return (state.Questions == null ? (stringArrayJsonOption = undefined, (0, _AllenNLP.GetNLP)(stringArrayJsonOption, text$$1)) : (input = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input)))).then(function (_arg1) {
       var input$$1;
       return ((state.LastQuestion != null ? state.LastStudentAnswer != null : false) ? (0, _AllenNLP.GetTextualEntailment)(state.LastQuestion.Answer, state.LastStudentAnswer) : (input$$1 = (0, _AllenNLP.Entailment$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$1)))).then(function (_arg2) {
         var p, lastQ, x, q$$5, list$$1, list, mapping$$1, clo1, list$$3, list$$2, mapping$$2, clo1$$1;
@@ -118,7 +118,7 @@ function GetDialogue(state) {
 
         const resultToTypeOption = function resultToTypeOption(r$$2) {
           if (r$$2.tag === 1) {
-            return null;
+            return undefined;
           } else {
             return (0, _Option.some)(r$$2.fields[0]);
           }
@@ -128,7 +128,7 @@ function GetDialogue(state) {
           if (r$$4.tag === 1) {
             return (0, _Option.some)(r$$4.fields[0]);
           } else {
-            return null;
+            return undefined;
           }
         };
 
@@ -201,7 +201,7 @@ function GetDialogue(state) {
 
             case 2:
               {
-                patternInput = [null, questions];
+                patternInput = [undefined, questions];
                 break;
               }
           }
@@ -239,7 +239,7 @@ function GetDialogue(state) {
 
             case 1:
               {
-                feedbackOption = null;
+                feedbackOption = undefined;
                 break;
               }
           }
@@ -279,14 +279,14 @@ function GetDialogue(state) {
                   const arg0$$4 = makeElaboration();
                   elaborationOption = arg0$$4;
                 } else {
-                  elaborationOption = null;
+                  elaborationOption = undefined;
                 }
 
                 break;
               }
           }
 
-          return (patternInput[0] != null ? elaborationOption == null ? (q$$5 = patternInput[0], (void display.push(q$$5.Text), Promise.resolve())) : (null, Promise.resolve()) : (null, Promise.resolve())).then(() => (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
+          return (patternInput[0] != null ? elaborationOption == null ? (q$$5 = patternInput[0], (void display.push(q$$5.Text), Promise.resolve())) : (void null, Promise.resolve()) : (void null, Promise.resolve())).then(() => (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
             var Questions, Display, arg0$$8;
             let finishedOption;
 

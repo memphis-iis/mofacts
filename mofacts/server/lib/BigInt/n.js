@@ -102,28 +102,28 @@ exports.BigNatModule$$$ofString = BigNatModule$$$ofString;
 exports.BigNatModule$$$isSmall = BigNatModule$$$isSmall;
 exports.BigNatModule$$$getSmall = BigNatModule$$$getSmall;
 exports.BigNatModule$$$factorial = BigNatModule$$$factorial;
-exports.BigNatModule$$$two = exports.BigNatModule$$$productDigitsUpperFft = exports.BigNatModule$$$singleDigitForceSchoolBook = exports.BigNatModule$$$productDigitsUpperSchoolBook = exports.BigNatModule$$$minDigitsKaratsuba = exports.BigNatModule$$$twopowersI64 = exports.BigNatModule$$$twopowers = exports.BigNatModule$$$bitmask = exports.BigNatModule$$$table = exports.BigNatModule$002Eencoding = exports.BigNatModule$$$zero = exports.BigNatModule$$$one = exports.BigNatModule$$$boundBase = exports.BigNatModule$$$boundInt64 = exports.BigNatModule$$$boundInt = exports.BigNatModule$$$baseShift64C = exports.BigNatModule$$$baseShift64B = exports.BigNatModule$$$baseMask64C = exports.BigNatModule$$$baseMask64B = exports.BigNatModule$$$baseMask64A = exports.BigNatModule$$$baseShift32B = exports.BigNatModule$$$baseMask32B = exports.BigNatModule$$$baseMask32A = exports.BigNatModule$$$baseMaskU = exports.BigNatModule$$$baseMaski64 = exports.BigNatModule$$$baseNi64 = exports.BigNatModule$$$baseMask = exports.BigNatModule$$$baseN = exports.BigNatModule$$$baseBits = exports.BigNatModule$002EFFT$$$maxFp = exports.BigNatModule$002EFFT$$$mone = exports.BigNatModule$002EFFT$$$mzero = exports.BigNatModule$002EFFT$$$twoPowerTable = exports.BigNatModule$002EFFT$$$maxTwoPower = exports.BigNatModule$002EFFT$002EFp$$$mtwo = exports.BigNatModule$002EFFT$002EFp$$$mone = exports.BigNatModule$002EFFT$002EFp$$$mzero = exports.BigNatModule$002EFFT$002EFp$$$p64 = exports.BigNatModule$002EFFT$002EFp$$$p = exports.BigNatModule$002EFFT$$$maxBitsInsideFp = exports.BigNatModule$002EFFT$$$primeP = exports.BigNatModule$002EFFT$$$g = exports.BigNatModule$002EFFT$$$k = exports.BigNatModule$002EFFT$$$m = exports.BigNatModule$002EFFT$$$p = exports.BigNatModule$002EFFT$$$w = exports.BigNat = void 0;
+exports.BigNatModule$$$two = exports.BigNatModule$$$productDigitsUpperFft = exports.BigNatModule$$$singleDigitForceSchoolBook = exports.BigNatModule$$$productDigitsUpperSchoolBook = exports.BigNatModule$$$minDigitsKaratsuba = exports.BigNatModule$$$twopowersI64 = exports.BigNatModule$$$twopowers = exports.BigNatModule$$$bitmask = exports.BigNatModule$$$table = exports.BigNatModule$002Eencoding = exports.BigNatModule$$$zero = exports.BigNatModule$$$one = exports.BigNatModule$$$boundBase = exports.BigNatModule$$$boundInt64 = exports.BigNatModule$$$boundInt = exports.BigNatModule$$$baseShift64C = exports.BigNatModule$$$baseShift64B = exports.BigNatModule$$$baseMask64C = exports.BigNatModule$$$baseMask64B = exports.BigNatModule$$$baseMask64A = exports.BigNatModule$$$baseShift32B = exports.BigNatModule$$$baseMask32B = exports.BigNatModule$$$baseMask32A = exports.BigNatModule$$$baseMaskU = exports.BigNatModule$$$baseMaski64 = exports.BigNatModule$$$baseNi64 = exports.BigNatModule$$$baseMask = exports.BigNatModule$$$baseN = exports.BigNatModule$$$baseBits = exports.BigNatModule$002EFFT$$$maxFp = exports.BigNatModule$002EFFT$$$mone = exports.BigNatModule$002EFFT$$$mzero = exports.BigNatModule$002EFFT$$$twoPowerTable = exports.BigNatModule$002EFFT$$$maxTwoPower = exports.BigNatModule$002EFFT$002EFp$$$mtwo = exports.BigNatModule$002EFFT$002EFp$$$mone = exports.BigNatModule$002EFFT$002EFp$$$mzero = exports.BigNatModule$002EFFT$002EFp$$$p64 = exports.BigNatModule$002EFFT$002EFp$$$p = exports.BigNatModule$002EFFT$$$maxBitsInsideFp = exports.BigNatModule$002EFFT$$$primeP = exports.BigNatModule$002EFFT$$$g = exports.BigNatModule$002EFFT$$$k = exports.BigNatModule$002EFFT$$$m = exports.BigNatModule$002EFFT$$$w = exports.BigNatModule$002EFFT$$$p = exports.BigNat = void 0;
 
-var _Types = require("../fable-library.2.8.4/Types");
+var _Types = require("../fable-library.2.10.2/Types");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
-var _Long = require("../fable-library.2.8.4/Long");
+var _Long = require("../fable-library.2.10.2/Long");
 
-var _Array = require("../fable-library.2.8.4/Array");
+var _Array = require("../fable-library.2.10.2/Array");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
-var _String = require("../fable-library.2.8.4/String");
+var _String = require("../fable-library.2.10.2/String");
 
-const BigNat = (0, _Types.declare)(function BigInt_BigNat(arg1, arg2) {
-  this.bound = arg1 | 0;
-  this.digits = arg2;
+const BigNat = (0, _Types.declare)(function BigInt_BigNat(bound, digits) {
+  this.bound = bound | 0;
+  this.digits = digits;
 }, _Types.Record);
 exports.BigNat = BigNat;
 
 function BigNat$reflection() {
-  return (0, _Reflection.record)("BigInt.BigNat", [], BigNat, () => [["bound", _Reflection.int32], ["digits", (0, _Reflection.array)(_Reflection.int32)]]);
+  return (0, _Reflection.record_type)("BigInt.BigNat", [], BigNat, () => [["bound", _Reflection.int32_type], ["digits", (0, _Reflection.array_type)(_Reflection.int32_type)]]);
 }
 
 function BigNatModule$002EFFT$$$pow32($x$$1, $n$$2) {
@@ -168,16 +168,16 @@ function BigNatModule$002EFFT$$$leastBounding2Power(b) {
   return findBounding2Power(b, 1, 0);
 }
 
-const BigNatModule$002EFFT$$$patternInput$004074 = [(0, _Long.fromBits)(2013265921, 0, false), 27, 15, 31, 440564289];
-const BigNatModule$002EFFT$$$w = BigNatModule$002EFFT$$$patternInput$004074[4];
-exports.BigNatModule$002EFFT$$$w = BigNatModule$002EFFT$$$w;
-const BigNatModule$002EFFT$$$p = BigNatModule$002EFFT$$$patternInput$004074[0];
+const BigNatModule$002EFFT$$$p = (0, _Long.fromBits)(2013265921, 0, false);
 exports.BigNatModule$002EFFT$$$p = BigNatModule$002EFFT$$$p;
-const BigNatModule$002EFFT$$$m = BigNatModule$002EFFT$$$patternInput$004074[2];
+const BigNatModule$002EFFT$$$patternInput$004075 = [27, 15, 31, 440564289];
+const BigNatModule$002EFFT$$$w = BigNatModule$002EFFT$$$patternInput$004075[3];
+exports.BigNatModule$002EFFT$$$w = BigNatModule$002EFFT$$$w;
+const BigNatModule$002EFFT$$$m = BigNatModule$002EFFT$$$patternInput$004075[1];
 exports.BigNatModule$002EFFT$$$m = BigNatModule$002EFFT$$$m;
-const BigNatModule$002EFFT$$$k = BigNatModule$002EFFT$$$patternInput$004074[1];
+const BigNatModule$002EFFT$$$k = BigNatModule$002EFFT$$$patternInput$004075[0];
 exports.BigNatModule$002EFFT$$$k = BigNatModule$002EFFT$$$k;
-const BigNatModule$002EFFT$$$g = BigNatModule$002EFFT$$$patternInput$004074[3];
+const BigNatModule$002EFFT$$$g = BigNatModule$002EFFT$$$patternInput$004075[2];
 exports.BigNatModule$002EFFT$$$g = BigNatModule$002EFFT$$$g;
 const BigNatModule$002EFFT$$$primeP = BigNatModule$002EFFT$$$p;
 exports.BigNatModule$002EFFT$$$primeP = BigNatModule$002EFFT$$$primeP;
@@ -617,6 +617,8 @@ function BigNatModule$$$addP($i$$16$$75, $n$$25$$76, $c$$77, $p$$78, $q$$79, $r$
       $q$$79 = q;
       $r$$5$$80 = r$$5;
       continue BigNatModule$$$addP;
+    } else {
+      void null;
     }
 
     break;
@@ -850,6 +852,8 @@ function BigNatModule$$$contributeArr($a$$4$$123, $i$$25$$124, $c$$5$$125) {
       $i$$25$$124 = i$$25 + 1;
       $c$$5$$125 = c$$6;
       continue BigNatModule$$$contributeArr;
+    } else {
+      void null;
     }
 
     break;
@@ -893,6 +897,8 @@ function BigNatModule$$$mulSchoolBookCarry($r$$12$$130, $c$$8$$131, $k$$4$$132) 
       $c$$8$$131 = (0, _Long.op_Division)(rak$$1, BigNatModule$$$baseNi64);
       $k$$4$$132 = k$$4 + 1;
       continue BigNatModule$$$mulSchoolBookCarry;
+    } else {
+      void null;
     }
 
     break;
@@ -956,19 +962,19 @@ function BigNatModule$$$mulSchoolBook(p$$18, q$$15) {
   }
 }
 
-const BigNatModule$002Eencoding = (0, _Types.declare)(function BigInt_BigNatModule_encoding(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
-  this.bigL = arg1 | 0;
-  this.twoToBigL = arg2 | 0;
-  this.k = arg3 | 0;
-  this.bigK = arg4 | 0;
-  this.bigN = arg5 | 0;
-  this.split = arg6 | 0;
-  this.splits = arg7;
+const BigNatModule$002Eencoding = (0, _Types.declare)(function BigInt_BigNatModule_encoding(bigL, twoToBigL, k, bigK, bigN, split, splits) {
+  this.bigL = bigL | 0;
+  this.twoToBigL = twoToBigL | 0;
+  this.k = k | 0;
+  this.bigK = bigK | 0;
+  this.bigN = bigN | 0;
+  this.split = split | 0;
+  this.splits = splits;
 }, _Types.Record);
 exports.BigNatModule$002Eencoding = BigNatModule$002Eencoding;
 
 function BigNatModule$002Eencoding$reflection() {
-  return (0, _Reflection.record)("BigInt.BigNatModule.encoding", [], BigNatModule$002Eencoding, () => [["bigL", _Reflection.int32], ["twoToBigL", _Reflection.int32], ["k", _Reflection.int32], ["bigK", _Reflection.int32], ["bigN", _Reflection.int32], ["split", _Reflection.int32], ["splits", (0, _Reflection.array)(_Reflection.int32)]]);
+  return (0, _Reflection.record_type)("BigInt.BigNatModule.encoding", [], BigNatModule$002Eencoding, () => [["bigL", _Reflection.int32_type], ["twoToBigL", _Reflection.int32_type], ["k", _Reflection.int32_type], ["bigK", _Reflection.int32_type], ["bigN", _Reflection.int32_type], ["split", _Reflection.int32_type], ["splits", (0, _Reflection.array_type)(_Reflection.int32_type)]]);
 }
 
 function BigNatModule$$$mkEncoding(bigL, k$$6, bigK$$2, bigN) {
@@ -1085,7 +1091,9 @@ function BigNatModule$$$encodePoly(enc$$1, n$$28) {
       const i$$38 = $i$$38$$154,
             bi$$1 = $bi$$1$$155;
 
-      if (i$$38 === enc$$1.bigK ? true : bi$$1 > biMax) {} else {
+      if (i$$38 === enc$$1.bigK ? true : bi$$1 > biMax) {
+        void null;
+      } else {
         const pi = BigNatModule$$$extractBits(n$$28, enc$$1, bi$$1) | 0;
         poly[i$$38] = BigNatModule$002EFFT$002EFp$$$ofInt32(pi);
         const i$$39 = i$$38 + 1 | 0;
@@ -1109,6 +1117,8 @@ function BigNatModule$$$decodeResultBits(enc$$2, poly$$1) {
   for (let i$$40 = 0; i$$40 <= poly$$1.length - 1; i$$40++) {
     if (poly$$1[i$$40] !== BigNatModule$002EFFT$$$mzero) {
       n$$29 = i$$40;
+    } else {
+      void null;
     }
   }
 
@@ -1126,8 +1136,12 @@ function BigNatModule$$$decodePoly(enc$$3, poly$$2) {
             j$$2 = $j$$2$$161,
             d$$3 = $d$$3$$162;
 
-      if (i$$41 === enc$$3.bigK) {} else {
-        if (j$$2 >= rbound$$5) {} else {
+      if (i$$41 === enc$$3.bigK) {
+        void null;
+      } else {
+        if (j$$2 >= rbound$$5) {
+          void null;
+        } else {
           const x$$54 = (0, _Long.op_Multiply)((0, _Long.fromInteger)(BigNatModule$002EFFT$002EFp$$$toInt(poly$$2[i$$41]), false, 2), BigNatModule$$$twopowersI64[d$$3]);
           BigNatModule$$$contributeArr(r$$15.digits, j$$2, x$$54);
         }
@@ -1209,9 +1223,10 @@ function BigNatModule$$$scaleSubInPlace(x$$57, f, a$$5, n$$30) {
   while ((0, _Long.compare)(z$$7, (0, _Long.fromBits)(0, 0, false)) > 0 ? true : j$$4 < patternInput$$3[1]) {
     if (j$$4 > patternInput$$2[1]) {
       throw new Error("scaleSubInPlace: pre-condition did not apply, result would be -ve");
+    } else {
+      void null;
     }
 
-    const tupledArg = [z$$7, j$$4, n$$30];
     let zLo;
     let value$$6;
     const x$$59 = z$$7;
@@ -1257,9 +1272,10 @@ function BigNatModule$$$scaleAddInPlace(x$$62, f$$3, a$$8, n$$32) {
   while ((0, _Long.compare)(z$$8, (0, _Long.fromBits)(0, 0, false)) > 0 ? true : j$$5 < patternInput$$5[1]) {
     if (j$$5 > patternInput$$4[1]) {
       throw new Error("scaleSubInPlace: pre-condition did not apply, result would be -ve");
+    } else {
+      void null;
     }
 
-    const tupledArg$$1 = [z$$8, j$$5, n$$32];
     let zLo$$1;
     let value$$8;
     const x$$64 = z$$8;
@@ -1343,7 +1359,9 @@ function BigNatModule$$$divmod(b$$7, a$$12) {
     const m$$2 = BigNatModule$$$degree(a$$12) | 0;
     let n$$35 = p$$21 - m$$2 | 0;
 
-    const Invariant = function Invariant(tupledArg$$2) {};
+    const Invariant = function Invariant(tupledArg) {
+      void null;
+    };
 
     let finished = false;
 
@@ -1367,6 +1385,8 @@ function BigNatModule$$$divmod(b$$7, a$$12) {
             n$$35 = n$$35 - 1;
             p$$21 = p$$21 - 1;
           }
+        } else {
+          void null;
         }
       }
     }
@@ -1567,6 +1587,8 @@ function BigNatModule$$$toUInt32(n$$43) {
 
         if (patternInput$$10[1] > BigNatModule$$$baseMask32B) {
           throw new Error();
+        } else {
+          void null;
         }
 
         return ((patternInput$$10[0] & BigNatModule$$$baseMask32A) >>> 0) + ((patternInput$$10[1] & BigNatModule$$$baseMask32B) >>> 0 << BigNatModule$$$baseShift32B >>> 0);
@@ -1606,6 +1628,8 @@ function BigNatModule$$$toUInt64(n$$44) {
 
         if (patternInput$$12[2] > BigNatModule$$$baseMask64C) {
           throw new Error();
+        } else {
+          void null;
         }
 
         return (0, _Long.op_Addition)((0, _Long.op_Addition)((0, _Long.fromInteger)(patternInput$$12[0] & BigNatModule$$$baseMask64A, true, 2), (0, _Long.op_LeftShift)((0, _Long.fromInteger)(patternInput$$12[1] & BigNatModule$$$baseMask64B, true, 2), BigNatModule$$$baseShift64B)), (0, _Long.op_LeftShift)((0, _Long.fromInteger)(patternInput$$12[2] & BigNatModule$$$baseMask64C, true, 2), BigNatModule$$$baseShift64C));
@@ -1642,16 +1666,16 @@ function BigNatModule$$$toString(n$$45) {
 
   const kten2ks = route(new _Types.List(), 0, BigNatModule$$$embed(10));
 
-  const collect = function collect(isLeading, digits, n$$46, _arg1$$3) {
-    if (_arg1$$3.tail != null) {
-      const patternInput$$13 = BigNatModule$$$divmod(n$$46, _arg1$$3.head[1]);
+  const collect = function collect(isLeading, digits, n$$46, _arg1$$1) {
+    if (_arg1$$1.tail != null) {
+      const patternInput$$13 = BigNatModule$$$divmod(n$$46, _arg1$$1.head[1]);
 
       if (isLeading ? BigNatModule$$$isZero(patternInput$$13[0]) : false) {
-        const digits$$1 = collect(isLeading, digits, patternInput$$13[1], _arg1$$3.tail);
+        const digits$$1 = collect(isLeading, digits, patternInput$$13[1], _arg1$$1.tail);
         return digits$$1;
       } else {
-        const digits$$2 = collect(false, digits, patternInput$$13[1], _arg1$$3.tail);
-        const digits$$3 = collect(isLeading, digits$$2, patternInput$$13[0], _arg1$$3.tail);
+        const digits$$2 = collect(false, digits, patternInput$$13[1], _arg1$$1.tail);
+        const digits$$3 = collect(isLeading, digits$$2, patternInput$$13[0], _arg1$$1.tail);
         return digits$$3;
       }
     } else {
@@ -1681,6 +1705,8 @@ function BigNatModule$$$ofString(str) {
 
   if ((0, _String.isNullOrEmpty)(str)) {
     throw new Error("empty string\\nParameter name: str");
+  } else {
+    void null;
   }
 
   const ten = BigNatModule$$$embed(10);

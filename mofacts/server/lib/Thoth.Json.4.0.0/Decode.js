@@ -69,43 +69,45 @@ exports.Auto$$$fromString$$Z5CB6BD = Auto$$$fromString$$Z5CB6BD;
 exports.Auto$$$unsafeFromString$$Z5CB6BD = Auto$$$unsafeFromString$$Z5CB6BD;
 exports.Auto = exports.Getters$00601 = exports.uint64 = exports.int64 = void 0;
 
-var _String = require("../fable-library.2.8.4/String");
+var _String = require("../fable-library.2.10.2/String");
 
-var _Util = require("../fable-library.2.8.4/Util");
+var _Util = require("../fable-library.2.10.2/Util");
 
-var _Option = require("../fable-library.2.8.4/Option");
+var _Option = require("../fable-library.2.10.2/Option");
 
 var _Types = require("./Types");
 
-var _Int = require("../fable-library.2.8.4/Int32");
+var _Int = require("../fable-library.2.10.2/Int32");
 
-var _Long = require("../fable-library.2.8.4/Long");
+var _Long = require("../fable-library.2.10.2/Long");
 
-var _BigInt = require("../fable-library.2.8.4/BigInt");
+var _BigInt = require("../fable-library.2.10.2/BigInt");
 
-var _Decimal = _interopRequireWildcard(require("../fable-library.2.8.4/Decimal"));
+var _Decimal = _interopRequireWildcard(require("../fable-library.2.10.2/Decimal"));
 
-var _Date = require("../fable-library.2.8.4/Date");
+var _Date = require("../fable-library.2.10.2/Date");
 
-var _DateOffset = require("../fable-library.2.8.4/DateOffset");
+var _DateOffset = require("../fable-library.2.10.2/DateOffset");
 
-var _TimeSpan = require("../fable-library.2.8.4/TimeSpan");
+var _TimeSpan = require("../fable-library.2.10.2/TimeSpan");
 
-var _Types2 = require("../fable-library.2.8.4/Types");
+var _Types2 = require("../fable-library.2.10.2/Types");
 
-var _List = require("../fable-library.2.8.4/List");
+var _List = require("../fable-library.2.10.2/List");
 
-var _Array = require("../fable-library.2.8.4/Array");
+var _Array = require("../fable-library.2.10.2/Array");
 
-var _Seq = require("../fable-library.2.8.4/Seq");
+var _Seq = require("../fable-library.2.10.2/Seq");
 
-var _Map = require("../fable-library.2.8.4/Map");
+var _Map = require("../fable-library.2.10.2/Map");
 
-var _Reflection = require("../fable-library.2.8.4/Reflection");
+var _Reflection = require("../fable-library.2.10.2/Reflection");
 
-var _Set = require("../fable-library.2.8.4/Set");
+var _Set = require("../fable-library.2.10.2/Set");
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function Helpers$$$isUndefined(o) {
   return typeof o === "undefined";
@@ -203,7 +205,7 @@ function guid(path$$5, value$$14) {
 
 function unit(path$$6, value$$15) {
   if (value$$15 == null) {
-    return new _Option.Result(0, "Ok", null);
+    return new _Option.Result(0, "Ok", void null);
   } else {
     const arg0$$3 = [path$$6, new _Types.ErrorReason(0, "BadPrimitive", "null", value$$15)];
     return new _Option.Result(1, "Error", arg0$$3);
@@ -619,7 +621,7 @@ function decodeMaybeNull(path$$31, decoder$$7, value$$57) {
 
   if (matchValue$$18.tag === 1) {
     if (o$$50 = value$$57, o$$50 == null) {
-      return new _Option.Result(0, "Ok", null);
+      return new _Option.Result(0, "Ok", undefined);
     } else {
       if (matchValue$$18.tag === 1) {
         return new _Option.Result(1, "Error", matchValue$$18.fields[0]);
@@ -637,7 +639,7 @@ function optional(fieldName$$1, decoder$$8, path$$32, value$$58) {
     const fieldValue = value$$58[fieldName$$1];
 
     if (Helpers$$$isUndefined(fieldValue)) {
-      return new _Option.Result(0, "Ok", null);
+      return new _Option.Result(0, "Ok", undefined);
     } else {
       return decodeMaybeNull(path$$32 + "." + fieldName$$1, decoder$$8, fieldValue);
     }
@@ -656,7 +658,7 @@ function badPathError(fieldNames, currentPath, value$$59) {
 function optionalAt(fieldNames$$1, decoder$$9, firstPath, firstValue) {
   let _arg1;
 
-  const state = [firstPath, firstValue, null];
+  const state = [firstPath, firstValue, undefined];
   _arg1 = (0, _List.fold)(function folder(tupledArg, field$$1) {
     if (tupledArg[2] == null) {
       if (tupledArg[1] == null) {
@@ -664,7 +666,7 @@ function optionalAt(fieldNames$$1, decoder$$9, firstPath, firstValue) {
         return [tupledArg[0], tupledArg[1], res$$1];
       } else if (tupledArg[1] === null ? false : Object.getPrototypeOf(tupledArg[1] || false) === Object.prototype) {
         const curValue$$1 = tupledArg[1][field$$1];
-        return [tupledArg[0] + "." + field$$1, curValue$$1, null];
+        return [tupledArg[0] + "." + field$$1, curValue$$1, undefined];
       } else {
         const res$$2 = new _Option.Result(1, "Error", [tupledArg[0], new _Types.ErrorReason(2, "BadType", "an object", tupledArg[1])]);
         return [tupledArg[0], tupledArg[1], res$$2];
@@ -676,7 +678,7 @@ function optionalAt(fieldNames$$1, decoder$$9, firstPath, firstValue) {
 
   if (_arg1[2] == null) {
     if (Helpers$$$isUndefined(_arg1[1])) {
-      return new _Option.Result(0, "Ok", null);
+      return new _Option.Result(0, "Ok", undefined);
     } else {
       return decodeMaybeNull(_arg1[0], decoder$$9, _arg1[1]);
     }
@@ -703,7 +705,7 @@ function field(fieldName$$4, decoder$$10, path$$33, value$$61) {
 function at(fieldNames$$2, decoder$$11, firstPath$$1, firstValue$$1) {
   let _arg1$$1;
 
-  const state$$1 = [firstPath$$1, firstValue$$1, null];
+  const state$$1 = [firstPath$$1, firstValue$$1, undefined];
   _arg1$$1 = (0, _List.fold)(function folder$$1(tupledArg$$1, field$$2) {
     if (tupledArg$$1[2] == null) {
       if (tupledArg$$1[1] == null) {
@@ -713,10 +715,10 @@ function at(fieldNames$$2, decoder$$11, firstPath$$1, firstValue$$1) {
         const curValue$$3 = tupledArg$$1[1][field$$2];
 
         if (Helpers$$$isUndefined(curValue$$3)) {
-          const res$$6 = badPathError(fieldNames$$2, null, firstValue$$1);
+          const res$$6 = badPathError(fieldNames$$2, undefined, firstValue$$1);
           return [tupledArg$$1[0], curValue$$3, res$$6];
         } else {
-          return [tupledArg$$1[0] + "." + field$$2, curValue$$3, null];
+          return [tupledArg$$1[0] + "." + field$$2, curValue$$3, undefined];
         }
       } else {
         const res$$7 = new _Option.Result(1, "Error", [tupledArg$$1[0], new _Types.ErrorReason(2, "BadType", "an object", tupledArg$$1[1])]);
@@ -757,7 +759,7 @@ function index(requestedIndex, decoder$$12, path$$34, value$$62) {
 
 function option(decoder$$13, path$$35, value$$63) {
   if (value$$63 == null) {
-    return new _Option.Result(0, "Ok", null);
+    return new _Option.Result(0, "Ok", undefined);
   } else {
     const result = decoder$$13(path$$35, value$$63);
     return (0, _Option.mapOk)(function mapping(arg0$$55) {
@@ -1166,7 +1168,7 @@ const Getters$00601 = (0, _Types2.declare)(function Thoth_Json_Decode_Getters(pa
           case 0:
             {
               if (v$$6 == null) {
-                return null;
+                return undefined;
               } else {
                 void $this$$3.errors.push(matchValue$$34.fields[0]);
                 return null;
@@ -1175,7 +1177,7 @@ const Getters$00601 = (0, _Types2.declare)(function Thoth_Json_Decode_Getters(pa
 
           case 1:
             {
-              return null;
+              return undefined;
             }
 
           case 2:
@@ -1190,11 +1192,12 @@ const Getters$00601 = (0, _Types2.declare)(function Thoth_Json_Decode_Getters(pa
     }
 
   };
+  void null;
 });
 exports.Getters$00601 = Getters$00601;
 
 function Getters$00601$reflection($gen$$191) {
-  return (0, _Reflection.type)("Thoth.Json.Decode.Getters`1", [$gen$$191]);
+  return (0, _Reflection.class_type)("Thoth.Json.Decode.Getters`1", [$gen$$191], Getters$00601);
 }
 
 function Getters$00601$$$$002Ector$$4A51B60E(path$$55, v$$4) {
@@ -1996,7 +1999,7 @@ const Auto = (0, _Types2.declare)(function Thoth_Json_Decode_Auto() {});
 exports.Auto = Auto;
 
 function Auto$reflection() {
-  return (0, _Reflection.type)("Thoth.Json.Decode.Auto");
+  return (0, _Reflection.class_type)("Thoth.Json.Decode.Auto", undefined, Auto);
 }
 
 function Auto$$$generateDecoderCached$$7848D058(caseStrategy$$3, extra$$5, resolver) {
