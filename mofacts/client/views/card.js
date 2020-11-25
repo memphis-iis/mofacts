@@ -1026,7 +1026,7 @@ function newQuestionHandler() {
 
         if(!correctButtonPopulated){
           //If we're using button images we need to get the answer string (aka image url) in its original case, in case part of the path is capitalized
-          let currentAnswer = getResponseType() == "image" ? Session.get("originalAnswer") : Session.get("currentAnswer");
+          let currentAnswer = Session.get("originalAnswer");
           let correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
           buttonChoices.unshift(correctAnswer);
         }
