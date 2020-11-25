@@ -183,7 +183,7 @@ Template.registerHelper('isLoggedIn', function (){
 });
 
 Template.registerHelper('inPracticeModule', function(){
-  return Session.get("curModule") == "card" || Session.get("curModule") == "instructions";
+  return (Session.get("curModule") == "card" || Session.get("curModule") == "instructions") && Session.get("sessionType") == "learningsession";
   // var curLocation = Router.current().location.get().path;
   // if(curLocation == "/card" || curLocation == "/instructions"){
   //   return true;
