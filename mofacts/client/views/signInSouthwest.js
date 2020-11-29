@@ -4,7 +4,7 @@ Session.set("teachers",[]);
 Session.set("curTeacher",{});
 Session.set("curClass",{});
 Session.set("systemOverloaded",false);
-Session.set("systemDown",true);
+Session.set("systemDown",undefined);
 
 function getUrlVars()
 {
@@ -177,6 +177,10 @@ Template.signInSouthwest.onRendered(function(){
 Template.signInSouthwest.helpers({
     'altServerUrl': function(){
       return Session.get("altServerUrl");
+    },
+
+    'readingServerStatus': function(){
+      return Session.get("systemDown")  == undefined;
     },
 
     'systemDown': function(){
