@@ -36,7 +36,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
             var nameIDFormat;
             // Default nameIDFormat is emailAddress
             if (!(Meteor.settings.saml[0].identifierFormat)) {
-                nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+                nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified";
             } else {
                 nameIDFormat = Meteor.settings.saml[0].identifierFormat;
             }
