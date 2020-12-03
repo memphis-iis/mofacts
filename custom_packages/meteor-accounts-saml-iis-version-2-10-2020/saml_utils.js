@@ -559,7 +559,7 @@ SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
                 },
                 'NameIDFormat': this.options.identifierFormat,
                 'AssertionConsumerService': {
-                    '@index': '1',
+                    '@index': '0',
                     '@isDefault': 'true',
                     '@Binding': 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
                     '@Location': callbackUrl
@@ -619,16 +619,16 @@ SAML.prototype.generateServiceProviderMetadata = function(callbackUrl) {
             ]
         });
 
-        // metadata.EntityDescriptor.SPSSODescriptor.KeyDescriptor.push({
-        //     '@use': 'signing',
-        //     'ds:KeyInfo' : {
-        //       'ds:X509Data' : {
-        //         'ds:X509Certificate': {
-        //           '#text': decryptionCert
-        //         }
-        //       }
-        //     }
-        //   });
+        metadata.EntityDescriptor.SPSSODescriptor.KeyDescriptor.push({
+            '@use': 'signing',
+            'ds:KeyInfo' : {
+              'ds:X509Data' : {
+                'ds:X509Certificate': {
+                  '#text': decryptionCert
+                }
+              }
+            }
+          });
     }
 
     return xmlbuilder.create(metadata).end({
