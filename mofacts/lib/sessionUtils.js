@@ -39,12 +39,6 @@
  * showOverlearningText
  * speechAPIKeyIsSetup       - Indicates if we have a *user* provided speech api key (there may be one provided in the tdf file)
  * speechOutOfGrammarFeedback - If ignoring out of grammar responses, what should we display when transcription is ignored?
- * statsAnswerDetails        - Used by stats page template
- * statsCorrect              - Used by stats page template
- * statsPercentage           - Used by stats page template
- * statsRendered             - Used by stats page template
- * statsTotal                - Used by stats page template
- * statsUserTimeLogView      - User by stats page template
  * testType
  * VADInitialized            - Indicates whether we've already initialized the voice activity detection code which gives up our voice start/stop events
  * */
@@ -68,6 +62,7 @@ sessionCleanUp = function() {
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("originalAnswer",undefined);
+    Session.set("displayReady",undefined);
     Session.set("currentDisplay", undefined);
     Session.set("currentDisplayEngine", undefined);
     Session.set("originalDisplay", undefined);
@@ -97,12 +92,6 @@ sessionCleanUp = function() {
     Session.set("sessionType",undefined);
     Session.set("showOverlearningText", undefined);
     Session.set("speechOutOfGrammarFeedback",undefined);
-    Session.set("statsAnswerDetails", undefined);
-    Session.set("statsRendered", false);
-    Session.set("statsCorrect", undefined);
-    Session.set("statsTotal", undefined);
-    Session.set("statsPercentage", undefined);
-    Session.set("statsUserTimeLogView", undefined);
     Session.set("subTdfIndex",undefined);
     Session.set("testType", undefined);
     Session.set("VADInitialized",false);

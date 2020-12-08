@@ -85,7 +85,7 @@ turn it on, you need to set <showhistory>true</showhistory> in the
 // Global variables and helper functions for them
 
 engine = null; //The unit engine for display (i.e. model or schedule)
-var buttonList = new Mongo.Collection(null); //local-only - no database
+buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
 cachedSyllables = null;
@@ -649,6 +649,14 @@ Template.card.helpers({
         return Session.get("questionIndex");
     },
 
+    'displayReady': function(){
+      return Session.get("displayReady");
+    },
+
+    'displayReadyConverter': function(displayReady){
+      return displayReady ? "" : "none";
+    },
+
     'textCard': function() {
       return !!(Session.get("currentDisplay").text);
     },
@@ -682,6 +690,7 @@ Template.card.helpers({
       return rt === "image";
     },
 
+    //TODO: currently unused, evaluate this
     'test': function() {
         return getTestType() === "t";
     },
@@ -739,8 +748,6 @@ Template.card.helpers({
         }
       }
       var ret = [arr1,arr2];
-      window.ret = ret;
-      window.items = items;
       return ret;
     },
 
@@ -955,10 +962,9 @@ function newQuestionHandler() {
         }
     );
 
-    // Change buttonTrial to neither true nor false to try and stop a spurious
-    // "update miss" in our templating
-    Session.set("buttonTrial", null);
-    Session.set("currentDisplay", null);
+    clearButtonList();
+    Session.set("currentDisplay",{});
+    Session.set("displayReady",false);
 
     // Buttons are determined by 3 options: buttonorder, buttonOptions,
     // wrongButtonLimit:
@@ -978,16 +984,16 @@ function newQuestionHandler() {
     // IMPORTANT: the above implies that the correct answer must be in the button label
     // list if you use fixed button order and buttonOptions. See the Music
     // TDF for an example.
-    if (!getButtonTrial()) {
-        //Not a button trial
-        clearButtonList();
-        //Session.set("buttonTrial", false);
-        textFocus = true; //Need the text box focused
+    let isButtonTrial = getButtonTrial();
+    Session.set("buttonTrial", isButtonTrial);
+    console.log("newQuestionHandler, isButtonTrial",isButtonTrial);
 
+    if (!isButtonTrial) {
+        //Not a button trial
+        textFocus = true; //Need the text box focused
         $("#textEntryRow").show();
     }else {
         // Is a button trial - we need to figure out what to show
-        //Session.set("buttonTrial", true);
         $("#textEntryRow").hide();
 
         let buttonChoices = [];
@@ -1004,11 +1010,13 @@ function newQuestionHandler() {
         if (buttonOptions) {
             buttonChoices = buttonOptions.split(",");
             correctButtonPopulated = true;
+            console.log("buttonChoices==buttonOptions",buttonChoices);
         }else{
             _.each(getCurrentFalseResponses(), function(ele) {
                 buttonChoices.push(ele);
                 correctButtonPopulated = false;
             });
+            console.log("buttonChoices==falseresponses and correct answer",buttonChoices);
         }
         if (correctButtonPopulated == null) {
             console.log("A button trial requires correct configuration");
@@ -1040,9 +1048,6 @@ function newQuestionHandler() {
         else {
             throw new Error("Unknown buttonorder option " + buttonOrder);
         }
-
-        clearButtonList();
-        //Session.set("buttonTrial", true);
         let curChar = 'a'
 
         _.each(buttonChoices, function(val, idx) {
@@ -1648,6 +1653,7 @@ function startQuestionTimeout(textFocus) {
   //Define the function we will call to actually start user input
   var beginQuestionAndInitiateUserInput = function(){
     console.log("beginQuestionAndInitiateUserInput");
+    Session.set("displayReady", true);
 
     var startMainCardTimeout = function(){
       console.log("start main card timeout");
@@ -1687,7 +1693,6 @@ function startQuestionTimeout(textFocus) {
   //We do this little shuffle of session variables so the display will update all at the same time
   let currentDisplayEngine = Session.get("currentDisplayEngine");
   Session.set("currentDisplay",currentDisplayEngine);
-  Session.set("buttonTrial", getButtonTrial());
 
   //Swap out the current question with a pre question display as defined in the tdf file
   //then delay for the specified amount of time before setting back to the current question
@@ -1695,18 +1700,13 @@ function startQuestionTimeout(textFocus) {
   let curDisplayTemp = Session.get("currentDisplay");
   console.log('++++ CURRENT DISPLAY ++++');
   console.log(curDisplayTemp);
-  var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
-  let prestimulusDisplayWrapper = { 'text': prestimulusDisplay };
-  Session.set("currentDisplay",prestimulusDisplayWrapper);
 
-  console.log("delaying for " + timeuntilstimulus + " ms then starting question");
-  setTimeout(function(){
-    Session.set("currentDisplay",curDisplayTemp);
-    console.log("past timeuntilstimulus, start question logic");
-
+  function checkAndDisplayTwoPartQuestion(nextStageCb){
+    console.log("checking for two part questions");
     //Handle two part questions
     var currentQuestionPart2 = Session.get("currentQuestionPart2");
-    if(!!currentQuestionPart2){
+    if(currentQuestionPart2){
+      console.log("two part question detected, displaying");
       let twoPartQuestionWrapper = { 'text': currentQuestionPart2 };
       var initialviewTimeDelay = deliveryParams.initialview;
       console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
@@ -1715,13 +1715,35 @@ function startQuestionTimeout(textFocus) {
         Session.set("currentDisplay",twoPartQuestionWrapper);
         Session.set("currentQuestionPart2",undefined);
         redoCardImage();
-        beginQuestionAndInitiateUserInput();
+        nextStageCb();
       },initialviewTimeDelay);
     }else{
       console.log("one part question detected, continuing with question");
-      beginQuestionAndInitiateUserInput();
+      nextStageCb();
     }
-  },timeuntilstimulus);
+  }
+  
+  function checkAndDisplayPrestimulus(nextStageCb){
+    console.log("checking for prestimulus display");
+    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
+
+    if(prestimulusDisplay){
+      console.log("prestimulusDisplay detected, displaying");
+      let prestimulusDisplayWrapper = { 'text': prestimulusDisplay };
+      Session.set("currentDisplay",prestimulusDisplayWrapper);
+      console.log("delaying for " + timeuntilstimulus + " ms then starting question");
+      setTimeout(function(){
+        Session.set("currentDisplay",curDisplayTemp);
+        console.log("past timeuntilstimulus, start two part question logic");
+        nextStageCb();
+      },timeuntilstimulus);
+    }else{
+      console.log("no prestimulusDisplay detected, continuing to next stage");
+      nextStageCb();
+    }  
+  }
+  let pipeline = checkAndDisplayTwoPartQuestion.bind(null,beginQuestionAndInitiateUserInput);
+  checkAndDisplayPrestimulus(pipeline);
 }
 
 function showUserInteraction(isGoodNews, news) {
@@ -1793,11 +1815,6 @@ function hideUserInteraction() {
     // forceCorrection is now part of user interaction
     $("#userForceCorrect").val("");    // text box - see inputF.html
     $("#forceCorrectionEntry").hide();  // Container
-
-    // Scroll to ensure correct view in on screen
-    // Edit: commented out per request from Phil, leaving in commented in case we ever
-    // decide to put it back in
-    //scrollElementIntoView("#stimulusTarget", true);
 }
 
 // BEGIN WEB AUDIO section

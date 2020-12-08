@@ -1,5 +1,7 @@
 <template name="card">
     <div class="container" id="cardContainer">
+
+    {{#if displayReady}}
         <div class="scrollHistoryContainer">
             {{#if haveScrollList}}
             {{#each scrollList}}
@@ -14,8 +16,6 @@
             {{/each}}
             {{/if}}
         </div>
-
-        <div id="stimulusTarget">&nbsp;</div>
 
         <!-- Progress bar while resuming -->
         {{#if inResume}}
@@ -107,46 +107,46 @@
 
             <div class="row">
                 {{#if buttonTrial}}
-                  {{#if audioEnabled}}
+                {{#if audioEnabled}}
                     <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
-                  {{/if}}
+                {{/if}}
                 {{/if}}
                 <div class="col-md-12">
                     <div id="multipleChoiceContainer">
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
-                          <table id="multipleChoiceTable">
-                              {{#if imageResponse}}
+                        <table id="multipleChoiceTable">
+                            {{#if imageResponse}}
                                 {{#each buttonListImageRows}}
-                                  <tr>
+                                <tr>
                                     {{#each this}}
-                                      {{#if audioEnabled}}
+                                    {{#if audioEnabled}}
                                         <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
                                         <td>&nbsp;</td>
-                                      {{/if}}
-                                      <td class="td-img">
+                                    {{/if}}
+                                    <td class="td-img">
                                         <button style="background: url({{buttonValue}});background-size:100%;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
                                         </button>
-                                      </td>
+                                    </td>
                                     {{/each}}
-                                  </tr>
+                                </tr>
                                 {{/each}}
-                              {{else}}
+                            {{else}}
                                 {{#each buttonList}}
-                                  <tr>
+                                <tr display={{displayReadyConverter (displayReady) }}>
                                     {{#if audioEnabled}}
-                                      <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                      <td>&nbsp;</td>
+                                    <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                    <td>&nbsp;</td>
                                     {{/if}}
-                                      <td>
+                                    <td>
                                         <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                          {{buttonValue}}
+                                        {{buttonValue}}
                                         </button>
-                                      </td>
-                                  </tr>
+                                    </td>
+                                </tr>
                                 {{/each}}
-                              {{/if}}
-                          </table>
+                            {{/if}}
+                        </table>
                         {{/if}}
                     </div>
                 </div>
@@ -181,8 +181,14 @@
                 <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
             </div>
         </div>
-
-        <div id="feedbackTarget">&nbsp;</div>
+    {{else}}
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8">
+                <br /><br />
+                <h2>Content loading...</h2>
+            </div>
+        </div>
+    {{/if}}
 
         <!-- Modal -->
         <div class="modal fade" id="finalInstructionsDlg" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
