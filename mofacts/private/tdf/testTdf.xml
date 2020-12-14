@@ -9,6 +9,7 @@
 		<simTimeout>3500</simTimeout>
 		<simCorrectProb>0.85</simCorrectProb>
 		<audioInputEnabled>true</audioInputEnabled>
+		<prestimulusDisplay>Prestimulus Display Text</prestimulusDisplay>
 	</setspec>
 	<unit>
 		<unitinstructions>Here comes the test assessment session</unitinstructions>
@@ -23,7 +24,6 @@
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
-			<timeuntilstimulus>500</timeuntilstimulus>
 		</deliveryparams>
 		<assessmentsession>
 			<conditiontemplatesbygroup>
@@ -114,7 +114,7 @@
 		<buttontrial>false</buttontrial>
 		<buttonorder>random</buttonorder>
 		<deliveryparams>
-			<feedbackType>dialogue</feedbackType>
+			<feedbackType>simple</feedbackType>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>8000</drill>
 			<purestudy>16000</purestudy>
@@ -125,7 +125,9 @@
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
 			<falseAnswerLimit>3</falseAnswerLimit>
-			<timeuntilstimulus>1000</timeuntilstimulus>
+			<timeuntilaudio>2000</timeuntilaudio>
+			<timeuntilaudiofeedback>500</timeuntilaudiofeedback>
+			<prestimulusdisplaytime>5000</prestimulusdisplaytime>
 		</deliveryparams>
 	</unit>
 	<unit>

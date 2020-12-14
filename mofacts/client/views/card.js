@@ -268,7 +268,9 @@ function beginMainCardTimeout(delay, func) {
       }
     };
     timeoutDelay = delay;
-    Session.set("mainCardTimeoutStart",new Date());
+    let mainCardTimeoutStart = new Date();
+    Session.set("mainCardTimeoutStart",mainCardTimeoutStart);
+    console.log("mainCardTimeoutStart:",mainCardTimeoutStart);
     timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
     varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
@@ -690,7 +692,6 @@ Template.card.helpers({
       return rt === "image";
     },
 
-    //TODO: currently unused, evaluate this
     'test': function() {
         return getTestType() === "t";
     },
@@ -1208,11 +1209,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
       //Note that we need to log from data in the cluster returned from
       //getStimCluster so that we honor cluster mapping
       var currCluster = getStimCluster(getCurrentClusterIndex());
+      let deliveryParams = getCurrentDeliveryParams();
 
       //Figure out the review latency we should log
       var reviewLatency = 0;
       if (getTestType() === "d" && !isCorrect) {
-          reviewLatency = _.intval(getCurrentDeliveryParams().reviewstudy);
+          reviewLatency = _.intval(deliveryParams.reviewstudy);
       }
 
       //Set up to log the answer they gave. We'll call the function below at the
@@ -1238,7 +1240,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
       curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
       Session.set("curStudentPerformance",curUserPerformance);
 
-      let feedbackType = getCurrentDeliveryParams().feedbackType || "simple";
+      let feedbackType = deliveryParams.feedbackType || "simple";
       let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
 
       var answerLogRecord = {
@@ -1292,7 +1294,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
           // Figure out threshold (with default of 0)
           // Also note: threshold < 1 means no autostop at all
-          var threshold = _.chain(getCurrentDeliveryParams())
+          var threshold = _.chain(deliveryParams)
               .prop("autostopTimeoutThreshold")
               .intval(0).value();
 
@@ -1309,7 +1311,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
       recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
 
       //Figure out timeout and reviewLatency
-      var deliveryParams = getCurrentDeliveryParams();
       var timeout = 0;
 
       let testType = getTestType();
@@ -1346,7 +1347,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
           return;
       }
     
-      let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect);
+      let skipReviewAfterDialogueLoop = (deliveryParams.feedbackType == "dialogue" && !isCorrect);
       console.log("skipReviewAfterDialogueLoop: " + skipReviewAfterDialogueLoop);
 
       if(skipReviewAfterDialogueLoop) {
@@ -1367,14 +1368,15 @@ function handleUserInput(e, source, simAnswerCorrect) {
           });
       };
 
-      //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound.
-      //Otherwise, we can just use our reset logic directly
+      //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, after the optional audio feedback delay time
       if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect && getTestType() === "d" && !skipReviewAfterDialogueLoop) {
-          playCurrentSound(resetAfterTimeout);
+          setTimeout(function(){
+            console.log("playing sound after timeuntilaudiofeedback", new Date());
+            playCurrentSound();
+          },deliveryParams.timeuntilaudiofeedback);
       }
-      else {
-          resetAfterTimeout();
-      }
+      
+      resetAfterTimeout();
     }
     
     //Show user feedback and find out if they answered correctly
@@ -1670,15 +1672,20 @@ function startQuestionTimeout(textFocus) {
     let currentDisplay = Session.get("currentDisplay");
 
     if(!!(currentDisplay.audioSrc)) {
-        //We don't allow user input until the sound is finished playing
-        playCurrentSound(function() {
-            allowUserInput(textFocus);
-            startMainCardTimeout();
-        });
+        let timeuntilaudio = deliveryParams.timeuntilaudio;
+        setTimeout(function(){
+          console.log("playing audio: ", new Date());
+          //We don't allow user input until the sound is finished playing
+          playCurrentSound(function() {
+              allowUserInput(textFocus);
+              startMainCardTimeout();
+          });
+        }, timeuntilaudio);
     }else {
         let questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
         //Only speak the prompt if the question type makes sense
         if(!!(questionToSpeak)){
+          console.log("text to speak playing prompt: ", new Date());
           speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,true,"all");
         }
         //Not a sound - can unlock now for data entry now
@@ -1696,8 +1703,10 @@ function startQuestionTimeout(textFocus) {
 
   //Swap out the current question with a pre question display as defined in the tdf file
   //then delay for the specified amount of time before setting back to the current question
-  var timeuntilstimulus = getCurrentDeliveryParams().timeuntilstimulus;
+  var prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
   let curDisplayTemp = Session.get("currentDisplay");
+  let closeQuestionParts = Session.get("clozeQuestionParts");
+  Session.set("clozeQuestionParts",undefined);
   console.log('++++ CURRENT DISPLAY ++++');
   console.log(curDisplayTemp);
 
@@ -1711,8 +1720,10 @@ function startQuestionTimeout(textFocus) {
       var initialviewTimeDelay = deliveryParams.initialview;
       console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
       setTimeout(function(){
-        console.log("after timeout");
+        console.log("after timeout, displaying question part two", new Date());
+        Session.set("displayReady", false);
         Session.set("currentDisplay",twoPartQuestionWrapper);
+        Session.set("displayReady", true);
         Session.set("currentQuestionPart2",undefined);
         redoCardImage();
         nextStageCb();
@@ -1725,18 +1736,25 @@ function startQuestionTimeout(textFocus) {
   
   function checkAndDisplayPrestimulus(nextStageCb){
     console.log("checking for prestimulus display");
-    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay;
+    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay[0];
+    console.log("prestimulusDisplay:",prestimulusDisplay);
 
     if(prestimulusDisplay){
-      console.log("prestimulusDisplay detected, displaying");
       let prestimulusDisplayWrapper = { 'text': prestimulusDisplay };
+      console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
+      Session.set("displayReady", false);
       Session.set("currentDisplay",prestimulusDisplayWrapper);
-      console.log("delaying for " + timeuntilstimulus + " ms then starting question");
+      Session.set("displayReady", true);
+      console.log("delaying for " + prestimulusdisplaytime + " ms then starting question", new Date());
       setTimeout(function(){
+        console.log("done with prestimulusDisplay, switching to original display", new Date());
+        Session.set("displayReady", false);
         Session.set("currentDisplay",curDisplayTemp);
-        console.log("past timeuntilstimulus, start two part question logic");
+        Session.set("clozeQuestionParts",closeQuestionParts);
+        Session.set("displayReady", true);
+        console.log("past prestimulusdisplaytime, start two part question logic");
         nextStageCb();
-      },timeuntilstimulus);
+      },prestimulusdisplaytime);
     }else{
       console.log("no prestimulusDisplay detected, continuing to next stage");
       nextStageCb();

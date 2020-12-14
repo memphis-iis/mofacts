@@ -27,7 +27,7 @@
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
-			<timeuntilstimulus>5000</timeuntilstimulus>
+			<prestimulusdisplaytime>5000</prestimulusdisplaytime>
 		</deliveryparams>
 	</unit>
 	<unit>
