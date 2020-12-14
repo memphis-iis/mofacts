@@ -23,3 +23,4 @@ mofacts/private/certs/*
 custom_packages/meteor-accounts-saml-iis-version-2-10-2020/.npm
 ubuntu-bionic-18.04-cloudimg-console.log
 glossary*.json
+certs
