@@ -26,7 +26,7 @@
 			<reviewstudy>0</reviewstudy>
 			<correctprompt>0</correctprompt>
 			<drill>30000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>

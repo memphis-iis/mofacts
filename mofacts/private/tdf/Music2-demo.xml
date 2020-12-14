@@ -23,7 +23,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -54,7 +54,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -85,7 +85,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -116,7 +116,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -147,7 +147,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -178,7 +178,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -211,7 +211,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -277,7 +277,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>120000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
@@ -370,7 +370,7 @@
 			<reviewstudy>3000</reviewstudy>
 			<correctprompt>1000</correctprompt>
 			<drill>10000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>

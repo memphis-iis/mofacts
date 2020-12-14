@@ -39,7 +39,7 @@
 			<reviewstudy>12000</reviewstudy>
 			<correctprompt>750</correctprompt>
 			<drill>25000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
 		</deliveryparams>
@@ -127,7 +127,7 @@ We will check your completion and approve your assignment for the $3 payment. Yo
 			<reviewstudy>12000</reviewstudy>
 			<correctprompt>750</correctprompt>
 			<drill>25000</drill>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
 		</deliveryparams>

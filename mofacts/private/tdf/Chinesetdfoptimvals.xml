@@ -19,7 +19,7 @@
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<learningsession>
@@ -118,7 +118,7 @@ console.log(p.probability )
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
-			<timeuntilstimulus>500</timeuntilstimulus>
+			<timeuntilaudio>500</timeuntilaudio>
 		</deliveryparams>
 		<buttontrial>true</buttontrial>
 		<assessmentsession>
