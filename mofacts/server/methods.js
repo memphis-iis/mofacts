@@ -42,8 +42,17 @@ if(Meteor.settings.saml){
     // privateCert is weird name, I know. spCert is better one. Will need to refactor
     if (Meteor.settings.saml[i].privateKeyFile && Meteor.settings.saml[i].publicCertFile) {
         console.log("Set keys/certs for " + Meteor.settings.saml[i].provider);
-        Meteor.settings.saml[i].privateCert = Assets.getText(Meteor.settings.saml[i].publicCertFile);
-        Meteor.settings.saml[i].privateKey = Assets.getText(Meteor.settings.saml[i].privateKeyFile);
+        let privateCert = fs.readFileSync(Meteor.settings.saml[i].publicCertFile);
+        if(typeof(privateCert) != "string"){
+          privateCert = privateCert.toString();
+        }
+        Meteor.settings.saml[i].privateCert = privateCert;
+        
+        let privateKey = fs.readFileSync(Meteor.settings.saml[i].privateKeyFile);
+        if(typeof(privateKey) != "string"){
+          privateKey = privateKey.toString();
+        }
+        Meteor.settings.saml[i].privateKey = privateKey;
     } else {
         console.log("No keys/certs found for " + Meteor.settings.saml[i].provider);
     }
