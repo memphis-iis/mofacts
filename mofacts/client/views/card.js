@@ -739,17 +739,18 @@ Template.card.helpers({
 
     'buttonListImageRows': function(){
       var items = buttonList.find({'temp': 1}, {sort: {idx: 1}}).fetch();
-      var arr1 = [];
-      var arr2 = [];
-      for(var i = 0; i< items.length; i++){
-        if(i % 2 == 0){
-          arr1.push(items[i]);
-        }else{
-          arr2.push(items[i]);
-        }
+      let numColumns = getCurrentDeliveryParams().numButtonListImageColumns;
+      let numRows = Math.ceil(items.length / numColumns);
+      let arrayHolder = [];
+      for(let i=0;i<numRows;i++){
+        arrayHolder.push([]);
       }
-      var ret = [arr1,arr2];
-      return ret;
+      for(let i=0;i<items.length;i++){
+        let arrayIndex = Math.floor(i / numColumns);
+        arrayHolder[arrayIndex].push(items[i]);
+      }
+
+      return arrayHolder;
     },
 
     'haveScrollList': function() {

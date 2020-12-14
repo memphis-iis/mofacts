@@ -14,6 +14,7 @@
 	<unit>
 		<unitinstructions>Here comes the test assessment session</unitinstructions>
 		<unitname>Schedule Unit</unitname>
+		<buttontrial>true</buttontrial>
 		<deliveryparams>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>7000</drill>
@@ -24,6 +25,7 @@
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
+			<numButtonListImageColumns>3</numButtonListImageColumns>
 		</deliveryparams>
 		<assessmentsession>
 			<conditiontemplatesbygroup>
@@ -34,7 +36,7 @@
 			</conditiontemplatesbygroup>
 			<initialpositions>A_1</initialpositions>
 			<randomizegroups>false</randomizegroups>
-			<clusterlist>0-0</clusterlist>
+			<clusterlist>2-2</clusterlist>
 			<assignrandomclusters>false</assignrandomclusters>
 		</assessmentsession>
 	</unit>
