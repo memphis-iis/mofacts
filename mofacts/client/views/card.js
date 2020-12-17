@@ -1025,6 +1025,7 @@ function newQuestionHandler() {
             throw new Error("Bad TDF or Stim file - could not determine answer location");
         }
 
+        //TODO: what if we do button options and falseAnswerLimit?
         let wrongButtonLimit = deliveryParams.falseAnswerLimit;
         if (wrongButtonLimit) {
             let numberOfWrongButtonsToPrune = buttonChoices.length-wrongButtonLimit;
@@ -1737,11 +1738,11 @@ function startQuestionTimeout(textFocus) {
   
   function checkAndDisplayPrestimulus(nextStageCb){
     console.log("checking for prestimulus display");
-    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay[0];
+    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay; //[0]
     console.log("prestimulusDisplay:",prestimulusDisplay);
 
     if(prestimulusDisplay){
-      let prestimulusDisplayWrapper = { 'text': prestimulusDisplay };
+      let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
       console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
       Session.set("displayReady", false);
       Session.set("currentDisplay",prestimulusDisplayWrapper);
