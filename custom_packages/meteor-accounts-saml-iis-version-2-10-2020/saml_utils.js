@@ -39,7 +39,7 @@ SAML.prototype.initialize = function(options) {
     }
 
     if (!options.issuer) {
-        options.issuer = Meteor.settings.ROOT_URL; //'https://mofacts.optimallearning.org';
+        options.issuer = Meteor.settings.ROOT_URL;
     }
 
     if (options.identifierFormat === undefined) {

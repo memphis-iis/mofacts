@@ -225,7 +225,7 @@ curStimHasSoundDisplayType = function(){
   return foundSoundDisplayType;
 }
 
-curStimHasAudioDisplayType = function(){
+curStimHasImageDisplayType = function(){
   let foundAudioDisplayType = false;
   Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.stims.display.imgSrc":{"$exists":true}}).forEach(function(entry){
     foundAudioDisplayType = true;

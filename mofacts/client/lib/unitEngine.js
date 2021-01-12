@@ -469,18 +469,18 @@ function modelUnitEngine() {
             var card = {
                 questionSuccessCount: 0,
                 questionFailureCount: 0,
-                studyTrialCount: 0,
-                trialsSinceLastSeen: 3,  // We start at >2 for initial logic (see findMin/Max functions below)
+                hasBeenIntroduced: false,
+                outcomeHistory: [],
                 lastShownTimestamp: 0,
                 firstShownTimestamp: 0,
-                hasBeenIntroduced: false,
-                canUse: false,
-                stims: [],
-                practiceTimes: [],
                 otherPracticeTimeSinceFirst: 0,
                 otherPracticeTimeSinceLast: 0,
-                outcomeHistory: [],
-                previousCalculatedProbabilities: []
+                previousCalculatedProbabilities: [],
+                studyTrialCount: 0,
+                trialsSinceLastSeen: 3,  // We start at >2 for initial logic (see findMin/Max functions below)
+                practiceTimes: [],
+                canUse: false,
+                stims: [],
             };
 
             // We keep per-stim and re-response-text results as well
@@ -493,13 +493,13 @@ function modelUnitEngine() {
                     stimSuccessCount: 0,
                     stimFailureCount: 0,
                     hasBeenIntroduced: false,
-                    parameter: parameter,
                     outcomeHistory: [],
-                    previousCalculatedProbabilities: [],
                     lastShownTimestamp: 0,
                     firstShownTimestamp: 0,
                     otherPracticeTimeSinceFirst: 0,
                     otherPracticeTimeSinceLast: 0,
+                    previousCalculatedProbabilities: [],
+                    parameter: parameter,
                 });
 
                 initProbs.push({

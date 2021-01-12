@@ -1,7 +1,19 @@
 <template name="inputF">
-    <div class="{{fontSizeClass}}">
-        <input id="userAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
-    </div>
+    {{#if inDialogueLoop}}
+        {{#if dialogueIntroExit}}
+            <button type="button" id="dialogueIntroExit" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
+                Press to continue when ready
+            </button>
+        {{else}}
+            <div class="{{fontSizeClass}}">
+                <input id="dialogueUserAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
+            </div>
+        {{/if}}
+    {{else}}
+        <div class="{{fontSizeClass}}">
+            <input id="userAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
+        </div>
+    {{/if}}
 </template>
 
 <template name="inputForceCorrect">
