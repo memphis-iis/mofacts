@@ -1,4 +1,4 @@
-import { curSemester } from '../../common/Definitions';
+import { curSemester } from '../../../common/Definitions';
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
