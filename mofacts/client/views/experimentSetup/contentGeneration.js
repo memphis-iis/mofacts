@@ -1,6 +1,6 @@
-import { curSemester } from '../../common/Definitions';
+import { curSemester } from '../../../common/Definitions';
 import { Tracker } from 'meteor/tracker';
-import { DynamicTdfGenerator } from "../../common/DynamicTdfGenerator";
+import { DynamicTdfGenerator } from "../../../common/DynamicTdfGenerator";
 
 Session.set("curClozeSentencePairItemId", "");
 Session.set("clozeSentencePairs", {});

@@ -1,4 +1,4 @@
-import { ALL_TDFS } from "../../common/Definitions";
+import { ALL_TDFS } from "../../../common/Definitions";
 
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
