@@ -136,31 +136,40 @@ Router.route('/experiment/:target?/:xcond?', {
     }
 });
 
-Router.route('/signin', {
-    name: "client.signin",
-    action: function () {
-        Session.set("curModule","signin");
-        console.log("SIGNIN ROUTE");
-        this.render('signIn');
-    }
-});
+const defaultBehaviorRoutes = [
+  'signIn',
+  'signInSouthwest',
+  'signUp',
+  'profileSouthwest',
+  'multiTdfSelect',
+  'turkWorkflow',
+  'contentUpload',
+  'dataDownload',
+  'userProfileEdit',
+  'userAdmin',
+  'contentGeneration',
+  'classEdit',
+  'tdfAssignmentEdit',
+  'instructorReporting',
+  'studentReporting',
+  'voice' //Voice interstitial to delay the user until voice input can recognize voice start and voice stop with VAD.js
+];
 
-Router.route('/signInSouthwest', {
-    name: "client.signinSouthwest",
-    action: function () {
-        Session.set("curModule","signinsouthwest");
-        console.log("signin southwest");
-        this.render('signInSouthwest');
-    }
-})
+var getDefaultRouteAction = function(routeName){
+  return function(){
+    Session.set("curModule",routeName.toLowerCase());
+    console.log(routeName + " ROUTE");
+    this.render(routeName);
+  }
+}
 
-Router.route('/signup', {
-    name: "client.signup",
-    action: function () {
-        Session.set("curModule","signup");
-        this.render('signUp');
-    }
-});
+//set up all routes with default behavior
+for(let route of defaultBehaviorRoutes){
+  Router.route('/' + route,{
+    name: "client." + route,
+    action: getDefaultRouteAction(route)
+  });
+}
 
 Router.route('/', {
     name: "client.index",
@@ -200,70 +209,6 @@ Router.route('/profile', {
     }
 });
 
-Router.route('/profileSouthwest',{
-  name: "client.profileSouthwest",
-  action: function(){
-    Session.set("curModule","profilesouthwest");
-    this.render('profileSouthwest');
-  }
-});
-
-Router.route('/multiTdfSelect',{
-  name: "client.multiTdfSelect",
-  action: function(){
-    Session.set("curModule","multiTdfSelect");
-    this.render('multiTdfSelect');
-  }
-});
-
-Router.route('/turkWorkflow',{
-  name: "client.turkWorkflow",
-  action: function(){
-    Session.set("curModule","turkWorkflow");
-    this.render('turkWorkflow');
-  }
-});
-
-Router.route('/contentUpload',{
-  name: "client.contentUpload",
-  action: function(){
-    Session.set("curModule","contentUpload");
-    this.render('contentUpload');
-  }
-});
-
-Router.route('/dataDownload',{
-  name: "client.dataDownload",
-  action: function(){
-    Session.set("curModule","dataDownload");
-    this.render('dataDownload');
-  }
-});
-
-Router.route('/userProfileEdit',{
-  name: "client.userProfileEdit",
-  action: function(){
-    Session.set("curModule","userProfileEdit");
-    this.render('userProfileEdit');
-  }
-});
-
-Router.route('/userAdmin',{
-  name: "client.userAdmin",
-  action: function(){
-    Session.set("curModule","userAdmin");
-    this.render('userAdmin');
-  }
-});
-
-Router.route('/contentGeneration',{
-  name: "client.contentGeneration",
-  action: function(){
-    Session.set("curModule","contentGeneration");
-    this.render('contentGeneration');
-  }
-});
-
 Router.route('/card', {
     name: "client.card",
     action: function () {
@@ -273,38 +218,6 @@ Router.route('/card', {
       }else{
         this.redirect('/');
       }
-    }
-});
-
-Router.route('/classEdit', {
-    name: "client.classEdit",
-    action: function () {
-        Session.set("curModule","classEdit");
-        this.render('classEdit');
-    }
-});
-
-Router.route('/tdfAssignmentEdit',{
-    name: "client.tdfAssignmentEdit",
-    action: function () {
-        Session.set("curModule","tdfAssignmentEdit");
-        this.render('tdfAssignmentEdit');
-    }
-})
-
-Router.route('/instructorReporting',{
-    name: "client.instructorReporting",
-    action: function () {
-        Session.set("curModule","instructorReporting");
-        this.render('instructorReporting');
-    }
-});
-
-Router.route('/studentReporting',{
-    name: "client.studentReporting",
-    action: function () {
-        Session.set("curModule","studentReporting");
-        this.render('studentReporting');
     }
 });
 
@@ -336,14 +249,4 @@ Router.route('/instructions', {
             }
         }
     },
-});
-
-//Voice interstitial to delay the user until voice input can recognize voice start
-//and voice stop with VAD.js
-Router.route('/voice', {
-    name: "client.voice",
-    action: function () {
-        Session.set("curModule","voice");
-        this.render('voice');
-    }
 });

@@ -116,7 +116,8 @@
 		<buttontrial>false</buttontrial>
 		<buttonorder>random</buttonorder>
 		<deliveryparams>
-			<feedbackType>simple</feedbackType>
+			<feedbackType>dialogue</feedbackType>
+			<forceCorrection>true</forceCorrection>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>8000</drill>
 			<purestudy>16000</purestudy>
@@ -129,7 +130,7 @@
 			<falseAnswerLimit>3</falseAnswerLimit>
 			<timeuntilaudio>2000</timeuntilaudio>
 			<timeuntilaudiofeedback>500</timeuntilaudiofeedback>
-			<prestimulusdisplaytime>5000</prestimulusdisplaytime>
+			<prestimulusdisplaytime>500</prestimulusdisplaytime>
 		</deliveryparams>
 	</unit>
 	<unit>

@@ -1,4 +1,4 @@
-import { DialogueUtils } from '../../lib/DialogueUtils';
+import { DialogueUtils } from './dialogueUtils';
 
 /*
 card.js - the implementation behind card.html (and thus
@@ -261,7 +261,7 @@ function beginMainCardTimeout(delay, func) {
         if(document.location.pathname != "/card"){
           leavePage(function(){console.log("cleaning up page after nav away from card")});
         }else if (typeof func === "function") {
-            func();
+          func();
         }else{
           console.log("function!!!: " + JSON.stringify(func));
         }
@@ -281,7 +281,13 @@ resetMainCardTimeout = function() {
     var savedFunc = timeoutFunc;
     var savedDelay = timeoutDelay;
     clearCardTimeout();
-    beginMainCardTimeout(savedDelay, savedFunc);
+    timeoutFunc = savedFunc;
+    timeoutDelay = savedDelay;
+    let mainCardTimeoutStart = new Date();
+    Session.set("mainCardTimeoutStart",mainCardTimeoutStart);
+    console.log("reset, mainCardTimeoutStart:",mainCardTimeoutStart);
+    timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
+    varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
 
 //Set a special timeout to handle simulation if necessary
@@ -433,6 +439,7 @@ Template.card.events({
       if (key == ENTER_KEY) {
         if(!enterKeyLock){
           enterKeyLock = true;
+          $("#dialogueUserAnswer").prop("disabled",true);
           let answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
           $("#dialogueUserAnswer").val("");
           dialogueUserAnswers.push(answer);
@@ -445,12 +452,14 @@ Template.card.events({
     'keypress #userForceCorrect': function(e) {
         var key = e.keyCode || e.which;
         if (key == ENTER_KEY) {
+          $("#userForceCorrect").prop("disabled", true);
+          console.log("userForceCorrect, enter key");
           // Enter key - see if gave us the correct answer
           var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
-          var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
-          if (getTestType() === 'n') {
+          if (getTestType() === "n") {
             if (entry.length < 4) {
               var oldPrompt = $("#forceCorrectGuidance").text();
+              $("#userForceCorrect").prop("disabled", false);
               $("#userForceCorrect").val("");
               $("#forceCorrectGuidance").text(oldPrompt + " (4 character minimum)");
             } else {
@@ -459,20 +468,22 @@ Template.card.events({
               savedFunc();
             }
           } else {
-            if (entry === answer) {
-                var savedFunc = timeoutFunc;
-                clearCardTimeout();
-                savedFunc();
+            var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
+            var originalAnswer = Answers.getDisplayAnswerText(Session.get("originalAnswer")).toLowerCase();
+            if (entry === answer || entry === originalAnswer) {
+                var afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
+                afterUserFeedbackForceCorrectCb = undefined;
+                afterUserFeedbackForceCorrectCbHolder();
             }
             else {
+                $("#userForceCorrect").prop("disabled", false);
                 $("#userForceCorrect").val("");
                 $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
                 speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", false, "feedback");
                 startRecording();
             }
           }
-        }
-        else {
+        }else if(getTestType() === "n"){
             // "Normal" keypress - reset the timeout period
             resetMainCardTimeout();
         }
@@ -601,10 +612,6 @@ Template.card.helpers({
         }
     },
 
-    'inDialogueLoop': function(){
-      return typeof(Session.get("dialogueLoopStage")) != "undefined";
-    },
-
     'subWordClozeCurrentQuestionExists': function(){
       console.log("subWordClozeCurrentQuestionExists: " + (typeof(Session.get("clozeQuestionParts")) != "undefined"));
       return typeof(Session.get("clozeQuestionParts")) != "undefined";
@@ -660,31 +667,35 @@ Template.card.helpers({
     },
 
     'textCard': function() {
-      return !!(Session.get("currentDisplay").text);
+      return !!(Session.get("currentDisplay")) && !!(Session.get("currentDisplay").text);
     },
 
     'audioCard': function() {
-      return !!(Session.get("currentDisplay").audioSrc);
+      return !!(Session.get("currentDisplay")) && !!(Session.get("currentDisplay").audioSrc);
     },
 
     'imageCard': function() {
-      return !!(Session.get("currentDisplay").imgSrc);
+      return !!(Session.get("currentDisplay")) && !!(Session.get("currentDisplay").imgSrc);
     },
 
     'videoCard': function() {
-      return !!(Session.get("currentDisplay").videoSrc);
+      return !!(Session.get("currentDisplay")) && !!(Session.get("currentDisplay").videoSrc);
     },
 
     'clozeCard': function() {
-      return !!(Session.get("currentDisplay").clozeText);
+      return !!(Session.get("currentDisplay")) && !!(Session.get("currentDisplay").clozeText);
     },
 
     'textOrClozeCard': function() {
-      return !!(Session.get("currentDisplay").text) || !!(Session.get("currentDisplay").clozeText);
+      return !!(Session.get("currentDisplay")) && (!!(Session.get("currentDisplay").text) || !!(Session.get("currentDisplay").clozeText));
     },
 
     'anythingButAudioCard': function() {
-      return !!(Session.get("currentDisplay").text) || !!(Session.get("currentDisplay").clozeText) || !!(Session.get("currentDisplay").imgSrc) || !!(Session.get("currentDisplay").videoSrc);
+      return !!(Session.get("currentDisplay")) && 
+            (!!(Session.get("currentDisplay").text) || 
+            !!(Session.get("currentDisplay").clozeText) || 
+            !!(Session.get("currentDisplay").imgSrc) || 
+            !!(Session.get("currentDisplay").videoSrc));
     },
 
     'imageResponse' : function() {
@@ -946,7 +957,6 @@ function newQuestionHandler() {
     console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
 
     let textFocus = false; //We'll set to true if needed
-
     let unitNumber = getCurrentUnitNumber();
     let file = getCurrentTdfFile();
     let currUnit = file.tdfs.tutor.unit[unitNumber];
@@ -966,7 +976,6 @@ function newQuestionHandler() {
 
     clearButtonList();
     Session.set("currentDisplay",{});
-    Session.set("displayReady",false);
 
     // Buttons are determined by 3 options: buttonorder, buttonOptions,
     // wrongButtonLimit:
@@ -1122,15 +1131,13 @@ function handleUserInput(e, source, simAnswerCorrect) {
     if (source === "timeout") {
         key = ENTER_KEY;
         isTimeout = true;
-    }
-    else if (source === "keypress") {
+    }else if (source === "keypress") {
         key = e.keyCode || e.which;
         //Do we need to capture the first keypress timestamp?
         if (!keypressTimestamp) {
             keypressTimestamp = Date.now();
         }
-    }
-    else if (source === "buttonClick" || source === "simulation" || source === "voice") {
+    }else if (source === "buttonClick" || source === "simulation" || source === "voice") {
         //to save space we will just go ahead and act like it was a key press.
         key = ENTER_KEY;
     }
@@ -1173,328 +1180,343 @@ function handleUserInput(e, source, simAnswerCorrect) {
       }
     }
 
-    userAnswerFeedbackCallback = function(isCorrect){
-      //Note that we must provide the client-side timestamp since we need it...
-      //Pretty much everywhere else relies on recordUserTime to provide it.
-      //We also get the timestamp of the first keypress for the current trial.
-      //Of course for things like a button trial, we won't have it
-      var timestamp = Date.now();
-      var firstActionTimestamp = keypressTimestamp || timestamp;
-
-      //Note that if something messed up and we can't calculate start/end
-      //latency, we'll punt and the output script (experiment_times.js) will
-      //need to construct the times
-      var startLatency, endLatency;
-      if (trialTimestamp) {
-          startLatency = firstActionTimestamp - trialTimestamp;
-          endLatency = timestamp - trialTimestamp;
-      }
-      else {
-          console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
-      }
-
-      //Don't count test type trials in progress reporting
-      if(getTestType() === "t"){
-        endLatency = undefined;
-      }
-
-      //Figure out button trial entries
-      var buttonEntries = "";
-      var wasButtonTrial = !!Session.get("buttonTrial");
-      if (wasButtonTrial) {
-          buttonEntries = _.map(
-              buttonList.find({}, {sort: {idx: 1}}).fetch(),
-              function(val) { return val.buttonValue; }
-          ).join(',');
-      }
-
-      //Note that we need to log from data in the cluster returned from
-      //getStimCluster so that we honor cluster mapping
-      var currCluster = getStimCluster(getCurrentClusterIndex());
-      let deliveryParams = getCurrentDeliveryParams();
-
-      //Figure out the review latency we should log
-      var reviewLatency = 0;
-      if (getTestType() === "d" && !isCorrect) {
-          reviewLatency = _.intval(deliveryParams.reviewstudy);
-      }
-
-      //Set up to log the answer they gave. We'll call the function below at the
-      //appropriate time
-      var reviewBegin = Date.now();
-      var answerLogAction = isTimeout ? "[timeout]" : "answer";
-      var currentAnswerSyllables;
-      var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
-      if(typeof(sessCurrentAnswerSyllables) != "undefined"){
-        currentAnswerSyllables = {
-          syllables:sessCurrentAnswerSyllables.syllableArray,
-          count:sessCurrentAnswerSyllables.syllableArray.length,
-          displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
-        };
-      }
-
-      //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
-      let curUserPerformance = Session.get("curStudentPerformance");
-      curUserPerformance.count = curUserPerformance.count + 1;
-      if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-      curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
-      curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
-      curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
-      Session.set("curStudentPerformance",curUserPerformance);
-
-      let feedbackType = deliveryParams.feedbackType || "simple";
-      let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
-
-      var answerLogRecord = {
-          'questionIndex': _.intval(Session.get("questionIndex"), -1),
-          'index': _.intval(currCluster.clusterIndex, -1),
-          'shufIndex': _.intval(currCluster.shufIndex, -1),
-          'ttype': _.trim(getTestType()),
-          'qtype':  _.trim(findQTypeSimpified()),
-          'guiSource':  _.trim(source),
-          'answer':  _.trim(userAnswer),
-          'isCorrect': isCorrect,
-          'trialStartTimestamp': trialTimestamp,
-          'clientSideTimeStamp': timestamp,
-          'firstActionTimestamp': firstActionTimestamp,
-          'startLatency': startLatency,
-          'endLatency': endLatency,
-          'wasButtonTrial': wasButtonTrial,
-          'buttonOrder': buttonEntries,
-          'reviewLatency': 0,
-          'inferredReviewLatency': reviewLatency,
-          'wasSim': (source === "simulation") ? 1 : 0,
-          'displayedSystemResponse': $("#UserInteraction").text() || "",
-          'forceCorrectFeedback': "",
-          'audioInputEnabled':Session.get("audioEnabled") || false,
-          'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
-          'currentAnswerSyllables':currentAnswerSyllables || "",
-          'feedbackType':feedbackType,
-          'dialogueHistory':dialogueHistory
-      };
-      Session.set("dialogueHistory",undefined);
-      var writeAnswerLog = function() {
-          var realReviewLatency = Date.now() - reviewBegin;
-          if (realReviewLatency > 0) {
-              answerLogRecord.reviewLatency = realReviewLatency;
-          }
-          //TODO: need a column for this in experiment_times
-          answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
-          recordUserTime(answerLogAction, answerLogRecord);
-      };
-
-      // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-      // is specified and we have seen that many (or more) timeouts in a row, then
-      // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-      // this feature MUST be turned on in the TDF.
-      if (!isTimeout) {
-          timeoutsSeen = 0;  // Reset count
-      }
-      else {
-          // Anothing timeout!
-          timeoutsSeen++;
-
-          // Figure out threshold (with default of 0)
-          // Also note: threshold < 1 means no autostop at all
-          var threshold = _.chain(deliveryParams)
-              .prop("autostopTimeoutThreshold")
-              .intval(0).value();
-
-          if (threshold > 0 && timeoutsSeen >= threshold) {
-              console.log("Hit timeout threshold", threshold, "Quitting");
-              leavePage("/profile");
-              return;  // We are totally done
-          }
-      }
-
-      //record progress in userProgress variable storage (note that this is
-      //helpful and used on the stats page, but the user times log is the
-      //"system of record")
-      recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
-      //Figure out timeout and reviewLatency
-      var timeout = 0;
-
-      let testType = getTestType();
-
-      if (testType === "s" || testType === "f") {
-          //Just a study - note that the purestudy timeout is used for the QUESTION
-          //timeout, not the display timeout after the ANSWER. However, we need a
-          //timeout for our logic below so just use the minimum
-          timeout = 1;
-      }
-      else if (testType === "t" || testType === "i") {
-          //A test or instruction unit - we don't have timeouts since they don't get feedback about
-          //how they did (that's what drills are for)
-          timeout = 1;
-      }
-      else if (testType === "d" || testType === "m" || testType === "n") {
-          //Drill - the timeout depends on how they did
-          if (isCorrect) {
-              timeout = _.intval(deliveryParams.correctprompt);
-          }
-          else {
-              timeout = _.intval(deliveryParams.reviewstudy);
-          }
-      }
-      else {
-          //We don't know what to do since this is an unsupported test type - fail
-          failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
-          return;
-      }
-
-      //We need at least a timeout of 1ms
-      if (timeout < 1) {
-          failNoDeliveryParams("No correct timeout specified");
-          return;
-      }
-    
-      let skipReviewAfterDialogueLoop = (deliveryParams.feedbackType == "dialogue" && !isCorrect);
-      console.log("skipReviewAfterDialogueLoop: " + skipReviewAfterDialogueLoop);
-
-      if(skipReviewAfterDialogueLoop) {
-        //After dialogue loop we want to fast forward through review
-        timeout = 1;
-      }
-
-      //Stop previous timeout
-      clearCardTimeout();
-
-      //Create the action we're about to call
-      var resetAfterTimeout = function() {
-          beginMainCardTimeout(timeout, function() {
-              writeAnswerLog();
-              prepareCard();
-              $("#userAnswer").val("");
-              hideUserInteraction();
-          });
-      };
-
-      //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, after the optional audio feedback delay time
-      if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect && getTestType() === "d" && !skipReviewAfterDialogueLoop) {
-          setTimeout(function(){
-            console.log("playing sound after timeuntilaudiofeedback", new Date());
-            playCurrentSound();
-          },deliveryParams.timeuntilaudiofeedback);
-      }
-      
-      resetAfterTimeout();
-    }
+    var trialEndTimeStamp = Date.now();
+    var afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,trialEndTimeStamp,source,userAnswer);
     
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
     //our responsbility to decide when to hide it and move on
-    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, userAnswerFeedbackCallback);
+    userAnswerFeedback(userAnswer, isTimeout, simAnswerCorrect, afterAnswerFeedbackCallbackWithEndTime);
 }
 
-getButtonTrial = function() {
-    //Default to value given in the unit
-    var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
-        .prop("buttontrial").first()
-        .trim().value().toLowerCase();
-
-    var progress = getUserProgress();
-
-    if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
-        //Did this question specifically override button trial?
-        isButtonTrial = true;
-    }
-    else {
-        // An entire schedule can override a button trial
-        var schedButtonTrial = _.chain(progress)
-            .prop("currentSchedule")
-            .prop("isButtonTrial").value();
-        if (!!schedButtonTrial) {
-            isButtonTrial = true;  //Entire schedule is a button trial
-        }
-    }
-
-    return isButtonTrial;
-}
-
-//Take care of user feedback - and return whether or not the user correctly
-//answered the question. simCorrect will usually be undefined/null BUT if
+//Take care of user feedback - simCorrect will usually be undefined/null BUT if
 //it is true or false we know this is part of a simulation call
-function userAnswerFeedback(userAnswer, isTimeout, simCorrect, callback) {
-    var isCorrect = null;
+function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
+    var setspec = !getButtonTrial() ? getCurrentTdfFile().tdfs.tutor.setspec[0] : undefined;
+    var isCorrectAccumulator = null;
+    let feedbackForAnswer = null;
+    let userAnswerWithTimeout = null;
     //Nothing to evaluate for a study - just pretend they answered correctly
     if (getTestType() === "s" || getTestType() === "f") {
-        isCorrect = true;
-        isTimeout = false;
-    }
-
-    var setspec = null;
-    if (!getButtonTrial()) {
-        setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-    }
-
-    let goodNews = null;
-    let msg = null;
-    let userAnswerWithTimeout = null;
-    // How was their answer? (And note we only need to update historyUserAnswer
-    // if it's not a "standard" )
-    if (!!isTimeout) {
-        //Timeout - doesn't matter what the answer says!
-        goodNews = false;
-        userAnswerWithTimeout = "";
-    }
-    else if (isCorrect) {
-        //We've already marked this as a correct answer
-        goodNews = true;
-        msg = "Please study the answer";
-    }
-    else if (typeof simCorrect === "boolean") {
-        //Simulation! We know what they did
-        goodNews = simCorrect;
-        msg = "Simulation";
-    }
-    else {
+      isCorrectAccumulator = true;
+      isTimeout = false;
+      feedbackForAnswer = "Please study the answer";
+    }else if (isTimeout) {
+      // How was their answer? (And note we only need to update historyUserAnswer
+      // if it's not a "standard" )
+      //Timeout - doesn't matter what the answer says!
+      isCorrectAccumulator = false;
+      userAnswerWithTimeout = "";
+    }else if (typeof simCorrect === "boolean") {
+      //Simulation! We know what they did
+      isCorrectAccumulator = simCorrect;
+      feedbackForAnswer = "Simulation";
+    }else {
       userAnswerWithTimeout = userAnswer;
     }
 
     //Make sure to record what they just did (and set justAdded)
     writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
 
-    var afterAnswerAssessment = function(correctAndText){
-      if(goodNews == null && correctAndText != null){
-        goodNews = correctAndText.isCorrect;
-      }
-      if(msg == null && correctAndText != null){
-        msg = correctAndText.matchText;
-      }
+    var afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null,isTimeout);
+    var afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,isCorrectAccumulator,feedbackForAnswer,afterAnswerFeedbackCbWithTimeout);
 
-      isCorrect = goodNews;
-
-      let testType = getTestType();
-      let isDrill = (testType === "d" || testType === "m" || testType === "n");
-      let skipReviewAfterDialogueLoop = (getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect);
-      if (isDrill && !skipReviewAfterDialogueLoop) {
-          showUserInteraction(goodNews, msg);
-      }
-
-      //Give unit engine a chance to update any necessary stats
-      engine.cardAnswered(isCorrect);
-
-      //If they are incorrect on a drill, we might need to do extra work for
-      //their review period
-      if (isDrill && !isCorrect) {
-          //Cheat and inject a review message
-          $("#UserInteraction").append(
-              $("<p class='text-danger'></p>").html("") //No review message currently
-          );
-      }
-
-      callback(isCorrect);
-    }
-
+    //Answer assessment -> 
     if(userAnswerWithTimeout != null){
-      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec,afterAnswerAssessment);
+      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec,afterAnswerAssessmentCbWithArgs);
     }else{
-      afterAnswerAssessment(null);
+      afterAnswerAssessmentCbWithArgs(null);
     }    
 }
 
+function afterAnswerAssessmentCb(isCorrect,feedbackForAnswer,afterAnswerFeedbackCb,correctAndText){
+  if(isCorrect == null && correctAndText != null){
+    isCorrect = correctAndText.isCorrect;
+  }
+  //Give unit engine a chance to update any necessary stats
+  engine.cardAnswered(isCorrect);
+
+  let afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null,isCorrect);
+  let testType = getTestType();
+  let isDrill = (testType === "d" || testType === "m" || testType === "n");
+  if (isDrill) {
+    if(feedbackForAnswer == null && correctAndText != null){
+      feedbackForAnswer = correctAndText.matchText;
+    }
+    showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound);
+  }else{
+    afterAnswerFeedbackCbBound();
+  }
+}
+
+function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
+    console.log("showUserFeedback");
+    //For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
+    if(!isCorrect && getButtonTrial() && getResponseType() == "image"){
+      $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
+      let buttonImageFeedback = "Incorrect.  The correct response is displayed below.";
+      let correctImageSrc = Session.get("originalAnswer");
+      $("#UserInteraction").html('<p class="text-align alert alert-danger">' + buttonImageFeedback + '</p><img style="background: url(' + correctImageSrc + '); background-size:100%; background-repeat: no-repeat;" disabled="" class="btn-alt btn-block btn-image btn-responsive">').show();
+    }else{
+      $("#UserInteraction")
+      .removeClass("alert-success alert-danger")
+      .addClass("text-align alert")
+      .addClass(isCorrect ? "alert-success" : "alert-danger")
+      .text(feedbackMessage)
+      .show();
+    }    
+
+    speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage,false,"feedback");
+
+    //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, after the optional audio feedback delay time
+    if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect) {
+      setTimeout(function(){
+        console.log("playing sound after timeuntilaudiofeedback", new Date());
+        playCurrentSound();
+      },getCurrentDeliveryParams().timeuntilaudiofeedback);
+    }
+
+    // forceCorrection is now part of user interaction - we always clear the
+    // textbox, but only show it if:
+    // * They got the answer wrong somehow
+    // * forceCorrection is true in the current delivery params
+    // * the trial params are specified to enable forceCorrection
+    // * we are NOT in a sim
+
+    var isForceCorrectTrial = getTestType() === "m" || getTestType() === "n";
+    var doForceCorrect = (!isCorrect && (getCurrentDeliveryParams().forceCorrection || isForceCorrectTrial) && !Session.get("runSimulation"));
+    var doClearForceCorrectBound = doClearForceCorrect.bind(null,doForceCorrect,afterAnswerFeedbackCbBound);
+    Tracker.afterFlush(doClearForceCorrectBound);
+}
+
+//Note the execution thread will finish in the keypress event above for userForceCorrect
+afterUserFeedbackForceCorrectCb = undefined;
+function doClearForceCorrect(doForceCorrect,afterAnswerFeedbackCbBound){
+  if (doForceCorrect) {
+    $("#forceCorrectionEntry").show();
+
+    if(getTestType() === "n"){
+      var prompt = getCurrentDeliveryParams().forcecorrectprompt;
+      $("#forceCorrectGuidance").text(prompt);
+      speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
+
+      var forcecorrecttimeout = getCurrentDeliveryParams().forcecorrecttimeout;
+      beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCbBound);
+    } else {
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCbBound;
+
+      var prompt = "Please enter the correct answer to continue";
+      $("#forceCorrectGuidance").text(prompt);
+      speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
+    }
+
+    $("#userForceCorrect").prop("disabled", false);
+    $("#userForceCorrect").val("").focus();
+    startRecording();
+  }
+  else {
+      $("#forceCorrectGuidance").text("");
+      $("#userForceCorrect").prop("disabled", false);
+      $("#userForceCorrect").val("");
+      afterAnswerFeedbackCbBound();
+  }
+}
+
+function hideUserFeedback() {
+    $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("").hide();
+    $("#userForceCorrect").val("");    // text box - see inputF.html
+    $("#forceCorrectionEntry").hide();  // Container
+}
+
+function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
+  //Note that we must provide the client-side timestamp since we need it...
+  //Pretty much everywhere else relies on recordUserTime to provide it.
+  //We also get the timestamp of the first keypress for the current trial.
+  //Of course for things like a button trial, we won't have it
+  var firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
+  let testType = getTestType();
+
+  //Note that if something messed up and we can't calculate start/end
+  //latency, we'll punt and the output script (experiment_times.js) will
+  //need to construct the times
+  var startLatency, endLatency;
+  if (trialTimestamp) {
+      startLatency = firstActionTimestamp - trialTimestamp;
+      endLatency = trialEndTimeStamp - trialTimestamp;
+  }
+  else {
+      console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
+  }
+
+  //Don't count test type trials in progress reporting
+  if(testType === "t"){
+    endLatency = undefined;
+  }
+
+  //Figure out button trial entries
+  var buttonEntries = "";
+  var wasButtonTrial = !!Session.get("buttonTrial");
+  if (wasButtonTrial) {
+      buttonEntries = _.map(
+          buttonList.find({}, {sort: {idx: 1}}).fetch(),
+          function(val) { return val.buttonValue; }
+      ).join(',');
+  }
+
+  //Note that we need to log from data in the cluster returned from
+  //getStimCluster so that we honor cluster mapping
+  var currCluster = getStimCluster(getCurrentClusterIndex());
+  let deliveryParams = getCurrentDeliveryParams();
+
+  var assumedReviewLatency = 0;
+  if (testType === "d" && !isCorrect) {
+      assumedReviewLatency = _.intval(deliveryParams.reviewstudy); 
+  }
+
+  //Set up to log the answer they gave. We'll call the function below at the
+  //appropriate time
+  var reviewBegin = Date.now();
+  var answerLogAction = isTimeout ? "[timeout]" : "answer";
+  var currentAnswerSyllables;
+  var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
+  if(typeof(sessCurrentAnswerSyllables) != "undefined"){
+    currentAnswerSyllables = {
+      syllables:sessCurrentAnswerSyllables.syllableArray,
+      count:sessCurrentAnswerSyllables.syllableArray.length,
+      displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
+    };
+  }
+
+  //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
+  let curUserPerformance = Session.get("curStudentPerformance");
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
+  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
+  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
+  Session.set("curStudentPerformance",curUserPerformance);
+
+  let feedbackType = deliveryParams.feedbackType || "simple";
+  let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
+
+  var answerLogRecord = {
+      'questionIndex': _.intval(Session.get("questionIndex"), -1),
+      'index': _.intval(currCluster.clusterIndex, -1),
+      'shufIndex': _.intval(currCluster.shufIndex, -1),
+      'ttype': _.trim(testType),
+      'qtype':  _.trim(findQTypeSimpified()),
+      'guiSource':  _.trim(source),
+      'answer':  _.trim(userAnswer),
+      'isCorrect': isCorrect,
+      'trialStartTimestamp': trialTimestamp,
+      'clientSideTimeStamp': trialEndTimeStamp,
+      'firstActionTimestamp': firstActionTimestamp,
+      'startLatency': startLatency,
+      'endLatency': endLatency,
+      'wasButtonTrial': wasButtonTrial,
+      'buttonOrder': buttonEntries,
+      'reviewLatency': 0,
+      'inferredReviewLatency': assumedReviewLatency,
+      'wasSim': (source === "simulation") ? 1 : 0,
+      'displayedSystemResponse': $("#UserInteraction").text() || "",
+      'forceCorrectFeedback': "",
+      'audioInputEnabled':Session.get("audioEnabled") || false,
+      'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
+      'currentAnswerSyllables':currentAnswerSyllables || "",
+      'feedbackType':feedbackType,
+      'dialogueHistory':dialogueHistory
+  };
+  Session.set("dialogueHistory",undefined);
+  var writeAnswerLog = function() {
+      var realReviewLatency = Date.now() - reviewBegin;
+      if (realReviewLatency > 0) {
+          answerLogRecord.reviewLatency = realReviewLatency;
+      }
+      //TODO: need a column for this in experiment_times
+      answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
+      recordUserTime(answerLogAction, answerLogRecord);
+  };
+
+  // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+  // is specified and we have seen that many (or more) timeouts in a row, then
+  // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+  // this feature MUST be turned on in the TDF.
+  if (!isTimeout) {
+      timeoutsSeen = 0;  // Reset count
+  }
+  else {
+      // Anothing timeout!
+      timeoutsSeen++;
+
+      // Figure out threshold (with default of 0)
+      // Also note: threshold < 1 means no autostop at all
+      var threshold = _.chain(deliveryParams)
+          .prop("autostopTimeoutThreshold")
+          .intval(0).value();
+
+      if (threshold > 0 && timeoutsSeen >= threshold) {
+          console.log("Hit timeout threshold", threshold, "Quitting");
+          leavePage("/profile");
+          return;  // We are totally done
+      }
+  }
+
+  //record progress in userProgress variable storage (note that this is
+  //helpful and used on the stats page, but the user times log is the
+  //"system of record")
+  recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
+
+  //Figure out timeout and reviewLatency
+  var reviewTimeout = 0;
+
+  if (testType === "s" || testType === "f") {
+      //Just a study - note that the purestudy timeout is used for the QUESTION
+      //timeout, not the display timeout after the ANSWER. However, we need a
+      //timeout for our logic below so just use the minimum
+      reviewTimeout = 1;
+  }
+  else if (testType === "t" || testType === "i") {
+      //A test or instruction unit - we don't have timeouts since they don't get feedback about
+      //how they did (that's what drills are for)
+      reviewTimeout = 1;
+  }
+  else if (testType === "d" || testType === "m" || testType === "n") {
+      //Drill - the timeout depends on how they did
+      if (isCorrect) {
+          reviewTimeout = _.intval(deliveryParams.correctprompt);
+      }
+      else {
+          reviewTimeout = _.intval(deliveryParams.reviewstudy);
+      }
+  }
+  else {
+      //We don't know what to do since this is an unsupported test type - fail
+      failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
+      return;
+  }
+
+  //We need at least a timeout of 1ms
+  if (reviewTimeout < 1) {
+      failNoDeliveryParams("No correct timeout specified");
+      return;
+  }
+
+  //Stop previous timeout, log response data, and clear up any other vars for next question
+  clearCardTimeout();
+  Meteor.setTimeout(function(){
+    writeAnswerLog();
+    hideUserFeedback();
+    $("#userAnswer").val("");
+    if(feedbackType == "dialogue" && !isCorrect){
+      initiateDialogue(prepareCard);
+    }else{
+      prepareCard();
+    }
+  },reviewTimeout);
+}
+
 function prepareCard() {
+    Session.set("displayReady",false);
     if (Session.get("questionIndex") === undefined) {
         // At this point, a missing question index is assumed to mean "start
         // with the first question"
@@ -1503,8 +1525,7 @@ function prepareCard() {
 
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
-    }
-    else {
+    }else {
         // Not finished - we have another card to show...
         // Before we change anything, if we are showing an image we will change
         // it to a 1x1 pixel (so the old image doesn't stick around if there is
@@ -1622,6 +1643,28 @@ function failNoDeliveryParams(customMsg) {
     clearCardTimeout();
     clearPlayingSound();
     throw new Error("The current TDF is malformed");
+}
+
+function getButtonTrial() {
+  //Default to value given in the unit
+  var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
+      .prop("buttontrial").first()
+      .trim().value().toLowerCase();
+
+  if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
+      //Did this question specifically override button trial?
+      isButtonTrial = true;
+  }
+  else {
+      // An entire schedule can override a button trial
+      var progress = getUserProgress();
+      var schedButtonTrial = !!(progress.currentSchedule) && (progress.currentSchedule.unitNumber == getCurrentUnitNumber()) ? _.chain(progress).prop("currentSchedule").prop("isButtonTrial").value() : false;
+      if (!!schedButtonTrial) {
+          isButtonTrial = true;  //Entire schedule is a button trial
+      }
+  }
+
+  return isButtonTrial;
 }
 
 function startQuestionTimeout(textFocus) {
@@ -1766,77 +1809,6 @@ function startQuestionTimeout(textFocus) {
   checkAndDisplayPrestimulus(pipeline);
 }
 
-function showUserInteraction(isGoodNews, news) {
-    //For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
-    if(!isGoodNews && getButtonTrial() && getResponseType() == "image"){
-      $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
-      let buttonImageFeedback = "Incorrect.  The correct response is displayed below.";
-      let correctImageSrc = Session.get("originalAnswer");
-      $("#UserInteraction").html('<p class="text-align alert alert-danger">' + buttonImageFeedback + '</p><img style="background: url(' + correctImageSrc + '); background-size:100%; background-repeat: no-repeat;" disabled="" class="btn-alt btn-block btn-image btn-responsive">').show();
-    }else{
-      $("#UserInteraction")
-      .removeClass("alert-success alert-danger")
-      .addClass("text-align alert")
-      .addClass(isGoodNews ? "alert-success" : "alert-danger")
-      .text(news)
-      .show();
-    }    
-
-    speakMessageIfAudioPromptFeedbackEnabled(news,false,"feedback");
-
-    // forceCorrection is now part of user interaction - we always clear the
-    // textbox, but only show it if:
-    // * They got the answer wrong somehow
-    // * forceCorrection is true in the current delivery params
-    // * the trial params are specified to enable forceCorrection
-    // * we are NOT in a sim
-
-    var isForceCorrectTrial = getTestType() === "m" || getTestType() === "n";
-    var doForceCorrect = (!isGoodNews && (getCurrentDeliveryParams().forceCorrection || isForceCorrectTrial) && !Session.get("runSimulation"));
-    Tracker.afterFlush(function() {
-        if (doForceCorrect) {
-          $("#forceCorrectionEntry").show();
-
-          if(getTestType() === "n"){
-            var forceCorrectDelay = getCurrentDeliveryParams().forcecorrecttimeout;
-            var prompt = getCurrentDeliveryParams().forcecorrectprompt;
-            $("#forceCorrectGuidance").text(prompt);
-
-            speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
-            var savedFunc = timeoutFunc;
-            beginMainCardTimeout(forceCorrectDelay, savedFunc);
-          } else {
-            $("#forceCorrectGuidance").text("Please enter the correct answer to continue");
-
-            speakMessageIfAudioPromptFeedbackEnabled("Please enter the correct answer to continue",false,"feedback");
-          }
-
-          $("#userForceCorrect").val("").focus();
-          startRecording();
-        }
-        else {
-            $("#forceCorrectGuidance").text("");
-            $("#userForceCorrect").val("");
-        }
-    });
-
-    // When all done, we set up to scroll to the bottom of the display
-    // Edit: commented out per request from Phil, leaving in commented in case we ever
-    // decide to put it back in
-    //scrollElementIntoView(null, false);
-}
-
-function hideUserInteraction() {
-    $("#UserInteraction")
-        .removeClass("text-align alert alert-success alert-danger")
-        .html("")
-        .hide();
-
-    // forceCorrection is now part of user interaction
-    $("#userForceCorrect").val("");    // text box - see inputF.html
-    $("#forceCorrectionEntry").hide();  // Container
-}
-
 // BEGIN WEB AUDIO section
 
 //Audio prompt/feedback
@@ -1876,7 +1848,13 @@ speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPrompt
   }
   if(resetTimeout){
     console.log("RESTARTING TIMEOUT AFTER READING");
-    beginMainCardTimeout(savedDelay, savedFunc);
+    timeoutFunc = savedFunc;
+    timeoutDelay = savedDelay;
+    let mainCardTimeoutStart = new Date();
+    Session.set("mainCardTimeoutStart",mainCardTimeoutStart);
+    console.log("tts reset, mainCardTimeoutStart:",mainCardTimeoutStart);
+    timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
+    varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
   }
 }
 
@@ -2464,7 +2442,7 @@ function resumeFromUserTimesLog() {
       }else{
         console.log("Non sound type detected");
       }
-      if(curStimHasAudioDisplayType()){
+      if(curStimHasImageDisplayType()){
         console.log("image type questions detected, pre-loading images");
         preloadImages();
       }else{

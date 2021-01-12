@@ -10,6 +10,14 @@ Template.inputF.rendered = function() {
 Template.inputF.helpers({
     'fontSizeClass': function() {
         return 'h' + getCurrentFontSize().toString();  //Bootstrap classes
+    },
+
+    'inDialogueLoop': function(){
+      return typeof(Session.get("dialogueLoopStage")) != "undefined";
+    },
+    
+    'dialogueIntroExit': function(){
+        return Session.get("dialogueLoopStage") == "intro" || Session.get("dialogueLoopStage") == "exit";
     }
 });
 

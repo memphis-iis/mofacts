@@ -184,7 +184,6 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
 
         if (!!overrideData) {
             initVals = _.extend(initVals, overrideData);
-
         }
         userProgress = initVals;
     };
