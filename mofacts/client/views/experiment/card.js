@@ -251,6 +251,7 @@ function clearCardTimeout() {
 //Start a timeout count
 //Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
 function beginMainCardTimeout(delay, func) {
+    console.log("beginMainCardTimeout",func);
     clearCardTimeout();
 
     timeoutFunc = function(){
@@ -450,43 +451,7 @@ Template.card.events({
     },
 
     'keypress #userForceCorrect': function(e) {
-        var key = e.keyCode || e.which;
-        if (key == ENTER_KEY) {
-          $("#userForceCorrect").prop("disabled", true);
-          console.log("userForceCorrect, enter key");
-          // Enter key - see if gave us the correct answer
-          var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
-          if (getTestType() === "n") {
-            if (entry.length < 4) {
-              var oldPrompt = $("#forceCorrectGuidance").text();
-              $("#userForceCorrect").prop("disabled", false);
-              $("#userForceCorrect").val("");
-              $("#forceCorrectGuidance").text(oldPrompt + " (4 character minimum)");
-            } else {
-              var savedFunc = timeoutFunc;
-              clearCardTimeout();
-              savedFunc();
-            }
-          } else {
-            var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
-            var originalAnswer = Answers.getDisplayAnswerText(Session.get("originalAnswer")).toLowerCase();
-            if (entry === answer || entry === originalAnswer) {
-                var afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
-                afterUserFeedbackForceCorrectCb = undefined;
-                afterUserFeedbackForceCorrectCbHolder();
-            }
-            else {
-                $("#userForceCorrect").prop("disabled", false);
-                $("#userForceCorrect").val("");
-                $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
-                speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", false, "feedback");
-                startRecording();
-            }
-          }
-        }else if(getTestType() === "n"){
-            // "Normal" keypress - reset the timeout period
-            resetMainCardTimeout();
-        }
+        handleUserForceCorrectInput(e, "keypress");
     },
 
     'click .statsPageLink' : function (event) {
@@ -1123,6 +1088,53 @@ function playCurrentSound(onEndCallback) {
     //mark the howler instance as playing
     currentSound.isCurrentlyPlaying = true;
     currentSound.play();
+}
+
+function handleUserForceCorrectInput(e, source){
+  let key = e.keyCode || e.which;
+  if (key == ENTER_KEY || source === "voice") {
+    console.log("handleUserForceCorrectInput");
+    $("#userForceCorrect").prop("disabled", true);
+    stopRecording();
+    console.log("userForceCorrect, enter key");
+    // Enter key - see if gave us the correct answer
+    var entry = _.trim($("#userForceCorrect").val()).toLowerCase();
+    if (getTestType() === "n") {
+      console.log("force correct n type test");
+      if (entry.length < 4) {
+        var oldPrompt = $("#forceCorrectGuidance").text();
+        $("#userForceCorrect").prop("disabled", false);
+        $("#userForceCorrect").val("");
+        $("#forceCorrectGuidance").text(oldPrompt + " (4 character minimum)");
+      } else {
+        var savedFunc = timeoutFunc;
+        clearCardTimeout();
+        savedFunc();
+      }
+    } else {
+      console.log("force correct non n type test");
+      var answer = Answers.getDisplayAnswerText(Session.get("currentAnswer")).toLowerCase();
+      var originalAnswer = Answers.getDisplayAnswerText(Session.get("originalAnswer")).toLowerCase();
+      if (entry === answer || entry === originalAnswer) {
+          console.log("force correct, correct answer");
+          var afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
+          afterUserFeedbackForceCorrectCb = undefined;
+          afterUserFeedbackForceCorrectCbHolder();
+      }
+      else {
+          console.log("force correct, wrong answer");
+          $("#userForceCorrect").prop("disabled", false);
+          $("#userForceCorrect").val("");
+          $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
+          speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", false, "feedback");
+          startRecording();
+      }
+    }
+  }else if(getTestType() === "n"){
+      console.log("not enter key and test type n, resetting main card timeout");
+      // "Normal" keypress - reset the timeout period
+      resetMainCardTimeout();
+  }
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
@@ -1885,7 +1897,11 @@ makeGoogleTTSApiCall = function(message,ttsAPIKey,audioPromptSpeakingRate,callba
 //Speech recognition function to process audio data, this is called by the web worker
 //started with the recorder object when enough data is received to fill up the buffer
 processLINEAR16 = function(data){
-  resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
+  if(resetMainCardTimeout && timeoutFunc){
+    resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
+  }else{
+    console.log("not resetting during processLINEAR16");
+  }
   recorder.clear();
   var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
 
@@ -2006,6 +2022,8 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         ignoredOrSilent = true;
       }
 
+      let inUserForceCorrect = $("#forceCorrectionEntry").is(":visible");
+      var userAnswer;
       if (getButtonTrial()) {
         console.log("button trial, setting user answer to verbalChoice");
         userAnswer = $("[verbalChoice='" + transcript + "']")[0];
@@ -2017,7 +2035,7 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         console.log("dialogue loop -> transcribe to dialogue user answer");
         DialogueUtils.setDialogueUserAnswerValue(transcript);
       } else {
-        userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
+        userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
         console.log("regular trial, transcribing user response to user answer box");
         userAnswer.value = transcript;
       }
@@ -2047,7 +2065,11 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
           dialogueContext.LastStudentAnswer = answer;
           Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
         } else {
-            handleUserInput({},"voice");
+            if(inUserForceCorrect){
+              handleUserForceCorrectInput({},"voice");
+            }else{
+              handleUserInput({},"voice");
+            }
         }
       }
     });
@@ -2118,7 +2140,7 @@ startUserMedia = function(stream) {
         return;
       }else{
         console.log("VOICE START");
-        if(resetMainCardTimeout){
+        if(resetMainCardTimeout && timeoutFunc){
           if(Session.get('recording')){
             console.log("voice_start resetMainCardTimeout");
             resetMainCardTimeout();
@@ -2155,6 +2177,7 @@ startRecording = function() {
 }
 
 stopRecording = function() {
+  console.log("stopRecording",recorder,Session.get('recording'));
   if(recorder && Session.get('recording'))
   {
     recorder.stop();

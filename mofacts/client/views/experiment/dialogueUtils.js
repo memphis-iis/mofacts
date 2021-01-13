@@ -39,6 +39,7 @@ function updateDialogueDisplay(newDisplay){
     let displayWrapper = { 'text': newDisplay }
     Session.set("currentDisplay",displayWrapper);
     $("#dialogueUserAnswer").prop("disabled",false);
+    $("#dialogueUserAnswer").val("");
     Session.set("displayReady",true);
     Tracker.afterFlush(function(){
         console.log("dialogue after flush");
@@ -47,8 +48,8 @@ function updateDialogueDisplay(newDisplay){
 }
 
 dialogueLoop = function(err,res){
-    startRecording();
     console.log("dialogue loop");
+    stopRecording();
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
         console.log(res);
@@ -64,6 +65,8 @@ dialogueLoop = function(err,res){
         if(result.Finished){
             newDisplay = result.Display + endDialogueNotice;
             Session.set("dialogueLoopStage","exit");
+        }else{
+            startRecording();
         }
         updateDialogueDisplay(newDisplay);
         speakMessageIfAudioPromptFeedbackEnabled(newDisplay, false, "dialogue");
@@ -78,7 +81,6 @@ dialogueLoop = function(err,res){
 }
 
 dialogueContinue = function(){
-    stopRecording();
     console.log("dialogueContinue");
     let dialogueLoopStage = Session.get("dialogueLoopStage");
     switch(dialogueLoopStage){
