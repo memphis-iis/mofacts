@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correctresponse",
+                                "correctResponse": "correct",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -24,7 +24,7 @@
                         },
                         {
                             "response": {
-                                "correctResponse": "correctresponse",
+                                "correctResponse": "correct",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -42,7 +42,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correctresponse",
+                                "correctResponse": "correct",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
