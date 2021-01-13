@@ -2,20 +2,21 @@
 	<setspec>
 		<name>Internal Testing</name>
 		<lessonname>Testing Tdf</lessonname>
-		<userselect>true</userselect>
+		<userselect>false</userselect>
+		<experimentTarget>test</experimentTarget>
 		<stimulusfile>testStim.json</stimulusfile>
 		<isModeled>false</isModeled>
 		<lfparameter>.85</lfparameter>
 		<simTimeout>3500</simTimeout>
 		<simCorrectProb>0.85</simCorrectProb>
-		<speechAPIKey/>
-		<audioInputEnabled>true</audioInputEnabled>
+		<speechAPIKey></speechAPIKey>
+		<textToSpeechAPIKey></textToSpeechAPIKey>
+		<audioInputEnabled>false</audioInputEnabled>
 		<audioInputSensitivity>15</audioInputSensitivity>
 		<speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
 		<speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
-		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
+		<enableAudioPromptAndFeedback>false</enableAudioPromptAndFeedback>
 		<audioPromptSpeakingRate>1</audioPromptSpeakingRate>
-		<textToSpeechAPIKey/>
 		<prestimulusDisplay>Prestimulus Display Text</prestimulusDisplay>
 	</setspec>
 	<unit>
