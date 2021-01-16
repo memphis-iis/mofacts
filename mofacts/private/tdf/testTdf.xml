@@ -31,7 +31,7 @@
 			<reviewstudy>5000</reviewstudy>
 			<correctprompt>500</correctprompt>
 			<fontsize>2</fontsize>
-			<correctscore>1</correctscore>
+			<correctscore>0</correctscore>
 			<incorrectscore>0</incorrectscore>
 			<numButtonListImageColumns>3</numButtonListImageColumns>
 		</deliveryparams>
@@ -39,10 +39,10 @@
 			<conditiontemplatesbygroup>
 				<groupnames>A</groupnames>
 				<clustersrepeated>1</clustersrepeated>
-				<templatesrepeated>1</templatesrepeated>
-				<group>0,t,t,0</group>
+				<templatesrepeated>3</templatesrepeated>
+				<group>0,t,t,0 0,t,t,0 0,t,t,0</group>
 			</conditiontemplatesbygroup>
-			<initialpositions>A_1</initialpositions>
+			<initialpositions>A_1 A_2 A_3</initialpositions>
 			<randomizegroups>false</randomizegroups>
 			<clusterlist>2-2</clusterlist>
 			<assignrandomclusters>false</assignrandomclusters>
