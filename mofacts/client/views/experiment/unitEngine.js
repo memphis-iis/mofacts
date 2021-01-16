@@ -278,16 +278,6 @@ function defaultUnitEngine(extensionData) {
             Session.set("clozeQuestionParts",clozeQuestionParts);
             Session.set("currentQuestionPart2",currentQuestionPart2);
     
-            let imageFilteringConditionGroup = Session.get("imageFilteringConditionGroup");
-            if(imageFilteringConditionGroup){
-                let originalClusterIndexIsEven = getOriginalCurrentClusterIndex() % 2 == 0;
-                if(imageFilteringConditionGroup == "even" && originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }else if(imageFilteringConditionGroup == "odd" && !originalClusterIndexIsEven){
-                    currentQuestion = currentQuestion.replace(/<[^>]*>/g,'');
-                }
-            }
-    
             if(!!(currentDisplay.text)){
                 currentDisplay.text = currentQuestion;
             }else if(!!(currentDisplay.clozeText)){

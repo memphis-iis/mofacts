@@ -1,24 +1,26 @@
+import { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording } from './card.js';
+export { dialogueLoop, dialogueContinue, initiateDialogue };
 export const DialogueUtils = {
-  isUserInDialogueLoop: function() {
-    return Session.get("dialogueLoopStage") != undefined;
-  },
+    isUserInDialogueLoop: function() {
+      return Session.get("dialogueLoopStage") != undefined;
+    },
+  
+    setDialogueUserAnswerValue: function(val) {
+      $('#dialogueUserAnswer').val(val);
+    },
+  
+    getDialogueUserAnswerValue: function() {
+      return $('#dialogueUserAnswer').val();
+    }
+  };
 
-  setDialogueUserAnswerValue: function(val) {
-    $('#dialogueUserAnswer').val(val);
-  },
-
-  getDialogueUserAnswerValue: function() {
-    return $('#dialogueUserAnswer').val();
-  }
-}
-
-
-dialogueUserPrompts = [];
 dialogueUserAnswers = [];
 dialogueContext = undefined;
-dialogueCurrentDisplaySaver = undefined;
-dialogueCallbackSaver = undefined;
-
+let dialogueUserPrompts = [];
+let dialogueCurrentDisplaySaver = undefined;
+let dialogueCallbackSaver = undefined;
+let dialogueTransitionInstructions = "  Press the button to continue.";
+let endDialogueNotice = " Press the button to continue practice.";
 let dialogueTransitionStatements = [
     "That wasn’t right, so to help you build the knowledge let’s chat about it for a little.",
     "That wasn’t the answer we are looking for. To help you construct the understanding, let’s have a short discussion.",
@@ -28,10 +30,6 @@ let dialogueTransitionStatements = [
     "Your answer was incorrect. Let’s talk about this some more.",
     "Not quite. I’m going to ask you some follow up questions."
 ]          
-
-let dialogueTransitionInstructions = "  Press the button to continue.";
-
-let endDialogueNotice = " Press the button to continue practice.";
 
 function updateDialogueDisplay(newDisplay){
     Session.set("displayReady",false);
@@ -47,7 +45,7 @@ function updateDialogueDisplay(newDisplay){
     });
 }
 
-dialogueLoop = function(err,res){
+function dialogueLoop(err,res){
     console.log("dialogue loop");
     stopRecording();
     if(typeof(err) != "undefined"){
@@ -80,7 +78,7 @@ dialogueLoop = function(err,res){
     }, 2000); 
 }
 
-dialogueContinue = function(){
+function dialogueContinue(){
     console.log("dialogueContinue");
     let dialogueLoopStage = Session.get("dialogueLoopStage");
     switch(dialogueLoopStage){
@@ -110,7 +108,7 @@ dialogueContinue = function(){
     }
 }
 
-initiateDialogue = function(callback){
+function initiateDialogue(callback){
   Session.set("clozeQuestionParts",undefined);
   Session.set("dialogueLoopStage","intro");
   dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));

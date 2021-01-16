@@ -335,15 +335,8 @@ Template.profile.rendered = function () {
             return;
         }
 
-        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value();
-        if(!audioInputEnabled){
-          audioInputEnabled = false;
-        }
-
-        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
-        if(!enableAudioPromptAndFeedback){
-          enableAudioPromptAndFeedback = false;
-        }
+        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value() == "true";
+        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value() == "true";
 
         tdfObject.name = name;
         tdfObject.stimulusFile = stimulusFile;
@@ -462,7 +455,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0];
+   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 

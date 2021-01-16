@@ -2,7 +2,7 @@
 	<setspec>
 		<name>Internal Testing</name>
 		<lessonname>Testing Tdf</lessonname>
-		<userselect>false</userselect>
+		<userselect>true</userselect>
 		<experimentTarget>test</experimentTarget>
 		<stimulusfile>testStim.json</stimulusfile>
 		<isModeled>false</isModeled>
@@ -11,11 +11,11 @@
 		<simCorrectProb>0.85</simCorrectProb>
 		<speechAPIKey></speechAPIKey>
 		<textToSpeechAPIKey></textToSpeechAPIKey>
-		<audioInputEnabled>false</audioInputEnabled>
+		<audioInputEnabled>true</audioInputEnabled>
 		<audioInputSensitivity>15</audioInputSensitivity>
 		<speechIgnoreOutOfGrammarResponses>false</speechIgnoreOutOfGrammarResponses>
 		<speechOutOfGrammarFeedback>Please try again</speechOutOfGrammarFeedback>
-		<enableAudioPromptAndFeedback>false</enableAudioPromptAndFeedback>
+		<enableAudioPromptAndFeedback>true</enableAudioPromptAndFeedback>
 		<audioPromptSpeakingRate>1</audioPromptSpeakingRate>
 		<prestimulusDisplay>Prestimulus Display Text</prestimulusDisplay>
 	</setspec>
@@ -25,11 +25,11 @@
 		<buttontrial>true</buttontrial>
 		<deliveryparams>
 			<practiceseconds>1000000</practiceseconds>
-			<drill>7000</drill>
+			<drill>5000</drill>
 			<skipstudy>false</skipstudy>
 			<purestudy>5000</purestudy>
-			<reviewstudy>6000</reviewstudy>
-			<correctprompt>1000</correctprompt>
+			<reviewstudy>5000</reviewstudy>
+			<correctprompt>500</correctprompt>
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
@@ -127,16 +127,16 @@
 			<feedbackType>dialogue</feedbackType>
 			<forceCorrection>true</forceCorrection>
 			<practiceseconds>1000000</practiceseconds>
-			<drill>8000</drill>
-			<purestudy>16000</purestudy>
+			<drill>20000</drill>
+			<purestudy>20000</purestudy>
 			<skipstudy>false</skipstudy>
 			<reviewstudy>5000</reviewstudy>
-			<correctprompt>1000</correctprompt>
+			<correctprompt>500</correctprompt>
 			<fontsize>2</fontsize>
 			<correctscore>1</correctscore>
 			<incorrectscore>0</incorrectscore>
 			<falseAnswerLimit>3</falseAnswerLimit>
-			<timeuntilaudio>2000</timeuntilaudio>
+			<timeuntilaudio>500</timeuntilaudio>
 			<timeuntilaudiofeedback>500</timeuntilaudiofeedback>
 			<prestimulusdisplaytime>500</prestimulusdisplaytime>
 		</deliveryparams>
