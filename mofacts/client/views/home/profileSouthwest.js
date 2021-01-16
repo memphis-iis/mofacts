@@ -97,18 +97,13 @@ Template.profileSouthwest.rendered = function () {
             speechOutOfGrammarFeedback = "Response not in answer set"
           }
 
-          var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value();
-          if(!audioInputEnabled){
-            audioInputEnabled = false;
-          }
+          var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value() == "true";
+          var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value() == "true";
 
           var audioInputSpeechAPIKeyAvailable = !!_.chain(setspec).prop("speechAPIKey").first().value();
 
           //Only display the audio input available if enabled in tdf and tdf has key for it
           audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
-
-          var enableAudioPromptAndFeedback = !!_.chain(setspec).prop("enableAudioPromptAndFeedback").first().value();
-
           var audioPromptTTSAPIKeyAvailable = !!_.chain(setspec).prop("textToSpeechAPIKey").first().value();
 
           //Only display the audio output available if enabled in tdf and tdf has key for it
@@ -194,7 +189,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0];
+   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = tdfAudioEnabled && userAudioToggled;
    Session.set("audioEnabled", audioEnabled);
 

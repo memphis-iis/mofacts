@@ -1,4 +1,5 @@
-import { DialogueUtils } from './dialogueUtils';
+export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording };
+import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
 
 /*
 card.js - the implementation behind card.html (and thus
@@ -91,9 +92,6 @@ Session.set("scrollListCount", 0);
 cachedSyllables = null;
 
 function clearButtonList() {
-    //In theory, they could put something without temp defined and we would
-    //keep it for the session. In truth, we just want a field to specify in
-    //the query.
     buttonList.remove({'temp': 1});
     buttonList.remove({'temp': 2});  // Also delete the temp record
 }
@@ -222,6 +220,10 @@ function elapsedSecs() {
         return 0.0;
     }
     return (Date.now() - unitStartTimestamp) / 1000.0;
+}
+
+function nextChar(c) {
+  return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
 //Note that this isn't just a convenience function - it should be called
@@ -412,8 +414,6 @@ function leavePage(dest) {
     }
     clearCardTimeout();
     clearPlayingSound();
-    clearTimeout(allowInputInterval);
-    clearTimeout(stopInputInterval);
     if (typeof dest === "function") {
         dest();
     }
@@ -421,6 +421,9 @@ function leavePage(dest) {
         Router.go(dest);
     }
 }
+
+////////////////////////////////////////////////////////////////////////////
+// Template helpers and meteor events
 
 Template.card.events({
     'focus #userAnswer' : function() {
@@ -493,69 +496,45 @@ Template.card.events({
     },
 });
 
-////////////////////////////////////////////////////////////////////////////
-// Template helpers and meteor events
-
-soundsDict = {};
-imagesDict = {};
-var onEndCallbackDict = {};
-
 Template.card.rendered = function() {
+  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
   //Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function(event){
-    //console.log("back button pressed?" + document.location.pathname);
     if(document.location.pathname == "/card"){
       leavePage("/card");
     }
   }
-  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-    var audioInputEnabled = Session.get("audioEnabled");
-    if(audioInputEnabled){
-      if(!Session.get("audioInputSensitivity")){
-        //Default to 20 in case tdf doesn't specify and we're in an experiment
-        var audioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity || 20;
-        Session.set("audioInputSensitivity",audioInputSensitivity);
-      }
-    }
 
-    var audioOutputEnabled = Session.get("enableAudioPromptAndFeedback");
-    if(audioOutputEnabled){
-      if(!Session.get("audioPromptSpeakingRate")){
-        //Default to 1 in case tdf doesn't specify and we're in an experiment
-        var audioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
-        Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
-      }
+  var audioInputEnabled = Session.get("audioEnabled");
+  if(audioInputEnabled){
+    if(!Session.get("audioInputSensitivity")){
+      //Default to 20 in case tdf doesn't specify and we're in an experiment
+      var audioInputSensitivity = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputSensitivity || 20;
+      Session.set("audioInputSensitivity",audioInputSensitivity);
     }
-    var audioInputDetectionInitialized = Session.get("VADInitialized");
+  }
 
-    var alternateImageFiltering = getCurrentTdfFile().tdfs.tutor.setspec[0].alternateImageFiltering;
-    if(alternateImageFiltering){
-      let curTdfName = getCurrentTdfName().replace(/\./g,'_');
-      let profileCurTdf = Meteor.user().profile[curTdfName];
-      let imageFilteringConditionGroup = profileCurTdf && profileCurTdf.imageFilteringConditionGroup || undefined;
-      if(!imageFilteringConditionGroup){
-        imageFilteringConditionGroup = Math.random() < 0.5 ? "even" : "odd";
-        let profileAttribute = 'profile.' + curTdfName + '.imageFilteringConditionGroup'
-        Meteor.users.update({_id: Meteor.userId()}, {
-          $set: {
-              [profileAttribute]: imageFilteringConditionGroup
-          }
-        });
-      }
-      Session.set("imageFilteringConditionGroup",imageFilteringConditionGroup)
+  var audioOutputEnabled = Session.get("enableAudioPromptAndFeedback");
+  if(audioOutputEnabled){
+    if(!Session.get("audioPromptSpeakingRate")){
+      //Default to 1 in case tdf doesn't specify and we're in an experiment
+      var audioPromptSpeakingRate = getCurrentTdfFile().tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
+      Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
     }
+  }
+  var audioInputDetectionInitialized = Session.get("VADInitialized");
 
-    window.AudioContext = window.webkitAudioContext || window.AudioContext;
-    window.URL = window.URL || window.webkitURL;
-    audioContext = new AudioContext();
-    //If user has enabled audio input initialize web audio (this takes a bit)
-    //(this will eventually call cardStart after we redirect through the voice
-    //interstitial and get back here again)
-    if(audioInputEnabled && !audioInputDetectionInitialized){
-      initializeAudio();
-    }else{
-      cardStart();
-    }
+  window.AudioContext = window.webkitAudioContext || window.AudioContext;
+  window.URL = window.URL || window.webkitURL;
+  audioContext = new AudioContext();
+  //If user has enabled audio input initialize web audio (this takes a bit)
+  //(this will eventually call cardStart after we redirect through the voice
+  //interstitial and get back here again)
+  if(audioInputEnabled && !audioInputDetectionInitialized){
+    initializeAudio();
+  }else{
+    cardStart();
+  }
 };
 
 Template.card.helpers({
@@ -759,9 +738,11 @@ Template.card.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Implementation functions
 
+soundsDict = {};
+imagesDict = {};
+var onEndCallbackDict = {};
 pollMediaDevicesInterval = null;
-
-pollMediaDevices = function(){
+function pollMediaDevices(){
   navigator.mediaDevices.enumerateDevices().then(function(devices){
     if(selectedInputDevice != null){
       if(devices.filter(x => x.deviceId == selectedInputDevice).length == 0){
@@ -772,7 +753,7 @@ pollMediaDevices = function(){
   })
 }
 
-clearAudioContextAndRelatedVariables = function(){
+function clearAudioContextAndRelatedVariables(){
   window.audioContext.close();
   if(!!streamSource){
     streamSource.disconnect();
@@ -790,7 +771,7 @@ clearAudioContextAndRelatedVariables = function(){
   Session.get("VADInitialized",false);
 }
 
-reinitializeMediaDueToDeviceChange = function(){
+function reinitializeMediaDueToDeviceChange(){
   //This will be decremented on startUserMedia and the main card timeout will be reset due to card being reloaded
   Session.set("pausedLocks",Session.get("pausedLocks")+1);
   clearAudioContextAndRelatedVariables();
@@ -798,7 +779,7 @@ reinitializeMediaDueToDeviceChange = function(){
   initializeAudio();
 }
 
-initializeAudio = function(){
+function initializeAudio(){
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
@@ -838,7 +819,7 @@ initializeAudio = function(){
   }
 }
 
-var preloadAudioFiles = function(){
+function preloadAudioFiles(){
   let allSrcs = getCurrentStimDisplaySources('audioSrc');
   for(let index in allSrcs){
     let source = allSrcs[index];
@@ -873,7 +854,7 @@ var preloadAudioFiles = function(){
   }
 }
 
-var preloadImages = function(){
+function preloadImages(){
   let curStimImgSrcs = getCurrentStimDisplaySources("imgSrc");
   console.log("curStimImgSrcs: " + JSON.stringify(curStimImgSrcs));
   imagesDict = {};
@@ -888,11 +869,7 @@ var preloadImages = function(){
   console.log("img.src:" + img.src);
 }
 
-cardStart = function(){
-  if(Session.get("debugging")) {
-      console.log('cards template rendered');
-  }
-
+function cardStart(){
   //Reset resizing for card images (see also index.js)
   $("#cardQuestionImg").load(function(evt) {
       redoCardImage();
@@ -912,10 +889,6 @@ cardStart = function(){
       Session.set("needResume", false); //Turn this off to keep from re-resuming
       resumeFromUserTimesLog();
   }
-}
-
-function nextChar(c) {
-    return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
 function newQuestionHandler() {
@@ -1016,14 +989,8 @@ function newQuestionHandler() {
           buttonChoices.unshift(correctAnswer);
         }
 
-        if (buttonOrder === "fixed") {
-            //Do nothing
-        }
-        else if (buttonOrder === "random") {
+        if (buttonOrder === "random") {
             Helpers.shuffle(buttonChoices);
-        }
-        else {
-            throw new Error("Unknown buttonorder option " + buttonOrder);
         }
         let curChar = 'a'
 
@@ -1126,7 +1093,7 @@ function handleUserForceCorrectInput(e, source){
           $("#userForceCorrect").prop("disabled", false);
           $("#userForceCorrect").val("");
           $("#forceCorrectGuidance").text("Incorrect - please enter '" + answer + "'");
-          speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", false, "feedback");
+          speakMessageIfAudioPromptFeedbackEnabled("Incorrect - please enter '" + answer + "'", "feedback");
           startRecording();
       }
     }
@@ -1278,7 +1245,7 @@ function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound
       .show();
     }    
 
-    speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage,false,"feedback");
+    speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage,"feedback");
 
     //If incorrect answer for a drill on a sound not after a dialogue loop, we need to replay the sound, after the optional audio feedback delay time
     if (!!(Session.get("currentDisplay").audioSrc) && !isCorrect) {
@@ -1310,25 +1277,24 @@ function doClearForceCorrect(doForceCorrect,afterAnswerFeedbackCbBound){
     if(getTestType() === "n"){
       var prompt = getCurrentDeliveryParams().forcecorrectprompt;
       $("#forceCorrectGuidance").text(prompt);
-      speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
+      speakMessageIfAudioPromptFeedbackEnabled(prompt,"feedback");
 
       var forcecorrecttimeout = getCurrentDeliveryParams().forcecorrecttimeout;
       beginMainCardTimeout(forcecorrecttimeout, afterAnswerFeedbackCbBound);
     } else {
-      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCbBound;
-
       var prompt = "Please enter the correct answer to continue";
       $("#forceCorrectGuidance").text(prompt);
-      speakMessageIfAudioPromptFeedbackEnabled(prompt,false,"feedback");
+      speakMessageIfAudioPromptFeedbackEnabled(prompt,"feedback");
+
+      afterUserFeedbackForceCorrectCb = afterAnswerFeedbackCbBound;
     }
 
     $("#userForceCorrect").prop("disabled", false);
     $("#userForceCorrect").val("").focus();
     startRecording();
-  }
-  else {
+  } else {
       $("#forceCorrectGuidance").text("");
-      $("#userForceCorrect").prop("disabled", false);
+      $("#userForceCorrect").prop("disabled", true);
       $("#userForceCorrect").val("");
       afterAnswerFeedbackCbBound();
   }
@@ -1409,7 +1375,6 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   Session.set("curStudentPerformance",curUserPerformance);
 
   let feedbackType = deliveryParams.feedbackType || "simple";
-  let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
 
   var answerLogRecord = {
       'questionIndex': _.intval(Session.get("questionIndex"), -1),
@@ -1436,14 +1401,15 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
       'currentAnswerSyllables':currentAnswerSyllables || "",
       'feedbackType':feedbackType,
-      'dialogueHistory':dialogueHistory
+      'dialogueHistory':undefined //We'll fill this in later
   };
-  Session.set("dialogueHistory",undefined);
   var writeAnswerLog = function() {
       var realReviewLatency = Date.now() - reviewBegin;
       if (realReviewLatency > 0) {
           answerLogRecord.reviewLatency = realReviewLatency;
       }
+      answerLogRecord.dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
+      Session.set("dialogueHistory",undefined);
       //TODO: need a column for this in experiment_times
       answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
       recordUserTime(answerLogAction, answerLogRecord);
@@ -1516,18 +1482,19 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   //Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(function(){
-    writeAnswerLog();
     hideUserFeedback();
     $("#userAnswer").val("");
+    let writeAnswerLogAndPrepareCardCb = prepareCard.bind(null,writeAnswerLog);
     if(feedbackType == "dialogue" && !isCorrect){
-      initiateDialogue(prepareCard);
+      initiateDialogue(writeAnswerLogAndPrepareCardCb);
     }else{
-      prepareCard();
+      writeAnswerLogAndPrepareCardCb();
     }
   },reviewTimeout);
 }
 
-function prepareCard() {
+function prepareCard(writeAnswerLogCb) {
+    if(writeAnswerLogCb) writeAnswerLogCb();
     Session.set("displayReady",false);
     if (Session.get("questionIndex") === undefined) {
         // At this point, a missing question index is assumed to mean "start
@@ -1743,7 +1710,7 @@ function startQuestionTimeout(textFocus) {
         //Only speak the prompt if the question type makes sense
         if(!!(questionToSpeak)){
           console.log("text to speak playing prompt: ", new Date());
-          speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,true,"all");
+          speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,"all");
         }
         //Not a sound - can unlock now for data entry now
         allowUserInput(textFocus);
@@ -1824,13 +1791,7 @@ function startQuestionTimeout(textFocus) {
 // BEGIN WEB AUDIO section
 
 //Audio prompt/feedback
-speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPromptSource){
-  var savedFunc = timeoutFunc;
-  var savedDelay = timeoutDelay;
-  if(resetTimeout){
-    console.log("RESETTING TIMEOUT WHILE READING");
-    clearCardTimeout();
-  }
+function speakMessageIfAudioPromptFeedbackEnabled(msg,audioPromptSource){
   var enableAudioPromptAndFeedback = Session.get("enableAudioPromptAndFeedback");
   var audioPromptMode = Session.get("audioPromptMode");
   if(enableAudioPromptAndFeedback){
@@ -1858,23 +1819,13 @@ speakMessageIfAudioPromptFeedbackEnabled =function(msg,resetTimeout, audioPrompt
   }else{
     console.log("audio feedback disabled");
   }
-  if(resetTimeout){
-    console.log("RESTARTING TIMEOUT AFTER READING");
-    timeoutFunc = savedFunc;
-    timeoutDelay = savedDelay;
-    let mainCardTimeoutStart = new Date();
-    Session.set("mainCardTimeoutStart",mainCardTimeoutStart);
-    console.log("tts reset, mainCardTimeoutStart:",mainCardTimeoutStart);
-    timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
-    varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
-  }
 }
 
-decodeBase64AudioContent = function(audioDataEncoded){
+function decodeBase64AudioContent(audioDataEncoded){
   return new Audio("data:audio/ogg;base64," + audioDataEncoded);
 }
 
-makeGoogleTTSApiCall = function(message,ttsAPIKey,audioPromptSpeakingRate,callback){
+function makeGoogleTTSApiCall(message,ttsAPIKey,audioPromptSpeakingRate,callback){
       const request = {
         input: { text: message},
         voice: { languageCode: "en-US", ssmlGender: "FEMALE"},
@@ -1896,8 +1847,8 @@ makeGoogleTTSApiCall = function(message,ttsAPIKey,audioPromptSpeakingRate,callba
 
 //Speech recognition function to process audio data, this is called by the web worker
 //started with the recorder object when enough data is received to fill up the buffer
-processLINEAR16 = function(data){
-  if(resetMainCardTimeout && timeoutFunc){
+function processLINEAR16(data){
+  if(resetMainCardTimeout && timeoutFunc && !inputDisabled){
     resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
   }else{
     console.log("not resetting during processLINEAR16");
@@ -1961,7 +1912,7 @@ processLINEAR16 = function(data){
   }
 }
 
-generateRequestJSON = function(sampleRate,speechRecognitionLanguage,phraseHints,data){
+function generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data){
   var request = {
     "config": {
       "encoding": "LINEAR16",
@@ -1985,7 +1936,7 @@ generateRequestJSON = function(sampleRate,speechRecognitionLanguage,phraseHints,
   return request;
 }
 
-makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
+function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
   var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
   HTTP.call("POST",speechURL,{"data":request}, function(err,response){
       console.log(JSON.stringify(response));
@@ -2001,16 +1952,13 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         alert("Error with speech api call: " + content['error']['message']);
         transcript = "";
         ignoredOrSilent = true;
-      }else if(!!response['data']['results'])
-      {
+      }else if(!!response['data']['results']){
         transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
         console.log("transcript: " + transcript);
-        if(ignoreOutOfGrammarResponses)
-        {
+        if(ignoreOutOfGrammarResponses){
           if(transcript == "skip"){
             ignoredOrSilent = false;
-          }else if(answerGrammar.indexOf(transcript) == -1) //Answer not in grammar, ignore and reset/re-record
-          {
+          }else if(answerGrammar.indexOf(transcript) == -1){ //Answer not in grammar, ignore and reset/re-record
             console.log("ANSWER OUT OF GRAMMAR, IGNORING");
             transcript = speechOutOfGrammarFeedback;
             ignoredOrSilent = true;
@@ -2046,12 +1994,8 @@ makeGoogleSpeechAPICall = function(request,speechAPIKey,answerGrammar){
         //If answer is out of grammar or we pick up silence wait 5 seconds for
         //user to read feedback then clear the answer value
         if (!getButtonTrial()) {
-          if (DialogueUtils.isUserInDialogueLoop()) {
-
-          } else {
-            setTimeout(function(){
-              userAnswer.value = "";
-            }, 5000);
+          if (!DialogueUtils.isUserInDialogueLoop()) {
+            setTimeout(() => userAnswer.value = "", 5000);
           }
         }
       } else {
@@ -2083,7 +2027,7 @@ userMediaStream = null;
 streamSource = null;
 
 //The callback used in initializeAudio when an audio data stream becomes available
-startUserMedia = function(stream) {
+function startUserMedia(stream) {
   userMediaStream = stream;
   var tracks = stream.getTracks();
   selectedInputDevice = tracks[0].getSettings().deviceId;
@@ -2125,8 +2069,13 @@ startUserMedia = function(stream) {
         Router.go("/card");
         return;
       }else if(!Session.get('recording')){
-        console.log("NOT RECORDING, VOICE STOP");
-        return;
+        if(document.location.pathname != "/card" && document.location.pathname != "/instructions"){
+          leavePage(function(){console.log("cleaning up page after nav away from card, voice_stop")});
+          return;
+        }else{
+          console.log("NOT RECORDING, VOICE STOP");
+          return;
+        }
       }else{
         console.log("VOICE STOP");
         recorder.stop();
@@ -2166,7 +2115,7 @@ startUserMedia = function(stream) {
   Router.go("/voice");
 };
 
-startRecording = function() {
+function startRecording() {
   if (recorder){
     Session.set('recording',true);
     recorder.record();
@@ -2176,7 +2125,7 @@ startRecording = function() {
   }
 }
 
-stopRecording = function() {
+function stopRecording() {
   console.log("stopRecording",recorder,Session.get('recording'));
   if(recorder && Session.get('recording'))
   {
@@ -2190,52 +2139,11 @@ stopRecording = function() {
 
 // END WEB AUDIO SECTION
 
-//This is used after audio transcription to make use of existing keyboard functionality
-//to enter answers
-simulateUserAnswerEnterKeyPress = function(){
-    //Simulate enter key press on the correct input box if the user is being
-    //forced to enter the correct answer in userForceCorrect
-    var $textBox = $("#forceCorrectionEntry").is(":visible") ? $("#userForceCorrect") : $("#userAnswer");
-
-    var press = jQuery.Event("keypress");
-    press.altGraphKey = false;
-    press.altKey = false;
-    press.bubbles = true;
-    press.cancelBubble = false;
-    press.cancelable = true;
-    press.charCode = ENTER_KEY;
-    press.clipboardData = undefined;
-    press.ctrlKey = false;
-    press.currentTarget = $textBox[0];
-    press.defaultPrevented = false;
-    press.detail = 0;
-    press.eventPhase = 2;
-    press.keyCode = ENTER_KEY;
-    press.keyIdentifier = "";
-    press.keyLocation = 0;
-    press.layerX = 0;
-    press.layerY = 0;
-    press.metaKey = false;
-    press.pageX = 0;
-    press.pageY = 0;
-    press.returnValue = true;
-    press.shiftKey = false;
-    press.srcElement = $textBox[0];
-    press.target = $textBox[0];
-    press.type = "keypress";
-    press.view = Window;
-    press.which = ENTER_KEY;
-
-    $textBox.trigger(press);
-    console.log("SIMULATED ENTER KEY PRESS");
-}
-
 //This records the synchronous state of whether input should be enabled or disabled
 //without this we get into the situation where either stopUserInput fails because
 //the DOM hasn't fully updated yet or worse allowUserInput fails because the DOM
 //loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 var inputDisabled = undefined;
-var stopInputInterval;
 function stopUserInput() {
   console.log("stop user input");
   inputDisabled = true;
@@ -2248,43 +2156,33 @@ function stopUserInput() {
   },200);
 }
 
-var allowInputInterval;
 function allowUserInput(textFocus) {
   console.log("allow user input");
   inputDisabled = false;
-  var enableUserInput = function(){
-    startRecording();
+  startRecording();
 
-    //Need timeout here so that the disable input timeout doesn't fire after this
-    setTimeout(function(){
-      if(typeof inputDisabled != "undefined"){
-        //Use inputDisabled variable so that successive calls of stop and allow
-        //are resolved synchronously i.e. whoever last set the inputDisabled variable
-        //should win
-        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
-        inputDisabled = undefined;
-      }else{
-        $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
-      }
-      // Force scrolling to bottom of screen for the input
-      scrollElementIntoView(null, false);
+  //Need timeout here so that the disable input timeout doesn't fire after this
+  setTimeout(function(){
+    if(typeof inputDisabled != "undefined"){
+      //Use inputDisabled variable so that successive calls of stop and allow
+      //are resolved synchronously i.e. whoever last set the inputDisabled variable
+      //should win
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled",inputDisabled);
+      inputDisabled = undefined;
+    }else{
+      $("#continueStudy, #userAnswer, #multipleChoiceContainer button").prop("disabled", false);
+    }
+    // Force scrolling to bottom of screen for the input
+    scrollElementIntoView(null, false);
 
-      if (typeof textFocus !== "undefined" && !!textFocus) {
-        try {
-            $("#userAnswer").focus();
-        }
-        catch(e) {
-            //Nothing to do
-        }
+    if (textFocus) {
+      try {
+          $("#userAnswer").focus();
       }
-    },200);
-  }
-  enableUserInput();
+      catch(e) { } //Do nothing
+    }
+  },200);
 }
-
-
-////////////////////////////////////////////////////////////////////////////
-// BEGIN Resume Logic
 
 //Helper for getting the relevant user times log
 getCurrentUserTimesLog = function(expKey) {
@@ -2317,29 +2215,15 @@ getCurrentUserTimesLog = function(expKey) {
     return records;
 }
 
+////////////////////////////////////////////////////////////////////////////
+// BEGIN Resume Logic
+
 //ONLY ONE RESUME CAN RUN AT A TIME - we set this at the beginng of resumeFromUserTimesLog
 //and then unset it after a callback from the server succeeds. AS A RESULT, unhandled
 //exception in resumeFromUserTimesLog will break our resume logic until the user has
 //reloaded the page and started over. This is actually a good thing, since a broken resume
 //should stop us cold.
 Session.set('inResume', false);
-
-checkSyllableCacheForCurrentStimFile = function(cb){
-  let curStimFile = getCurrentStimName().replace(/\./g,'_');
-  cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-  console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
-  if(!cachedSyllables){
-    console.log("no cached syllables for this stim, calling server method to create them");
-    let curAnswers = getAllCurrentStimAnswers();
-    Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
-      cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-      console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
-      cb();
-    });
-  }else{
-    cb();
-  }
-}
 
 //Re-initialize our User Progress and Card Probabilities internal storage
 //from the user times log. Note that most of the logic will be in
@@ -2357,227 +2241,235 @@ function resumeFromUserTimesLog() {
 
     console.log("Resuming from previous User Times info (if any)");
 
-    //Short circuit and don't replay all of the userTimesLog's for the experiment if we already have a perfectly up to date engine
-    if(false && engine && //disable this for now as it'll take a lot more work
-      engine.currentRootTdfName == Session.get("currentRootTdfName") && 
-      engine.currentTdfName == Session.get("currentTdfName") &&
-      engine.subTdfIndex == Session.get("subTdfIndex")){
-      Session.set('inResume', false);
-      prepareCard();
-    }else{
-      //Clear any previous permutation and/or timeout call
-      timeoutsSeen = 0;
-      clearCardTimeout();
-      keypressTimestamp = 0;
-      trialTimestamp = 0;
-      unitStartTimestamp = Date.now();
-      clearScrollList();
+    //Clear any previous permutation and/or timeout call
+    timeoutsSeen = 0;
+    keypressTimestamp = 0;
+    trialTimestamp = 0;
+    unitStartTimestamp = Date.now();
+    clearScrollList();
+    clearCardTimeout();
 
-      //Clear any previous session data about unit/question/answer
-      Session.set("clusterMapping", undefined);
-      Session.set("currentUnitNumber", undefined);
-      Session.set("questionIndex", undefined);
-      Session.set("clusterIndex", undefined);
-      Session.set("currentDisplay", undefined);
-      Session.set("currentDisplayEngine", undefined);
-      Session.set("originalDisplay", undefined);
-      Session.set("currentQuestionPart2", undefined);
-      Session.set("currentAnswer", undefined);
-      Session.set("testType", undefined);
-      Session.set("lastTimestamp", 0);
+    //Clear any previous session data about unit/question/answer
+    Session.set("clusterMapping", undefined);
+    Session.set("currentUnitNumber", undefined);
+    Session.set("questionIndex", undefined);
+    Session.set("clusterIndex", undefined);
+    Session.set("currentDisplay", undefined);
+    Session.set("currentDisplayEngine", undefined);
+    Session.set("originalDisplay", undefined);
+    Session.set("currentQuestionPart2", undefined);
+    Session.set("currentAnswer", undefined);
+    Session.set("testType", undefined);
+    Session.set("lastTimestamp", 0);
 
-      //Disallow continuing (it will be turned on somewhere else)
-      setDispTimeoutText("");
-      $("#continueButton").prop("disabled", true);
+    //Disallow continuing (it will be turned on somewhere else)
+    setDispTimeoutText("");
+    $("#continueButton").prop("disabled", true);
 
-      //So here's the place where we'll use the ROOT tdf instead of just the
-      //current TDF. It's how we'll find out if we need to perform experimental
-      //condition selection. It will be our responsibility to update
-      //currentTdfName and currentStimName based on experimental conditions
-      //(if necessary)
-      var rootTDF = Tdfs.findOne({fileName: Session.get("currentRootTdfName")});
-      if (!rootTDF) {
-          console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
-          alert("Unfortunately, something is broken and this lesson cannot continue");
-          leavePage("/profile");
-          return;
-      }
-
-      var setspec = rootTDF.tdfs.tutor.setspec[0];
-      var needExpCondition = (setspec.condition && setspec.condition.length);
-      var conditionAction;
-      var conditionData = {};
-
-      var userTimesLog = getCurrentUserTimesLog();
-
-      //We must always check for experiment condition
-      if (needExpCondition) {
-          console.log("Experimental condition is required: searching");
-          var prevCondition = _.find(userTimesLog, function(entry) {
-              return entry && entry.action && entry.action === "expcondition";
-          });
-
-          var subTdf = null;
-
-          if (prevCondition) {
-              //Use previous condition and log a notification that we did so
-              console.log("Found previous experimental condition: using that");
-              subTdf = prevCondition.selectedTdf;
-              conditionAction = "condition-notify";
-              conditionData.note = "Using previous condition: " + subTdf;
-          }
-          else {
-              //Select condition and save it
-              console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
-              subTdf = _.sample(setspec.condition);
-              conditionAction = "expcondition";
-              conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
-          }
-
-          if (!subTdf) {
-              console.log("No experimental condition could be selected!");
-              alert("Unfortunately, something is broken and this lesson cannot continue");
-              leavePage("/profile");
-              return;
-          }
-
-          conditionData.selectedTdf = subTdf;
-          console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
-
-          //Now we have a different current TDF (but root stays the same)
-          Session.set("currentTdfName", subTdf);
-
-          //Also need to read new stimulus file (and note that we allow an exception
-          //to kill us if the current tdf is broken and has no stimulus file)
-          Session.set("currentStimName", getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
-      }
-      else {
-          //Just notify that we're skipping
-          console.log("No Experimental condition is required: continuing");
-          conditionAction = "condition-notify";
-          conditionData.note = "No exp condition necessary";
-      }
-
-      //Pre-load sounds to be played into soundsDict to avoid audio lag issues
-      if(curStimHasSoundDisplayType()){
-        console.log("Sound type questions detected, pre-loading sounds");
-        preloadAudioFiles();
-      }else{
-        console.log("Non sound type detected");
-      }
-      if(curStimHasImageDisplayType()){
-        console.log("image type questions detected, pre-loading images");
-        preloadImages();
-      }else{
-        console.log("Non image type detected");
-      }
-
-      //Add some session data to the log message we're sending
-      conditionData = _.extend(conditionData, {
-          currentRootTdfName: Session.get("currentRootTdfName"),
-          currentTdfName: Session.get("currentTdfName"),
-          currentStimName: Session.get("currentStimName")
-      });
-
-      //Now we can create our record for the server - note that we use an array
-      //since we might add other records below
-      var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
-
-      //In addition to experimental condition, we allow a root TDF to specify
-      //that the xcond parameter used for selecting from multiple deliveryParms's
-      //is to be system assigned (as opposed to URL-specified)
-      if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
-          console.log("xcond for delivery params is sys assigned: searching");
-          var prevXCond = _.find(userTimesLog, function(entry) {
-              return entry && entry.action && entry.action === "xcondassign";
-          });
-
-          var xcondAction, xcondValue;
-
-          if (prevXCond) {
-              //Found it!
-              console.log("Found previous xcond for delivery");
-              xcondAction = "xcondnotify";
-              xcondValue = prevXCond.xcond;
-          }
-          else {
-              //Not present - we need to select one
-              console.log("NO previous xcond for delivery - selecting one");
-              xcondAction = "xcondassign";
-              var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
-              xcondValue = Math.floor(Math.random() * xcondCount);
-          }
-
-          console.log("Setting XCond from sys-selection", xcondValue);
-          Session.set("experimentXCond", xcondValue);
-
-          serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
-      }
-
-      //Find previous cluster mapping (or create if it's missing)
-      //Note that we need to wait until the exp condition is selected above so
-      //that we go to the correct TDF
-      var clusterMapping = _.find(userTimesLog, function(entry) {
-          return entry && entry.action && entry.action === "cluster-mapping";
-      });
-      if (!clusterMapping) {
-          //No cluster mapping! Need to create it and store for resume
-          //We process each pair of shuffle/swap together and keep processing
-          //until we have nothing left
-          var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
-
-          //Note our default of a single no-op to insure we at least build a
-          //default cluster mapping
-          var shuffles = setSpec.shuffleclusters || [""];
-          var swaps = setSpec.swapclusters || [""];
-          clusterMapping = [];
-
-          while(shuffles.length > 0 || swaps.length > 0) {
-              clusterMapping = createStimClusterMapping(
-                  getStimClusterCount(),
-                  shuffles.shift() || "",
-                  swaps.shift() || "",
-                  clusterMapping
-              );
-          }
-
-          serverRecords.push(createUserTimeRecord("cluster-mapping", {
-              clusterMapping: clusterMapping
-          }));
-
-          console.log("Cluster mapping created", clusterMapping);
-      }
-      else {
-          //Found the cluster mapping record - extract the embedded mapping
-          clusterMapping = clusterMapping.clusterMapping;
-          console.log("Cluster mapping found", clusterMapping);
-      }
-
-      if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
-          console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
-          throw "The cluster mapping is invalid - can not continue";
-      }
-
-      //Go ahead and save the cluster mapping we found/created
-      Session.set("clusterMapping", clusterMapping);
-
-      //Notice that no matter what, we log something about condition data
-      //ALSO NOTICE that we'll be calling processUserTimesLog after the server
-      //returns and we know we've logged what happened
-      cb = function(){
-          recordUserTimeMulti(serverRecords, function() {
-            processUserTimesLog(userTimesLog);
-            Session.set('inResume', false);
-        });
-      }
-
-      checkSyllableCacheForCurrentStimFile(cb);
+    //So here's the place where we'll use the ROOT tdf instead of just the
+    //current TDF. It's how we'll find out if we need to perform experimental
+    //condition selection. It will be our responsibility to update
+    //currentTdfName and currentStimName based on experimental conditions
+    //(if necessary)
+    var rootTDF = Tdfs.findOne({fileName: Session.get("currentRootTdfName")});
+    if (!rootTDF) {
+        console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
+        alert("Unfortunately, something is broken and this lesson cannot continue");
+        leavePage("/profile");
+        return;
     }
+
+    var setspec = rootTDF.tdfs.tutor.setspec[0];
+    var needExpCondition = (setspec.condition && setspec.condition.length);
+    var conditionAction;
+    var conditionData = {};
+
+    var userTimesLog = getCurrentUserTimesLog();
+
+    //We must always check for experiment condition
+    if (needExpCondition) {
+        console.log("Experimental condition is required: searching");
+        var prevCondition = _.find(userTimesLog, function(entry) {
+            return entry && entry.action && entry.action === "expcondition";
+        });
+
+        var subTdf = null;
+
+        if (prevCondition) {
+            //Use previous condition and log a notification that we did so
+            console.log("Found previous experimental condition: using that");
+            subTdf = prevCondition.selectedTdf;
+            conditionAction = "condition-notify";
+            conditionData.note = "Using previous condition: " + subTdf;
+        }
+        else {
+            //Select condition and save it
+            console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
+            subTdf = _.sample(setspec.condition);
+            conditionAction = "expcondition";
+            conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
+        }
+
+        if (!subTdf) {
+            console.log("No experimental condition could be selected!");
+            alert("Unfortunately, something is broken and this lesson cannot continue");
+            leavePage("/profile");
+            return;
+        }
+
+        conditionData.selectedTdf = subTdf;
+        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
+
+        //Now we have a different current TDF (but root stays the same)
+        Session.set("currentTdfName", subTdf);
+
+        //Also need to read new stimulus file (and note that we allow an exception
+        //to kill us if the current tdf is broken and has no stimulus file)
+        Session.set("currentStimName", getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+    }
+    else {
+        //Just notify that we're skipping
+        console.log("No Experimental condition is required: continuing");
+        conditionAction = "condition-notify";
+        conditionData.note = "No exp condition necessary";
+    }
+
+    //Pre-load sounds to be played into soundsDict to avoid audio lag issues
+    if(curStimHasSoundDisplayType()){
+      console.log("Sound type questions detected, pre-loading sounds");
+      preloadAudioFiles();
+    }else{
+      console.log("Non sound type detected");
+    }
+    if(curStimHasImageDisplayType()){
+      console.log("image type questions detected, pre-loading images");
+      preloadImages();
+    }else{
+      console.log("Non image type detected");
+    }
+
+    //Add some session data to the log message we're sending
+    conditionData = _.extend(conditionData, {
+        currentRootTdfName: Session.get("currentRootTdfName"),
+        currentTdfName: Session.get("currentTdfName"),
+        currentStimName: Session.get("currentStimName")
+    });
+
+    //Now we can create our record for the server - note that we use an array
+    //since we might add other records below
+    var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
+
+    //In addition to experimental condition, we allow a root TDF to specify
+    //that the xcond parameter used for selecting from multiple deliveryParms's
+    //is to be system assigned (as opposed to URL-specified)
+    if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
+        console.log("xcond for delivery params is sys assigned: searching");
+        var prevXCond = _.find(userTimesLog, function(entry) {
+            return entry && entry.action && entry.action === "xcondassign";
+        });
+
+        var xcondAction, xcondValue;
+
+        if (prevXCond) {
+            //Found it!
+            console.log("Found previous xcond for delivery");
+            xcondAction = "xcondnotify";
+            xcondValue = prevXCond.xcond;
+        }
+        else {
+            //Not present - we need to select one
+            console.log("NO previous xcond for delivery - selecting one");
+            xcondAction = "xcondassign";
+            var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
+            xcondValue = Math.floor(Math.random() * xcondCount);
+        }
+
+        console.log("Setting XCond from sys-selection", xcondValue);
+        Session.set("experimentXCond", xcondValue);
+
+        serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
+    }
+
+    //Find previous cluster mapping (or create if it's missing)
+    //Note that we need to wait until the exp condition is selected above so
+    //that we go to the correct TDF
+    var clusterMapping = _.find(userTimesLog, function(entry) {
+        return entry && entry.action && entry.action === "cluster-mapping";
+    });
+    if (!clusterMapping) {
+        //No cluster mapping! Need to create it and store for resume
+        //We process each pair of shuffle/swap together and keep processing
+        //until we have nothing left
+        var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+
+        //Note our default of a single no-op to insure we at least build a
+        //default cluster mapping
+        var shuffles = setSpec.shuffleclusters || [""];
+        var swaps = setSpec.swapclusters || [""];
+        clusterMapping = [];
+
+        while(shuffles.length > 0 || swaps.length > 0) {
+            clusterMapping = createStimClusterMapping(
+                getStimClusterCount(),
+                shuffles.shift() || "",
+                swaps.shift() || "",
+                clusterMapping
+            );
+        }
+
+        serverRecords.push(createUserTimeRecord("cluster-mapping", {
+            clusterMapping: clusterMapping
+        }));
+
+        console.log("Cluster mapping created", clusterMapping);
+    }
+    else {
+        //Found the cluster mapping record - extract the embedded mapping
+        clusterMapping = clusterMapping.clusterMapping;
+        console.log("Cluster mapping found", clusterMapping);
+    }
+
+    if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
+        console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
+        throw "The cluster mapping is invalid - can not continue";
+    }
+
+    //Go ahead and save the cluster mapping we found/created
+    Session.set("clusterMapping", clusterMapping);
+
+    //Notice that no matter what, we log something about condition data
+    //ALSO NOTICE that we'll be calling processUserTimesLog after the server
+    //returns and we know we've logged what happened
+    cb = function(){
+      recordUserTimeMulti(serverRecords, function() {
+        processUserTimesLog(userTimesLog);
+        Session.set('inResume', false);
+      });
+    }
+
+    checkSyllableCacheForCurrentStimFile(cb);
+}
+
+function checkSyllableCacheForCurrentStimFile(cb){
+  let curStimFile = getCurrentStimName().replace(/\./g,'_');
+  cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+  console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
+  if(!cachedSyllables){
+    console.log("no cached syllables for this stim, calling server method to create them");
+    let curAnswers = getAllCurrentStimAnswers();
+    Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
+      cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+      console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
+      cb();
+    });
+  }else{
+    cb();
+  }
 }
 
 //We process the user times log, assuming resumeFromUserTimesLog has properly
 //set up the TDF/Stim session variables
-processUserTimesLog = function(userTimesLogs) {
+function processUserTimesLog(userTimesLogs) {
     //Get TDF info
     var file = getCurrentTdfFile();
     var tutor = file.tdfs.tutor;
@@ -2636,6 +2528,18 @@ processUserTimesLog = function(userTimesLogs) {
         }
     };
 
+    var unsetTrialSessionVariablesAndClearScrollList = function(){
+      Session.set("questionIndex", 0);
+      Session.set("clusterIndex", undefined);
+      Session.set("currentDisplay", undefined);
+      Session.set("currentDisplayEngine", undefined);
+      Session.set("originalDisplay", undefined);
+      Session.set("currentQuestionPart2",undefined);
+      Session.set("currentAnswer", undefined);
+      Session.set("testType", undefined);
+      clearScrollList();
+    }
+
     //The last unit we captured start time for - this way we always get the
     //earliest time for our unit start
     var startTimeMinUnit = -1;
@@ -2675,17 +2579,7 @@ processUserTimesLog = function(userTimesLogs) {
             var instructUnit = entry.currentUnit;
             if (!!instructUnit || instructUnit === 0) {
                 Session.set("currentUnitNumber", instructUnit);
-                Session.set("questionIndex", 0);
-                Session.set("clusterIndex", undefined);
-                Session.set("currentDisplay", undefined);
-                Session.set("currentDisplayEngine", undefined);
-                Session.set("originalDisplay", undefined);
-                Session.set("currentQuestionPart2",undefined);
-                Session.set("currentAnswer", undefined);
-                Session.set("testType", undefined);
-
-                clearScrollList();
-
+                unsetTrialSessionVariablesAndClearScrollList();
                 resetEngine(instructUnit);
             }
         }
@@ -2700,16 +2594,7 @@ processUserTimesLog = function(userTimesLogs) {
                 needFirstUnitInstructions = false;
                 lastQuestionEntry = null;
 
-                Session.set("questionIndex", 0);
-                Session.set("clusterIndex", undefined);
-                Session.set("currentDisplay", undefined);
-                Session.set("currentDisplayEngine", undefined);
-                Session.set("originalDisplay", undefined);
-                Session.set("currentQuestionPart2",undefined);
-                Session.set("currentAnswer", undefined);
-                Session.set("testType", undefined);
-
-                clearScrollList();
+                unsetTrialSessionVariablesAndClearScrollList();
 
                 if (finishedUnit === file.tdfs.tutor.unit.length - 1) {
                     //Completed
@@ -2730,8 +2615,8 @@ processUserTimesLog = function(userTimesLogs) {
 
         else if (action === "schedule") {
             //Read in the previously created schedule
-            lastQuestionEntry = null; //Kills the last question
             needFirstUnitInstructions = false;
+            lastQuestionEntry = null; //Kills the last question
 
             var unit = entry.unitindex;
             if (!unit && unit !== 0) {
@@ -2760,23 +2645,13 @@ processUserTimesLog = function(userTimesLogs) {
             //Note that the schedule unit engine will see and use this
             getUserProgress().currentSchedule = schedule;
             Session.set("currentUnitNumber", unit); //TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
-            Session.set("questionIndex", 0);
-
-            //Blank out things that should restart with a schedule
-            Session.set("clusterIndex", undefined);
-            Session.set("currentDisplay", undefined);
-            Session.set("currentDisplayEngine", undefined);
-            Session.set("originalDisplay", undefined);
-            Session.set("currentQuestionPart2",undefined);
-            Session.set("currentAnswer", undefined);
-            Session.set("testType", undefined);
-            clearScrollList();
+            unsetTrialSessionVariablesAndClearScrollList();
         }
 
         else if (action === "question") {
             //Read in previously asked question
-            lastQuestionEntry = entry; //Always save the last question
             needFirstUnitInstructions = false;
+            lastQuestionEntry = entry; //Always save the last question
 
             if (!entry.selType) {
                 console.log("Ignoring user times entry question with no selType", entry);
@@ -2815,9 +2690,9 @@ processUserTimesLog = function(userTimesLogs) {
         }
 
         else if (action === "answer" || action === "[timeout]") {
+            needFirstUnitInstructions = false;
             //Read in the previously recorded answer (even if it was a timeout)
             needCurrentInstruction = false; //Answer means they got past the instructions
-            needFirstUnitInstructions = false;
             if (lastQuestionEntry === null) {
                 console.log("Ignore answer for no question", entry);
                 return;
@@ -2859,11 +2734,8 @@ processUserTimesLog = function(userTimesLogs) {
 
             //We know the last question no longer applies
             lastQuestionEntry = null;
-        }
-
-        else {
+        }else {
             recordTimestamp = false; //Don't use the timestamp for this one
-            //console.log("Ignoring user times log entry with action", action);
         }
 
         if (recordTimestamp && entry.clientSideTimeStamp) {
@@ -2889,25 +2761,21 @@ processUserTimesLog = function(userTimesLogs) {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");
         leavePage("/instructions");
-    }
-    else if (!!lastQuestionEntry) {
+    }else if (!!lastQuestionEntry) {
         //Question outstanding: force question display and let them give an answer
         console.log("RESUME FINISHED: displaying current question");
         newQuestionHandler();
-    }
-    else if (moduleCompleted) {
+    }else if (moduleCompleted) {
         //They are DONE!
         console.log("TDF already completed - leaving for profile page.");
         if (Session.get("loginMode") === "experiment") {
             // Experiment users don't *have* a normal page
             leavePage(routeToSignin);
-        }
-        else {
+        }else {
             // "Normal" user - they just go back to their root page
             leavePage("/profile");
         }
-    }
-    else {
+    }else {
         // If we get this far and the unit engine thinks the unit is finished,
         // we might need to stick with the instructions *IF AND ONLY IF* the
         // lockout period hasn't finished (which prepareCard won't handle)
@@ -2926,11 +2794,6 @@ processUserTimesLog = function(userTimesLogs) {
                 }
             }
         }
-
-        // Stil here...
-        // We have an answer (or no questions at all) - run next question logic
-        // Note that this will also handle new units, instructions, and whether
-        // or not they are completed
         console.log("RESUME FINISHED: next-question logic to commence");
         prepareCard();
     }
