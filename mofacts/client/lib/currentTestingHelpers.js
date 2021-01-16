@@ -401,6 +401,8 @@ getCurrentDeliveryParams = function (currUnit) {
         currUnit = getCurrentTdfUnit();
     }
 
+    const isLearningSession = Session.get("sessionType") == "learningsession";
+
     //Note that we will only extract values that have a specified default
     //value here.
     var deliveryParams = {
@@ -415,7 +417,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'lockoutminutes': 0,
         'fontsize': 3,
         'numButtonListImageColumns': 2,
-        'correctscore': 1,
+        'correctscore': isLearningSession ? 1 : 0,
         'incorrectscore': 0,
         'practiceseconds': 0,
         'autostopTimeoutThreshold': 0,
