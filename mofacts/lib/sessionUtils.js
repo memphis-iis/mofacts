@@ -97,6 +97,7 @@ sessionCleanUp = function() {
     Session.set("studentReportingTdfs",[]);
     Session.set("studentUsername",undefined);
     Session.set("curStudentPerformance",{});
+    Session.set("scoringEnabled",undefined);
 
     //Special: we reset card probs and user progress when we reset the session
     if (Meteor.isClient) {

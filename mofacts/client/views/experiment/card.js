@@ -1,4 +1,5 @@
 export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording };
+import { getCurrentDeliveryParams } from '../../lib/currentTestingHelpers';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
 
 /*
@@ -504,6 +505,8 @@ Template.card.rendered = function() {
       leavePage("/card");
     }
   }
+
+  Session.set("scoringEnabled",undefined);
 
   var audioInputEnabled = Session.get("audioEnabled");
   if(audioInputEnabled){
@@ -1460,14 +1463,13 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   }
   else if (testType === "d" || testType === "m" || testType === "n") {
       //Drill - the timeout depends on how they did
-      if (isCorrect) {
+      if(isCorrect){
           reviewTimeout = _.intval(deliveryParams.correctprompt);
       }
-      else {
+      else{
           reviewTimeout = _.intval(deliveryParams.reviewstudy);
       }
-  }
-  else {
+  }else{
       //We don't know what to do since this is an unsupported test type - fail
       failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
       return;
@@ -1542,12 +1544,11 @@ function unitIsFinished(reason) {
     Session.set("currentUnitStartTime", Date.now());
 
     var leaveTarget;
-    if (newUnit < file.tdfs.tutor.unit.length) {
+    if(newUnit < file.tdfs.tutor.unit.length){
         //Just hit a new unit - we need to restart with instructions
         console.log("UNIT FINISHED: show instructions for next unit", newUnit);
         leaveTarget = "/instructions";
-    }
-    else {
+    }else{
         //We have run out of units - return home for now
         console.log("UNIT FINISHED: No More Units");
         leaveTarget = "/profile";
@@ -1576,11 +1577,6 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
         questionIndex = null;
     }
 
-    // //Don't count assessment session trials as part of user progress
-    // if(Session.get("sessionType") === "assessmentsession"){
-    //   return;
-    // }
-
     var prog = getUserProgress();
     prog.progressDataArray.push({
         clusterIndex: getCurrentClusterIndex(),
@@ -1597,14 +1593,16 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
       prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
     }
 
-    // Note that we track the score in the user progress object, but we
-    // copy it to the Session object for template updates
-    scoring = getCurrentScoreValues();  // in format [correct, incorrect]
+    if(getCurrentDeliveryParams().scoringEnabled){
+      // Note that we track the score in the user progress object, but we
+      // copy it to the Session object for template updates
+      scoring = getCurrentScoreValues();  // in format [correct, incorrect]
 
-    var oldScore = _.intval(prog.currentScore);
-    var newScore = oldScore + (isCorrect ? scoring[0] : -scoring[1]);
-    prog.currentScore = newScore;
-    Session.set("currentScore", prog.currentScore);
+      var oldScore = _.intval(prog.currentScore);
+      var newScore = oldScore + (isCorrect ? scoring[0] : -scoring[1]);
+      prog.currentScore = newScore;
+      Session.set("currentScore", prog.currentScore);
+    }
 }
 
 function failNoDeliveryParams(customMsg) {
@@ -2549,18 +2547,6 @@ function processUserTimesLog(userTimesLogs) {
     //entries and update that state
 
     _.each(userTimesLogs, function(entry) {
-        // IMPORTANT: this won't really work since we're in a tight loop. If we really
-        // want to get this to work, we would need asynch loop processing (see
-        // http://stackoverflow.com/questions/9772400/javascript-async-loop-processing
-        // if you're unfamiliar). As a result, we just have a loading message
-        // IMPORTANT: remember that you will need to integrate with
-        // Meteor's handling of the event loop (so base your async loop on
-        // Meteor.setTimeout or something)
-        // var progress = (index + 1.0) / currentList.length;
-        // progress = _.intval(progress * 100);
-        // $('#resumeMsg').text(progress + "% Complete");
-        // $('.progress-bar').css('width', progress+'%').attr('aria-valuenow', progress);
-
         if (!entry.action) {
             console.log("Ignoring user times entry with no action");
             return;
@@ -2706,8 +2692,7 @@ function processUserTimesLog(userTimesLogs) {
                     console.log("Missing isCorrect on an answer - assuming false", entry);
                     wasCorrect = false;
                 }
-            }
-            else {
+            }else {
                 wasCorrect = false; //timeout is never correct
             }
 
@@ -2762,6 +2747,7 @@ function processUserTimesLog(userTimesLogs) {
         console.log("RESUME FINISHED: displaying initial instructions");
         leavePage("/instructions");
     }else if (!!lastQuestionEntry) {
+        Session.set("scoringEnabled",getCurrentDeliveryParams().scoringEnabled);
         //Question outstanding: force question display and let them give an answer
         console.log("RESUME FINISHED: displaying current question");
         newQuestionHandler();
@@ -2794,6 +2780,7 @@ function processUserTimesLog(userTimesLogs) {
                 }
             }
         }
+        Session.set("scoringEnabled",getCurrentDeliveryParams().scoringEnabled);
         console.log("RESUME FINISHED: next-question logic to commence");
         prepareCard();
     }
