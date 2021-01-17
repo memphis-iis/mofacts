@@ -57,7 +57,7 @@ AssessmentSession = {
         //First get the setting we'll use
         var settings = AssessmentSession.loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
-        console.log(displayify(settings));
+        console.log("settings:",settings);
 
         //Shuffle clusters at start
         if (settings.randomClusters) {

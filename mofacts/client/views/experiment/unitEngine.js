@@ -1141,98 +1141,96 @@ function modelUnitEngine() {
 //////////////////////////////////////////////////////////////////////////////
 // Return an instance of the schedule-based unit engine
 
-function scheduleUnitEngine() {
-    //Return the schedule for the current unit of the current lesson -
-    //If it doesn't exist, then create and store it in User Progress
-    function getSchedule() {
-        //Retrieve current schedule
-        var progress = getUserProgress();
-
-        var unit = getCurrentUnitNumber();
-        var schedule = null;
-        if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
-            schedule = progress.currentSchedule;
-        }
-
-        //Lazy create save if we don't have a correct schedule
-        if (schedule === null) {
-            console.log("CREATING SCHEDULE, showing progress");
-            console.log(progress);
-
-            var file = getCurrentTdfFile();
-            var setSpec = file.tdfs.tutor.setspec[0];
-            var currUnit = file.tdfs.tutor.unit[unit];
-
-            schedule = AssessmentSession.createSchedule(setSpec, unit, currUnit);
-            if (!schedule) {
-                //There was an error creating the schedule - there's really nothing
-                //left to do since the experiment is broken
-                recordUserTime("FAILURE to create schedule", {
-                    unitname: _.display(currUnit.unitname),
-                    unitindex: unit
-                });
-                alert("There is an issue with the TDF - experiment cannot continue");
-                throw new Error("There is an issue with the TDF - experiment cannot continue");
-            }
-
-            //We save the current schedule and also log it to the UserTime collection
-            progress.currentSchedule = schedule;
-
-            recordUserTime("schedule", {
-                unitname: _.display(currUnit.unitname),
-                unitindex: unit,
-                schedule: schedule
-            });
-        }
-
-        //Now they can have the schedule
-        return schedule;
-    }
-
+function scheduleUnitEngine(){
     return {
         unitType: "schedule",
-
+    
         initImpl: function() {
             //Nothing currently
         },
-
+    
+        getSchedule: function() {
+            //Retrieve current schedule
+            var progress = getUserProgress();
+    
+            var unit = getCurrentUnitNumber();
+            var schedule = null;
+            if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
+                schedule = progress.currentSchedule;
+            }
+    
+            //Lazy create save if we don't have a correct schedule
+            if (schedule === null) {
+                console.log("CREATING SCHEDULE, showing progress");
+                console.log(progress);
+    
+                var file = getCurrentTdfFile();
+                var setSpec = file.tdfs.tutor.setspec[0];
+                var currUnit = file.tdfs.tutor.unit[unit];
+    
+                schedule = AssessmentSession.createSchedule(setSpec, unit, currUnit);
+                if (!schedule) {
+                    //There was an error creating the schedule - there's really nothing
+                    //left to do since the experiment is broken
+                    recordUserTime("FAILURE to create schedule", {
+                        unitname: _.display(currUnit.unitname),
+                        unitindex: unit
+                    });
+                    alert("There is an issue with the TDF - experiment cannot continue");
+                    throw new Error("There is an issue with the TDF - experiment cannot continue");
+                }
+    
+                //We save the current schedule and also log it to the UserTime collection
+                progress.currentSchedule = schedule;
+    
+                recordUserTime("schedule", {
+                    unitname: _.display(currUnit.unitname),
+                    unitindex: unit,
+                    schedule: schedule
+                });
+            }
+    
+            //Now they can have the schedule
+            return schedule;
+        },
+    
         selectNextCard: function() {
             let questionIndex = Session.get("questionIndex");
-            let questInfo = getSchedule().q[questionIndex];
+            let questInfo = this.getSchedule().q[questionIndex];
             let curClusterIndex = questInfo.clusterIndex;
             let curStimIndex = questInfo.whichStim;
-
+    
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
             setCurrentClusterIndex(curClusterIndex);
-
+    
             this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined);
-
+    
             Session.set("testType", questInfo.testType);
             Session.set("questionIndex", questionIndex + 1);
             Session.set("showOverlearningText", false);  //No overlearning in a schedule
-
+    
             console.log("SCHEDULE UNIT card selection => ",
                 "cluster-idx-unmapped:", curClusterIndex,
                 "whichStim:", curStimIndex
             );
-
+    
             return curClusterIndex;
         },
-
+    
         findCurrentCardInfo: function() {
             //selectNextCard increments questionIndex after setting all card
             //info, so we need to use -1 for this info
-            return getSchedule().q[Session.get("questionIndex") - 1];
+            return this.getSchedule().q[Session.get("questionIndex") - 1];
         },
-
+    
         cardSelected: function(selectVal, resumeData) {
             //Nothing currently
         },
-
+    
         createQuestionLogEntry: function() {
             var questInfo = this.findCurrentCardInfo();
-
+    
             try {
                 return {
                     'whichStim': questInfo.whichStim
@@ -1242,21 +1240,21 @@ function scheduleUnitEngine() {
                 console.log(e);
                 throw e;
             }
-
+    
         },
-
+    
         cardAnswered: function(wasCorrect, resumeData) {
             //Nothing currently
         },
-
+    
         unitFinished: function() {
             var questionIndex = Session.get("questionIndex");
             var unit = getCurrentUnitNumber();
             var schedule = null;
             if (unit < getCurrentTdfFile().tdfs.tutor.unit.length) {
-                schedule = getSchedule();
+                schedule = this.getSchedule();
             }
-
+    
             if (schedule && questionIndex < schedule.q.length) {
                 return false; // have more
             }
@@ -1264,5 +1262,5 @@ function scheduleUnitEngine() {
                 return true; // nothing left
             }
         }
-    };
-}
+    }
+} 

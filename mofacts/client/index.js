@@ -1,3 +1,4 @@
+import { dialogueContinue } from './views/experiment/dialogueUtils.js';
 ENTER_KEY = 13;
 enterKeyLock = false;
 
@@ -182,8 +183,8 @@ Template.registerHelper('isLoggedIn', function (){
   return haveMeteorUser();
 });
 
-Template.registerHelper('inPracticeModule', function(){
-  return (Session.get("curModule") == "card" || Session.get("curModule") == "instructions") && Session.get("sessionType") == "learningsession";
+Template.registerHelper('showPerformanceDetails', function(){
+  return (Session.get("curModule") == "card" || Session.get("curModule") == "instructions") && Session.get("scoringEnabled");
   // var curLocation = Router.current().location.get().path;
   // if(curLocation == "/card" || curLocation == "/instructions"){
   //   return true;

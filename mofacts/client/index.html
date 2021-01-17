@@ -46,26 +46,27 @@
           {{#if isLoggedIn}}
           <div id="navbarRight" class="nav navbar-nav navbar-right">
               <TABLE BORDER="0">
-                  {{#if inPracticeModule}}
-                  <td><s1>Time: {{curStudentPerformance.totalTimeDisplay}} min,</s1></td>
-                  <td>&nbsp;</td>
-                  <td><s1>Correct: {{curStudentPerformance.percentCorrect}},</s1></td>
-                  <td>&nbsp;</td>
-                  <td><s1>Count: {{curStudentPerformance.count}}</s1></td>
-                  <td>&nbsp;</td>
-                  <!-- <td style="line-height:50px;"><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
-                  <td>&nbsp;</td> -->
+                  {{#if showPerformanceDetails}}
+                    <td><s1>Time: {{curStudentPerformance.totalTimeDisplay}} min,</s1></td>
+                    <td>&nbsp;</td>
+                    <td><s1>Correct: {{curStudentPerformance.percentCorrect}},</s1></td>
+                    <td>&nbsp;</td>
+                    <td><s1>Count: {{curStudentPerformance.count}}</s1></td>
+                    <td>&nbsp;</td>
+                    <!-- <td style="line-height:50px;"><s1>Score:</s1>&nbsp;<span class="badge">{{currentScore}}</span></td>
+                    <td>&nbsp;</td> -->
                   {{/if}}
-                  <td style="line-height:50px;"><s1>{{username}}</s1></td>
-                  <td>&nbsp;</td>    <td>&nbsp;</td>
+                    <td style="line-height:50px;"><s1>{{username}}</s1></td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
                   {{#if isNormal}}
-                  <td><button type="button" id="homeButton" class="button btn  navbar-btn">Home</button></td>
-                  <td>&nbsp;</td>
-                  <!-- <td><button type="button" id="progressButton" class="button btn  navbar-btn">Progress</button></td>
-                  <td>&nbsp;</td> -->
-                  <td><button type="button" id="errorReportButton" class="button btn  navbar-btn">Report Error</button></td>
-                  <td>&nbsp;</td>
-                  <td><button type="button" id="logoutButton" class="button btn  navbar-btn">Logout</button></td>
+                    <td><button type="button" id="homeButton" class="button btn  navbar-btn">Home</button></td>
+                    <td>&nbsp;</td>
+                    <!-- <td><button type="button" id="progressButton" class="button btn  navbar-btn">Progress</button></td>
+                    <td>&nbsp;</td> -->
+                    <td><button type="button" id="errorReportButton" class="button btn  navbar-btn">Report Error</button></td>
+                    <td>&nbsp;</td>
+                    <td><button type="button" id="logoutButton" class="button btn  navbar-btn">Logout</button></td>
                   {{/if}}
               </table>
           </div>  <!-- close navbar-collapse -->

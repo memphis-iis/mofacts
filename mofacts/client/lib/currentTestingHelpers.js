@@ -1,4 +1,5 @@
 import { curSemester } from '../../common/Definitions';
+export { getCurrentDeliveryParams };
 
 /* client/lib/currentTestingHelpers.js
  *
@@ -401,13 +402,14 @@ getCurrentDeliveryParams = function (currUnit) {
         currUnit = getCurrentTdfUnit();
     }
 
-    const isLearningSession = Session.get("sessionType") == "learningsession";
+    let isLearningSession = Session.get("sessionType") == "learningsession";
 
     //Note that we will only extract values that have a specified default
     //value here.
     var deliveryParams = {
         'showhistory': false,
         'forceCorrection': false,
+        'scoringEnabled':isLearningSession,
         'purestudy': 0,
         'initialview': 0,
         'drill': 0,
@@ -417,7 +419,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'lockoutminutes': 0,
         'fontsize': 3,
         'numButtonListImageColumns': 2,
-        'correctscore': isLearningSession ? 1 : 0,
+        'correctscore': 1,
         'incorrectscore': 0,
         'practiceseconds': 0,
         'autostopTimeoutThreshold': 0,
@@ -441,6 +443,7 @@ getCurrentDeliveryParams = function (currUnit) {
     var xlations = {
         'showhistory': xlateBool,
         'forceCorrection': xlateBool,
+        'scoringEnabled': xlateBool,
         'purestudy': _.intval,
         'skipstudy': xlateBool,
         'reviewstudy': _.intval,
@@ -464,15 +467,14 @@ getCurrentDeliveryParams = function (currUnit) {
     //Use the current unit specified to get the deliveryparams array. If there
     //isn't a unit then we use the top-level deliveryparams (if there are)
     var sourceDelParams = null;
-    if (!!currUnit) {
+    if(!!currUnit){
         //We have a unit
         if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
             sourceDelParams = currUnit.deliveryparams;
         }
-    }
-    else {
+    }else{
         //No unit - we look for the top-level deliveryparams
-        var tdf = getCurrentTdfFile();
+        let tdf = getCurrentTdfFile();
         if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
             sourceDelParams = tdf.tdfs.tutor.deliveryparams;
         }
