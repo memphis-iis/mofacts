@@ -1594,8 +1594,7 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
 
 function getButtonTrial() {
   //Default to value given in the unit
-  var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
-      .prop("buttontrial").first().trim().value().toLowerCase();
+  var isButtonTrial = "true" === _.chain(getCurrentTdfUnit()).prop("buttontrial").first().trim().value().toLowerCase();
 
   if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
       //Did this question specifically override button trial?
@@ -1833,7 +1832,7 @@ function processLINEAR16(data){
 
     var request = generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data);
 
-    var answerGrammar;
+    var answerGrammar = [];
     if(getButtonTrial()) {
       answerGrammar = phraseHints;
     } else if (!DialogueUtils.isUserInDialogueLoop()){
