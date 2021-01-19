@@ -138,6 +138,7 @@
 			<falseAnswerLimit>3</falseAnswerLimit>
 			<timeuntilaudio>500</timeuntilaudio>
 			<timeuntilaudiofeedback>500</timeuntilaudiofeedback>
+			<autostopTranscriptionAttemptLimit>4</autostopTranscriptionAttemptLimit>
 			<prestimulusdisplaytime>500</prestimulusdisplaytime>
 		</deliveryparams>
 	</unit>

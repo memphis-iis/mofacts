@@ -423,6 +423,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'incorrectscore': 0,
         'practiceseconds': 0,
         'autostopTimeoutThreshold': 0,
+        'autostopTranscriptionAttemptLimit': 3,
         'timeuntilaudio' : 0,
         'timeuntilaudiofeedback' : 0,
         'prestimulusdisplaytime' : 0,
