@@ -87,11 +87,7 @@ Template.profileSouthwest.rendered = function () {
 
           var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
 
-          var ignoreOutOfGrammarResponses = _.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value();
-          if(!ignoreOutOfGrammarResponses){
-            ignoreOutOfGrammarResponses = false;
-          }
-
+          var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
           var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
           if(!speechOutOfGrammarFeedback){
             speechOutOfGrammarFeedback = "Response not in answer set"
