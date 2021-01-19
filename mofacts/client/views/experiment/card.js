@@ -200,6 +200,7 @@ function scrollElementIntoView(selector, scrollType) {
     }, 1);
 }
 
+var speechTranscriptionTimeoutsSeen = 0;
 var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
 var unitStartTimestamp = 0;
 var trialTimestamp = 0;
@@ -897,118 +898,27 @@ function cardStart(){
 function newQuestionHandler() {
     console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
 
-    let textFocus = false; //We'll set to true if needed
-    let unitNumber = getCurrentUnitNumber();
-    let file = getCurrentTdfFile();
-    let currUnit = file.tdfs.tutor.unit[unitNumber];
-    let deliveryParams = getCurrentDeliveryParams(currUnit);
-
-    // Whatever happens next, no scolling history is "justAdded"
     scrollList.update(
-        {'justAdded': 1},           // Query
-        {'$set': {'justAdded': 0}}, // Operation
-        {'multi': true},            // Options
-        function(err, numrecs) {    // Callback
-            if (!!err) {
-                console.log("UDPATE ERROR:", displayify(err));
-            }
+        {'justAdded': 1},          
+        {'$set': {'justAdded': 0}}, 
+        {'multi': true},          
+        function(err, numrecs) {
+            if (err) console.log("UDPATE ERROR:", displayify(err));
         }
     );
 
     clearButtonList();
     Session.set("currentDisplay",{});
-
-    // Buttons are determined by 3 options: buttonorder, buttonOptions,
-    // wrongButtonLimit:
-    //
-    // 1. buttonorder - can be "fixed" or "random" with a default of fixed.
-    //
-    // 2. buttonOptions - the list of button labels to use. If empty the
-    //    button labels will be taken from the current stim cluster.
-    //
-    // 3. wrongButtonLimit - The number of WRONG buttons to display (so final
-    //    button is wrongButtonLimit + 1 for the correct answer). This is ONLY
-    //    used if buttonorder is random.
-    //
-    // For fixed order, we just use the button labels we find per #2 above. For
-    // random order, we take buttonOptions random buttons from the wrong button
-    // labels, add in the correct answer, and shuffle the order of buttons.
-    // IMPORTANT: the above implies that the correct answer must be in the button label
-    // list if you use fixed button order and buttonOptions. See the Music
-    // TDF for an example.
+    speechTranscriptionTimeoutsSeen = 0;
     let isButtonTrial = getButtonTrial();
     Session.set("buttonTrial", isButtonTrial);
     console.log("newQuestionHandler, isButtonTrial",isButtonTrial);
 
-    if (!isButtonTrial) {
-        //Not a button trial
-        textFocus = true; //Need the text box focused
-        $("#textEntryRow").show();
-    }else {
-        // Is a button trial - we need to figure out what to show
-        $("#textEntryRow").hide();
-
-        let buttonChoices = [];
-
-        let buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
-        if (buttonOrder !== "random") {
-            //Only choices are random or fixed, and we def to fixed
-            buttonOrder = "fixed";
-        }
-
-        let buttonOptions = _.chain(currUnit).prop("buttonOptions").first().trim().value();
-        let correctButtonPopulated = null;
-
-        if (buttonOptions) {
-            buttonChoices = buttonOptions.split(",");
-            correctButtonPopulated = true;
-            console.log("buttonChoices==buttonOptions",buttonChoices);
-        }else{
-            _.each(getCurrentFalseResponses(), function(ele) {
-                buttonChoices.push(ele);
-                correctButtonPopulated = false;
-            });
-            console.log("buttonChoices==falseresponses and correct answer",buttonChoices);
-        }
-        if (correctButtonPopulated == null) {
-            console.log("A button trial requires correct configuration");
-            throw new Error("Bad TDF or Stim file - could not determine answer location");
-        }
-
-        //TODO: what if we do button options and falseAnswerLimit?
-        let wrongButtonLimit = deliveryParams.falseAnswerLimit;
-        if (wrongButtonLimit) {
-            let numberOfWrongButtonsToPrune = buttonChoices.length-wrongButtonLimit;
-            for(let i=0;i<numberOfWrongButtonsToPrune;i++){
-              let randomIndex = Math.floor(Math.random()*buttonChoices.length);
-              buttonChoices.splice(randomIndex,1);
-            }
-        }
-
-        if(!correctButtonPopulated){
-          //If we're using button images we need to get the answer string (aka image url) in its original case, in case part of the path is capitalized
-          let currentAnswer = Session.get("originalAnswer");
-          let correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
-          buttonChoices.unshift(correctAnswer);
-        }
-
-        if (buttonOrder === "random") {
-            Helpers.shuffle(buttonChoices);
-        }
-        let curChar = 'a'
-
-        _.each(buttonChoices, function(val, idx) {
-            buttonList.insert({
-                temp: 1,         //Deleted when clearing
-                idx: idx,        //Will be ordered by array index
-                verbalChoice: curChar,
-                buttonName: val, //Currently, name and value are the same
-                buttonValue: val
-            });
-            curChar = nextChar(curChar);
-        });
-        // Insert a record that we'll never show
-        buttonList.insert({temp: 2, uniq: Date.now()});
+    if (isButtonTrial) {
+      $("#textEntryRow").hide();
+      setUpButtonTrial();  
+    }else {      
+      $("#textEntryRow").show();
     }
 
     //If this is a study-trial and we are displaying a cloze, then we should
@@ -1022,12 +932,97 @@ function newQuestionHandler() {
       Session.set("currentDisplayEngine",currentDisplay);
     }
 
-    startQuestionTimeout(textFocus);
+    startQuestionTimeout();
     checkSimulation();
 
     if (Session.get("showOverlearningText")) {
         $("#overlearningRow").show();
     }
+}
+
+// Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:
+//
+// 1. buttonorder - can be "fixed" or "random" with a default of fixed.
+//
+// 2. buttonOptions - the list of button labels to use. If empty the
+//    button labels will be taken from the current stim cluster.
+//
+// 3. wrongButtonLimit - The number of WRONG buttons to display (so final
+//    button is wrongButtonLimit + 1 for the correct answer). 
+function setUpButtonTrial(){
+  let currUnit = getCurrentTdfUnit();
+  let deliveryParams = getCurrentDeliveryParams(currUnit);
+  let buttonChoices = [];
+  let buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
+  let buttonOptions = _.chain(currUnit).prop("buttonOptions").first().trim().value();
+  let correctButtonPopulated = null;
+
+  if (buttonOptions) {
+      buttonChoices = buttonOptions.split(",");
+      correctButtonPopulated = true;
+      console.log("buttonChoices==buttonOptions",buttonChoices);
+  }else{
+      _.each(getCurrentFalseResponses(), function(ele) {
+          buttonChoices.push(ele);
+          correctButtonPopulated = false;
+      });
+      console.log("buttonChoices==falseresponses and correct answer",buttonChoices);
+  }
+  if (correctButtonPopulated == null) {
+      console.log("No correct button");
+      throw new Error("Bad TDF/Stim file - no buttonOptions and no false responses");
+  }
+
+  let currentAnswer = Session.get("originalAnswer");
+  let correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
+  let wrongButtonLimit = deliveryParams.falseAnswerLimit;
+  if (wrongButtonLimit) {
+      let foundIsCurrentAnswer = undefined;
+      let correctAnswerIndex = undefined;
+      if(correctButtonPopulated){
+        correctAnswerIndex = buttonChoices.findIndex(function(answer){
+          if(answer === currentAnswer){
+            foundIsCurrentAnswer = true;
+            return true;
+          }else if(answer === correctAnswer){
+            foundIsCurrentAnswer = false;
+            return true;
+          }
+        });
+        if(correctAnswerIndex != -1) buttonChoices.splice(correctAnswerIndex,1);
+        else correctAnswerIndex = undefined;
+      }
+      
+      let numberOfWrongButtonsToPrune = buttonChoices.length-wrongButtonLimit;
+      for(let i=0;i<numberOfWrongButtonsToPrune;i++){
+        let randomIndex = Math.floor(Math.random()*buttonChoices.length);
+        buttonChoices.splice(randomIndex,1);
+      }
+
+      if(correctAnswerIndex) buttonChoices.unshift(foundIsCurrentAnswer ? currentAnswer : correctAnswer);
+  }
+
+  if(!correctButtonPopulated){
+    buttonChoices.unshift(correctAnswer);
+  }
+
+  if (buttonOrder === "random") {
+      Helpers.shuffle(buttonChoices);
+  }
+  let curChar = 'a'
+
+  _.each(buttonChoices, function(val, idx) {
+      buttonList.insert({
+          temp: 1,         //Deleted when clearing
+          idx: idx,        //Will be ordered by array index
+          verbalChoice: curChar,
+          buttonName: val, //Currently, name and value are the same
+          buttonValue: val
+      });
+      curChar = nextChar(curChar);
+  });
+  // Insert a record that we'll never show
+  buttonList.insert({temp: 2, uniq: Date.now()});
 }
 
 //Stop previous sound
@@ -1090,8 +1085,7 @@ function handleUserForceCorrectInput(e, source){
           var afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
           afterUserFeedbackForceCorrectCb = undefined;
           afterUserFeedbackForceCorrectCbHolder();
-      }
-      else {
+      } else {
           console.log("force correct, wrong answer");
           $("#userForceCorrect").prop("disabled", false);
           $("#userForceCorrect").val("");
@@ -1145,21 +1139,18 @@ function handleUserInput(e, source, simAnswerCorrect) {
     var userAnswer;
     if (isTimeout) {
         userAnswer = "[timeout]";
-    }
-    else if (source === "keypress") {
+    } else if (source === "keypress") {
         userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
-    }
-    else if (source === "buttonClick") {
+    } else if (source === "buttonClick") {
         userAnswer = e.currentTarget.name;
-    }
-    else if (source === "simulation") {
+    } else if (source === "simulation") {
         userAnswer = simAnswerCorrect ? "SIM: Correct Answer" : "SIM: Wrong Answer";
-    }else if (source === "voice"){
-      if(getButtonTrial()){
-        userAnswer = e.answer.name;
-      }else{
-        userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
-      }
+    } else if (source === "voice"){
+        if(getButtonTrial()){
+          userAnswer = e.answer.name;
+        }else{
+          userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
+        }
     }
 
     var trialEndTimeStamp = Date.now();
@@ -1465,21 +1456,16 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       //Drill - the timeout depends on how they did
       if(isCorrect){
           reviewTimeout = _.intval(deliveryParams.correctprompt);
-      }
-      else{
+      }else{
           reviewTimeout = _.intval(deliveryParams.reviewstudy);
       }
   }else{
       //We don't know what to do since this is an unsupported test type - fail
-      failNoDeliveryParams("Unknown trial type was specified - no way to proceed");
-      return;
+      throw new Error("Unknown trial type was specified - no way to proceed");
   }
 
   //We need at least a timeout of 1ms
-  if (reviewTimeout < 1) {
-      failNoDeliveryParams("No correct timeout specified");
-      return;
-  }
+  if (reviewTimeout < 1) throw new Error("No correct timeout specified");
 
   //Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -1488,6 +1474,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
     $("#userAnswer").val("");
     let writeAnswerLogAndPrepareCardCb = prepareCard.bind(null,writeAnswerLog);
     if(feedbackType == "dialogue" && !isCorrect){
+      speechTranscriptionTimeoutsSeen = 0;
       initiateDialogue(writeAnswerLogAndPrepareCardCb);
     }else{
       writeAnswerLogAndPrepareCardCb();
@@ -1605,34 +1592,15 @@ function recordProgress(question, answer, userAnswer, isCorrect) {
     }
 }
 
-function failNoDeliveryParams(customMsg) {
-    var errMsg;
-
-    if (typeof customMsg !== "undefined") {
-        errMsg = customMsg;
-    }
-    else {
-        errMsg = "The current unit is missing a delivery params section";
-    }
-
-    console.log(errMsg);
-    alert(errMsg); //Note that we actually show an alert
-    clearCardTimeout();
-    clearPlayingSound();
-    throw new Error("The current TDF is malformed");
-}
-
 function getButtonTrial() {
   //Default to value given in the unit
   var isButtonTrial = "true" === _.chain(getCurrentTdfUnit())
-      .prop("buttontrial").first()
-      .trim().value().toLowerCase();
+      .prop("buttontrial").first().trim().value().toLowerCase();
 
   if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
       //Did this question specifically override button trial?
       isButtonTrial = true;
-  }
-  else {
+  } else {
       // An entire schedule can override a button trial
       var progress = getUserProgress();
       var schedButtonTrial = !!(progress.currentSchedule) && (progress.currentSchedule.unitNumber == getCurrentUnitNumber()) ? _.chain(progress).prop("currentSchedule").prop("isButtonTrial").value() : false;
@@ -1644,146 +1612,126 @@ function getButtonTrial() {
   return isButtonTrial;
 }
 
-function startQuestionTimeout(textFocus) {
+function startQuestionTimeout() {
+  stopUserInput(); //No user input (re-enabled below) and reset keypress timestamp.
   clearCardTimeout(); //No previous timeout now
-
-  var delayMs = 0;
-
-  //If this is scheduled TDF and the current test is a study, use the timeout
-  //for purestudy for the current unit. Otherwise use the top-level setspec
-  //timeout in seconds
 
   var deliveryParams = getCurrentDeliveryParams();
   if (!deliveryParams) {
-      failNoDeliveryParams();
-      return;
+      throw new Error("No delivery params");
   }
-
   console.log("startQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
 
-  if (getTestType() === "s" || getTestType() === "f") {
-      //Study
+  var delayMs = 0;
+  if (getTestType() === "s" || getTestType() === "f") { //Study
       delayMs = _.intval(deliveryParams.purestudy);
-  }
-  else {
-      //Not study - must be drill or test
+  } else { //Not study - must be drill or test
       delayMs = _.intval(deliveryParams.drill);
   }
 
   if (delayMs < 1) {
-      failNoDeliveryParams("Could not find appropriate question timeout");
+    throw new Error("Could not find appropriate question timeout");
   }
 
-  //Define the function we will call to actually start user input
-  var beginQuestionAndInitiateUserInput = function(){
-    console.log("beginQuestionAndInitiateUserInput");
-    Session.set("displayReady", true);
+  //We do this little shuffle of session variables so the display will update all at the same time
+  let currentDisplayEngine = Session.get("currentDisplayEngine");
+  let closeQuestionParts = Session.get("clozeQuestionParts");
+  Session.set("clozeQuestionParts",undefined);
+  console.log('++++ CURRENT DISPLAY ++++');
+  console.log(currentDisplayEngine);
+  
+  let beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null,delayMs,deliveryParams);
+  let pipeline = checkAndDisplayTwoPartQuestion.bind(null,deliveryParams,beginQuestionAndInitiateUserInputBound);
+  checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQuestionParts,pipeline);
+}
 
-    var startMainCardTimeout = function(){
-      console.log("start main card timeout");
+function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQuestionParts,nextStageCb){
+  console.log("checking for prestimulus display");
+  let prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay; //[0], if it exists
+  console.log("prestimulusDisplay:",prestimulusDisplay);
+
+  if(prestimulusDisplay){
+    let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
+    console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
+    Session.set("displayReady", false);
+    Session.set("currentDisplay",prestimulusDisplayWrapper);
+    Session.set("displayReady", true);
+    let prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
+    console.log("delaying for " + prestimulusdisplaytime + " ms then starting question", new Date());
+    setTimeout(function(){
+      console.log("done with prestimulusDisplay, switching to original display", new Date());
+      Session.set("displayReady", false);
+      Session.set("currentDisplay",currentDisplayEngine);
+      Session.set("clozeQuestionParts",closeQuestionParts);
+      Session.set("displayReady", true);
+      console.log("past prestimulusdisplaytime, start two part question logic");
+      nextStageCb();
+    },prestimulusdisplaytime);
+  }else{
+    console.log("no prestimulusDisplay detected, continuing to next stage");
+    nextStageCb();
+  }  
+}
+
+function checkAndDisplayTwoPartQuestion(deliveryParams,nextStageCb){
+  console.log("checking for two part questions");
+  //Handle two part questions
+  var currentQuestionPart2 = Session.get("currentQuestionPart2");
+  if(currentQuestionPart2){
+    console.log("two part question detected, displaying");
+    let twoPartQuestionWrapper = { 'text': currentQuestionPart2 };
+    var initialviewTimeDelay = deliveryParams.initialview;
+    console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
+    setTimeout(function(){
+      console.log("after timeout, displaying question part two", new Date());
+      Session.set("displayReady", false);
+      Session.set("currentDisplay",twoPartQuestionWrapper);
+      Session.set("displayReady", true);
+      Session.set("currentQuestionPart2",undefined);
+      redoCardImage();
+      nextStageCb();
+    },initialviewTimeDelay);
+  }else{
+    console.log("one part question detected, continuing with question");
+    nextStageCb();
+  }
+}
+
+function beginQuestionAndInitiateUserInput(delayMs,deliveryParams){
+  console.log("beginQuestionAndInitiateUserInput");
+  Session.set("displayReady", true);
+  keypressTimestamp = 0;
+  trialTimestamp = Date.now();
+  let currentDisplay = Session.get("currentDisplay");
+
+  if(!!(currentDisplay.audioSrc)) {
+      let timeuntilaudio = deliveryParams.timeuntilaudio;
+      setTimeout(function(){
+        console.log("playing audio: ", new Date());
+        //We don't allow user input until the sound is finished playing
+        playCurrentSound(function() {
+            allowUserInput();
+            beginMainCardTimeout(delayMs, function() {
+              console.log("stopping input after " + delayMs + " ms");
+                stopUserInput();
+                handleUserInput({}, "timeout");
+            });
+        });
+      }, timeuntilaudio);
+  }else { //Not a sound - can unlock now for data entry now
+      let questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
+      //Only speak the prompt if the question type makes sense
+      if(!!(questionToSpeak)){
+        console.log("text to speak playing prompt: ", new Date());
+        speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,"all");
+      }
+      allowUserInput();
       beginMainCardTimeout(delayMs, function() {
         console.log("stopping input after " + delayMs + " ms");
           stopUserInput();
           handleUserInput({}, "timeout");
       });
-    }
-
-    keypressTimestamp = 0;
-    trialTimestamp = Date.now();
-
-    let currentDisplay = Session.get("currentDisplay");
-
-    if(!!(currentDisplay.audioSrc)) {
-        let timeuntilaudio = deliveryParams.timeuntilaudio;
-        setTimeout(function(){
-          console.log("playing audio: ", new Date());
-          //We don't allow user input until the sound is finished playing
-          playCurrentSound(function() {
-              allowUserInput(textFocus);
-              startMainCardTimeout();
-          });
-        }, timeuntilaudio);
-    }else {
-        let questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
-        //Only speak the prompt if the question type makes sense
-        if(!!(questionToSpeak)){
-          console.log("text to speak playing prompt: ", new Date());
-          speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak,"all");
-        }
-        //Not a sound - can unlock now for data entry now
-        allowUserInput(textFocus);
-        startMainCardTimeout();
-    }
   }
-
-  //No user input (re-enabled below) and reset keypress timestamp.
-  stopUserInput();
-
-  //We do this little shuffle of session variables so the display will update all at the same time
-  let currentDisplayEngine = Session.get("currentDisplayEngine");
-  Session.set("currentDisplay",currentDisplayEngine);
-
-  //Swap out the current question with a pre question display as defined in the tdf file
-  //then delay for the specified amount of time before setting back to the current question
-  var prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
-  let curDisplayTemp = Session.get("currentDisplay");
-  let closeQuestionParts = Session.get("clozeQuestionParts");
-  Session.set("clozeQuestionParts",undefined);
-  console.log('++++ CURRENT DISPLAY ++++');
-  console.log(curDisplayTemp);
-
-  function checkAndDisplayTwoPartQuestion(nextStageCb){
-    console.log("checking for two part questions");
-    //Handle two part questions
-    var currentQuestionPart2 = Session.get("currentQuestionPart2");
-    if(currentQuestionPart2){
-      console.log("two part question detected, displaying");
-      let twoPartQuestionWrapper = { 'text': currentQuestionPart2 };
-      var initialviewTimeDelay = deliveryParams.initialview;
-      console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
-      setTimeout(function(){
-        console.log("after timeout, displaying question part two", new Date());
-        Session.set("displayReady", false);
-        Session.set("currentDisplay",twoPartQuestionWrapper);
-        Session.set("displayReady", true);
-        Session.set("currentQuestionPart2",undefined);
-        redoCardImage();
-        nextStageCb();
-      },initialviewTimeDelay);
-    }else{
-      console.log("one part question detected, continuing with question");
-      nextStageCb();
-    }
-  }
-  
-  function checkAndDisplayPrestimulus(nextStageCb){
-    console.log("checking for prestimulus display");
-    var prestimulusDisplay = getCurrentTdfFile().tdfs.tutor.setspec[0].prestimulusDisplay; //[0]
-    console.log("prestimulusDisplay:",prestimulusDisplay);
-
-    if(prestimulusDisplay){
-      let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
-      console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
-      Session.set("displayReady", false);
-      Session.set("currentDisplay",prestimulusDisplayWrapper);
-      Session.set("displayReady", true);
-      console.log("delaying for " + prestimulusdisplaytime + " ms then starting question", new Date());
-      setTimeout(function(){
-        console.log("done with prestimulusDisplay, switching to original display", new Date());
-        Session.set("displayReady", false);
-        Session.set("currentDisplay",curDisplayTemp);
-        Session.set("clozeQuestionParts",closeQuestionParts);
-        Session.set("displayReady", true);
-        console.log("past prestimulusdisplaytime, start two part question logic");
-        nextStageCb();
-      },prestimulusdisplaytime);
-    }else{
-      console.log("no prestimulusDisplay detected, continuing to next stage");
-      nextStageCb();
-    }  
-  }
-  let pipeline = checkAndDisplayTwoPartQuestion.bind(null,beginQuestionAndInitiateUserInput);
-  checkAndDisplayPrestimulus(pipeline);
 }
 
 // BEGIN WEB AUDIO section
@@ -1855,6 +1803,7 @@ function processLINEAR16(data){
   var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
 
   if(userAnswer || getButtonTrial() || DialogueUtils.isUserInDialogueLoop()){
+    speechTranscriptionTimeoutsSeen += 1;
     var sampleRate = Session.get("sampleRate");
     var setSpec = getCurrentTdfFile().tdfs.tutor.setspec[0];
     var speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
@@ -1935,7 +1884,7 @@ function generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,da
 }
 
 function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
-  var speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
+  const speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
   HTTP.call("POST",speechURL,{"data":request}, function(err,response){
       console.log(JSON.stringify(response));
       var transcript = '';
@@ -1985,22 +1934,30 @@ function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
         console.log("regular trial, transcribing user response to user answer box");
         userAnswer.value = transcript;
       }
+
+      if(speechTranscriptionTimeoutsSeen >= getCurrentDeliveryParams().autostopTranscriptionAttemptLimit){
+        ignoredOrSilent = false; //Force out of a silence loop if we've tried enough
+        console.log(speechTranscriptionTimeoutsSeen + " transcription attempts which is over autostopTranscriptionAttemptLimit, forcing incorrect answer to move things along.");
+        //Dummy up some data so we don't fail downstream
+        if(getButtonTrial()){
+          userAnswer = {'answer':{'name':'a'}};
+        } else if (DialogueUtils.isUserInDialogueLoop()) {
+          DialogueUtils.setDialogueUserAnswerValue('FORCEDINCORRECT');
+        }
+      } 
+
       if (ignoredOrSilent) {
-        //Reset recording var so we can try again since we didn't get anything good
-        Session.set('recording',true);
-        recorder.record();
+        startRecording();
         //If answer is out of grammar or we pick up silence wait 5 seconds for
         //user to read feedback then clear the answer value
-        if (!getButtonTrial()) {
-          if (!DialogueUtils.isUserInDialogueLoop()) {
-            setTimeout(() => userAnswer.value = "", 5000);
-          }
+        if (!getButtonTrial() && !DialogueUtils.isUserInDialogueLoop()) {
+          setTimeout(() => userAnswer.value = "", 5000);
         }
       } else {
         //Only simulate enter key press if we picked up transcribable/in grammar
         //audio for better UX
         if (getButtonTrial()) {
-            handleUserInput({answer:userAnswer},"voice");
+          handleUserInput({answer:userAnswer},"voice");
         } else if (DialogueUtils.isUserInDialogueLoop()) {
           const answer = DialogueUtils.getDialogueUserAnswerValue();
           dialogueUserAnswers.push(answer);
@@ -2097,9 +2054,6 @@ function startUserMedia(stream) {
         }else{
           console.log("RESETMAINCARDTIMEOUT NOT DEFINED");
         }
-        //For multiple transcriptions:
-        //recorder.record();
-        //Session.set('recording',true);
       }
     }
   }
@@ -2154,7 +2108,7 @@ function stopUserInput() {
   },200);
 }
 
-function allowUserInput(textFocus) {
+function allowUserInput() {
   console.log("allow user input");
   inputDisabled = false;
   startRecording();
@@ -2173,11 +2127,11 @@ function allowUserInput(textFocus) {
     // Force scrolling to bottom of screen for the input
     scrollElementIntoView(null, false);
 
+    let textFocus = !getButtonTrial();
     if (textFocus) {
       try {
           $("#userAnswer").focus();
-      }
-      catch(e) { } //Do nothing
+      }catch(e) { } //Do nothing
     }
   },200);
 }
