@@ -42,16 +42,16 @@ setAllTdfs = function(ownerMapCallback){
         if(fileName.indexOf(curSemester) != -1){
           var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
           var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
-          let formattedDate = "";
+          let displayDate = "";
           if (entry.createdAt) {
             let date = new Date(entry.createdAt);
-            formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
+            displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
           }
  
           let ownerId = entry.owner;
           ownerIds.push(entry.owner);
           var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-          allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": formattedDate || ""});
+          allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate || ""});
           tdfFileNameToTdfFileMap[fileName] = entry;
           tdfFileNameToStimfileMap[fileName] = stimulusObject;
         }
@@ -242,7 +242,8 @@ generateAndSubmitTDFAndStimFiles = function(){
   console.log('Generating TDF with clozes: ' + JSON.stringify(clozes));
   var displayName = $("#tdfDisplayNameTextBox").val();
   var curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g,"_");
-  var curDateTime = new Date().toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
+  let curDate = new Date();
+  var curDateTime = curDate.toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
   var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_TDF.xml";
   var stimFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_Stim.json";
 
@@ -270,7 +271,18 @@ generateAndSubmitTDFAndStimFiles = function(){
       saveEditHistory(originalClozes,clozes);
       //Update session variable used in tdfAssignmentEdit so that we can assign a tdf immediately after generation without reloading the page
       Session.set("allTdfFilenamesAndDisplayNames",Session.get("allTdfFilenamesAndDisplayNames").concat({fileName:tdfFileName,displayName:displayName}));
-      Session.set("contentGenerationAllTdfs",Session.get("contentGenerationAllTdfs").concat(newTDFJSON));
+
+      let displayDate = (curDate.getMonth() + 1) + '/' + curDate.getDate() + '/' + curDate.getFullYear(); 
+      let ownerId = Meteor.userId();
+      let newTdfInfo = {'fileName':tdfFileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate};
+      Session.set("contentGenerationAllTdfs",Session.get("contentGenerationAllTdfs").concat(newTdfInfo));
+
+      let tempTdfOwnersMap = Session.get("tdfOwnersMap");
+      tempTdfOwnersMap[ownerId] = Meteor.user().username;
+      Session.set("tdfOwnersMap", tempTdfOwnersMap);
+
+      tdfFileNameToTdfFileMap[tdfFileName] = newTDFJSON;
+      tdfFileNameToStimfileMap[tdfFileName] = newStimJSON;
       alert("Saved Successfully!");
       $("#tdfDisplayNameTextBox").val("");
       $("#save-modal").modal('hide');
@@ -654,8 +666,9 @@ Template.contentGeneration.events({
       alert("Please enter a correct response");
     }else{
       let oldCloze = clozeIDToClozesMap[clozeID].find((elem) => elem.paraphraseId == paraphraseId);
+      let originalVersion = oldCloze.originalVersion === "Same" ? oldCloze.cloze : oldCloze.originalVersion;
 
-      let newCloze = {...oldCloze,cloze:newClozeText,correctResponse:response,itemId:sentenceID,clozeId:clozeID,origStimIndex:oldCloze.origStimIndex};
+      let newCloze = {...oldCloze,originalVersion:originalVersion,cloze:newClozeText,correctResponse:response,itemId:sentenceID,clozeId:clozeID,origStimIndex:oldCloze.origStimIndex};
       recordClozeEditHistory(oldCloze,newCloze);
 
       clozeIDToClozesMap[clozeID] = clozeIDToClozesMap[clozeID].filter((clozeItem) => clozeItem.paraphraseId != paraphraseId);
