@@ -125,7 +125,7 @@
 		<buttonorder>random</buttonorder>
 		<deliveryparams>
 			<feedbackType>dialogue</feedbackType>
-			<forceCorrection>true</forceCorrection>
+			<forceCorrection>false</forceCorrection>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>20000</drill>
 			<purestudy>20000</purestudy>
