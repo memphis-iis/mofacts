@@ -13,7 +13,7 @@ function userFilesRefresh() {
     var count = 0;
     var userId = Meteor.user()._id;
 
-    Tdfs.find().forEach(function(tdf) {
+    Session.get("allTdfs").forEach(function(tdf) {
         if (userId === tdf.owner) {
             userFiles.insert({
                 'temp': 1,

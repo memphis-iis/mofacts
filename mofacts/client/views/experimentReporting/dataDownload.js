@@ -1,15 +1,22 @@
 import { ReactiveVar } from 'meteor/reactive-var'
 
-Template.dataDownload.onCreated(function() {
+Template.dataDownload.onCreated(async function() {
   this.selectedTeacherId = new ReactiveVar(null);
   this.selectedClassId = new ReactiveVar(null);
 });
 
-Template.dataDownload.onRendered(function() {
-  Meteor.subscribe('allUsersWithTeacherRole', function() {
-    var users = Meteor.users.find({}).fetch();
-    Session.set("allUsersWithTeacherRole", users);
-  });
+Template.dataDownload.onRendered(async function() {
+  const allCourses = await meteorCallAsync("getAllCourses");
+  let classesByInstructorId = {};
+  for(let course of allCourses){
+    if(!classesByInstructorId[course.teacherUserId]){
+      classesByInstructorId[course.teacherUserId] = [];
+    }
+    classesByInstructorId[course.teacherUserId].push(course);
+  }
+  Session.set("classesByInstructorId",classesByInstructorId);
+  const allTeachers = await meteorCallAsync("getAllTeachers");
+  Session.set("allUsersWithTeacherRole", allTeachers);
 
   if (isAdmin()) {
     var clozeEdits = [];
@@ -44,13 +51,11 @@ Template.dataDownload.helpers({
 
     if (isAdmin() && !_.isEmpty(Template.instance().selectedTeacherId.get())) {
       uid = Template.instance().selectedTeacherId.get();
-    }
-  
-    if (isTeacher() && !isAdmin()) {
+    }else if (isTeacher()) {
       uid = Meteor.userId();
     }
-
-    return Classes.find({'instructor': uid});
+    
+    return Session.get("classesByInstructorId")[uid];
   },
   'selectedTeacherId': function() {
     return Template.instance().selectedTeacherId.get();
@@ -73,10 +78,11 @@ Template.dataDownload.helpers({
         uid = Meteor.userId();
       }
 
-      var classes = Classes.find({'instructor': uid});
+      var classes = Session.get("classesByInstructorId")[uid];
 
       classes.forEach(function(classObject) {
-        if (classObject._id == Template.instance().selectedClassId.get()) {
+        if (classObject.courseId == Template.instance().selectedClassId.get()) {
+
           if (classObject.tdfs) {
             classObject.tdfs.forEach(function(tdf) {
               classTdfNames.push(tdf.fileName);
@@ -86,7 +92,7 @@ Template.dataDownload.helpers({
       });
     }
 
-    dataDownloads = Tdfs.find({}).map(function(tdfObject) {
+    dataDownloads = Session.get("allTdfs").map(function(tdfObject) {
       tdfObject.disp = name;
       
       if (tdfObject.fileName != name) {

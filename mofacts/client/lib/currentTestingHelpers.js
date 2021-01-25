@@ -1,81 +1,130 @@
 import { curSemester } from '../../common/Definitions';
-export { getCurrentDeliveryParams };
+export { 
+  blankPassword,
+  extractDelimFields,
+  rangeVal,
+  shuffle,
+  randomChoice,
+  search,
+  haveMeteorUser,
+  getAllCoursesForInstructor, 
+  getAllCourseAssignmentsForInstructor,
+  getCurrentClusterAndStimIndices,
+  setStudentPerformance,
+  getStimClusterCount,
+  getStimCluster,
+  createStimClusterMapping,
+  getAllCurrentStimAnswers,
+  getTestType,
+  getCurrentDeliveryParams,
+  getTdfByFileName
+};
 
-/* client/lib/currentTestingHelpers.js
- *
- * Client-side helper functions for getting current information about testing
+//Given a user ID, return the "dummy" password that stands in for a blank
+//password. This is because we REALLY do want to use blanks passwords for
+//some users
+function blankPassword(userName) {
+    return (userName + "BlankPassword").toUpperCase();
+}
+
+//Extract space-delimited fields from src and push them to dest. Note that
+//dest is changed, but is NOT cleared before commencing. Also note that
+//false-ish values and whitespace-only strings are silently discarded
+function extractDelimFields(src, dest) {
+    if (!src) {
+        return;
+    }
+    var fields = _.trim(src).split(/\s/);
+    for(var i = 0; i < fields.length; ++i) {
+        var fld = _.trim(fields[i]);
+        if (fld && fld.length > 0) {
+            dest.push(fld);
+        }
+    }
+}
+
+//Given a string of format "a-b", return an array containing all
+//numbers from a to b inclusive.  On errors, return an empty array
+function rangeVal(src) {
+    src = _.trim(src);
+    var idx = src.indexOf("-");
+    if (idx < 1) {
+        return [];
+    }
+
+    var first = _.intval(src.substring(0, idx));
+    var last  = _.intval(src.substring(idx+1));
+    if (last < first) {
+        return [];
+    }
+
+    var range = [];
+    for (var r = first; r <= last; ++r) {
+        range.push(r);
+    }
+
+    return range;
+}
+
+//Given an array, shuffle IN PLACE and then return the array
+function shuffle(array) {
+    if (!array || !array.length) {
+        return array;
+    }
+
+    var currentIndex = array.length;
+
+    while (currentIndex > 0) {
+        var randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+
+        var tmp = array[currentIndex];
+        array[currentIndex] = array[randomIndex];
+        array[randomIndex] = tmp;
+    }
+
+    return array;
+}
+
+//Given an array, select and return one item at random. If the array is
+//empty, then undefined is returned
+function randomChoice(array) {
+    var choice;
+    if (array && array.length) {
+        choice = array[Math.floor(Math.random() * array.length)];
+    }
+    return choice;
+}
+
+/* Client-side helper functions for getting current information about testing
  * and/or the current trial. Much of this functionality began in card.js
  * but has been moved here for easier use. See also lib/sessionUtils.js for
  * a better list of Session variables we currently use.
  * */
 
-search = function(key, prop, array){
-  for(var i=0;i<array.length;i++){
-    if(array[i][prop] === key){
-      return array[i];
+function search(key, prop, searchObj){
+  for(let item of searchObj){
+    if(item[prop] == key){
+      return item;
     }
-  }
+  }  
 }
 
-getAllClassesForCurrentInstructor = function(instructorID){
-  console.log("getAllClassesForCurrentInstructor, instructorID:" + instructorID);
-  if (Roles.userIsInRole(Meteor.user(), ["admin"])){
-    console.log("admin role, getAllClassesForCurrentInstructor");
-    return Classes.find({}).fetch();
-  }else{
-    console.log("teacher role, getAllClassesForCurrentInstructor");
-    return Classes.find({instructor:instructorID,"curSemester":curSemester}).fetch();
-  }
+function haveMeteorUser() {
+  return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
+};
+
+async function getAllCoursesForInstructor(instructorId){
+  const courses = await meteorCallAsync("getAllCoursesForInstructor",instructorId)
+  return courses;
 }
 
-hasLearningSessionItems = function(tdfQueryName){
-  let tdfObject = Tdfs.findOne({fileName:tdfQueryName});
-  if(!tdfObject.tdfs.tutor.unit) return false;//TODO: fix root/condition tdfs
-
-  for(let unit of tdfObject.tdfs.tutor.unit){
-    if(!!unit.learningsession) return true;
-  }
-
-  return false;
+async function getAllCourseAssignmentsForInstructor(instructorId){
+  const courseAssignments = await meteorCallAsync("getAllCourseAssignmentsForInstructor",instructorId)
+  return courseAssignments;
 }
 
-//TODO: refactor to combine with server method and put in common
-getLearningSessionItems = function(tdfQueryName){
-  // var tdfQueryNames = [];
-  // if(tdfFileName === ALL_TDFS){
-  //   tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
-  // }else if(tdfFileName){
-  //   tdfQueryNames = [tdfFileName];
-  // }
-
-  learningSessionItems = {};
-  console.log("getLearningSessionItems, tdfQueryName:" + tdfQueryName);
-  
-  let tdfObject = Tdfs.findOne({fileName:tdfQueryName});
-  if(tdfObject.isMultiTdf){
-    learningSessionItems = {};
-    let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile[0];
-    let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
-    for(let i=0;i<lastStim -1;i++){ //for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
-      learningSessionItems[i] = true;
-    }
-  }
-  _.each(tdfObject.tdfs.tutor.unit,function(unit){
-    if(!!unit.learningsession){
-      clusterList = unit.learningsession[0].clusterlist[0];
-      clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y))); //TODO: Could probably do Helpers.RangeVal here or something
-      _.each(clusterLists,function(clusterStartEnd){
-        for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
-          learningSessionItems[i] = true;
-        }
-      });
-    }
-  });
-
-  return learningSessionItems;
-}
-
-setStudentPerformance = function(studentID,studentUsername,tdfFileName){
+function setStudentPerformance(studentID,studentUsername,tdfFileName){
   console.log("setStudentPerformance:",studentID,studentUsername);
   Meteor.subscribe('specificUserMetrics',studentID,function(){
     var count = 0;
@@ -83,7 +132,7 @@ setStudentPerformance = function(studentID,studentUsername,tdfFileName){
     var totalTime = 0;
 
     if(tdfFileName){
-      var learningSessionItems = getLearningSessionItems(tdfFileName);
+      let learningSessionItems = Session.get("learningSessionItems")[tdfFileName];
 
       var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
 
@@ -129,41 +178,7 @@ setStudentPerformance = function(studentID,studentUsername,tdfFileName){
   })
 }
 
-//Return the current fontsize from the TDF
-getCurrentFontSize = function () {
-    return _.intval(getCurrentDeliveryParams().fontsize);
-};
-
-//Return [correctscore, incorrectscore] for our current unit.
-getCurrentScoreValues = function () {
-    var parms = getCurrentDeliveryParams();
-    return [
-        _.intval(parms.correctscore),
-        _.intval(parms.incorrectscore)
-    ];
-};
-
-//Returns the current cluster index with shuffles and swaps applied, NOT the original index in the stim file
-getCurrentClusterIndex = function () {
-    return Session.get("clusterIndex");
-};
-
-//Returns the original current cluster index, i.e. the index in the original stim file without shuffles or swaps
-getOriginalCurrentClusterIndex = function () {
-  var clusterMapping = Session.get("clusterMapping");
-  if(clusterMapping){
-    return clusterMapping[getCurrentClusterIndex()];
-  }else{
-    throw "no cluster mapping found";
-  }
-}
-
-//Allow setting the current cluster index
-setCurrentClusterIndex = function(newIdx) {
-    Session.set("clusterIndex", newIdx);
-};
-
-getCurrentClusterAndStimIndices = function(){
+function getCurrentClusterAndStimIndices(){
   let curClusterIndex = null;
   let curStimIndex = null;
 
@@ -183,8 +198,8 @@ getCurrentClusterAndStimIndices = function(){
 }
 
 //Return the total number of stim clusters
-getStimClusterCount = function() {
-    return Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters.length;
+function getStimClusterCount() {
+    return Stimuli.findOne({fileName: Session.get("currentStimName")}).stimuli.setspec.clusters.length;
 };
 
 // Return the stim file cluster matching the index AFTER mapping it per the
@@ -192,7 +207,7 @@ getStimClusterCount = function() {
 // a cached stimuli document for optimization
 
 //Note that the cluster mapping goes from current session index to raw index in order of the stim file
-getStimCluster = function (index, cachedStimuli) {
+function getStimCluster(index, cachedStimuli) {
     var clusterMapping = Session.get("clusterMapping");
     var mappedIndex;
 
@@ -205,7 +220,7 @@ getStimCluster = function (index, cachedStimuli) {
     }
 
     if (!cachedStimuli) {
-        cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
+        cachedStimuli = Stimuli.findOne({fileName: Session.get("currentStimName")});
     }
     let cluster = cachedStimuli.stimuli.setspec.clusters[mappedIndex];
 
@@ -217,40 +232,99 @@ getStimCluster = function (index, cachedStimuli) {
     return cluster;
 };
 
-curStimHasSoundDisplayType = function(){
-  let foundSoundDisplayType = false;
-  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.stims.display.audioSrc":{"$exists":true}}).forEach(function(entry){
-    foundSoundDisplayType = true;
-  });
+//Given a cluster count, a shuffleclusters string, and a swapclusters string,
+//create a mapping vector. The idea is that for cluster x, mapping[x] returns
+//a translated index. Note that the default mapping is identity, so that
+//mapping[x] = x HOWEVER, the user may submit a different default mapping.
+//This is mainly so that multiple shuffle/swap pairs can be run. ALSO important
+//is the fact that additional elements will be added if
+//mapping.length < clusterCount
+function createStimClusterMapping(clusterCount, shuffleclusters, swapclusters, startMapping) {
+  if (clusterCount < 1)
+      return [];
 
-  return foundSoundDisplayType;
-}
+  var i;
 
-curStimHasImageDisplayType = function(){
-  let foundAudioDisplayType = false;
-  Stimuli.find({fileName: getCurrentStimName(),"stimuli.setspec.clusters.stims.display.imgSrc":{"$exists":true}}).forEach(function(entry){
-    foundAudioDisplayType = true;
-  });
-
-  return foundAudioDisplayType;
-}
-
-getCurrentStimDisplaySources = function(filterPropertyName = "clozeText"){
-  let displaySrcs = [];
-  let clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters;
-  for(let cluster of clusters){
-    for(let stim of cluster.stims){
-      if(typeof(stim.display[filterPropertyName]) != "undefined"){
-        displaySrcs.push(stim.display[filterPropertyName]);
-      }
-    }
+  //Default mapping is identity - mapping[x] == x
+  //We also need to make sure we have clusterCount elements
+  var mapping = (startMapping || []).slice(); //they get a copy back
+  while (mapping.length < clusterCount) {
+      mapping.push(mapping.length);
   }
-  return displaySrcs;
-}
 
-getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
+  //Shufle the given ranges of cards (like permutefinalresult)
+  if (!!shuffleclusters) {
+      var shuffleRanges = [];
+      extractDelimFields(shuffleclusters, shuffleRanges);
+
+      var shuffled = mapping.slice(); //work on a copy
+
+      _.each(shuffleRanges, function(rng) {
+          var targetIndexes = rangeVal(rng);
+          var randPerm = targetIndexes.slice(); //clone
+          shuffle(randPerm);
+
+          for(j = 0; j < targetIndexes.length; ++j) {
+              shuffled[targetIndexes[j]] = mapping[randPerm[j]];
+          }
+      });
+
+      mapping = shuffled.slice();
+  }
+
+  //Swap out sections of clusters (one step up from our shuffle above)
+  if (!!swapclusters) {
+      //Get the chunks that we'll be swapping. Each chunk is in the format
+      //of an array of integral indexes (after the map). We actually get
+      //TWO lists of chunks - one in order and one that is the actual swap
+      var ranges = [];
+      extractDelimFields(swapclusters, ranges);
+      var swapChunks = _.map(ranges, rangeVal);
+      var sortChunks = _.map(ranges, rangeVal);
+
+      //Now insure our sorted chunks are actually in order - we sort
+      //numerically by the first index
+      sortChunks.sort(function(lhs, rhs) {
+          var lv = lhs[0], rv = rhs[0];
+          if      (lv < rv) return -1;
+          else if (lv > rv) return 1;
+          else              return 0;
+      });
+
+      //Now get a permuted copy of our chunks
+      shuffle(swapChunks);
+
+      var swapped = [];
+      i = 0;
+      while (i < mapping.length) {
+          if (sortChunks.length > 0 && i == sortChunks[0][0]) {
+              //Swap chunk - grab the permuted chunk and add the mapped numbers
+              var chunk = swapChunks.shift();
+              for (var chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
+                  swapped.push(mapping[chunk[chunkIdx]]);
+              }
+
+              //advance to the next chunk
+              i += sortChunks.shift().length;
+          }
+          else {
+              //Not part of a swapped chunk - keep this number and just move
+              //to the next number
+              swapped.push(mapping[i]);
+              i++;
+          }
+      }
+
+      //All done
+      mapping = swapped.slice();
+  }
+
+  return mapping;
+};
+
+function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
-  let clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters
+  let clusters = Stimuli.findOne({fileName: Session.get("currentStimName")}).stimuli.setspec.clusters
   let allAnswers = new Set;
 
   for(cluster of clusters){
@@ -278,115 +352,14 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   return allAnswers;
 }
 
-getResponseType = function () {
-
-  //If we get called too soon, we just use the first cluster
-  let clusterIndex = getCurrentClusterIndex();
-  if (!clusterIndex)
-      clusterIndex = 0;
-
-  let cluster = getStimCluster(clusterIndex);
-  let type = cluster.responseType || "text"; //Default type
-
-  return ("" + type).toLowerCase();
-}
-
-findQTypeSimpified = function () {
-  let currentDisplay = Session.get("currentDisplay");
-  let QTypes = "";
-
-  if(currentDisplay.text)       QTypes = QTypes + "T";    //T for Text
-  if(currentDisplay.imgSrc)     QTypes = QTypes + "I";   //I for Image
-  if(currentDisplay.audioSrc)   QTypes = QTypes + "A";   //A for Audio
-  if(currentDisplay.clozeText)  QTypes = QTypes + "C";   //C for Cloze
-  if(currentDisplay.videoSrc)   QTypes = QTypes + "V";   //V for video
-
-  if(QTypes == "") QTypes = "NA"; //NA for Not Applicable
-
-  return QTypes;
-};
-
-getTestType = function () {
+function getTestType() {
     return _.trim(Session.get("testType")).toLowerCase();
 };
 
-//get the answer at this index - note that the cluster index will be mapped
-//in getStimCluster
-getStimAnswer = function (index, whichAnswer) {
-    return getStimCluster(index).stims[whichAnswer].response.correctResponse;
-};
-
-//Return the list of false responses corresponding to the current question/answer
-getCurrentFalseResponses = function() {
-  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
-  let cluster = getStimCluster(curClusterIndex);
-
-  if (typeof(cluster) == "undefined" || typeof(cluster.stims[curStimIndex].response.incorrectResponses) == "undefined") {
-      return []; //No false responses
-  }else{
-    return cluster.stims[curStimIndex].response.incorrectResponses;
-  }
-};
-
-getCurrentStimName = function () {
-    return Session.get("currentStimName");
-};
-
-getCurrentUnitNumber = function () {
-    return Session.get("currentUnitNumber");
-};
-
-getCurrentTdfName = function () {
-    return Session.get("currentTdfName");
-};
-
-getCurrentTdfFile = function () {
-    return Tdfs.findOne({fileName: getCurrentTdfName()});
-};
-
-//Note that unit number used can be overridden - otherwise we just use the
-//currentUnitNumber
-getCurrentTdfUnit = function (unitIdx) {
-    var thisTdf = getCurrentTdfFile();
-    if (!thisTdf) {
-        return null;
-    }
-
-    var currUnit = null;
-    if (typeof thisTdf.tdfs.tutor.unit !== "undefined") {
-        //If they didn't override the unit idx, then use the current
-        if (!unitIdx && unitIdx !== 0)
-            unitIdx = getCurrentUnitNumber();
-        currUnit = thisTdf.tdfs.tutor.unit[unitIdx];
-    }
-
-    return currUnit || null;
-};
-
-//Get units left to display/execute - note that the current unit isn't
-//counted. Ex: if you have three units (0, 1, 2) and unit 1 is the current
-//unit, then you have 1 unit remaining. If there are no units or there is
-//we return 0
-getUnitsRemaining = function() {
-    var unitsLeft = 0;
-
-    var thisTdf = getCurrentTdfFile();
-    if (!!thisTdf) {
-        var unitCount = 0;
-        if (typeof thisTdf.tdfs.tutor.unit !== "undefined" && thisTdf.tdfs.tutor.unit.length) {
-            unitCount = thisTdf.tdfs.tutor.unit.length;
-        }
-        if (unitCount > 0) {
-            var unitIdx = getCurrentUnitNumber() || 0;
-            unitsLeft = (unitCount - unitIdx) - 1;
-            if (unitsLeft < 0) {
-                unitsLeft = 0;
-            }
-        }
-    }
-
-    return unitsLeft;
-};
+async function getTdfByFileName(tdfFileName){
+  const tdf = await meteorCallAsync("getTdfByFileName",tdfFileName);
+  return tdf.content;
+}
 
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping
@@ -396,11 +369,9 @@ getUnitsRemaining = function() {
 //
 //IMPORTANT: we also support selecting one of multiple delivery params via
 //experimentXCond (which can be specified in the URL or system-assigned)
-getCurrentDeliveryParams = function (currUnit) {
+function getCurrentDeliveryParams(){
     //If they didn't specify the unit, assume that current unit
-    if (!currUnit) {
-        currUnit = getCurrentTdfUnit();
-    }
+    let currUnit = Session.get("currentTdfUnit");
 
     let isLearningSession = Session.get("sessionType") == "learningsession";
 
@@ -437,7 +408,7 @@ getCurrentDeliveryParams = function (currUnit) {
     };
 
     //We've defined defaults - also define translatations for values
-    var xlateBool = function(v) {
+    function xlateBool(v) {
         return  v ? _.trim(v).toLowerCase() === "true" : false;
     };
 
@@ -475,7 +446,7 @@ getCurrentDeliveryParams = function (currUnit) {
         }
     }else{
         //No unit - we look for the top-level deliveryparams
-        let tdf = getCurrentTdfFile();
+        let tdf = Session.get("currentTdfFile");
         if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
             sourceDelParams = tdf.tdfs.tutor.deliveryparams;
         }

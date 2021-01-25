@@ -35,33 +35,31 @@ recordClozeEditHistory = function(oldCloze,newCloze){
 setAllTdfs = function(ownerMapCallback){
   allTdfs = [];
   let ownerIds = [];
-  Meteor.subscribe('tdfs',function(){
-    Tdfs.find({}).forEach(function(entry){
-      try{
-        var fileName = entry.fileName;
-        if(fileName.indexOf(curSemester) != -1){
-          var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-          var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
-          let displayDate = "";
-          if (entry.createdAt) {
-            let date = new Date(entry.createdAt);
-            displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
-          }
- 
-          let ownerId = entry.owner;
-          ownerIds.push(entry.owner);
-          var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-          allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate || ""});
-          tdfFileNameToTdfFileMap[fileName] = entry;
-          tdfFileNameToStimfileMap[fileName] = stimulusObject;
+  Session.get("allTdfs").forEach(function(entry){
+    try{
+      var fileName = entry.fileName;
+      if(fileName.indexOf(curSemester) != -1){
+        var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+        var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
+        let displayDate = "";
+        if (entry.createdAt) {
+          let date = new Date(entry.createdAt);
+          displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
         }
-      }catch(err){
-        console.log("error with setting all tdfs: " + JSON.stringify(err));
+
+        let ownerId = entry.owner;
+        ownerIds.push(entry.owner);
+        var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
+        allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate || ""});
+        tdfFileNameToTdfFileMap[fileName] = entry;
+        tdfFileNameToStimfileMap[fileName] = stimulusObject;
       }
-    });
-    ownerMapCallback(ownerIds);
-    Session.set('contentGenerationAllTdfs',allTdfs);
+    }catch(err){
+      console.log("error with setting all tdfs: " + JSON.stringify(err));
+    }
   });
+  ownerMapCallback(ownerIds);
+  Session.set('contentGenerationAllTdfs',allTdfs);
 }
 
 getTdfOwnersMap = function(ownerIds) {
@@ -520,7 +518,7 @@ sortClozes = function(sortingMethod){
   Session.set("clozeSentencePairs",clozeSentencePairs);
 }
 
-Template.contentGeneration.onRendered(function(){
+Template.contentGeneration.onRendered(async function(){
   $('html,body').scrollTop(0);
   Session.set("curClozeSentencePairItemId", "");
   Session.set("clozeSentencePairs", {});

@@ -80,7 +80,7 @@ Template.turkWorkflow.helpers({
 ////////////////////////////////////////////////////////////////////////////
 // Template Events
 
-Template.turkWorkflow.rendered = function () {
+Template.turkWorkflow.rendered = async function () {
     //Init the modal dialogs
     $('#turkModal').modal({
         'backdrop': 'static',
@@ -92,18 +92,14 @@ Template.turkWorkflow.rendered = function () {
         'show': false
     });
 
-    var allTdfs = Tdfs.find();
+    const allTdfs = await meteorCallAsync("getAllTdfs");
     var turkLogCount = 0; //Check all the valid TDF's
 
     var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
 
     allTdfs.forEach( function (tdfObject) {
         //Make sure we have a valid TDF (with a setspec)
-        var setspec = _.chain(tdfObject)
-            .prop("tdfs")
-            .prop("tutor")
-            .prop("setspec").first()
-            .value();
+        let setspec = tdfObject.tdfs.tutor.setspec[0];
 
         if (!setspec) {
             return;

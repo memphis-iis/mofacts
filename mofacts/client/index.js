@@ -1,10 +1,16 @@
+import Promise from "bluebird";
+import {Meteor} from "meteor/meteor";
 import { dialogueContinue } from './views/experiment/dialogueUtils.js';
+import { haveMeteorUser } from "./lib/currentTestingHelpers";
+export { redoCardImage };
+
+meteorCallAsync = Promise.promisify(Meteor.call);
 ENTER_KEY = 13;
 enterKeyLock = false;
 
 //This will be setup for window resize, but is made global so that the
 //card template page can hook it up as well
-redoCardImage = function() {
+function redoCardImage() {
     //Note that just in case we can't get the height on the window we punt
     //with a default that is reasonable a lot of the time
     var wid = $(window).width() || 640;
@@ -56,7 +62,7 @@ Meteor.startup(function() {
     });
 });
 
-restartMainCardTimeoutIfNecessary = function(){
+function restartMainCardTimeoutIfNecessary(){
   console.log("restartMainCardTimeoutIfNecessary");
   var mainCardTimeoutStart = Session.get("mainCardTimeoutStart");
   if(!mainCardTimeoutStart){
@@ -71,7 +77,7 @@ restartMainCardTimeoutIfNecessary = function(){
   timeoutDelay = remainingDelay;
   var rightNow = new Date();
   Session.set("mainCardTimeoutStart",rightNow);
-  wrappedTimeout = function(){
+  function wrappedTimeout(){
     var numRemainingLocks = Session.get("pausedLocks")-1;
     Session.set("pausedLocks",numRemainingLocks);
     if(numRemainingLocks <= 0){

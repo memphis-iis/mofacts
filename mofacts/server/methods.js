@@ -3,6 +3,7 @@ import { curSemester, ALL_TDFS } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
+export { getTdfBy_id };
 
 /*jshint sub:true*/
 
@@ -66,6 +67,70 @@ if(Meteor.settings.definitionalFeedbackDataLocation){
   DefinitionalFeedback.Initialize(feedbackData);
 }
 
+const pgp = require('pg-promise')();
+const connectionString = "postgres://mofacts:test101@localhost:5432";
+const db = pgp(connectionString);
+
+//Published to all clients (even without subscription calls)
+Meteor.publish(null, function () {
+  //Only valid way to get the user ID for publications
+  var userId = this.userId;
+
+  //The default data published to everyone - all TDF's and stims, and the
+  //user data (user times log and user record) for them
+  var defaultData = [
+      StimSyllables.find({}),
+      Stimuli.find({}),
+      UserTimesLog.find({_id:userId}),
+      Meteor.users.find({_id: userId}),
+      UserProfileData.find({_id: userId}, {fields: {
+          have_aws_id: 1,
+          have_aws_secret: 1,
+          use_sandbox: 1
+      }}),
+      UserMetrics.find({_id:userId})
+  ];
+
+  return defaultData;
+});
+
+Meteor.publish('specificUser',function(username){
+return Meteor.users.find({"username":username});
+})
+
+Meteor.publish('Stimuli', function(){
+return Stimuli.find({});
+})
+
+Meteor.publish('specificUserTimesLog',function(userId){
+Meteor.call("updatePerformanceData","utlQuery","server.specificUserTimesLog",this.userId);
+return UserTimesLog.find({_id:userId});
+})
+
+Meteor.publish('specificUserMetrics',function(userId){
+return UserMetrics.find({_id:userId});
+})
+
+Meteor.publish('allUsers', function () {
+  var opts = {
+      fields: {username: 1}
+  };
+  if (Roles.userIsInRole(this.userId, ["admin"])) {
+      opts.fields.roles = 1;
+  }
+return Meteor.users.find({}, opts);
+});
+
+//Config for scheduled jobs - the start command is at the end of
+//Meteor.startup below
+SyncedCron.config({
+  log: true,
+  logger: null,
+  collectionName: 'cronHistory',
+  utc: false,
+  collectionTTL: undefined
+});
+
 //Helper functions
 
 serverConsole = function() {
@@ -76,28 +141,29 @@ serverConsole = function() {
     console.log.apply(this, disp);
 };
 
-function getTdfQueryNames(tdfFileName) {
+async function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = {};
   if (tdfFileName === ALL_TDFS) {
-    tdfQueryNames = getAllTdfFileNames();
+    tdfQueryNames = await getAllTdfFileNames();
   } else if (tdfFileName){
     tdfQueryNames = [tdfFileName];
   }
   return tdfQueryNames;
 }
 
-function getAllTdfFileNames() {
-  return Tdfs.find({}).fetch().map(x => x.fileName);
+async function getAllTdfFileNames() {
+  const allTdfs = await getAllTdfs();
+  return allTdfs.map(x => x.fileName);
 }
 
-function getLearningSessionItems(tdfFileName) {
+async function getLearningSessionItems(tdfFileName) {
   let learningSessionItems = [];
-  let tdfQueryNames = getTdfQueryNames(tdfFileName);
-  tdfQueryNames.forEach(tdfQueryName => {
-    let tdf = Tdfs.findOne({fileName: tdfQueryName});
+  const tdfQueryNames = await getTdfQueryNames(tdfFileName);
+  tdfQueryNames.forEach(async function(tdfQueryName){
     if (!learningSessionItems[tdfQueryName]) {
       learningSessionItems[tdfQueryName] = {};
     }
+    const tdf = await getTdfByFileName(tdfQueryName);
     if (tdf.isMultiTdf) {
       setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
     } else {
@@ -105,6 +171,240 @@ function getLearningSessionItems(tdfFileName) {
     }
   });
   return learningSessionItems;
+}
+
+async function getTdfByOwnerId(ownerId){
+  try{
+    console.log("getTdfByOwnerId:"+ownerId);
+    const tdfs = await db.any("SELECT * from tdf WHERE ownerid=$1",[ownerId]);
+    return tdfs[0];
+  }catch(e){
+    console.log("getTdfByOwnerId ERROR,",ownerId,",",e);
+    return null;
+  }
+}
+
+async function getTdfBy_id(_id){
+  try{
+    console.log("getTdfBy_id:"+_id);
+    let queryJSON = {"_id":_id};
+    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    return tdfs[0];
+  }catch(e){
+    console.log("getTdfBy_id ERROR,",_id,",",e);
+    return null;
+  }
+}
+
+async function getTdfByFileName(filename){
+  try{
+    console.log("getTdfByFileName:"+filename);
+    let queryJSON = {"fileName":filename};
+    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    return tdfs[0];
+  }catch(e){
+    console.log("getTdfByFileName ERROR,",filename,",",e);
+    return null;
+  }
+}
+
+async function getTdfByExperimentTarget(experimentTarget){
+  try{
+    console.log("getTdfByExperimentTarget:"+experimentTarget);
+    let queryJSON = {"tdfs":{"tutor":{"setspec":[{"experimentTarget":[experimentTarget]}]}}};
+    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    return tdfs[0];
+  }catch(e){
+    console.log("getTdfByExperimentTarget ERROR,",experimentTarget,",",e);
+    return null;
+  }
+}
+
+async function getAllTdfs(){
+  try{
+    console.log("getAllTdfs");
+    const tdfs = await db.any("SELECT * from tdf");
+    return tdfs;
+  }catch(e){
+    console.log("getAllTdfs ERROR,",e);
+    return null;
+  }
+}
+
+async function getAllCourses(){
+  try{
+    const courses = await db.any("SELECT * from course");
+    return courses;
+  }catch(e){
+    console.log("getAllCourses ERROR,",e);
+    return null;
+  }
+}
+
+async function getAllCoursesForInstructor(instructorId,inCurrentSemester=false){
+  try{
+    console.log("getAllCoursesForInstructor:"+instructorId);
+    let query = "SELECT * from course WHERE teacherUserId=$1";
+    let args = [instructorId];
+    if(inCurrentSemester){
+      query += " AND semester=$2";
+      args.push(curSemester);
+    } 
+    const courses = await db.any(query,args);
+    return courses;
+  }catch(e){
+    console.log("getAllCoursesForInstructor ERROR,",instructorId,inCurrentSemester,",",e);
+    return null;
+  }
+}
+
+async function getAllCourseAssignmentsForInstructor(instructorId){
+  try{
+    console.log("getAllCourseAssignmentsForInstructor:"+instructorId);
+    let query = "SELECT t.content -> 'fileName' AS filename, c.courseName, c.courseId from assignment AS a \
+                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+                 INNER JOIN course AS c ON c.courseId = a.courseId \
+                 WHERE c.teacherUserId = $1 AND c.semester = $2";
+    let args = [instructorId,curSemester];
+    const courseAssignments = await db.any(query,args);
+    return courseAssignments;
+  }catch(e){
+    console.log("getAllCourseAssignmentsForInstructor ERROR,",instructorId,",",e);
+    return null;
+  }
+}
+
+function getSetAMinusB(arrayA, arrayB){
+  let a = new Set(arrayA);
+  let b = new Set(arrayB);
+  let difference = new Set([...a].filter(x => !b.has(x)));
+  return Array.from(difference);
+}
+
+async function editCourseAssignments(newCourseAssignment){ //Shape: {coursename: "Test Course", courseid: 1, 'tdfs': ['filename1']}
+  try{
+    console.log("editCourseAssignments:",newCourseAssignment);
+    const res = await db.tx(async t => {
+      let newTdfs = newCourseAssignment.tdfs;
+      let query = "SELECT t.content -> 'fileName' AS filename, t.TDFId, c.courseId from assignment AS a \
+                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+                  INNER JOIN course AS c ON c.courseId = a.courseId \
+                  WHERE c.courseid = $1";
+      const curCourseAssignments = await db.manyOrNone(query,newCourseAssignment.courseid);
+      let existingTdfs = curCourseAssignments.map((courseAssignment) => courseAssignment.filename);
+  
+      let tdfsAdded = getSetAMinusB(newTdfs,existingTdfs);
+      let tdfsRemoved = getSetAMinusB(existingTdfs,newTdfs);
+
+      const tdfNamesAndIDs = await t.manyOrNone("SELECT TDFId, content -> 'fileName' AS filename from tdf");
+      console.log("tdfNamesAndIDs",tdfNamesAndIDs);
+      let tdfNameIDMap = {};
+      for(let tdfNamesAndID of tdfNamesAndIDs){
+        tdfNameIDMap[tdfNamesAndID.filename] = tdfNamesAndID.tdfid;
+      }
+      console.log("tdfNameIDMap",tdfNameIDMap);
+  
+      for(let tdfName of tdfsAdded){
+        let TDFId = tdfNameIDMap[tdfName];
+        await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)',[newCourseAssignment.courseid,TDFId]);
+      }
+      for(let tdfName of tdfsRemoved){
+        let TDFId = tdfNameIDMap[tdfName];
+        await t.none('DELETE FROM assignment WHERE courseId=$1 AND TDFId=$2',[newCourseAssignment.courseid,TDFId]);
+      }
+      return newCourseAssignment;
+    });
+    return res;
+  }catch(e){
+    console.log("editCourseAssignments ERROR,",newCourseAssignment,",",e);
+    return null;
+  }
+}
+
+async function getTdfAssignmentsByCourseId(courseId){
+  try{
+    console.log("getTdfAssignmentsByCourseId:"+courseId);
+    let query = "SELECT t.content -> 'fileName' AS filename from assignment AS a \
+                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+                 INNER JOIN course AS c ON c.courseId = a.courseId \
+                 WHERE c.courseId = $1 AND c.semester = $2";
+    const assignmentTdfFileNames = await db.any(query,[instructorID,curSemester]);
+    let unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
+    console.log("assignmentTdfFileNames",unboxedAssignmentTdfFileNames);
+    return unboxedAssignmentTdfFileNames;
+  }catch(e){
+    console.log("getTdfAssignmentsByCourseId ERROR,",e);
+    return null;
+  }
+}
+               
+async function getTdfNamesAssignedByInstructor(instructorID){
+  try{
+    let query = "SELECT t.content -> 'fileName' AS filename from course AS c \
+                 INNER JOIN assignment AS a ON a.courseId = c.courseId\
+                 INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
+                 WHERE c.teacherUserId = $1 AND c.semester = $2";
+    const allTdfs = await getAllTdfs();
+    console.log("allTdfs.length:",allTdfs.length);
+    const assignmentTdfFileNames = await db.any(query,[instructorID,curSemester]);
+    let unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
+    console.log("assignmentTdfFileNames",unboxedAssignmentTdfFileNames);
+    return unboxedAssignmentTdfFileNames;
+  }catch(e){
+    console.log("getTdfNamesAssignedByInstructor ERROR,",e);
+    return null;
+  }
+}
+
+function getAllTeachers(southwestOnly=false){
+  let query = {'roles':'teacher'};
+  if(southwestOnly) query["username"]=/southwest[.]tn[.]edu/i;
+  return Meteor.users.find(query);
+}
+
+async function addCourse(mycourse){
+  console.log("addCourse:" + JSON.stringify(mycourse));
+  const res = await db.tx(async t => {
+    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) VALUES(${coursename}, ${teacheruserid}, ${semester}, ${beginDate}) RETURNING courseId',mycourse)
+    .then(async row => {
+      let courseId = row.courseid;
+      for(let sectionName of mycourse.sections){
+        await t.none('INSERT INTO section(courseId, sectionName) VALUES($1, $2)',[courseId,sectionName]);
+      }
+      return courseId;
+    })
+  });
+  return res;
+}
+
+async function editCourse(mycourse){
+  console.log("editCourse:" + JSON.stringify(mycourse));
+  const res = await db.tx(async t => {
+    console.log("transaction");
+    return t.one('UPDATE course SET courseName=${coursename}, beginDate=${beginDate} WHERE courseid=${courseid} RETURNING courseId',mycourse).then(async row => {
+      let courseId = row.courseid;
+      console.log("courseId",courseId,row);
+      let newSections = mycourse.sections;
+      const curCourseSections = await t.many('SELECT sectionName from section WHERE courseId=$1',courseId);
+      let oldSections = curCourseSections.map(section => section.sectionname);
+      console.log("old/new",oldSections,newSections);
+
+      let sectionsAdded = getSetAMinusB(newSections,oldSections);
+      let sectionsRemoved = getSetAMinusB(oldSections,newSections);
+      console.log("sectionsAdded,",sectionsAdded);
+      console.log("sectionsRemoved,",sectionsRemoved);
+
+      for(let sectionName of sectionsAdded){
+        await t.none('INSERT INTO section(courseId, sectionName) VALUES($1, $2)',[courseId,sectionName]);
+      }
+      for(let sectionName of sectionsRemoved){
+        await t.none('DELETE FROM section WHERE courseId=$1 AND sectionName=$2',[courseId,sectionName]);
+      }
+      
+      return courseId;
+    })
+  });
+  return res;
 }
 
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
@@ -169,15 +469,6 @@ function defaultUserProfile() {
         aws_secret_key: '',
         use_sandbox: true
     };
-}
-
-// Append a row to CSV file that serves as a log of online users
-function logNumOnlineUsers() {
-  var now = (new Date()).toString();
-  var numUsers = Meteor.call('numOnlineUsers');
-  var rowToWrite = now + ',' + numUsers + '\n';
-  activeUserLogStream.write(rowToWrite);
-  serverConsole('Logged ' + numUsers + ' active users.');
 }
 
 function sendErrorReportSummaries(){
@@ -294,17 +585,11 @@ function hasGeneratedTdfs(json) {
 }
 
 function hasAssociatedStimFile(json) {
-  stim = Stimuli.findOne({fileName: json.tutor.setspec[0].stimulusfile[0]});
-
-  if (!stim) {
-    return false;
-  }
-
-  return true;
+  return !!Stimuli.findOne({fileName: json.tutor.setspec[0].stimulusfile[0]});
 }
 
 const baseSyllableURL = 'http://localhost:4567/syllables/'
-getSyllablesForWord = function(word){
+function getSyllablesForWord(word){
   let syllablesURL = baseSyllableURL + word;
   const result = HTTP.call('GET',syllablesURL);
   let syllableArray = result.content.replace(/\[|\]/g,'').split(',').map(x => x.trim());
@@ -314,88 +599,9 @@ getSyllablesForWord = function(word){
 
 const lengthOfNewGeneratedIDs = 6;
 
-//Published to all clients (even without subscription calls)
-Meteor.publish(null, function () {
-    //Only valid way to get the user ID for publications
-    var userId = this.userId;
-
-    //The default data published to everyone - all TDF's and stims, and the
-    //user data (user times log and user record) for them
-    var defaultData = [
-        StimSyllables.find({}),
-        Stimuli.find({}),
-        Tdfs.find({}),
-        UserTimesLog.find({_id:userId}),
-        Meteor.users.find({_id: userId}),
-        UserProfileData.find({_id: userId}, {fields: {
-            have_aws_id: 1,
-            have_aws_secret: 1,
-            use_sandbox: 1
-        }}),
-        UserMetrics.find({_id:userId}),
-        Classes.find({})
-    ];
-
-    return defaultData;
-});
-
-Meteor.publish('specificUser',function(username){
-  return Meteor.users.find({"username":username});
-})
-
-Meteor.publish('tdfs', function(){
-  return Tdfs.find({});
-})
-
-
-Meteor.publish('Stimuli', function(){
-  return Stimuli.find({});
-})
-
-Meteor.publish('specificUserTimesLog',function(userId){
-  Meteor.call("updatePerformanceData","utlQuery","server.specificUserTimesLog",this.userId);
-  return UserTimesLog.find({_id:userId});
-})
-
-Meteor.publish('specificUserMetrics',function(userId){
-  return UserMetrics.find({_id:userId});
-})
-
-Meteor.publish('allUsers', function () {
-    var opts = {
-        fields: {username: 1}
-    };
-    if (Roles.userIsInRole(this.userId, ["admin"])) {
-        opts.fields.roles = 1;
-    }
-	return Meteor.users.find({}, opts);
-});
-
-Meteor.publish('classesForInstructor',function(instructorID){
-  return Classes.find({"instructor":instructorID});
-})
-
-Meteor.publish('allTeachers', function(){
-  return Meteor.users.find({'roles':'teacher',"username":/southwest[.]tn[.]edu/i});
-});
-
-Meteor.publish('allUsersWithTeacherRole', function() {
-  return Meteor.users.find({'roles': 'teacher'});
-});
-
-//Config for scheduled jobs - the start command is at the end of
-//Meteor.startup below
-SyncedCron.config({
-    log: true,
-    logger: null,
-    collectionName: 'cronHistory',
-    utc: false,
-    collectionTTL: undefined
-});
-
 //Server-side startup logic
 
-Meteor.startup(function () {
+Meteor.startup(async function () {
     // Let anyone looking know what config is in effect
     serverConsole("Log Notice (from siteConfig):", getConfigProperty("logNotice"));
 
@@ -476,13 +682,13 @@ Meteor.startup(function () {
 
       _.each(
           _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-          function (ele, idx, lst) {
+          async function (ele, idx, lst) {
               //serverConsole("Updating TDF in DB from ", ele);
               var json = getTdfJSON('tdf/' + ele);
 
               var rec = createTdfRecord(ele, json, adminUserId, 'repo');
 
-              var prev = Tdfs.findOne({'fileName': ele});
+              const prev = await getTdfByFileName(ele);
 
               if (prev && !hasGeneratedTdfs(json)) {
                 Tdfs.update({ _id: prev._id }, rec);
@@ -588,6 +794,32 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+      getAllTdfs:getAllTdfs,
+
+      getTdfByFileName:getTdfByFileName,
+
+      getTdfByExperimentTarget:getTdfByExperimentTarget,
+
+      getTdfByOwnerId:getTdfByOwnerId,
+
+      getLearningSessionItems:getLearningSessionItems,
+
+      getAllCourses: getAllCourses,
+
+      getAllCoursesForInstructor:getAllCoursesForInstructor,
+
+      getAllCourseAssignmentsForInstructor:getAllCourseAssignmentsForInstructor,
+
+      getAllTeachers:getAllTeachers,
+
+      getTdfNamesAssignedByInstructor:getTdfNamesAssignedByInstructor,
+
+      addCourse: addCourse,
+      
+      editCourse:editCourse,
+
+      editCourseAssignments:editCourseAssignments,
+
       getAltServerUrl:function(){
         return altServerUrl;
       },
@@ -637,12 +869,6 @@ Meteor.startup(function () {
           StimSyllables.insert({filename:stimFileName,data:data});
           console.log("after updateStimSyllableCache");
         }
-      },
-
-      getUsageReportData:function(){
-        const numDaysToQuery = 7;
-        var startQueryDate = new Date(Date.now() - (1000*60*60*24*numDaysToQuery));
-
       },
 
       getClozeEditAuthors:function(){
@@ -700,103 +926,6 @@ Meteor.startup(function () {
         return newIDs;
       },
 
-      getStudentPerformanceForClassAndTdf: function(classID, tdfFileName){
-        let curClass = Classes.findOne({_id:classID});
-        studentTotals = {
-          numCorrect: 0,
-          count: 0,
-          totalTime: 0,
-          percentCorrectsSum: 0,
-          numStudentsWithData: 0
-        }
-        let students = [];
-        if(!!curClass){
-          let curClassTdfs = [];
-          for(let tdf of curClass.tdfs){
-            curClassTdfs.push(tdf.fileName);
-          }
-          curClass.students.forEach(function(studentUsername){
-            if(studentUsername.indexOf("@") == -1){
-              studentUsername = studentUsername.toUpperCase();
-            }
-            let student = Meteor.users.findOne({"username":studentUsername}) || {};
-            let studentID = student._id;
-            let count = 0;
-            let numCorrect = 0;
-            let totalTime = 0;
-            assessmentItems = {};
-            let learningSessionItems = getLearningSessionItems(tdfFileName);
-            let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-            let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
-            UserMetrics.find({_id: studentID}).forEach(function(entry){
-              let tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-              tdfEntries = tdfEntries.filter(x => curClassTdfs.indexOf(x.replace("_xml",".xml")) != -1);
-              for(var index in tdfEntries){
-                var key = tdfEntries[index];
-                var tdf = entry[key];
-                let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
-                for(var index in tdf){
-                  //Only count items in learning sessions
-                  if(!!learningSessionItems[tdfKey] 
-                      && !!learningSessionItems[tdfKey][index]){
-                    var stim = tdf[index];
-                    count += stim.questionCount || 0;
-                    numCorrect += stim.correctAnswerCount || 0;
-                    var answerTimes = stim.answerTimes;
-                    for(var index in answerTimes){
-                      var time = answerTimes[index];
-                      totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-                    }
-                  }
-                }
-              }
-            });
-            var percentCorrect = "N/A";
-            if(count != 0){
-              percentCorrect = ((numCorrect / count)*100);
-              studentTotals.percentCorrectsSum  += percentCorrect;
-              studentTotals.numStudentsWithData += 1;
-              percentCorrect = percentCorrect.toFixed(2) + "%";
-            }
-            totalTime = totalTime.toFixed(1);
-            var studentPerformance = {
-              "username":studentUsername,
-              "count":count,
-              "percentCorrect":percentCorrect,
-              "numCorrect":numCorrect,
-              "totalTime":totalTime
-            }
-            studentTotals.count += studentPerformance.count;
-            studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
-            studentTotals.numCorrect += studentPerformance.numCorrect;
-            students.push(studentPerformance);
-          })
-        }
-        studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
-        studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
-
-        studentTotals.averageCount = studentTotals.count / studentTotals.numStudentsWithData;
-        studentTotals.averageTotalTime = (studentTotals.totalTime / studentTotals.numStudentsWithData).toFixed(1);
-        studentTotals.averagePercentCorrect = (studentTotals.percentCorrectsSum / studentTotals.numStudentsWithData).toFixed(4) + "%";
-
-        return [students,studentTotals];
-      },
-
-      getTdfNamesAssignedByInstructor:function(instructorID){
-        var user = Meteor.users.findOne({_id:instructorID});
-        var instructorClasses;
-        if(Roles.userIsInRole(user, ['admin'])){
-          instructorClasses = Classes.find({}).fetch();
-        }else{
-          instructorClasses = Classes.find({"instructor":instructorID,"curSemester":curSemester}).fetch();
-        }
-        var tdfs = {};
-        for(let curClass of instructorClasses){
-          tdfs[curClass._id] = curClass.tdfs;
-        }
-        return tdfs;
-      },
-
       insertClozeEditHistory:function(history){
         ClozeEditHistory.insert(history);
       },
@@ -808,21 +937,6 @@ Meteor.startup(function () {
       insertStimTDFPair:function(newStimJSON,newTDFJSON){
         Stimuli.insert(newStimJSON);
         Tdfs.insert(newTDFJSON);
-      },
-
-      addClass: function(myClass){
-        console.log("add myClass:" + JSON.stringify(myClass));
-        return Classes.insert(myClass);
-      },
-
-      editClass:function(myClass){
-        console.log("edit myClass:" + JSON.stringify(myClass));
-        Classes.update({"_id":myClass._id},myClass,{upsert: true});
-        return myClass._id;
-      },
-
-      deleteClass: function(myClass){
-        Classes.remove({"instructor":this.userId,"name":myClass.name});
       },
 
       addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
@@ -1349,12 +1463,10 @@ Router.route("data-by-teacher", {
   name: "server.teacherData",
   where: "server",
   path: "/data-by-teacher/:uid/:format",
-  action: function() {
+  action: async function() {
     var uid = this.params.uid;
     var fmt = this.params.format;
     var response = this.response;
-
-    var tdfs = [];
 
     if (!uid) {
       response.writeHead(404);
@@ -1368,21 +1480,9 @@ Router.route("data-by-teacher", {
       return;
     }
 
-    var classes = Classes.find({'instructor': uid});
-  
-    if (!classes) {
-      response.writeHead(404);
-      response.end("No classes found for the specified user ID");
-      return;
-    }
+    let tdfNames = getTdfNamesAssignedByInstructor(uid);
 
-    classes.forEach(function(c) {
-      c.tdfs.forEach(function(tdf) {
-        tdfs.push(tdf.fileName);
-      });
-    });
-
-    if (!tdfs.length > 0) {
+    if (!tdfNames.length > 0) {
       response.writeHead(404);
       response.end("No tdfs found for any classes");
       return;
@@ -1399,12 +1499,12 @@ Router.route("data-by-teacher", {
       "Content-Disposition": "attachment; filename=" + fileName
     });
 
-    var recCount = createExperimentExport(tdfs, fmt, function(record) {
+    const recCount = await createExperimentExport(tdfNames, fmt, function(record) {
       response.write(record);
       response.write('\r\n');
     });
 
-    tdfs.forEach(function(tdf) {
+    tdfNames.forEach(function(tdf) {
       serverConsole("Sent all  data for", tdf, "as file", fileName, "with record-count:", recCount);
     });
 
@@ -1417,12 +1517,10 @@ Router.route("data-by-class", {
   name: "server.classData",
   where: "server",
   path: "/data-by-class/:classid/:format",
-  action: function() {
+  action: async function() {
     var classId = this.params.classid;
     var fmt = this.params.format;
     var response = this.response;
-
-    var tdfs = [];
 
     if (!classId) {
       response.writeHead(404);
@@ -1436,41 +1534,36 @@ Router.route("data-by-class", {
       return;
     }
 
-    var foundClass = Classes.findOne({'_id': classId});
+    const foundClass = await getCourseById(classId);
   
     if (!foundClass) {
       response.writeHead(404);
       response.end("No classes found for the specified class ID");
       return;
     }
-    console.log(foundClass);
-    foundClass.tdfs.forEach(function(tdf) {
-      tdfs.push(tdf.fileName);
-    });
 
-    if (!tdfs.length > 0) {
+    const tdfFileNames = await getTdfAssignmentsByCourseId(classId);
+
+    if (!tdfFileNames || tdfFileNames.length == 0) {
       response.writeHead(404);
       response.end("No tdfs found for any classes");
       return;
     }
 
-    var className = foundClass.name;
-    className = className.replace('/[/\\?%*:|"<>\s]/g', '_');
-    
-
-    var fileName = 'mofacts_' + className + '_all_class_data.txt';
+    let className = foundClass.courseName.replace('/[/\\?%*:|"<>\s]/g', '_');
+    let fileName = 'mofacts_' + className + '_all_class_data.txt';
 
     response.writeHead(200, {
       "Content-Type": "text/tab-separated-values",
       "Content-Disposition": "attachment; filename=" + fileName
     });
 
-    var recCount = createExperimentExport(tdfs, fmt, function(record) {
+    const recCount = await createExperimentExport(tdfFileNames, fmt, function(record) {
       response.write(record);
       response.write('\r\n');
     });
 
-    tdfs.forEach(function(tdf) {
+    tdfFileNames.forEach(function(tdf) {
       serverConsole("Sent all  data for", tdf, "as file", fileName, "with record-count:", recCount);
     });
 
@@ -1483,7 +1576,7 @@ Router.route("experiment-data", {
     name: "server.data",
     where: "server",
     path: "/experiment-data/:expKey/:format",
-    action: function () {
+    action: async function () {
         var exp = this.params.expKey;
         var fmt = this.params.format;
         var response = this.response;
@@ -1500,14 +1593,14 @@ Router.route("experiment-data", {
             return;
         }
 
-        var filename = fmt + exp + "-data.txt";
+        let filename = fmt + exp + "-data.txt";
 
         response.writeHead(200, {
             "Content-Type": "text/tab-separated-values",
             "Content-Disposition": "attachment; filename=" + filename
         });
 
-        var recCount = createExperimentExport(exp, fmt, function(record) {
+        const recCount = await createExperimentExport(exp, fmt, function(record) {
             response.write(record);
             response.write('\r\n');
         });

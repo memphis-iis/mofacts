@@ -1,3 +1,5 @@
+import { search, getAllCoursesForInstructor } from '../../lib/currentTestingHelpers';
+
 Session.set("instructorReportingTdfs",[]);
 Session.set("classes",[]);
 Session.set("curClass",undefined);
@@ -34,6 +36,88 @@ setCurClassStudents = function(curClass,currentTdf){
     }
   })
 }
+
+// getStudentPerformanceForClassAndTdf: async function(classID, tdfFileName){
+//   let curClass = Classes.findOne({_id:classID});
+//   studentTotals = {
+//     numCorrect: 0,
+//     count: 0,
+//     totalTime: 0,
+//     percentCorrectsSum: 0,
+//     numStudentsWithData: 0
+//   }
+//   let students = [];
+//   if(!!curClass){
+//     let curClassTdfs = [];
+//     for(let tdf of curClass.tdfs){
+//       curClassTdfs.push(tdf.fileName);
+//     }
+//     curClass.students.forEach(async function(studentUsername){
+//       if(studentUsername.indexOf("@") == -1){
+//         studentUsername = studentUsername.toUpperCase();
+//       }
+//       let student = Meteor.users.findOne({"username":studentUsername}) || {};
+//       let studentID = student._id;
+//       let count = 0;
+//       let numCorrect = 0;
+//       let totalTime = 0;
+//       assessmentItems = {};
+//       const learningSessionItems = await getLearningSessionItems(tdfFileName);
+//       let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
+//       let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
+//       UserMetrics.find({_id: studentID}).forEach(function(entry){
+//         let tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
+//         tdfEntries = tdfEntries.filter(x => curClassTdfs.indexOf(x.replace("_xml",".xml")) != -1);
+//         for(var index in tdfEntries){
+//           var key = tdfEntries[index];
+//           var tdf = entry[key];
+//           let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
+//           for(var index in tdf){
+//             //Only count items in learning sessions
+//             if(!!learningSessionItems[tdfKey] 
+//                 && !!learningSessionItems[tdfKey][index]){
+//               var stim = tdf[index];
+//               count += stim.questionCount || 0;
+//               numCorrect += stim.correctAnswerCount || 0;
+//               var answerTimes = stim.answerTimes;
+//               for(var index in answerTimes){
+//                 var time = answerTimes[index];
+//                 totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+//               }
+//             }
+//           }
+//         }
+//       });
+//       var percentCorrect = "N/A";
+//       if(count != 0){
+//         percentCorrect = ((numCorrect / count)*100);
+//         studentTotals.percentCorrectsSum  += percentCorrect;
+//         studentTotals.numStudentsWithData += 1;
+//         percentCorrect = percentCorrect.toFixed(2) + "%";
+//       }
+//       totalTime = totalTime.toFixed(1);
+//       var studentPerformance = {
+//         "username":studentUsername,
+//         "count":count,
+//         "percentCorrect":percentCorrect,
+//         "numCorrect":numCorrect,
+//         "totalTime":totalTime
+//       }
+//       studentTotals.count += studentPerformance.count;
+//       studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+//       studentTotals.numCorrect += studentPerformance.numCorrect;
+//       students.push(studentPerformance);
+//     })
+//   }
+//   studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
+//   studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
+
+//   studentTotals.averageCount = studentTotals.count / studentTotals.numStudentsWithData;
+//   studentTotals.averageTotalTime = (studentTotals.totalTime / studentTotals.numStudentsWithData).toFixed(1);
+//   studentTotals.averagePercentCorrect = (studentTotals.percentCorrectsSum / studentTotals.numStudentsWithData).toFixed(4) + "%";
+
+//   return [students,studentTotals];
+// },
 
 Template.instructorReporting.helpers({
   tdfs: function(){
@@ -112,8 +196,8 @@ Template.instructorReporting.onRendered(function(){
       Session.set("instructorReportingTdfs",res);
     }
   });
-
-  let classes = getAllClassesForCurrentInstructor(Meteor.userId());
+  
+  let classes = getAllCoursesForInstructor(Meteor.userId()); //getAllClassesForCurrentInstructor
   console.log("userID: " + Meteor.userId());
   console.log("classes: " + JSON.stringify(classes));
   Session.set("classes",classes);

@@ -1,3 +1,10 @@
+import { 
+    extractDelimFields,
+    rangeVal,
+    getStimClusterCount, 
+    getStimCluster, 
+    getTestType
+} from '../../lib/currentTestingHelpers';
 /* unitEngine.js
 *******************************************************************************
 Unit engines handle question/answer selection for a particular unit. This
@@ -99,6 +106,12 @@ createModelUnit = function(extensionData) {
 
 createScheduleUnit = function(extensionData) {
     return create(scheduleUnitEngine,extensionData);
+};
+
+//get the answer at this index - note that the cluster index will be mapped
+//in getStimCluster
+function getStimAnswer(index, whichAnswer) {
+    return getStimCluster(index).stims[whichAnswer].response.correctResponse;
 };
 
 // Return an instance of the "base" engine
@@ -336,7 +349,7 @@ function emptyUnitEngine() {
   LAST practice - card.otherPracticeTimeSinceLast
 */
 
-
+//TODO: pass in all session variables possible
 function modelUnitEngine() {
     console.log('model unit engine created!!!');
     //Checked against practice seconds. Notice that we capture this on unit
@@ -348,7 +361,7 @@ function modelUnitEngine() {
     var cachedStimuli = null;
     fastGetStimCluster =function(index) {
         if (!cachedStimuli) {
-            cachedStimuli = Stimuli.findOne({fileName: getCurrentStimName()});
+            cachedStimuli = Stimuli.findOne({fileName: Session.get("currentStimName")});
         }
         return getStimCluster(index, cachedStimuli);
     }
@@ -408,7 +421,7 @@ function modelUnitEngine() {
 
     //TODO: do this function without side effects on cards
     function setUpClusterList(cards){
-        const currentTdfFile = getCurrentTdfFile();
+        const currentTdfFile = Session.get("currentTdfFile");
         const isMultiTdf = currentTdfFile.isMultiTdf;
         let clusterList = [];
 
@@ -423,21 +436,21 @@ function modelUnitEngine() {
                     console.log("assuming we are in studentReporting, therefore ignoring the clusterlists"); //TODO, make this an explicit argument and error when it happens if we don't pass in the argument
                 }else{
                     const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
-                    Helpers.extractDelimFields(unitClusterList, clusterList);
+                    extractDelimFields(unitClusterList, clusterList);
                 }
             }else if(curUnitNumber > 2){
                 throw new Error("We shouldn't ever get here, dynamic tdf cluster list error");
             }
         }else{
             // Figure out which cluster numbers that they want
-            const unitClusterList = _.chain(getCurrentTdfUnit())
+            const unitClusterList = _.chain(this.curUnit)
             .prop("learningsession").first()
             .prop("clusterlist").trim().value();
-            Helpers.extractDelimFields(unitClusterList, clusterList);
+            extractDelimFields(unitClusterList, clusterList);
         }
 
         for (i = 0; i < clusterList.length; ++i) {
-            var nums = Helpers.rangeVal(clusterList[i]);
+            var nums = rangeVal(clusterList[i]);
             for (j = 0; j < nums.length; ++j) {
                 cards[_.intval(nums[j])].canUse = true;
             }
@@ -569,7 +582,7 @@ function modelUnitEngine() {
     }
 
     // See if they specified a probability function
-    var probFunction = _.chain(getCurrentTdfUnit())
+    var probFunction = _.chain(this.curUnit)
         .prop("learningsession").first()
         .prop("calculateProbability").first().trim().value();
     var probFunctionHasHintSylls = typeof(probFunction) == "undefined" ? false : probFunction.indexOf("hintsylls") > -1;
@@ -618,7 +631,7 @@ function modelUnitEngine() {
         p.stimFailureCount = stim.stimFailureCount;
         let answerText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
-        let curStimFile = getCurrentStimName().replace(/\./g,'_');
+        let curStimFile = Session.get("currentStimName").replace(/\./g,'_');
         answerText = answerText.replace(/\./g,'_');
         
         if(probFunctionHasHintSylls){
@@ -850,7 +863,7 @@ function modelUnitEngine() {
         unitType: "model",
 
         unitMode: (function(){
-          var unitMode = _.chain(getCurrentTdfUnit())
+          var unitMode = _.chain(this.curUnit)
               .prop("learningsession").first()
               .prop("unitMode").trim().value() || "default";
           console.log("UNIT MODE: " + unitMode);
@@ -910,7 +923,7 @@ function modelUnitEngine() {
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
-            setCurrentClusterIndex(cardIndex);
+            Session.set("clusterIndex", cardIndex);
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
@@ -929,7 +942,7 @@ function modelUnitEngine() {
             let card = cardProbabilities.cards[cardIndex];
             let stim = card.stims[whichStim];
 
-            if(getCurrentDeliveryParams().studyFirst && card.studyTrialCount == 0){
+            if(Session.get("currentDeliveryParams").studyFirst && card.studyTrialCount == 0){
               console.log("!!! STUDY FOR FIRST TRIAL");
               Session.set("testType",'s');
             }else{
@@ -992,9 +1005,9 @@ function modelUnitEngine() {
         },
 
         createQuestionLogEntry: function() {
-            let idx = getCurrentClusterIndex();
+            let idx = Session.get("clusterIndex");
             let card = cardProbabilities.cards[idx];
-            let cluster = fastGetStimCluster(getCurrentClusterIndex());
+            let cluster = fastGetStimCluster(idx);
             let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].response.correctResponse));
             let responseData = {
               responseText: responseText,
@@ -1011,7 +1024,7 @@ function modelUnitEngine() {
         cardAnswered: function(wasCorrect, resumeData) {
             // Get info we need for updates and logic below
             let cards = cardProbabilities.cards;
-            let cluster = fastGetStimCluster(getCurrentClusterIndex());
+            let cluster = fastGetStimCluster(Session.get("clusterIndex"));
             let card = _.prop(cards, cluster.shufIndex);
             console.log("cardAnswered, card: " + JSON.stringify(card) + "cluster.shufIndex: " + cluster.shufIndex);
 
@@ -1109,7 +1122,7 @@ function modelUnitEngine() {
         },
 
         unitFinished: function() {
-            var session = _.chain(getCurrentTdfUnit()).prop("learningsession").first().value();
+            var session = _.chain(this.curUnit).prop("learningsession").first().value();
             var minSecs = _.chain(session).prop("displayminseconds").first().intval(0).value();
             var maxSecs = _.chain(session).prop("displaymaxseconds").first().intval(0).value();
 
@@ -1124,7 +1137,7 @@ function modelUnitEngine() {
 
             //TODO: we should probably remove this as it's been superceded by displayminseconds/displaymaxseconds
             // If we're still here, check practice seconds
-            var practiceSeconds = getCurrentDeliveryParams().practiceseconds;
+            var practiceSeconds = Session.get("currentDeliveryParams").practiceseconds;
             if (practiceSeconds < 1.0) {
                 //Less than a second is an error or a missing values
                 console.log("No Practice Time Found and display timer: user must quit with Continue button");
@@ -1153,9 +1166,10 @@ function scheduleUnitEngine(){
             //Retrieve current schedule
             var progress = getUserProgress();
     
-            var unit = getCurrentUnitNumber();
+            let curUnitNum = Session.get("currentUnitNumber");
+            console.log("getSchedule, curUnitNum",curUnitNum);
             var schedule = null;
-            if (progress.currentSchedule && progress.currentSchedule.unitNumber == unit) {
+            if (progress.currentSchedule && progress.currentSchedule.unitNumber == curUnitNum) {
                 schedule = progress.currentSchedule;
             }
     
@@ -1164,17 +1178,17 @@ function scheduleUnitEngine(){
                 console.log("CREATING SCHEDULE, showing progress");
                 console.log(progress);
     
-                var file = getCurrentTdfFile();
-                var setSpec = file.tdfs.tutor.setspec[0];
-                var currUnit = file.tdfs.tutor.unit[unit];
+                let file = Session.get("currentTdfFile");
+                const setSpec = file.tdfs.tutor.setspec[0];
+                var currUnit = file.tdfs.tutor.unit[curUnitNum];
     
-                schedule = AssessmentSession.createSchedule(setSpec, unit, currUnit);
+                schedule = AssessmentSession.createSchedule(setSpec, curUnitNum, currUnit);
                 if (!schedule) {
                     //There was an error creating the schedule - there's really nothing
                     //left to do since the experiment is broken
                     recordUserTime("FAILURE to create schedule", {
                         unitname: _.display(currUnit.unitname),
-                        unitindex: unit
+                        unitindex: curUnitNum
                     });
                     alert("There is an issue with the TDF - experiment cannot continue");
                     throw new Error("There is an issue with the TDF - experiment cannot continue");
@@ -1185,7 +1199,7 @@ function scheduleUnitEngine(){
     
                 recordUserTime("schedule", {
                     unitname: _.display(currUnit.unitname),
-                    unitindex: unit,
+                    unitindex: curUnitNum,
                     schedule: schedule
                 });
             }
@@ -1202,7 +1216,7 @@ function scheduleUnitEngine(){
     
             //Set current Q/A info, type of test (drill, test, study), and then
             //increment the session's question index number
-            setCurrentClusterIndex(curClusterIndex);
+            Session.set("clusterIndex", curClusterIndex);
     
             this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined);
     
@@ -1248,10 +1262,10 @@ function scheduleUnitEngine(){
         },
     
         unitFinished: function() {
-            var questionIndex = Session.get("questionIndex");
-            var unit = getCurrentUnitNumber();
-            var schedule = null;
-            if (unit < getCurrentTdfFile().tdfs.tutor.unit.length) {
+            let questionIndex = Session.get("questionIndex");
+            let curUnitNum = Session.get("currentUnitNumber");
+            let schedule = null;
+            if (curUnitNum < Session.get("currentTdfFile").tdfs.tutor.unit.length) {
                 schedule = this.getSchedule();
             }
     

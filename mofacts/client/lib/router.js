@@ -1,3 +1,4 @@
+import { haveMeteorUser } from '../lib/currentTestingHelpers';
 /* router.js - the routing logic we use for the application.
 
 If you need to create a new route, note that you should specify a name and an
@@ -106,7 +107,7 @@ routeToSignin = function() {
 
 Router.route('/experiment/:target?/:xcond?', {
     name: "client.experiment",
-    action: function() {
+    action: async function() {
         Session.set("curModule","experiment");
         // We set our session variable and also set a cookie (so that we still
         // know they're an experimental participant after browser refresh)
@@ -121,7 +122,7 @@ Router.route('/experiment/:target?/:xcond?', {
         Cookie.set("experimentTarget", target, 21);
         Cookie.set("experimentXCond", xcond, 21);
 
-        var tdf = Tdfs.findOne({"tdfs.tutor.setspec.experimentTarget":target});
+        const tdf = await meteorCallAsync("getTdfByExperimentTarget",target);
         if(!!tdf){
           console.log("tdf found");
           var experimentPasswordRequired = !!tdf.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
@@ -240,9 +241,9 @@ Router.route('/instructions', {
             console.log("No one logged in - allowing template to handle");
         }
         else {
-            var unit = getCurrentTdfUnit();
-            var txt = _.chain(unit).prop("unitinstructions").first().trim().value();
-            var pic = _.chain(unit).prop("picture").first().trim().value();
+            let unit = Session.get("currentTdfUnit");
+            let txt = _.chain(unit).prop("unitinstructions").first().trim().value();
+            let pic = _.chain(unit).prop("picture").first().trim().value();
             if (!txt && !pic) {
                 console.log("Instructions empty: skipping", displayify(unit));
                 instructContinue();

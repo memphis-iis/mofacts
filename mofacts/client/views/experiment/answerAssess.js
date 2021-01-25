@@ -1,3 +1,63 @@
+import { getAllCurrentStimAnswers } from '../../lib/currentTestingHelpers';
+
+/*
+Copyright (c) 2011 Andrei Mackenzie
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+// Compute the edit distance between the two given strings
+function getEditDistance(a, b){
+    if(a.length === 0) return b.length;
+    if(b.length === 0) return a.length;
+
+    var matrix = [];
+
+    // increment along the first column of each row
+    var i;
+    for(i = 0; i <= b.length; i++){
+        matrix[i] = [i];
+    }
+
+    // increment each column in the first row
+    var j;
+    for(j = 0; j <= a.length; j++){
+        matrix[0][j] = j;
+    }
+
+    // Fill in the rest of the matrix
+    for(i = 1; i <= b.length; i++) {
+    for(j = 1; j <= a.length; j++) {
+        if(b.charAt(i-1) == a.charAt(j-1)){
+            matrix[i][j] = matrix[i-1][j-1];
+        }
+        else {
+            matrix[i][j] = Math.min(matrix[i-1][j-1] + 1, // substitution
+                           Math.min(matrix[i][j-1] + 1,   // insertion
+                                    matrix[i-1][j] + 1)); // deletion
+        }
+    }
+    }
+
+    return matrix[b.length][a.length];
+};
+
 /* answerAssess.js
  *
  * Provide support assessing user answers
@@ -13,18 +73,12 @@
  * The first branch is assumed to be the "correct answer" match, while the
  * rest are matches for potential incorrect answers.
  * */
-
-
-function capFirst(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
 //Return true if the answer is a "branched answer"
 function answerIsBranched(answer) {
     return _.trim(answer).indexOf(';') >= 0;
 }
 
-checkIfUserAnswerMatchesOtherAnswers = function(userAnswer,correctAnswer){
+function checkIfUserAnswerMatchesOtherAnswers(userAnswer,correctAnswer){
   otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== correctAnswer);
   for(var i=0;i<otherQuestionAnswers.length;i++){
     var stimStr = otherQuestionAnswers[i];
@@ -54,7 +108,7 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
     else {
         //See if they were close enough
         if (!!lfparameter) {
-            let checkOtherAnswers = getCurrentDeliveryParams().checkOtherAnswers;
+            let checkOtherAnswers = Session.get("currentDeliveryParams").checkOtherAnswers;
             //Check to see if the user answer is an exact match for any other answers in the stim file,
             //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
             if(checkOtherAnswers && checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
@@ -208,7 +262,7 @@ Answers = {
     answerIsCorrect: function(userInput, answer, originalAnswer, setspec,callback) {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
-        let feedbackType = getCurrentDeliveryParams().feedbackType;
+        let feedbackType = Session.get("currentDeliveryParams").feedbackType;
 
         checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
             let answerDisplay = originalAnswer || correctAnswer;

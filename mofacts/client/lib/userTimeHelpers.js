@@ -1,3 +1,4 @@
+import { getStimCluster } from '../lib/currentTestingHelpers';
 /* client/lib/userTimeHelpers.js
  *
  * Client-side helper functions for working with the user time log
@@ -63,7 +64,7 @@ recordUserTime = function(action, extendedData, callback) {
 
 //Helper for question selection
 recordUserTimeQuestion = function(extendedData) {
-    var currCluster = getStimCluster(getCurrentClusterIndex());
+    var currCluster = getStimCluster(Session.get("clusterIndex"));
 
     var dataRec = _.extend({
         clusterIndex:               currCluster.clusterIndex,
