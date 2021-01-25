@@ -1,13 +1,14 @@
 import { curSemester } from '../../../common/Definitions';
+import { blankPassword } from '../../lib/currentTestingHelpers';
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
 Session.set("curClass",{});
 Session.set("systemOverloaded",false);
 Session.set("systemDown",undefined);
+Session.set("classesByInstructorId",{});
 
-function getUrlVars()
-{
+function getUrlVars(){
     var vars = [], hash;
     if(window.location.href.indexOf('?') > 0){
       var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
@@ -32,10 +33,10 @@ function testLogin(){
       return;
   }
 
-  var testPassword = Helpers.blankPassword(testUserName);
+  var testPassword = blankPassword(testUserName);
 
 
-  Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass").name, function(err, result){
+  Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass").courseName, function(err, result){
     if(!!err){
       console.log("error adding user to teacher class: " + err);
     }
@@ -92,32 +93,27 @@ setTeacher = function(teacher){
   console.log(teacher);
   Session.set("curTeacher",teacher);
   $("#initialInstructorSelection").prop('hidden','true');
+  let curClasses = Session.get("classesByInstructorId")[teacher._id];
 
-  Meteor.subscribe('classesForInstructor',teacher._id,function(){
-    var curClasses = Classes.find({"instructor":Session.get("curTeacher")._id,"curSemester":curSemester}).fetch();
-
-    console.log("classesForInstructor returned");
-
-    if(curClasses.length == 0){
-      $("#initialInstructorSelection").prop('hidden','');
-      alert("Your instructor hasn't set up their classes yet.  Please contact them and check back in at a later time.");
-      Session.set("curTeacher",{});
-    }else{
-      Session.set("curTeacherClasses",curClasses);
-      $("#classSelection").prop('hidden','');
-    }
-  });
+  if(curClasses.length == 0){
+    $("#initialInstructorSelection").prop('hidden','');
+    alert("Your instructor hasn't set up their classes yet.  Please contact them and check back in at a later time.");
+    Session.set("curTeacher",{});
+  }else{
+    Session.set("curTeacherClasses",curClasses);
+    $("#classSelection").prop('hidden','');
+  }
 }
 
 setClass = function(curClassID){
   $("#classSelection").prop('hidden','true');
   let allClasses = Session.get("curTeacherClasses");
-  let curClass = allClasses.find((aClass) => aClass._id == curClassID);
+  let curClass = allClasses.find((aClass) => aClass.courseId == curClassID);
   Session.set("curClass",curClass);
   $(".login").prop('hidden','');
 }
 
-Template.signInSouthwest.onCreated(function(){
+Template.signInSouthwest.onCreated(async function(){
   Session.set("loginMode","southwest");
   Meteor.call('isSystemDown',function(err, systemDown){
     console.log("SYSTEM_DOWN:",systemDown);
@@ -136,32 +132,36 @@ Template.signInSouthwest.onCreated(function(){
     }
   });
 
-  Meteor.subscribe('allTeachers',function () {
-    var teachers = Meteor.users.find({}).fetch();
-    var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
+  let verifiedTeachers = await meteorCallAsync("getAllTeachers",southwestOnly=true);
 
-    //Hack to redirect rblaudow classes to ambanker
-    var ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
-    if(!!ambanker){
-      var rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
-      if(!!rblaudow){
-        rblaudow._id = ambanker._id;
-      }
-    }
-    console.log("got teachers");
-    var urlVars = getUrlVars();
-    if(!urlVars['showTestLogins']){
-      Session.set("showTestLogins",false);
-      var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
-      verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
-    }else{
-      Session.set("showTestLogins",true);
-    }
-    Session.set("teachers",verifiedTeachers);
-  });
+  //Hack to redirect rblaudow classes to ambanker
+  var ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
+  var rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
+  if(ambanker && rblaudow) rblaudow._id = ambanker._id
+
+  console.log("got teachers");
+  var urlVars = getUrlVars();
+  if(!urlVars['showTestLogins']){
+    Session.set("showTestLogins",false);
+    var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
+    verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+  }else{
+    Session.set("showTestLogins",true);
+  }
+  Session.set("teachers",verifiedTeachers);
 });
 
-Template.signInSouthwest.onRendered(function(){
+Template.signInSouthwest.onRendered(async function(){
+  const allCourses = await meteorCallAsync("getAllCourses");
+  let classesByInstructorId = {};
+  for(let course of allCourses){
+    if(!classesByInstructorId[course.teacherUserId]){
+      classesByInstructorId[course.teacherUserId] = [];
+    }
+    classesByInstructorId[course.teacherUserId].push(course);
+  }
+  Session.set("classesByInstructorId",classesByInstructorId);
+
   window.onpopstate = function(event){
     console.log("window popstate signin southwest");
     if(document.location.pathname == "/signInSouthwest"){
@@ -220,7 +220,7 @@ Template.signInSouthwest.events({
         if(!!data && !!data.error){
           alert("Problem logging in: " + data.error);
         }else{
-          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass").name, function(err, result){
+          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass").courseName, function(err, result){
             if(!!err){
               console.log("error adding user to teacher class: " + err);
             }

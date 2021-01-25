@@ -23,7 +23,6 @@ if (!String.prototype.endsWith) {
     };
 }
 
-
 Date.secsIntervalString = function(elapsedSecs) {
     var timeLeft = _.floatval(elapsedSecs);
 
@@ -65,13 +64,6 @@ if (_ && _.mixin) {
             str = "";
           }
           return str.split(delimiter);
-        },
-
-        safekeys: function(obj) {
-            if (_.isString(obj) || !_.isObject(obj)) {
-                return [];
-            }
-            return _.keys(obj);
         },
 
         safefirst: function(arr) {
@@ -245,37 +237,4 @@ displayify = function(obj) {
     }
 
     return JSON.stringify(dispObj, null, 2);
-};
-
-
-//INPUT: a score, a float between 0 and 1
-//OUTPUT: a hex color code corresponding to the item's desired color.
-determineButtonColor = function(score) {
-    // The colors used to gradient the buttons based on correctness scores.
-    // They need to be sorted with the most wrong color first, and the most
-    // right color last. The current schema is bad=red, good=blue. Also notice
-    // that we return a special color if score is NaN.
-    var colors = [
-        "#800000", "#990000", "#b10000", "#cc0000", "#e60000", "#ff0000", "#ff1a1a", "#ff3333", "#ff4d4d", "#ff6666",
-        "#6666ff", "#4d4dff", "#3333ff", "#1a1aff", "#0000ff", "#0000e6", "#0000cc", "#0000b3", "#000099", "#000080"
-    ];
-
-    if (isNaN(score)) {
-        return "#b0b09b";
-    }
-
-    var colorIndex;
-    if (score == 1) {
-        colorIndex = colors.length - 1;
-    }
-    else {
-        colorIndex = Math.floor(score / (1.0 / colors.length));
-    }
-
-    return colors[colorIndex];
-};
-
-// Simple function for taking the filename of the given Tdf and converting it to the format Mongo recognizes.
-buildTdfDBName = function (tdfname) {
-    return tdfname.replace(".", "_");
 };

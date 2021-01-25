@@ -26,7 +26,7 @@ Template.multiTdfSelect.events({
 Template.multiTdfSelect.rendered = function () {
     const currentTdfName = Session.get("currentTdfName");
     //this is called whenever the template is rendered.
-    const subTdfs = Tdfs.findOne({fileName:currentTdfName}).subTdfs;
+    const subTdfs = Session.get("currentTdfFile").subTdfs;
 
     $("#expDataDownloadContainer").html("");
 

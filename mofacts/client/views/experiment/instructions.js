@@ -1,3 +1,4 @@
+import { haveMeteorUser } from '../../lib/currentTestingHelpers';
 ////////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -52,7 +53,7 @@ var logLockout = _.throttle(
 
 //Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-    var lockoutminutes = _.chain(getCurrentDeliveryParams()).prop("lockoutminutes").intval().value();
+    var lockoutminutes = _.chain(Session.get("currentDeliveryParams")).prop("lockoutminutes").intval().value();
     logLockout(lockoutminutes);
     return lockoutminutes;
 }
@@ -72,7 +73,7 @@ function lockoutKick() {
 // the screen forward. HOWEVER, the lockout functionality currently overrides
 // this functionality (i.e. we don't check this stuff while we are locked out)
 function getDisplayTimeouts() {
-    var unit = getCurrentTdfUnit();
+    let unit = Session.get("currentTdfUnit");
     return {
         'minSecs': _.chain(unit).prop("instructionminseconds").first().intval(0).value(),
         'maxSecs': _.chain(unit).prop("instructionmaxseconds").first().intval(0).value()
@@ -138,7 +139,7 @@ function lockoutPeriodicCheck() {
 
                 //We're in experiment mode and locked out - if they should get a Turk email,
                 //now is the time to let the server know we've shown a lockout msg
-                var currUnit = getCurrentTdfUnit();
+                let currUnit = Session.get("currentTdfUnit");
                 var turkemail = _.trim(_.safefirst(currUnit.turkemail));
                 var subject = _.trim(_.safefirst(currUnit.turkemailsubject));
 
@@ -218,6 +219,31 @@ function lockoutPeriodicCheck() {
     }
 }
 
+//Get units left to display/execute - note that the current unit isn't
+//counted. Ex: if you have three units (0, 1, 2) and unit 1 is the current
+//unit, then you have 1 unit remaining. If there are no units or there is
+//we return 0
+function getUnitsRemaining() {
+    var unitsLeft = 0;
+
+    var thisTdf = Session.get("currentTdfFile");
+    if (!!thisTdf) {
+        var unitCount = 0;
+        if (typeof thisTdf.tdfs.tutor.unit !== "undefined" && thisTdf.tdfs.tutor.unit.length) {
+            unitCount = thisTdf.tdfs.tutor.unit.length;
+        }
+        if (unitCount > 0) {
+            var unitIdx = Session.get("currentUnitNumber") || 0;
+            unitsLeft = (unitCount - unitIdx) - 1;
+            if (unitsLeft < 0) {
+                unitsLeft = 0;
+            }
+        }
+    }
+
+    return unitsLeft;
+};
+
 // Called when users continues to next screen.
 // SUPER-IMPORTANT: note that this can be called outside this template, so it
 // must only reference visible from anywhere on the client AND we take great
@@ -228,18 +254,14 @@ instructContinue = function () {
     //As a result, we only want to log an instruction record ONCE PER UNIT. In
     //the unlikely event we've already logged an instruction record for the
     //current unit, we should log a duplicate instead
-    var logAction = "instructions";
-    var currUnit = Session.get("currentUnitNumber");
-    var unit = _.chain(getCurrentTdfFile())
-        .prop("tdfs")
-        .prop("tutor")
-        .prop("unit").prop(_.intval(currUnit))
-        .value();
+    let logAction = "instructions";
+    let curUnitNum = Session.get("currentUnitNumber");
+    let curUnit = Session.get("currentTdfUnit");
 
-    var unitName = _.chain(unit).prop("unitname").trim().value();
-    var feedbackText = _.chain(unit).prop("unitinstructions").trim().value();
+    var unitName = _.chain(curUnit).prop("unitname").trim().value();
+    var feedbackText = _.chain(curUnit).prop("unitinstructions").trim().value();
     if (feedbackText.length < 1) {
-        feedbackText = _.chain(unit).prop("picture").trim().value();
+        feedbackText = _.chain(curUnit).prop("picture").trim().value();
     }
 
     var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
@@ -250,7 +272,7 @@ instructContinue = function () {
     var dup = _.find(entries, function(rec){
         return (
             _.prop(rec, "action") === "instructions" &&
-            _.prop(rec, "currentUnit") === currUnit
+            _.prop(rec, "currentUnit") === curUnitNum
         );
     });
 
@@ -273,7 +295,7 @@ instructContinue = function () {
         }
 
         recordUserTime(logAction, {
-            'currentUnit': currUnit,
+            'currentUnit': curUnitNum,
             'unitname': unitName,
             'xcondition': Session.get("experimentXCond"),
             'instructionClientStart': instructStart,
@@ -301,7 +323,7 @@ Template.instructions.helpers({
     },
 
     backgroundImage: function() {
-        var currUnit = getCurrentTdfUnit();
+        var currUnit = Session.get("currentTdfUnit");
         var img = "";
 
         if (currUnit && currUnit.picture) {
@@ -312,7 +334,7 @@ Template.instructions.helpers({
     },
 
     instructions: function () {
-        return _.chain(getCurrentTdfUnit()).prop("unitinstructions").trim().value();
+        return _.chain(Session.get("currentTdfUnit")).prop("unitinstructions").trim().value();
     },
 
     islockout: function() {

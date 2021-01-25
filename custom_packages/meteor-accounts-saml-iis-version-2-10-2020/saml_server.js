@@ -7,7 +7,7 @@ var Fiber = Npm.require('fibers');
 var bodyParser = Npm.require('body-parser')
 RoutePolicy.declare('/sw-adfs/', 'network');
 
-var updateProfile = function(profile, newValues) {
+function updateProfile(profile, newValues) {
     var keys = Object.keys(newValues);
     var result = profile;
 
@@ -18,6 +18,10 @@ var updateProfile = function(profile, newValues) {
         
     })
     return result;
+}
+
+function blankPassword(userName) {
+    return (userName + "BlankPassword").toUpperCase();
 }
 
 Accounts.registerLoginHandler(function(loginRequest) {
@@ -67,7 +71,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
                 serverConsole("no existing user found");
                 if (Meteor.settings.saml[0].dynamicProfile) {
                     var newUser = {
-                        password: Helpers.blankPassword(profileOrEmailValue),
+                        password: blankPassword(profileOrEmailValue),
                         username: profileOrEmailValue,
                         [profileOrEmail]:  {
                             [localProfileMatchAttribute]: profileOrEmailValue

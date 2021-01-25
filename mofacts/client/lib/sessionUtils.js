@@ -57,6 +57,9 @@ sessionCleanUp = function() {
     Session.set("currentAnswerSyllables",undefined);
     Session.set("currentRootTdfName", undefined);
     Session.set("currentTdfName", undefined);
+    Session.set("currentTdfUnit",undefined);
+    Session.set("currentTdfFile", undefined);
+    Session.set("learningSessionItems", undefined);
     Session.set("currentStimName", undefined);
     Session.set("curTeacher",undefined);
     Session.set("clusterIndex", undefined);

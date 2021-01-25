@@ -27,6 +27,8 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
+import { getTdfByFileName } from "./methods";
+
 (function () { //Begin IIFE pattern
 
     // Define an ordering for the fields and the column name we'll put in the
@@ -136,7 +138,7 @@
     }
 
     //Create our output record
-    function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, dynamicStimTags) {
+    async function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, dynamicStimTags) {
         // Return the default value if the given value isn't "truthy" BUT numeric
         // zero (0) is considered "truthy". Note that the default value is always
         // the last argument
@@ -260,8 +262,8 @@
         ));
         if (!unitName) {
             serverConsole("Forced to lookup up unit name:", unitName);
-            var tdf = Tdfs.findOne({'fileName': tdfName});
-            unitName = _.chain(Tdfs.findOne({'fileName': tdfName}))
+            
+            unitName = _.chain(await getTdfByFileName(tdfName))
                 .prop('tdfs')
                 .prop('tutor')
                 .prop('unit')
@@ -458,7 +460,7 @@
 
     //Iterate over a user times log cursor and call the callback function with a
     //record populated with current information in log
-    function processUserLog(username, userTimesDoc, expName, listOfDynamicStimTags, callback) {
+    async function processUserLog(username, userTimesDoc, expName, listOfDynamicStimTags, callback) {
         var expKey = ('' + expName).replace(/\./g, "_");
         if (!(expKey in userTimesDoc)) {
             return;
@@ -564,10 +566,9 @@
                 //FINALLY have enough to populate the record
                 populated = null;
                 try {
-                    let dynamicStimTagValues = getValuesOfStimTagList(expName, lastq.clusterIndex, lastq.whichStim, listOfDynamicStimTags);
-                    populated = populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, dynamicStimTagValues);
-                }
-                catch (e) {
+                    const dynamicStimTagValues = await getValuesOfStimTagList(expName, lastq.clusterIndex, lastq.whichStim, listOfDynamicStimTags);
+                    populated = await populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, dynamicStimTagValues);
+                }catch (e) {
                     serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
                     serverConsole(
                         username,
@@ -585,8 +586,8 @@
         }
     }
 
-    getValuesOfStimTagList = function(tdfFileName, clusterIndex,stimIndex,tagList){
-        let stimFileName = getStimFileNameForTdf(tdfFileName);
+    getValuesOfStimTagList = async function(tdfFileName, clusterIndex,stimIndex,tagList){
+        const stimFileName = await getStimFileNameForTdf(tdfFileName);
         let curStimuliFile = Stimuli.findOne({fileName:stimFileName});
         let curStim = curStimuliFile.stimuli.setspec.clusters[clusterIndex].stims[stimIndex];
         let valueDict = {};
@@ -602,9 +603,9 @@
         return valueDict;
     }
 
-    getListOfStimTags = function(tdfFileName){
+    getListOfStimTags = async function(tdfFileName){
         serverConsole("getListOfStimTags, tdfFileName: " + tdfFileName);
-        let stimFileName = getStimFileNameForTdf(tdfFileName);
+        const stimFileName = await getStimFileNameForTdf(tdfFileName);
         serverConsole("getListOfStimTags, stimFileName: " + stimFileName);
         let curStimFile = Stimuli.findOne({fileName:stimFileName});
         let allTagsInStimFile = new Set();
@@ -622,8 +623,8 @@
         return Array.from(allTagsInStimFile);
     }
 
-    getStimFileNameForTdf = function(tdfName){
-        let tdf = Tdfs.findOne({fileName:tdfName});
+    getStimFileNameForTdf = async function(tdfName){
+        const tdf = await getTdfByFileName(tdfName);
 
         return tdf.tdfs.tutor.setspec[0].stimulusfile[0];
     }
@@ -631,7 +632,7 @@
     // Exported main function: call recordAcceptor with each record generated
     // for expName in datashop format. We do NOT terminate our records.
     // We return the number of records written
-    createExperimentExport = function (expName, format, recordAcceptor) {
+    createExperimentExport = async function (expName, format, recordAcceptor) {
         var header = {};
         var expNames = [];
         
@@ -641,7 +642,7 @@
             expNames = expName;
         }
 
-        let listOfDynamicStimTags = getListOfStimTags(expName);
+        const listOfDynamicStimTags = await getListOfStimTags(expName);
         let listOfDynamicStimTagsWithColumnNames = [];
         for(let tag of listOfDynamicStimTags){
             listOfDynamicStimTagsWithColumnNames.push("CF (" + tag + ")");

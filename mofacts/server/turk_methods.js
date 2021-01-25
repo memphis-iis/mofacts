@@ -1,9 +1,11 @@
+import { getTdfBy_id, getTdfByFileName } from './methods';
+import { userLogGetTdfId } from './userlog';
 /* turk_methods.js - Implement the server-side methods called by our clients
 **/
 
 // Return the _id of the user record for the "owner" (or teacher) of the given
 // experiment name (TDF). This is mainly for knowing how to handle MTurk calls
-function getTdfOwner(experiment, userId) {
+async function getTdfOwner(experiment, userId) {
     if (!userId) {
         var usr = Meteor.user();
         userId = !!usr ? usr._id : null;
@@ -25,7 +27,7 @@ function getTdfOwner(experiment, userId) {
 
     //Now we can get the owner (either set on upload of TDF *OR* set on server
     //startup for TDF's that live in git)
-    var tdf = Tdfs.findOne({_id: tdfId});
+    const tdf = await getTdfBy_id(tdfId);
     if (!!tdf && typeof tdf.owner !== "undefined") {
         return tdf.owner;
     }
@@ -173,7 +175,7 @@ Meteor.methods({
     },
 
     //Message sending for the end of a lockout
-    turkScheduleLockoutMessage: function(experiment, lockoutend, subject, msgbody) {
+    turkScheduleLockoutMessage: async function(experiment, lockoutend, subject, msgbody) {
         serverConsole('turkScheduleLockoutMessage', experiment, lockoutend, subject);
 
         var usr, turkid, ownerId, workerUserId;
@@ -196,7 +198,7 @@ Meteor.methods({
             }
             turkid = _.trim(turkid).toUpperCase();
 
-            ownerId = getTdfOwner(experiment);
+            ownerId = await getTdfOwner(experiment);
 
             var ownerProfile = UserProfileData.findOne({_id: ownerId});
             if (!ownerProfile) {
@@ -312,13 +314,13 @@ Meteor.methods({
                 throw "No valid username found";
             }
 
-            if (ownerId != getTdfOwner(experiment, workerUserId)) {
+            if (ownerId != await getTdfOwner(experiment, workerUserId)) {
                 throw "You are not the owner of that TDF";
             }
 
             //If we have a minimum score, check vs their current score
             var tdfId = userLogGetTdfId(workerUserId, experiment);
-            var tdf = Tdfs.findOne({_id: tdfId});
+            const tdf = await getTdfBy_id(tdfId);
 
             // Get available HITs
             hitlist = await turk.getAvailableHITs(ownerProfile, {});
@@ -428,7 +430,7 @@ Meteor.methods({
                 throw "No valid username found";
             }
 
-            if (ownerId != getTdfOwner(experiment, workerUserId)) {
+            if (ownerId != await getTdfOwner(experiment, workerUserId)) {
                 throw "You are not the owner of that TDF";
             }
 
@@ -481,7 +483,7 @@ Meteor.methods({
             }
 
             //We read the TDF to get the bonus amount
-            var tdfFile = Tdfs.findOne({_id: tdfid});
+            const tdfFile = await getTdfBy_id(tdfid);
             var bonusAmt = null;
             var unitList = tdfFile.tdfs.tutor.unit || [];
             for(i = 0; i < unitList.length; ++i) {
@@ -535,14 +537,14 @@ Meteor.methods({
     },
 
     //Given an experiment name, return the current status of any turk activities
-    turkUserLogStatus: function(experiment) {
+    turkUserLogStatus: async function(experiment) {
         serverConsole('turkUserLogStatus', experiment);
         
         var expKey = ('' + experiment).replace(/\./g, "_");
         var records = [];
         var tdf = null;
 
-        UserTimesLog.find({}).forEach(function (entry) {
+        UserTimesLog.find({}).forEach(async function (entry) {
             if (!(expKey in entry)) {
                 return;
             }
@@ -606,7 +608,8 @@ Meteor.methods({
                 else if (tdf !== null && (act === "expcondition" || act === "condition-notify")) {
                     //Two things to keep in mind here - this is a one time check,
                     //and we'll immediately fail if there is a problem
-                    tdf = Tdfs.findOne({'fileName': rec.currentTdfName});
+                    const mytdf = await getTdfByFileName(rec.currentTdfName);
+                    tdf = mytdf;
                     var ownerOK = false;
                     if (!!tdf && typeof tdf.owner !== "undefined") {
                         //They must be the owner of the TDF

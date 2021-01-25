@@ -1,4 +1,5 @@
 import { ALL_TDFS } from "../../../common/Definitions";
+import { getStimClusterCount, getTestType, getTdfByFileName } from '../../lib/currentTestingHelpers';
 
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
@@ -9,6 +10,17 @@ const numTrialsForKCLearningCurve = 5;
 //currentUserTimeLogs = undefined;
 curTracker = undefined;
 tempModelUnitEngine = undefined;
+
+function hasLearningSessionItems(tdfQueryName){
+  let tdfObject = Tdfs.findOne({fileName:tdfQueryName});
+  if(!tdfObject.tdfs.tutor.unit) return false;//TODO: fix root/condition tdfs
+
+  for(let unit of tdfObject.tdfs.tutor.unit){
+    if(!!unit.learningsession) return true;
+  }
+
+  return false;
+}
 
 Template.studentReporting.helpers({
   tdfs: function(){
@@ -60,23 +72,21 @@ setTdfFileNamesAndDisplayValues = function(){
     });
     
     studentReportingTdfs = [];
-    Meteor.subscribe('tdfs',function(){
-      console.log("tdfs subscribe back");
-      Meteor.subscribe('Stimuli',function(){
-        console.log("stimuli subscribe back");
-        Tdfs.find({}).forEach(function(entry){
-          if(tdfsInScopeForReporting.indexOf(entry.fileName) != -1 && hasLearningSessionItems(entry.fileName)){
-            let displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-            let fileName = entry.fileName;
-            studentReportingTdfs.push({fileName,displayName});
-          }
-        });
-  
-        console.log("studentReportingTdfs: " + JSON.stringify(studentReportingTdfs));
-        Session.set('studentReportingTdfs',studentReportingTdfs);
-        selectOptionByDefaultAndUpdateCharts(studentReportingTdfs);
-      })
-    });
+    console.log("tdfs subscribe back");
+    Meteor.subscribe('Stimuli',function(){
+      console.log("stimuli subscribe back");
+      Session.get("allTdfs").forEach(function(entry){
+        if(tdfsInScopeForReporting.indexOf(entry.fileName) != -1 && hasLearningSessionItems(entry.fileName)){
+          let displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+          let fileName = entry.fileName;
+          studentReportingTdfs.push({fileName,displayName});
+        }
+      });
+
+      console.log("studentReportingTdfs: " + JSON.stringify(studentReportingTdfs));
+      Session.set('studentReportingTdfs',studentReportingTdfs);
+      selectOptionByDefaultAndUpdateCharts(studentReportingTdfs);
+    })
   });
 }
 
@@ -101,9 +111,11 @@ selectOptionByDefaultAndUpdateCharts = function(tdfs){
    });
 }
 
-Template.studentReporting.rendered = function(){
+Template.studentReporting.rendered = async function(){
   Session.set("studentReportingTdfs",[]);
   Session.set("curStudentPerformance",{});
+  const learningSessionItems = await meteorCallAsync("getLearningSessionItems",ALL_TDFS);
+  Session.set("learningSessionItems",learningSessionItems);
 
   window.onpopstate = function(event){
     console.log("window popstate student reporting");
@@ -190,6 +202,8 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
   //    //Session.set("currentStimName",null);
   //   // Session.set("currentTdfName",curTdfFileName);
   //   // Session.set("curTdfFileName",curTdfFileName);
+      // const curTdf = await getTdfByFileName(curTdfFileName);
+      // Session.set("currentTdfFile",curTdf);
   //   // $("#cardProbsChart").attr('data-y-axis-label',"Chapter");
   // }else{
   //   // $("#cardProbsChart").attr('data-y-axis-label',"");
@@ -197,8 +211,8 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
   //   // Session.set("currentTdfName",curTdfFileName);
   //   // Session.set("curTdfFileName",curTdfFileName);
   //   // Session.set("currentRootTdfName",curTdfFileName);
-  //   // checkIfNeedSubTdfName(getCurrentTdfFile()); //TODO: technically we need this for reporting experiments with conditions, fix later
-  //   var curTdfFile = getCurrentTdfFile();
+  //   // checkIfNeedSubTdfName(Session.get("currentTdfFile")); //TODO: technically we need this for reporting experiments with conditions, fix later
+  //   var curTdfFile = Session.get("currentTdfFile");
   //   if(!!curTdfFile){
   //     console.log("updateDataAndCharts, setting currentStimName to: " + curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
   //     Session.set("currentStimName",curTdfFile.tdfs.tutor.setspec[0].stimulusfile[0]);
@@ -293,8 +307,8 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
 
 // recreateEngineFinalState = function(){
 //   console.log("recreateEngineFinalState");
-//   checkIfNeedSubTdfName(getCurrentTdfFile());
-//   let curStimFile = getCurrentStimName().replace(/\./g,'_');
+//   checkIfNeedSubTdfName(Session.get("currentTdfFile"));
+//   let curStimFile = Session.get("currentStimName").replace(/\./g,'_');
 //   console.log("recreateEngineFinalState, curStimFile: " + curStimFile);
 //   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
 //   //console.log("cachedSyllables: " + JSON.stringify(cachedSyllables));
@@ -319,11 +333,11 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
 //       Session.set("currentTdfName",curTdfFileName);
 //       Session.set("currentRootTdfName",curTdfFileName);
 //       console.log("curTdfFileName: " + curTdfFileName);
-//       if(!!getCurrentTdfFile() && !!getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile){
-//         Session.set("currentStimName",getCurrentTdfFile().tdfs.tutor.setspec[0].stimulusfile[0]);
+//       if(!!Session.get("currentTdfFile") && !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].stimulusfile){
+//         Session.set("currentStimName",Session.get("currentTdfFile").tdfs.tutor.setspec[0].stimulusfile[0]);
         
 //         recreateEngineFinalState();
-//         let learningSessionItems = getLearningSessionItems(curTdfFileName);
+//         let learningSessionItems = Session.get("learningSessionItems")[curTdfFileName];
 //         let totalStimProb = 0;
 //         let cardProbs = tempModelUnitEngine.getCardProbs();
 //         let numProbs = 0;
@@ -350,7 +364,7 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
 //     recreateEngineFinalState();
 
 //     let curTdfFileName = Session.get("currentTdfName");
-//     let learningSessionItems = getLearningSessionItems(curTdfFileName);
+//     let learningSessionItems = Session.get("learningSessionItems")[curTdfFileName];
 //     let cardProbs = [];
 //     let cardProbsLabels = [];
 //     let mycardProbs =tempModelUnitEngine.getCardProbs();
@@ -658,7 +672,7 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
 
 //     var prog = getUserProgress();
 //     prog.progressDataArray.push({
-//         clusterIndex: getCurrentClusterIndex(),
+//         clusterIndex: Session.get("clusterIndex"),
 //         questionIndex: questionIndex,
 //         question: question,
 //         answer: answer,
@@ -676,7 +690,7 @@ updateDataAndCharts = function(selectedTdf,curTdfFileName){
 // processUserTimesLogStudentReporting = function(tempEngine,userTimesLogs) {
 //     var engine = tempEngine;
 //     //Get TDF info
-//     var file = getCurrentTdfFile();
+//     var file = Session.get("currentTdfFile");
 //     var tutor = file.tdfs.tutor;
   
 

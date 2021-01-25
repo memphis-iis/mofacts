@@ -9,7 +9,7 @@ Template.inputF.rendered = function() {
 
 Template.inputF.helpers({
     'fontSizeClass': function() {
-        return 'h' + getCurrentFontSize().toString();  //Bootstrap classes
+        return 'h' + Session.get("currentDeliveryParams").fontsize.toString();  //Bootstrap classes
     },
 
     'inDialogueLoop': function(){
@@ -27,6 +27,6 @@ Template.inputForceCorrect.rendered = function() {
 
 Template.inputForceCorrect.helpers({
     'fontSizeClass': function() {
-        return 'h' + getCurrentFontSize().toString();  //Bootstrap classes
+        return 'h' + Session.get("currentDeliveryParams").fontsize.toString();  //Bootstrap classes
     },
 });

@@ -1,97 +1,109 @@
 import { curSemester } from '../../../common/Definitions';
+import { getAllCourseAssignmentsForInstructor, getAllCoursesForInstructor } from '../../lib/currentTestingHelpers';
 
-Session.set("classes",[]);
+Session.set("courses",[]);
+Session.set("assignments",[]);
 Session.set("allTdfFilenamesAndDisplayNames",[]);
 Session.set("tdfsSelected",[]);
 Session.set("tdfsNotSelected",[]);
 
-curClass = {tdfs:[]};
-
-Template.tdfAssignmentEdit.onRendered(function(){
+curCourseAssignment = { coursename: "", courseid: undefined, tdfs: [] };
+Template.tdfAssignmentEdit.onRendered(async function(){
   console.log("tdfAssignmentEdit rendered");
-  Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
-  curClass = {
-    tdfs: []
-  };
+  const curCourses = await getAllCoursesForInstructor(Meteor.userId());
+  console.log("curCourses",curCourses);
+  Session.set("courses",curCourses);
+  
+  const courseAssignments = await getAllCourseAssignmentsForInstructor(Meteor.userId());
+  let assignments = {};
+  for(let courseAssignment of courseAssignments){
+    if(!assignments[courseAssignment.coursename]) assignments[courseAssignment.coursename] = new Set();
+    assignments[courseAssignment.coursename].add(courseAssignment.filename);
+  }
+  for(let assignmentKey of Object.keys(assignments)){
+    assignments[assignmentKey] = Array.from(assignments[assignmentKey])
+  }
+  Session.set("assignments",assignments);
+  console.log("assignments",assignments);
+  curCourseAssignment = { coursename: "", courseid: undefined, tdfs: [] };
 
-  Meteor.subscribe('tdfs',function () {
-    var allTdfs = [];
-    var allTdfObjects = Tdfs.find({}).fetch();
-    for(var i in allTdfObjects){
-      var tdf = allTdfObjects[i];
-      if(tdf.owner == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
-        allTdfs.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
-      }
+  let allTdfs = await meteorCallAsync("getAllTdfs");
+  console.log("allTdfs",allTdfs);
+  var allTdfObjects = allTdfs.map(tdf => tdf.content);
+  if(!Session.get("allTdfs")) Session.set("allTdfs",allTdfObjects);
+  let allTdfDisplays = [];
+  for(var i in allTdfObjects){
+    var tdf = allTdfObjects[i];
+    if(tdf.owner == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
+      allTdfDisplays.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
     }
-    Session.set("allTdfFilenamesAndDisplayNames",allTdfs);
-  });
+  }
+  console.log("allTdfDisplays",allTdfDisplays);
+  Session.set("allTdfFilenamesAndDisplayNames",allTdfDisplays);
 
-  Tracker.autorun(function(){
-      updateTdfsSelectedAndNotSelected();
-  });
+  Tracker.autorun(updateTdfsSelectedAndNotSelected);
 });
 
-////////////////////////////////////////////////////////////////////////////
-// Template helpers
-////////////////////////////////////////////////////////////////////////////
-
 Template.tdfAssignmentEdit.helpers({
-  classes: function(){
-    return Session.get("classes");
-  },
-
-  tdfsSelected: function(){
-    return Session.get("tdfsSelected");
-  },
-
-  tdfsNotSelected: function(){
-    return Session.get("tdfsNotSelected");
-  }
+  courses: () => Session.get("courses"),
+  tdfsSelected: () => Session.get("tdfsSelected"),
+  tdfsNotSelected: () => Session.get("tdfsNotSelected")
 });
 
 Template.tdfAssignmentEdit.events({
   "change #class-select": function(event, template){
     console.log("change class-select");
-    var curClassName = $(event.currentTarget).val();
-    var classes = Session.get("classes");
-    curClass = search(curClassName,"name",classes);
-    curClass.tdfs = curClass.tdfs || [];
+    var curCourseId = $(event.currentTarget).val();
+    let curCourseName = $("#class-select option:selected").text();
+    var assignments = Session.get("assignments");
+    let tempTdfs = assignments[curCourseName] || [];
+    curCourseAssignment = { coursename: curCourseName, courseid: curCourseId, tdfs: tempTdfs };
+    console.log("curCourseAssignment",curCourseAssignment);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #selectTdf": function(event, template){
     console.log("select tdf: ");
-    var selectedTdfs = getselectedItems("notSelectedTdfs");
-    curClass.tdfs = curClass.tdfs.concat(selectedTdfs);
+    var tdfsToBeSelected = getselectedItems("notSelectedTdfs").map(x => x.fileName);
+    curCourseAssignment.tdfs = curCourseAssignment.tdfs.concat(tdfsToBeSelected);
+    console.log("curCourseAssignment",curCourseAssignment);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #unselectTdf": function(event, template){
     console.log("unselect tdf: ");
-    var unselectedTdfs = getselectedItems("selectedTdfs");
-    curClass.tdfs = curClass.tdfs.filter(x => unselectedTdfs.findIndex(y => y.fileName == x.fileName) == -1);
+    var tdfsToBeUnselected = getselectedItems("selectedTdfs").map(x => x.fileName);
+    curCourseAssignment.tdfs = curCourseAssignment.tdfs.filter(x => tdfsToBeUnselected.indexOf(x) == -1);
+    console.log("curCourseAssignment",curCourseAssignment);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #saveAssignment": function(event, template){
     console.log("save assignment");
-
-    if(!curClass.name){
+    if(!curCourseAssignment.coursename){
       alert("Please select a class to assign Chapters to.");
     }else{
-      Meteor.call('editClass',curClass, function(err,res){
-        if(!!err){
+      let dbCurCourseAssignment = JSON.parse(JSON.stringify(curCourseAssignment));
+      dbCurCourseAssignment.tdfs = dbCurCourseAssignment.tdfs.map(x => x.fileName);
+      Meteor.call('editCourseAssignments',dbCurCourseAssignment, function(err,res){
+        if(!!err ){
           alert("Error saving class: " + err);
+        }else if(res == null){
+          alert("Error saving class (check server logs)");
         }else{
           alert("Saved class successfully!");
-          console.log("curClass:" + JSON.stringify(curClass));
-          var classes = Session.get("classes");
-          for(var i=0;i<classes.length;i++){
-            if(classes[i].name == curClass.name){
-              classes[i] = curClass;
+          console.log("curCourseAssignment:" + JSON.stringify(curCourseAssignment));
+          var assignments = Session.get("assignments");
+          let hadAssignment = false;
+          for(var i=0;i<assignments.length;i++){
+            if(assignments[i].coursename == curCourseAssignment.coursename){
+              assignments[i] = curCourseAssignment;
+              hadAssignment = true;
+              break;
             }
           }
-          Session.set("classes",classes);
+          if(!hadAssignment) assignments[curCourseAssignment.coursename] = curCourseAssignment.tdfs;
+          Session.set("assignments",assignments);
         }
       });
     }
@@ -113,7 +125,11 @@ function getselectedItems(itemSelector){
 }
 
 function updateTdfsSelectedAndNotSelected(){
-  console.log("updateTdfsSelectedAndNotSelected");
-  Session.set("tdfsSelected",curClass.tdfs);
-  Session.set("tdfsNotSelected",Session.get("allTdfFilenamesAndDisplayNames").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
+  let allTdfDisplays = Session.get("allTdfFilenamesAndDisplayNames");
+  let tdfsNotSelected = allTdfDisplays.filter(x => curCourseAssignment.tdfs.indexOf(x.fileName) == -1);;
+  console.log("curCourseAssignment",curCourseAssignment);
+  let tdfsSelected = curCourseAssignment.tdfs.map(x => allTdfDisplays.find(tdfDisplay => tdfDisplay.fileName == x));
+  console.log("updateTdfsSelectedAndNotSelected",tdfsSelected,tdfsNotSelected,curCourseAssignment);
+  Session.set("tdfsSelected",tdfsSelected);
+  Session.set("tdfsNotSelected",tdfsNotSelected);
 }

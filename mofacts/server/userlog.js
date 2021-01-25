@@ -1,3 +1,5 @@
+import { getTdfByFileName } from './methods';
+export { userLogGetTdfId };
 /*jshint sub:true*/
 
 /* userlog.js - Server-side utilities for working with the user times log
@@ -109,7 +111,7 @@ function logUserMetrics(userId, experimentKey, valsToCheck) {
 }
 
 //Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
-userLogGetTdfId = function(userid, experiment) {
+async function userLogGetTdfId(userid, experiment) {
     var userLog = UserTimesLog.findOne({ _id: userid });
     var entries = [];
     if (userLog && userLog[experiment] && userLog[experiment].length) {
@@ -131,7 +133,7 @@ userLogGetTdfId = function(userid, experiment) {
     }
 
     if (!!filename) {
-        var tdf = Tdfs.findOne({'fileName': filename});
+        const tdf = await getTdfByFileName(filename);
         if (tdf) {
             return tdf._id;
         }

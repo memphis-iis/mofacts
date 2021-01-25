@@ -1,49 +1,29 @@
 <template name="classEdit">
 {{#if isInRole 'admin, teacher'}}
     <br /><br />
-    <!-- <div class="row">
-        <div class="col-md-offset-3 col-md-6">
-            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#classEditCollapse" aria-expanded="false" aria-controls="classEditCollapse">
-                Add/Edit Classes
-            </button>
+    <div class="col-md-3">
+        <legend class="text-center">Add/Edit Classes</legend>
+        <div>
+          <select id="class-select">
+              <option selected="selected" value="">Add a class</option>
+              {{#each classes}}
+                <option value="{{this.coursename}}">{{this.coursename}}</option>
+              {{/each}}
+          </select>
+        </div>
+        <div>
+          <label>Class name</label>
+          <input class="form-control" type="text" placeholder="Enter classname here" id="newClassName" />
+        </div>
+        <div>
+          <label>Section names (one per line)</label>
+          <textarea class="form-control" rows=15 cols=20 id="sectionNames" placeholder="Enter section names here"></textarea>
+        </div>
+        <div>
+          <button type='button' id='saveClass' class='btn btn-fix'>
+              Save Class
+          </button>
         </div>
     </div>
-
-    <div class="row collapse" id="classEditCollapse"> -->
-        <div class="col-md-3">
-            <legend class="text-center">Add/Edit Classes</legend>
-            <div>
-              <select id="class-select">
-                  <option selected="selected" value="">Add a class</option>
-                  {{#each classes}}
-                    <option value="{{this.name}}">{{this.name}}</option>
-                  {{/each}}
-              </select>
-            </div>
-            <div>
-              <label>Class name</label>
-              <input class="form-control" type="text" placeholder="Enter classname here" id="newClassName" />
-            </div>
-            <div>
-              <label>Student Login IDs (one per line)</label>
-              <textarea class="form-control" rows=15 cols=20 id="classStudents" placeholder="Enter login IDs here"></textarea>
-            </div>
-            <div>
-              <button type="button" id="deleteClass" class="btn btn-fix" disabled="disabled">
-                Delete class
-              </button>
-              <button type='button' id='saveClass' class='btn btn-fix'>
-                  Save Class
-              </button>
-            </div>
-            <div>
-              <label>Generate random user ids</label>
-              <input type="text" placeholder="Num IDs to generate" id="numIDs" />
-              <button type='button' id='generateIDs' class='btn btn-fix'>
-                Generate IDs
-              </button>
-            </div>
-        </div>
-    <!-- </div> -->
 {{/if}}
 </template>

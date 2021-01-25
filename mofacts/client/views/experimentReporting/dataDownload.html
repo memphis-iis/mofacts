@@ -24,7 +24,7 @@
             <select id="classSelect" name="classSelect">
                 <option value="">Show all</option>
                 {{#each classes}}
-                    <option value="{{this._id}}">{{this.name}}</option>
+                    <option value="{{this.courseId}}">{{this.courseName}}</option>
                 {{/each}}
             </select>
             {{#if isClassSelected}}

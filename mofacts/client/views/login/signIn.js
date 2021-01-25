@@ -1,3 +1,5 @@
+import { blankPassword } from '../../lib/currentTestingHelpers';
+
 Template.signIn.onRendered(function(){
   if(Session.get("loginMode") !== "experiment"){
     console.log("password signin, setting login mode");
@@ -80,7 +82,7 @@ function UserPasswordCheck() {
     var newPassword = _.trim(experiment && !experimentPasswordRequired ? "" : $("#password").val());
 
     if (!!newUsername & newPassword === "") {
-        newPassword = Helpers.blankPassword(newUsername);
+        newPassword = blankPassword(newUsername);
     }
 
     if (experiment) {
@@ -161,7 +163,7 @@ function UserPasswordCheck() {
             $("#signInButton").prop("disabled",false);
         }
         else {
-            if (newPassword === Helpers.blankPassword(newUsername)) {
+            if (newPassword === blankPassword(newUsername)) {
                 //So now we know it's NOT experiment mode and they've logged in
                 //with a blank password. Currently this is someone who's
                 //managed to figure out to use the "normal" login flow. Tell

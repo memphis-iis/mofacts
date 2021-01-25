@@ -1,5 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
-// Template storage and helpers
+import { haveMeteorUser, getTdfByFileName } from '../../lib/currentTestingHelpers';
 
 Template.profileSouthwest.helpers({
     username: function () {
@@ -11,9 +10,6 @@ Template.profileSouthwest.helpers({
         }
     },
 });
-
-////////////////////////////////////////////////////////////////////////////
-// Template Events
 
 Template.profileSouthwest.events({
     // Start a TDF
@@ -49,25 +45,23 @@ var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) 
   $("#testButtonContainer").append(container);
 };
 
-Template.profileSouthwest.rendered = function () {
+Template.profileSouthwest.rendered = async function () {
     Session.set("showSpeechAPISetup",false);
     $("#expDataDownloadContainer").html("");
+    const allTdfs = await meteorCallAsync("getAllTdfs");
+    Session.set("allTdfs",allTdfs);
 
     Meteor.call('getTdfsAssignedToStudent',Meteor.user().username.toLowerCase(),function(err,result){
       console.log("err: " + err + ", res: " + result);
       var assignedTdfs = result;
-      var allTdfs = Tdfs.find({});
       console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
       //Check all the valid TDF's
-      allTdfs.forEach( function (tdfObject) {
+      allTdfs.forEach( function (tdf) {
+          let tdfObject = tdf.content;
           let isMultiTdf = tdfObject.isMultiTdf;
 
           //Make sure we have a valid TDF (with a setspec)
-          var setspec = _.chain(tdfObject)
-              .prop("tdfs")
-              .prop("tutor")
-              .prop("setspec").first()
-              .value();
+          const setspec = tdfObject.tdfs.tutor.setspec[0];
 
           if (!setspec) {
               console.log("Invalid TDF - it will never work", tdfObject);
@@ -122,7 +116,7 @@ Template.profileSouthwest.rendered = function () {
 };
 
 //Actual logic for selecting and starting a TDF
-function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
+async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
     console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
     //make sure session variables are cleared from previous tests
     sessionCleanUp();
@@ -133,6 +127,8 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     //current TDF should be changed due to an experimental condition
     Session.set("currentRootTdfName", tdffilename);
     Session.set("currentTdfName", tdffilename);
+    const curTdf = await getTdfByFileName(tdffilename);
+    Session.set("currentTdfFile",curTdf);
     Session.set("currentStimName", stimulusfile);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
@@ -177,15 +173,15 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled and there's a tts key in the tdf then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (Session.get("audioPromptFeedbackView") == "feedback") || (Session.get("audioPromptFeedbackView") == "all");
-    var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptTTSAPIKeyAvailable = !!getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey;
+    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
+    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey;
     var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = curTdf.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = tdfAudioEnabled && userAudioToggled;
    Session.set("audioEnabled", audioEnabled);
 

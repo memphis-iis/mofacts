@@ -1,3 +1,5 @@
+import { shuffle, extractDelimFields, randomChoice, rangeVal, getStimClusterCount, createStimClusterMapping } from '../../lib/currentTestingHelpers';
+
 /* AssessmentSession - this is the main logic for loading the necessary
  * data from the TDF and Stimulus files and creating a schedule based
  * on the assessment session configuration.
@@ -61,7 +63,7 @@ AssessmentSession = {
 
         //Shuffle clusters at start
         if (settings.randomClusters) {
-            Helpers.shuffle(settings.clusterNumbers);
+            shuffle(settings.clusterNumbers);
         }
 
         //Our question array should be pre-populated
@@ -97,7 +99,7 @@ AssessmentSession = {
                 indices.push(z);
             }
             if (settings.randomConditions) {
-                Helpers.shuffle(indices);
+                shuffle(indices);
             }
 
             //For each template index
@@ -169,7 +171,7 @@ AssessmentSession = {
                             //be populated with the possible offsets already
                             if (settings.ranChoices.length < 1)
                                 throw "Random offset, but randomcchoices isn't set";
-                            offset = Helpers.randomChoice(settings.ranChoices);
+                            offset = randomChoice(settings.ranChoices);
                         }
                         else {
                             offset = _.intval(offStr);
@@ -294,7 +296,7 @@ AssessmentSession = {
         settings.finalPermute = _.prop(rawAssess, "permutefinalresult") || [""];
 
         //The "easy" "top-level" settings
-        Helpers.extractDelimFields(assess.initialpositions, settings.initialPositions);
+        extractDelimFields(assess.initialpositions, settings.initialPositions);
         settings.randomClusters = boolVal(assess.assignrandomclusters);
         settings.randomConditions = boolVal(assess.randomizegroups);
         settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
@@ -305,7 +307,7 @@ AssessmentSession = {
         //([X,Y] where the string is X-Y). SO - we convert this into a list of
         //all possible random choices
         var randomChoicesParts = [];
-        Helpers.extractDelimFields(assess.randomchoices, randomChoicesParts);
+        extractDelimFields(assess.randomchoices, randomChoicesParts);
         _.each(randomChoicesParts, function(item) {
             if (item.indexOf('-') < 0) {
                 //Single number - convert to range
@@ -316,7 +318,7 @@ AssessmentSession = {
                 item = "0-" + (val-1).toString();
             }
 
-            _.each(Helpers.rangeVal(item), function(subitem) {
+            _.each(rangeVal(item), function(subitem) {
                 settings.ranChoices.push(subitem);
             });
         });
@@ -329,14 +331,14 @@ AssessmentSession = {
         });
 
         if (by_group) {
-            Helpers.extractDelimFields(by_group.groupnames,        settings.groupNames);
-            Helpers.extractDelimFields(by_group.clustersrepeated,  settings.templateSizes);
-            Helpers.extractDelimFields(by_group.templatesrepeated, settings.numTemplatesList);
-            Helpers.extractDelimFields(by_group.initialpositions,  settings.initialPositions);
+            extractDelimFields(by_group.groupnames,        settings.groupNames);
+            extractDelimFields(by_group.clustersrepeated,  settings.templateSizes);
+            extractDelimFields(by_group.templatesrepeated, settings.numTemplatesList);
+            extractDelimFields(by_group.initialpositions,  settings.initialPositions);
 
             _.each(by_group.group, function(tdf_group) {
                 var new_group = [];
-                Helpers.extractDelimFields(tdf_group, new_group);
+                extractDelimFields(tdf_group, new_group);
                 if (new_group.length > 0) {
                     settings.groups.push(new_group);
                 }
@@ -351,7 +353,7 @@ AssessmentSession = {
         //done, we know our schedule size
         settings.scheduleSize = settings.initialPositions.length;
 
-        const currentTdfFile = getCurrentTdfFile();
+        const currentTdfFile = Session.get("currentTdfFile");
         const isMultiTdf = currentTdfFile.isMultiTdf;
         let unitClusterList;
 
@@ -373,9 +375,9 @@ AssessmentSession = {
 
         //Cluster Numbers
         let clusterList = [];
-        Helpers.extractDelimFields(unitClusterList, clusterList);
+        extractDelimFields(unitClusterList, clusterList);
         for (var i = 0; i < clusterList.length; ++i) {
-            var nums = Helpers.rangeVal(clusterList[i]);
+            var nums = rangeVal(clusterList[i]);
             for (var j = 0; j < nums.length; ++j) {
                 settings.clusterNumbers.push(_.intval(nums[j]));
             }
