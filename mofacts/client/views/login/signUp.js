@@ -47,12 +47,6 @@ Template.signUp.events({
                 errorMsgs.push(error);
             }
 
-            if (!!result && result.length) {
-                _.each(result, function(msg) {
-                    errorMsgs.push(msg);
-                });
-            }
-
             //If there was a call failure or server returned error message,
             //then we can't proceed
             if (errorMsgs.length > 0) {

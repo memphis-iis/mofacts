@@ -1,4 +1,4 @@
-import { shuffle, extractDelimFields, randomChoice, rangeVal, getStimClusterCount, createStimClusterMapping } from '../../lib/currentTestingHelpers';
+import { shuffle, extractDelimFields, randomChoice, rangeVal, getStimCount, createStimClusterMapping } from '../../lib/currentTestingHelpers';
 
 /* AssessmentSession - this is the main logic for loading the necessary
  * data from the TDF and Stimulus files and creating a schedule based
@@ -52,7 +52,7 @@ AssessmentSession = {
         return schedule;
     },
 
-    //"Private" implmentation version of createSchedule - should really
+    //"Private" implementation version of createSchedule - should really
     //be wrapped in an exception handler (see createSchedule for
     //parameter descriptions)
     createScheduleImpl: function(setspec, unitNumber, unit) {
@@ -363,7 +363,7 @@ AssessmentSession = {
             //NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
             //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
             if(curUnitNumber == 1){
-                const lastClusterIndex = getStimClusterCount() - 1;
+                const lastClusterIndex = getStimCount() - 1;
                 unitClusterList = lastClusterIndex + "-" + lastClusterIndex;
             }else{
                 const subTdfIndex = Session.get("subTdfIndex");

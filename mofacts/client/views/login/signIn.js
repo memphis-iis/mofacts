@@ -3,7 +3,7 @@ import { blankPassword } from '../../lib/currentTestingHelpers';
 Template.signIn.onRendered(function(){
   if(Session.get("loginMode") !== "experiment"){
     console.log("password signin, setting login mode");
-    Session.set('loginMode','password');
+    Session.set("loginMode",'password');
   }
 })
 
@@ -88,7 +88,7 @@ function UserPasswordCheck() {
     if (experiment) {
         if(experimentPasswordRequired){
           sessionCleanUp();
-          Session.set('experimentPasswordRequired',true);
+          Session.set("experimentPasswordRequired",true);
           console.log("username:" + newUsername + ",password:" + newPassword);
           Meteor.loginWithPassword(newUsername, newPassword, function(error) {
               if (typeof error !== 'undefined') {
@@ -113,12 +113,6 @@ function UserPasswordCheck() {
 
               if (typeof error !== "undefined") {
                   errorMsgs.push(error);
-              }
-
-              if (!!result && result.length) {
-                  _.each(result, function(msg) {
-                      errorMsgs.push(msg);
-                  });
               }
 
               //If there was a call failure or server returned error message,

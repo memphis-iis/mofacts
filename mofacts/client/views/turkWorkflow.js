@@ -97,7 +97,8 @@ Template.turkWorkflow.rendered = async function () {
 
     var isAdmin = Roles.userIsInRole(Meteor.user(), ["admin"]);
 
-    allTdfs.forEach( function (tdfObject) {
+    allTdfs.forEach( function (tdf) {
+        let tdfObject = tdf.content;
         //Make sure we have a valid TDF (with a setspec)
         let setspec = tdfObject.tdfs.tutor.setspec[0];
 

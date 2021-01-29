@@ -1,4 +1,3 @@
-import { curSemester } from '../../../common/Definitions';
 import { blankPassword } from '../../lib/currentTestingHelpers';
 
 Session.set("teachers",[]);
@@ -35,67 +34,65 @@ function testLogin(){
 
   var testPassword = blankPassword(testUserName);
 
+  Meteor.call("signUpUser", testUserName, testPassword, true, function(error, result) {
+      var errorMsgs = [];
 
-  Meteor.call("addUserToTeachersClass",testUserName,Session.get("curTeacher").username,Session.get("curClass").courseName, function(err, result){
-    if(!!err){
-      console.log("error adding user to teacher class: " + err);
-    }
-    console.log("addUserToTeachersClass result: " + result);
-    Meteor.call("signUpUser", testUserName, testPassword, true, function(error, result) {
-        var errorMsgs = [];
+      if (typeof error !== "undefined") {
+          errorMsgs.push(error);
+      }
 
-        if (typeof error !== "undefined") {
-            errorMsgs.push(error);
-        }
+      //If there was a call failure or server returned error message,
+      //then we can't proceed
+      if (errorMsgs.length > 0) {
+          var errorText = displayify(errorMsgs);
+          console.log("SW user login errors:", errorText);
+          alert("User login errors:", errorText);
+          $("#signInButton").prop('disabled', false);
+          return;
+      }
 
-        if (!!result && result.length) {
-            _.each(result, function(msg) {
-                errorMsgs.push(msg);
-            });
-        }
+      let newUserId = result;
 
-        //If there was a call failure or server returned error message,
-        //then we can't proceed
-        if (errorMsgs.length > 0) {
-            var errorText = displayify(errorMsgs);
-            console.log("SW user login errors:", errorText);
-            alert("User login errors:", errorText);
-            $("#signInButton").prop('disabled', false);
-            return;
-        }
+    Meteor.call("addUserToTeachersClass",newUserId,Session.get("curTeacher")._id,Session.get("curClass").sectionid, function(err, result){
+      if(err){
+        console.log("error adding user to teacher class: " + err);
+        alert(err);
+        return;
+      }
+      console.log("addUserToTeachersClass result: " + result);
 
-        sessionCleanUp();
+      sessionCleanUp();
 
-        // Note that we force Meteor to think we have a user name so that
-        // it doesn't try it as an email - this let's you test email-like
-        // users, which you can promote to admin or teacher
-        Meteor.loginWithPassword({'username': testUserName}, testPassword, function(error) {
-            if (typeof error !== 'undefined') {
-                console.log("ERROR: The user was not logged in on TEST sign in?", testUserName, "Error:", error);
-                alert("It appears that you couldn't be logged in as " + testUserName);
-                $("#signInButton").prop('disabled', false);
-            }
-            else {
-                if (Session.get("debugging")) {
-                    var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-                    console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
-                }
-                Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
-                Meteor.call("updatePerformanceData","login","signinSouthwest.testLogin",Meteor.userId());
-                Router.go("/profileSouthwest");
-            }
-        });
+      // Note that we force Meteor to think we have a user name so that
+      // it doesn't try it as an email - this let's you test email-like
+      // users, which you can promote to admin or teacher
+      Meteor.loginWithPassword({'username': testUserName}, testPassword, function(loginerror) {
+          if (typeof loginerror !== 'undefined') {
+              console.log("ERROR: The user was not logged in on TEST sign in?", testUserName, "Error:", loginerror);
+              alert("It appears that you couldn't be logged in as " + testUserName);
+              $("#signInButton").prop('disabled', false);
+          }else {
+              if (Session.get("debugging")) {
+                  var currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
+                  console.log(currentUser + " was test logged in successfully! Current route is ", Router.current().route.getName());
+              }
+              Meteor.call('logUserAgentAndLoginTime',Meteor.userId(),navigator.userAgent);
+              Meteor.call("updatePerformanceData","login","signinSouthwest.testLogin",Meteor.userId());
+              Router.go("/profileSouthwest");
+          }
+      });
     });
   })
 }
 
-setTeacher = function(teacher){
+setTeacher = function(teacher){ //Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
   console.log(teacher);
   Session.set("curTeacher",teacher);
   $("#initialInstructorSelection").prop('hidden','true');
   let curClasses = Session.get("classesByInstructorId")[teacher._id];
+  console.log("setTeacher",Session.get("classesByInstructorId"),teacher._id,teacher);
 
-  if(curClasses.length == 0){
+  if(curClasses == undefined){
     $("#initialInstructorSelection").prop('hidden','');
     alert("Your instructor hasn't set up their classes yet.  Please contact them and check back in at a later time.");
     Session.set("curTeacher",{});
@@ -106,9 +103,10 @@ setTeacher = function(teacher){
 }
 
 setClass = function(curClassID){
+  console.log(curClassID);
   $("#classSelection").prop('hidden','true');
   let allClasses = Session.get("curTeacherClasses");
-  let curClass = allClasses.find((aClass) => aClass.courseId == curClassID);
+  let curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
   Session.set("curClass",curClass);
   $(".login").prop('hidden','');
 }
@@ -132,7 +130,9 @@ Template.signInSouthwest.onCreated(async function(){
     }
   });
 
-  let verifiedTeachers = await meteorCallAsync("getAllTeachers",southwestOnly=true);
+  let southwestOnly=true;
+  let verifiedTeachers = await meteorCallAsync("getAllTeachers",southwestOnly);
+  console.log("verifiedTeachers",verifiedTeachers);
 
   //Hack to redirect rblaudow classes to ambanker
   var ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
@@ -145,6 +145,7 @@ Template.signInSouthwest.onCreated(async function(){
     Session.set("showTestLogins",false);
     var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
     verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+    console.log("verifiedTeachers2",verifiedTeachers);
   }else{
     Session.set("showTestLogins",true);
   }
@@ -152,13 +153,14 @@ Template.signInSouthwest.onCreated(async function(){
 });
 
 Template.signInSouthwest.onRendered(async function(){
-  const allCourses = await meteorCallAsync("getAllCourses");
+  const allCourseSections = await meteorCallAsync("getAllCourseSections");
   let classesByInstructorId = {};
-  for(let course of allCourses){
-    if(!classesByInstructorId[course.teacherUserId]){
-      classesByInstructorId[course.teacherUserId] = [];
+//  //sectionid, courseandsectionname
+  for(let coursesection of allCourseSections){
+    if(!classesByInstructorId[coursesection.teacheruserid]){
+      classesByInstructorId[coursesection.teacheruserid] = [];
     }
-    classesByInstructorId[course.teacherUserId].push(course);
+    classesByInstructorId[coursesection.teacheruserid].push(coursesection);
   }
   Session.set("classesByInstructorId",classesByInstructorId);
 
@@ -175,9 +177,7 @@ Template.signInSouthwest.onRendered(async function(){
 });
 
 Template.signInSouthwest.helpers({
-    'altServerUrl': function(){
-      return Session.get("altServerUrl");
-    },
+    'altServerUrl': () => Session.get("altServerUrl"),
 
     'readingServerStatus': function(){
       return Session.get("systemDown")  == undefined;
@@ -187,21 +187,13 @@ Template.signInSouthwest.helpers({
       return Session.get("systemDown") && !Session.get("showTestLogins");
     },
 
-    'systemOverloaded': function(){
-      return Session.get("systemOverloaded");
-    },
+    'systemOverloaded': () => Session.get("systemOverloaded"),
 
-    'showTestLogins': function(){
-      return Session.get("showTestLogins");
-    },
+    'showTestLogins': () => Session.get("showTestLogins"),
 
-    'teachers': function() {
-        return Session.get('teachers');
-    },
+    'teachers': () => Session.get('teachers'),
 
-    'curTeacherClasses': function(){
-      return Session.get("curTeacherClasses");
-    }
+    'curTeacherClasses': () => Session.get("curTeacherClasses")
 });
 
 Template.signInSouthwest.events({
@@ -220,7 +212,7 @@ Template.signInSouthwest.events({
         if(!!data && !!data.error){
           alert("Problem logging in: " + data.error);
         }else{
-          Meteor.call("addUserToTeachersClass",Meteor.user().username,Session.get("curTeacher").username,Session.get("curClass").courseName, function(err, result){
+          Meteor.call("addUserToTeachersClass",Meteor.userId(),Session.get("curTeacher")._id,Session.get("curClass").sectionid, function(err, result){
             if(!!err){
               console.log("error adding user to teacher class: " + err);
             }

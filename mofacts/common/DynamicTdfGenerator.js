@@ -78,7 +78,7 @@ export class DynamicTdfGenerator {
 
     this.stimFileClusters_.forEach((cluster, idx) => {
       let allClusterTags = [];
-      for(let stim of cluster.stims){
+      for(let stim of cluster){
         if(stim.tags){
           allClusterTags.push(stim.tags);
         }
@@ -100,9 +100,6 @@ export class DynamicTdfGenerator {
       }
     });
     clusterListString = clusterListString.trim();
-    // if (clusterListString.length < 1) {
-    //   throw new Error("Could not generate cluster list");
-    // }
     return clusterListString;
   }
 
@@ -165,8 +162,8 @@ export class DynamicTdfGenerator {
    */
   setOrderGroupValuesMap() {
     this.stimFileClusters_.forEach(cluster => {
-      if (cluster.stims[0].tags && cluster.stims[0].tags.orderGroup) {
-        let orderGroupValueKey = (cluster.stims[0].tags.orderGroup[0] || cluster.stims[0].tags.orderGroup).toString();
+      if (cluster[0].tags && cluster[0].tags.orderGroup) {
+        let orderGroupValueKey = (cluster[0].tags.orderGroup[0] || cluster[0].tags.orderGroup).toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;
@@ -184,10 +181,8 @@ export class DynamicTdfGenerator {
    */
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
-    try {
+    try { Session.get("")
       clusters = !!(stimJson) ? stimJson.stimuli.setspec.clusters : Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
-      // clusters = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
-      // console.log(clusters);
     } catch (error) {
      throw new Error('Unable to find clusters with stim file: ' 
        + stimFileName + ' ' + error);

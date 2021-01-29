@@ -36,6 +36,23 @@ console.log("altServerUrl: " + altServerUrl);
 
 var clozeGeneration = require('./lib/Process.js');
 
+let userIdToUsernames = {};
+let usernameToUserIds = {};
+Meteor.users.find({},{ fields: {_id:1, username: 1}, sort: [['username', 'asc']] }).map(function(user){
+  userIdToUsernames[user._id] = user.username;
+  usernameToUserIds[user.username] = user._id;
+});
+
+function getUserIdforUsername(username){
+  let userId = usernameToUserIds[username];
+  if(!userId){
+    let user = Meteor.users.findOne({username:username}).fetch();
+    userId = user._id;
+    usernameToUserIds[username] = userId;
+  }
+  return userId;
+}
+
 //For Southwest SSO with ADFS/SAML 2.0
 if(Meteor.settings.saml){
   console.log("reading SAML settings");
@@ -80,36 +97,16 @@ Meteor.publish(null, function () {
   //user data (user times log and user record) for them
   var defaultData = [
       StimSyllables.find({}),
-      Stimuli.find({}),
-      UserTimesLog.find({_id:userId}),
       Meteor.users.find({_id: userId}),
       UserProfileData.find({_id: userId}, {fields: {
           have_aws_id: 1,
           have_aws_secret: 1,
           use_sandbox: 1
       }}),
-      UserMetrics.find({_id:userId})
   ];
 
   return defaultData;
 });
-
-Meteor.publish('specificUser',function(username){
-return Meteor.users.find({"username":username});
-})
-
-Meteor.publish('Stimuli', function(){
-return Stimuli.find({});
-})
-
-Meteor.publish('specificUserTimesLog',function(userId){
-Meteor.call("updatePerformanceData","utlQuery","server.specificUserTimesLog",this.userId);
-return UserTimesLog.find({_id:userId});
-})
-
-Meteor.publish('specificUserMetrics',function(userId){
-return UserMetrics.find({_id:userId});
-})
 
 Meteor.publish('allUsers', function () {
   var opts = {
@@ -131,8 +128,6 @@ SyncedCron.config({
   collectionTTL: undefined
 });
 
-//Helper functions
-
 serverConsole = function() {
     var disp = [(new Date()).toString()];
     for (var i = 0; i < arguments.length; ++i) {
@@ -140,6 +135,11 @@ serverConsole = function() {
     }
     console.log.apply(this, disp);
 };
+
+async function getAllTdfFileNames() {
+  const allTdfs = await getAllTdfs();
+  return allTdfs.map(x => x.content.fileName);
+}
 
 async function getTdfQueryNames(tdfFileName) {
   let tdfQueryNames = {};
@@ -151,11 +151,6 @@ async function getTdfQueryNames(tdfFileName) {
   return tdfQueryNames;
 }
 
-async function getAllTdfFileNames() {
-  const allTdfs = await getAllTdfs();
-  return allTdfs.map(x => x.fileName);
-}
-
 async function getLearningSessionItems(tdfFileName) {
   let learningSessionItems = [];
   const tdfQueryNames = await getTdfQueryNames(tdfFileName);
@@ -164,10 +159,10 @@ async function getLearningSessionItems(tdfFileName) {
       learningSessionItems[tdfQueryName] = {};
     }
     const tdf = await getTdfByFileName(tdfQueryName);
-    if (tdf.isMultiTdf) {
-      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
+    if (tdf.content.isMultiTdf) {
+      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf.content);
     } else {
-      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
+      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf.content);
     }
   });
   return learningSessionItems;
@@ -182,6 +177,10 @@ async function getTdfByOwnerId(ownerId){
     console.log("getTdfByOwnerId ERROR,",ownerId,",",e);
     return null;
   }
+}
+
+async function getTdfById(TDFId){
+  return await db.one("SELECT * from tdf WHERE TDFId=$1",TDFId);
 }
 
 async function getTdfBy_id(_id){
@@ -221,14 +220,9 @@ async function getTdfByExperimentTarget(experimentTarget){
 }
 
 async function getAllTdfs(){
-  try{
-    console.log("getAllTdfs");
-    const tdfs = await db.any("SELECT * from tdf");
-    return tdfs;
-  }catch(e){
-    console.log("getAllTdfs ERROR,",e);
-    return null;
-  }
+  console.log("getAllTdfs");
+  const tdfs = await db.any("SELECT * from tdf");
+  return tdfs;
 }
 
 async function getAllCourses(){
@@ -241,21 +235,23 @@ async function getAllCourses(){
   }
 }
 
-async function getAllCoursesForInstructor(instructorId,inCurrentSemester=false){
-  try{
-    console.log("getAllCoursesForInstructor:"+instructorId);
-    let query = "SELECT * from course WHERE teacherUserId=$1";
-    let args = [instructorId];
-    if(inCurrentSemester){
-      query += " AND semester=$2";
-      args.push(curSemester);
-    } 
-    const courses = await db.any(query,args);
+async function getAllCourseSections(){
+  try{//  //sectionid, courseandsectionname
+    console.log("getAllCourseSections");
+    let query = "SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1";
+    const courses = await db.any(query,curSemester);
     return courses;
   }catch(e){
-    console.log("getAllCoursesForInstructor ERROR,",instructorId,inCurrentSemester,",",e);
+    console.log("getAllCourseSections ERROR,",instructorId,inCurrentSemester,",",e);
     return null;
   }
+}
+
+async function getAllCoursesForInstructor(instructorId){
+  console.log("getAllCoursesForInstructor:",instructorId);
+  let query = "SELECT * from course WHERE teacherUserId=$1 AND semester=$2";
+  const courses = await db.any(query,[instructorId,curSemester]);
+  return courses;
 }
 
 async function getAllCourseAssignmentsForInstructor(instructorId){
@@ -321,21 +317,28 @@ async function editCourseAssignments(newCourseAssignment){ //Shape: {coursename:
   }
 }
 
-async function getTdfAssignmentsByCourseId(courseId){
-  try{
-    console.log("getTdfAssignmentsByCourseId:"+courseId);
-    let query = "SELECT t.content -> 'fileName' AS filename from assignment AS a \
+async function getTdfAssignmentsByCourseIdMap(instructorId){
+    console.log("getTdfAssignmentsByCourseIdMap",instructorId);
+    let query = "SELECT t.content -> 'tdfs.tutor.setspec[0].lessonname[0]' AS displayname, TDFId, a.courseId \
+                 FROM assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
-                 WHERE c.courseId = $1 AND c.semester = $2";
-    const assignmentTdfFileNames = await db.any(query,[instructorID,curSemester]);
-    let unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
-    console.log("assignmentTdfFileNames",unboxedAssignmentTdfFileNames);
-    return unboxedAssignmentTdfFileNames;
-  }catch(e){
-    console.log("getTdfAssignmentsByCourseId ERROR,",e);
-    return null;
-  }
+                 WHERE c.semester = $1 AND c.teacherUserId=$2";
+    const assignmentTdfFileNamesRet = await db.any(query,[curSemester,instructorId]);
+    console.log("assignmentTdfFileNames",assignmentTdfFileNamesRet);
+    let assignmentTdfFileNamesByCourseIdMap = {};
+    for(let assignment of assignmentTdfFileNamesRet){
+      if(!assignmentTdfFileNamesByCourseIdMap[assignment.courseid]) assignmentTdfFileNamesByCourseIdMap[assignment.courseid] = [];
+      assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({tdfid:assignment.tdfid, displayname:assignment.displayname});
+    }
+    return assignmentTdfFileNamesByCourseIdMap;
+}
+
+async function getTdfsAssignedToStudent(userId){
+  console.log('getTdfsAssignedToStudent',userId);
+  const tdfs = await db.manyOrNone('SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId INNER JOIN section_user_map AS m ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2',[userId,curSemester]);
+  console.log("tdfs",tdfs);
+  return tdfs;
 }
                
 async function getTdfNamesAssignedByInstructor(instructorID){
@@ -356,10 +359,33 @@ async function getTdfNamesAssignedByInstructor(instructorID){
   }
 }
 
+async function getExperimentState(UserId,TDFId){
+  let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
+  const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
+  let experimentState = experimentStateRet[0].experimentState;
+  console.log("getExperimentState",TDFId,UserId,experimentState);
+  return experimentState;
+}
+
+async function setExperimentState(UserId,TDFId,newExperimentState){
+  let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
+  const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
+  let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentState : {};
+  let updatedExperimentState = Object.assign(experimentState,newExperimentState);
+  let updateQuery = "UPDATE course SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
+  const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
+  console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
+  return updatedExperimentState;
+}
+
 function getAllTeachers(southwestOnly=false){
   let query = {'roles':'teacher'};
   if(southwestOnly) query["username"]=/southwest[.]tn[.]edu/i;
-  return Meteor.users.find(query);
+  console.log("getAllTeachers",query);
+  let allTeachers = Meteor.users.find(query).fetch();
+
+  console.log("allTeachers",allTeachers);
+  return allTeachers;
 }
 
 async function addCourse(mycourse){
@@ -407,9 +433,165 @@ async function editCourse(mycourse){
   return res;
 }
 
+async function addUserToTeachersClass(userid,teacherID,sectionId){
+  console.log("addUserToTeachersClass",userid,teacherID,sectionId);
+
+  const existingMapping = await db.oneOrNone('SELECT COUNT(*) FROM section_user_map WHERE sectionId=$1 AND userId=$2',[sectionId,userid]);
+  console.log("existingMapping",existingMapping);
+  if(!existingMapping.length || existingMapping.length == 0){
+    console.log("new user, inserting into section_user_mapping",[sectionId,userid]);
+    await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)',[sectionId,userid]);
+  }
+
+  return true;
+}
+
+async function getStimDisplayTypeMap(){
+  try{
+    console.log("getStimDisplayTypeMap");
+    let query = "SELECT \
+    COUNT(i.clozeStimulus) AS clozeItemCount, \
+    COUNT(i.textStimulus)  AS textItemCount, \
+    COUNT(i.audioStimulus) AS audioItemCount, \
+    COUNT(i.imageStimulus) AS imageItemCount, \
+    COUNT(i.videoStimulus) AS videoItemCount, \
+    i.stimuliSetId \
+    FROM item AS i \
+    GROUP BY i.stimuliSetId;"
+    const counts = await db.many(query);
+    let map = {};
+    for(let count of counts){
+      map[count.stimulisetid] = {
+        hasCloze: count.clozeItemCount > 0,
+        hasText:  count.textItemCount  > 0,
+        hasAudio: count.audioItemCount > 0,
+        hasImage: count.imageItemCount > 0,
+        hasVideo: count.videoItemCount > 0
+      }
+    }
+    return map;
+  }catch(e){
+    console.log("getStimDisplayTypeMap ERROR,",e);
+    return null;
+  }
+}
+
+async function getStimuliSetById(stimuliSetId){
+  let query = "SELECT * FROM item \
+               WHERE stimuliSetId=$1 \
+               ORDER BY itemId";
+  return await db.many(query,stimuliSetId);
+}
+
+async function getStimCountByStimuliSetId(stimuliSetId){
+  let query = "SELECT COUNT(*) FROM item \
+               WHERE stimuliSetId=$1 \
+               ORDER BY itemId";
+  const ret = await db.one(query,stimuliSetId);
+  return ret.count;
+}
+
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
+  let query = "SELECT SUM(s.priorCorrect) AS numCorrect, \
+               SUM(s.priorIncorrect) AS numIncorrect, \
+               SUM(s.totalPromptDuration) AS totalPrompt, \
+               SUM(s.totalStudyDuration) AS totalStudy \
+               FROM componentState AS s \
+               INNER JOIN item AS i ON i.stimulusKC = s.KCId \
+               INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.currentUnitType = 'learningsession' \
+               GROUP BY s.userId";
+  return await db.one(query,[userId,TDFid]);
+}
+
+async function getStudentPerformanceForClassAndTdfId(instructorId){
+  let query =  "SELECT MAX(t.TDFId) AS tdfid, \ 
+                MAX(t.courseId) AS courseid, \
+                MAX(s.userId) AS userid, \
+                SUM(s.priorCorrect) AS correct, \
+                SUM(s.priorIncorrect) AS incorrect, \
+                SUM(s.totalPromptDuration) AS totalPrompt, \
+                SUM(s.totalStudyDuration) AS totalStudy \
+                FROM componentState AS s \
+                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
+                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
+                INNER JOIN assignment AS a on a.TDFId = t.TDFId \
+                INNER JOIN course AS c on c.courseId = t.courseId \
+                WHERE c.semester = $1, c.teacherUserId = $2 AND s.currentUnitType = 'learningsession' \
+                GROUP BY s.userId, t.TDFId, c.courseId";
+
+  const studentPerformanceRet = await db.any(query,[curSemester,instructorId]);
+  let studentPerformanceForClass = {};
+  let studentPerformanceForClassAndTdfIdMap = {};
+  for(let studentPerformance of studentPerformanceRet){
+    let studentUsername = userIdToUsernames[studentPerformance.userid];
+    if(!studentUsername){
+      studentUsername = Meteor.find({_id:userid});
+      userIdToUsernames[userid] = studentUsername;
+    } 
+
+    let { courseid, userid, tdfid, correct, incorrect, totalPrompt, totalStudy } = studentPerformance;
+    if(!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
+    if(!studentPerformanceForClass[courseid][tdfid]) studentPerformanceForClass[courseid][tdfid] = {count:0,totalTime:0,numCorrect:0}
+    studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
+    studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
+    studentPerformanceForClass[courseid][tdfid].totalTime += totalPrompt + totalStudy;
+
+    if(!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
+    if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
+
+    if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count:0,totalTime:0,numCorrect:0,username:studentUsername};
+    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
+    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
+    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalPrompt + totalStudy;
+  }
+  for(let coursetotals of studentPerformanceForClass){
+    for(let tdftotal of coursetotals){
+      tdftotal.percentCorrect = ((tdftotal.numCorrect / tdftotal.count)*100).toFixed(2) + "%",
+      tdftotal.totalTimeDisplay = tdftotal.totalTime.toFixed(1)
+    }
+  }
+  for(let coursetotals of studentPerformanceForClassAndTdfIdMap){
+    for(let tdftotals of coursetotals){
+      for( let studenttotal of tdftotals){
+        studenttotal.percentCorrect = ((studenttotal.numCorrect / studenttotal.count)*100).toFixed(2) + "%",
+        studenttotal.totalTimeDisplay = studenttotal.totalTime.toFixed(1)
+      }
+    }
+  }
+  return [studentPerformanceForClass,studentPerformanceForClassAndTdfIdMap];
+}
+
+async function getTdfIDsAndDisplaysAttemptedByUserId(userId,onlyWithLearningSessions=true){
+  let query = "SELECT TDFId from globalExperimentState WHERE userId = $1";
+  const tdfRet = await db.manyOrNone(query,userId);
+  const allTdfs = await getAllTdfs();
+  
+  let tdfsAttempted = [];
+  for(let obj of tdfRet){
+    let tdfid = obj.tdfid;
+    let tdfObject = allTdfs.findOne(x => x.tdfid == tdfid).content;
+    if(!tdfObject.tdfs.tutor.unit) continue;//TODO: fix root/condition tdfs
+
+    if(onlyWithLearningSessions){
+      for(let unit of tdfObject.tdfs.tutor.unit){
+        if(unit.learningsession){
+          let displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+          tdfsAttempted.push({tdfid,displayName});
+          break;
+        } 
+      }
+    }else{
+      let displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+      tdfsAttempted.push({tdfid,displayName});
+    }
+  }
+
+  return tdfsAttempted;
+}
+
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
-  let stimFileName = tdf.tdfs.tutor.setspec[0].stimulusfile[0];
-  let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
+  let lastStim = getStimCountByStimuliSetId(tdf.stimuliSetId) - 1;
   for (let i = 0; i < lastStim - 1; i++) {
     learningSessionItem[i] = true;
   }
@@ -453,7 +635,7 @@ function getTdfJSON(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err) {
-            serverConsole("Error reading Stim JSON", err);
+            serverConsole("Error reading Tdf JSON", err);
             throw err;
         }
         future.return(xml2js.parseStringSync(data));
@@ -665,7 +847,7 @@ Meteor.startup(async function () {
     if(!isProd){
         _.each(
           _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
-          function (ele, idx, lst) {
+          function (ele) {
               //serverConsole("Updating Stim in DB from ", ele);
               var json = getStimJSON('stims/' + ele);
               var rec = createStimRecord(ele, json, adminUserId, 'repo');
@@ -682,7 +864,7 @@ Meteor.startup(async function () {
 
       _.each(
           _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-          async function (ele, idx, lst) {
+          async function (ele) {
               //serverConsole("Updating TDF in DB from ", ele);
               var json = getTdfJSON('tdf/' + ele);
 
@@ -722,8 +904,7 @@ Meteor.startup(async function () {
     //Log this late so they're more prone to see it
     if (adminUserId) {
         serverConsole("Admin user is", _.pick(adminUser, "_id", "username", "email"));
-    }
-    else {
+    }else {
         serverConsole("ADMIN USER is MISSING: a restart might be required");
         serverConsole("Make sure you have a valid siteConfig");
         serverConsole("***IMPORTANT*** There will be no owner for system TDF's");
@@ -794,31 +975,11 @@ Meteor.startup(async function () {
 
     //Set up our server-side methods
     Meteor.methods({
-      getAllTdfs:getAllTdfs,
-
-      getTdfByFileName:getTdfByFileName,
-
-      getTdfByExperimentTarget:getTdfByExperimentTarget,
-
-      getTdfByOwnerId:getTdfByOwnerId,
-
-      getLearningSessionItems:getLearningSessionItems,
-
-      getAllCourses: getAllCourses,
-
-      getAllCoursesForInstructor:getAllCoursesForInstructor,
-
-      getAllCourseAssignmentsForInstructor:getAllCourseAssignmentsForInstructor,
-
-      getAllTeachers:getAllTeachers,
-
-      getTdfNamesAssignedByInstructor:getTdfNamesAssignedByInstructor,
-
-      addCourse: addCourse,
-      
-      editCourse:editCourse,
-
-      editCourseAssignments:editCourseAssignments,
+      getAllTdfs,getTdfById,getTdfByFileName,getTdfByExperimentTarget,getTdfByOwnerId,getTdfIDsAndDisplaysAttemptedByUserId,
+      getLearningSessionItems,getAllCourses,getAllCourseSections,getAllCoursesForInstructor,getAllCourseAssignmentsForInstructor,
+      getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
+      getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
+      setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,
 
       getAltServerUrl:function(){
         return altServerUrl;
@@ -906,29 +1067,10 @@ Meteor.startup(async function () {
         return Meteor.users.update({_id:userID},{$set: {status : {lastLogin:loginTime,userAgent:userAgent}}});
       },
 
-      generateUnusedIDs:function(numIDsToGen){
-        var newIDs = [];
-        var idMap = {};
-        var allUsers = Meteor.users.find({}).fetch();
-        _.each(allUsers,function(user){
-          var id = user.username;
-          idMap[id] = true;
-        })
-        for(var i=0;i<numIDsToGen;i++){
-          var newID = genID(lengthOfNewGeneratedIDs);
-          while(idMap[newID]){
-            newID = genID(lengthOfNewGeneratedIDs);
-          }
-          newIDs.push(newID);
-          idMap[newID] = true;
-        }
-
-        return newIDs;
-      },
-
       insertClozeEditHistory:function(history){
         ClozeEditHistory.insert(history);
       },
+
       getClozesAndSentencesForText:function(rawText){
         console.log("rawText!!!: " + rawText);
         return clozeGeneration.GetClozeAPI(null,null,null,rawText);
@@ -937,47 +1079,6 @@ Meteor.startup(async function () {
       insertStimTDFPair:function(newStimJSON,newTDFJSON){
         Stimuli.insert(newStimJSON);
         Tdfs.insert(newTDFJSON);
-      },
-
-      addUserToTeachersClass: function(user,teacherUsername,teacherClassName){
-        user = user.toLowerCase();
-        var teacher = Meteor.users.find({"username": teacherUsername}) || {};
-        var teacherID = teacher._id;
-        console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
-        var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();
-        console.log("teacherClasses: " + JSON.stringify(teacherClasses));
-        var studentInAClass = false;
-        for(var index in teacherClasses){
-          var curClass = teacherClasses[index];
-          if(curClass.students.findIndex(x => x === user) != -1){
-            studentInAClass = true;
-            break;
-          }
-        }
-        if(!studentInAClass && teacherClasses.length > 0){
-          console.log("student not in a class");
-          var classToUpdate = teacherClasses[0];
-          classToUpdate.students.push(user);
-          Classes.update({"_id":classToUpdate._id},classToUpdate,{upsert: true});
-        }
-      },
-
-      getTdfsAssignedToStudent: function(user){
-        console.log('user: ' + user);
-        var classesWithStudent = Classes.find({"students":user}).fetch();
-        console.log("classesWithStudent: " + JSON.stringify(classesWithStudent));
-        tdfs = new Set([]);
-        for(var index in classesWithStudent){
-          var curClass = classesWithStudent[index];
-          console.log("curClass: " + JSON.stringify(curClass));
-          var tdfsInCurClass = curClass.tdfs;
-          for(var index2 in tdfsInCurClass){
-            var tdf = tdfsInCurClass[index2];
-            tdfs.add(tdf);
-          }
-        }
-        console.log("tdfs: " + JSON.stringify(Array.from(tdfs)));
-        return Array.from(tdfs);
       },
 
       serverLog: function(data){
@@ -1006,7 +1107,7 @@ Meteor.startup(async function () {
                       // passwords - so when we detect them, we automatically
                       // change the password
                       Accounts.setPassword(prevUser._id, newUserPassword);
-                      return null; //User has already been created - nothing to do
+                      return prevUser._id; //User has already been created - nothing to do
                   }else{
                     checks.push("User is already in use");
                   }
@@ -1018,7 +1119,7 @@ Meteor.startup(async function () {
           }
 
           if (checks.length > 0) {
-              return checks; //Nothing to create
+              throw new Error(checks[0]) //Nothing to create
           }
 
           // Now we can actually create the user
@@ -1035,14 +1136,14 @@ Meteor.startup(async function () {
               }
           });
           if (!createdId) {
-              return ["Unknown failure creating user account"];
+              throw new Error("Unknown failure creating user account");
           }
 
           //Now we need to create a default user profile record
           userProfileSave(createdId, defaultUserProfile());
 
           //Remember we return a LIST of errors, so this is success
-          return null;
+          return createdId;
       },
 
       //We provide a separate server method for user profile info - this is
@@ -1194,7 +1295,6 @@ Meteor.startup(async function () {
         serverConsole("saveUsersFile: " + filename);
         var allErrors = [];
         var rows = Papa.parse(filecontents).data;
-        var headerRow = rows[0];
         rows = rows.slice(1);
         for(var index in rows){
           var row = rows[index];
@@ -1320,12 +1420,6 @@ Meteor.startup(async function () {
           // }
 
           return results;
-      },
-
-      //Log one or more user records for the currently running experiment
-      userTime: function (experiment, objectsToLog) {
-          // No serverConsole call - it's handled by writeUserLogEntries
-          writeUserLogEntries(experiment, objectsToLog);
       },
 
       updatePerformanceData: function(type,codeLocation,userId){
@@ -1542,7 +1636,7 @@ Router.route("data-by-class", {
       return;
     }
 
-    const tdfFileNames = await getTdfAssignmentsByCourseId(classId);
+    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
 
     if (!tdfFileNames || tdfFileNames.length == 0) {
       response.writeHead(404);
@@ -1550,7 +1644,7 @@ Router.route("data-by-class", {
       return;
     }
 
-    let className = foundClass.courseName.replace('/[/\\?%*:|"<>\s]/g', '_');
+    let className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
     let fileName = 'mofacts_' + className + '_all_class_data.txt';
 
     response.writeHead(200, {

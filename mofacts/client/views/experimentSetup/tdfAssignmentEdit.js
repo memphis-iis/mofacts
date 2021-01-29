@@ -1,5 +1,4 @@
 import { curSemester } from '../../../common/Definitions';
-import { getAllCourseAssignmentsForInstructor, getAllCoursesForInstructor } from '../../lib/currentTestingHelpers';
 
 Session.set("courses",[]);
 Session.set("assignments",[]);
@@ -10,11 +9,11 @@ Session.set("tdfsNotSelected",[]);
 curCourseAssignment = { coursename: "", courseid: undefined, tdfs: [] };
 Template.tdfAssignmentEdit.onRendered(async function(){
   console.log("tdfAssignmentEdit rendered");
-  const curCourses = await getAllCoursesForInstructor(Meteor.userId());
-  console.log("curCourses",curCourses);
-  Session.set("courses",curCourses);
+  const courses = await meteorCallAsync("getAllCoursesForInstructor",Meteor.userId());
+  console.log("courses",courses);
+  Session.set("courses",courses);
   
-  const courseAssignments = await getAllCourseAssignmentsForInstructor(Meteor.userId());
+  const courseAssignments = await meteorCallAsync("getAllCourseAssignmentsForInstructor",Meteor.userId());
   let assignments = {};
   for(let courseAssignment of courseAssignments){
     if(!assignments[courseAssignment.coursename]) assignments[courseAssignment.coursename] = new Set();

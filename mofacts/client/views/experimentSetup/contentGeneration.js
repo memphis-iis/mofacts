@@ -35,31 +35,28 @@ recordClozeEditHistory = function(oldCloze,newCloze){
 setAllTdfs = function(ownerMapCallback){
   allTdfs = [];
   let ownerIds = [];
-  Session.get("allTdfs").forEach(function(entry){
-    try{
-      var fileName = entry.fileName;
-      if(fileName.indexOf(curSemester) != -1){
-        var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
-        var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
-        let displayDate = "";
-        if (entry.createdAt) {
-          let date = new Date(entry.createdAt);
-          displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
-        }
-
-        let ownerId = entry.owner;
-        ownerIds.push(entry.owner);
-        var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
-        allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate || ""});
-        tdfFileNameToTdfFileMap[fileName] = entry;
-        tdfFileNameToStimfileMap[fileName] = stimulusObject;
-      }
-    }catch(err){
-      console.log("error with setting all tdfs: " + JSON.stringify(err));
+  Session.get("allTdfs").forEach(function(tdf){
+    if(tdf.semester != curSemester) return;
+    let entry = tdf.content;
+    let fileName = entry.fileName;
+    var displayName = entry.tdfs.tutor.setspec[0].lessonname[0];
+    let stimSetId = tdf.stimulisetid;
+    var stimulusFile = entry.tdfs.tutor.setspec[0].stimulusfile[0];
+    let displayDate = "";
+    if (entry.createdAt) {
+      let date = new Date(entry.createdAt);
+      displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
     }
+
+    let ownerId = entry.owner;
+    ownerIds.push(entry.owner);
+    var stimulusObject = Stimuli.findOne({"fileName":stimulusFile})
+    allTdfs.push({'fileName':fileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate || ""});
+    tdfFileNameToTdfFileMap[fileName] = entry;
+    tdfFileNameToStimfileMap[fileName] = stimulusObject;
   });
   ownerMapCallback(ownerIds);
-  Session.set('contentGenerationAllTdfs',allTdfs);
+  Session.set("contentGenerationAllTdfs",allTdfs);
 }
 
 getTdfOwnersMap = function(ownerIds) {
@@ -465,7 +462,7 @@ function updateLookupMaps(clozeID,itemID,paraphraseId,oldCloze,newCloze){
     });
   }
 
-  Session.set('clozeSentencePairs', {
+  Session.set("clozeSentencePairs", {
     'sentences':newSentences,
     'clozes':newClozes
   });
@@ -806,17 +803,14 @@ Template.contentGeneration.events({
 });
 
 Template.contentGeneration.helpers({
-  sentences: function() {
-    return Session.get("clozeSentencePairs").sentences;
-  },
-
-  clozes: function() {
-    return Session.get("clozeSentencePairs").clozes;
-  },
-
-  clozesSelected: function() {
-    return Session.get("selectedForDelete").length > 0;
-  },
+  sentences: () => Session.get("clozeSentencePairs").sentences,
+  clozes: () => Session.get("clozeSentencePairs").clozes,
+  clozesSelected: () => Session.get("selectedForDelete").length > 0,
+  editingCloze: () => Session.get("editingCloze").cloze,
+  editingClozeResponse: () => Session.get("editingCloze").correctResponse,
+  editingSentence: () => Session.get("editingSentence").sentence,
+  contentGenerationAllTdfs: () => Session.get("contentGenerationAllTdfs"),
+  tdfOwnersMap: ownerId => Session.get("tdfOwnersMap")[ownerId],
 
   isCurrentPair: function(itemId) {
     return itemId === Session.get("curClozeSentencePairItemId");
@@ -845,26 +839,6 @@ Template.contentGeneration.helpers({
       if (c.itemId === curClozeItemId) { curClozeText = c.cloze }
     });
     return curClozeText;
-  },
-
-  editingCloze: function(){
-    return Session.get("editingCloze").cloze;
-  },
-
-  editingClozeResponse: function(){
-    return Session.get("editingCloze").correctResponse;
-  },
-
-  editingSentence: function(){
-    return Session.get("editingSentence").sentence;
-  },
-
-  tdfs: function(){
-    return Session.get("contentGenerationAllTdfs");
-  },
-
-  tdfOwnersMap: ownerId => {
-    return Session.get("tdfOwnersMap")[ownerId];
   }
 });
 

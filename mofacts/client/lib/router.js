@@ -125,7 +125,7 @@ Router.route('/experiment/:target?/:xcond?', {
         const tdf = await meteorCallAsync("getTdfByExperimentTarget",target);
         if(!!tdf){
           console.log("tdf found");
-          var experimentPasswordRequired = !!tdf.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
+          var experimentPasswordRequired = !!tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
           Session.set("experimentPasswordRequired",experimentPasswordRequired);
           console.log("experimentPasswordRequired:" + experimentPasswordRequired);
 

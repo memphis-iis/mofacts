@@ -1,5 +1,5 @@
 import { curSemester } from '../../../common/Definitions';
-import { search, getAllCoursesForInstructor } from '../../lib/currentTestingHelpers';
+import { search } from '../../lib/currentTestingHelpers';
 
 Session.set("classes",[]);
 
@@ -29,7 +29,7 @@ function noClassSelectedSetup(){
 }
 
 Template.classEdit.onRendered(async function(){
-  const courses = await getAllCoursesForInstructor(Meteor.userId());
+  const courses = await meteorCallAsync("getAllCoursesForInstructor",Meteor.userId());
   console.log("classEdit.onRendered,classes:",courses);
   Session.set("classes",courses);
 });

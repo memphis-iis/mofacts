@@ -1,4 +1,5 @@
 import { haveMeteorUser } from '../../lib/currentTestingHelpers';
+import { updateExperimentState } from './card';
 ////////////////////////////////////////////////////////////////////////////
 // Instruction timer and leaving this page - we don't want to leave a
 // timer running!
@@ -98,8 +99,7 @@ function lockoutPeriodicCheck() {
 
         var lockoutMins = currLockOutMinutes();
         if (lockoutMins) {
-            var lockoutMs = lockoutMins * (60 * 1000); //Minutes to millisecs
-            lockoutFreeTime = unitStartTimestamp + lockoutMs;
+            lockoutFreeTime = unitStartTimestamp + lockoutMins * (60 * 1000); //Minutes to millisecs
         }
     }
 
@@ -147,9 +147,9 @@ function lockoutPeriodicCheck() {
                     return; //No message to show
                 }
 
-                var experiment = userTimesExpKey(true);
+                var experimentId = Session.get("currentRootTdfId");
 
-                Meteor.call("turkScheduleLockoutMessage", experiment, lockoutFreeTime + 1, subject, turkemail, function(error, result) {
+                Meteor.call("turkScheduleLockoutMessage", experimentId, lockoutFreeTime + 1, subject, turkemail, function(error, result) {
                     if (typeof error !== "undefined") {
                         console.log("Server schedule failed. Error:", error);
                     }
@@ -249,32 +249,10 @@ function getUnitsRemaining() {
 // must only reference visible from anywhere on the client AND we take great
 // pains to not modify anything reactive until this function has returned
 instructContinue = function () {
-    //On resume, seeing an "instructions" log event is seen as a breaking point
-    //in the TDF session (since it's supposed to be the beginning of a new unit).
-    //As a result, we only want to log an instruction record ONCE PER UNIT. In
-    //the unlikely event we've already logged an instruction record for the
-    //current unit, we should log a duplicate instead
-    let logAction = "instructions";
-    let curUnitNum = Session.get("currentUnitNumber");
     let curUnit = Session.get("currentTdfUnit");
 
-    var unitName = _.chain(curUnit).prop("unitname").trim().value();
-    var feedbackText = _.chain(curUnit).prop("unitinstructions").trim().value();
-    if (feedbackText.length < 1) {
-        feedbackText = _.chain(curUnit).prop("picture").trim().value();
-    }
-
-    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-    var expKey = userTimesExpKey(true);
-
-    var entries = _.prop(userLog, expKey) || [];
-
-    var dup = _.find(entries, function(rec){
-        return (
-            _.prop(rec, "action") === "instructions" &&
-            _.prop(rec, "currentUnit") === curUnitNum
-        );
-    });
+    var feedbackText = curUnit.unitinstructions.trim().value();
+    if (feedbackText.length < 1) feedbackText = curUnit.picture.trim().value();
 
     // Record the fact that we just showed instruction. Also - we use a call
     // back to redirect to the card display screen to make sure that everything
@@ -288,30 +266,21 @@ instructContinue = function () {
         var instructStart = _.intval(Session.get("instructionClientStart"));
         Session.set("instructionClientStart", 0);
 
-        if (!!dup) {
-            console.log("Found dup instruction", dup);
-            Meteor.call("debugLog", "Found dup instruction. Entry:", displayify(dup));
-            logAction = "instructions-dup";
+        let newExperimentState = {
+            instructionClientStart: instructStart,
+            feedbackText: feedbackText,
+            lastAction: "instructions",
+            lastActionTimeStamp: Date.now()
         }
 
-        recordUserTime(logAction, {
-            'currentUnit': curUnitNum,
-            'unitname': unitName,
-            'xcondition': Session.get("experimentXCond"),
-            'instructionClientStart': instructStart,
-            'feedbackText': feedbackText
-        }, function(error, result) {
-            //We know they'll need to resume now
-            Session.set("needResume", true);
-            leavePage("/card");
-            enterKeyLock = false;
-            console.log("releasing enterKeyLock in instructContinue");
-        });
+        const res = await updateExperimentState(newExperimentState, "instructions.instructContinue");
+        console.log("instructContinue",res);
+        Session.set("needResume", true);
+        leavePage("/card");
+        enterKeyLock = false;
+        console.log("releasing enterKeyLock in instructContinue");
     }, 1);
 };
-
-////////////////////////////////////////////////////////////////////////////
-// Template helpers
 
 Template.instructions.helpers({
      isExperiment: function() {
