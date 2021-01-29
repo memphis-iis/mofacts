@@ -1,4 +1,3 @@
-import { curSemester } from '../../common/Definitions';
 export { 
   blankPassword,
   extractDelimFields,
@@ -7,17 +6,14 @@ export {
   randomChoice,
   search,
   haveMeteorUser,
-  getAllCoursesForInstructor, 
-  getAllCourseAssignmentsForInstructor,
   getCurrentClusterAndStimIndices,
   setStudentPerformance,
-  getStimClusterCount,
+  getStimCount,
   getStimCluster,
   createStimClusterMapping,
   getAllCurrentStimAnswers,
   getTestType,
-  getCurrentDeliveryParams,
-  getTdfByFileName
+  getCurrentDeliveryParams
 };
 
 //Given a user ID, return the "dummy" password that stands in for a blank
@@ -96,12 +92,6 @@ function randomChoice(array) {
     return choice;
 }
 
-/* Client-side helper functions for getting current information about testing
- * and/or the current trial. Much of this functionality began in card.js
- * but has been moved here for easier use. See also lib/sessionUtils.js for
- * a better list of Session variables we currently use.
- * */
-
 function search(key, prop, searchObj){
   for(let item of searchObj){
     if(item[prop] == key){
@@ -114,68 +104,20 @@ function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 };
 
-async function getAllCoursesForInstructor(instructorId){
-  const courses = await meteorCallAsync("getAllCoursesForInstructor",instructorId)
-  return courses;
-}
-
-async function getAllCourseAssignmentsForInstructor(instructorId){
-  const courseAssignments = await meteorCallAsync("getAllCourseAssignmentsForInstructor",instructorId)
-  return courseAssignments;
-}
-
-function setStudentPerformance(studentID,studentUsername,tdfFileName){
-  console.log("setStudentPerformance:",studentID,studentUsername);
-  Meteor.subscribe('specificUserMetrics',studentID,function(){
-    var count = 0;
-    var numCorrect = 0;
-    var totalTime = 0;
-
-    if(tdfFileName){
-      let learningSessionItems = Session.get("learningSessionItems")[tdfFileName];
-
-      var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-
-      console.log("usermetrics:",UserMetrics.find({_id:studentID}).fetch());
-
-      UserMetrics.find({_id:studentID}).forEach(function(entry){
-        var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-        for(var index in tdfEntries){
-          var tdfUserMetricsName = tdfEntries[index];
-          var tdf = entry[tdfUserMetricsName];
-          for(var index in tdf){
-            //Ignore assessment entries
-            if(!!learningSessionItems && !!learningSessionItems[index]){
-              var stim = tdf[index];
-              count += stim.questionCount || 0;
-              numCorrect += stim.correctAnswerCount || 0;
-              var answerTimes = stim.answerTimes;
-              for(var index in answerTimes){
-                var time = answerTimes[index];
-                totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-              }
-            }
-          }
-        }
-      });
-    }
-    
-    var percentCorrect = "N/A";
-    if(count != 0){
-      percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
-      console.log('percentCorrect: ' + percentCorrect + ", numCorrect: " + numCorrect + ", count: " + count);
-    }
-    var studentObj = {
-      "username":studentUsername,
-      "count":count,
-      "percentCorrect":percentCorrect,
-      "numCorrect":numCorrect,
-      "totalTime":totalTime,
-      "totalTimeDisplay":totalTime.toFixed(1)
-    }
-    Session.set("curStudentPerformance",studentObj);
-    console.log("setStudentPerformance,output:",studentObj);
-  })
+async function setStudentPerformance(studentID,studentUsername,tdfId){
+  console.log("setStudentPerformance:",studentID,studentUsername,tdfId);
+  const studentPerformanceData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,tdfId);
+  let count = (studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect);
+  let studentPerformance = {
+    "username":studentUsername,
+    "count":count,
+    "percentCorrect":((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%",
+    "numCorrect":studentPerformanceData.numCorrect,
+    "totalTime":studentPerformanceData.totalprompt + studentPerformanceData.totalstudy,
+    "totalTimeDisplay":(studentPerformanceData.totalprompt + studentPerformanceData.totalstudy).toFixed(1)
+  }
+  Session.set("curStudentPerformance",studentPerformance);
+  console.log("setStudentPerformance,output:",studentPerformance);
 }
 
 function getCurrentClusterAndStimIndices(){
@@ -198,37 +140,23 @@ function getCurrentClusterAndStimIndices(){
 }
 
 //Return the total number of stim clusters
-function getStimClusterCount() {
-    return Stimuli.findOne({fileName: Session.get("currentStimName")}).stimuli.setspec.clusters.length;
+function getStimCount() {
+  return Session.get("currentStimuliSet").length;
 };
 
 // Return the stim file cluster matching the index AFTER mapping it per the
-// current sessions cluster mapping. Note that they are allowed to give us
-// a cached stimuli document for optimization
-
-//Note that the cluster mapping goes from current session index to raw index in order of the stim file
-function getStimCluster(index, cachedStimuli) {
-    var clusterMapping = Session.get("clusterMapping");
-    var mappedIndex;
-
-    if(clusterMapping) {
-        //Generic, normal functioning - use the previously defined mapping
-        mappedIndex = clusterMapping[index];
-    }
-    else {
-        mappedIndex = index || 0;
-    }
-
-    if (!cachedStimuli) {
-        cachedStimuli = Stimuli.findOne({fileName: Session.get("currentStimName")});
-    }
-    let cluster = cachedStimuli.stimuli.setspec.clusters[mappedIndex];
-
-    //When we log, we want to be able to record the origin index as shufIndex
-    //and the mapped index as clusterIndex
-    cluster.shufIndex = index;
-    cluster.clusterIndex = mappedIndex;
-
+// current sessions cluster mapping. 
+// Note that the cluster mapping goes from current session index to raw index in order of the stim file
+function getStimCluster(index=0) {
+  let clusterMapping = Session.get("clusterMapping");
+    let mappedIndex = clusterMapping ? clusterMapping[index] : index;
+    let mainClusterBits = Session.get("currentStimuliSet")[mappedIndex];
+    let cluster = { 
+      shufIndex: index,//Tack these on for later logging purposes
+      clusterIndex: mappedIndex,
+      ...mainClusterBits
+    };
+    //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
     return cluster;
 };
 
@@ -238,17 +166,17 @@ function getStimCluster(index, cachedStimuli) {
 //mapping[x] = x HOWEVER, the user may submit a different default mapping.
 //This is mainly so that multiple shuffle/swap pairs can be run. ALSO important
 //is the fact that additional elements will be added if
-//mapping.length < clusterCount
-function createStimClusterMapping(clusterCount, shuffleclusters, swapclusters, startMapping) {
-  if (clusterCount < 1)
+//mapping.length < stimCount
+function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, startMapping) {
+  if (stimCount < 1)
       return [];
 
   var i;
 
   //Default mapping is identity - mapping[x] == x
-  //We also need to make sure we have clusterCount elements
+  //We also need to make sure we have stimCount elements
   var mapping = (startMapping || []).slice(); //they get a copy back
-  while (mapping.length < clusterCount) {
+  while (mapping.length < stimCount) {
       mapping.push(mapping.length);
   }
 
@@ -324,29 +252,25 @@ function createStimClusterMapping(clusterCount, shuffleclusters, swapclusters, s
 
 function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
-  let clusters = Stimuli.findOne({fileName: Session.get("currentStimName")}).stimuli.setspec.clusters
-  let allAnswers = new Set;
+  let stims = Session.get("currentStimuliSet");
+  let allAnswers = new Set();
 
-  for(cluster of clusters){
-    for(stim of cluster.stims){
-      var responseParts = stim.response.correctResponse.toLowerCase().split(";");
-      var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
-      if(answerArray.length > 0){
-        var singularAnswer = answerArray[0].split("~")[0];
-        allAnswers.add(singularAnswer);
-      }
+  for(stim of stims){
+    var responseParts = stim.correctResponse.toLowerCase().split(";");
+    var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
+    if(answerArray.length > 0){
+      var singularAnswer = answerArray[0].split("~")[0];
+      allAnswers.add(singularAnswer);
     }
   }
 
   allAnswers = Array.from(allAnswers);
 
   if(removeExcludedPhraseHints){
-    let curSpeechHintExclusionListText = clusters[curClusterIndex].stims[curStimIndex].speechHintExclusionList || "";
+    let curSpeechHintExclusionListText = clusters[curClusterIndex][curStimIndex].speechHintExclusionList || "";
     let exclusionList = curSpeechHintExclusionListText.split(',');
     //Remove the optional phrase hint exclusions
-    allAnswers = allAnswers.filter( function (el){
-      return exclusionList.indexOf(el) < 0;
-    });
+    allAnswers = allAnswers.filter((el)=>exclusionList.indexOf(el)==-1);
   }
 
   return allAnswers;
@@ -355,11 +279,6 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
 function getTestType() {
     return _.trim(Session.get("testType")).toLowerCase();
 };
-
-async function getTdfByFileName(tdfFileName){
-  const tdf = await meteorCallAsync("getTdfByFileName",tdfFileName);
-  return tdf.content;
-}
 
 //Return the delivery parms for the current unit. Note that we provide default
 //values AND eliminate the single-value array issue from our XML-2-JSON mapping

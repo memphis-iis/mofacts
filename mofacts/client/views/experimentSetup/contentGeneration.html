@@ -108,7 +108,7 @@
       <div class="col-md-6">
         <select id="templateTDFSelect">
           <option value="invalid" disabled="true" selected="true">Select a template</option>
-          {{#each tdfs}}
+          {{#each contentGenerationAllTdfs}}
             <option value="{{this.fileName}}">
               {{this.displayName}} - {{tdfOwnersMap this.ownerId}} - {{this.displayDate}}
             </option>

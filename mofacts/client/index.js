@@ -136,12 +136,15 @@ Template.body.events({
       if(!!window.currentAudioObj){
         window.currentAudioObj.pause();
       }
+      sdfasd
       //Clear out studentUsername in case we are a teacher/admin who previously
       //navigated to this page for a particular student and want to see our own progress
       Session.set("studentUsername",null);
+      Session.set("curStudentID",undefined);
+      Session.set("curStudentPerformance",undefined);
       Session.set("curClass",undefined);
       Session.set("instructorSelectedTdf",undefined);
-      Session.set("curClassStudentTotals",undefined);
+      Session.set("curClassPerformance",undefined);
       Router.go("/studentReporting");
   },
 

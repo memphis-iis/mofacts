@@ -3,10 +3,6 @@
  * This script exports all user trial information in the DataShop tab-delimited
  * format a given experiment in.
  *
- * To use in Meteor, call createExperimentExport to get back a (fairly large)
- * array you can use to send a file to the client
- *
- *
  * A note concerning indexes
  * ***************************
  *
@@ -27,7 +23,7 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-import { getTdfByFileName } from "./methods";
+import { getTdfByFileName, getStimuliSetById } from "./methods";
 
 (function () { //Begin IIFE pattern
 
@@ -35,15 +31,6 @@ import { getTdfByFileName } from "./methods";
     // output file. Note that these names must match the fields used in populate
     // record.
     var FIELDSDS = [
-        //Needed*******************
-        //Session ID
-
-        //Not needed***************
-        //Time Zone == UTC
-        //Tutor Response Type
-        //Tutor Response Subtype
-        //Problem View
-
         "Anon Student Id", //username
         "Session ID", //not sure yet
         "Condition Namea", //new field? always == 'tdf file'************
@@ -138,41 +125,14 @@ import { getTdfByFileName } from "./methods";
     }
 
     //Create our output record
-    async function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, nextq, dynamicStimTags) {
-        // Return the default value if the given value isn't "truthy" BUT numeric
-        // zero (0) is considered "truthy". Note that the default value is always
-        // the last argument
-        var d = function () {
-            var lastIndex = arguments.length - 1;
-            for (var i = 0; i < lastIndex; ++i) {
-                var val = arguments[i];
-                if (!!val || val === 0) {
-                    return val;
-                }
-            }
-            return arguments[lastIndex]; //Default value
-        };
-
+    async function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, dynamicStimTags) {
         //Get the "actual" schedule object out of the last sched entry
         var sched = !!lastschedule ? lastschedule.schedule : null;
 
-        //Either there was a system assigned xcond, a URL assigned xcond
-        //(recorded in lastinstruct), or none at all
+        //Either there was a system assigned xcond, a URL assigned xcond (recorded in lastinstruct), or none at all
         var xcond = lastxcond !== null ? lastxcond : lastinstruct.xcondition;
-        //Empty string becomes 0
-        xcond = _.trim(d(xcond, '0')) || '0';
-
-        //We might append a warning message
+        xcond = xcond || '0';
         var note = "";
-        if (lasta.action !== "[timeout]" && d(lastq.clusterIndex, -1) !== d(lasta.index, -2)) {
-            note += msg(
-                    "QUESTION/ANSWER CLUSTER INDEX MISMATCH => q-clusterIndex:",
-                    lastq.clusterIndex,
-                    ", a-index:",
-                    _.display(lasta.index),
-                    " "
-                    );
-        }
 
         //Grab the latency number. Note that if we don't have them (they were added
         //later) then we calculate the latency numbers - note that some trials
@@ -181,23 +141,13 @@ import { getTdfByFileName } from "./methods";
         //startLatency = endLatency
         var firstAction = lasta.firstActionTimestamp || lasta.clientSideTimeStamp;
 
-        var startLatency = lasta.startLatency || 0;
-        if (!startLatency) {
-            startLatency = firstAction - lastq.clientSideTimeStamp;
-        }
-
-        var endLatency = lasta.endLatency || 0;
-        if (!endLatency) {
-            endLatency = lasta.clientSideTimeStamp - lastq.clientSideTimeStamp;
-        }
+        var startLatency = lasta.startLatency || firstAction - lastq.clientSideTimeStamp;
+        var endLatency = lasta.endLatency || (lasta.clientSideTimeStamp - lastq.clientSideTimeStamp);
 
         // We attempt to get the "real" review latency, but we'll take the
         // pre-timeout "inferred" latency instead. Note that we will also guess
         // at inferred latency below if neither value is specified
-        var reviewLatency = _.chain(lasta).prop("reviewLatency").intval().value();
-        if (reviewLatency <= 0) {
-            reviewLatency = _.chain(lasta).prop("inferredReviewLatency").intval().value();
-        }
+        var reviewLatency = lasta.reviewLatency || lasta.inferredReviewLatency;
 
         // We change the latency numbers based on the ttype
         var ttype = lasta.ttype;
@@ -208,13 +158,7 @@ import { getTdfByFileName } from "./methods";
         else if (ttype === "d") {
             //Dril - everything is fine, but what if inferredReviewLatency missing?
             if (!lasta.isCorrect && !reviewLatency) {
-                // need to infer review latency
-                if (nextq && nextq.clientSideTimeStamp) {
-                    reviewLatency = nextq.clientSideTimeStamp - lasta.clientSideTimeStamp;
-                }
-                else {
-                    reviewLatency = 1; //Nothing we can do about this one
-                }
+                reviewLatency = 1; //Nothing we can do about this one
             }
         }
         else if (ttype === "s") {
@@ -226,27 +170,19 @@ import { getTdfByFileName } from "./methods";
 
         //Figure out schedule item condition
         //See note above about indexes and 0 vs 1 based
-        var schedCondition;
+        var schedCondition = "N/A";
         if (sched && sched.q && sched.q.length) {
             var schedItemIndex = d(lastq.questionIndex, 0) - 1;
             if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
                 schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
             }
             else {
-                note += msg(
-                        "SCHEDULE Q-INDEX MISMATCH => sched.q.length:",
-                        d(sched.q.length, 'missing'),
-                        ", lastq.questionIndex-1:",
-                        d(schedItemIndex, 'missing'),
-                        " "
-                        );
+                note += msg( "SCHEDULE Q-INDEX MISMATCH => sched.q.length:",
+                        d(sched.q.length, 'missing'),", lastq.questionIndex-1:",d(schedItemIndex, 'missing')," ");
             }
         }
-        else {
-            schedCondition = "N/A";
-        }
 
-        var tdfName = d(lastexpcond.selectedTdf, lastexpcond.currentTdfName, '');
+        var tdfName = lastexpcond.selectedTdf || lastexpcond.currentTdfId;
 
         var unitNum = Math.max(d(lastq.currentUnit, -1), d(lastschedule.unitindex, -1), d(lastinstruct.currentUnit, -1));
 
@@ -262,15 +198,8 @@ import { getTdfByFileName } from "./methods";
         ));
         if (!unitName) {
             serverConsole("Forced to lookup up unit name:", unitName);
-            
-            unitName = _.chain(await getTdfByFileName(tdfName))
-                .prop('tdfs')
-                .prop('tutor')
-                .prop('unit')
-                .prop(_.intval(unitNum, -1))
-                .prop('unitname')
-                .trim()
-                .value();
+            const curTdf = await getTdfByFileName(tdfName)
+            unitName = curTdf.content.tdfs.tutor.unit.[unitNum].unitname.trim()
             // Cheat - store it in the instruction for the next Q/A pair
             // This should be OK because instructions are cleared if they don't
             // match the current unit index
@@ -319,7 +248,6 @@ import { getTdfByFileName } from "./methods";
             currentAnswerSyllableIndices = lasta.currentAnswerSyllables.displaySyllableIndices;
             currentAnswerSyllableCount = lasta.currentAnswerSyllables.count;
         }
-
 
         let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay));
         if(lastq.selectedDisplay.clozeText){
@@ -397,7 +325,7 @@ import { getTdfByFileName } from "./methods";
             instructLatency = instructEnd - instructBegin;
         }
 
-        var tdfName = _.trim(lastexpcond.selectedTdf) || _.trim(lastexpcond.currentTdfName);
+        var tdfName = _.trim(lastexpcond.selectedTdf) || _.trim(lastexpcond.currentTdfId);
 
         return {
             "Anon Student Id": _.trim(username),
@@ -460,23 +388,7 @@ import { getTdfByFileName } from "./methods";
 
     //Iterate over a user times log cursor and call the callback function with a
     //record populated with current information in log
-    async function processUserLog(username, userTimesDoc, expName, listOfDynamicStimTags, callback) {
-        var expKey = ('' + expName).replace(/\./g, "_");
-        if (!(expKey in userTimesDoc)) {
-            return;
-        }
-
-        var recs = userTimesDoc[expKey];
-        if (!recs || !recs.length) {
-            return;
-        }
-
-        //There can be duplicate records in the event of connection reset - the
-        //client side libs will resend Meteor method calls if they never got an
-        //ACK back. Since we grab a timestamp on the client, we can eliminate
-        //these spurious dups. Just to be safe we track both timestamp and action
-        var previousRecords = {};
-
+    async function processUserLog(username, expName, listOfDynamicStimTags, callback) {
         //Note our defaults in case there are errors
         var lastschedule = {};
         var lastexpcond = {selectedTdf: expName};
@@ -488,108 +400,65 @@ import { getTdfByFileName } from "./methods";
         //You should note that state is PER USER
         state = {};
 
-        var populated = null;
+        var act = _.trim('' + rec.action).toLowerCase();
 
-        for (var i = 0; i < recs.length; ++i) {
-            var rec = recs[i];
-            if (!rec || !rec.action || !rec.clientSideTimeStamp) {
-                continue;
-            }
+        if (act === "instructions") {
+            lastinstruct = rec;
+            lastq = null;
 
-            var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
-            if (uniqifier in previousRecords) {
-                continue; //dup detected
-            }
-            previousRecords[uniqifier] = true;
-
-            var act = _.trim('' + rec.action).toLowerCase();
-
-            if (act === "expcondition" || act === "condition-notify") {
-                lastexpcond = rec;
-            }
-            else if (act === "xcondassign" || act === "xcondnotify") {
-                lastxcond = rec.xcond;
-            }
-            else if (act === "schedule") {
-                lastschedule = rec;
-            }
-            else if (act === "instructions") {
-                lastinstruct = rec;
-                lastq = null;
-
-                // We now create a record from instruction display
-                populated = null;
-                try {
-                    populated = populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
-                }
-                catch (e) {
-                    serverConsole("There was an error populating the Instruction record - it will be skipped", e, e.stack);
-                    serverConsole(
-                        username,
-                        JSON.stringify(lastexpcond),
-                        JSON.stringify(lastinstruct),
-                        JSON.stringify(rec)
-                    );
-                }
-                if (populated) {
-                    callback(populated);
+            // We now create a record from instruction display
+            populated = populateInstructionRecord(state, username, lastexpcond, lastxcond, lastinstruct);
+            if (populated) callback(populated);
+        }
+        else if (act === "answer" || act === "[timeout]") {
+            //They might need the following question for inference
+            var nextq = null;
+            for (var j = i + 1; j < recs.length; ++j) {
+                if (_.trim('' + recs[j].action).toLowerCase() === "question") {
+                    nextq = recs[j];
+                    break;
                 }
             }
-            else if (act === "question") {
-                lastq = rec;
+
+            // The last question's unit determines the unit for this answer:
+            // Make sure that the schedule and instructions that we have
+            // match the current unit.
+            var questionUnit = lastq["currentUnit"] || -1;
+            var scheduleUnit = lastschedule["unitindex"] || -1;
+            if (scheduleUnit != questionUnit) {
+                lastschedule = {};
             }
-            else if (act === "answer" || act === "[timeout]") {
-                //They might need the following question for inference
-                var nextq = null;
-                for (var j = i + 1; j < recs.length; ++j) {
-                    if (_.trim('' + recs[j].action).toLowerCase() === "question") {
-                        nextq = recs[j];
-                        break;
-                    }
-                }
 
-                // The last question's unit determines the unit for this answer:
-                // Make sure that the schedule and instructions that we have
-                // match the current unit.
-                var questionUnit = _.chain(lastq).prop("currentUnit").intval(-1).value();
-
-                var scheduleUnit = _.chain(lastschedule).prop("unitindex").intval(-1).value();
-                if (scheduleUnit != questionUnit) {
-                    lastschedule = {};
-                }
-
-                var instructUnit = _.chain(lastinstruct).prop("currentUnit").intval(-1).value();
-                if (instructUnit != questionUnit) {
-                    lastinstruct = {};
-                }
-
-                //FINALLY have enough to populate the record
-                populated = null;
-                try {
-                    const dynamicStimTagValues = await getValuesOfStimTagList(expName, lastq.clusterIndex, lastq.whichStim, listOfDynamicStimTags);
-                    populated = await populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, dynamicStimTagValues);
-                }catch (e) {
-                    serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
-                    serverConsole(
-                        username,
-                        JSON.stringify(lastexpcond),
-                        JSON.stringify(lastschedule),
-                        JSON.stringify(lastinstruct),
-                        JSON.stringify(lastq),
-                        JSON.stringify(rec)
-                    );
-                }
-                if (populated) {
-                    callback(populated);
-                }
+            var instructUnit = lastinstruct["currentUnit"] || -1;
+            if (instructUnit != questionUnit) {
+                lastinstruct = {};
             }
+
+            //FINALLY have enough to populate the record
+            populated = null;
+            try {
+                const dynamicStimTagValues = await getValuesOfStimTagList(expName, lastq.clusterIndex, lastq.whichStim, listOfDynamicStimTags);
+                populated = await populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, rec, nextq, dynamicStimTagValues);
+            }catch (e) {
+                serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
+                serverConsole(
+                    username,
+                    JSON.stringify(lastexpcond),
+                    JSON.stringify(lastschedule),
+                    JSON.stringify(lastinstruct),
+                    JSON.stringify(lastq),
+                    JSON.stringify(rec)
+                );
+            }
+            if (populated) callback(populated);
         }
     }
 
     getValuesOfStimTagList = async function(tdfFileName, clusterIndex,stimIndex,tagList){
-        const stimFileName = await getStimFileNameForTdf(tdfFileName);
-        let curStimuliFile = Stimuli.findOne({fileName:stimFileName});
-        let curStim = curStimuliFile.stimuli.setspec.clusters[clusterIndex].stims[stimIndex];
+        const tdf = await getTdfByFileName(tdfFileName);
+        const stimuliSetId = tdf.stimulisetid;
+        const stimuliSet = await getStimuliSetById(stimuliSetId);
+        let curStim = stimuliSet[clusterIndex][stimIndex];
         let valueDict = {};
 
         for(var tag of tagList){
@@ -605,28 +474,21 @@ import { getTdfByFileName } from "./methods";
 
     getListOfStimTags = async function(tdfFileName){
         serverConsole("getListOfStimTags, tdfFileName: " + tdfFileName);
-        const stimFileName = await getStimFileNameForTdf(tdfFileName);
-        serverConsole("getListOfStimTags, stimFileName: " + stimFileName);
-        let curStimFile = Stimuli.findOne({fileName:stimFileName});
+        const tdf = await getTdfByFileName(tdfFileName);
+        const stimuliSetId = tdf.stimulisetid;
+        serverConsole("getListOfStimTags, stimuliSetId: " + stimuliSetId);
+        const stims = await getStimuliSetById(stimuliSetId);
         let allTagsInStimFile = new Set();
 
-        for(let cluster of curStimFile.stimuli.setspec.clusters){
-            for(let stim of cluster.stims){
-                if(stim.tags){
-                    for(let tagName of Object.keys(stim.tags)){
-                        allTagsInStimFile.add(tagName);
-                    }
+        for(let stim of stims){
+            if(stim.tags){
+                for(let tagName of Object.keys(stim.tags)){
+                    allTagsInStimFile.add(tagName);
                 }
             }
         }
 
         return Array.from(allTagsInStimFile);
-    }
-
-    getStimFileNameForTdf = async function(tdfName){
-        const tdf = await getTdfByFileName(tdfName);
-
-        return tdf.tdfs.tutor.setspec[0].stimulusfile[0];
     }
 
     // Exported main function: call recordAcceptor with each record generated
@@ -649,8 +511,6 @@ import { getTdfByFileName } from "./methods";
         }
 
         FIELDSDS = FIELDSDS.concat(listOfDynamicStimTagsWithColumnNames);
-
-        // We currently just ignore format
 
         FIELDSDS.forEach(function (f) {
             var prefix = f.substr(0, 14);
@@ -676,11 +536,6 @@ import { getTdfByFileName } from "./methods";
 
         UserTimesLog.find({}).forEach(function (entry) {
             var userRec = Meteor.users.findOne({_id: entry._id});
-            if (!userRec || !userRec.username) {
-                serverConsole("Skipping output for ", entry._id);
-                return;
-            }
-
             var username = userRec.username;
 
             expNames.forEach(function(expName) {

@@ -1,16 +1,15 @@
-export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording };
+export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording, updateExperimentState };
 import { 
   shuffle,
   haveMeteorUser,
   getCurrentDeliveryParams, 
   setStudentPerformance, 
-  getStimClusterCount, 
+  getStimCount, 
   getStimCluster, 
   createStimClusterMapping,
   getCurrentClusterAndStimIndices,
   getAllCurrentStimAnswers,
-  getTestType,
-  getTdfByFileName
+  getTestType
 } from '../../lib/currentTestingHelpers';
 import { redoCardImage } from '../../index';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
@@ -105,7 +104,22 @@ buttonList = new Mongo.Collection(null); //local-only - no database
 var scrollList = new Mongo.Collection(null); //local-only - no database
 Session.set("scrollListCount", 0);
 Session.set("currentDeliveryParams",{});
+Session.set("inResume", false);
 cachedSyllables = null;
+var speechTranscriptionTimeoutsSeen = 0;
+var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
+var unitStartTimestamp = 0;
+var trialTimestamp = 0;
+var keypressTimestamp = 0;
+var currentSound = null; //See later in this file for sound functions
+
+//We need to track the name/ID for clear and reset. We need the function and
+//delay used for reset
+timeoutName = null;
+timeoutFunc = null;
+timeoutDelay = null;
+var varLenTimeoutName = null;
+var simTimeoutName = null;
 
 function clearButtonList() {
     buttonList.remove({'temp': 1});
@@ -117,8 +131,6 @@ function clearScrollList() {
     Session.set("scrollListCount", 0);
 }
 
-// IMPORTANT: this function assumes that the current state reflects a properly
-// set up Session for the current question/answer information
 function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
     // We only store scroll history if it has been turned on in the TDF
     var params = Session.get("currentDeliveryParams");
@@ -195,7 +207,7 @@ function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) 
     }
 
     if(userAnswerWithTimeout != null){
-      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec,afterAnswerAssessment);
+      Answers.answerIsCorrect(userAnswerWithTimeout, Session.get("currentAnswer"), Session.get("originalAnswer"), setspec, afterAnswerAssessment);
     }else{
       afterAnswerAssessment(null);
     }    
@@ -215,21 +227,6 @@ function scrollElementIntoView(selector, scrollType) {
     }, 1);
 }
 
-var speechTranscriptionTimeoutsSeen = 0;
-var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
-var unitStartTimestamp = 0;
-var trialTimestamp = 0;
-var keypressTimestamp = 0;
-var currentSound = null; //See later in this file for sound functions
-
-//We need to track the name/ID for clear and reset. We need the function and
-//delay used for reset
-timeoutName = null;
-timeoutFunc = null;
-timeoutDelay = null;
-var varLenTimeoutName = null;
-var simTimeoutName = null;
-
 // Helper - return elapsed seconds since unit started. Note that this is
 // technically seconds since unit RESUME began (when we set unitStartTimestamp)
 function elapsedSecs() {
@@ -244,45 +241,35 @@ function nextChar(c) {
 }
 
 function curStimHasSoundDisplayType(){
-  let foundSoundDisplayType = false;
-  Stimuli.find({fileName: Session.get("currentStimName"),"stimuli.setspec.clusters.stims.display.audioSrc":{"$exists":true}}).forEach(function(entry){
-    foundSoundDisplayType = true;
-  });
-
-  return foundSoundDisplayType;
+  let currentStimSetId = Session.get("currentStimSetId");
+  let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
+  return stimDisplayTypeMap[currentStimSetId].hasAudio;
 }
 
 function curStimHasImageDisplayType(){
-  let foundAudioDisplayType = false;
-  Stimuli.find({fileName: Session.get("currentStimName"),"stimuli.setspec.clusters.stims.display.imgSrc":{"$exists":true}}).forEach(function(entry){
-    foundAudioDisplayType = true;
-  });
-
-  return foundAudioDisplayType;
+  let currentStimSetId = Session.get("currentStimSetId");
+  let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
+  return stimDisplayTypeMap[currentStimSetId].hasImage;
 }
 
-function getCurrentStimDisplaySources(filterPropertyName = "clozeText"){
+function getCurrentStimDisplaySources(filterPropertyName="clozeText"){
   let displaySrcs = [];
-  let clusters = Stimuli.findOne({fileName: Session.get("currentStimName")}).stimuli.setspec.clusters;
-  for(let cluster of clusters){
-    for(let stim of cluster.stims){
-      if(typeof(stim.display[filterPropertyName]) != "undefined"){
-        displaySrcs.push(stim.display[filterPropertyName]);
-      }
+  let stims = Session.get("currentStimuliSet");
+  for(let stim of stims){
+    if(typeof(stim[filterPropertyName]) != "undefined"){
+      displaySrcs.push(stim[filterPropertyName]);
     }
   }
   return displaySrcs;
 }
 
 function getResponseType() {
-
   //If we get called too soon, we just use the first cluster
   let clusterIndex = Session.get("clusterIndex");
-  if (!clusterIndex)
-      clusterIndex = 0;
+  if (!clusterIndex) clusterIndex = 0;
 
   let cluster = getStimCluster(clusterIndex);
-  let type = cluster.responseType || "text"; //Default type
+  let type = cluster[0].itemResponseType;
 
   return ("" + type).toLowerCase();
 }
@@ -307,10 +294,10 @@ function getCurrentFalseResponses() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let cluster = getStimCluster(curClusterIndex);
 
-  if (typeof(cluster) == "undefined" || typeof(cluster.stims[curStimIndex].response.incorrectResponses) == "undefined") {
+  if (typeof(cluster) == "undefined" || typeof(cluster[curStimIndex].incorrectResponses) == "undefined") {
       return []; //No false responses
   }else{
-    return cluster.stims[curStimIndex].response.incorrectResponses;
+    return cluster[curStimIndex].incorrectResponses.split(',');
   }
 };
 
@@ -361,7 +348,7 @@ function beginMainCardTimeout(delay, func) {
     timeoutDelay = delay;
     let mainCardTimeoutStart = new Date();
     Session.set("mainCardTimeoutStart",mainCardTimeoutStart);
-    console.log("mainCardTimeoutStart:",mainCardTimeoutStart);
+    console.log("mainCardTimeoutStart",mainCardTimeoutStart);
     timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
     varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
@@ -589,10 +576,12 @@ Template.card.rendered = async function() {
       leavePage("/card");
     }
   }
-
-  const learningSessionItems = await meteorCallAsync("getLearningSessionItems",ALL_TDFS);
-  Session.set("learningSessionItems",learningSessionItems);
   Session.set("scoringEnabled",undefined);
+
+  if(!Session.get("stimDisplayTypeMap")){
+    const stimDisplayTypeMap = await meteorCallAsync("getStimDisplayTypeMap");
+    Session.set("stimDisplayTypeMap",stimDisplayTypeMap);
+  }
 
   var audioInputEnabled = Session.get("audioEnabled");
   if(audioInputEnabled){
@@ -627,13 +616,9 @@ Template.card.rendered = async function() {
 };
 
 Template.card.helpers({
-    'isExperiment': function() {
-        return Session.get("loginMode") === "experiment";
-    },
+    'isExperiment': () => Session.get("loginMode") === "experiment",
 
-    'isNormal': function() {
-        return Session.get("loginMode") !== "experiment";
-    },
+    'isNormal': () => Session.get("loginMode") !== "experiment",
 
     'username': function () {
         if (!haveMeteorUser()) {
@@ -651,9 +636,7 @@ Template.card.helpers({
     },
 
     //For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
-    'subWordParts': function(){
-      return Session.get("clozeQuestionParts");
-    },
+    'subWordParts': () => Session.get("clozeQuestionParts"),
 
     'clozeText': function(){
       let clozeText = Session.get("currentDisplay") ? Session.get("currentDisplay").clozeText : undefined;
@@ -683,17 +666,11 @@ Template.card.helpers({
         return Answers.getDisplayAnswerText(Session.get("currentAnswer"));
     },
 
-    'rawAnswer': function() {
-        return Session.get("currentAnswer");
-    },
+    'rawAnswer': ()=> Session.get("currentAnswer"),
 
-    'currentProgress': function() {
-        return Session.get("questionIndex");
-    },
+    'currentProgress': () => Session.get("questionIndex"),
 
-    'displayReady': function(){
-      return Session.get("displayReady");
-    },
+    'displayReady': () => Session.get("displayReady"),
 
     'displayReadyConverter': function(displayReady){
       return displayReady ? "" : "none";
@@ -769,13 +746,9 @@ Template.card.helpers({
         return 'h' + Session.get("currentDeliveryParams").fontsize.toString();
     },
 
-    'skipstudy': function() {
-        return Session.get("currentDeliveryParams").skipstudy;
-    },
+    'skipstudy': () => Session.get("currentDeliveryParams").skipstudy,
 
-    'buttonTrial': function() {
-        return Session.get("buttonTrial");
-    },
+    'buttonTrial': () => Session.get("buttonTrial"),
 
     'buttonList': function() {
         return buttonList.find({'temp': 1}, {sort: {idx: 1}});
@@ -805,27 +778,17 @@ Template.card.helpers({
         return scrollList.find({'temp': 1, 'justAdded': 0}, {sort: {idx: 1}});
     },
 
-    'currentScore': function() {
-        return Session.get("currentScore");
-    },
+    'currentScore': () => Session.get("currentScore"),
 
     'haveDispTimeout': function() {
         var disp = getDisplayTimeouts();
         return (disp.minSecs > 0 || disp.maxSecs > 0);
     },
 
-    'inResume': function() {
-        return Session.get("inResume");
-    },
+    'inResume': () => Session.get("inResume"),
 
-    'audioEnabled' : function(){
-      return Session.get("audioEnabled");
-    }
+    'audioEnabled' : () => Session.get("audioEnabled")
 });
-
-
-////////////////////////////////////////////////////////////////////////////
-// Implementation functions
 
 soundsDict = {};
 imagesDict = {};
@@ -958,6 +921,22 @@ function preloadImages(){
   console.log("img.src:" + img.src);
 }
 
+function preloadStimuliFiles(){
+  //Pre-load sounds to be played into soundsDict to avoid audio lag issues
+  if(curStimHasSoundDisplayType()){
+    console.log("Sound type questions detected, pre-loading sounds");
+    preloadAudioFiles();
+  }else{
+    console.log("Non sound type detected");
+  }
+  if(curStimHasImageDisplayType()){
+    console.log("image type questions detected, pre-loading images");
+    preloadImages();
+  }else{
+    console.log("Non image type detected");
+  }
+}
+
 async function cardStart(){
   //Reset resizing for card images (see also index.js)
   $("#cardQuestionImg").load(function(evt) {
@@ -976,7 +955,7 @@ async function cardStart(){
       Session.set("showOverlearningText", false);
 
       Session.set("needResume", false); //Turn this off to keep from re-resuming
-      resumeFromUserTimesLog();
+      resumeFromComponentState();
   }
 }
 
@@ -1115,9 +1094,7 @@ function clearPlayingSound() {
     if (!!currentSound) {
         try {
             currentSound.stop();
-        }
-        catch(e) {
-        }
+        }catch(e) {}
         currentSound = null;
     }
 }
@@ -1386,10 +1363,6 @@ function hideUserFeedback() {
 }
 
 function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
-  //Note that we must provide the client-side timestamp since we need it...
-  //Pretty much everywhere else relies on recordUserTime to provide it.
-  //We also get the timestamp of the first keypress for the current trial.
-  //Of course for things like a button trial, we won't have it
   var firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
   let testType = getTestType();
 
@@ -1491,7 +1464,13 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       Session.set("dialogueHistory",undefined);
       //TODO: need a column for this in experiment_times
       answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
-      recordUserTime(answerLogAction, answerLogRecord);
+      let newExperimentState = { 
+        
+        lastAction: answerLogAction,
+        lastActionTimeStamp: Date.now()
+      }
+      answerLogAction, answerLogRecord
+      await updateExperimentState(newExperimentState,"card.afterAnswerFeedbackCallback.writeAnswerLog");
   };
 
   // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
@@ -1502,14 +1481,11 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       timeoutsSeen = 0;  // Reset count
   }
   else {
-      // Anothing timeout!
       timeoutsSeen++;
 
       // Figure out threshold (with default of 0)
       // Also note: threshold < 1 means no autostop at all
-      var threshold = _.chain(deliveryParams)
-          .prop("autostopTimeoutThreshold")
-          .intval(0).value();
+      var threshold = deliveryParams.autostopTimeoutThreshold;
 
       if (threshold > 0 && timeoutsSeen >= threshold) {
           console.log("Hit timeout threshold", threshold, "Quitting");
@@ -1518,10 +1494,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       }
   }
 
-  //record progress in userProgress variable storage (note that this is
-  //helpful and used on the stats page, but the user times log is the
-  //"system of record")
-  recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
+  recordProgress(isCorrect);
 
   //Figure out timeout and reviewLatency
   var reviewTimeout = 0;
@@ -1570,12 +1543,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
 function prepareCard(writeAnswerLogCb) {
     if(writeAnswerLogCb) writeAnswerLogCb();
     Session.set("displayReady",false);
-    if (Session.get("questionIndex") === undefined) {
-        // At this point, a missing question index is assumed to mean "start
-        // with the first question"
-        Session.set("questionIndex", 0);
-    }
-
+    
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
     }else {
@@ -1593,9 +1561,7 @@ function prepareCard(writeAnswerLogCb) {
         }else{
           console.log("not reinitializing clusterlists");
         }
-        var selReturn = engine.selectNextCard();
-        engine.cardSelected(selReturn);
-        engine.writeQuestionEntry(selReturn);
+        engine.selectNextCard();
         newQuestionHandler();
     }
 }
@@ -1608,12 +1574,13 @@ function unitIsFinished(reason) {
 
     let curTdf = Session.get("currentTdfFile");
     let curUnitNum = Session.get("currentUnitNumber");
+    let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
 
     Session.set("questionIndex", 0);
     Session.set("clusterIndex", undefined);
     var newUnitNum = curUnitNum + 1;
     Session.set("currentUnitNumber", newUnitNum);
-    Session.set("currentTdfUnit",curTdf.tdfs.tutor.unit[newUnitNum]);
+    Session.set("currentTdfUnit",curTdfUnit);
     Session.set("currentDeliveryParams",getCurrentDeliveryParams());
     Session.set("currentUnitStartTime", Date.now());
 
@@ -1628,38 +1595,31 @@ function unitIsFinished(reason) {
         leaveTarget = "/profile";
     }
 
-    const subTdfIndex = Session.get("subTdfIndex");
+    let newExperimentState = { 
+      questionIndex: questionIndex,
+      clusterIndex: -1,
+      lastUnitCompleted: curUnitNum,
+      lastUnitStarted: newUnitNum,
+      currentUnitNumber: newUnitNum, 
+      currentTdfUnit: currentTdfUnit,
+      lastAction: "unit-end",
+      lastActionTimeStamp: Date.now()
+    }
 
-    recordUserTime("unit-end", {
-        'reason': reason,
-        'curSubTdfIndex': subTdfIndex,
-        'currentUnit': curUnitNum,  
-    }, function(error, result) {
-        leavePage(leaveTarget);
-    });
+    if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
+    const res = await updateExperimentState(newExperimentState,"card.unitIsFinished");
+    console.log("unitIsFinished,updateExperimentState",res);
+    leavePage(leaveTarget);
 }
 
-function recordProgress(question, answer, userAnswer, isCorrect) {
+function recordProgress(isCorrect) {
     var uid = Meteor.userId();
     if (!uid) {
         console.log("NO USER ID!!!");
         return;
     }
 
-    var questionIndex = Session.get("questionIndex");
-    if (!questionIndex && questionIndex !== 0) {
-        questionIndex = null;
-    }
-
     var prog = getUserProgress();
-    prog.progressDataArray.push({
-        clusterIndex: Session.get("clusterIndex"),
-        questionIndex: questionIndex,
-        question: question,
-        answer: answer,
-        userAnswer: userAnswer,
-        isCorrect: isCorrect,
-    });
 
     //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
     //Ignore instruction type questions for overallOutcomeHistory
@@ -1691,8 +1651,7 @@ function getButtonTrial() {
       isButtonTrial = true;
   } else {
       // An entire schedule can override a button trial
-      var progress = getUserProgress();
-      var schedButtonTrial = !!(progress.currentSchedule) && (progress.currentSchedule.unitNumber == Session.get("currentUnitNumber")) ? _.chain(progress).prop("currentSchedule").prop("isButtonTrial").value() : false;
+      var schedButtonTrial = !!(Session.get("currentSchedule")) ? Session.get("currentSchedule").isButtonTrial : false;
       if (!!schedButtonTrial) {
           isButtonTrial = true;  //Entire schedule is a button trial
       }
@@ -2123,7 +2082,7 @@ function startUserMedia(stream) {
       }else{
         console.log("VOICE STOP");
         recorder.stop();
-        Session.set('recording',false);
+        Session.set("recording",false);
         recorder.exportToProcessCallback();
       }
     },
@@ -2158,7 +2117,7 @@ function startUserMedia(stream) {
 
 function startRecording() {
   if (recorder){
-    Session.set('recording',true);
+    Session.set("recording",true);
     recorder.record();
     console.log("RECORDING START");
   }else{
@@ -2171,7 +2130,7 @@ function stopRecording() {
   if(recorder && Session.get('recording'))
   {
     recorder.stop();
-    Session.set('recording',false);
+    Session.set("recording",false);
 
     recorder.clear();
     console.log("RECORDING END");
@@ -2225,62 +2184,41 @@ function allowUserInput() {
   },200);
 }
 
-//Helper for getting the relevant user times log
-getCurrentUserTimesLog = function(expKey) {
-    var userLog = UserTimesLog.findOne({ _id: Meteor.userId() });
-    Meteor.call("updatePerformanceData","utlQuery","card.getCurrentUserTimesLog",Meteor.userId());
-    var expKey = expKey || userTimesExpKey(true);
-
-    var entries = [];
-    if (userLog && userLog[expKey] && userLog[expKey].length) {
-        entries = userLog[expKey];
-    }
-
-    var previousRecords = {};
-    var records = [];
-
-    for(var i = 0; i < entries.length; ++i) {
-        var rec = entries[i];
-
-        //Suppress duplicates like we do on the server side for file export
-        var uniqifier = rec.action + ':' + rec.clientSideTimeStamp;
-        if (uniqifier in previousRecords) {
-            continue; //dup detected
-        }
-        previousRecords[uniqifier] = true;
-
-        //We don't do much other than save the record
-        records.push(rec);
-    }
-
-    return records;
+getExperimentState = async function() {
+    const curExperimentState = await meteorCallAsync('getExperimentState',Meteor.userId(), Session.get("currentRootTdfId"));
+    Meteor.call("updatePerformanceData","utlQuery","card.getExperimentState",Meteor.userId());
+    return curExperimentState;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// BEGIN Resume Logic
-
-//ONLY ONE RESUME CAN RUN AT A TIME - we set this at the beginng of resumeFromUserTimesLog
-//and then unset it after a callback from the server succeeds. AS A RESULT, unhandled
-//exception in resumeFromUserTimesLog will break our resume logic until the user has
-//reloaded the page and started over. This is actually a good thing, since a broken resume
-//should stop us cold.
-Session.set('inResume', false);
+async function updateExperimentState(newState,codeCallLocation){
+  let oldExperimentState = Session.get("currentExperimentState");
+  let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
+  if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
+      let clientSideTimeStamp = Date.now();
+      Session.set("lastTimestamp", clientSideTimeStamp);
+      newExperimentState.lastTimestamp = clientSideTimeStamp;
+  }
+  const res = await meteorCallAsync('setExperimentState',Meteor.userId(), Session.get("currentRootTdfId"),newExperimentState);
+  Session.set("currentExperimentState",newExperimentState);
+  console.log("updateExperimentState",codeCallLocation,oldExperimentState,newExperimentState,res);
+  return res;
+}
 
 //Re-initialize our User Progress and Card Probabilities internal storage
 //from the user times log. Note that most of the logic will be in
-//processUserTimesLog. This function just does some initial set up, insures
+//processUserTimesLog This function just does some initial set up, insures
 //that experimental conditions are correct, and uses processUserTimesLog as
 //a callback. This callback pattern is important because it allows us to be
 //sure our server-side call regarding experimental conditions has completed
 //before continuing to resume the session
-async function resumeFromUserTimesLog() {
+async function resumeFromComponentState() {
     if (Session.get('inResume')) {
         console.log("RESUME DENIED - already running in resume");
         return;
     }
-    Session.set('inResume', true);
+    Session.set("inResume", true);
 
-    console.log("Resuming from previous User Times info (if any)");
+    console.log("Resuming from previous componentState info (if any)");
 
     //Clear any previous permutation and/or timeout call
     timeoutsSeen = 0;
@@ -2310,135 +2248,106 @@ async function resumeFromUserTimesLog() {
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
     //condition selection. It will be our responsibility to update
-    //currentTdfName and currentStimName based on experimental conditions
+    //currentTdfId and currentStimSetId based on experimental conditions
     //(if necessary)
-    const rootTDF = await getTdfByFileName(Session.get("currentRootTdfName"));
+    const rootTDFBoxed = await meteorCallAsync('getTdfById',Session.get("currentRootTdfId"));
+    let rootTDF = rootTDFBoxed.content;
     if (!rootTDF) {
-        console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfName"));
+        console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfId"));
         alert("Unfortunately, something is broken and this lesson cannot continue");
         leavePage("/profile");
         return;
     }
 
     const setspec = rootTDF.tdfs.tutor.setspec[0];
-    var needExpCondition = (setspec.condition && setspec.condition.length);
-    var conditionAction;
-    var conditionData = {};
+    let needExpCondition = (setspec.condition && setspec.condition.length);
 
-    var userTimesLog = getCurrentUserTimesLog();
+    const experimentState = await getExperimentState();
+    let newExperimentState = {};
 
     //We must always check for experiment condition
     if (needExpCondition) {
         console.log("Experimental condition is required: searching");
-        var prevCondition = _.find(userTimesLog, function(entry) {
-            return entry && entry.action && entry.action === "expcondition";
-        });
+        const prevCondition = experimentState.conditionTdfId;
 
-        var subTdf = null;
+        var conditionTdfId = null;
 
         if (prevCondition) {
             //Use previous condition and log a notification that we did so
             console.log("Found previous experimental condition: using that");
-            subTdf = prevCondition.selectedTdf;
-            conditionAction = "condition-notify";
-            conditionData.note = "Using previous condition: " + subTdf;
-        }
-        else {
+            conditionTdfId = prevCondition.selectedTdf;
+        }else {
             //Select condition and save it
             console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
-            subTdf = _.sample(setspec.condition);
-            conditionAction = "expcondition";
-            conditionData.note = "Selected from " + _.display(setspec.condition.length) + " conditions";
+            conditionTdfId = _.sample(setspec.condition);//Transform from tdffilename to tdfid
+            newExperimentState.lastAction = "expcondition";
+            newExperimentState.lastActionTimeStamp = Date.now();
+            newExperimentState.conditionTdfId = conditionTdfId;
+            newExperimentState.conditionNote = "Selected from " + _.display(setspec.condition.length) + " conditions";
+            console.log("Exp Condition", conditionTdfId, newExperimentState.conditionNote);
         }
 
-        if (!subTdf) {
+        if (!conditionTdfId) {
             console.log("No experimental condition could be selected!");
             alert("Unfortunately, something is broken and this lesson cannot continue");
             leavePage("/profile");
             return;
         }
 
-        conditionData.selectedTdf = subTdf;
-        console.log("Exp Condition", conditionData.selectedTdf, conditionData.note);
-
         //Now we have a different current TDF (but root stays the same)
-        Session.set("currentTdfName", subTdf);
-        const curTdf = await getTdfByFileName(subTdf);
-        Session.set("currentTdfFile",curTdf);
+        Session.set("currentTdfId", conditionTdfId);
+
+        const curTdf = await meteorCallAsync("getTdfById",conditionTdfId);
+        Session.set("currentTdfFile",curTdf.content);
 
         //Also need to read new stimulus file (and note that we allow an exception
         //to kill us if the current tdf is broken and has no stimulus file)
-        Session.set("currentStimName", curTdf.tdfs.tutor.setspec[0].stimulusfile[0]);
-    }
-    else {
+        Session.set("currentStimSetId", curTdf.stimuliSetId);
+    }else {
+        Session.set("currentTdfFile",rootTdf);
         //Just notify that we're skipping
         console.log("No Experimental condition is required: continuing");
-        conditionAction = "condition-notify";
-        conditionData.note = "No exp condition necessary";
     }
 
-    //Pre-load sounds to be played into soundsDict to avoid audio lag issues
-    if(curStimHasSoundDisplayType()){
-      console.log("Sound type questions detected, pre-loading sounds");
-      preloadAudioFiles();
-    }else{
-      console.log("Non sound type detected");
-    }
-    if(curStimHasImageDisplayType()){
-      console.log("image type questions detected, pre-loading images");
-      preloadImages();
-    }else{
-      console.log("Non image type detected");
-    }
+    const stimuliSetId = Session.get("currentTdfFile").stimulisetid;
+    const stimuliSet = await getStimuliSetById(stimuliSetId);
 
-    //Add some session data to the log message we're sending
-    conditionData = _.extend(conditionData, {
-        currentRootTdfName: Session.get("currentRootTdfName"),
-        currentTdfName: Session.get("currentTdfName"),
-        currentStimName: Session.get("currentStimName")
-    });
+    Session.set("currentStimuliSet",stimuliSet);
 
-    //Now we can create our record for the server - note that we use an array
-    //since we might add other records below
-    var serverRecords = [createUserTimeRecord(conditionAction, conditionData)];
+    preloadStimuliFiles();
 
     //In addition to experimental condition, we allow a root TDF to specify
     //that the xcond parameter used for selecting from multiple deliveryParms's
     //is to be system assigned (as opposed to URL-specified)
     if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
         console.log("xcond for delivery params is sys assigned: searching");
-        var prevXCond = _.find(userTimesLog, function(entry) {
-            return entry && entry.action && entry.action === "xcondassign";
-        });
+        const prevExperimentXCond = experimentState.experimentXCond;
 
-        var xcondAction, xcondValue;
+        var experimentXCond;
 
-        if (prevXCond) {
+        if (prevExperimentXCond) {
             //Found it!
             console.log("Found previous xcond for delivery");
-            xcondAction = "xcondnotify";
-            xcondValue = prevXCond.xcond;
-        }
-        else {
+            experimentXCond = prevExperimentXCond;
+        }else {
             //Not present - we need to select one
             console.log("NO previous xcond for delivery - selecting one");
-            xcondAction = "xcondassign";
             var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
-            xcondValue = Math.floor(Math.random() * xcondCount);
+            experimentXCond = Math.floor(Math.random() * xcondCount);
+            newExperimentState.experimentXCond = experimentXCond;
+            newExperimentState.lastAction = "expcondition";
+            newExperimentState.lastActionTimeStamp = Date.now();
         }
 
-        console.log("Setting XCond from sys-selection", xcondValue);
-        Session.set("experimentXCond", xcondValue);
-
-        serverRecords.push(createUserTimeRecord(xcondAction, {'xcond':xcondValue}));
+        console.log("Setting XCond from sys-selection", experimentXCond);
+        Session.set("experimentXCond", experimentXCond);
     }
 
     //Find previous cluster mapping (or create if it's missing)
     //Note that we need to wait until the exp condition is selected above so
     //that we go to the correct TDF
-    var clusterMapping = _.find(userTimesLog, function(entry) {
-        return entry && entry.action && entry.action === "cluster-mapping";
-    });
+    let stimCount = getStimCount();
+    const clusterMapping = experimentState.clusterMapping;
     if (!clusterMapping) {
         //No cluster mapping! Need to create it and store for resume
         //We process each pair of shuffle/swap together and keep processing
@@ -2453,55 +2362,63 @@ async function resumeFromUserTimesLog() {
 
         while(shuffles.length > 0 || swaps.length > 0) {
             clusterMapping = createStimClusterMapping(
-                getStimClusterCount(),
+                stimCount,
                 shuffles.shift() || "",
                 swaps.shift() || "",
                 clusterMapping
             );
         }
-
-        serverRecords.push(createUserTimeRecord("cluster-mapping", {
-            clusterMapping: clusterMapping
-        }));
-
+        newExperimentState.clusterMapping = clusterMapping;
+        newExperimentState.lastAction = "clusterMapping";
+        newExperimentState.lastActionTimeStamp = Date.now();
         console.log("Cluster mapping created", clusterMapping);
-    }
-    else {
+    }else {
         //Found the cluster mapping record - extract the embedded mapping
-        clusterMapping = clusterMapping.clusterMapping;
         console.log("Cluster mapping found", clusterMapping);
     }
 
-    if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== getStimClusterCount()) {
-        console.log("Invalid cluster mapping", getStimClusterCount(), clusterMapping);
+    if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== stimCount) {
+        console.log("Invalid cluster mapping", stimCount, clusterMapping);
         throw "The cluster mapping is invalid - can not continue";
     }
-
     //Go ahead and save the cluster mapping we found/created
     Session.set("clusterMapping", clusterMapping);
+
+    if(experimentState.currentUnitNumber){
+      Session.set("currentUnitNumber",experimentState.currentUnitNumber);
+    }else{
+      Session.set("currentUnitNumber",0);
+      newExperimentState.currentUnitNumber = 0;
+    }
+
+    let curTdfUnit = tdfFile.tdfs.tutor.unit[Session.get("currentUnitNumber")];
+    Session.set("currentTdfUnit",curTdfUnit);
+    if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
+
+    if(experimentState.questionIndex){
+      Session.set("questionIndex", experimentState.questionIndex);
+    }else{
+      Session.set("questionIndex", 0);
+      newExperimentState.questionIndex = 0;
+    }
+
+    await updateExperimentState(newExperimentState,"card.resumeFromComponentState");
 
     //Notice that no matter what, we log something about condition data
     //ALSO NOTICE that we'll be calling processUserTimesLog after the server
     //returns and we know we've logged what happened
-    cb = function(){
-      recordUserTimeMulti(serverRecords, function() {
-        processUserTimesLog(userTimesLog);
-        Session.set('inResume', false);
-      });
-    }
-
-    checkSyllableCacheForCurrentStimFile(cb);
+    checkSyllableCacheForCurrentStimFile(processUserTimesLog);
 }
 
 function checkSyllableCacheForCurrentStimFile(cb){
-  let curStimFile = Session.get("currentStimName").replace(/\./g,'_');
-  cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+  let currentStimSetId = Session.get("currentStimSetId");
+  cachedSyllables = StimSyllables.findOne({filename:currentStimSetId});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
   if(!cachedSyllables){
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers();
-    Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
-      cachedSyllables = StimSyllables.findOne({filename:curStimFile});
+    Meteor.call('updateStimSyllableCache',currentStimSetId,curAnswers,function(){
+      cachedSyllables = StimSyllables.findOne({filename:currentStimSetId});
       console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
       cb();
     });
@@ -2510,9 +2427,8 @@ function checkSyllableCacheForCurrentStimFile(cb){
   }
 }
 
-//We process the user times log, assuming resumeFromUserTimesLog has properly
-//set up the TDF/Stim session variables
-function processUserTimesLog(userTimesLogs) {
+function processUserTimesLog() {
+    let experimentState = Session.get("currentExperimentState");
     //Get TDF info
     const tdfFile = Session.get("currentTdfFile");
     console.log("tdfFile",tdfFile);
@@ -2520,30 +2436,39 @@ function processUserTimesLog(userTimesLogs) {
 
     //Before the below options, reset current test data
     initUserProgress({
-        overallOutcomeHistory: [],
-        progressDataArray: [],
-        currentSchedule: {}
+        overallOutcomeHistory: []
     });
-
-    //Default to first unit
-    Session.set("currentUnitNumber", 0);
+    
+    Session.set("currentSchedule",experimentState.schedule);
     Session.set("currentUnitStartTime", Date.now());
+    Session.set("currentDeliveryParams",getCurrentDeliveryParams());
+
+    Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
+
+
+    Session.set("clusterIndex",           experimentState.shufIndex || experimentState.clusterIndex);
+
+    Session.set("currentDisplayEngine",   experimentState.selectedDisplay);
+    Session.set("currentQuestionPart2",   experimentState.selectedQuestionPart2);
+    Session.set("currentAnswer",          experimentState.selectedAnswer);
+    Session.set("currentAnswerSyllables", experimentState.currentAnswerSyllables);
+    Session.set("clozeQuestionParts",     experimentState.clozeQuestionParts);
+    Session.set("showOverlearningText",   experimentState.showOverlearningText);
+    Session.set("testType",               experimentState.testType);
+    Session.set("originalDisplay",        experimentState.originalSelectedDisplay);
+    Session.set("originalAnswer",         experimentState.originalAnswer);
+    Session.set("originalQuestion",       experimentState.originalQuestion);
+    Session.set("originalQuestion2",      experimentState.originalQuestion2);
+
+
+    Session.set("currentDisplay", undefined);//TODO: should we recompute this instead?
 
     //We'll be tracking the last question so that we can match with the answer
-    var lastQuestionEntry = null;
+    var lastQuestion = null;
 
     //prepareCard will handle whether or not new units see instructions, but
     //it will miss instructions for the very first unit.
-    var needFirstUnitInstructions = tutor.unit && tutor.unit.length;
-
-    //Helper to determine if a unit specified by index has the given field
-    var unitHasOption = function(unitIdx, optionName) {
-        var unitSection = _.chain(tdfFile.tdfs.tutor) 
-            .prop("unit").prop(unitIdx)
-            .prop(optionName).first().value();
-        console.log("UNIT CHECK", unitIdx, optionName, !!unitSection);
-        return !!unitSection;
-    };
+    var needFirstUnitInstructions = false;
 
     //It's possible that they clicked Continue on a final unit, so we need to
     //know to act as if we're done
@@ -2551,39 +2476,27 @@ function processUserTimesLog(userTimesLogs) {
 
     //Reset current engine
     var resetEngine = function(currUnit) {
-        let extensionData = {
-          cachedSyllables: cachedSyllables,
-          currentRootTdfName: Session.get("currentRootTdfName"),
-          currentTdfName: Session.get("currentTdfName"),
-          subTdfIndex: Session.get("subTdfIndex"),
-          curUnit: Session.get("currentTdfUnit")
+        let curExperimentData = {
+          cachedSyllables,
+          experimentState
         }
+        subTdfIndex: Session.get("subTdfIndex"),
+        curUnit: Session.get("currentTdfUnit")
 
-        if (unitHasOption(currUnit, "assessmentsession")) {
-            engine = createScheduleUnit(extensionData);
+        if (tdfFile.tdfs.tutor.unit[currUnit].hasOwnProperty("assessmentsession")) {
+            engine = createScheduleUnit(curExperimentData);
             Session.set("sessionType","assessmentsession");
         }
-        else if (unitHasOption(currUnit, "learningsession")) {
-            engine = createModelUnit(extensionData);
+        else if(tdfFile.tdfs.tutor.unit[currUnit].hasOwnProperty("learningsession")) {
+            engine = createModelUnit(curExperimentData);
             Session.set("sessionType","learningsession");
         }
         else {
-            engine = createEmptyUnit(extensionData); //used for instructional units
+            engine = createEmptyUnit(curExperimentData); //used for instructional units
             Session.set("sessionType","empty");
         }
     };
-
-    var unsetTrialSessionVariablesAndClearScrollList = function(){
-      Session.set("questionIndex", 0);
-      Session.set("clusterIndex", undefined);
-      Session.set("currentDisplay", undefined);
-      Session.set("currentDisplayEngine", undefined);
-      Session.set("originalDisplay", undefined);
-      Session.set("currentQuestionPart2",undefined);
-      Session.set("currentAnswer", undefined);
-      Session.set("testType", undefined);
-      clearScrollList();
-    }
+    clearScrollList();
 
     //The last unit we captured start time for - this way we always get the
     //earliest time for our unit start
@@ -2593,198 +2506,61 @@ function processUserTimesLog(userTimesLogs) {
     //session for the first time. We need to loop thru the user times log
     //entries and update that state
 
-    _.each(userTimesLogs, function(entry) {
-        if (!entry.action) {
-            console.log("Ignoring user times entry with no action");
-            return;
-        }
-
-        //Only examine the messages that we care about
-        var action = _.trim(entry.action).toLowerCase();
-
-        //Generally we use the last timestamp for our major actions. This will
-        //currently only be set to false in the default/fall-thru else block
-        var recordTimestamp = true;
-
-        if (action === "instructions") {
-            //They've been shown instructions for this unit
-            needFirstUnitInstructions = false;
-            var instructUnit = entry.currentUnit;
-            if (!!instructUnit || instructUnit === 0) {
-                Session.set("currentUnitNumber", instructUnit);
-                Session.set("currentTdfUnit",tdfFile.tdfs.tutor.unit[instructUnit]);
-                Session.set("currentDeliveryParams",getCurrentDeliveryParams());
-                unsetTrialSessionVariablesAndClearScrollList();
-                resetEngine(instructUnit);
-            }
-        }
-
-        else if (action === "unit-end") {
+    switch(experimentState.lastAction) {
+        case "instructions": break;
+        case "unit-end":
             //Logged completion of unit - if this is the final unit we also
             //know that the TDF is completed
-            var finishedUnit = _.intval(entry.currentUnit, -1);
-            var checkUnit = _.intval(Session.get("currentUnitNumber"), -2);
-            if (finishedUnit >= 0 && checkUnit === finishedUnit) {
-                //Correctly matches current unit - reset
-                needFirstUnitInstructions = false;
-                lastQuestionEntry = null;
-
-                unsetTrialSessionVariablesAndClearScrollList();
-
+            var finishedUnit = experimentState.currentUnitNumber;
+            var checkUnit = Session.get("currentUnitNumber");
+            if ((!!finishedUnit && !!checkUnit) && checkUnit === finishedUnit) {
                 if (finishedUnit === tdfFile.tdfs.tutor.unit.length - 1) {
-                    //Completed
                     moduleCompleted = true; //TODO: what do we do in the case of multiTdfs?  Depends on structure of template parentTdf
-                }
-                else {
+                }else {
                     //Moving to next unit
-                    checkUnit += 1;
-                    Session.set("currentUnitNumber", checkUnit);
-                    Session.set("currentTdfUnit",tdfFile.tdfs.tutor.unit[checkUnit]);
+                    currentUnitNumber += 1;
+                    let curTdfUnit = tdfFile.tdfs.tutor.unit[currentUnitNumber];
+                    Session.set("currentUnitNumber", currentUnitNumber);
+                    Session.set("currentTdfUnit",curTdfUnit);
                     Session.set("currentDeliveryParams",getCurrentDeliveryParams());
-                    resetEngine(checkUnit);
+                    if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
                 }
+            }else{
+              needFirstUnitInstructions = tutor.unit && tutor.unit.length;
             }
-        }
-
-        else if (action === "turk-approval" || action === "turk-bonus") {
-            //Currently just walk on by (but we don't log an "ignored this" msg)
-        }
-
-        else if (action === "schedule") {
+            break;
+        case "schedule":
             //Read in the previously created schedule
-            needFirstUnitInstructions = false;
-            lastQuestionEntry = null; //Kills the last question
-
-            var curUnitNum = entry.unitindex;
-            if (!curUnitNum && curUnitNum !== 0) {
-                //If we don't know the unit, then we can't proceed
-                console.log("Schedule Entry is missing unitindex", curUnitNum);
-                return;
-            }
-
-            var currUnit = tdfFile.tdfs.tutor.unit[curUnitNum];
-            var schedule = entry.schedule;
-
-            if (!schedule) {
-                //There was an error creating the schedule - there's really nothing
-                //left to do since the experiment is broken
-                recordUserTime("FAILURE to read schedule from user time log", {
-                    unitname: _.display(currUnit.unitname),
-                    unitindex: curUnitNum
-                });
-                alert("There is an issue with either the TDF or the Stimulus file - experiment cannot continue");
-                clearCardTimeout();
-                leavePage("/profile");
-                return;
-            }
-
-            //Update what we know about the session
+            var schedule = experimentState.schedule;
             //Note that the schedule unit engine will see and use this
-            getUserProgress().currentSchedule = schedule;
-            Session.set("currentUnitNumber", curUnitNum); //TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
-            Session.set("currentTdfUnit",currUnit);
-            Session.set("currentDeliveryParams",getCurrentDeliveryParams());
-            unsetTrialSessionVariablesAndClearScrollList();
-        }
-
-        else if (action === "question") {
-            //Read in previously asked question
-            needFirstUnitInstructions = false;
-            lastQuestionEntry = entry; //Always save the last question
-
-            if (!entry.selType) {
-                console.log("Ignoring user times entry question with no selType", entry);
-                return;
-            }
-
-            //Restore the session variables we save with each question
-            //REMEMBER - the logged card had its mapped index logged as
-            //clusterIndex, but we use the UN-mapped index right up until we
-            //send the log or access a stimulus cluster. Luckily the unmapped
-            //index should have been logged as shufIndex. Note that if there
-            //isn't a shufIndex, we just use the clusterIndex
-            var cardIndex = entry.shufIndex || entry.clusterIndex;
-
-            Session.set("clusterIndex",           cardIndex);
-            Session.set("questionIndex",          entry.questionIndex);
-            Session.set("currentUnitNumber",      entry.currentUnit);//TODO: This seems unnecessary, we should only care on unit-end or instructions (unit start)
-            Session.set("currentDisplayEngine",   entry.selectedDisplay);
-            Session.set("currentQuestionPart2",   entry.selectedQuestionPart2);
-            Session.set("currentAnswer",          entry.selectedAnswer);
-            Session.set("currentAnswerSyllables", entry.currentAnswerSyllables);
-            Session.set("clozeQuestionParts",     entry.clozeQuestionParts);
-            Session.set("showOverlearningText",   entry.showOverlearningText);
-            Session.set("testType",               entry.testType);
-            Session.set("originalDisplay",        entry.originalSelectedDisplay);
-            Session.set("originalAnswer",         entry.originalAnswer);
-            Session.set("originalQuestion",       entry.originalQuestion);
-            Session.set("originalQuestion2",      entry.originalQuestion2);
-
-            // Notify the current engine about the card selection (and note that
-            // the engine knows that this is a resume because we're passing the
-            // log entry back to it). The entry should include the original
-            // selection value to pass in, but if it doesn't we default to
-            // cardIndex (which should work for all units except the model)
-            engine.cardSelected(entry.selectVal || cardIndex, entry);
-        }
-
-        else if (action === "answer" || action === "[timeout]") {
-            needFirstUnitInstructions = false;
-            //Read in the previously recorded answer (even if it was a timeout)
-            needCurrentInstruction = false; //Answer means they got past the instructions
-            if (lastQuestionEntry === null) {
-                console.log("Ignore answer for no question", entry);
-                return;
-            }
-
-            //Did they get it right or wrong?
-            var wasCorrect;
-            if (action === "answer") {
-                wasCorrect = typeof entry.isCorrect !== "undefined" ? entry.isCorrect : null;
-                if (wasCorrect === null) {
-                    console.log("Missing isCorrect on an answer - assuming false", entry);
-                    wasCorrect = false;
-                }
-            }else {
-                wasCorrect = false; //timeout is never correct
-            }
-
-            //Test type is always recorded with an answer, so we just reset it
-            var testType = entry.ttype;
-            Session.set("testType", testType);
-
+            Session.set("currentSchedule",schedule);
+            break;
+        case "question":
+            lastQuestion = entry; //Always save the last question
+            break;
+       case "answer":
+       case "[timeout]":
+            lastQuestion = entry; //Always save the last question
             //The session variables should be set up correctly from the question
-            recordProgress(
-                Session.get("currentDisplay"),
-                Session.get("currentAnswer"),
-                entry.answer,
-                wasCorrect
-            );
+            recordProgress(wasCorrect);
 
-            var simCorrect = null;
-            if (_.chain(entry).prop("wasSim").intval() > 0) {
-                simCorrect = wasCorrect;
-            }
+            var simCorrect = experimentState.wasSim > 0 ? simCorrect = wasCorrect : null;
             writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);
 
             //Notify unit engine about card answer
             engine.cardAnswered(wasCorrect, entry);
+            break;
+    };
 
-            //We know the last question no longer applies
-            lastQuestionEntry = null;
-        }else {
-            recordTimestamp = false; //Don't use the timestamp for this one
-        }
-
-        if (recordTimestamp && entry.clientSideTimeStamp) {
-            Session.set("lastTimestamp", entry.clientSideTimeStamp);
-
-            if (Session.get("currentUnitNumber") > startTimeMinUnit) {
-                Session.set("currentUnitStartTime", Session.get("lastTimestamp"));
-                startTimeMinUnit = Session.get("currentUnitNumber");
-            }
-        }
-    });
+    resetEngine(currentUnitNumber);
+    
+    if (experimentState.lastActionTimeStamp) {
+      Session.set("lastTimestamp", experimentState.lastActionTimeStamp);
+      if (Session.get("currentUnitNumber") > startTimeMinUnit) {
+          Session.set("currentUnitStartTime", Session.get("lastTimestamp"));
+          startTimeMinUnit = Session.get("currentUnitNumber");
+      }
+    }
 
     //If we make it here, then we know we won't need a resume until something
     //else happens
@@ -2792,14 +2568,14 @@ function processUserTimesLog(userTimesLogs) {
 
     //Initialize client side student performance
     let curUser = Meteor.user();
-    let curTdfName = Session.get("currentTdfName");
-    setStudentPerformance(curUser._id,curUser.username,curTdfName);
+    let currentTdfId = Session.get("currentTdfId");
+    setStudentPerformance(curUser._id,curUser.username,currentTdfId);
 
     if (needFirstUnitInstructions) {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");
         leavePage("/instructions");
-    }else if (!!lastQuestionEntry) {
+    }else if (!!lastQuestion) {
         Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
         //Question outstanding: force question display and let them give an answer
         console.log("RESUME FINISHED: displaying current question");
@@ -2819,12 +2595,9 @@ function processUserTimesLog(userTimesLogs) {
         // we might need to stick with the instructions *IF AND ONLY IF* the
         // lockout period hasn't finished (which prepareCard won't handle)
         if (engine.unitFinished()) {
-            var lockoutMins = _.chain(Session.get("currentDeliveryParams")).prop("lockoutminutes").intval().value();
+            var lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
             if (lockoutMins > 0) {
-                var unitStartTimestamp = _.intval(Session.get("currentUnitStartTime"));
-                if (unitStartTimestamp < 1) {
-                    unitStartTimestamp = Date.now();
-                }
+                var unitStartTimestamp = Session.get("currentUnitStartTime") || Date.now();
                 var lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
                 if (Date.now() < lockoutFreeTime) {
                     console.log("RESUME FINISHED: showing lockout instructions");
@@ -2833,7 +2606,6 @@ function processUserTimesLog(userTimesLogs) {
                 }
             }
         }
-        Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
         console.log("RESUME FINISHED: next-question logic to commence");
         prepareCard();
     }

@@ -1,4 +1,5 @@
-import { haveMeteorUser, getTdfByFileName } from '../../lib/currentTestingHelpers';
+import { haveMeteorUser } from '../../lib/currentTestingHelpers';
+import { selectTdf } from './profile';
 
 Template.profileSouthwest.helpers({
     username: function () {
@@ -19,14 +20,14 @@ Template.profileSouthwest.events({
 
         var target = $(event.currentTarget);
         selectTdf(
-            target.data("tdfkey"),
+            target.data("currentTdfId"),
             target.data("lessonname"),
-            target.data("stimulusfile"),
-            target.data("tdffilename"),
+            target.data("currentStimSetId"),
             target.data("ignoreOutOfGrammarResponses"),
             target.data("speechOutOfGrammarFeedback"),
             "User button click",
-            target.data("isMultiTdf")
+            target.data("isMultiTdf"),
+            true
         );
     },
 });
@@ -51,12 +52,14 @@ Template.profileSouthwest.rendered = async function () {
     const allTdfs = await meteorCallAsync("getAllTdfs");
     Session.set("allTdfs",allTdfs);
 
-    Meteor.call('getTdfsAssignedToStudent',Meteor.user().username.toLowerCase(),function(err,result){
+    Meteor.call('getTdfsAssignedToStudent',Meteor.userId(),function(err,result){
       console.log("err: " + err + ", res: " + result);
       var assignedTdfs = result;
       console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
       //Check all the valid TDF's
-      allTdfs.forEach( function (tdf) {
+      assignedTdfs.forEach( function (tdf) {
+          let TDFId = tdf.TDFId;
+          console.log("assignedTdfs",tdf);
           let tdfObject = tdf.content;
           let isMultiTdf = tdfObject.isMultiTdf;
 
@@ -74,12 +77,7 @@ Template.profileSouthwest.rendered = async function () {
               return;
           }
 
-          //Make sure we only present the tdfs assigned to the classes the user is in
-          if(assignedTdfs.findIndex(x => x.fileName == tdfObject.fileName) == -1){
-            return;
-          }
-
-          var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
+          var currentStimSetId = tdf.currentStimSetId;
 
           var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
           var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
@@ -100,12 +98,11 @@ Template.profileSouthwest.rendered = async function () {
           var audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
 
           addButton(
-              $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
+              $("<button type='button' id='"+TDFId+"' name='"+name+"'>")
                   .addClass("btn btn-block btn-responsive tdfButton")
+                  .data("tdfid", TDFId)
                   .data("lessonname", name)
-                  .data("stimulusfile", stimulusFile)
-                  .data("tdfkey", tdfObject._id)
-                  .data("tdffilename", tdfObject.fileName)
+                  .data("currentStimSetId", currentStimSetId)
                   .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                   .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
                   .data("isMultiTdf",isMultiTdf)
@@ -114,86 +111,6 @@ Template.profileSouthwest.rendered = async function () {
       });
     });
 };
-
-//Actual logic for selecting and starting a TDF
-async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
-    console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
-    //make sure session variables are cleared from previous tests
-    sessionCleanUp();
-
-    //Set the session variables we know
-    //Note that we assume the root and current TDF names are the same.
-    //The resume logic in the the card template will determine if the
-    //current TDF should be changed due to an experimental condition
-    Session.set("currentRootTdfName", tdffilename);
-    Session.set("currentTdfName", tdffilename);
-    const curTdf = await getTdfByFileName(tdffilename);
-    Session.set("currentTdfFile",curTdf);
-    Session.set("currentStimName", stimulusfile);
-    Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
-    Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
-
-    //Record state to restore when we return to this page
-    var audioPromptMode = getAudioPromptModeFromPage();
-    Session.set("audioPromptMode",audioPromptMode);
-    Session.set("audioPromptFeedbackView",audioPromptMode);
-    var audioInputEnabled = getAudioInputFromPage();
-    Session.set("audioEnabledView",audioInputEnabled);
-    var audioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
-    Session.set("audioPromptSpeakingRateView",audioPromptSpeakingRate);
-    var audioInputSensitivity = document.getElementById("audioInputSensitivity").value;
-    Session.set("audioInputSensitivityView",audioInputSensitivity);
-
-    //Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
-    Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
-    Session.set("audioInputSensitivity",audioInputSensitivity);
-
-    //Get some basic info about the current user's environment
-    var userAgent = "[Could not read user agent string]";
-    var prefLang = "[N/A]";
-    try {
-        userAgent = _.display(navigator.userAgent);
-        prefLang = _.display(navigator.language);
-    }
-    catch(err) {
-        console.log("Error getting browser info", err);
-    }
-
-    //Save the test selection event
-    recordUserTime("profile tdf selection", {
-        target: lessonName,
-        tdfkey: tdfkey,
-        tdffilename: tdffilename,
-        stimulusfile: stimulusfile,
-        userAgent: userAgent,
-        browserLanguage: prefLang,
-        selectedHow: how,
-        isMultiTdf: isMultiTdf
-    });
-
-    //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled and there's a tts key in the tdf then turn on, otherwise we won't do anything
-    var userAudioPromptFeedbackToggled = (Session.get("audioPromptFeedbackView") == "feedback") || (Session.get("audioPromptFeedbackView") == "all");
-    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey;
-    var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
-    Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
-
-   //If we're in experiment mode and the tdf file defines whether audio input is enabled
-   //forcibly use that, otherwise go with whatever the user set the audio input toggle to
-   var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = curTdf.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
-   var audioEnabled = tdfAudioEnabled && userAudioToggled;
-   Session.set("audioEnabled", audioEnabled);
-
-   //Go directly to the card session - which will decide whether or
-   //not to show instruction
-   Session.set("needResume", true);
-   if(isMultiTdf){
-    navigateForMultiTdf();
-   }else{
-     Router.go("/card");
-   }
-}
 
 //We'll use this in card.js if audio input is enabled and user has provided a
 //speech API key

@@ -1,7 +1,95 @@
 import { getTdfBy_id, getTdfByFileName } from './methods';
-import { userLogGetTdfId } from './userlog';
 /* turk_methods.js - Implement the server-side methods called by our clients
 **/
+
+
+writeUserLogEntries = function(experimentId, objectsToLog, userId) {
+    if (!userId) {
+        throw new Meteor.Error("No valid user ID found for User Log Entry");
+    }
+  
+    //Create action object: should look like:
+    // { $push: { <experimentId>: { $each: <objectsToLog in array> } } }
+    var action = {$push: {}};
+    action["$push"][experimentId] = {$each: objectsToLog};
+  
+    UserTimesLog.update( {_id: userId}, action, {upsert: true} );
+    logUserMetrics(userId, experimentId, objectsToLog);
+  };
+
+  //Utility - update server-side metrics when we see an answer
+  function logUserMetrics(userId, experimentKey, valsToCheck) {
+    //Gather the answers we should use to check
+    var answers = valsToCheck.map((rec) =>(rec.action == "answer" || rec.action == "[timeout]"));
+  
+    //Leave if nothing to do
+    if (answers.length < 1) {
+        return;
+    }
+  
+    var makeKey = function(idx, fieldName) {
+        return experimentKey + '.' + idx + '.' + fieldName;
+    };
+  
+    for(i = 0; i < answers.length; ++i) {
+        var answer = answers[i];
+        var ttype = _.trim(answer.ttype);
+        var idx = _.intval(answer.shufIndex);
+  
+        var action;
+        if (ttype == 's') {
+            //Study
+            var reviewTime = _.intval(answer.inferredReviewLatency);
+            action = [{ '$push': {}, '$inc': {} }];
+            action[0]['$push'][makeKey(idx, 'studyTimes')] = reviewTime;
+            action[0]['$inc' ][makeKey(idx, 'studyCount')] = 1;
+        }
+        else {
+            var isCorrect = answer.isCorrect;
+            var answerTime = _.intval(answer.endLatency);
+            action = [{'$push': {}, '$inc': {}}];
+            action[0]['$push'][makeKey(idx, 'answerTimes')] = answerTime;
+            action[0]['$push'][makeKey(idx, 'answerCorrect')] = isCorrect;
+            action[0]['$inc' ][makeKey(idx, 'questionCount')] = 1;
+            action[0]['$inc' ][makeKey(idx, 'correctAnswerCount')] = (isCorrect ? 1 : 0);
+        }
+  
+        for (var j = 0; j < action.length; ++j) {
+            UserMetrics.update({_id: userId}, action[j]);
+        }
+    }
+  }
+//Given a user ID (_id) and an experiment, return the corresponding tdfId (_id)
+async function userLogGetTdfId(userid, experiment) {
+    var userLog = UserTimesLog.findOne({ _id: userid });
+    var entries = [];
+    if (userLog && userLog[experiment] && userLog[experiment].length) {
+        entries = userLog[experiment];
+    }
+
+    var id = null;
+    for(i = 0; i < entries.length; ++i) {
+        rec = entries[i];
+        action = _.trim(rec.action).toLowerCase();
+
+        //Only need to see the tdf select event once to get the key
+        if (action === "expcondition" || action === "condition-notify") {
+            id = _.display(rec.currentTdfName);
+            if (!!id) {
+                break;
+            }
+        }
+    }
+
+    if (!!id) {
+        const tdf = await getTdfByFileName(id);
+        if (tdf) {
+            return tdf.content._id;
+        }
+    }
+
+    return null; //Whoops
+};
 
 // Return the _id of the user record for the "owner" (or teacher) of the given
 // experiment name (TDF). This is mainly for knowing how to handle MTurk calls
@@ -27,7 +115,8 @@ async function getTdfOwner(experiment, userId) {
 
     //Now we can get the owner (either set on upload of TDF *OR* set on server
     //startup for TDF's that live in git)
-    const tdf = await getTdfBy_id(tdfId);
+    const tdfBoxed = await getTdfBy_id(tdfId);
+    let tdf = tdfBoxed.content;
     if (!!tdf && typeof tdf.owner !== "undefined") {
         return tdf.owner;
     }
@@ -318,10 +407,6 @@ Meteor.methods({
                 throw "You are not the owner of that TDF";
             }
 
-            //If we have a minimum score, check vs their current score
-            var tdfId = userLogGetTdfId(workerUserId, experiment);
-            const tdf = await getTdfBy_id(tdfId);
-
             // Get available HITs
             hitlist = await turk.getAvailableHITs(ownerProfile, {});
             if (hitlist && hitlist.length) {
@@ -609,7 +694,7 @@ Meteor.methods({
                     //Two things to keep in mind here - this is a one time check,
                     //and we'll immediately fail if there is a problem
                     const mytdf = await getTdfByFileName(rec.currentTdfName);
-                    tdf = mytdf;
+                    tdf = mytdf.content;
                     var ownerOK = false;
                     if (!!tdf && typeof tdf.owner !== "undefined") {
                         //They must be the owner of the TDF

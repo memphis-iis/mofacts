@@ -170,8 +170,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
         var initVals = {
             currentTestMode: "NONE",
             currentScore: 0,
-            overallOutcomeHistory: [],
-            progressDataArray: []
+            overallOutcomeHistory: []
         };
 
         if (!!overrideData) {
@@ -183,9 +182,7 @@ if (typeof Meteor !== "undefined" && Meteor.isClient) {
     //Provide access to user progress. Note that this function provides
     //an always-created object with lazy init.
     getUserProgress = function() {
-        if (!userProgress) {
-            initUserProgress();
-        }
+        if (!userProgress) initUserProgress();
         return userProgress;
     };
 }

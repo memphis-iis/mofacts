@@ -22,21 +22,15 @@ function userFilesRefresh() {
                 'type': 'tdf',
                 'fileName': _.chain(tdf).prop('fileName').trim().value()
             });
-
             count += 1;
-        }
-    });
-
-    Stimuli.find().forEach(function(stim){
-        if (userId === stim.owner) {
+            let stimuliSetId = tdf.stimuliSetId;
             userFiles.insert({
                 'temp': 1,
-                '_id': stim._id,
+                '_id': stimuliSetId,
                 'idx': count,
                 'type': 'stim',
-                'fileName': _.chain(stim).prop('fileName').trim().value()
+                'fileName': stimuliSetId
             });
-
             count += 1;
         }
     });

@@ -1,6 +1,6 @@
 import { ReactiveVar } from 'meteor/reactive-var'
-import { haveMeteorUser, getTdfByFileName } from '../../lib/currentTestingHelpers';
-
+import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+export { selectTdf };
 /**
  * Set up state variables for profile page
  */
@@ -63,14 +63,14 @@ Template.profile.events({
 
         var target = $(event.currentTarget);
         selectTdf(
-            target.data("tdfkey"),
+            target.data("tdfid"),
             target.data("lessonname"),
-            target.data("stimulusfile"),
-            target.data("tdffilename"),
+            target.data("currentStimSetId"),
             target.data("ignoreoutofgrammarresponses"),
             target.data("speechoutofgrammarfeedback"),
             "User button click",
-            target.data("ismultitdf")
+            target.data("ismultitdf"),
+            false
         );
     },
 
@@ -244,8 +244,10 @@ Template.profile.rendered = async function () {
 
     //Check all the valid TDF's
     for(let tdf of allTdfs){
+        let TDFId = tdf.TDFId;
         let tdfObject = tdf.content;
         let isMultiTdf = tdfObject.isMultiTdf;
+        let currentStimSetId = tdf.stimuliSetId;
 
         //Make sure we have a valid TDF (with a setspec)
         const setspec = tdfObject.tdfs.tutor.setspec[0];
@@ -277,10 +279,9 @@ Template.profile.rendered = async function () {
 
             if (tdfExperimentTarget && experimentTarget == tdfExperimentTarget) {
                 foundExpTarget = {
-                    tdfkey: tdfObject._id,
+                    tdfid: TDFId,
                     lessonName: name,
-                    stimulusfile: stimulusFile,
-                    tdffilename: tdfObject.fileName,
+                    currentStimSetId: currentStimSetId,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
                     speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget,
@@ -312,8 +313,7 @@ Template.profile.rendered = async function () {
             .value().toLowerCase();
 
         var userselect = true;
-        if (userselectText === "false")
-            userselect = false;
+        if (userselectText === "false") userselect = false;
 
         if (!userselect) {
             //console.log("Skipping due to userselect=false for ", name);
@@ -362,21 +362,21 @@ Template.profile.rendered = async function () {
     //Did we find something to auto-jump to?
     if (foundExpTarget) {
         selectTdf(
-            foundExpTarget.tdfkey,
+            foundExpTarget.tdfid,
             foundExpTarget.lessonName,
-            foundExpTarget.stimulusfile,
-            foundExpTarget.tdffilename,
+            foundExpTarget.currentStimSetId,
             foundExpTarget.ignoreOutOfGrammarResponses,
             foundExpTarget.speechOutOfGrammarFeedback,
             foundExpTarget.how,
-            foundExpTarget.isMultiTdf
+            foundExpTarget.isMultiTdf,
+            false
         );
     }
 };
 
 //Actual logic for selecting and starting a TDF
-async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf) {
-    console.log("Starting Lesson", lessonName, tdffilename, "Stim:", stimulusfile);
+async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf,fromSouthwest) {
+    console.log("Starting Lesson", lessonName, currentTdfId, "currentStimSetId:", currentStimSetId);
 
     var audioPromptFeedbackView = Session.get("audioPromptFeedbackView");
 
@@ -387,11 +387,11 @@ async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOu
     //Note that we assume the root and current TDF names are the same.
     //The resume logic in the the card template will determine if the
     //current TDF should be changed due to an experimental condition
-    Session.set("currentRootTdfName", tdffilename);
-    Session.set("currentTdfName", tdffilename);
-    const curTdf = await getTdfByFileName(tdffilename);
-    Session.set("currentTdfFile",curTdf);
-    Session.set("currentStimName", stimulusfile);
+    Session.set("currentRootTdfId", currentTdfId);
+    Session.set("currentTdfId", currentTdfId);
+    const curTdf = await getTdfById(currentTdfId);
+    Session.set("currentTdfFile",curTdf.content);
+    Session.set("currentStimSetId", currentStimSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
 
@@ -421,22 +421,18 @@ async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOu
         console.log("Error getting browser info", err);
     }
 
-    //Save the test selection event
-    recordUserTime("profile tdf selection", {
-        target: lessonName,
-        tdfkey: tdfkey,
-        tdffilename: tdffilename,
-        stimulusfile: stimulusfile,
-        userAgent: userAgent,
-        browserLanguage: prefLang,
-        selectedHow: how,
-        isMultiTdf: isMultiTdf
-    });
-
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
-    var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
+    var userAudioPromptFeedbackToggled = fromSouthwest ? (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
     var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptFeedbackEnabled = !Session.get("experimentTarget") ? (tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled) : tdfAudioPromptFeedbackEnabled;
+    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey;
+    var audioPromptFeedbackEnabled = undefined;
+    if(Session.get("experimentTarget")){
+      audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
+    }else if(fromSouthwest){
+      audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
+    }else{
+      audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled
+    }
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
@@ -472,6 +468,17 @@ async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOu
   //Go directly to the card session - which will decide whether or
   //not to show instruction
   if(continueToCard){
+    let lastAction = fromSouthwest ? "profileSouthwest tdf selection" : "profile tdf selection";
+    let newExperimentState = { 
+      lastAction: lastAction,
+      lastActionTimeStamp: Date.now(),
+      userAgent: userAgent,
+      browserLanguage: prefLang,
+      selectedHow: how,
+      isMultiTdf: isMultiTdf
+    }
+    await updateExperimentState(newExperimentState,"profile.selectTdf");
+
     Session.set("needResume", true);
     if(isMultiTdf){
       navigateForMultiTdf();
@@ -481,7 +488,7 @@ async function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOu
   }
 }
 
-navigateForMultiTdf = function(){
+navigateForMultiTdf = async function(){
   function getUnitType(curUnit){
     let unitType = "other";
     if(!!curUnit.assessmentsession){
@@ -492,19 +499,10 @@ navigateForMultiTdf = function(){
     return unitType;
   }
 
-  const userTimesLog = getCurrentUserTimesLog();
-  let lastUnitCompleted = -1;
-  let lastUnitStarted = -1;
+  const experimentState = await getExperimentState();
+  let lastUnitCompleted = experimentState.lastUnitCompleted || -1;
+  let lastUnitStarted = experimentState.lastUnitStarted || -1;
   let unitLocked = false;
-  userTimesLog.forEach(function(entry){
-    if(!!entry.currentUnit){
-      if(entry.action === "instructions"){
-        lastUnitStarted = entry.currentUnit;
-      }else if(entry.action === "unit-end"){
-        lastUnitCompleted = entry.currentUnit;
-      }
-    }
-  });
 
   //If we haven't finished the unit yet, we may want to lock into the current unit
   //so the user can't mess up the data

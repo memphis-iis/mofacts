@@ -1,175 +1,57 @@
-import { search, getAllCoursesForInstructor } from '../../lib/currentTestingHelpers';
-
-Session.set("instructorReportingTdfs",[]);
-Session.set("classes",[]);
-Session.set("curClass",undefined);
-Session.set("curClassStudentTotals",undefined);
-Session.set("curInstructorReportingTdfs",[]);
-
 const INVALID_TDF = "invalid";
 curTdf = INVALID_TDF;
-curClass = {_id:""};
 
-navigateToStudentReporting = function(studentUsername){
-  console.log("navigateToStudentReporting: " + studentUsername);
+async function navigateToStudentReporting(studentUsername){
+  console.log("navigateToStudentReporting:",studentUsername);
   Session.set("studentUsername",studentUsername);
-  Session.set("curClass",curClass);
   Session.set("instructorSelectedTdf",curTdf);
-  Session.set("curStudentPerformance",{});
+
+  if(studentUsername.indexOf("@") == -1) studentUsername = studentUsername.toUpperCase();
+  let userIdRet = await meteorCallAsync('getUserIdforUsername',studentUsername);
+  console.log("student,",studentUsername,userIdRet);
+  Session.set("curStudentID",userIdRet);
+  Session.set("curStudentPerformance",Session.get("studentPerformanceForClassAndTdfIdMap")[userIdRet]);
   Router.go("/studentReporting");
 }
 
-setCurClassStudents = function(curClass,currentTdf){
-  Session.set("curClassStudents",[]);
-  Session.set("curClassStudentTotals",undefined);
-
-  Session.set("performanceLoading", true);
-
-  Meteor.call('getStudentPerformanceForClassAndTdf',curClass._id,currentTdf,function(err,res){
-    Session.set("performanceLoading", false);
-    if(!!err){
-      console.log("error getting student performance for class and tdf: " + JSON.stringify(err));
-    }else{
-      console.log("getStudentPerformanceForClassAndTdf returned: " + JSON.stringify(res));
-      Session.set("curClassStudents",res[0]);
-      Session.set("curClassStudentTotals",res[1]);
-    }
-  })
+function setCurClassStudents(curClass,currentTdf){
+  Session.set("curClassStudentPerformance",Session.get("studentPerformanceForClassAndTdfIdMap")[curClass.courseid][currentTdf]);//PER STUDENT
+  Session.set("curClassPerformance",Session.get("studentPerformanceForClass")[curClass.courseid]);//AGGREGATED BY CLASS
 }
 
-// getStudentPerformanceForClassAndTdf: async function(classID, tdfFileName){
-//   let curClass = Classes.findOne({_id:classID});
-//   studentTotals = {
-//     numCorrect: 0,
-//     count: 0,
-//     totalTime: 0,
-//     percentCorrectsSum: 0,
-//     numStudentsWithData: 0
-//   }
-//   let students = [];
-//   if(!!curClass){
-//     let curClassTdfs = [];
-//     for(let tdf of curClass.tdfs){
-//       curClassTdfs.push(tdf.fileName);
-//     }
-//     curClass.students.forEach(async function(studentUsername){
-//       if(studentUsername.indexOf("@") == -1){
-//         studentUsername = studentUsername.toUpperCase();
-//       }
-//       let student = Meteor.users.findOne({"username":studentUsername}) || {};
-//       let studentID = student._id;
-//       let count = 0;
-//       let numCorrect = 0;
-//       let totalTime = 0;
-//       assessmentItems = {};
-//       const learningSessionItems = await getLearningSessionItems(tdfFileName);
-//       let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-//       let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
-//       UserMetrics.find({_id: studentID}).forEach(function(entry){
-//         let tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-//         tdfEntries = tdfEntries.filter(x => curClassTdfs.indexOf(x.replace("_xml",".xml")) != -1);
-//         for(var index in tdfEntries){
-//           var key = tdfEntries[index];
-//           var tdf = entry[key];
-//           let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
-//           for(var index in tdf){
-//             //Only count items in learning sessions
-//             if(!!learningSessionItems[tdfKey] 
-//                 && !!learningSessionItems[tdfKey][index]){
-//               var stim = tdf[index];
-//               count += stim.questionCount || 0;
-//               numCorrect += stim.correctAnswerCount || 0;
-//               var answerTimes = stim.answerTimes;
-//               for(var index in answerTimes){
-//                 var time = answerTimes[index];
-//                 totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-//               }
-//             }
-//           }
-//         }
-//       });
-//       var percentCorrect = "N/A";
-//       if(count != 0){
-//         percentCorrect = ((numCorrect / count)*100);
-//         studentTotals.percentCorrectsSum  += percentCorrect;
-//         studentTotals.numStudentsWithData += 1;
-//         percentCorrect = percentCorrect.toFixed(2) + "%";
-//       }
-//       totalTime = totalTime.toFixed(1);
-//       var studentPerformance = {
-//         "username":studentUsername,
-//         "count":count,
-//         "percentCorrect":percentCorrect,
-//         "numCorrect":numCorrect,
-//         "totalTime":totalTime
-//       }
-//       studentTotals.count += studentPerformance.count;
-//       studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
-//       studentTotals.numCorrect += studentPerformance.numCorrect;
-//       students.push(studentPerformance);
-//     })
-//   }
-//   studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
-//   studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
-
-//   studentTotals.averageCount = studentTotals.count / studentTotals.numStudentsWithData;
-//   studentTotals.averageTotalTime = (studentTotals.totalTime / studentTotals.numStudentsWithData).toFixed(1);
-//   studentTotals.averagePercentCorrect = (studentTotals.percentCorrectsSum / studentTotals.numStudentsWithData).toFixed(4) + "%";
-
-//   return [students,studentTotals];
-// },
-
 Template.instructorReporting.helpers({
-  tdfs: function(){
-    return Session.get("curInstructorReportingTdfs");
-  },
-
-  classes: function(){
-    return Session.get("classes");
-  },
-
-//Session var index by curClassName?
-  curClassStudents: function(){
-    return Session.get("curClassStudents");
-  },
-
-  replaceSpacesWithUnderscores: function(string){
-    return string.replace(" ","_");
-  },
-
-  curClassStudentTotals: function(){
-    return Session.get("curClassStudentTotals");
-  },
-
-  performanceLoading: function() {
-    return Session.get("performanceLoading");
-  }
+  curClassStudentPerformance: () => Session.get("curClassStudentPerformance"),
+  curInstructorReportingTdfs: () => Session.get("curInstructorReportingTdfs"),
+  classes: () => Session.get("classes"),
+  curClassPerformance: () => Session.get("curClassPerformance"),
+  performanceLoading: () => Session.get("performanceLoading"),
+  replaceSpacesWithUnderscores: (string) => string.replace(" ","_")
 });
 
 Template.instructorReporting.events({
-
-  "click .nav-tabs": function(event, template){
-    Session.set("curClassStudents",[]);
-    Session.set("curClassStudentTotals",undefined);
+  "click .nav-tabs": function(){
+    Session.set("curClassStudentPerformance",[]);
+    Session.set("curClassPerformance",undefined);
 
     //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
-    setTimeout(function(){
+    Tracker.afterFlush(function(){
       //Need to strip newlines because chrome appends them for some reason
-      let curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-      var classes = Session.get("classes");
-      curClass = search(curClassName,"name",classes);
-      let curClassTdfs = Session.get("instructorReportingTdfs")[curClass._id];
+      let curClassId = $(".nav-tabs > .active")[0].innerText.replace('\n','');
+      let curClass = Session.get("classes").find(x => x.courseid == curClassId);
+      Session.set("curClass",curClass);
+      let curClassTdfs = Session.get("instructorReportingTdfs")[curClassId];
+      console.log("click nav tabs after timeout, curClass: ", curClass, curClassTdfs);
       Session.set("curInstructorReportingTdfs",curClassTdfs);
-      console.log("click nav tabs after timeout, curClass: ", curClass);
+
       curTdf = INVALID_TDF;
       $("#tdf-select").val(INVALID_TDF);
-    },200);
+    });
   },
   
-  "change #tdf-select": function(event, template){
+  "change #tdf-select": function(event){
     curTdf = $(event.currentTarget).val();
     console.log("tdf change: " + curTdf);
-    if(curClass){
+    if(Session.get("curClass")){
       setCurClassStudents(curClass,curTdf);
     }else {
       alert('Please select a class');
@@ -177,28 +59,32 @@ Template.instructorReporting.events({
   }
 });
 
-Template.instructorReporting.onRendered(function(){
-  curClass = {_id:""};
+Template.instructorReporting.onRendered(async function(){
+  console.log("instructorReporting rendered",Meteor.userId());
   Session.set("curClass",undefined);
+  Session.set("curStudentID",undefined);
   Session.set("studentUsername",undefined);
+  Session.set("curStudentPerformance",undefined);
   Session.set("instructorSelectedTdf",undefined);
   Session.set("instructorReportingTdfs",[]);
   Session.set("classes",[]);
-  Session.set("curClassStudents",[]);
-  Session.set("curClassStudentTotals",undefined);
+  Session.set("curClassStudentPerformance",[]);
+  Session.set("curClassPerformance",undefined);
   Session.set("curInstructorReportingTdfs",[]);
 
-  console.log("instructorReporting rendered");
-  Meteor.call('getTdfNamesAssignedByInstructor',Meteor.userId(),function (err,res) {
-    if(!!err){
-      console.log("error getting tdf names assigned by instructor: " + JSON.stringify(err));
-    }else{
-      Session.set("instructorReportingTdfs",res);
-    }
-  });
+  Session.set("performanceLoading", true);
+
+  const studentPerformance = await meteorCallAsync('getStudentPerformanceForClassAndTdfId',Meteor.userId());
+  [studentPerformanceForClass,studentPerformanceForClassAndTdfIdMap] = studentPerformance;
+  Session.set("studentPerformanceForClass",studentPerformanceForClass);
+  Session.set("studentPerformanceForClassAndTdfIdMap",studentPerformanceForClassAndTdfIdMap);
+
+  const instructorReportingTdfs = await meteorCallAsync('getTdfAssignmentsByCourseIdMap',Meteor.userId());
+  Session.set("instructorReportingTdfs",instructorReportingTdfs);
   
-  let classes = getAllCoursesForInstructor(Meteor.userId()); //getAllClassesForCurrentInstructor
-  console.log("userID: " + Meteor.userId());
-  console.log("classes: " + JSON.stringify(classes));
-  Session.set("classes",classes);
+  const courses = await meteorCallAsync("getAllCoursesForInstructor",Meteor.userId());
+  console.log("classes: " + JSON.stringify(courses));
+  Session.set("classes",courses);
+
+  Session.set("performanceLoading", false);
 })

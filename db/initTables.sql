@@ -49,6 +49,8 @@ CREATE TABLE section_user_map (
 CREATE INDEX idx_section_user_map_sectionid on section_user_map USING hash (sectionId);
 CREATE INDEX idx_section_user_map_userid on section_user_map USING hash (userId);
 
+CREATE TYPE responseType AS ENUM ('image','text');
+
 CREATE TABLE item (
     itemId SERIAL PRIMARY KEY,
     stimuliSetId INTEGER,
@@ -59,15 +61,17 @@ CREATE TABLE item (
     optimalProb NUMERIC(4,3),
     correctResponse VARCHAR(255) NOT NULL,
     incorrectResponses VARCHAR(2048),
+    itemResponseType responseType DEFAULT 'text',
+    speechHintExclusionList VARCHAR(2048),
     clozeStimulus VARCHAR(1024),
     textStimulus VARCHAR(1024),
     audioStimulus VARCHAR(1024),
     imageStimulus VARCHAR(1024),
-    videoStimulus VARCHAR(1024)
+    videoStimulus VARCHAR(1024),
+    tags JSONB
 );
 
 CREATE TYPE outcomeType AS ENUM ('correct','incorrect');
-CREATE TYPE responseType AS ENUM ('image','text');
 
 CREATE TABLE history (
     eventId SERIAL PRIMARY KEY,
@@ -84,6 +88,7 @@ CREATE TABLE history (
 );
 
 CREATE TYPE componentStateType AS ENUM ('stimulus','cluster','response');
+CREATE TYPE unitType AS ENUM ('learningsession','assessmentsession');
 
 CREATE TABLE componentState (
     componentStateId SERIAL PRIMARY KEY,
@@ -100,5 +105,16 @@ CREATE TABLE componentState (
     totalStudyDuration INTEGER NOT NULL,
     totalInterference INTEGER NOT NULL,
     currentUnit INTEGER NOT NULL,
+    currentUnitType unitType NOT NULL,
     outcomeStack VARCHAR(255)
 );
+
+CREATE TABLE globalExperimentState (
+    experimentStateId SERIAL PRIMARY KEY,
+    userId CHAR(17) NOT NULL,
+    TDFId INTEGER REFERENCES tdf (TDFId),
+    experimentState JSONB
+);
+
+CREATE INDEX idx_globalExperimentState_userId on globalExperimentState USING hash (userId);
+CREATE INDEX idx_globalExperimentState_TDFId on globalExperimentState USING hash (TDFId);

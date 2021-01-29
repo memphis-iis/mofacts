@@ -197,7 +197,7 @@ checkAndSetSpeechAPIKeyIsSetup = function(){
     if(err){
       console.log("Error getting whether speech api key is setup");
     }else {
-      Session.set('speechAPIKeyIsSetup',data);
+      Session.set("speechAPIKeyIsSetup",data);
     }
   })
 }

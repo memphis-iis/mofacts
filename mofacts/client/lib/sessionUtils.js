@@ -16,10 +16,10 @@
  * clusterMapping            - For an entire experiment
  * currentAnswer
  * currentDisplay            - Entire display json structure with clozeText, text, imgSrc, audioSrc, videoSrc
- * currentRootTdfName
+ * currentRootTdfId
  * currentTdfName
+ * currentTdfId
  * currentScore
- * currentStimName
  * currentUnitNumber
  * currentUnitStartTime      - Mostly only for lock-outs
  * debugging                 - Generic debugging flag
@@ -55,16 +55,24 @@ sessionCleanUp = function() {
     Session.set("audioPromptSpeakingRate",undefined);
     Session.set("buttonTrial", false);
     Session.set("currentAnswerSyllables",undefined);
-    Session.set("currentRootTdfName", undefined);
+
+    Session.set("currentSchedule",undefined);
+
+    Session.set("currentRootTdfId", undefined);
     Session.set("currentTdfName", undefined);
+    Session.set("currentTdfId",undefined);
+    Session.set("currentUnitNumber", undefined);
     Session.set("currentTdfUnit",undefined);
     Session.set("currentTdfFile", undefined);
-    Session.set("learningSessionItems", undefined);
-    Session.set("currentStimName", undefined);
+    Session.set("currentStimSetId", undefined);
+    Session.set("currentStimuliSet",undefined);
+    Session.set("currentDeliveryParams",{});
+
     Session.set("curTeacher",undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("originalAnswer",undefined);
+
     Session.set("displayReady",undefined);
     Session.set("currentDisplay", undefined);
     Session.set("currentDisplayEngine", undefined);
@@ -73,7 +81,7 @@ sessionCleanUp = function() {
     Session.set("originalQuestion",undefined);
     Session.set("originalQuestion2",undefined);
     Session.set("clozeQuestionParts",undefined);
-    Session.set("currentUnitNumber", 0);
+
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentScore", 0);
     Session.set("dialogueLoopStage",undefined);

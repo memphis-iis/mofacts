@@ -1,3 +1,5 @@
+import { blankPassword } from '../../lib/currentTestingHelpers';
+
 function testUserEnabled() {
     return _.chain(Meteor.settings).prop("public").prop("testLogin").value();
 }
@@ -20,19 +22,13 @@ function testLogin(){
       return;
   }
 
-  var testPassword = Helpers.blankPassword(testUserName);
+  var testPassword = blankPassword(testUserName);
 
   Meteor.call("signUpUser", testUserName, testPassword, true, function(error, result) {
       var errorMsgs = [];
 
       if (typeof error !== "undefined") {
           errorMsgs.push(error);
-      }
-
-      if (!!result && result.length) {
-          _.each(result, function(msg) {
-              errorMsgs.push(msg);
-          });
       }
 
       //If there was a call failure or server returned error message,

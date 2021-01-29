@@ -1,73 +1,36 @@
 import { 
     extractDelimFields,
     rangeVal,
-    getStimClusterCount, 
+    getStimCount, 
     getStimCluster, 
     getTestType
 } from '../../lib/currentTestingHelpers';
+import { updateExperimentState } from './card';
 /* unitEngine.js
 *******************************************************************************
 Unit engines handle question/answer selection for a particular unit. This
-abstraction let's us treat scheduled-based and module-based units the same in
+abstraction lets us treat scheduled-based and module-based units the same in
 card.js
-
-A unit engine is "created" by returning an object from a function - note that
-this is slightly different from JavaScript prototype object creation, so these
-engines aren't created with the "new" keyword.
-
-Also note that the engines may assume that they are added on to the object
-from defaultUnitEngine via _.extend
 
 The engine "API"
 --------------------------
-
-We provide creation functions for each of the "unit engines" defined here. A
-unit engine extends the result of the defaultUnitEngine function call (via the
-_.extend function). A unit engine is required to implement:
-
-* field unitType - it should be a string identifying what kind of unit is
-supported (note that this will be logged in the UserTimesLog)
-
 * function selectNextCard - when called the engine will select the next card
 for display _and_ set the appropriate Session variables. The function should
 also return the cluster index identifying the card just selected.
-
-* function cardSelected (accepts selectVal and resumeData) - this function is
-called when a card is selected. It will also be called on resume. During "real
-time" use the function is called with the return value of selectNextCard (see
-above). During resume, seledctVal is set to the the cluster index in the user
-log. resumeData is set if and only if resume is happening. It will be the user
-log entry - note that this entry should be what was previously returned by
-createQuestionLogEntry (see below) plus any additional fields added during the
-server-side write.
 
 * function findCurrentCardInfo - when called, then engine should return an
 object with the currently selected card's information. See the model unit for
 an explicit definition of these fields. Note that the schedule unit just
 return an item from the current schedule's q array.
 
-* function createQuestionLogEntry - when called, the engined should return an
-object with all fields that should be written to the user log. This is used by
-writeQuestionEntry (see below). Also note that this object is what will be in
-the resumeData parameter in a call to cardSelected during resume logic (see
-above).
-
 * function cardAnswered (accepts wasCorrect and resumeData) - called after the
 user provides a response. wasCorrect is a boolean value specifying whether the
-user correctly answered or not. resumeData is specified if and only if resume
-mode is active (just like cardSelected - see above). Note that this function
+user correctly answered or not. Note that this function
 _IS_ called for study trials (even though no answer is given) - see the model
 unit engine for an example if why this matters.
 
 * function unitFinished - the unit engine should return true if the unit is
 completed (nothing more to display)
-
-* function initImpl - OPTIONAL! An engine may implement this function if it
-needs special startup logic to be called before it is used.
-
-* function writeQuestionEntry - Should _NOT_ be implemented by the engine.
-This function is supplied by the default (base) engine and takes selectVal,
-which should be the value returnen by selectNextCard
 
 --------------------------------------------------------
 
@@ -79,14 +42,11 @@ honored across all session types.
 
 ******************************************************************************/
 
-//Helper for our "public" functions
-function create(func,extensionData) {
-    var engine = _.extend(defaultUnitEngine(extensionData), func());
+function create(func,curExperimentData) {
+    var engine = _.extend(defaultUnitEngine(curExperimentData), func());
     engine.init();
     return engine;
 }
-
-// Our "public" functions
 
 getRandomInt = function(max){
     return Math.floor(Math.random() * max);
@@ -96,32 +56,22 @@ stripSpacesAndLowerCase = function(input){
   return input.replace(/ /g,'').toLowerCase();
 }
 
-createEmptyUnit = function(extensionData) {
-    return create(emptyUnitEngine,extensionData);
-};
+createEmptyUnit = function(curExperimentData) { return create(emptyUnitEngine,curExperimentData); };
 
-createModelUnit = function(extensionData) {
-    return create(modelUnitEngine,extensionData);
-};
+createModelUnit = function(curExperimentData) { return create(modelUnitEngine,curExperimentData); };
 
-createScheduleUnit = function(extensionData) {
-    return create(scheduleUnitEngine,extensionData);
-};
+createScheduleUnit = function(curExperimentData) { return create(scheduleUnitEngine,curExperimentData); };
 
-//get the answer at this index - note that the cluster index will be mapped
-//in getStimCluster
-function getStimAnswer(index, whichAnswer) {
-    return getStimCluster(index).stims[whichAnswer].response.correctResponse;
+function getStimAnswer(clusterIndex, whichAnswer) {
+    return getStimCluster(clusterIndex)[whichAnswer].correctResponse;
 };
 
 // Return an instance of the "base" engine
-function defaultUnitEngine(extensionData) {
+function defaultUnitEngine(curExperimentData) {
     let engine = {
         // Things actual engines must supply
         unitType: "DEFAULT",
         selectNextCard: function() { throw "Missing Implementation"; },
-        cardSelected: function(selectVal, resumeData) { throw "Missing Implementation"; },
-        createQuestionLogEntry: function() { throw "Missing Implementation"; },
         cardAnswered: function(wasCorrect, resumeData) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
 
@@ -133,15 +83,6 @@ function defaultUnitEngine(extensionData) {
         init: function() {
             console.log("Engine created for unit:", this.unitType);
             this.initImpl();
-        },
-
-        writeQuestionEntry: function(selectVal) {
-            recordUserTimeQuestion(
-                _.extend(
-                    { selType: this.unitType, 'selectVal': selectVal },
-                    this.createQuestionLogEntry()
-                )
-            );
         },
 
         getSubClozeAnswerSyllables: function(answer,displaySyllableIndices,cachedSyllables){
@@ -252,23 +193,28 @@ function defaultUnitEngine(extensionData) {
         },
 
         setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
+            let newExperimentState = {};
             Session.set("alternateDisplayIndex",undefined);
-            let curStim = getStimCluster(cardIndex).stims[whichStim];
+            let curStim = getStimCluster(cardIndex)[whichStim];
             let currentDisplay = JSON.parse(JSON.stringify(curStim.display));
             if(curStim.alternateDisplays){
                 let numPotentialDisplays = curStim.alternateDisplays.length + 1;
                 let displayIndex = Math.floor(numPotentialDisplays * Math.random());
                 if(displayIndex < curStim.alternateDisplays.length){
                     Session.set("alternateDisplayIndex",displayIndex);
+                    newExperimentState.alternateDisplayIndex = displayIndex;
                     currentDisplay = JSON.parse(JSON.stringify(curStim.alternateDisplays[displayIndex]));
                 }
             }
-            Session.set("originalDisplay", JSON.parse(JSON.stringify(currentDisplay)));
+            let originalDisplay = JSON.parse(JSON.stringify(currentDisplay));
+            Session.set("originalDisplay", originalDisplay);
+            newExperimentState.originalDisplay = originalDisplay;
     
             let currentQuestion = currentDisplay.text || currentDisplay.clozeText;
             let currentQuestionPart2 = undefined;
             let currentStimAnswer = getStimAnswer(cardIndex, whichStim);
             Session.set("originalAnswer",currentStimAnswer);
+            newExperimentState.originalAnswer = currentStimAnswer;
             currentStimAnswer = currentStimAnswer.toLowerCase();
     
             //If we have a dual prompt question populate the spare data field
@@ -279,6 +225,8 @@ function defaultUnitEngine(extensionData) {
             }
             Session.set("originalQuestion",currentQuestion);
             Session.set("originalQuestion2",currentQuestionPart2);
+            newExperimentState.originalQuestion = currentQuestion;
+            newExperimentState.originalQuestion2 = currentQuestionPart2;
             
             let currentAnswerSyllables, clozeQuestionParts, currentAnswer;
             ({currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer} = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob));
@@ -290,6 +238,10 @@ function defaultUnitEngine(extensionData) {
             Session.set("currentAnswer",currentAnswer);
             Session.set("clozeQuestionParts",clozeQuestionParts);
             Session.set("currentQuestionPart2",currentQuestionPart2);
+            newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
+            newExperimentState.currentAnswer = currentAnswer;
+            newExperimentState.clozeQuestionParts = clozeQuestionParts;
+            newExperimentState.currentQuestionPart2 = currentQuestionPart2;
     
             if(!!(currentDisplay.text)){
                 currentDisplay.text = currentQuestion;
@@ -298,10 +250,15 @@ function defaultUnitEngine(extensionData) {
             }
     
             Session.set("currentDisplayEngine",currentDisplay);
+            newExperimentState.currentDisplayEngine = currentDisplay;
+
+            return newExperimentState;
         }
     };
-    console.log("extension data: " + JSON.stringify(extensionData));
-    return _.extend(engine,extensionData);
+    engine.experimentState = curExperimentData.experimentState;
+    engine.cachedSyllables = curExperimentData.cachedSyllables;
+    console.log("curExperimentData: " + JSON.stringify(curExperimentData));
+    return engine;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -309,13 +266,9 @@ function defaultUnitEngine(extensionData) {
 function emptyUnitEngine() {
     return {
         unitType: "instruction-only",
-
         unitFinished: function() { return true; },
-
         selectNextCard: function() { },
         findCurrentCardInfo: function() { },
-        cardSelected: function(selectVal, resumeData) { },
-        createQuestionLogEntry: function() { },
         cardAnswered: function(wasCorrect, resumeData) { }
     };
 }
@@ -357,32 +310,13 @@ function modelUnitEngine() {
     //the unit we'll start all over.
     var unitStartTimestamp = Date.now();
 
-    //We cache the stimuli found since it shouldn't change during the unit
-    var cachedStimuli = null;
-    fastGetStimCluster =function(index) {
-        if (!cachedStimuli) {
-            cachedStimuli = Stimuli.findOne({fileName: Session.get("currentStimName")});
-        }
-        return getStimCluster(index, cachedStimuli);
-    }
-
-    function getStimParameterArray(clusterIndex,whichParameter){
-      return _.chain(fastGetStimCluster(clusterIndex))
-            .prop("stims")
-            .prop(_.intval(whichParameter))
-            .prop("parameter")
+    function getStimParameterArray(clusterIndex,whichStim){
+      return _.chain(getStimCluster(clusterIndex))
+            .prop(_.intval(whichStim))
+            .prop("params")
             .split(',')
             .map(x => _.floatval(x))
             .value();
-    }
-
-    fastGetStimDisplay = function(index, whichQuestion) {
-        let display = fastGetStimCluster(index).stims[whichQuestion].display;
-        return display;
-    }
-
-    function fastGetStimAnswer(index, whichAnswer) {
-        return fastGetStimCluster(index).stims[whichAnswer].response.correctResponse;
     }
 
     var currentCardInfo = {
@@ -464,7 +398,7 @@ function modelUnitEngine() {
     // this is to speed up calculations and make iteration below easier
     function initializeActRModel() {
         var i, j;
-        var numQuestions = getStimClusterCount();
+        var numQuestions = getStimCount();
         var initCards = [];
         var initResponses = {};
         var initProbs = [];
@@ -487,8 +421,8 @@ function modelUnitEngine() {
             };
 
             // We keep per-stim and re-response-text results as well
-            var cluster = fastGetStimCluster(i);
-            var numStims = _.chain(cluster).prop("stims").prop("length").intval().value();
+            var cluster = getStimCluster(i);
+            var numStims = cluster.length;
             for (j = 0; j < numStims; ++j) {
                 var parameter = getStimParameterArray(i,j); //Note this may be a single element array for older stims or a 3 digit array for newer ones
                 // Per-stim counts
@@ -512,7 +446,7 @@ function modelUnitEngine() {
                 });
 
                 // Per-response counts
-                var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[j].response.correctResponse));
+                var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster[j].correctResponse));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
                         responseSuccessCount: 0,
@@ -594,7 +528,6 @@ function modelUnitEngine() {
         probFunction = defaultProbFunction;
     }
 
-
     // Given a single item from the cardProbabilities.probs array, calculate the
     // current probability. IMPORTANT: this function only returns ALL parameters
     // used which include probability. The caller is responsible for storing it.
@@ -629,14 +562,14 @@ function modelUnitEngine() {
 
         p.stimSuccessCount = stim.stimSuccessCount;
         p.stimFailureCount = stim.stimFailureCount;
-        let answerText = Answers.getDisplayAnswerText(fastGetStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
+        let answerText = Answers.getDisplayAnswerText(getStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
-        let curStimFile = Session.get("currentStimName").replace(/\./g,'_');
+        let currentStimSetId = Session.get("currentStimSetId");
         answerText = answerText.replace(/\./g,'_');
         
         if(probFunctionHasHintSylls){
             if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
-                console.log("no cached syllables for: " + curStimFile + "|" + answerText);
+                console.log("no cached syllables for: " + currentStimSetId + "|" + answerText);
                 throw new Error("can't find syllable data in database");
             }else{
                 let stimSyllableData = this.cachedSyllables.data[answerText];
@@ -689,8 +622,6 @@ function modelUnitEngine() {
         return cardProbabilities.probs;
     }
 
-    // Return index of PROB with minimum probability that was last seen at least
-    // 2 trials ago. Default to index 0 in case no probs meet this criterion
     function findMinProbCard(cards, probs) {
         var currentMin = 1.00001;
         var indexToReturn = 0;
@@ -710,8 +641,6 @@ function modelUnitEngine() {
         return indexToReturn;
     }
 
-    //Return index of PROB with max probability that is under ceiling. If no
-    //card is found under ceiling then -1 is returned
     function findMaxProbCard(cards, probs, ceiling) {
         var currentMax = 0;
         var indexToReturn = -1;
@@ -794,7 +723,7 @@ function modelUnitEngine() {
     function updateCardAndStimData(cardIndex, whichStim, resumeData){
         let card = cardProbabilities.cards[cardIndex];
         let stim = card.stims[whichStim];
-        let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(cardIndex,whichStim)));
+        let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(getStimAnswer(cardIndex,whichStim)));
 
         // About to show a card - record any times necessary
         card.lastShownTimestamp = Date.now();
@@ -924,37 +853,29 @@ function modelUnitEngine() {
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
             Session.set("clusterIndex", cardIndex);
+            newExperimentState = {clusterIndex:cardIndex};
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
 
-            this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
+            newExperimentState = Object.assign(newExperimentState,this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob));// Find objects we'll be touching
 
-            return newProbIndex; //Must return index for call to cardSelected
-        },
-
-        cardSelected: function(selectVal, resumeData) {
-            // Find objects we'll be touching
-            let probIndex = _.intval(selectVal);  // See selectNextCard
-            let prob = cardProbabilities.probs[probIndex];
-            let cardIndex = prob.cardIndex;
-            let whichStim = prob.stimIndex;
-            let card = cardProbabilities.cards[cardIndex];
-            let stim = card.stims[whichStim];
-
+            let testType = "d";
             if(Session.get("currentDeliveryParams").studyFirst && card.studyTrialCount == 0){
               console.log("!!! STUDY FOR FIRST TRIAL");
-              Session.set("testType",'s');
-            }else{
-              Session.set("testType", "d");
+              testType = 's';
             }
+            Session.set("testType", testType);
+            newExperimentState.testType = testType;
+            newExperimentState.questionIndex = 1;//TODO: is this right?
+            
             Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", false);
 
             updateCardAndStimData(cardIndex, whichStim, resumeData);
 
             // only log this for teachers/admins
-            if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"]) || Meteor.user().username.startsWith('debug')) {
+            if (Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
                 console.log(">>>BEGIN METRICS>>>>>>>");
 
                 console.log("Overall user stats => ",
@@ -983,7 +904,7 @@ function modelUnitEngine() {
                 );
 
                 // Display response and current response stats
-                let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(fastGetStimAnswer(cardIndex,whichStim)));
+                let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(getStimAnswer(cardIndex,whichStim)));
                 if(responseText && responseText in cardProbabilities.responses){
                     console.log("Response is", responseText, displayify(cardProbabilities.responses[responseText]));
                 }
@@ -1002,29 +923,56 @@ function modelUnitEngine() {
                     card.trialsSinceLastSeen += 1;
                 }
             });
-        },
 
-        createQuestionLogEntry: function() {
+            
             let idx = Session.get("clusterIndex");
             let card = cardProbabilities.cards[idx];
-            let cluster = fastGetStimCluster(idx);
-            let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].response.correctResponse));
+            let cluster = getStimCluster(idx);
+            let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster[currentCardInfo.whichStim].correctResponse));
             let responseData = {
               responseText: responseText,
               lastShownTimestamp: Date.now()
             };
-            return {
-                'cardModelData':   _.omit(card, ["question", "answer"]),
-                'currentCardInfo': _.extend({}, currentCardInfo),
+            'cardModelData':   _.omit(card, ["question", "answer"]),
+            'currentCardInfo': _.extend({}, currentCardInfo),
+            
+            var currCluster = getStimCluster(Session.get("clusterIndex"));
+            
+            var dataRec = _.extend({
+                clusterIndex:               currCluster.clusterIndex,
+                shufIndex:                  currCluster.shufIndex,
+                questionIndex:              Session.get("questionIndex"),
+                currentUnit:                Session.get("currentUnitNumber"),
+                curSubTdfIndex:             Session.get("subTdfIndex"),
+                originalQuestion:           Session.get("originalQuestion"),
+                originalQuestion2:          Session.get("originalQuestion2"),
+                originalSelectedDisplay:    Session.get("originalDisplay"),
+                selectedDisplay:            Session.get("currentDisplayEngine"),
+                selectedQuestionPart2:      Session.get("currentQuestionPart2"),
+                selectedAnswer:             Session.get("currentAnswer"),
+                originalAnswer:             Session.get("originalAnswer"),
+                alternateDisplayIndex:      Session.get("alternateDisplayIndex"),
+                currentAnswerSyllables:     Session.get("currentAnswerSyllables"),
+                clozeQuestionParts:         Session.get("clozeQuestionParts"),
+                showOverlearningText:       Session.get("showOverlearningText"),
+                testType:                   Session.get("testType"),
+            }, extendedData || {});
+            {
                 'responseData': responseData,
-                'whichStim': currentCardInfo.whichStim
+                'whichStim': currentCardInfo.whichStim,
+                'selType': this.unitType, 
+                'selectVal': newProbIndex 
             };
+
+            await updateExperimentState(newExperimentState,"unitEngine.modelUnitEngine.selectNextCard");
+
+            return newProbIndex;
         },
 
         cardAnswered: function(wasCorrect, resumeData) {
             // Get info we need for updates and logic below
             let cards = cardProbabilities.cards;
-            let cluster = fastGetStimCluster(Session.get("clusterIndex"));
+            let cluster = getStimCluster(Session.get("clusterIndex"));
             let card = _.prop(cards, cluster.shufIndex);
             console.log("cardAnswered, card: " + JSON.stringify(card) + "cluster.shufIndex: " + cluster.shufIndex);
 
@@ -1096,7 +1044,7 @@ function modelUnitEngine() {
             }
 
             // "Response" stats
-            let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].response.correctResponse));
+            let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster[currentCardInfo.whichStim].correctResponse));
             if (answerText && answerText in cardProbabilities.responses) {
                 let resp = cardProbabilities.responses[answerText];
                 if (wasCorrect) resp.responseSuccessCount += 1;
@@ -1110,7 +1058,7 @@ function modelUnitEngine() {
                 console.log("COULD NOT STORE RESPONSE METRICS",
                     answerText,
                     currentCardInfo.whichStim,
-                    displayify(cluster.stims[currentCardInfo.whichStim].response.correctResponse),
+                    displayify(cluster[currentCardInfo.whichStim].correctResponse),
                     displayify(cardProbabilities.responses));
             }
 
@@ -1122,9 +1070,9 @@ function modelUnitEngine() {
         },
 
         unitFinished: function() {
-            var session = _.chain(this.curUnit).prop("learningsession").first().value();
-            var minSecs = _.chain(session).prop("displayminseconds").first().intval(0).value();
-            var maxSecs = _.chain(session).prop("displaymaxseconds").first().intval(0).value();
+            var session = this.curUnit.learningsession;
+            var minSecs = session.displayminseconds || 0;
+            var maxSecs = session.displaymaxseconds || 0;
 
             //TODO: why are we using side effects to handle the unit being finished? Fix this
             if (minSecs > 0.0 || maxSecs > 0.0) {
@@ -1151,14 +1099,13 @@ function modelUnitEngine() {
     };
 }
 
-//////////////////////////////////////////////////////////////////////////////
-// Return an instance of the schedule-based unit engine
-
+//Aka assessment session
 function scheduleUnitEngine(){
     return {
         unitType: "schedule",
     
         initImpl: function() {
+
             //Nothing currently
         },
     
@@ -1169,8 +1116,8 @@ function scheduleUnitEngine(){
             let curUnitNum = Session.get("currentUnitNumber");
             console.log("getSchedule, curUnitNum",curUnitNum);
             var schedule = null;
-            if (progress.currentSchedule && progress.currentSchedule.unitNumber == curUnitNum) {
-                schedule = progress.currentSchedule;
+            if (Session.get("currentSchedule") && Session.get("currentSchedule").unitNumber == curUnitNum) {
+                schedule = Session.get("currentSchedule");
             }
     
             //Lazy create save if we don't have a correct schedule
@@ -1184,24 +1131,19 @@ function scheduleUnitEngine(){
     
                 schedule = AssessmentSession.createSchedule(setSpec, curUnitNum, currUnit);
                 if (!schedule) {
-                    //There was an error creating the schedule - there's really nothing
-                    //left to do since the experiment is broken
-                    recordUserTime("FAILURE to create schedule", {
-                        unitname: _.display(currUnit.unitname),
-                        unitindex: curUnitNum
-                    });
                     alert("There is an issue with the TDF - experiment cannot continue");
                     throw new Error("There is an issue with the TDF - experiment cannot continue");
                 }
     
                 //We save the current schedule and also log it to the UserTime collection
-                progress.currentSchedule = schedule;
+                Session.set("currentSchedule",schedule);
     
-                recordUserTime("schedule", {
-                    unitname: _.display(currUnit.unitname),
-                    unitindex: curUnitNum,
-                    schedule: schedule
-                });
+                let newExperimentState = { 
+                    schedule: schedule, 
+                    lastAction: "schedule",
+                    lastActionTimeStamp: Date.now()
+                }
+                await updateExperimentState(newExperimentState,"unitEngine.getSchedule");
             }
     
             //Now they can have the schedule
@@ -1229,6 +1171,37 @@ function scheduleUnitEngine(){
                 "whichStim:", curStimIndex
             );
     
+            let newExperimentState = { 
+                clusterIndex:clusterIndex,
+                questionIndex: questionIndex + 1, 
+                whichStim: questInfo.whichStim,
+                testType: questInfo.testType,
+                lastAction: "question",
+                lastActionTimeStamp: Date.now()
+            }
+            var currCluster = getStimCluster(Session.get("clusterIndex"));
+            
+            var dataRec = _.extend({
+                clusterIndex:               currCluster.clusterIndex,
+                shufIndex:                  currCluster.shufIndex,
+                questionIndex:              Session.get("questionIndex"),
+                currentUnit:                Session.get("currentUnitNumber"),
+                curSubTdfIndex:             Session.get("subTdfIndex"),
+                originalQuestion:           Session.get("originalQuestion"),
+                originalQuestion2:          Session.get("originalQuestion2"),
+                originalSelectedDisplay:    Session.get("originalDisplay"),
+                selectedDisplay:            Session.get("currentDisplayEngine"),
+                selectedQuestionPart2:      Session.get("currentQuestionPart2"),
+                selectedAnswer:             Session.get("currentAnswer"),
+                originalAnswer:             Session.get("originalAnswer"),
+                alternateDisplayIndex:      Session.get("alternateDisplayIndex"),
+                currentAnswerSyllables:     Session.get("currentAnswerSyllables"),
+                clozeQuestionParts:         Session.get("clozeQuestionParts"),
+                showOverlearningText:       Session.get("showOverlearningText"),
+                testType:                   Session.get("testType"),
+            }, extendedData || {});
+            await updateExperimentState(newExperimentState,"question");
+    
             return curClusterIndex;
         },
     
@@ -1236,25 +1209,6 @@ function scheduleUnitEngine(){
             //selectNextCard increments questionIndex after setting all card
             //info, so we need to use -1 for this info
             return this.getSchedule().q[Session.get("questionIndex") - 1];
-        },
-    
-        cardSelected: function(selectVal, resumeData) {
-            //Nothing currently
-        },
-    
-        createQuestionLogEntry: function() {
-            var questInfo = this.findCurrentCardInfo();
-    
-            try {
-                return {
-                    'whichStim': questInfo.whichStim
-                };
-            }
-            catch(e) {
-                console.log(e);
-                throw e;
-            }
-    
         },
     
         cardAnswered: function(wasCorrect, resumeData) {

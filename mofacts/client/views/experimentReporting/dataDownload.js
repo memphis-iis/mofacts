@@ -9,10 +9,10 @@ Template.dataDownload.onRendered(async function() {
   const allCourses = await meteorCallAsync("getAllCourses");
   let classesByInstructorId = {};
   for(let course of allCourses){
-    if(!classesByInstructorId[course.teacherUserId]){
-      classesByInstructorId[course.teacherUserId] = [];
+    if(!classesByInstructorId[course.teacheruserid]){
+      classesByInstructorId[course.teacheruserid] = [];
     }
-    classesByInstructorId[course.teacherUserId].push(course);
+    classesByInstructorId[course.teacheruserid].push(course);
   }
   Session.set("classesByInstructorId",classesByInstructorId);
   const allTeachers = await meteorCallAsync("getAllTeachers");

@@ -1,21 +1,12 @@
 <template name="instructorReporting">
 {{#if isInRole 'admin, teacher'}}
   <br /><br />
-  <!-- <div class="row">
-      <div class="col-md-offset-3 col-md-6">
-          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#instructorReportingCollapse" aria-expanded="false" aria-controls="instructorReportingCollapse">
-              Instructor Reporting
-          </button>
-      </div>
-  </div>
-
-  <div class="row collapse" id="instructorReportingCollapse"> -->
     <legend class="text-center">Instructor Reporting</legend>
     <div id="mainContent">
       <h3>Class Selection</h3>
       <ul class="nav nav-tabs">
         {{#each classes}}
-          <li><a data-toggle="tab" href="#{{replaceSpacesWithUnderscores this.name}}" class="myNavTab">{{this.name}}</a></li>
+          <li><a data-toggle="tab" href="#{{this.courseid}}" class="myNavTab">{{this.coursename}}</a></li>
         {{/each}}
       </ul>
       <div>
@@ -23,8 +14,8 @@
         <select id="tdf-select">
             <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
             <option value="xml">All</option>
-            {{#each tdfs}}
-              <option value="{{this.fileName}}">{{this.displayName}}</option>
+            {{#each curInstructorReportingTdfs}}
+              <option value="{{this.tdfid}}">{{this.displayname}}</option>
             {{/each}}
         </select>
         {{#if performanceLoading}}
@@ -32,30 +23,23 @@
         {{/if}}
       </div>
       <h3>Class Data</h3>
-      <!-- <div class="tab-content">
-        {{#each classes}}
-          <div id="{{replaceSpacesWithUnderscores this.name}}" class="tab-pane fade"> -->
-            <table border="1">
-              <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th></tr>
-              {{#each curClassStudents}}
-                <tr>
-                  <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
-                  <td>{{this.percentCorrect}}</td>
-                  <td>{{this.count}}</td>
-                  <td>{{this.totalTime}}</td>
-                </tr>
-              {{/each}}
-              <tr>
-                <td>Total</td>
-                <td>{{curClassStudentTotals.percentCorrect}}</td>
-                <td>{{curClassStudentTotals.count}}</td>
-                <td>{{curClassStudentTotals.totalTime}}</td>
-              </tr>
-            </table>
-          <!-- </div>
-        {{/each}}
-      </div> -->
+        <table border="1">
+          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th></tr>
+          {{#each curClassStudentPerformance}}
+            <tr>
+              <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
+              <td>{{this.percentCorrect}}</td>
+              <td>{{this.count}}</td>
+              <td>{{this.totalTime}}</td>
+            </tr>
+          {{/each}}
+          <tr>
+            <td>Total</td>
+            <td>{{curClassPerformance.percentCorrect}}</td>
+            <td>{{curClassPerformance.count}}</td>
+            <td>{{curClassPerformance.totalTime}}</td>
+          </tr>
+        </table>
     </div>
-  <!-- </div> -->
 {{/if}}
 </template>

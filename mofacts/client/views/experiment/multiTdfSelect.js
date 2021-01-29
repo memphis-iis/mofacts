@@ -1,16 +1,12 @@
-////////////////////////////////////////////////////////////////////////////
-// Template storage and helpers
+import { updateExperimentState } from './card';
 
 Template.multiTdfSelect.helpers({
-    
+    //None
 });
-
-////////////////////////////////////////////////////////////////////////////
-// Template Events
 
 Template.multiTdfSelect.events({
     // Start a Sub TDF
-    'click .subTdfButton' : function (event) {
+    'click .subTdfButton' : async function (event) {
         event.preventDefault();
         console.log(event);
 
@@ -24,7 +20,6 @@ Template.multiTdfSelect.events({
 });
 
 Template.multiTdfSelect.rendered = function () {
-    const currentTdfName = Session.get("currentTdfName");
     //this is called whenever the template is rendered.
     const subTdfs = Session.get("currentTdfFile").subTdfs;
 
@@ -55,17 +50,16 @@ function addSubTdfButton(btnObj){
 }
 
 //Actual logic for selecting and starting a TDF
-function selectSubTdf(lessonName, clusterList, subTdfIndex) {
+async function selectSubTdf(lessonName, clusterList, subTdfIndex) {
     console.log("Selected subtdf: " + lessonName + " with clusterList: " + clusterList + " and subTdfIndex: " + subTdfIndex);
 
     Session.set("subTdfIndex",subTdfIndex);
-
-    //Save the test selection event
-    recordUserTime("multiTdfSelect subtdf selection", {
-        subTdfTarget: lessonName,
-        clusterList: clusterList,
-        subTdfIndex: subTdfIndex,
-    });
+    let newExperimentState = { 
+        subTdfIndex: subTdfIndex, 
+        lastAction: "multiTdfSelect subtdf selection",
+        lastActionTimeStamp: Date.now()
+    }
+    await updateExperimentState(newExperimentState,"multiTdfSelect.selectSubTdf");
 
     Router.go("/card");
 }
