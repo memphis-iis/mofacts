@@ -225,6 +225,72 @@ async function getAllTdfs(){
   return tdfs;
 }
 
+async function getStimuliSetsForIdSet(stimuliSetIds){
+  let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (";
+  stimuliSetIds.map(stimSetId => query += stimSetId + ", ");
+  query.substr(0,query.length-2); //cut off extra comma
+  query += ")";
+  const stimSets = db.many(query);
+  return stimSets;
+}
+
+const KC_MULTIPLE = 10000;
+async function insertStimTDFPair(newStimJSON,wrappedTDF){
+  let highestStimuliSetId = await db.manyOrNone('SELECT MAX(stimuliSetId) FROM tdf');
+  let newStimuliSetId = highestStimuliSetId + 1;
+  wrappedTDF.stimuliSetId = newStimuliSetId;
+  for(let stim of newStimJSON){
+    stim.stimuliSetId = newStimuliSetId;
+  }
+  let highestStimulusKC = await db.manyOrNone('SELECT MAX(stimulusKC) FROM item');
+  let curNewKCBase = (Math.floor(highestStimulusKC / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE + 1;
+  let curNewStimulusKC = curNewKCBase;
+  let curNewClusterKC = curNewKCBase;
+
+  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
+  let responseKCMap = {};
+  let maxResponseKC = 0;
+  for(let pair of responseKCStuff){
+    responseKCMap[pair.correctResponse] = pair.responseKC;
+    if(pair.responseKC > maxResponseKC){
+      maxResponseKC = pair.responseKC;
+    }
+  }
+  let curNewResponseKC = maxResponseKC + 1;
+
+  let stimulusKCTranslationMap = {};
+  let clusterKCTranslationMap = {};
+  for(let stim of newStimJSON){
+    if(!stimulusKCTranslationMap[stim.stimulusKC]){
+      stimulusKCTranslationMap[stim.stimulusKC] = curNewStimulusKC;
+      curNewStimulusKC += 1;
+    }
+    if(!clusterKCTranslationMap[stim.clusterKC]){
+      clusterKCTranslationMap[stim.clusterKC] = curNewClusterKC;
+      curNewClusterKC += 1;
+    }
+    if(!responseKCMap[stim.correctResponse]){
+      responseKCMap[stim.correctResponse] = curNewResponseKC;
+      curNewResponseKC += 1;
+    }
+    stim.stimulusKC = stimulusKCTranslationMap[stim.stimulusKC];
+    stim.responseKC = responseKCMap[stim.correctResponse]
+    stim.clusterKC = clusterKCTranslationMap[stim.clusterKC];
+  }
+  const res = await db.tx(async t => {
+    return t.one('INSERT INTO tdf(ownerId, stimuliSetId, visibility, content) VALUES(${ownerId}, ${stimuliSetId}, ${visibility}, ${content}) RETURNING TDFId',wrappedTDF)
+    .then(async row => {
+      let TDFId = row.tdfid;
+      for(let stim of newStimJSON){
+        await t.none('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, clozeStimulus, alternateDisplays, tags) \
+                      VALUES(${stimuliSetId}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
+      }
+      return TDFId;
+    })
+  });
+  return res;
+}
+
 async function getAllCourses(){
   try{
     const courses = await db.any("SELECT * from course");
@@ -728,16 +794,6 @@ function findUserByName(username) {
     return null;
 }
 
-// Create a formatted TDF record given the specified parameters
-function createTdfRecord(fileName, tdfJson, ownerId, source) {
-    return {
-        'fileName': fileName,
-        'tdfs': tdfJson,
-        'owner': ownerId,
-        'source': source
-    };
-}
-
 // Create a formatted Stim record given the specified parameters
 function createStimRecord(fileName, stimJson, ownerId, source) {
     return {
@@ -868,7 +924,7 @@ Meteor.startup(async function () {
               //serverConsole("Updating TDF in DB from ", ele);
               var json = getTdfJSON('tdf/' + ele);
 
-              var rec = createTdfRecord(ele, json, adminUserId, 'repo');
+              var rec = {'fileName':ele, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
 
               const prev = await getTdfByFileName(ele);
 
@@ -970,6 +1026,9 @@ Meteor.startup(async function () {
         addIfInit("admins", "admin");
         addIfInit("teachers", "teacher");
 
+        userIdToUsernames[user._id] = user.username;
+        usernameToUserIds[user.username] = user._id;
+
         return user;
     });
 
@@ -979,7 +1038,7 @@ Meteor.startup(async function () {
       getLearningSessionItems,getAllCourses,getAllCourseSections,getAllCoursesForInstructor,getAllCourseAssignmentsForInstructor,
       getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
-      setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,
+      setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
 
       getAltServerUrl:function(){
         return altServerUrl;
@@ -1074,11 +1133,6 @@ Meteor.startup(async function () {
       getClozesAndSentencesForText:function(rawText){
         console.log("rawText!!!: " + rawText);
         return clozeGeneration.GetClozeAPI(null,null,null,rawText);
-      },
-
-      insertStimTDFPair:function(newStimJSON,newTDFJSON){
-        Stimuli.insert(newStimJSON);
-        Tdfs.insert(newTDFJSON);
       },
 
       serverLog: function(data){
@@ -1374,7 +1428,7 @@ Meteor.startup(async function () {
                     }             
                   } else {
                     //Set up for TDF save
-                    rec = createTdfRecord(filename, jsonContents, ownerId, 'upload');
+                    rec = {'fileName':filename, 'tdfs':jsonContents, 'owner':ownerId, 'source':'upload'};
                   }
                   
                   collection = Tdfs;

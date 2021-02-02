@@ -68,6 +68,7 @@ CREATE TABLE item (
     audioStimulus VARCHAR(1024),
     imageStimulus VARCHAR(1024),
     videoStimulus VARCHAR(1024),
+    alternateDisplays JSONB,
     tags JSONB
 );
 

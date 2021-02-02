@@ -109,7 +109,7 @@
         <select id="templateTDFSelect">
           <option value="invalid" disabled="true" selected="true">Select a template</option>
           {{#each contentGenerationAllTdfs}}
-            <option value="{{this.fileName}}">
+            <option value="{{this.tdfid}}">
               {{this.displayName}} - {{tdfOwnersMap this.ownerId}} - {{this.displayDate}}
             </option>
           {{/each}}
@@ -147,10 +147,10 @@
         <div id="extracted-clozes">
           {{#each clozes}}
             <div id="cloze-display">
-              <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
-              <div class="row" id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
+              <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}"/>
+              <div class="row" id="cloze" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">
                 <ul class="ul-no-bullets">
-                  {{#if isCurrentPair this.itemId}}
+                  {{#if isCurrentPair this.clusterKC}}
                     <li><span class="cur-sentence">Current Version: {{this.cloze}}</span></li>
                   {{else}}
                     <li><span>Current Version: {{this.cloze}}</span></li>
@@ -161,14 +161,14 @@
                     <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
                     <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
                     <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
-                    <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                    <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
+                    <input type="image" id="delete-btn" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                    <input type="image" id="edit-btn" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
                     {{#if isCoreference this.paraphraseId}}
                       <span class="col-md-2">
                         {{#if isCorefReverted this.paraphraseId}}
-                        <button type="button" id="redoCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
+                        <button type="button" id="redoCoreference" class="btn btn-primary" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
                         {{else}}
-                        <button type="button" id="revertCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
+                        <button type="button" id="revertCoreference" class="btn btn-primary" clusterKC="{{this.clusterKC}}" stimulusKC="{{this.stimulusKC}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
                         {{/if}}
                       </span>
                     {{/if}}
