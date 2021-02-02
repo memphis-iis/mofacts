@@ -1,3 +1,5 @@
+import { dialogueSelectState } from '../views/home/profileDialogueToggles';
+
 export { 
   blankPassword,
   extractDelimFields,
@@ -323,6 +325,7 @@ function getCurrentDeliveryParams(){
         'enhancedFeedback':false,
         'checkOtherAnswers':false,
         'feedbackType':'',
+        'allowFeedbackTypeSelect': false,
         'falseAnswerLimit':9999999
     };
 
@@ -349,6 +352,7 @@ function getCurrentDeliveryParams(){
         'studyFirst':xlateBool,
         'enhancedFeedback':xlateBool,
         'checkOtherAnswers':xlateBool,
+        'allowFeedbackTypeSelect': xlateBool,
         'falseAnswerLimit': _.intval
     };
 
@@ -402,6 +406,15 @@ function getCurrentDeliveryParams(){
                 deliveryParams[fieldName] = xlation(currVal);
             }
         }
+    }
+
+    // If there's no feedback type defined by the TDF author
+    // or if the user is allowed to select a feedback type,
+    // type selected with the profile page toggle
+    if (!deliveryParams["feedbackType"].length 
+      || deliveryParams["allowFeedbackTypeSelect"]) {
+      deliveryParams["feedbackType"] = 
+        dialogueSelectState.get("selectedDialogueType");
     }
 
     return deliveryParams;
