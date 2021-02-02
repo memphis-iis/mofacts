@@ -1,4 +1,5 @@
 import { ReactiveVar } from 'meteor/reactive-var'
+import { dialogueSelectState } from './profileDialogueToggles';
 
 /**
  * Set up state variables for profile page
