@@ -528,7 +528,7 @@ p.admin-info-p {
   font-size: .75em;
 }
 
-#toggleSwitchContainer {
+.toggleSwitchContainer {
     width: 70% !important;
     border-style: solid;
     border-width: thin;

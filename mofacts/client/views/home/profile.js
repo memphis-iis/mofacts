@@ -1,6 +1,9 @@
 import { ReactiveVar } from 'meteor/reactive-var'
+import { dialogueSelectState } from './profileDialogueToggles';
 import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+
 export { selectTdf };
+
 /**
  * Set up state variables for profile page
  */
