@@ -1,26 +1,20 @@
-////////////////////////////////////////////////////////////////////////////
-// Template helpers
-
 var userFiles = new Mongo.Collection(null); //local-only - no database;
 
-function clearUserFiles() {
-    userFiles.remove({'temp': 1});
-}
-
 function userFilesRefresh() {
-    clearUserFiles();
+    userFiles.remove({'temp': 1});
 
     var count = 0;
     var userId = Meteor.user()._id;
 
     Session.get("allTdfs").forEach(function(tdf) {
+        let tdfObject = tdf.content;
         if (userId === tdf.owner) {
             userFiles.insert({
                 'temp': 1,
-                '_id': tdf._id,
+                '_id': tdf.tdfid,
                 'idx': count,
                 'type': 'tdf',
-                'fileName': _.chain(tdf).prop('fileName').trim().value()
+                'fileName': tdfObject.fileName.trim().value()
             });
             count += 1;
             let stimuliSetId = tdf.stimuliSetId;
