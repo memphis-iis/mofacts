@@ -108,7 +108,7 @@ function setClozesFromStimObject(stimObject,isMultiTdf){
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let isCoreference = !!(stim.tags.clozeCorefTransformation);
     let unitIndex = isMultiTdf ? MULTITDF_MAIN_CLUSTER_UNIT : stimUnitMappings[index];
-    let {sessionType, unitIndex} = stimUnitMappings[index];
+    let {sessionType,...rest} = stimUnitMappings[index];
     if(isMultiTdf || sessionType == "learningsession"){
       allClozes.push({
         unitIndex, cloze, correctResponse, stimulusKC, clusterKC, paraphraseId, originalOrderIndex, isCoreference, sourceSentence,

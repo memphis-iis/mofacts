@@ -1,4 +1,4 @@
-export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording, updateExperimentState };
+export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording, getExperimentState, updateExperimentState };
 import { 
   shuffle,
   haveMeteorUser,
@@ -269,7 +269,7 @@ function getResponseType() {
   if (!clusterIndex) clusterIndex = 0;
 
   let cluster = getStimCluster(clusterIndex);
-  let type = cluster[0].itemResponseType;
+  let type = cluster[0].itemResponseType || 'text';
 
   return ("" + type).toLowerCase();
 }
@@ -959,7 +959,7 @@ async function cardStart(){
   }
 }
 
-function newQuestionHandler() {
+async function newQuestionHandler() {
     console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
 
     scrollList.update(
@@ -993,6 +993,8 @@ function newQuestionHandler() {
       let currentDisplay = Session.get("currentDisplayEngine");
       let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
       currentDisplay.clozeText = clozeQuestionFilledIn;
+      let newExperimentState = { currentDisplayEngine: currentDisplay };
+      await updateExperimentState(newExperimentState,"card.newQuestionHandler");
       Session.set("currentDisplayEngine",currentDisplay);
     }
 
@@ -1286,6 +1288,7 @@ function afterAnswerAssessmentCb(isCorrect,feedbackForAnswer,afterAnswerFeedback
 
 function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
     console.log("showUserFeedback");
+    userFeedbackStart = Date.now();
     //For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
     if(!isCorrect && getButtonTrial() && getResponseType() == "image"){
       $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
@@ -1362,14 +1365,57 @@ function hideUserFeedback() {
     $("#forceCorrectionEntry").hide();  // Container
 }
 
+function stringifyIfExists(json){
+  if(json){
+      return JSON.stringify(json);
+  }else{
+      return "";
+  }
+}
+
+//Helper to parse a schedule condition - see note above about 0 and 1 based
+//indexes for why we do some of our manipulation below
+function parseSchedItemCondition(cond) {
+    if (typeof cond === "undefined" || !cond)
+        return "UNKNOWN";
+
+    var fields = _.trim('' + cond).split('-');
+    if (fields.length !== 2)
+        return cond;
+
+    var num = parseInt(fields[1]);
+    if (isNaN(num))
+        return cond;
+
+    return fields[0] + "_" + (num + 1).toString();
+}
+
+//String together all arguments using the disp function
+function msg() {
+  if (!arguments) {
+      return "";
+  }
+
+  //Remember, arguments looks like an array, but it is NOT an array
+  var all = [];
+  for (var i = 0; i < arguments.length; ++i) {
+      all.push(_.display(arguments[i]));
+  }
+
+  return all.join(' ');
+}
+
 function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
+  let feedbackDuration = Date.now() - userFeedbackStart;
+  let responseDuration = trialEndTimeStamp - keypressTimestamp;
   var firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
   let testType = getTestType();
 
   //Note that if something messed up and we can't calculate start/end
   //latency, we'll punt and the output script (experiment_times.js) will
   //need to construct the times
-  var startLatency, endLatency;
+  let startLatency =0;
+  let endLatency= 0;
   if (trialTimestamp) {
       startLatency = firstActionTimestamp - trialTimestamp;
       endLatency = trialEndTimeStamp - trialTimestamp;
@@ -1380,7 +1426,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
 
   //Don't count test type trials in progress reporting
   if(testType === "t"){
-    endLatency = undefined;
+    endLatency = 0;
   }
 
   //Figure out button trial entries
@@ -1393,9 +1439,6 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       ).join(',');
   }
 
-  //Note that we need to log from data in the cluster returned from
-  //getStimCluster so that we honor cluster mapping
-  var currCluster = getStimCluster(Session.get("clusterIndex"));
   let deliveryParams = Session.get("currentDeliveryParams");
 
   var assumedReviewLatency = 0;
@@ -1427,45 +1470,119 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   Session.set("curStudentPerformance",curUserPerformance);
 
   let feedbackType = deliveryParams.feedbackType || "simple";
+  let {itemId,stimulusKC,clusterKC,dynamicTagFields} = getItemDataForCurClusterIndex(Session.get("clusterIndex"));
+  let {whichStim,probabilityEstimate,...rest} = engine.findCurrentCardInfo();
+
+  let curTdf = Session.get("currentTdfFile");
+  let unitName = curTdf.content.tdfs.tutor.unit[unitNum].unitname.trim()
+
+  let problemName = stringifyIfExists(Session.get("originalDisplay"));
+  let stepName = problemName;
+  // var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
+  // state.stepNameSeen[stepName] = stepCount;
+  // stepName = stepCount + " " + stepName;
+  let isStudy = testType === "s";
+  let clusterIndex = Session.get("clusterIndex");
+  let cluster = getStimCluster(clusterIndex);
+  let shufIndex = cluster.shufIndex;
+
+
+  let schedCondition =  "N/A" ;
+  if(engine.unitType == "schedule"){
+    let sched = Session.get("currentSchedule");
+    if (sched && sched.q && sched.q.length) {
+      var schedItemIndex = Session.get("questionIndex") - 1;
+      if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
+          schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
+      }else {
+          note += msg( "SCHEDULE Q-INDEX MISMATCH => sched.q.length:",
+                  d(sched.q.length, 'missing'),", lastq.questionIndex-1:",d(schedItemIndex, 'missing')," ");
+      }
+    }
+  }
 
   var answerLogRecord = {
-      'questionIndex': _.intval(Session.get("questionIndex"), -1),
-      'index': _.intval(currCluster.clusterIndex, -1),
-      'shufIndex': _.intval(currCluster.shufIndex, -1),
-      'ttype': _.trim(testType),
-      'qtype':  _.trim(findQTypeSimpified()),
-      'guiSource':  _.trim(source),
-      'answer':  _.trim(userAnswer),
-      'isCorrect': isCorrect,
-      'trialStartTimestamp': trialTimestamp,
-      'clientSideTimeStamp': trialEndTimeStamp,
-      'firstActionTimestamp': firstActionTimestamp,
-      'startLatency': startLatency,
-      'endLatency': endLatency,
-      'wasButtonTrial': wasButtonTrial,
-      'buttonOrder': buttonEntries,
-      'reviewLatency': 0,
-      'inferredReviewLatency': assumedReviewLatency,
-      'wasSim': (source === "simulation") ? 1 : 0,
-      'displayedSystemResponse': $("#UserInteraction").text() || "",
-      'forceCorrectFeedback': "",
-      'audioInputEnabled':Session.get("audioEnabled") || false,
-      'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
-      'currentAnswerSyllables':currentAnswerSyllables || "",
-      'feedbackType':feedbackType,
+      'itemId': itemId,
+      'KCId': stimulusKC,
+      'userId': Meteor.userId(),
+      'TDFId': Session.get("currentTdfId"),
+      'eventStartTime': trialTimestamp,
+      'outcome': wasCorrect ? 'correct' : 'incorrect',
+      'typeOfResponse': getResponseType(),
+      'responseValue': _.trim(userAnswer),
+      'displayedStimulus': Session.get("currentDisplay"),
+      'dynamicTagFields': dynamicTagFields,
+
+      'Anon Student Id':Meteor.username(),
+      'Condition Namea':'tdf file', 
+      'Condition Typea':Session.get("currentTdfName"),
+
+      'Condition Nameb':'xcondition',
+      'Condition Typeb':Session.get("experimentXCond"),
+
+      'Condition Namec':'schedule condition',//schedCondition
+      'Condition Typec':schedCondition,
+      'feedbackDuration':feedbackDuration,
+      'stimulusDuration':endLatency,
+      'responseDuration':responseDuration,
+      'probabilityEstimate':probabilityEstimate,
+
+      'Condition Named':'how answered',
+      'Condition Typed':_.trim(source),
+      'Condition Namee': 'how answered',
+      'Condition Typee': wasButtonTrial,
+      'Level (Unit)': Session.get("currentUnitNumber"),
+      'Level (Unitname)':unitName,
+      'Problem Name': problemName,
+      'Step Name': stepName,//this is no longer a valid field as we don't restore state one step at a time
+      'Time': trialTimestamp,
+      'Selection': '',
+      'Action': '',
+      'Input': _.trim(userAnswer),
+      'Student Response Type': isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
+      'Student Response Subtype': _.trim(findQTypeSimpified()),
+      'Tutor Response Type': isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
+      'Tutor Response Subtype': '',
+    
+      "KC (Default)": stimulusKC,
+      "KC Category(Default)": '',
+      "KC (Cluster)": clusterKC,
+      "KC Category(Cluster)": '',
+      "CF (GUI Source)":_.trim(source),
+      "CF (Audio Input Enabled)":Session.get('audioEnabled'),
+      "CF (Audio Output Enabled)":Session.get('enableAudioPromptAndFeedback'),
+      "CF (Display Order)": Session.get('questionIndex'),
+      "CF (Stim File Index)": clusterIndex,
+      "CF (Set Shuffled Index)": shufIndex || clusterIndex,
+      "CF (Alternate Display Index)": Session.get('alternateDisplayIndex'),
+      "CF (Stimulus Version)": whichStim,
+
+      "CF (Correct Answer)": correctAnswer,
+      "CF (Correct Answer Syllables)": Session.get("currentAnswerSyllables").syllableArray, 
+      "CF (Correct Answer Syllables Count)": Session.get("currentAnswerSyllables").syllables.length,
+      "CF (Display Syllable Indices)": Session.get("currentAnswerSyllables").displaySyllableIndices, 
+      "CF (Overlearning)": false,
+      "CF (Response Time)": trialEndTimeStamp,
+      "CF (Start Latency)": startLatency,
+      "CF (End Latency)": endLatency,
+      "CF (Review Latency)": assumedReviewLatency,
+      "CF (Review Entry)": _.trim($("#userForceCorrect").val()),
+      "CF (Button Order)": buttonEntries,
+      "CF (Note)": '',
+      "Feedback Text": $("#UserInteraction").text() || "",
+
+      //'ttype': _.trim(testType),
       'dialogueHistory':undefined //We'll fill this in later
   };
-  var writeAnswerLog = function() {
+  
+  var writeAnswerLog = async function() {
       var realReviewLatency = Date.now() - reviewBegin;
       if (realReviewLatency > 0) {
-          answerLogRecord.reviewLatency = realReviewLatency;
+          answerLogRecord['CF (Review Latency)'] = realReviewLatency;
       }
       answerLogRecord.dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
       Session.set("dialogueHistory",undefined);
-      //TODO: need a column for this in experiment_times
-      answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
       let newExperimentState = { 
-        
         lastAction: answerLogAction,
         lastActionTimeStamp: Date.now()
       }
@@ -1540,7 +1657,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   },reviewTimeout);
 }
 
-function prepareCard(writeAnswerLogCb) {
+async function prepareCard(writeAnswerLogCb) {
     if(writeAnswerLogCb) writeAnswerLogCb();
     Session.set("displayReady",false);
     
@@ -1561,7 +1678,7 @@ function prepareCard(writeAnswerLogCb) {
         }else{
           console.log("not reinitializing clusterlists");
         }
-        engine.selectNextCard();
+        await engine.selectNextCard();
         newQuestionHandler();
     }
 }
@@ -1569,18 +1686,18 @@ function prepareCard(writeAnswerLogCb) {
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
-function unitIsFinished(reason) {
+async function unitIsFinished(reason) {
     clearCardTimeout();
 
     let curTdf = Session.get("currentTdfFile");
     let curUnitNum = Session.get("currentUnitNumber");
+    let newUnitNum = curUnitNum + 1;
     let curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
 
     Session.set("questionIndex", 0);
     Session.set("clusterIndex", undefined);
-    var newUnitNum = curUnitNum + 1;
     Session.set("currentUnitNumber", newUnitNum);
-    Session.set("currentTdfUnit",curTdfUnit);
+    Session.set("currentTdfUnit", curTdfUnit);
     Session.set("currentDeliveryParams",getCurrentDeliveryParams());
     Session.set("currentUnitStartTime", Date.now());
 
@@ -1606,7 +1723,11 @@ function unitIsFinished(reason) {
       lastActionTimeStamp: Date.now()
     }
 
-    if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
+    if(curTdfUnit.learningsession){
+      newExperimentState.schedule = null; 
+    }else{
+      //nothing for now
+    } 
     const res = await updateExperimentState(newExperimentState,"card.unitIsFinished");
     console.log("unitIsFinished,updateExperimentState",res);
     leavePage(leaveTarget);
@@ -2184,9 +2305,10 @@ function allowUserInput() {
   },200);
 }
 
-getExperimentState = async function() {
+async function getExperimentState() {
     const curExperimentState = await meteorCallAsync('getExperimentState',Meteor.userId(), Session.get("currentRootTdfId"));
     Meteor.call("updatePerformanceData","utlQuery","card.getExperimentState",Meteor.userId());
+    Session.set("currentExperimentState",curExperimentState);
     return curExperimentState;
 }
 
@@ -2231,6 +2353,7 @@ async function resumeFromComponentState() {
     //Clear any previous session data about unit/question/answer
     Session.set("clusterMapping", undefined);
     Session.set("currentUnitNumber", undefined);
+    Session.set("currentTdfUnit", undefined);
     Session.set("questionIndex", undefined);
     Session.set("clusterIndex", undefined);
     Session.set("currentDisplay", undefined);
@@ -2275,7 +2398,7 @@ async function resumeFromComponentState() {
         if (prevCondition) {
             //Use previous condition and log a notification that we did so
             console.log("Found previous experimental condition: using that");
-            conditionTdfId = prevCondition.selectedTdf;
+            conditionTdfId = prevCondition;
         }else {
             //Select condition and save it
             console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
@@ -2389,6 +2512,7 @@ async function resumeFromComponentState() {
     }else{
       Session.set("currentUnitNumber",0);
       newExperimentState.currentUnitNumber = 0;
+      newExperimentState.lastUnitStarted = 0;
     }
 
     let curTdfUnit = tdfFile.tdfs.tutor.unit[Session.get("currentUnitNumber")];
@@ -2427,14 +2551,13 @@ function checkSyllableCacheForCurrentStimFile(cb){
   }
 }
 
-function processUserTimesLog() {
+async function processUserTimesLog() {
     let experimentState = Session.get("currentExperimentState");
     //Get TDF info
     const tdfFile = Session.get("currentTdfFile");
     console.log("tdfFile",tdfFile);
     let tutor = tdfFile.tdfs.tutor;
 
-    //Before the below options, reset current test data
     initUserProgress({
         overallOutcomeHistory: []
     });
@@ -2445,20 +2568,21 @@ function processUserTimesLog() {
 
     Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
 
-
     Session.set("clusterIndex",           experimentState.shufIndex || experimentState.clusterIndex);
 
-    Session.set("currentDisplayEngine",   experimentState.selectedDisplay);
-    Session.set("currentQuestionPart2",   experimentState.selectedQuestionPart2);
-    Session.set("currentAnswer",          experimentState.selectedAnswer);
+    Session.set("currentDisplayEngine",   experimentState.currentDisplayEngine);
+    Session.set("currentQuestionPart2",   experimentState.currentQuestionPart2);
+    Session.set("currentAnswer",          experimentState.currentAnswer);
     Session.set("currentAnswerSyllables", experimentState.currentAnswerSyllables);
     Session.set("clozeQuestionParts",     experimentState.clozeQuestionParts);
     Session.set("showOverlearningText",   experimentState.showOverlearningText);
     Session.set("testType",               experimentState.testType);
-    Session.set("originalDisplay",        experimentState.originalSelectedDisplay);
+    Session.set("originalDisplay",        experimentState.originalDisplay);
     Session.set("originalAnswer",         experimentState.originalAnswer);
     Session.set("originalQuestion",       experimentState.originalQuestion);
     Session.set("originalQuestion2",      experimentState.originalQuestion2);
+
+    Session.set("subTdfIndex",experimentState.subTdfIndex);
 
 
     Session.set("currentDisplay", undefined);//TODO: should we recompute this instead?
@@ -2475,19 +2599,17 @@ function processUserTimesLog() {
     var moduleCompleted = false;
 
     //Reset current engine
-    var resetEngine = function(currUnit) {
+    var resetEngine = function(curUnitNum) {
         let curExperimentData = {
           cachedSyllables,
           experimentState
         }
-        subTdfIndex: Session.get("subTdfIndex"),
-        curUnit: Session.get("currentTdfUnit")
 
-        if (tdfFile.tdfs.tutor.unit[currUnit].hasOwnProperty("assessmentsession")) {
+        if (tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("assessmentsession")) {
             engine = createScheduleUnit(curExperimentData);
             Session.set("sessionType","assessmentsession");
         }
-        else if(tdfFile.tdfs.tutor.unit[currUnit].hasOwnProperty("learningsession")) {
+        else if(tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("learningsession")) {
             engine = createModelUnit(curExperimentData);
             Session.set("sessionType","learningsession");
         }
@@ -2518,7 +2640,9 @@ function processUserTimesLog() {
                     moduleCompleted = true; //TODO: what do we do in the case of multiTdfs?  Depends on structure of template parentTdf
                 }else {
                     //Moving to next unit
+                    newExperimentState.lastUnitCompleted = currentUnitNumber;
                     currentUnitNumber += 1;
+                    newExperimentState.lastUnitStarted = currentUnitNumber;
                     let curTdfUnit = tdfFile.tdfs.tutor.unit[currentUnitNumber];
                     Session.set("currentUnitNumber", currentUnitNumber);
                     Session.set("currentTdfUnit",curTdfUnit);
@@ -2553,6 +2677,8 @@ function processUserTimesLog() {
     };
 
     resetEngine(currentUnitNumber);
+    let componentStates = await meteorCallAsync('getComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"));
+    engine.loadExperimentState(componentStates);
     
     if (experimentState.lastActionTimeStamp) {
       Session.set("lastTimestamp", experimentState.lastActionTimeStamp);

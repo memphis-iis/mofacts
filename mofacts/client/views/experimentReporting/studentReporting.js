@@ -21,7 +21,7 @@ Template.studentReporting.rendered = async function(){
   console.log("studentReporting rendered!!!");
 
   Session.set("studentReportingTdfs",[]);
-  Tracker.afterFlush(function(){
+  Tracker.afterFlush(async function(){
     console.log("afterFlush");
 
     let studentUsername = Session.get("studentUsername") || Meteor.user().username;

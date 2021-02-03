@@ -1,5 +1,5 @@
 import { DynamicTdfGenerator } from "../common/DynamicTdfGenerator";
-import { curSemester, ALL_TDFS } from "../common/Definitions";
+import { curSemester, ALL_TDFS, KC_MULTIPLE } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
@@ -234,7 +234,29 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
   return stimSets;
 }
 
-const KC_MULTIPLE = 10000;
+async function getProbabilityEstimatesByKCId(relevantKCIds){
+  return await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate) AS probabilityEstimates FROM history WHERE KCId = ANY($1) GROUP BY KCId ORDER BY eventId',[relevantKCIds]);
+}
+
+//by currentTDFId, not currentRootTDFId
+async function getOutcomeHistoryByUserAndTDFId(userId,TDFId){
+  return await db.manyOrNone('SELECT array_agg(outcome) AS outcomeHistory FROM history WHERE userId=$1 AND TDFId=$2 GROUP BY TDFId ORDER BY eventId',[userId,TDFId]);
+}
+
+async function getReponseKCMap(){
+  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
+  let responseKCMap = {};
+  for(let pair of responseKCStuff){
+    responseKCMap[pair.correctResponse] = pair.responseKC;
+  }
+  return responseKCMap;
+}
+
+//by currentTDFId, not currentRootTDFId
+async function getComponentStatesByUserIdAndTDFId(userId,TDFId){
+  return await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2',[userId,TDFId]);
+}
+
 async function insertStimTDFPair(newStimJSON,wrappedTDF){
   let highestStimuliSetId = await db.manyOrNone('SELECT MAX(stimuliSetId) FROM tdf');
   let newStimuliSetId = highestStimuliSetId + 1;
@@ -425,7 +447,7 @@ async function getTdfNamesAssignedByInstructor(instructorID){
   }
 }
 
-async function getExperimentState(UserId,TDFId){
+async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not currentTDFId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
   let experimentState = experimentStateRet[0].experimentState;
@@ -433,7 +455,7 @@ async function getExperimentState(UserId,TDFId){
   return experimentState;
 }
 
-async function setExperimentState(UserId,TDFId,newExperimentState){
+async function setExperimentState(UserId,TDFId,newExperimentState){ //by currentRootTDFId, not currentTDFId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
   let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentState : {};
@@ -560,8 +582,7 @@ async function getStimCountByStimuliSetId(stimuliSetId){
 async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
   let query = "SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
-               SUM(s.totalPromptDuration) AS totalPrompt, \
-               SUM(s.totalStudyDuration) AS totalStudy \
+               SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
@@ -571,13 +592,13 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId){
-  let query =  "SELECT MAX(t.TDFId) AS tdfid, \ 
+
+  let query =  "SELECT MAX(t.TDFId) AS tdfid, \
                 MAX(t.courseId) AS courseid, \
                 MAX(s.userId) AS userid, \
                 SUM(s.priorCorrect) AS correct, \
                 SUM(s.priorIncorrect) AS incorrect, \
-                SUM(s.totalPromptDuration) AS totalPrompt, \
-                SUM(s.totalStudyDuration) AS totalStudy \
+                SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
                 FROM componentState AS s \
                 INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
@@ -802,10 +823,6 @@ function createStimRecord(fileName, stimJson, ownerId, source) {
         'owner': ownerId,
         'source': source
     };
-}
-
-function genID(length){
-  return Math.random().toString(36).substring(2, (2+length));
 }
 
 function sendEmail(to,from,subject,text){
@@ -1039,6 +1056,7 @@ Meteor.startup(async function () {
       getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
+      getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFId,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
 
       getAltServerUrl:function(){
         return altServerUrl;

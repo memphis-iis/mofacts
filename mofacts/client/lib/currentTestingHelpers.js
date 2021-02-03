@@ -115,8 +115,8 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     "count":count,
     "percentCorrect":((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%",
     "numCorrect":studentPerformanceData.numCorrect,
-    "totalTime":studentPerformanceData.totalprompt + studentPerformanceData.totalstudy,
-    "totalTimeDisplay":(studentPerformanceData.totalprompt + studentPerformanceData.totalstudy).toFixed(1)
+    "totalTime":studentPerformanceData.totalpracticeduration,
+    "totalTimeDisplay":(studentPerformanceData.totalpracticeduration).toFixed(1)
   }
   Session.set("curStudentPerformance",studentPerformance);
   console.log("setStudentPerformance,output:",studentPerformance);
