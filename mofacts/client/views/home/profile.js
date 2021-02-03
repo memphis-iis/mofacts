@@ -1,5 +1,6 @@
 import { ReactiveVar } from 'meteor/reactive-var'
 import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+import { getExperimentState } from '../experiment/card';
 
 export { selectTdf };
 
@@ -424,7 +425,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
     }
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
-    var userAudioPromptFeedbackToggled = fromSouthwest ? (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
+    var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
     var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
     var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey;
     var audioPromptFeedbackEnabled = undefined;

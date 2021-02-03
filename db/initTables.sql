@@ -54,9 +54,9 @@ CREATE TYPE responseType AS ENUM ('image','text');
 CREATE TABLE item (
     itemId SERIAL PRIMARY KEY,
     stimuliSetId INTEGER,
-    stimulusKC INTEGER UNIQUE NOT NULL,
+    stimulusKC INTEGER UNIQUE,
     clusterKC INTEGER NOT NULL,
-    responseKC INTEGER NOT NULL,
+    responseKC INTEGER,
     params VARCHAR(255) NOT NULL,
     optimalProb NUMERIC(4,3),
     correctResponse VARCHAR(255) NOT NULL,
@@ -74,9 +74,12 @@ CREATE TABLE item (
 
 CREATE TYPE outcomeType AS ENUM ('correct','incorrect');
 
-CREATE TABLE history (
+CREATE TABLE history ( 
     eventId SERIAL PRIMARY KEY,
     itemId INTEGER REFERENCES item (itemId),
+    userId CHAR(17) NOT NULL,
+    TDFId INTEGER REFERENCES tdf (TDFId),
+    KCId INTEGER NOT NULL,
     eventStartTime BIGINT NOT NULL,
     feedbackDuration INTEGER NOT NULL,
     stimulusDuration INTEGER NOT NULL,
@@ -85,8 +88,62 @@ CREATE TABLE history (
     probabilityEstimate NUMERIC(4,3) NOT NULL,
     typeOfResponse responseType NOT NULL,
     responseValue VARCHAR(255) NOT NULL,
-    displayedStimulus VARCHAR(255) NOT NULL
+    displayedStimulus VARCHAR(255) NOT NULL,
+    dynamicTagFields JSONB
+    Anon_Student_Id VARCHAR(255) NOT NULL,
+    Condition_Namea VARCHAR(50) NOT NULL,
+    Condition_Typea VARCHAR(1024) NOT NULL,
+    Condition_Nameb VARCHAR(50) NOT NULL,
+    Condition_Typeb INTEGER NOT NULL,
+    Condition_Namec VARCHAR(50) NOT NULL,
+    Condition_Typec VARCHAR(255) NOT NULL,
+    Condition_Named VARCHAR(50) NOT NULL,
+    Condition_Typed VARCHAR(50) NOT NULL,
+    Condition_Namee VARCHAR(50) NOT NULL,
+    Condition_Typee BOOLEAN NOT NULL,
+    Level_Unit INTEGER NOT NULL,
+    Level_Unitname VARCHAR(255) NOT NULL,
+    Problem_Name VARCHAR(255) NOT NULL,
+    Step_Name VARCHAR(255) NOT NULL,
+    Time INTEGER NOT NULL,
+    Input VARCHAR(255) NOT NULL,
+    Student_Response_Type VARCHAR(50) NOT NULL,
+    Student_Response_Subtype VARCHAR(50) NOT NULL,
+    Tutor_Response_Type  VARCHAR(50) NOT NULL,
+    KC_Default INTEGER NOT NULL,
+    KC_Cluster INTEGER NOT NULL,
+    CF_GUI_Source VARCHAR(50) NOT NULL,
+    CF_Audio_Input_Enabled BOOLEAN NOT NULL,
+    CF_Audio_Output_Enabled BOOLEAN NOT NULL,
+    CF_Display_Order INTEGER NOT NULL,
+    CF_Stim_File_Index INTEGER NOT NULL,
+
 );
+
+      'Selection': '',
+      'Action': '',
+      'Tutor Response Subtype': '',
+      "KC Category(Default)": '',
+      "KC Category(Cluster)": '',
+      "CF (Overlearning)": false,
+      "CF (Note)": '',
+
+      "CF (Set Shuffled Index)": shufIndex || clusterIndex,
+      "CF (Alternate Display Index)": Session.get('alternateDisplayIndex'),
+      "CF (Stimulus Version)": whichStim,
+      "CF (Correct Answer)": correctAnswer,
+      "CF (Correct Answer Syllables)": Session.get("currentAnswerSyllables").syllableArray, 
+      "CF (Correct Answer Syllables Count)": Session.get("currentAnswerSyllables").syllables.length,
+      "CF (Display Syllable Indices)": Session.get("currentAnswerSyllables").displaySyllableIndices, 
+      "CF (Response Time)": trialEndTimeStamp,
+      "CF (Start Latency)": startLatency,
+      "CF (End Latency)": endLatency,
+      "CF (Review Latency)": assumedReviewLatency,
+      "CF (Review Entry)": _.trim($("#userForceCorrect").val()),
+      "CF (Button Order)": buttonEntries,
+      "Feedback Text": $("#UserInteraction").text() || "",
+
+CREATE INDEX idx_history_userId_TDFId on history USING hash (userId,TDFId);
 
 CREATE TYPE componentStateType AS ENUM ('stimulus','cluster','response');
 CREATE TYPE unitType AS ENUM ('learningsession','assessmentsession');
@@ -97,14 +154,13 @@ CREATE TABLE componentState (
     TDFId INTEGER REFERENCES tdf (TDFId),
     KCId INTEGER NOT NULL,
     componentType componentStateType NOT NULL,
+    probabilityEstimate NUMERIC(4,3) NOT NULL,
     firstSeen BIGINT NOT NULL,
     lastSeen BIGINT NOT NULL,
     priorCorrect INTEGER NOT NULL,
     priorIncorrect INTEGER NOT NULL,
     priorStudy INTEGER NOT NULL,
-    totalPromptDuration INTEGER NOT NULL,
-    totalStudyDuration INTEGER NOT NULL,
-    totalInterference INTEGER NOT NULL,
+    totalPracticeDuration INTEGER NOT NULL,
     currentUnit INTEGER NOT NULL,
     currentUnitType unitType NOT NULL,
     outcomeStack VARCHAR(255)

@@ -259,7 +259,7 @@ instructContinue = function () {
     // has been properly logged on the server. We do all this in an async
     // timeout because we don't know if we've been called from a reactive func
     // and we don't want to trigger any re-calculations
-    Meteor.setTimeout(function(){
+    Meteor.setTimeout(async function(){
         // Get the start time for instructions (set in router.js). IMPORTANT: we
         // wait until here to do this in case instructContinue was called from a
         // reactive function

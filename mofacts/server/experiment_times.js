@@ -24,105 +24,11 @@
  * */
 
 import { getTdfByFileName, getStimuliSetById } from "./methods";
+import { outputFields } from "../common/Definitions";
 
 (function () { //Begin IIFE pattern
-
-    // Define an ordering for the fields and the column name we'll put in the
-    // output file. Note that these names must match the fields used in populate
-    // record.
-    var FIELDSDS = [
-        "Anon Student Id", //username
-        "Session ID", //not sure yet
-        "Condition Namea", //new field? always == 'tdf file'************
-        "Condition Typea", //selectedTdf
-        "Condition Nameb", //new field? always == 'xcondition'************
-        "Condition Typeb", //xcondition
-        "Condition Namec", //new field? always == 'schedule condition" ***********
-        "Condition Typec", //schedCondition
-        "Condition Named", //new field? always == 'how answered'*******
-        "Condition Typed", //howAnswered
-        // "Condition Namee", //new field? always == 'button trial'***********
-        // "Condition Typee", //wasButtonTrial
-        "Level (Unit)", //unit
-        "Level (Unitname)", //unitname
-        "Problem Name", //questionValue
-        "Step Name", //new field repeats questionValue
-        "Time", //stimDisplayedTime
-        "Selection",
-        "Action",
-        "Input", //userAnswer
-        "Outcome", //answerCorrect recoded as CORRECT or INCORRECT
-        "Student Response Type", //trialType
-        "Student Response Subtype", //qtype
-        "Tutor Response Type", //trialType
-        "Tutor Response Subtype", //qtype
-        "KC (Default)",
-        "KC Category(Default)",
-        "KC (Cluster)",
-        "KC Category(Cluster)",
-        "CF (GUI Source)",
-        "CF (Audio Input Enabled)",
-        "CF (Audio Output Enabled)",
-        "CF (Display Order)", //questionIndex
-        "CF (Stim File Index)", //clusterIndex
-        "CF (Set Shuffled Index)", //shufIndex
-        "CF (Alternate Display Index)", //index of which alternate display used, if applicable
-        "CF (Stimulus Version)", //whichStim
-        "CF (Correct Answer)", //CF correctAnswer
-        "CF (Correct Answer Syllables)", // CF syllable list for correct answer
-        "CF (Correct Answer Syllables Count)", // CF syllable list length
-        "CF (Display Syllable Indices)", //CF the list of indices displayed to the user for subcloze hints
-        "CF (Overlearning)", //CF isOverlearning
-        "CF (Response Time)", //answerGivenTime
-        "CF (Start Latency)", //startLatency check first trial discrepancy********
-        "CF (End Latency)", //endLatency
-        "CF (Review Latency)", //reviewLatency
-        "CF (Review Entry)", //forceCorrectFeedback
-        "CF (Button Order)", //CF buttonOrder
-        "CF (Note)", //CF note
-        "Feedback Text"
-    ];
-
-
-    //String together all arguments using the disp function
-    function msg() {
-        if (!arguments) {
-            return "";
-        }
-
-        //Remember, arguments looks like an array, but it is NOT an array
-        var all = [];
-        for (var i = 0; i < arguments.length; ++i) {
-            all.push(_.display(arguments[i]));
-        }
-
-        return all.join(' ');
-    }
-
-    //Helper to parse a schedule condition - see note above about 0 and 1 based
-    //indexes for why we do some of our manipulation below
-    function parseSchedItemCondition(cond) {
-        if (typeof cond === "undefined" || !cond)
-            return "UNKNOWN";
-
-        var fields = _.trim('' + cond).split('-');
-        if (fields.length !== 2)
-            return cond;
-
-        var num = parseInt(fields[1]);
-        if (isNaN(num))
-            return cond;
-
-        return fields[0] + "_" + (num + 1).toString();
-    }
-
-    function stringifyIfExists(json){
-        if(json){
-            return JSON.stringify(json);
-        }else{
-            return "";
-        }
-    }
+    let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
+    
 
     //Create our output record
     async function populateRecord(state, username, lastexpcond, lastxcond, lastschedule, lastinstruct, lastq, lasta, dynamicStimTags) {
@@ -199,7 +105,7 @@ import { getTdfByFileName, getStimuliSetById } from "./methods";
         if (!unitName) {
             serverConsole("Forced to lookup up unit name:", unitName);
             const curTdf = await getTdfByFileName(tdfName)
-            unitName = curTdf.content.tdfs.tutor.unit.[unitNum].unitname.trim()
+            unitName = curTdf.content.tdfs.tutor.unit[unitNum].unitname.trim()
             // Cheat - store it in the instruction for the next Q/A pair
             // This should be OK because instructions are cleared if they don't
             // match the current unit index
