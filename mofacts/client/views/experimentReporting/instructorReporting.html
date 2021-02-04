@@ -22,15 +22,36 @@
           <p>Loading reports...</p>
         {{/if}}
       </div>
+      <div>
+        <h3>Practice Deadline</h3>
+        <input type="date" id="practice-deadline-date"
+          value="2021-01-01" 
+          name="practice-deadline-date-select">
+      </div>
+      <div>
+        <h3>Practice Time Threshold</h3>
+        <select id="practice-time-select">
+          <option value="10">10 min</option>
+          <option value="10">20 min</option>
+          <option value="10">30 min</option>
+          <option value="10">40 min</option>
+          <option value="10">50 min</option>
+          <option value="10">60 min</option>
+          <option value="10">70 min</option>
+          <option value="10">80 min</option>
+          <option value="10">90 min</option>
+        </select>
+      </div>
       <h3>Class Data</h3>
         <table border="1">
-          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th></tr>
+          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th><th>Completed Before Deadline</th></tr>
           {{#each curClassStudentPerformance}}
             <tr>
               <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>
               <td>{{this.totalTime}}</td>
+              <td>{{this.completedBeforeDeadline}} - {{this.timeCompletedBeforeDeadline}}</td>
             </tr>
           {{/each}}
           <tr>
