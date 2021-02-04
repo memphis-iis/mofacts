@@ -1,24 +1,41 @@
-const getNewItemFormat = (stim, stimuliSetId) => {
+const fs = require('fs');
+
+const rawTdfs = fs.readFileSync(__dirname + '/infiles/tdfs.json');
+const rawStims = fs.readFileSync(__dirname + '/infiles/stimuli.json');
+
+const tdfsJson = JSON.parse(rawTdfs);
+const stimsJson = JSON.parse(rawStims);
+
+// stimIdMap = {
+//   fileName: stimId
+// }
+let stimIdMap = {};
+
+const getNewItemFormat = (stimFile, stimuliSetId) => {
   let items = [];
 
-  stim.setspec.clusters.forEach((cluster, idx) => {
-    const clusterKC = idx + 1;
+  let baseKC = stimuliSetId * 10000;
+  let clusterKC = baseKC + 1;
+  let stimKC = baseKC + 1;
+  stimFile.stimuli.setspec.clusters.forEach((cluster, idx) => {
+    
     let responseKC = 0;
-    let stimulusKC = 0;
-
     cluster.stims.forEach(stim => {
-        stimulusKC = stimulusKC + 1;
+        let incorrectResponses = null;
+        if (stim.response.incorrectResponses) {
+          incorrectResponses = stim.response.incorrectResponses.join(",");
+        }
+        
         responseKC = responseKC + 1;
-
         let item = {
           stimuliSetId: stimuliSetId,
-          stimulusKC: stimulusKC,
           clusterKC: clusterKC,
+          stimulusKC: stimKC,
           responseKC: responseKC,
           params: stim.parameter,
           optimalProb: "",
           correctResponse: stim.response.correctResponse,
-          incorrectResponses: stim.response.incorrectResponses.join(","),
+          incorrectResponses: incorrectResponses,
           itemResponseType: cluster.responseType || "text",
           speechHintExclusionList: "",
           clozeStimulus: stim.display.clozeText || "",
@@ -31,43 +48,50 @@ const getNewItemFormat = (stim, stimuliSetId) => {
         }
 
         items.push(item);
+        stimKC++;
     });
+    clusterKC++
   })
-
+  stimIdMap[stimFile.fileName] = stimuliSetId;
   return items;
 }
 
-const getNewTdfFormat = (oldTdf, stimuliSetId) => {
+const getNewTdfFormat = (oldTdf, tdfId) => {
   let tdfObj = {
-    TDFId: oldTdf._id,
+    TDFId: tdfId,
     ownerId: oldTdf.owner,
     stimuliSetId: stimuliSetId,
     content: {
       tdf: oldTdf.tdfs
     }
   };
-
+  
   return tdfObj;
 }
 
-const generateNewFormattedPairs = (oldStim, oldTdf, stimuliSetId) => {
-  const items = getNewItemFormat(oldStim, stimuliSetId);
-  const newTdf = getNewTdfFormat(oldTdf, stimuliSetId);
+let stimuliSetId = 1;
+const generateStims = stimsJson => {
+  let jsonItems = [];
+  stimsJson.forEach(stimFile => {
+    const items = getNewItemFormat(stimFile, stimuliSetId);
+    jsonItems.push(items);
 
-  return [items, newTdf];
-}
-
-const getNewFormattedPairs = (oldStims, oldTdfs) => {
-  let stimuliSetId = 1;
-  let newItems = [];
-  let newTdfs = [];
-  oldTdfs.forEach((oldTdf, idx) => {
-    const [newItem, newTdf] = 
-      generateNewFormattedPairs(oldStims[idx], oldTdf, stimuliSetId);
-    newItems.push(newItem);
-    newTdfs.push(newTdf);
     stimuliSetId++;
   })
-
-  return [newItems, newTdfs];
+  fs.writeFileSync(__dirname + '/outfiles/items.json', JSON.stringify(jsonItems, null, 4));
 }
+
+let tdfId = 1;
+const generateTdfs = tdfsJson => {
+  let jsonTdfs = [];
+  tdfsJson.forEach(tdfFile => {
+    let tdfs = getNewTdfFormat(tdfFile, tdfId);
+    jsonTdfs.push(tdfs);
+
+    tdfId++;
+  })
+  fs.writeFileSync(__dirname + '/outfiles/tdfs.json', JSON.stringify(jsonTdfs, null, 4));
+}
+
+generateStims(stimsJson);
+generateTdfs(tdfsJson);
