@@ -1,3 +1,7 @@
+import { ReactiveDict } from 'meteor/reactive-dict';
+
+const _state = new ReactiveDict('instructorReportingState');
+
 const INVALID_TDF = "invalid";
 curTdf = INVALID_TDF;
 
@@ -50,6 +54,7 @@ Template.instructorReporting.events({
   
   "change #tdf-select": function(event){
     curTdf = $(event.currentTarget).val();
+    _state.set("currentSelectedTdf", curTdf);
     console.log("tdf change: " + curTdf);
     if(Session.get("curClass")){
       setCurClassStudents(curClass,curTdf);
@@ -58,6 +63,19 @@ Template.instructorReporting.events({
     }
   }
 });
+
+const getPracticeTimeIntervalsMap = async (date, tdfId) => {
+  try {
+    Meteor.call('getPracticeTimeIntervalsMap', date, tdfId, (err, res) => {
+      if (err)
+        throw 'Error fetching practice time intervals ->' + err;
+      
+      _state.set("practiceTimeIntervalsMap", res);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
 
 Template.instructorReporting.onRendered(async function(){
   console.log("instructorReporting rendered",Meteor.userId());

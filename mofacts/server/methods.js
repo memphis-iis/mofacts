@@ -564,6 +564,25 @@ async function getStimDisplayTypeMap(){
   }
 }
 
+async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
+  let query = `SELECT userId, SUM(responseDuration) AS duration
+    FROM history
+    WHERE eventStartTime < ${date}
+    AND
+    userId IN (${userIds.join(",")})
+    AND TDFId = ${tdfId}
+    GROUP BY userId`;
+  
+  const res = db.one(query);
+
+  let practiceTimeIntervalsMap = {};
+  for (let row of res) {
+    practiceItemIntervalMap[row.userId] = row.duration; 
+  }
+
+  return practiceTimeIntervalsMap;
+}
+
 async function getStimuliSetById(stimuliSetId){
   let query = "SELECT * FROM item \
                WHERE stimuliSetId=$1 \
@@ -1057,6 +1076,7 @@ Meteor.startup(async function () {
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
       getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFId,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
+      getPracticeTimeIntervalsMap,
 
       getAltServerUrl:function(){
         return altServerUrl;
