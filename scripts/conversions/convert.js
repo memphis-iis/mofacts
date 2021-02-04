@@ -25,7 +25,7 @@ const getNewItemFormat = (stimFile, stimuliSetId) => {
         if (stim.response.incorrectResponses) {
           incorrectResponses = stim.response.incorrectResponses.join(",");
         }
-        
+
         responseKC = responseKC + 1;
         let item = {
           stimuliSetId: stimuliSetId,
@@ -33,16 +33,16 @@ const getNewItemFormat = (stimFile, stimuliSetId) => {
           stimulusKC: stimKC,
           responseKC: responseKC,
           params: stim.parameter,
-          optimalProb: "",
+          optimalProb: null,
           correctResponse: stim.response.correctResponse,
           incorrectResponses: incorrectResponses,
           itemResponseType: cluster.responseType || "text",
-          speechHintExclusionList: "",
-          clozeStimulus: stim.display.clozeText || "",
-          textStimulus: stim.display.text || "",
-          audioStimulus: stim.display.audioSrc || "",
-          imageStimulus: stim.display.imageSrc || "",
-          videoStimulus: stim.display.videoSrc || "",
+          speechHintExclusionList: stim.speechHintExclusionList || null,
+          clozeStimulus: stim.display.clozeText || null,
+          textStimulus: stim.display.text || null,
+          audioStimulus: stim.display.audioSrc || null,
+          imageStimulus: stim.display.imageSrc || null,
+          videoStimulus: stim.display.videoSrc || null,
           alternateDisplays: stim.alternateDisplays,
           tags: stim.tags
         }
@@ -60,7 +60,7 @@ const getNewTdfFormat = (oldTdf, tdfId) => {
   let tdfObj = {
     TDFId: tdfId,
     ownerId: oldTdf.owner,
-    stimuliSetId: stimuliSetId,
+    stimuliSetId: stimIdMap[oldTdf.tdfs.tutor.setspec[0].stimulusfile[0]],
     content: {
       tdf: oldTdf.tdfs
     }
@@ -84,13 +84,20 @@ const generateStims = stimsJson => {
 let tdfId = 1;
 const generateTdfs = tdfsJson => {
   let jsonTdfs = [];
+  let rootTdfNames = [];
   tdfsJson.forEach(tdfFile => {
-    let tdfs = getNewTdfFormat(tdfFile, tdfId);
-    jsonTdfs.push(tdfs);
-
-    tdfId++;
+    if (tdfFile.tdfs.tutor.setspec[0].stimulusfile) {
+      let tdfs = getNewTdfFormat(tdfFile, tdfId);
+      jsonTdfs.push(tdfs);
+  
+      tdfId++;
+    }
+    else {
+      rootTdfNames.push(tdfFile.fileName);
+    }
   })
   fs.writeFileSync(__dirname + '/outfiles/tdfs.json', JSON.stringify(jsonTdfs, null, 4));
+  fs.writeFileSync(__dirname + '/outfiles/roots.json', JSON.stringify(rootTdfNames, null, 4));
 }
 
 generateStims(stimsJson);
