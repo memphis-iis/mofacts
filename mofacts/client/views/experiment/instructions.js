@@ -251,7 +251,7 @@ function getUnitsRemaining() {
 instructContinue = function () {
     let curUnit = Session.get("currentTdfUnit");
 
-    var feedbackText = curUnit.unitinstructions.trim().value();
+    let feedbackText = curUnit.unitinstructions.trim().value();
     if (feedbackText.length < 1) feedbackText = curUnit.picture.trim().value();
 
     // Record the fact that we just showed instruction. Also - we use a call
@@ -263,15 +263,89 @@ instructContinue = function () {
         // Get the start time for instructions (set in router.js). IMPORTANT: we
         // wait until here to do this in case instructContinue was called from a
         // reactive function
-        var instructStart = _.intval(Session.get("instructionClientStart"));
+        let instructionClientStart = _.intval(Session.get("instructionClientStart"));
+        let instructLatency = Date.now() - instructionClientStart;
         Session.set("instructionClientStart", 0);
 
         let newExperimentState = {
-            instructionClientStart: instructStart,
+            instructionClientStart: instructionClientStart,
             feedbackText: feedbackText,
             lastAction: "instructions",
             lastActionTimeStamp: Date.now()
         }
+        let curTdf = Session.get("currentTdfFile");
+        let unitName = curTdf.tdfs.tutor.unit[unitNum].unitname.trim();
+
+        var instructRecord = {
+            'itemId': null,
+            'KCId': null,
+            'userId': Meteor.userId(),
+            'TDFId': Session.get("currentTdfId"),
+            'eventStartTime': Date.now(),
+            'outcome': null,
+            'typeOfResponse': null,
+            'responseValue': null,
+            'displayedStimulus': null,
+            'dynamicTagFields': null,
+        
+            'Anon_Student_Id':_.trim(Meteor.username()),
+            'Session_ID': (new Date(_.intval(instructionClientStart))).toUTCString().substr(0, 16) + " " + tdfName, //hack
+        
+            'Condition_Namea':'tdf file', 
+            'Condition_Typea':Session.get("currentTdfName"),
+            'Condition_Nameb':'xcondition',
+            'Condition_Typeb':Session.get("experimentXCond"),
+            'Condition_Namec':'N/A',//schedCondition
+            'Condition_Typec':'schedule condition',
+            'Condition_Named':'how answered',
+            'Condition_Typed':'N/A',
+        
+            'feedbackDuration':null,
+            'stimulusDuration':null,
+            'responseDuration':responseDuration,
+            'probabilityEstimate':probabilityEstimate,
+            
+            'Level_Unit': Session.get("currentUnitNumber"),
+            'Level_Unitname':unitName,
+            'Problem_Name': 'Instructions',
+            'Step_Name': '',//this is no longer a valid field as we don't restore state one step at a time
+            'Time': instructionClientStart,
+            'Input': '',
+            'Student_Response_Type': "HINT_REQUEST", // where is ttype set?
+            'Student_Response_Subtype': '',
+            'Tutor_Response_Type': "HINT_MSG", // where is ttype set?
+            'Tutor_Response_Subtype': '',
+          
+            "KC_Default": '',
+            "KC_Category_Default": '',
+            "KC_Cluster": '',
+            "KC_Category_Cluster": '',
+            "CF_GUI_Source":'',
+            "CF_Audio_Input_Enabled":Session.get('audioEnabled'),
+            "CF_Audio_Output_Enabled":Session.get('enableAudioPromptAndFeedback'),
+            "CF_Display_Order": -1,
+            "CF_Stim_File_Index": -1,
+            "CF_Set_Shuffled_Index)": -1,
+            "CF_Alternate_Display_Index": null,
+            "CF_Stimulus_Version": -1,
+        
+            "CF_Correct_Answer": '',
+            "CF_Correct_Answer_Syllables": null, 
+            "CF_Correct_Answer_Syllables_Count": null,
+            "CF_Display Syllable_Indices": null, 
+            "CF_Overlearning": false,
+            "CF_Response_Time": 0,
+            "CF_Start_Latency": 0,
+            "CF_End_Latency": 0,
+            "CF_Review_Latency": instructLatency,
+            "CF_Review_Entry":null,
+            "CF_Button_Order": '',
+            "CF_Note": '',
+            "Feedback_Text": _.trim(feedbackText) || "",
+        
+            //'ttype': _.trim(testType),
+            'dialogueHistory':undefined //We'll fill this in later
+        };
 
         const res = await updateExperimentState(newExperimentState, "instructions.instructContinue");
         console.log("instructContinue",res);
@@ -281,6 +355,7 @@ instructContinue = function () {
         console.log("releasing enterKeyLock in instructContinue");
     }, 1);
 };
+
 
 Template.instructions.helpers({
      isExperiment: function() {

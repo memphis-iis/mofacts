@@ -13,8 +13,6 @@ import {
 } from '../../lib/currentTestingHelpers';
 import { redoCardImage } from '../../index';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
-import { ALL_TDFS } from '../../../common/Definitions';
-
 /*
 * card.js - the implementation behind card.html (and thus
 the main GUI implementation for MoFaCTS).
@@ -265,11 +263,9 @@ function getCurrentStimDisplaySources(filterPropertyName="clozeText"){
 
 function getResponseType() {
   //If we get called too soon, we just use the first cluster
-  let clusterIndex = Session.get("clusterIndex");
-  if (!clusterIndex) clusterIndex = 0;
-
+  let clusterIndex = Session.get("clusterIndex") || 0;
   let cluster = getStimCluster(clusterIndex);
-  let type = cluster[0].itemResponseType || 'text';
+  let type = cluster.stims[0].itemResponseType || 'text';
 
   return ("" + type).toLowerCase();
 }
@@ -294,10 +290,10 @@ function getCurrentFalseResponses() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let cluster = getStimCluster(curClusterIndex);
 
-  if (typeof(cluster) == "undefined" || typeof(cluster[curStimIndex].incorrectResponses) == "undefined") {
+  if (typeof(cluster) == "undefined" || !!cluster.stims || cluster.stims.length == 0 || typeof(cluster.stims[curStimIndex].incorrectResponses) == "undefined") {
       return []; //No false responses
   }else{
-    return cluster[curStimIndex].incorrectResponses.split(',');
+    return cluster.stims[curStimIndex].incorrectResponses.split(',');
   }
 };
 
@@ -587,7 +583,7 @@ Template.card.rendered = async function() {
   if(audioInputEnabled){
     if(!Session.get("audioInputSensitivity")){
       //Default to 20 in case tdf doesn't specify and we're in an experiment
-      var audioInputSensitivity = Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity || 20;
+      var audioInputSensitivity = _.intval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity[0]) || 20;
       Session.set("audioInputSensitivity",audioInputSensitivity);
     }
   }
@@ -596,7 +592,7 @@ Template.card.rendered = async function() {
   if(audioOutputEnabled){
     if(!Session.get("audioPromptSpeakingRate")){
       //Default to 1 in case tdf doesn't specify and we're in an experiment
-      var audioPromptSpeakingRate = Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate || 1;
+      var audioPromptSpeakingRate = _.floatval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate[0]) || 1;
       Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
     }
   }
@@ -1408,30 +1404,18 @@ function msg() {
 function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
   let feedbackDuration = Date.now() - userFeedbackStart;
   let responseDuration = trialEndTimeStamp - keypressTimestamp;
-  var firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
+  let firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
   let testType = getTestType();
 
   //Note that if something messed up and we can't calculate start/end
   //latency, we'll punt and the output script (experiment_times.js) will
   //need to construct the times
-  let startLatency =0;
-  let endLatency= 0;
-  if (trialTimestamp) {
-      startLatency = firstActionTimestamp - trialTimestamp;
-      endLatency = trialEndTimeStamp - trialTimestamp;
-  }
-  else {
-      console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
-  }
-
-  //Don't count test type trials in progress reporting
-  if(testType === "t"){
-    endLatency = 0;
-  }
+  let startLatency = firstActionTimestamp - trialTimestamp;
+  let endLatency = trialEndTimeStamp - trialTimestamp;
 
   //Figure out button trial entries
-  var buttonEntries = "";
-  var wasButtonTrial = !!Session.get("buttonTrial");
+  let buttonEntries = "";
+  let wasButtonTrial = !!Session.get("buttonTrial");
   if (wasButtonTrial) {
       buttonEntries = _.map(
           buttonList.find({}, {sort: {idx: 1}}).fetch(),
@@ -1441,17 +1425,17 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
 
   let deliveryParams = Session.get("currentDeliveryParams");
 
-  var assumedReviewLatency = 0;
+  let assumedReviewLatency = 0;
   if (testType === "d" && !isCorrect) {
       assumedReviewLatency = _.intval(deliveryParams.reviewstudy); 
   }
 
   //Set up to log the answer they gave. We'll call the function below at the
   //appropriate time
-  var reviewBegin = Date.now();
-  var answerLogAction = isTimeout ? "[timeout]" : "answer";
-  var currentAnswerSyllables;
-  var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
+  let reviewBegin = Date.now();
+  let answerLogAction = isTimeout ? "[timeout]" : "answer";
+  let currentAnswerSyllables;
+  let sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
   if(typeof(sessCurrentAnswerSyllables) != "undefined"){
     currentAnswerSyllables = {
       syllables:sessCurrentAnswerSyllables.syllableArray,
@@ -1459,15 +1443,6 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
     };
   }
-
-  //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
-  let curUserPerformance = Session.get("curStudentPerformance");
-  curUserPerformance.count = curUserPerformance.count + 1;
-  if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
-  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
-  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
-  Session.set("curStudentPerformance",curUserPerformance);
 
   let feedbackType = deliveryParams.feedbackType || "simple";
   let {itemId,stimulusKC,clusterKC,dynamicTagFields} = getItemDataForCurClusterIndex(Session.get("clusterIndex"));
@@ -1478,15 +1453,13 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
 
   let problemName = stringifyIfExists(Session.get("originalDisplay"));
   let stepName = problemName;
-  // var stepCount = (state.stepNameSeen[stepName] || 0) + 1;
+  // let stepCount = (state.stepNameSeen[stepName] || 0) + 1;
   // state.stepNameSeen[stepName] = stepCount;
   // stepName = stepCount + " " + stepName;
   let isStudy = testType === "s";
   let clusterIndex = Session.get("clusterIndex");
   let cluster = getStimCluster(clusterIndex);
   let shufIndex = cluster.shufIndex;
-
-
   let schedCondition =  "N/A" ;
   if(engine.unitType == "schedule"){
     let sched = Session.get("currentSchedule");
@@ -1500,8 +1473,18 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       }
     }
   }
+  let originalAnswer = Session.get("originalAnswer");
+  let currentAnswer = Session.get("currentAnswer");
+  let fullAnswer = (typeof(originalAnswer) == "undefined" || originalAnswer == "") ? currentAnswer : originalAnswer;
+  let temp = _.trim(d(fullAnswer, '')).split('~');
+  let correctAnswer = temp[0];
 
-  var answerLogRecord = {
+  let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay));
+  if(lastq.selectedDisplay.clozeText){
+      filledInDisplay.clozeText =  filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
+  }
+
+  let answerLogRecord = {
       'itemId': itemId,
       'KCId': stimulusKC,
       'userId': Meteor.userId(),
@@ -1513,72 +1496,90 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       'displayedStimulus': Session.get("currentDisplay"),
       'dynamicTagFields': dynamicTagFields,
 
-      'Anon Student Id':Meteor.username(),
-      'Condition Namea':'tdf file', 
-      'Condition Typea':Session.get("currentTdfName"),
+      'Anon_Student_Id':Meteor.username(),
+      'Session_ID': (new Date(trialTimestamp)).toUTCString().substr(0, 16) + " " + tdfName, //hack
 
-      'Condition Nameb':'xcondition',
-      'Condition Typeb':Session.get("experimentXCond"),
+      'Condition_Namea':'tdf file', 
+      'Condition_Typea':Session.get("currentTdfName"),
+      'Condition_Nameb':'xcondition',
+      'Condition_Typeb':Session.get("experimentXCond"),
+      'Condition_Namec':'schedule condition',//schedCondition
+      'Condition_Typec':schedCondition,
+      'Condition_Named':'how answered',
+      'Condition_Typed':_.trim(source),
+      'Condition_Namee': 'how answered',
+      'Condition_Typee': wasButtonTrial,
 
-      'Condition Namec':'schedule condition',//schedCondition
-      'Condition Typec':schedCondition,
       'feedbackDuration':feedbackDuration,
       'stimulusDuration':endLatency,
       'responseDuration':responseDuration,
       'probabilityEstimate':probabilityEstimate,
 
-      'Condition Named':'how answered',
-      'Condition Typed':_.trim(source),
-      'Condition Namee': 'how answered',
-      'Condition Typee': wasButtonTrial,
-      'Level (Unit)': Session.get("currentUnitNumber"),
-      'Level (Unitname)':unitName,
-      'Problem Name': problemName,
-      'Step Name': stepName,//this is no longer a valid field as we don't restore state one step at a time
+      'Level_Unit': Session.get("currentUnitNumber"),
+      'Level_Unitname':unitName,
+      'Problem_Name': problemName,
+      'Step_Name': stepName,//this is no longer a valid field as we don't restore state one step at a time
       'Time': trialTimestamp,
       'Selection': '',
       'Action': '',
       'Input': _.trim(userAnswer),
-      'Student Response Type': isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
-      'Student Response Subtype': _.trim(findQTypeSimpified()),
-      'Tutor Response Type': isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
-      'Tutor Response Subtype': '',
+      'Student_Response_Type': isStudy ? "HINT_REQUEST" : "ATTEMPT", // where is ttype set?
+      'Student_Response_Subtype': _.trim(findQTypeSimpified()),
+      'Tutor_Response_Type': isStudy ? "HINT_MSG" : "RESULT", // where is ttype set?
+      'Tutor_Response_Subtype': '',
     
-      "KC (Default)": stimulusKC,
-      "KC Category(Default)": '',
-      "KC (Cluster)": clusterKC,
-      "KC Category(Cluster)": '',
-      "CF (GUI Source)":_.trim(source),
-      "CF (Audio Input Enabled)":Session.get('audioEnabled'),
-      "CF (Audio Output Enabled)":Session.get('enableAudioPromptAndFeedback'),
-      "CF (Display Order)": Session.get('questionIndex'),
-      "CF (Stim File Index)": clusterIndex,
-      "CF (Set Shuffled Index)": shufIndex || clusterIndex,
-      "CF (Alternate Display Index)": Session.get('alternateDisplayIndex'),
-      "CF (Stimulus Version)": whichStim,
+      "KC_Default": stimulusKC,
+      "KC_Category_Default": '',
+      "KC_Cluster": clusterKC,
+      "KC_Category_Cluster": '',
+      "CF_GUI_Source":_.trim(source),
+      "CF_Audio_Input_Enabled":Session.get('audioEnabled'),
+      "CF_Audio_Output_Enabled":Session.get('enableAudioPromptAndFeedback'),
+      "CF_Display_Order": Session.get('questionIndex'),
+      "CF_Stim_File_Index": clusterIndex,
+      "CF_Set_Shuffled_Index)": shufIndex || clusterIndex,
+      "CF_Alternate_Display_Index": Session.get('alternateDisplayIndex'),
+      "CF_Stimulus_Version": whichStim,
 
-      "CF (Correct Answer)": correctAnswer,
-      "CF (Correct Answer Syllables)": Session.get("currentAnswerSyllables").syllableArray, 
-      "CF (Correct Answer Syllables Count)": Session.get("currentAnswerSyllables").syllables.length,
-      "CF (Display Syllable Indices)": Session.get("currentAnswerSyllables").displaySyllableIndices, 
-      "CF (Overlearning)": false,
-      "CF (Response Time)": trialEndTimeStamp,
-      "CF (Start Latency)": startLatency,
-      "CF (End Latency)": endLatency,
-      "CF (Review Latency)": assumedReviewLatency,
-      "CF (Review Entry)": _.trim($("#userForceCorrect").val()),
-      "CF (Button Order)": buttonEntries,
-      "CF (Note)": '',
-      "Feedback Text": $("#UserInteraction").text() || "",
-
-      //'ttype': _.trim(testType),
+      "CF_Correct_Answer": correctAnswer,
+      "CF_Correct_Answer_Syllables": Session.get("currentAnswerSyllables").syllableArray, 
+      "CF_Correct_Answer_Syllables_Count": Session.get("currentAnswerSyllables").syllables.length,
+      "CF_Display Syllable_Indices": Session.get("currentAnswerSyllables").displaySyllableIndices, 
+      "CF_Overlearning": false,
+      "CF_Response_Time": trialEndTimeStamp,
+      "CF_Start_Latency": startLatency,
+      "CF_End_Latency": endLatency,
+      "CF_Review_Latency": assumedReviewLatency,
+      "CF_Review_Entry": _.trim($("#userForceCorrect").val()),
+      "CF_Button_Order": buttonEntries,
+      "CF_Note": '',
+      "Feedback_Text": $("#UserInteraction").text() || "",
       'dialogueHistory':undefined //We'll fill this in later
   };
   
+  //Don't count test type trials in progress reporting
+  if(testType === "t"){
+    endLatency = 0;
+    reviewLatency = -1;
+  }else if (ttype === "s") {
+    // Study - we ONLY have review latency, but it is in endLatency
+    reviewLatency = endLatency;
+    endLatency = -1;
+    startLatency = -1;
+  }
+  //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
+  let curUserPerformance = Session.get("curStudentPerformance");
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
+  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
+  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
+  Session.set("curStudentPerformance",curUserPerformance);
+
   var writeAnswerLog = async function() {
       var realReviewLatency = Date.now() - reviewBegin;
       if (realReviewLatency > 0) {
-          answerLogRecord['CF (Review Latency)'] = realReviewLatency;
+          answerLogRecord['CF_Review_Latency'] = realReviewLatency;
       }
       answerLogRecord.dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
       Session.set("dialogueHistory",undefined);
@@ -1586,7 +1587,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
         lastAction: answerLogAction,
         lastActionTimeStamp: Date.now()
       }
-      answerLogAction, answerLogRecord
+      await meteorCallAsync('insertHistory',answerLogRecord);
       await updateExperimentState(newExperimentState,"card.afterAnswerFeedbackCallback.writeAnswerLog");
   };
 
@@ -1713,7 +1714,7 @@ async function unitIsFinished(reason) {
     }
 
     let newExperimentState = { 
-      questionIndex: questionIndex,
+      questionIndex: 0,
       clusterIndex: -1,
       lastUnitCompleted: curUnitNum,
       lastUnitStarted: newUnitNum,
@@ -1741,12 +1742,6 @@ function recordProgress(isCorrect) {
     }
 
     var prog = getUserProgress();
-
-    //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
-    //Ignore instruction type questions for overallOutcomeHistory
-    if(getTestType() !== "i"){
-      prog.overallOutcomeHistory.push(isCorrect ? 1 : 0);
-    }
 
     let currentDeliveryParams = Session.get("currentDeliveryParams");
     if(currentDeliveryParams.scoringEnabled){
@@ -1816,7 +1811,7 @@ function startQuestionTimeout() {
 
 function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQuestionParts,nextStageCb){
   console.log("checking for prestimulus display");
-  let prestimulusDisplay = Session.get("currentTdfFile").tdfs.tutor.setspec[0].prestimulusDisplay; //[0], if it exists
+  let prestimulusDisplay = Session.get("currentTdfFile").tdfs.tutor.setspec[0].prestimulusDisplay; //we'll [0], if it exists
   console.log("prestimulusDisplay:",prestimulusDisplay);
 
   if(prestimulusDisplay){
@@ -2012,7 +2007,7 @@ function processLINEAR16(data){
       answerGrammar = getAllCurrentStimAnswers(false);
     }
 
-    var tdfSpeechAPIKey = Session.get("currentTdfFile").tdfs.tutor.setspec[0].speechAPIKey;
+    var tdfSpeechAPIKey = Session.get("currentTdfFile").tdfs.tutor.setspec[0].speechAPIKey[0];
     //Make the actual call to the google speech api with the audio data for transcription
     if(tdfSpeechAPIKey && tdfSpeechAPIKey != ""){
       console.log("tdf key detected");
@@ -2315,11 +2310,9 @@ async function getExperimentState() {
 async function updateExperimentState(newState,codeCallLocation){
   let oldExperimentState = Session.get("currentExperimentState");
   let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
-  if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
-      let clientSideTimeStamp = Date.now();
-      Session.set("lastTimestamp", clientSideTimeStamp);
-      newExperimentState.lastTimestamp = clientSideTimeStamp;
-  }
+  // if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
+  //     let clientSideTimeStamp = Date.now();
+  // }
   const res = await meteorCallAsync('setExperimentState',Meteor.userId(), Session.get("currentRootTdfId"),newExperimentState);
   Session.set("currentExperimentState",newExperimentState);
   console.log("updateExperimentState",codeCallLocation,oldExperimentState,newExperimentState,res);
@@ -2362,7 +2355,6 @@ async function resumeFromComponentState() {
     Session.set("currentQuestionPart2", undefined);
     Session.set("currentAnswer", undefined);
     Session.set("testType", undefined);
-    Session.set("lastTimestamp", 0);
 
     //Disallow continuing (it will be turned on somewhere else)
     setDispTimeoutText("");
@@ -2403,8 +2395,6 @@ async function resumeFromComponentState() {
             //Select condition and save it
             console.log("No previous experimental condition: Selecting from " + setspec.condition.length);
             conditionTdfId = _.sample(setspec.condition);//Transform from tdffilename to tdfid
-            newExperimentState.lastAction = "expcondition";
-            newExperimentState.lastActionTimeStamp = Date.now();
             newExperimentState.conditionTdfId = conditionTdfId;
             newExperimentState.conditionNote = "Selected from " + _.display(setspec.condition.length) + " conditions";
             console.log("Exp Condition", conditionTdfId, newExperimentState.conditionNote);
@@ -2458,8 +2448,6 @@ async function resumeFromComponentState() {
             var xcondCount = _.intval(_.first(setspec.randomizedDelivery));
             experimentXCond = Math.floor(Math.random() * xcondCount);
             newExperimentState.experimentXCond = experimentXCond;
-            newExperimentState.lastAction = "expcondition";
-            newExperimentState.lastActionTimeStamp = Date.now();
         }
 
         console.log("Setting XCond from sys-selection", experimentXCond);
@@ -2492,8 +2480,6 @@ async function resumeFromComponentState() {
             );
         }
         newExperimentState.clusterMapping = clusterMapping;
-        newExperimentState.lastAction = "clusterMapping";
-        newExperimentState.lastActionTimeStamp = Date.now();
         console.log("Cluster mapping created", clusterMapping);
     }else {
         //Found the cluster mapping record - extract the embedded mapping
@@ -2517,7 +2503,6 @@ async function resumeFromComponentState() {
 
     let curTdfUnit = tdfFile.tdfs.tutor.unit[Session.get("currentUnitNumber")];
     Session.set("currentTdfUnit",curTdfUnit);
-    if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
 
     if(experimentState.questionIndex){
       Session.set("questionIndex", experimentState.questionIndex);
@@ -2556,18 +2541,15 @@ async function processUserTimesLog() {
     //Get TDF info
     const tdfFile = Session.get("currentTdfFile");
     console.log("tdfFile",tdfFile);
-    let tutor = tdfFile.tdfs.tutor;
 
-    initUserProgress({
-        overallOutcomeHistory: []
-    });
+    initUserProgress({ overallOutcomeHistory: [] });
     
-    Session.set("currentSchedule",experimentState.schedule);
+    Session.set("schedule",experimentState.schedule);
     Session.set("currentUnitStartTime", Date.now());
     Session.set("currentDeliveryParams",getCurrentDeliveryParams());
-
     Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
 
+    //shufIndex is mapped, clusterIndex is raw
     Session.set("clusterIndex",           experimentState.shufIndex || experimentState.clusterIndex);
 
     Session.set("currentDisplayEngine",   experimentState.currentDisplayEngine);
@@ -2583,23 +2565,22 @@ async function processUserTimesLog() {
     Session.set("originalQuestion2",      experimentState.originalQuestion2);
 
     Session.set("subTdfIndex",experimentState.subTdfIndex);
+    Session.set("alternateDisplayIndex",experimentState.alternateDisplayIndex);
 
+    Session.set("currentDisplay", undefined);
 
-    Session.set("currentDisplay", undefined);//TODO: should we recompute this instead?
-
-    //We'll be tracking the last question so that we can match with the answer
-    var lastQuestion = null;
+    let resumeToQuestion = false;
 
     //prepareCard will handle whether or not new units see instructions, but
     //it will miss instructions for the very first unit.
-    var needFirstUnitInstructions = false;
+    let needFirstUnitInstructions = false;
 
     //It's possible that they clicked Continue on a final unit, so we need to
     //know to act as if we're done
-    var moduleCompleted = false;
+    let moduleCompleted = false;
 
     //Reset current engine
-    var resetEngine = function(curUnitNum) {
+    let resetEngine = function(curUnitNum) {
         let curExperimentData = {
           cachedSyllables,
           experimentState
@@ -2607,6 +2588,7 @@ async function processUserTimesLog() {
 
         if (tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("assessmentsession")) {
             engine = createScheduleUnit(curExperimentData);
+            engine.getSchedule();//Make sure schedule is initialized
             Session.set("sessionType","assessmentsession");
         }
         else if(tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("learningsession")) {
@@ -2619,14 +2601,6 @@ async function processUserTimesLog() {
         }
     };
     clearScrollList();
-
-    //The last unit we captured start time for - this way we always get the
-    //earliest time for our unit start
-    var startTimeMinUnit = -1;
-
-    //At this point, our state is set as if they just started this learning
-    //session for the first time. We need to loop thru the user times log
-    //entries and update that state
 
     switch(experimentState.lastAction) {
         case "instructions": break;
@@ -2650,43 +2624,24 @@ async function processUserTimesLog() {
                     if(curTdfUnit.learningsession) newExperimentState.schedule = null; 
                 }
             }else{
-              needFirstUnitInstructions = tutor.unit && tutor.unit.length;
+              needFirstUnitInstructions = tdfFile.tdfs.tutor.unit && tdfFile.tdfs.tutor.unit.length;
             }
             break;
-        case "schedule":
-            //Read in the previously created schedule
-            var schedule = experimentState.schedule;
-            //Note that the schedule unit engine will see and use this
-            Session.set("currentSchedule",schedule);
-            break;
+        //case "schedule":
+        //    break;
         case "question":
-            lastQuestion = entry; //Always save the last question
+            resumeToQuestion = true;
             break;
        case "answer":
        case "[timeout]":
-            lastQuestion = entry; //Always save the last question
-            //The session variables should be set up correctly from the question
-            recordProgress(wasCorrect);
-
-            var simCorrect = experimentState.wasSim > 0 ? simCorrect = wasCorrect : null;
-            writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);
-
-            //Notify unit engine about card answer
-            engine.cardAnswered(wasCorrect, entry);
+            //resumeToQuestion = true;//TODO: may want true here
+            //let simCorrect = experimentState.wasSim > 0 ? simCorrect = wasCorrect : null;
+            //writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
             break;
     };
 
     resetEngine(currentUnitNumber);
-    let componentStates = await meteorCallAsync('getComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"));
-    engine.loadExperimentState(componentStates);
-    
-    if (experimentState.lastActionTimeStamp) {
-      Session.set("lastTimestamp", experimentState.lastActionTimeStamp);
-      if (Session.get("currentUnitNumber") > startTimeMinUnit) {
-          Session.set("currentUnitStartTime", Session.get("lastTimestamp"));
-          startTimeMinUnit = Session.get("currentUnitNumber");
-      }
-    }
+    engine.loadComponentStates();
 
     //If we make it here, then we know we won't need a resume until something
     //else happens
@@ -2701,8 +2656,7 @@ async function processUserTimesLog() {
         //They haven't seen our first instruction yet
         console.log("RESUME FINISHED: displaying initial instructions");
         leavePage("/instructions");
-    }else if (!!lastQuestion) {
-        Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
+    }else if (resumeToQuestion) {
         //Question outstanding: force question display and let them give an answer
         console.log("RESUME FINISHED: displaying current question");
         newQuestionHandler();
@@ -2721,10 +2675,10 @@ async function processUserTimesLog() {
         // we might need to stick with the instructions *IF AND ONLY IF* the
         // lockout period hasn't finished (which prepareCard won't handle)
         if (engine.unitFinished()) {
-            var lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
+            let lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
             if (lockoutMins > 0) {
-                var unitStartTimestamp = Session.get("currentUnitStartTime") || Date.now();
-                var lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+                let unitStartTimestamp = Session.get("currentUnitStartTime") || Date.now();
+                let lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
                 if (Date.now() < lockoutFreeTime) {
                     console.log("RESUME FINISHED: showing lockout instructions");
                     leavePage("/instructions");

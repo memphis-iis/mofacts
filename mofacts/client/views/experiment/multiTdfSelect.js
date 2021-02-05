@@ -55,9 +55,7 @@ async function selectSubTdf(lessonName, clusterList, subTdfIndex) {
 
     Session.set("subTdfIndex",subTdfIndex);
     let newExperimentState = { 
-        subTdfIndex: subTdfIndex, 
-        lastAction: "multiTdfSelect subtdf selection",
-        lastActionTimeStamp: Date.now()
+        subTdfIndex: subTdfIndex
     }
     await updateExperimentState(newExperimentState,"multiTdfSelect.selectSubTdf");
 
