@@ -23,13 +23,43 @@ function setCurClassStudents(curClass,currentTdf){
   Session.set("curClassPerformance",Session.get("studentPerformanceForClass")[curClass.courseid]);//AGGREGATED BY CLASS
 }
 
+const generateUserMetThresholdMap = threshold => {
+  const practiceTimeIntervalsMap = _state.get("practiceTimeIntervalsMap")
+  let userMetThresholdMap = {};
+  practiceTimeIntervalsMap.forEach(m => {
+    if (m.duration < threshold) {
+      userMetThresholdMap[m.userId] = `NO - ${m.duration}`;
+    } else {
+      userMetThresholdMap[m.userId] = `YES - ${m.duration}`;
+    }
+  });
+
+  _state.set("userMetThresholdMap", userMetThresholdMap);
+}
+
+const getPracticeTimeIntervalsMap = async (date, tdfId) => {
+  try {
+    Meteor.call('getPracticeTimeIntervalsMap', date, tdfId, (err, res) => {
+      if (err)
+        throw 'Error fetching practice time intervals ->' + err;
+      
+      _state.set("practiceTimeIntervalsMap", res);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
 Template.instructorReporting.helpers({
   curClassStudentPerformance: () => Session.get("curClassStudentPerformance"),
   curInstructorReportingTdfs: () => Session.get("curInstructorReportingTdfs"),
   classes: () => Session.get("classes"),
   curClassPerformance: () => Session.get("curClassPerformance"),
   performanceLoading: () => Session.get("performanceLoading"),
-  replaceSpacesWithUnderscores: (string) => string.replace(" ","_")
+  replaceSpacesWithUnderscores: (string) => string.replace(" ","_"),
+  getUserMetThresholdStatus: userId => {
+    return _state.get("userMetThresholdMap")[userId];
+  }
 });
 
 Template.instructorReporting.events({
@@ -61,21 +91,18 @@ Template.instructorReporting.events({
     }else {
       alert('Please select a class');
     }
+  },
+
+  "change #practice-deadline-date": async event => {
+    const date = event.currentTarget.value;
+    getPracticeTimeIntervalsMap(date, _state.get("currentTdf"));
+  },
+
+  "change #practice-time-select": event => {
+    const threshold = event.currentTarget.value;
+    generateUserMetThresholdMap(threshold);
   }
 });
-
-const getPracticeTimeIntervalsMap = async (date, tdfId) => {
-  try {
-    Meteor.call('getPracticeTimeIntervalsMap', date, tdfId, (err, res) => {
-      if (err)
-        throw 'Error fetching practice time intervals ->' + err;
-      
-      _state.set("practiceTimeIntervalsMap", res);
-    });
-  } catch (err) {
-    console.log(err);
-  }
-}
 
 Template.instructorReporting.onRendered(async function(){
   console.log("instructorReporting rendered",Meteor.userId());
