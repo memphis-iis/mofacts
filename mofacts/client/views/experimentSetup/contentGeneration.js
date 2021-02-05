@@ -1,4 +1,4 @@
-import { curSemester } from '../../../common/Definitions';
+import { curSemester, STIM_PARAMETER } from '../../../common/Definitions';
 import { Tracker } from 'meteor/tracker';
 import { DynamicTdfGenerator } from "../../../common/DynamicTdfGenerator";
 import { rangeVal } from "../../lib/currentTestingHelpers";
@@ -25,8 +25,6 @@ tdfIdToTdfFileMap = {};
 tdfIdToStimuliSetMap = {};
 
 finalDidYouReadQuestion = undefined;
-
-const STIM_PARAMETER = "0,.7";
 
 function recordClozeEditHistory(oldCloze,newCloze){
   var timestamp = Date.now();
@@ -72,13 +70,14 @@ function getTdfOwnersMap(ownerIds) {
   });
 }
 
-function setClozesFromStimObject(stimObject,isMultiTdf){
+async function setClozesFromStimObject(stimObject,isMultiTdf){
   console.log("setClozesFromStimObject");
   const MULTITDF_MAIN_CLUSTER_UNIT = 2;
   const LOWER_BOUND_RANDOM = -9999999999;
   const UPPER_BOUND_RANDOM = 9999999999;
   let allClozes = [];
-  let sourceSentences = stimObject.sourceSentences || [];
+  let stimuliSetId = stimObject[0].stimuliSetId;
+  let sourceSentences = await meteorCallAsync('getSourceSentences',stimuliSetId);
   fillOutSentenceLookupMap(sourceSentences);
   let originalOrderIndex = 0;
 
@@ -214,13 +213,15 @@ function generateAndSubmitTDFAndStimFiles(){
     visibility: 'profileSouthwestOnly',
     content: newTDFJSON
   }
+  
+  let sourceSentences = Session.get("clozeSentencePairs").sentences;
 
   //Clean up after ourselves
   for(var unitIndex in clusterListMappings) {
     clusterListMappings[unitIndex].new = undefined;
   }
 
-  Meteor.call("insertStimTDFPair",newStimJSON,wrappedTDF,function(err,res){
+  Meteor.call("insertStimTDFPair",newStimJSON,wrappedTDF,sourceSentences,function(err,res){
     if(!!err){
       console.log("Error inserting stim/tdf pair: " + err);
       alert("Error creating content: " + err);
@@ -330,11 +331,6 @@ function generateStimJSON(clozes,isMultiTdf){
     curStim.push(finalDidYouReadQuestion);//[{},{}]
   }
 
-  let sourceSentences = Session.get("clozeSentencePairs").sentences;
-  if(sourceSentences && sourceSentences.length > 0){
-    curStim.sourceSentences = sourceSentences;asdfasdf//Fix saving this data
-  }
-
   return curStim;
 }
 
@@ -359,7 +355,7 @@ function generateTDFJSON(tdfFileName,displayName,stimFileName,newStimJSON){
     curTdf = generatedTdf;
 
     let lastStim = newStimJSON.length - 1; //[{},{}]
-    curTdf.tdfs.tutor.unit[1].assessmentsession.clusterlist = [lastStim + "-" + lastStim];
+    curTdf.tdfs.tutor.unit[1].assessmentsession[0].clusterlist = [lastStim + "-" + lastStim];
     
     console.log("curTdf.subTdfs: " + JSON.stringify(curTdf.subTdfs));
   }else{
@@ -712,7 +708,7 @@ Template.contentGeneration.events({
     deleteCloze(stimulusKC,clusterKC,curParaphraseId);
   },
 
-  "change #templateTDFSelect": function(event){
+  "change #templateTDFSelect": async function(event){
     finalDidYouReadQuestion = undefined;
     clozesComeFromTemplate = true;
     clusterListMappings = {};

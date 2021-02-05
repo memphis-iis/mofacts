@@ -253,11 +253,12 @@ Template.profile.rendered = async function () {
         let currentStimSetId = tdf.stimuliSetId;
 
         //Make sure we have a valid TDF (with a setspec)
-        const setspec = tdfObject.tdfs.tutor.setspec[0];
+        console.log("tdfObject",tdfObject);
+        const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec[0] : null;
 
         if (!setspec) {
             console.log("Invalid TDF - it will never work", tdfObject);
-            return;
+            continue;
         }
 
         var name = _.chain(setspec).prop("lessonname").first().value();
@@ -323,8 +324,8 @@ Template.profile.rendered = async function () {
             return;
         }
 
-        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value() == "true";
-        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value() == "true";
+        let audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled[0] == "true" : false;
+        let enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ? setspec.enableAudioPromptAndFeedback[0] == "true" : false;
 
         tdfObject.name = name;
         tdfObject.stimulusFile = stimulusFile;
@@ -392,7 +393,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
     //current TDF should be changed due to an experimental condition
     Session.set("currentRootTdfId", currentTdfId);
     Session.set("currentTdfId", currentTdfId);
-    const curTdf = await getTdfById(currentTdfId);
+    const curTdf = await meteorCallAsync('getTdfById',currentTdfId);
     Session.set("currentTdfFile",curTdf.content);
     Session.set("currentStimSetId", currentStimSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
@@ -426,8 +427,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
-    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey;
+    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
+    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     var audioPromptFeedbackEnabled = undefined;
     if(Session.get("experimentTarget")){
       audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
@@ -471,10 +472,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
   //Go directly to the card session - which will decide whether or
   //not to show instruction
   if(continueToCard){
-    let lastAction = fromSouthwest ? "profileSouthwest tdf selection" : "profile tdf selection";
     let newExperimentState = { 
-      lastAction: lastAction,
-      lastActionTimeStamp: Date.now(),
       userAgent: userAgent,
       browserLanguage: prefLang,
       selectedHow: how,

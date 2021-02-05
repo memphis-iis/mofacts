@@ -181,11 +181,17 @@ export class DynamicTdfGenerator {
    */
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
-    try { Session.get("")
-      clusters = !!(stimJson) ? stimJson.stimuli.setspec.clusters : Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters;
+    try { 
+      let clusterMap = [];
+      for(let stim of stimJson){//[{},{}]
+        let clusterIndex = stim.clusterKC;
+        let stimIndex = stim.stimulusKC;
+        if(!clusterMap[clusterIndex]) clusterMap[clusterIndex] = [];
+        clusterMap[clusterIndex][stimIndex] = stim;
+      }
+      clusters = clusterMap;
     } catch (error) {
-     throw new Error('Unable to find clusters with stim file: ' 
-       + stimFileName + ' ' + error);
+     throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
     }
     return clusters;
   }
