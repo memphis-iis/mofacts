@@ -20,7 +20,7 @@ AssessmentSession = {
      *       wrapper around createScheduleImpl
     */
     createSchedule: function(setspec, unitNumber, unit) {
-        var schedule;
+        let schedule;
 
         try {
             schedule = AssessmentSession.createScheduleImpl(setspec, unitNumber, unit);

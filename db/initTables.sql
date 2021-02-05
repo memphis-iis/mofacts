@@ -54,12 +54,13 @@ CREATE TYPE responseType AS ENUM ('image','text');
 CREATE TABLE item (
     itemId SERIAL PRIMARY KEY,
     stimuliSetId INTEGER,
-    stimulusKC INTEGER UNIQUE,
+    stimulusFilename VARCHAR(1024),
+    stimulusKC INTEGER,
     clusterKC INTEGER NOT NULL,
     responseKC INTEGER,
     params VARCHAR(255) NOT NULL,
     optimalProb NUMERIC(4,3),
-    correctResponse VARCHAR(255) NOT NULL,
+    correctResponse TEXT NOT NULL,
     incorrectResponses VARCHAR(2048),
     itemResponseType responseType DEFAULT 'text',
     speechHintExclusionList VARCHAR(2048),
@@ -89,18 +90,19 @@ CREATE TABLE history (
     typeOfResponse responseType NOT NULL,
     responseValue VARCHAR(255) NOT NULL,
     displayedStimulus VARCHAR(255) NOT NULL,
-    dynamicTagFields JSONB
+    dynamicTagFields JSONB,
     Anon_Student_Id VARCHAR(255) NOT NULL,
-    Condition_Namea VARCHAR(50) NOT NULL,
-    Condition_Typea VARCHAR(1024) NOT NULL,
-    Condition_Nameb VARCHAR(50) NOT NULL,
-    Condition_Typeb INTEGER NOT NULL,
-    Condition_Namec VARCHAR(50) NOT NULL,
-    Condition_Typec VARCHAR(255) NOT NULL,
-    Condition_Named VARCHAR(50) NOT NULL,
-    Condition_Typed VARCHAR(50) NOT NULL,
-    Condition_Namee VARCHAR(50) NOT NULL,
-    Condition_Typee BOOLEAN NOT NULL,
+    SessionId VARCHAR(255) NOT NULL,
+    Condition_Namea VARCHAR(50),
+    Condition_Typea VARCHAR(1024),
+    Condition_Nameb VARCHAR(50),
+    Condition_Typeb INTEGER,
+    Condition_Namec VARCHAR(50),
+    Condition_Typec VARCHAR(255),
+    Condition_Named VARCHAR(50),
+    Condition_Typed VARCHAR(50),
+    Condition_Namee VARCHAR(50),
+    Condition_Typee BOOLEAN,
     Level_Unit INTEGER NOT NULL,
     Level_Unitname VARCHAR(255) NOT NULL,
     Problem_Name VARCHAR(255) NOT NULL,
@@ -117,33 +119,24 @@ CREATE TABLE history (
     CF_Audio_Output_Enabled BOOLEAN NOT NULL,
     CF_Display_Order INTEGER NOT NULL,
     CF_Stim_File_Index INTEGER NOT NULL,
-
+    CF_Set_Shuffled_Index INTEGER NOT NULL,
+    CF_Alternate_Display_Index INTEGER,
+    CF_Stimulus_Version INTEGER,
+    CF_Correct_Answer VARCHAR(255) NOT NULL,
+    CF_Correct_Answer_Syllables VARCHAR(1024),
+    CF_Correct_Answer_Syllables_Count INTEGER,
+    CF_Display_Syllable_Indices VARCHAR(1024),
+    CF_Response_Time BIGINT,
+    CF_Start_Latency BIGINT,
+    CF_End_Latency BIGINT,
+    CF_Review_Latency BIGINT,
+    CF_Review_Entry VARCHAR(1024),
+    CF_Button_Order VARCHAR(2048),
+    Feedback_Text VARCHAR(1024),
+    dialogueHistory JSONB
 );
 
-      'Selection': '',
-      'Action': '',
-      'Tutor Response Subtype': '',
-      "KC Category(Default)": '',
-      "KC Category(Cluster)": '',
-      "CF (Overlearning)": false,
-      "CF (Note)": '',
-
-      "CF (Set Shuffled Index)": shufIndex || clusterIndex,
-      "CF (Alternate Display Index)": Session.get('alternateDisplayIndex'),
-      "CF (Stimulus Version)": whichStim,
-      "CF (Correct Answer)": correctAnswer,
-      "CF (Correct Answer Syllables)": Session.get("currentAnswerSyllables").syllableArray, 
-      "CF (Correct Answer Syllables Count)": Session.get("currentAnswerSyllables").syllables.length,
-      "CF (Display Syllable Indices)": Session.get("currentAnswerSyllables").displaySyllableIndices, 
-      "CF (Response Time)": trialEndTimeStamp,
-      "CF (Start Latency)": startLatency,
-      "CF (End Latency)": endLatency,
-      "CF (Review Latency)": assumedReviewLatency,
-      "CF (Review Entry)": _.trim($("#userForceCorrect").val()),
-      "CF (Button Order)": buttonEntries,
-      "Feedback Text": $("#UserInteraction").text() || "",
-
-CREATE INDEX idx_history_userId_TDFId on history USING hash (userId,TDFId);
+CREATE INDEX idx_history_userId_TDFId on history (userId,TDFId);
 
 CREATE TYPE componentStateType AS ENUM ('stimulus','cluster','response');
 CREATE TYPE unitType AS ENUM ('learningsession','assessmentsession');
@@ -175,3 +168,10 @@ CREATE TABLE globalExperimentState (
 
 CREATE INDEX idx_globalExperimentState_userId on globalExperimentState USING hash (userId);
 CREATE INDEX idx_globalExperimentState_TDFId on globalExperimentState USING hash (TDFId);
+
+CREATE TABLE itemSourceSentences (
+    stimuliSetId INTEGER,
+    sourceSentences JSONB
+);
+
+CREATE INDEX idx_itemSourceSentences_stimuliSetId on itemSourceSentences USING hash (stimuliSetId);

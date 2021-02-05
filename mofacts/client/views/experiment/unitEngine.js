@@ -23,7 +23,7 @@ stripSpacesAndLowerCase = function(input){
 }
 
 function getStimAnswer(clusterIndex, whichAnswer) {
-    return getStimCluster(clusterIndex)[whichAnswer].correctResponse;
+    return getStimCluster(clusterIndex).stims[whichAnswer].correctResponse;
 };
 
 createEmptyUnit = function(curExperimentData) { return create(emptyUnitEngine,curExperimentData); };
@@ -40,8 +40,8 @@ function defaultUnitEngine(curExperimentData) {
         selectNextCard: function() { throw "Missing Implementation"; },
         cardAnswered: function(wasCorrect) { throw "Missing Implementation"; },
         unitFinished: function() { throw "Missing Implementation"; },
-        saveExperimentState: function() { throw "Missing Implementation; "},
-        loadExperimentState: function(experimentState) { throw "Missing Implementation"; },
+        saveComponentStates: function() { },
+        loadComponentStates: function() { },
 
         // Optional functions that engines can replace if they want
         initImpl: function() { },
@@ -155,8 +155,6 @@ function defaultUnitEngine(curExperimentData) {
                 }
             }          
 
-            Session.set("currentAnswerSyllables",currentAnswerSyllables);
-
             console.log("setUpCardQuestionSyllables:",currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer);
             return {currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
         },
@@ -164,7 +162,7 @@ function defaultUnitEngine(curExperimentData) {
         setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
             let newExperimentState = {};
             Session.set("alternateDisplayIndex",undefined);
-            let curStim = getStimCluster(cardIndex)[whichStim];
+            let curStim = getStimCluster(cardIndex).stims[whichStim];
             let currentDisplay = JSON.parse(JSON.stringify(curStim.display));
             if(curStim.alternateDisplays){
                 let numPotentialDisplays = curStim.alternateDisplays.length + 1;
@@ -275,12 +273,7 @@ function modelUnitEngine() {
     var unitStartTimestamp = Date.now();
 
     function getStimParameterArray(clusterIndex,whichStim){
-      return _.chain(getStimCluster(clusterIndex))
-            .prop(_.intval(whichStim))
-            .prop("params")
-            .split(',')
-            .map(x => _.floatval(x))
-            .value();
+      return getStimCluster(clusterIndex).stims[whichStim].params.split(',').map(x => _.floatval(x));
     }
 
     var currentCardInfo = {
@@ -388,7 +381,7 @@ function modelUnitEngine() {
 
             // We keep per-stim and re-response-text results as well
             var cluster = getStimCluster(i-1);
-            var numStims = cluster.length;
+            var numStims = cluster.stims.length;
             for (j = 1; j <= numStims; ++j) {
                 var parameter = getStimParameterArray(i-1,j-1); //Note this may be a single element array for older stims or a 3 digit array for newer ones
                 // Per-stim counts
@@ -417,7 +410,7 @@ function modelUnitEngine() {
                 });
 
                 // Per-response counts
-                let rawResponse = cluster[j-1].correctResponse;
+                let rawResponse = cluster.stims[j-1].correctResponse;
                 var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(rawResponse));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
@@ -581,7 +574,7 @@ function modelUnitEngine() {
 
     // Calculate current card probabilities for every card - see selectNextCard
     // the actual card/stim (cluster/version) selection
-    calculateCardProbabilities = function() {
+    calculateCardProbabilities = function(callback) {
         // We use a "flat" probability structure - this is faster than a loop
         // over our nested data structure, but it also gives us more readable
         // code when we're setting something per stimulus
@@ -598,7 +591,7 @@ function modelUnitEngine() {
 
         }
         console.log(JSON.stringify(ptemp));
-        return cardProbabilities.probs;
+        if(callback) callback();
     }
 
     function findMinProbCard(cards, probs) {
@@ -739,7 +732,7 @@ function modelUnitEngine() {
     //Our actual implementation
     return {
         //Unfinished
-        saveExperimentState: function(){
+        saveComponentStates: async function(){
             let userId = Meteor.userId();
             let TDFId = Session.set("currentTdfId");
             let cardKC = 1;
@@ -785,8 +778,8 @@ function modelUnitEngine() {
                 }
             }
 
-            //TODO: handle responseKC on server side
-            for(let response in cardProbabilities.responses){
+            for(let responseText in cardProbabilities.responses){
+                let response = cardProbabilities.responses[responseText];
                 let responseState = {
                     userId,
                     TDFId,
@@ -799,20 +792,21 @@ function modelUnitEngine() {
                     totalPracticeDuration: response.totalPracticeDuration,
                     currentUnit,
                     currentUnitType: 'learningsession',
-                    outcomeStack: response.outcomeStack.join(',')
+                    outcomeStack: response.outcomeStack.join(','),
+                    responseText //not actually in db, need to lookup/assign kcid
                 };
                 componentStates.push(responseState);
             }
-
-            let overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
-            let probs = cardProbabilities.probs;
+            //let probs = cardProbabilities.probs;//We grab this from the history table
+            await meteorCallAsync('setComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"),componentStates);
         },
-        loadExperimentState: async function(experimentState){//componentStates [{},{}]
-            let overallOutcomeHistory = await meteorCallAsync('getOutcomeHistoryByUserAndTDFId',Meteor.userId(),Session.get("currentTDFId"));
+        loadComponentStates: async function(){//componentStates [{},{}]
+            let componentStates = await meteorCallAsync('getComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"));
+            let overallOutcomeHistory = Session.get("currentExperimentState").overallOutcomeHistory;
             initUserProgress({ overallOutcomeHistory });
-            let stims = experimentState.filter(x => x.componentType == 'stimulus');
-            let cards = experimentState.filter(x => x.componentType == 'cluster');
-            let responses = experimentState.filter(x => x.componentType == 'response');
+            let stims = componentStates.filter(x => x.componentType == 'stimulus');
+            let cards = componentStates.filter(x => x.componentType == 'cluster');
+            let responses = componentStates.filter(x => x.componentType == 'response');
             let stimulusKCs = stims.map(x => x.stimulusKC);
             const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
             let numQuestionsAnswered = 0;
@@ -849,7 +843,7 @@ function modelUnitEngine() {
             var numQuestions = getStimCount();
             for (i = 1; i <= numQuestions; ++i) {
                 var cluster = getStimCluster(i-1);
-                var numStims = cluster.length;
+                var numStims = cluster.stims.length;
                 for (j = 1; j <= numStims; ++j) {
                     initProbs.push({
                         cardIndex: i,//clusterKC
@@ -875,7 +869,8 @@ function modelUnitEngine() {
         },
 
         getCardProbs: function(){
-          return calculateCardProbabilities();
+          calculateCardProbabilities();
+          return cardProbabilities.probs;
         },
 
         findCurrentCardInfo: function() {
@@ -953,7 +948,12 @@ function modelUnitEngine() {
 
             let clusterMapping = Session.get("clusterMapping");
             let unmappedIndex = clusterMapping.indexOf(index);
-            newExperimentState = {clusterIndex:cardIndex,shufIndex:unmappedIndex};
+            newExperimentState = {
+                clusterIndex:cardIndex,
+                shufIndex:unmappedIndex,
+                lastAction:'question',
+                lastTimeStamp: Date.now()
+            };
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
@@ -1022,13 +1022,13 @@ function modelUnitEngine() {
             //let idx = Session.get("clusterIndex");
             //let card = cardProbabilities.cards[idx];
             //let cluster = getStimCluster(idx);
-            // let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster[currentCardInfo.whichStim].correctResponse));
+            // let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].correctResponse));
             // let responseData = {
             //   responseText: responseText,
             //   lastSeen: Date.now()
             // };
             
-
+            this.saveComponentStates();
             await updateExperimentState(newExperimentState,"unitEngine.modelUnitEngine.selectNextCard");
 
             return newProbIndex;
@@ -1068,7 +1068,7 @@ function modelUnitEngine() {
             // the only place we call it after init *and* something might have
             // changed during question selection
             if (getTestType() === 's') {
-                calculateCardProbabilities();
+                calculateCardProbabilities(this.saveComponentStates);
                 return;
             }
 
@@ -1098,7 +1098,7 @@ function modelUnitEngine() {
             }
 
             // "Response" stats
-            let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster[currentCardInfo.whichStim].correctResponse));
+            let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].correctResponse));
             if (answerText && answerText in cardProbabilities.responses) {
                 let resp = cardProbabilities.responses[answerText];
                 if (wasCorrect) resp.priorCorrect += 1;
@@ -1112,15 +1112,21 @@ function modelUnitEngine() {
                 console.log("COULD NOT STORE RESPONSE METRICS",
                     answerText,
                     currentCardInfo.whichStim,
-                    displayify(cluster[currentCardInfo.whichStim].correctResponse),
+                    displayify(cluster.stims[currentCardInfo.whichStim].correctResponse),
                     displayify(cardProbabilities.responses));
+            }
+            if(wasCorrect && getTestType() !== "i"){
+                let prog = getUserProgress();
+                prog.overallOutcomeHistory.push(wasCorrect ? 1 : 0);
+                let newExperimentState = {overallOutcomeHistory:prog.overallOutcomeHistory};
+                updateExperimentState(newExperimentState,"unitEngine.modelUnit.cardAnswered");
             }
 
             // All stats gathered - calculate probabilities
             //Need a delay so that the outcomeStack arrays can be properly updated
             //before we use them in calculateCardProbabilities
             //Meteor.setTimeout(calculateCardProbabilities,20); //TODO: why did we need this?  Make sure we are calculating correct values now
-            calculateCardProbabilities();
+            calculateCardProbabilities(this.saveComponentStates);
         },
 
         unitFinished: function() {
@@ -1159,14 +1165,20 @@ function scheduleUnitEngine(){
         unitType: "schedule",
     
         initImpl: function() {
-
             //Nothing currently
+        },
+
+        saveComponentStates: function(){
+            //No component data for assessments
+        },
+
+        loadComponentStates: function(){
+            //No component data for assessments
         },
     
         getSchedule: async function() {
             //Retrieve current schedule
-            var progress = getUserProgress();
-    
+            let progress = getUserProgress();
             let curUnitNum = Session.get("currentUnitNumber");
             console.log("getSchedule, curUnitNum",curUnitNum);
             var schedule = null;
@@ -1190,12 +1202,12 @@ function scheduleUnitEngine(){
                 }
     
                 //We save the current schedule and also log it to the UserTime collection
-                Session.set("currentSchedule",schedule);
+                Session.set("schedule",schedule);
     
                 let newExperimentState = { 
                     schedule: schedule, 
-                    lastAction: "schedule",
-                    lastActionTimeStamp: Date.now()
+                    //lastAction: "schedule",
+                    //lastActionTimeStamp: Date.now()
                 }
                 await updateExperimentState(newExperimentState,"unitEngine.getSchedule");
             }
