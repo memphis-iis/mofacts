@@ -32,14 +32,14 @@
         <h3>Practice Time Threshold</h3>
         <select id="practice-time-select">
           <option value="10">10 min</option>
-          <option value="10">20 min</option>
-          <option value="10">30 min</option>
-          <option value="10">40 min</option>
-          <option value="10">50 min</option>
-          <option value="10">60 min</option>
-          <option value="10">70 min</option>
-          <option value="10">80 min</option>
-          <option value="10">90 min</option>
+          <option value="20">20 min</option>
+          <option value="30">30 min</option>
+          <option value="40">40 min</option>
+          <option value="50">50 min</option>
+          <option value="60">60 min</option>
+          <option value="70">70 min</option>
+          <option value="80">80 min</option>
+          <option value="90">90 min</option>
         </select>
       </div>
       <h3>Class Data</h3>
@@ -51,7 +51,7 @@
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>
               <td>{{this.totalTime}}</td>
-              <td>{{this.completedBeforeDeadline}} - {{this.timeCompletedBeforeDeadline}}</td>
+              <td>{{getUserMetThresholdStatus this.userId}}</td>
             </tr>
           {{/each}}
           <tr>

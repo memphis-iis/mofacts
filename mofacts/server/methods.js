@@ -646,7 +646,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
     if(!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
     if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
 
-    if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count:0,totalTime:0,numCorrect:0,username:studentUsername};
+    if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count:0,totalTime:0,numCorrect:0,username:studentUsername,userId:userId};
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalPrompt + totalStudy;
