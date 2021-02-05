@@ -573,7 +573,7 @@ async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
     AND TDFId = ${tdfId}
     GROUP BY userId`;
   
-  const res = db.one(query);
+  const res = await db.one(query);
 
   let practiceTimeIntervalsMap = {};
   for (let row of res) {
