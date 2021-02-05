@@ -29,7 +29,6 @@
  * experimentXCond           - untouched in sessionCleanUp
  * filter                    - filter for user admin page
  * ignoreOutOfGrammarResponses - speech input, only transcribe if recognized word in answer set
- * lastTimestamp             - set only by resume logic in card
  * loginMode                 - untouched in sessionCleanUp
  * needResume
  * questionIndex
@@ -56,7 +55,7 @@ sessionCleanUp = function() {
     Session.set("buttonTrial", false);
     Session.set("currentAnswerSyllables",undefined);
 
-    Session.set("currentSchedule",undefined);
+    Session.set("schedule",undefined);
 
     Session.set("currentRootTdfId", undefined);
     Session.set("currentTdfName", undefined);
@@ -94,7 +93,6 @@ sessionCleanUp = function() {
     Session.set("experimentPasswordRequired",false);
     Session.set("filter","@gmail.com");
     Session.set("ignoreOutOfGrammarResponses",false);
-    Session.set("lastTimestamp", 0);
     Session.set("needResume", false);
     Session.set("questionIndex", undefined);
     Session.set("recording",false);

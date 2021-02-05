@@ -149,14 +149,19 @@ function getStimCount() {
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping. 
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
-function getStimCluster(index=0) {
+function getStimCluster(clusterMappedIndex=0) {
   let clusterMapping = Session.get("clusterMapping");
-    let mappedIndex = clusterMapping ? clusterMapping[index] : index;
-    let mainClusterBits = Session.get("currentStimuliSet")[mappedIndex];
+    let rawIndex = clusterMapping ? clusterMapping[clusterMappedIndex] : clusterMappedIndex;
+    let stims = [];
+    for(let stim of Session.get("currentStimuliSet")){
+      if(stim.clusterKC == rawIndex){
+        stims.push(stim);
+      }
+    }
     let cluster = { 
-      shufIndex: index,//Tack these on for later logging purposes
-      clusterIndex: mappedIndex,
-      ...mainClusterBits
+      shufIndex: clusterMappedIndex,//Tack these on for later logging purposes
+      clusterIndex: rawIndex,
+      stims
     };
     //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
     return cluster;

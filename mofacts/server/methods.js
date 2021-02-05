@@ -3,7 +3,8 @@ import { curSemester, ALL_TDFS, KC_MULTIPLE } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
-export { getTdfBy_id };
+import { getNewItemFormat, getNewTdfFormat } from "./conversions/convert";
+export { getTdfBy_id, getHistoryByTDFfileName };
 
 /*jshint sub:true*/
 
@@ -21,7 +22,7 @@ if(!!Meteor.settings.public.testLogin){
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
   console.log("dev environment, allow insecure tls");
 }
-console.log("meteor settings: " + JSON.stringify(Meteor.settings));
+//console.log("meteor settings: " + JSON.stringify(Meteor.settings));
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 var adminUsers = Meteor.settings.initRoles.admins;
 var ownerEmail = Meteor.settings.owner;
@@ -160,9 +161,9 @@ async function getLearningSessionItems(tdfFileName) {
     }
     const tdf = await getTdfByFileName(tdfQueryName);
     if (tdf.content.isMultiTdf) {
-      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf.content);
+      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
     } else {
-      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf.content);
+      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
     }
   });
   return learningSessionItems;
@@ -170,7 +171,7 @@ async function getLearningSessionItems(tdfFileName) {
 
 async function getTdfByOwnerId(ownerId){
   try{
-    console.log("getTdfByOwnerId:"+ownerId);
+    console.log("getTdfByOwnerId:",ownerId);
     const tdfs = await db.any("SELECT * from tdf WHERE ownerid=$1",[ownerId]);
     return tdfs[0];
   }catch(e){
@@ -197,9 +198,8 @@ async function getTdfBy_id(_id){
 
 async function getTdfByFileName(filename){
   try{
-    console.log("getTdfByFileName:"+filename);
     let queryJSON = {"fileName":filename};
-    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1::jsonb",[queryJSON]);
     return tdfs[0];
   }catch(e){
     console.log("getTdfByFileName ERROR,",filename,",",e);
@@ -221,7 +221,17 @@ async function getTdfByExperimentTarget(experimentTarget){
 
 async function getAllTdfs(){
   console.log("getAllTdfs");
-  const tdfs = await db.any("SELECT * from tdf");
+  const tdfsRet = await db.any("SELECT * from tdf");
+  let tdfs = tdfsRet.map(function(tdf){
+    tdf = {
+      tdfid:tdf.tdfid,
+      ownerid:tdf.ownerid,
+      stimulisetid:tdf.stimulisetid,
+      content:tdf.content.content,
+      visibility:tdf.visibility
+    }
+    return tdf;
+  })
   return tdfs;
 }
 
@@ -229,8 +239,8 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
   let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (";
   stimuliSetIds.map(stimSetId => query += stimSetId + ", ");
   query.substr(0,query.length-2); //cut off extra comma
-  query += ")";
-  const stimSets = db.many(query);
+  query += ") ORDER BY itemId";
+  const stimSets = await db.many(query);
   return stimSets;
 }
 
@@ -239,12 +249,14 @@ async function getProbabilityEstimatesByKCId(relevantKCIds){
 }
 
 //by currentTDFId, not currentRootTDFId
-async function getOutcomeHistoryByUserAndTDFId(userId,TDFId){
+async function getOutcomeHistoryByUserAndTDFfileName(userId,TDFfileName){
+  const tdfRet = await db.one('SELECT TDFId from tdf WHERE content @> $1' + '::jsonb',{"fileName":TDFfileName});
+  let TDFId = tdfRet[0].tdfid;
   return await db.manyOrNone('SELECT array_agg(outcome) AS outcomeHistory FROM history WHERE userId=$1 AND TDFId=$2 GROUP BY TDFId ORDER BY eventId',[userId,TDFId]);
 }
 
 async function getReponseKCMap(){
-  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
+  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item ORDER BY itemId');
   let responseKCMap = {};
   for(let pair of responseKCStuff){
     responseKCMap[pair.correctResponse] = pair.responseKC;
@@ -254,18 +266,47 @@ async function getReponseKCMap(){
 
 //by currentTDFId, not currentRootTDFId
 async function getComponentStatesByUserIdAndTDFId(userId,TDFId){
-  return await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2',[userId,TDFId]);
+  return await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId',[userId,TDFId]);
 }
 
-async function insertStimTDFPair(newStimJSON,wrappedTDF){
-  let highestStimuliSetId = await db.manyOrNone('SELECT MAX(stimuliSetId) FROM tdf');
-  let newStimuliSetId = highestStimuliSetId + 1;
+async function setComponentStatesByUserIdAndTDFId(userId,TDFId,componentStates){
+  const res = await db.tx(async t => {
+    let responseComponentStates = componentStates.map(x => x.componenttype == 'response');
+    let responseKCMap = await getReponseKCMap();
+    const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
+    let newResponseKC = newResponseKCRet.responsekc + 1;
+    for(responseState of responseComponentStates){
+      if(responseKCMap[responseState.responseText]){
+        responseState.KCId = responseKCMap[responseState.responseText]
+      }else{
+        responseState.KCId = newResponseKC;
+        newResponseKC += 1;
+      }
+      delete responseState.responseText;
+    }
+    for(let componentState of componentStates){
+      await t.none('DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3',[userId,TDFId,componentState.KCId]);
+      await t.none('INSERT INTO componentState(userId,TDFId,KCId,componentType,probabilityEstimate, \
+        firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, \
+        currentUnit,currentUnitType, outcomeStack) VALUES(${userId},${TDFId}, \
+        ${KCId}, ${componentType}, ${probabilityEstimate}, ${firstSeen}, ${lastSeen}, \
+        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${currentUnit} \
+        ${currentUnitType},${outcomeStack}) RETURNING TDFId',componentState);
+    }
+    return {userId,TDFId};
+  })
+  return res;
+}
+
+async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
+  let highestStimuliSetIdRet = await db.manyOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
+  let newStimuliSetId = highestStimuliSetIdRet.higheststimulisetid + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
   for(let stim of newStimJSON){
     stim.stimuliSetId = newStimuliSetId;
   }
-  let highestStimulusKC = await db.manyOrNone('SELECT MAX(stimulusKC) FROM item');
-  let curNewKCBase = (Math.floor(highestStimulusKC / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE + 1;
+  let highestStimulusKCRet = await db.manyOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
+  let curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE + 1;
   let curNewStimulusKC = curNewKCBase;
   let curNewClusterKC = curNewKCBase;
 
@@ -273,9 +314,9 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF){
   let responseKCMap = {};
   let maxResponseKC = 0;
   for(let pair of responseKCStuff){
-    responseKCMap[pair.correctResponse] = pair.responseKC;
-    if(pair.responseKC > maxResponseKC){
-      maxResponseKC = pair.responseKC;
+    responseKCMap[pair.correctResponse] = pair.responsekc;
+    if(pair.responsekc > maxResponseKC){
+      maxResponseKC = pair.responsekc;
     }
   }
   let curNewResponseKC = maxResponseKC + 1;
@@ -304,13 +345,22 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF){
     .then(async row => {
       let TDFId = row.tdfid;
       for(let stim of newStimJSON){
+        //if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
         await t.none('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, clozeStimulus, alternateDisplays, tags) \
                       VALUES(${stimuliSetId}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
+      }
+      if(sourceSentences){
+        await t.none('INSERT INTO itemSourceSentences (stimuliSetId, sourceSentences) VALUES($1,$2)',[newStimuliSetId,sourceSentences]);
       }
       return TDFId;
     })
   });
   return res;
+}
+
+async function getSourceSentences(stimuliSetId){
+  const sourceSentencesRet = await db.manyOrNone('SELECT sourceSentences FROM itemSourceSentences WHERE stimuliSetId=$1',stimuliSetId);
+  return sourceSentencesRet.sourceSentences;
 }
 
 async function getAllCourses(){
@@ -435,8 +485,6 @@ async function getTdfNamesAssignedByInstructor(instructorID){
                  INNER JOIN assignment AS a ON a.courseId = c.courseId\
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  WHERE c.teacherUserId = $1 AND c.semester = $2";
-    const allTdfs = await getAllTdfs();
-    console.log("allTdfs.length:",allTdfs.length);
     const assignmentTdfFileNames = await db.any(query,[instructorID,curSemester]);
     let unboxedAssignmentTdfFileNames = assignmentTdfFileNames.map((obj) => obj.filename);
     console.log("assignmentTdfFileNames",unboxedAssignmentTdfFileNames);
@@ -458,12 +506,200 @@ async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not curr
 async function setExperimentState(UserId,TDFId,newExperimentState){ //by currentRootTDFId, not currentTDFId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
-  let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentState : {};
+  let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentstate : {};
   let updatedExperimentState = Object.assign(experimentState,newExperimentState);
   let updateQuery = "UPDATE course SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
   const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
   console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
   return updatedExperimentState;
+}
+
+async function insertHistory(historyRecord){
+  let query = "INSERT INTO history \
+                            (itemId, \
+                            userIdTDFId, \
+                            KCId, \
+                            eventStartTime, \
+                            feedbackDuration, \
+                            stimulusDuration, \
+                            responseDuration, \
+                            outcome, \
+                            probabilityEstimate, \
+                            typeOfResponse, \
+                            responseValue, \
+                            displayedStimulus, \
+                            dynamicTagFields, \
+                            Anon_Student_Id, \
+                            Condition_Namea, \
+                            Condition_Typea, \
+                            Condition_Nameb, \
+                            Condition_Typeb, \
+                            Condition_Namec, \
+                            Condition_Typec, \
+                            Condition_Named, \
+                            Condition_Typed, \
+                            Condition_Namee, \
+                            Condition_Typee, \
+                            Level_Unit, \
+                            Level_Unitname, \
+                            Problem_Name, \
+                            Step_Name, \
+                            Time, \
+                            Input, \
+                            Student_Response_Type, \
+                            Student_Response_Subtype, \
+                            Tutor_Response_Type, \
+                            KC_Default, \
+                            KC_Cluster, \
+                            CF_GUI_Source, \
+                            CF_Audio_Input_Enabled, \
+                            CF_Audio_Output_Enabled, \
+                            CF_Display_Order, \
+                            CF_Stim_File_Index, \
+                            CF_Set_Shuffled_Index, \
+                            CF_Alternate_Display_Index, \
+                            CF_Stimulus_Version, \
+                            CF_Correct_Answer, \
+                            CF_Correct_Answer_Syllables, \
+                            CF_Correct_Answer_Syllables_Count, \
+                            CF_Display_Syllable_Indices, \
+                            CF_Response_Time, \
+                            CF_Start_Latency, \
+                            CF_End_Latency, \
+                            CF_Review_Latency, \
+                            CF_Review_Entry, \
+                            CF_Button_Order, \
+                            Feedback_Text, \
+                            dialogueHistory)";
+  query += " VALUES( \
+              ${itemId}, \
+							${userId}, \
+							${TDFId}, \
+							${KCId}, \
+							${eventStartTime}, \
+							${feedbackDuration}, \
+							${stimulusDuration}, \
+							${responseDuration}, \
+							${outcome}, \
+							${probabilityEstimate}, \
+							${typeOfResponse}, \
+							${responseValue}, \
+							${displayedStimulus}, \
+							${dynamicTagFields}, \
+							${Anon_Student_Id}, \
+							${Condition_Namea}, \
+							${Condition_Typea}, \
+							${Condition_Nameb}, \
+							${Condition_Typeb}, \
+							${Condition_Namec}, \
+							${Condition_Typec}, \
+							${Condition_Named}, \
+							${Condition_Typed}, \
+							${Condition_Namee}, \
+							${Condition_Typee}, \
+							${Level_Unit}, \
+							${Level_Unitname}, \
+							${Problem_Name}, \
+							${Step_Name}, \
+							${Time}, \
+							${Input}, \
+							${Student_Response_Type}, \
+							${Student_Response_Subtype}, \
+							${Tutor_Response_Type}, \
+							${KC_Default}, \
+							${KC_Cluster}, \
+							${CF_GUI_Source}, \
+							${CF_Audio_Input_Enabled}, \
+							${CF_Audio_Output_Enabled}, \
+							${CF_Display_Order}, \
+							${CF_Stim_File_Index}, \
+							${CF_Set_Shuffled_Index}, \
+							${CF_Alternate_Display_Index}, \
+							${CF_Stimulus_Version}, \
+							${CF_Correct_Answer}, \
+							${CF_Correct_Answer_Syllables}, \
+							${CF_Correct_Answer_Syllables_Count}, \
+							${CF_Display_Syllable_Indices}, \
+							${CF_Response_Time}, \
+							${CF_Start_Latency}, \
+							${CF_End_Latency}, \
+							${CF_Review_Latency}, \
+							${CF_Review_Entry}, \
+							${CF_Button_Order}, \
+							${Feedback_Text}, \
+							${dialogueHistory})";
+  await db.none(query,historyRecord);
+}
+
+async function getHistoryByTDFfileName(TDFfileName){
+  let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
+  const histories = await db.manyOrNone(query,[{"fileName":TDFfileName}]);
+  let outputFormattedHistories = [];
+  for(let history of histories){
+    outputFormattedHistories.push({
+      'Selection': '',
+      'Action': '',
+      'Tutor Response Subtype': '',
+      "KC Category(Default)": '',
+      "KC Category(Cluster)": '',
+      "CF (Overlearning)": false,
+      "CF (Note)": '',
+      dialoguehistory:history.dialoguehistory,
+      itemid:history.itemid,
+      useridtdfid:history.useridtdfid,
+      kcid:history.kcid,
+      eventstarttime:history.eventstarttime,
+      feedbackduration:history.feedbackduration,
+      stimulusduration:history.stimulusduration,
+      responseduration:history.responseduration,
+      probabilityestimate:history.probabilityestimate,
+      typeofresponse:history.typeofresponse,
+      responsevalue:history.responsevalue,
+      displayedstimulus:history.displayedstimulus,
+      "Anon Student Id":history.anon_student_id,
+      "Session ID":history.session_id,
+      "Condition Namea":history.condition_namea,
+      "Condition Typea":history.condition_typea,
+      "Condition Nameb":history.condition_nameb,
+      "Condition Typeb":history.condition_typeb,
+      "Condition Namec":history.condition_namec,
+      "Condition Typec":history.condition_typec,
+      "Condition Named":history.condition_named,
+      "Condition Typed":history.condition_typed,
+      "Level (Unit)":history.level_unit,
+      "Level (Unitname)":history.level_unitname,
+      "Problem Name":history.problem_name,
+      "Step Name":history.step_name,
+      "Time":history.time,
+      "Input":history.input,
+      "Outcome":history.outcome,
+      "Student Response Type":history.student_response_type,
+      "Student Response Subtype":history.student_response_subtype,
+      "Tutor Response Type":history.tutor_response_type,
+      "Tutor Response Subtype":history.kc_default,
+      "KC (Cluster)":history.kc_cluster,
+      "CF (GUI Source)":history.cf_gui_source,
+      "CF (Audio Input Enabled)":history.cf_audio_input_enabled,
+      "CF (Audio Output Enabled)":history.cf_audio_output_enabled,
+      "CF (Display Order)":history.cf_display_order,
+      "CF (Stim File Index)":history.cf_stim_file_index,
+      "CF (Set Shuffled Index)":history.cf_set_shuffled_index,
+      "CF (Alternate Display Index)":history.cf_alternate_display_index,
+      "CF (Stimulus Version)":history.cf_stimulus_version,
+      "CF (Correct Answer)":history.cf_correct_answer,
+      "CF (Correct Answer Syllables)":history.cf_correct_answer_syllables,
+      "CF (Correct Answer Syllables Count)":history.cf_correct_answer_syllables_count,
+      "CF (Display Syllable Indices)":history.cf_display_syllable_indices,
+      "CF (Response Time)":history.cf_response_time,
+      "CF (Start Latency)":history.cf_start_latency,
+      "CF (End Latency)":history.cf_end_latency,
+      "CF (Review Latency)":history.cf_review_latency,
+      "CF (Review Entry)":history.cf_review_entry,
+      "CF (Button Order)":history.cf_button_order,
+      "Feedback Text":history.feedback_text
+    });
+  }
+  return outputFormattedHistories;
 }
 
 function getAllTeachers(southwestOnly=false){
@@ -524,9 +760,10 @@ async function editCourse(mycourse){
 async function addUserToTeachersClass(userid,teacherID,sectionId){
   console.log("addUserToTeachersClass",userid,teacherID,sectionId);
 
-  const existingMapping = await db.oneOrNone('SELECT COUNT(*) FROM section_user_map WHERE sectionId=$1 AND userId=$2',[sectionId,userid]);
-  console.log("existingMapping",existingMapping);
-  if(!existingMapping.length || existingMapping.length == 0){
+  const existingMappingCountRet = await db.oneOrNone('SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2',[sectionId,userid]);
+  let existingMappingCount = existingMappingCountRet.existingmappingcount;
+  console.log("existingMapping",existingMappingCount);
+  if(existingMappingCount == 0){
     console.log("new user, inserting into section_user_mapping",[sectionId,userid]);
     await db.none('INSERT INTO section_user_map(sectionId, userId) VALUES($1, $2)',[sectionId,userid]);
   }
@@ -573,7 +810,7 @@ async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
     AND TDFId = ${tdfId}
     GROUP BY userId`;
   
-  const res = db.one(query);
+  const res = await db.one(query);
 
   let practiceTimeIntervalsMap = {};
   for (let row of res) {
@@ -583,11 +820,18 @@ async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
   return practiceTimeIntervalsMap;
 }
 
+async function getStimuliSetByFilename(stimFilename){
+  const idRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1',stimFilename);
+  let stimuliSetId = idRet.stimulisetid;
+  if(!stimuliSetId) return null;
+  return await getStimuliSetById(stimuliSetId);
+}
+
 async function getStimuliSetById(stimuliSetId){
   let query = "SELECT * FROM item \
                WHERE stimuliSetId=$1 \
                ORDER BY itemId";
-  return await db.many(query,stimuliSetId);
+  return await db.manyOrNone(query,stimuliSetId);
 }
 
 async function getStimCountByStimuliSetId(stimuliSetId){
@@ -606,12 +850,12 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                WHERE s.userId=$1 AND t.TDFId=$2 AND s.currentUnitType = 'learningsession' \
-               GROUP BY s.userId";
+               GROUP BY s.userId \
+               ORDER BY i.itemId";
   return await db.one(query,[userId,TDFid]);
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId){
-
   let query =  "SELECT MAX(t.TDFId) AS tdfid, \
                 MAX(t.courseId) AS courseid, \
                 MAX(s.userId) AS userid, \
@@ -624,7 +868,8 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
                 INNER JOIN assignment AS a on a.TDFId = t.TDFId \
                 INNER JOIN course AS c on c.courseId = t.courseId \
                 WHERE c.semester = $1, c.teacherUserId = $2 AND s.currentUnitType = 'learningsession' \
-                GROUP BY s.userId, t.TDFId, c.courseId";
+                GROUP BY s.userId, t.TDFId, c.courseId \
+                ORDER BY i.itemId";
 
   const studentPerformanceRet = await db.any(query,[curSemester,instructorId]);
   let studentPerformanceForClass = {};
@@ -697,14 +942,14 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId,onlyWithLearningSess
 }
 
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
-  let lastStim = getStimCountByStimuliSetId(tdf.stimuliSetId) - 1;
+  let lastStim = getStimCountByStimuliSetId(tdf.stimulisetid) - 1;
   for (let i = 0; i < lastStim - 1; i++) {
     learningSessionItem[i] = true;
   }
 }
 
 function setLearningSessionItems(learningSessionItem, tdf) {
-  let units = tdf.tdfs.tutor.unit;
+  let units = tdf.content.tdfs.tutor.unit;
   if (!_.isEmpty(units)) {
     units.forEach(unit => {
       if (!!unit.learningsession) {
@@ -725,7 +970,7 @@ function getClusterListsFromUnit(unit) {
   return clustersToParse.split(' ').map(x => x.split('-').map(y => parseInt(y)));
 }
 
-function getStimJSON(fileName) {
+function getStimJSONFromFile(fileName) {
   var future = new Future();
   Assets.getText(fileName, function (err, data) {
       if (err) {
@@ -737,7 +982,7 @@ function getStimJSON(fileName) {
   return future.wait();
 }
 
-function getTdfJSON(fileName) {
+function getTdfJSONFromFile(fileName) {
     var future = new Future();
     Assets.getText(fileName, function (err, data) {
         if (err) {
@@ -834,16 +1079,6 @@ function findUserByName(username) {
     return null;
 }
 
-// Create a formatted Stim record given the specified parameters
-function createStimRecord(fileName, stimJson, ownerId, source) {
-    return {
-        'fileName': fileName,
-        'stimuli': stimJson,
-        'owner': ownerId,
-        'source': source
-    };
-}
-
 function sendEmail(to,from,subject,text){
   check([to,from,subject,text],[String]);
   Email.send({to,from,subject,text});
@@ -855,11 +1090,100 @@ function sendEmail(to,from,subject,text){
  * @param {Object} json 
  */
 function hasGeneratedTdfs(json) {
-  return json.tutor.generatedtdfs && json.tutor.generatedtdfs.length;
+  return json.tdfs.tutor.generatedtdfs && json.tdfs.tutor.generatedtdfs.length;
 }
 
-function hasAssociatedStimFile(json) {
-  return !!Stimuli.findOne({fileName: json.tutor.setspec[0].stimulusfile[0]});
+async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
+  const associatedStimSetIdRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1',stimulusFilename);
+  return associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
+}
+
+async function upsertStimFile(stimFilename,stimJSON,ownerId){
+  await db.tx(async t => {
+    const existingStimsRet = await t.manyOrNone('SELECT array_agg(itemId) AS stimIds FROM item WHERE stimulusFilename = $1 GROUP BY stimulusFilename',stimFilename);
+    let existingStims = existingStimsRet.stimids;
+    await t.none('DELETE from item WHERE itemId = ANY($1)',[existingStims]);
+
+    const highestStimSetIdRet = await t.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
+    let newStimSetId = (highestStimSetIdRet.higheststimsetid || 0) + 1;
+
+    let rec = {
+      'fileName': stimFilename,
+      'stimuli': stimJSON,
+      'owner': ownerId,
+      'source': 'repo'
+    };
+
+    const newItems = getNewItemFormat(rec,newStimSetId);
+
+    for(let stim of newItems){
+      stim.stimulusFilename = stimFilename;
+      if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
+      //try{
+        await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, clozeStimulus, alternateDisplays, tags) \
+        VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
+      //}catch(e){
+      //  serverConsole("ERROR upserting stim:",stimFilename,stim,e,e.stack)
+      //}
+    }
+    return {ownerId};
+  });
+}
+
+async function upsertTDFFile(tdfFilename,tdfJSON,ownerId){
+  const prev = await getTdfByFileName(tdfFilename);
+  let stimFileName;
+  let skipStimSet = false;
+  if(tdfJSON.tdfs.tutor.setspec[0].stimulusfile){
+    stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+  }else{
+    skipStimSet = true;
+  }
+  let stimSet;
+  if(!skipStimSet) stimSet = await getStimuliSetByFilename(stimFileName);
+  if(!stimSet && !skipStimSet) throw new Error('no stimset for tdf:',tdfFilename);
+  if (prev && prev.length > 0) {
+    if(!hasGeneratedTdfs(tdfJSON)){
+      try{
+        await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3 WHERE TDFId=$4'[ownerId, prev.stimulisetid, rec, prev.tdfid]);
+      }catch(e){
+        serverConsole('error updating tdf data',tdfFilename,e,e.stack)
+      }
+    }else{
+      let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
+      let generatedTdf = tdfGenerator.getGeneratedTdf();
+      delete generatedTdf.createdAt;
+      try{
+        await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3 WHERE TDFId=$4'[ownerId, prev.stimulisetid, generatedTdf, prev.tdfid])
+      }catch(e){
+        serverConsole('error updating tdf data2',tdfFilename,e,e.stack)
+      }
+    }
+  }else{
+    let stimuliSetId = await getAssociatedStimSetIdForStimFile(tdfFilename);
+    if(!stimuliSetId){
+      let highestStimSetIdRet = await db.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
+      stimuliSetId = highestStimSetIdRet.higheststimsetid + 1;
+    }
+    if (hasGeneratedTdfs(tdfJSON)) {
+      let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
+      let generatedTdf = tdfGenerator.getGeneratedTdf();
+      try{
+        await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3)',[ownerId,stimuliSetId,generatedTdf]);
+        console.log(JSON.stringify(generatedTdf));
+      }catch(e){
+        serverConsole('error updating tdf data3',tdfFilename,e,e.stack)
+      }
+    } else {
+      let rec = getNewTdfFormat(tdfJSON);
+      rec.createdAt = new Date();
+      try{
+        await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3)',[ownerId,stimuliSetId,rec]);
+      }catch(e){
+        serverConsole('error updating tdf data4',tdfFilename,e,e.stack)
+      }
+    }
+  }
 }
 
 const baseSyllableURL = 'http://localhost:4567/syllables/'
@@ -870,8 +1194,6 @@ function getSyllablesForWord(word){
   console.log("syllables for word, " + word + ": " + JSON.stringify(syllableArray) );
   return syllableArray;
 }
-
-const lengthOfNewGeneratedIDs = 6;
 
 //Server-side startup logic
 
@@ -893,10 +1215,10 @@ Meteor.startup(async function () {
 
     // Figure out the "prime admin" (owner of repo TDF/stim files)
     // Note that we accept username or email and then find the ID
-    var adminUser = findUserByName(getConfigProperty("owner"));
+    let adminUser = findUserByName(getConfigProperty("owner"));
 
     // Used below for ownership
-    var adminUserId = _.prop(adminUser, "_id") || "";
+    let adminUserId = _.prop(adminUser, "_id") || "";
     // adminUser should be in an admin role
     if (adminUserId) {
         Roles.addUsersToRoles(adminUserId, "admin");
@@ -904,6 +1226,9 @@ Meteor.startup(async function () {
     }
     else {
         serverConsole("Admin user ID could not be found. adminUser=", displayify(adminUser || "null"));
+        serverConsole("ADMIN USER is MISSING: a restart might be required");
+        serverConsole("Make sure you have a valid siteConfig");
+        serverConsole("***IMPORTANT*** There will be no owner for system TDF's");
     }
 
     // Get user in roles and make sure they are added
@@ -926,80 +1251,32 @@ Meteor.startup(async function () {
     roleAdd("admins", "admin");
     roleAdd("teachers", "teacher");
 
-    //Rewrite TDF and Stimuli documents if we have a file
-    //You'll note our lack of upsert in the loops below - we don't want _id to
-    //change under MongoDB 2.4 (later versions of Mongo don't have the bug)
-
-    var isXML = function (fn) {
-        return fn.indexOf('.xml') >= 0;
-    };
-    var isJSON = function (fn) {
-      return fn.indexOf('.json') >= 0;
-    };
     if(!isProd){
-        _.each(
-          _.filter(fs.readdirSync('./assets/app/stims/'), isJSON),
-          function (ele) {
-              //serverConsole("Updating Stim in DB from ", ele);
-              var json = getStimJSON('stims/' + ele);
-              var rec = createStimRecord(ele, json, adminUserId, 'repo');
+      serverConsole('start stims');
+      let stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => { return fn.indexOf('.json') >= 0; });
+      for(let filename of stimFilenames){
+        //try{
+          let json = getStimJSONFromFile('stims/' + filename);
+          await upsertStimFile(filename,json,adminUserId);
+        //}catch(e){
+        //  serverConsole('error loading stim file:',filename,e,e.stack);
+        //}
+      }
 
-              var prev = Stimuli.findOne({'fileName': ele});
-              if (prev) {
-                  Stimuli.update({ _id: prev._id }, rec);
-              }
-              else {
-                  Stimuli.insert(rec);
-              }
-          }
-      );
-
-      _.each(
-          _.filter(fs.readdirSync('./assets/app/tdf/'), isXML),
-          async function (ele) {
-              //serverConsole("Updating TDF in DB from ", ele);
-              var json = getTdfJSON('tdf/' + ele);
-
-              var rec = {'fileName':ele, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
-
-              const prev = await getTdfByFileName(ele);
-
-              if (prev && !hasGeneratedTdfs(json)) {
-                Tdfs.update({ _id: prev._id }, rec);
-              } else if (hasGeneratedTdfs(json)) {
-                let tdfGenerator = new DynamicTdfGenerator(json, ele, adminUserId, 
-                  'repo');
-                let generatedTdf = tdfGenerator.getGeneratedTdf();
-                if (prev) {
-                  try {
-                    delete generatedTdf.createdAt;
-                    Tdfs.update({_id: prev._id}, generatedTdf);
-                  } catch (error) {
-                    throw new Error('Error updating generated TDF: ', error);
-                  }
-                } else {
-                  try {
-                    Tdfs.insert(generatedTdf);
-                  } catch (error) {
-                    throw new Error('Error inserting generated TDF: ', error)
-                  }
-                }
-                console.log(JSON.stringify(tdfGenerator.getGeneratedTdf()));
-              } else {
-                rec.createdAt = new Date();
-                Tdfs.insert(rec);
-              }
-          }
-      );
-    }
-
-    //Log this late so they're more prone to see it
-    if (adminUserId) {
-        serverConsole("Admin user is", _.pick(adminUser, "_id", "username", "email"));
-    }else {
-        serverConsole("ADMIN USER is MISSING: a restart might be required");
-        serverConsole("Make sure you have a valid siteConfig");
-        serverConsole("***IMPORTANT*** There will be no owner for system TDF's");
+      setTimeout(async () => {
+        serverConsole('start tdfs');
+        let tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => { return fn.indexOf('.xml') >= 0; });
+        for(let filename of tdfFilenames){
+          //try{
+            let json = getTdfJSONFromFile('tdf/' + filename);
+            let rec = {'fileName':filename, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
+            await upsertTDFFile(filename,rec,adminUserId);
+          //}catch(e){
+          //  serverConsole('error loading tdf file:',filename,e);
+          //}
+        }
+      },2000);
+      
     }
 
     //Make sure we create a default user profile record when a new Google user
@@ -1075,8 +1352,9 @@ Meteor.startup(async function () {
       getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
-      getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFId,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
-      getPracticeTimeIntervalsMap,
+      getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
+      insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdAndTDFId,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
+      getSourceSentences,
 
       getAltServerUrl:function(){
         return altServerUrl;
@@ -1300,7 +1578,6 @@ Meteor.startup(async function () {
 
       saveUserSpeechAPIKey: function(key) {
         key = encryptUserData(key);
-        serverConsole("key:" + key);
         var result = true;
         var error = "";
         var userID = Meteor.userId();
@@ -1408,108 +1685,76 @@ Meteor.startup(async function () {
 
       //Allow file uploaded with name and contents. The type of file must be
       //specified - current allowed types are: 'stimuli', 'tdf'
-      saveContentFile: function(type, filename, filecontents) {
+      saveContentFile: async function(type, filename, filecontents) {
           serverConsole('saveContentFile', type, filename);
-          var results = {
+          let results = {
               'result': null,
               'errmsg': 'No action taken?',
               'action': 'None'
           };
+          if (!type)         throw "Type required for File Save";
+          if (!filename)     throw "Filename required for File Save";
+          if (!filecontents) throw "File Contents required for File Save";
 
-          //try {
-              if (!type)         throw "Type required for File Save";
-              if (!filename)     throw "Filename required for File Save";
-              if (!filecontents) throw "File Contents required for File Save";
+          //We need a valid use that is either admin or teacher
+          var ownerId = Meteor.user()._id;
+          if (!ownerId) { throw "No user logged in - no file upload allowed"; }
+          if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) { throw "You are not authorized to upload files"; }
+          if(type != "tdf" && type != "stim"){ throw "Unknown file type not allowed: " + type; }
 
-              //We need a valid use that is either admin or teacher
-              var ownerId = Meteor.user()._id;
-              if (!ownerId) {
-                  throw "No user logged in - no file upload allowed";
+          try{
+            if (type == "tdf") {
+              //Parse the XML contents to make sure we can acutally handle the file
+              let jsonContents = xml2js.parseStringSync(filecontents);
+              let json = { tutor: jsonContents.tutor }
+              let lessonName = _.trim(tutor.setspec[0].lessonname[0]);
+              if (lessonName.length < 1) { throw "TDF has no lessonname - it cannot be valid"; }
+
+              let rec;
+              if (hasGeneratedTdfs(json)) {
+                let stimulusFilename = json.tutor.setspec[0].stimulusfile[0];
+                if (!getAssociatedStimSetIdForStimFile(stimulusFilename)) {
+                  results.result = false;
+                  results.errmsg = "Please upload stimulus file before uploading a TDF"
+
+                  return results;
+                } else {
+                  const stimSet = getStimuliSetByFilename(stimulusFilename);
+                  let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload', stimSet);
+                  let generatedTdf = tdfGenerator.getGeneratedTdf();
+                  rec = generatedTdf;
+                }             
+              } else {
+                //Set up for TDF save
+                rec = {'fileName':filename, 'tdfs':json, 'owner':ownerId, 'source':'upload'};
               }
+              
+              await upsertTDFFile(filename,rec,ownerId);
+            }
+            else if (type === "stim") {
+              let jsonContents = JSON.parse(filecontents);
+              //Make sure the stim looks valid-ish
+              var clusterCount = jsonContents.setspec.clusters.length;
+              if (clusterCount < 1) { throw "Stimulus has no clusters - it cannot be valid"; }
 
-              if (!Roles.userIsInRole(Meteor.user(), ["admin", "teacher"])) {
-                  throw "You are not authorized to upload files";
-              }
+              //Set up for stim save
+              let rec = {
+                'fileName': filename,
+                'stimuli': jsonContents,
+                'owner': ownerId,
+                'source': 'upload'
+              };
+              await upsertStimFile(filename,rec,ownerId);
+            }
+          }catch(e){
+            serverConsole("ERROR saving content file:",e,e.stack);
+            results.result = false;
+            results.errmsg = JSON.stringify(e);
+            return results;
+          }
 
-              var rec, prev, collection;
-
-              if (type == "tdf") {
-                  //Parse the XML contents to make sure we can acutally handle the file
-                  var jsonContents = xml2js.parseStringSync(filecontents);
-
-                  //Make sure the TDF looks valid-ish
-                  var tutor = _.chain(jsonContents).prop("tutor").value();
-
-                  var lessonName = _.chain(tutor)
-                      .prop("setspec").first()
-                      .prop("lessonname").first().trim().value();
-                  if (lessonName.length < 1) {
-                      throw "TDF has no lessonname - it cannot be valid";
-                  }
-
-                  //Note that we don't check for units since a root TDF may
-                  //not have any units
-
-                  let json = {
-                    tutor: tutor,
-                  }
-                  if (hasGeneratedTdfs(json)) {
-                    if (!hasAssociatedStimFile(json)) {
-                      results.result = false;
-                      results.errmsg = "Please upload stimulus file before uploading a TDF"
-
-                      return results;
-                    } else {
-                      let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload');
-                      let generatedTdf = tdfGenerator.getGeneratedTdf();
-                      rec = generatedTdf;
-                    }             
-                  } else {
-                    //Set up for TDF save
-                    rec = {'fileName':filename, 'tdfs':jsonContents, 'owner':ownerId, 'source':'upload'};
-                  }
-                  
-                  collection = Tdfs;
-              }
-              else if (type === "stim") {
-                  let jsonContents = JSON.parse(filecontents);
-                  //Make sure the stim looks valid-ish
-                  var clusterCount = _.chain(jsonContents)
-                      .prop("setspec")
-                      .prop("clusters").prop("length").value();
-                  if (clusterCount < 1) {
-                      throw "Stimulus has no clusters - it cannot be valid";
-                  }
-
-                  //Set up for stim save
-                  rec = createStimRecord(filename, jsonContents, ownerId, 'upload');
-                  collection = Stimuli;
-              }
-              else {
-                  throw "Unknown file type not allowed: " + type;
-              }
-
-              //If we're here we should have enough to handle the file
-              prev = collection.findOne({'fileName': filename});
-              if (prev) {
-                  if (prev.owner !== ownerId) {
-                      throw "You may not overwrite a file you don't own";
-                  }
-                  results.action = "overwrite previous file";
-                  collection.update({ _id: prev._id }, rec);
-              }
-              else {
-                  results.action = "save new file";
-                  collection.insert(rec);
-              }
-
-              results.result = true;
-              results.errmsg = "";
-          // }
-          // catch(e) {
-          //     results.result = false;
-          //     results.errmsg = e;
-          // }
+          results.result = true;
+          results.errmsg = "";
 
           return results;
       },
@@ -1572,11 +1817,13 @@ Meteor.startup(async function () {
           serverConsole(usr + " " + logtxt);
       },
 
-      toggleTdfPresence: (tdfIds, mode) => {
+      toggleTdfPresence: async function(tdfIds, mode){
         let disable = mode === 'disable' ? true : false;
-        tdfIds.forEach(uid => {
-          Tdfs.update({_id: uid}, { $set: { disabled: disable } });
-        });
+        await db.tx(async t => {
+          tdfIds.forEach(tdfid => {
+            t.none("UPDATE tdf SET content = content::jsonb || $1 WHERE TDFId=$2",[{disabled: disable},tdfid]);
+          });
+        })
       },
 
       getTdfOwnersMap: ownerIds => {

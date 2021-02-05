@@ -1,6 +1,7 @@
 export const curSemester = "FA_2020";
 export const ALL_TDFS = "xml";
 export const KC_MULTIPLE = 10000;
+export const STIM_PARAMETER = "0,.7";
 // Define an ordering for the fields and the column name we'll put in the
 // output file. Note that these names must match the fields used in populate
 // record.
@@ -54,5 +55,6 @@ export const outputFields = [
     "CF (Review Entry)", //forceCorrectFeedback
     "CF (Button Order)", //CF buttonOrder
     "CF (Note)", //CF note
-    "Feedback Text"
+    "Feedback Text",
+    "dialogueHistory"
 ];

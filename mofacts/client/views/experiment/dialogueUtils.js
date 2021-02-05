@@ -17,6 +17,7 @@ export const DialogueUtils = {
 dialogueUserAnswers = [];
 dialogueContext = undefined;
 let dialogueUserPrompts = [];
+let closeQuestionPartsSaver = undefined;
 let dialogueCurrentDisplaySaver = undefined;
 let dialogueCallbackSaver = undefined;
 let dialogueTransitionInstructions = "  Press the button to continue.";
@@ -51,11 +52,11 @@ function dialogueLoop(err,res){
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
         console.log(res);
-        callback(fullTextIsCorrect); //TODO: are these in scope?
+        dialogueCallbackSaver();
     }else if(res.tag != 0){
         console.log("error with dialog loop, dialogue call: " + res.name);
         console.log(res);
-        callback(fullTextIsCorrect);
+        dialogueCallbackSaver();
     }else if(res.tag == 0){
         let result = res.fields[0];
         let newDisplay = result.Display;
@@ -95,6 +96,7 @@ function dialogueContinue(){
             Session.set("dialogueLoopStage",undefined);
             //restore session state
             Session.set("currentDisplay",dialogueCurrentDisplaySaver);
+            Session.set("closeQuestionParts",closeQuestionPartsSaver);
             console.log("finished, exiting dialogue loop");
             dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
             dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
@@ -109,6 +111,7 @@ function dialogueContinue(){
 }
 
 function initiateDialogue(callback){
+  closeQuestionPartsSaver = Session.get("clozeQuestionParts");
   Session.set("clozeQuestionParts",undefined);
   Session.set("dialogueLoopStage","intro");
   dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
