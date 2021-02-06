@@ -13,6 +13,7 @@ import {
 } from '../../lib/currentTestingHelpers';
 import { redoCardImage } from '../../index';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
+
 /*
 * card.js - the implementation behind card.html (and thus
 the main GUI implementation for MoFaCTS).
@@ -2308,7 +2309,12 @@ async function getExperimentState() {
 }
 
 async function updateExperimentState(newState,codeCallLocation){
+  if (!Session.get("currentExperimentState")) {
+    Session.set("currentExperimentState", {});
+  }
   let oldExperimentState = Session.get("currentExperimentState");
+  console.log(newState);
+  console.log(oldExperimentState);
   let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
   // if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
   //     let clientSideTimeStamp = Date.now();
@@ -2366,14 +2372,13 @@ async function resumeFromComponentState() {
     //currentTdfId and currentStimSetId based on experimental conditions
     //(if necessary)
     const rootTDFBoxed = await meteorCallAsync('getTdfById',Session.get("currentRootTdfId"));
-    let rootTDF = rootTDFBoxed.content;
+    let rootTDF = rootTDFBoxed.content.content;
     if (!rootTDF) {
         console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfId"));
         alert("Unfortunately, something is broken and this lesson cannot continue");
         leavePage("/profile");
         return;
     }
-
     const setspec = rootTDF.tdfs.tutor.setspec[0];
     let needExpCondition = (setspec.condition && setspec.condition.length);
 
@@ -2417,7 +2422,7 @@ async function resumeFromComponentState() {
         //to kill us if the current tdf is broken and has no stimulus file)
         Session.set("currentStimSetId", curTdf.stimuliSetId);
     }else {
-        Session.set("currentTdfFile",rootTdf);
+        Session.set("currentTdfFile",rootTDF);
         //Just notify that we're skipping
         console.log("No Experimental condition is required: continuing");
     }
