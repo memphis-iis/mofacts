@@ -534,12 +534,12 @@ function modelUnitEngine() {
         p.stimStudyTrialCount = stim.priorStudy;
         let answerText = Answers.getDisplayAnswerText(getStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
-        let currentStimSetId = Session.get("currentStimSetId");
+        let currentStimuliSetId = Session.get("currentStimuliSetId");
         answerText = answerText.replace(/\./g,'_');
         
         if(probFunctionHasHintSylls){
             if(!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]){
-                console.log("no cached syllables for: " + currentStimSetId + "|" + answerText);
+                console.log("no cached syllables for: " + currentStimuliSetId + "|" + answerText);
                 throw new Error("can't find syllable data in database");
             }else{
                 let stimSyllableData = this.cachedSyllables.data[answerText];

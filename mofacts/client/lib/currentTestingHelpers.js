@@ -108,7 +108,15 @@ function haveMeteorUser() {
 
 async function setStudentPerformance(studentID,studentUsername,tdfId){
   console.log("setStudentPerformance:",studentID,studentUsername,tdfId);
-  const studentPerformanceData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,tdfId);
+  const studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,tdfId);
+  let studentPerformanceData;
+  if(isEmpty(studentPerformanceDataRet)){
+    studentPerformanceData = {
+      numCorrect: 0,
+      numIncorrect: 0,
+      totalpracticeduration: 0
+    }
+  }
   let count = (studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect);
   let studentPerformance = {
     "username":studentUsername,
@@ -262,8 +270,10 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   let stims = Session.get("currentStimuliSet");
   let allAnswers = new Set();
 
+  console.log(stims);
   for(stim of stims){
-    var responseParts = stim.correctResponse.toLowerCase().split(";");
+    console.log(stim);
+    var responseParts = stim.correctresponse.toLowerCase().split(";");
     var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
     if(answerArray.length > 0){
       var singularAnswer = answerArray[0].split("~")[0];
@@ -274,7 +284,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   allAnswers = Array.from(allAnswers);
 
   if(removeExcludedPhraseHints){
-    let curSpeechHintExclusionListText = clusters[curClusterIndex][curStimIndex].speechHintExclusionList || "";
+    let curSpeechHintExclusionListText = getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || "";
     let exclusionList = curSpeechHintExclusionListText.split(',');
     //Remove the optional phrase hint exclusions
     allAnswers = allAnswers.filter((el)=>exclusionList.indexOf(el)==-1);

@@ -3,9 +3,9 @@ CREATE TYPE tdfVisibility AS ENUM ('enabled','disabled','profileOnly','profileSo
 CREATE TABLE tdf (
     TDFId SERIAL PRIMARY KEY,
     ownerId CHAR(17) NOT NULL,
-    stimuliSetId INTEGER NOT NULL,
+    stimuliSetId INTEGER,
     content JSONB  NOT NULL,
-    visibility tdfVisibility DEFAULT 'profileSouthwestOnly'
+    visibility tdfVisibility DEFAULT 'profileOnly'
 );
 
 CREATE INDEX idx_tdf_owner on tdf USING gin((content -> '_id'));

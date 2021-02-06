@@ -11,7 +11,7 @@ let stimuliSetId = 1;
 function generateStims(stimsJson){
   let jsonItems = [];
   stimsJson.forEach(stimFile => {
-    const items = getNewItemFormat(stimFile, stimuliSetId,localResponseKCMap);
+    const items = getNewItemFormat(stimFile, stimFile.fileName, stimuliSetId,localResponseKCMap);
     stimIdMap[stimFile.fileName] = stimuliSetId;
     jsonItems.push(items);
 
@@ -52,8 +52,8 @@ if(false){//switch to true to run via node
 }
 
 let localResponseKCMap = {};
-let curResponseKCCtr = 0;
-function getNewItemFormat(stimFile, stimuliSetId, responseKCMap){
+let curResponseKCCtr = 1;
+function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMap){
   let items = [];
   let responseKCs = Object.values(responseKCMap);
   for(let mapResponseKC of responseKCs){
@@ -73,20 +73,21 @@ function getNewItemFormat(stimFile, stimuliSetId, responseKCMap){
         }
 
         let responseKC;
-        if(responseKCMap[stim.response.correctResponse]){
+        if(responseKCMap[stim.response.correctResponse] || responseKCMap[stim.response.correctResponse] == 0){
           responseKC = responseKCMap[stim.response.correctResponse];
         }else{
           responseKC = curResponseKCCtr;
-          responseKCMap[stim.response.correctResponse] = curResponseKCCtr;
+          responseKCMap[stim.response.correctResponse] = JSON.parse(JSON.stringify(curResponseKCCtr));
           curResponseKCCtr += 1;
         }
         let item = {
           stimuliSetId: stimuliSetId,
-          clusterKC: clusterKC,
+          stimulusFilename: stimulusFilename,
           stimulusKC: stimKC,
+          clusterKC: clusterKC,
           responseKC: responseKC,
           params: stim.parameter || STIM_PARAMETER,
-          optimalProb: null,
+          optimalProb: stim.optimalProb,
           correctResponse: stim.response.correctResponse,
           incorrectResponses: incorrectResponses,
           itemResponseType: cluster.responseType || "text",
@@ -108,7 +109,7 @@ function getNewItemFormat(stimFile, stimuliSetId, responseKCMap){
   return items;
 }
 
-function getNewTdfFormat(oldTdf, tdfId, stimuliSetId){
+function getNewTdfFormat(oldTdf, stimuliSetId, tdfId){
   let tdfObj = {
     ownerId: oldTdf.owner,
     stimuliSetId: stimuliSetId,

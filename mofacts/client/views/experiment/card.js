@@ -240,15 +240,15 @@ function nextChar(c) {
 }
 
 function curStimHasSoundDisplayType(){
-  let currentStimSetId = Session.get("currentStimSetId");
+  let currentStimuliSetId = Session.get("currentStimuliSetId");
   let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
-  return stimDisplayTypeMap[currentStimSetId].hasAudio;
+  return stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
 }
 
 function curStimHasImageDisplayType(){
-  let currentStimSetId = Session.get("currentStimSetId");
+  let currentStimuliSetId = Session.get("currentStimuliSetId");
   let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
-  return stimDisplayTypeMap[currentStimSetId].hasImage;
+  return stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
 }
 
 function getCurrentStimDisplaySources(filterPropertyName="clozeText"){
@@ -2305,7 +2305,7 @@ async function getExperimentState() {
     const curExperimentState = await meteorCallAsync('getExperimentState',Meteor.userId(), Session.get("currentRootTdfId"));
     Meteor.call("updatePerformanceData","utlQuery","card.getExperimentState",Meteor.userId());
     Session.set("currentExperimentState",curExperimentState);
-    return curExperimentState;
+    return curExperimentState || {};
 }
 
 async function updateExperimentState(newState,codeCallLocation){
@@ -2369,10 +2369,10 @@ async function resumeFromComponentState() {
     //So here's the place where we'll use the ROOT tdf instead of just the
     //current TDF. It's how we'll find out if we need to perform experimental
     //condition selection. It will be our responsibility to update
-    //currentTdfId and currentStimSetId based on experimental conditions
+    //currentTdfId and currentStimuliSetId based on experimental conditions
     //(if necessary)
     const rootTDFBoxed = await meteorCallAsync('getTdfById',Session.get("currentRootTdfId"));
-    let rootTDF = rootTDFBoxed.content.content;
+    let rootTDF = rootTDFBoxed.content;
     if (!rootTDF) {
         console.log("PANIC: Unable to load the root TDF for learning", Session.get("currentRootTdfId"));
         alert("Unfortunately, something is broken and this lesson cannot continue");
@@ -2390,7 +2390,7 @@ async function resumeFromComponentState() {
         console.log("Experimental condition is required: searching");
         const prevCondition = experimentState.conditionTdfId;
 
-        var conditionTdfId = null;
+        let conditionTdfId = null;
 
         if (prevCondition) {
             //Use previous condition and log a notification that we did so
@@ -2420,15 +2420,18 @@ async function resumeFromComponentState() {
 
         //Also need to read new stimulus file (and note that we allow an exception
         //to kill us if the current tdf is broken and has no stimulus file)
-        Session.set("currentStimSetId", curTdf.stimuliSetId);
+        Session.set("currentStimuliSetId", curTdf.stimuliSetId);
+        console.log("condition stimuliSetId",curTdf)
     }else {
         Session.set("currentTdfFile",rootTDF);
+        Session.set("currentStimuliSetId", rootTDFBoxed.stimulisetid);
+
         //Just notify that we're skipping
-        console.log("No Experimental condition is required: continuing");
+        console.log("No Experimental condition is required: continuing",rootTDFBoxed);
     }
 
-    const stimuliSetId = Session.get("currentTdfFile").stimulisetid;
-    const stimuliSet = await getStimuliSetById(stimuliSetId);
+    let stimuliSetId = Session.get("currentStimuliSetId");
+    const stimuliSet = await meteorCallAsync('getStimuliSetById',stimuliSetId);
 
     Session.set("currentStimuliSet",stimuliSet);
 
@@ -2463,7 +2466,7 @@ async function resumeFromComponentState() {
     //Note that we need to wait until the exp condition is selected above so
     //that we go to the correct TDF
     let stimCount = getStimCount();
-    const clusterMapping = experimentState.clusterMapping;
+    let clusterMapping = experimentState.clusterMapping;
     if (!clusterMapping) {
         //No cluster mapping! Need to create it and store for resume
         //We process each pair of shuffle/swap together and keep processing
@@ -2506,7 +2509,7 @@ async function resumeFromComponentState() {
       newExperimentState.lastUnitStarted = 0;
     }
 
-    let curTdfUnit = tdfFile.tdfs.tutor.unit[Session.get("currentUnitNumber")];
+    let curTdfUnit = Session.get("currentTdfFile").tdfs.tutor.unit[Session.get("currentUnitNumber")];
     Session.set("currentTdfUnit",curTdfUnit);
 
     if(experimentState.questionIndex){
@@ -2525,14 +2528,14 @@ async function resumeFromComponentState() {
 }
 
 function checkSyllableCacheForCurrentStimFile(cb){
-  let currentStimSetId = Session.get("currentStimSetId");
-  cachedSyllables = StimSyllables.findOne({filename:currentStimSetId});
+  let currentStimuliSetId = Session.get("currentStimuliSetId");
+  cachedSyllables = StimSyllables.findOne({filename:currentStimuliSetId});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
   if(!cachedSyllables){
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers();
-    Meteor.call('updateStimSyllableCache',currentStimSetId,curAnswers,function(){
-      cachedSyllables = StimSyllables.findOne({filename:currentStimSetId});
+    Meteor.call('updateStimSyllableCache',currentStimuliSetId,curAnswers,function(){
+      cachedSyllables = StimSyllables.findOne({filename:currentStimuliSetId});
       console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
       cb();
     });
@@ -2585,7 +2588,7 @@ async function processUserTimesLog() {
     let moduleCompleted = false;
 
     //Reset current engine
-    let resetEngine = function(curUnitNum) {
+    function resetEngine(curUnitNum) {
         let curExperimentData = {
           cachedSyllables,
           experimentState
@@ -2645,7 +2648,7 @@ async function processUserTimesLog() {
             break;
     };
 
-    resetEngine(currentUnitNumber);
+    resetEngine(Session.get("currentUnitNumber"));
     engine.loadComponentStates();
 
     //If we make it here, then we know we won't need a resume until something

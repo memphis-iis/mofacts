@@ -22,7 +22,7 @@ Template.profileSouthwest.events({
         selectTdf(
             target.data("currentTdfId"),
             target.data("lessonname"),
-            target.data("currentStimSetId"),
+            target.data("currentStimuliSetId"),
             target.data("ignoreOutOfGrammarResponses"),
             target.data("speechOutOfGrammarFeedback"),
             "User button click",
@@ -77,7 +77,7 @@ Template.profileSouthwest.rendered = async function () {
               return;
           }
 
-          var currentStimSetId = tdf.currentStimSetId;
+          var currentStimuliSetId = tdf.currentStimuliSetId;
 
           var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
           var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
@@ -102,7 +102,7 @@ Template.profileSouthwest.rendered = async function () {
                   .addClass("btn btn-block btn-responsive tdfButton")
                   .data("tdfid", TDFId)
                   .data("lessonname", name)
-                  .data("currentStimSetId", currentStimSetId)
+                  .data("currentStimuliSetId", currentStimuliSetId)
                   .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
                   .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
                   .data("isMultiTdf",isMultiTdf)
