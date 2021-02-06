@@ -1,5 +1,5 @@
 import { ReactiveVar } from 'meteor/reactive-var'
-import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+import { haveMeteorUser } from '../../lib/currentTestingHelpers';
 import { getExperimentState } from '../experiment/card';
 
 export { selectTdf };
@@ -247,10 +247,10 @@ Template.profile.rendered = async function () {
 
     //Check all the valid TDF's
     for(let tdf of allTdfs){
-        let TDFId = tdf.TDFId;
+        let TDFId = tdf.tdfid;
         let tdfObject = tdf.content;
         let isMultiTdf = tdfObject.isMultiTdf;
-        let currentStimSetId = tdf.stimuliSetId;
+        let currentStimSetId = tdf.stimulisetid;
 
         //Make sure we have a valid TDF (with a setspec)
         console.log("tdfObject",tdfObject);
@@ -266,8 +266,6 @@ Template.profile.rendered = async function () {
             console.log("Skipping TDF with no name", setspec);
             return;
         }
-
-        var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
 
         var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
         var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
@@ -328,7 +326,8 @@ Template.profile.rendered = async function () {
         let enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ? setspec.enableAudioPromptAndFeedback[0] == "true" : false;
 
         tdfObject.name = name;
-        tdfObject.stimulusFile = stimulusFile;
+        tdfObject.tdfid = TDFId;
+        tdfObject.currentStimSetId = currentStimSetId;
         tdfObject.ignoreOutOfGrammarResponses = ignoreOutOfGrammarResponses;
         tdfObject.speechOutOfGrammarFeedback = speechOutOfGrammarFeedback;
         tdfObject.audioInputEnabled = audioInputEnabled;
@@ -394,6 +393,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
     Session.set("currentRootTdfId", currentTdfId);
     Session.set("currentTdfId", currentTdfId);
     const curTdf = await meteorCallAsync('getTdfById',currentTdfId);
+    console.log("selectTdf,curTdf",curTdf);
     Session.set("currentTdfFile",curTdf.content);
     Session.set("currentStimSetId", currentStimSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
@@ -427,8 +427,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
-    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
-    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    var tdfAudioPromptFeedbackEnabled = curTdf.content.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
+    var audioPromptTTSAPIKeyAvailable = !!curTdf.content.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     var audioPromptFeedbackEnabled = undefined;
     if(Session.get("experimentTarget")){
       audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
@@ -442,7 +442,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = curTdf.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = curTdf.content.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
@@ -455,7 +455,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       var tdfKeyPresent = !!curTdf.tdfs.tutor.setspec[0].speechAPIKey && !!curTdf.tdfs.tutor.setspec[0].speechAPIKey[0];
+       var tdfKeyPresent = !!curTdf.content.tdfs.tutor.setspec[0].speechAPIKey && !!curTdf.content.tdfs.tutor.setspec[0].speechAPIKey[0];
        if(!speechAPIKey && !tdfKeyPresent)
        {
          console.log("speech api key not found, showing modal for user to input");

@@ -173,7 +173,8 @@ async function getTdfByOwnerId(ownerId){
   try{
     console.log("getTdfByOwnerId:",ownerId);
     const tdfs = await db.any("SELECT * from tdf WHERE ownerid=$1",[ownerId]);
-    return tdfs[0];
+    let tdf = tdfs;
+    return tdf;
   }catch(e){
     console.log("getTdfByOwnerId ERROR,",ownerId,",",e);
     return null;
@@ -181,7 +182,10 @@ async function getTdfByOwnerId(ownerId){
 }
 
 async function getTdfById(TDFId){
-  return await db.one("SELECT * from tdf WHERE TDFId=$1",TDFId);
+  const tdfs = await db.one("SELECT * from tdf WHERE TDFId=$1",TDFId);
+  let tdf = tdfs;
+  serverConsole('getTdfById',TDFId,tdf,tdfs);
+  return tdf;
 }
 
 async function getTdfBy_id(_id){
@@ -189,7 +193,8 @@ async function getTdfBy_id(_id){
     console.log("getTdfBy_id:"+_id);
     let queryJSON = {"_id":_id};
     const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
-    return tdfs[0];
+    let tdf = tdfs;
+    return tdf;
   }catch(e){
     console.log("getTdfBy_id ERROR,",_id,",",e);
     return null;
@@ -199,8 +204,12 @@ async function getTdfBy_id(_id){
 async function getTdfByFileName(filename){
   try{
     let queryJSON = {"fileName":filename};
-    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1::jsonb",[queryJSON]);
-    return tdfs[0];
+    const tdfs = await db.one("SELECT * from tdf WHERE content @> $1::jsonb",[queryJSON]);
+    if(!tdfs){
+      return null;
+    }
+    let tdf = tdfs;
+    return tdf;
   }catch(e){
     console.log("getTdfByFileName ERROR,",filename,",",e);
     return null;
@@ -211,8 +220,9 @@ async function getTdfByExperimentTarget(experimentTarget){
   try{
     console.log("getTdfByExperimentTarget:"+experimentTarget);
     let queryJSON = {"tdfs":{"tutor":{"setspec":[{"experimentTarget":[experimentTarget]}]}}};
-    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
-    return tdfs[0];
+    const tdfs = await db.one("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    let tdf = tdfs;
+    return tdf;
   }catch(e){
     console.log("getTdfByExperimentTarget ERROR,",experimentTarget,",",e);
     return null;
@@ -223,19 +233,13 @@ async function getAllTdfs(){
   console.log("getAllTdfs");
   const tdfsRet = await db.any("SELECT * from tdf");
   let tdfs = tdfsRet.map(function(tdf){
-    tdf = {
-      tdfid:tdf.tdfid,
-      ownerid:tdf.ownerid,
-      stimulisetid:tdf.stimulisetid,
-      content:tdf.content.content,
-      visibility:tdf.visibility
-    }
     return tdf;
   })
   return tdfs;
 }
 
 async function getStimuliSetsForIdSet(stimuliSetIds){
+  if(!stimuliSetIds.length)stimuliSetIds = [stimuliSetIds];
   let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (";
   stimuliSetIds.map(stimSetId => query += stimSetId + ", ");
   query.substr(0,query.length-2); //cut off extra comma
@@ -508,7 +512,7 @@ async function setExperimentState(UserId,TDFId,newExperimentState){ //by current
   const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
   let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentstate : {};
   let updatedExperimentState = Object.assign(experimentState,newExperimentState);
-  let updateQuery = "UPDATE course SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
+  let updateQuery = "UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
   const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
   console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
   return updatedExperimentState;
@@ -1087,10 +1091,10 @@ function sendEmail(to,from,subject,text){
 /**
  * Helper to determine if a TDF should be generated according
  * to the provided tags
- * @param {Object} json 
+ * @param {Object} TDFjson 
  */
-function hasGeneratedTdfs(json) {
-  return json.tdfs.tutor.generatedtdfs && json.tdfs.tutor.generatedtdfs.length;
+function hasGeneratedTdfs(TDFjson) {
+  return TDFjson.tdfs.tutor.generatedtdfs && TDFjson.tdfs.tutor.generatedtdfs.length;
 }
 
 async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
@@ -1098,34 +1102,45 @@ async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
   return associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
 }
 
+//TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimFilename,stimJSON,ownerId){
   await db.tx(async t => {
     const existingStimsRet = await t.manyOrNone('SELECT array_agg(itemId) AS stimIds FROM item WHERE stimulusFilename = $1 GROUP BY stimulusFilename',stimFilename);
     let existingStims = existingStimsRet.stimids;
-    await t.none('DELETE from item WHERE itemId = ANY($1)',[existingStims]);
-
-    const highestStimSetIdRet = await t.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
-    let newStimSetId = (highestStimSetIdRet.higheststimsetid || 0) + 1;
-
-    let rec = {
-      'fileName': stimFilename,
-      'stimuli': stimJSON,
-      'owner': ownerId,
-      'source': 'repo'
-    };
-
-    const newItems = getNewItemFormat(rec,newStimSetId);
-
-    for(let stim of newItems){
-      stim.stimulusFilename = stimFilename;
-      if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
-      //try{
-        await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, clozeStimulus, alternateDisplays, tags) \
-        VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
-      //}catch(e){
-      //  serverConsole("ERROR upserting stim:",stimFilename,stim,e,e.stack)
-      //}
+    if(existingStims && existingStims.length > 0){//TODO: what if we find only some of the stims already exist?
+      for(let existingStimKC of existingStims){
+        let newStimData = stimJSON.find(x => x.stimulusKC == existingStimKC)
+        await t.none('UPDATE item SET stimulusSetId = ${stimulusSetId}, stimulusFilename = ${stimulusFilename}, stimulusKC = ${stimulusKC}, \
+                      clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, optimalProb = ${optimalProb}, \
+                      correctResponse = ${correctResponse}, incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
+                      speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, textStimulus = ${textStimulus}, \
+                      audioStimulus = ${audioStimulus}, imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus, \
+                      alternateDisplays = ${alternateDisplays}, tags = ${tags}',newStimData)
+      }
+    }else{
+      const highestStimSetIdRet = await t.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
+      let newStimSetId = (highestStimSetIdRet.higheststimsetid || 0) + 1;
+  
+      let oldStimFormat = {
+        'fileName': stimFilename,
+        'stimuli': stimJSON,
+        'owner': ownerId,
+        'source': 'repo'
+      };
+  
+      const responseKCMap = await getReponseKCMap();
+      const newItems = getNewItemFormat(oldStimFormat,newStimSetId,responseKCMap);
+  
+      for(let stim of newItems){
+        stim.stimulusFilename = stimFilename;
+        if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
+          await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, \
+            incorrectResponses, itemResponseType, clozeStimulus, alternateDisplays, tags) \
+          VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${optimalProb}, ${correctResponse}, \
+            ${incorrectResponses}, ${itemResponseType}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
+      }
     }
+    
     return {ownerId};
   });
 }
@@ -1134,30 +1149,29 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId){
   const prev = await getTdfByFileName(tdfFilename);
   let stimFileName;
   let skipStimSet = false;
+  let stimSet;
   if(tdfJSON.tdfs.tutor.setspec[0].stimulusfile){
     stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+    stimSet = await getStimuliSetByFilename(stimFileName);
   }else{
     skipStimSet = true;
   }
-  let stimSet;
-  if(!skipStimSet) stimSet = await getStimuliSetByFilename(stimFileName);
   if(!stimSet && !skipStimSet) throw new Error('no stimset for tdf:',tdfFilename);
-  if (prev && prev.length > 0) {
-    if(!hasGeneratedTdfs(tdfJSON)){
-      try{
-        await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3 WHERE TDFId=$4'[ownerId, prev.stimulisetid, rec, prev.tdfid]);
-      }catch(e){
-        serverConsole('error updating tdf data',tdfFilename,e,e.stack)
-      }
-    }else{
+  if (prev && prev.tdfid) {
+    let tdfJSONtoUpsert;
+    if(hasGeneratedTdfs(tdfJSON)){
       let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
       let generatedTdf = tdfGenerator.getGeneratedTdf();
       delete generatedTdf.createdAt;
-      try{
-        await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3 WHERE TDFId=$4'[ownerId, prev.stimulisetid, generatedTdf, prev.tdfid])
-      }catch(e){
-        serverConsole('error updating tdf data2',tdfFilename,e,e.stack)
-      }
+      tdfJSONtoUpsert = generatedTdf;
+    }else{
+      let rec = getNewTdfFormat(tdfJSON);//tdfJSON; TODO: is this right?
+      tdfJSONtoUpsert = rec.content;
+    }
+    try{
+      await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3 WHERE TDFId=$4'[ownerId, prev.stimulisetid, tdfJSONtoUpsert, prev.tdfid])
+    }catch(e){
+      serverConsole('error updating tdf data2',tdfFilename,e,e.stack)
     }
   }else{
     let stimuliSetId = await getAssociatedStimSetIdForStimFile(tdfFilename);
@@ -1165,23 +1179,22 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId){
       let highestStimSetIdRet = await db.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
       stimuliSetId = highestStimSetIdRet.higheststimsetid + 1;
     }
+    let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
       let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
       let generatedTdf = tdfGenerator.getGeneratedTdf();
-      try{
-        await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3)',[ownerId,stimuliSetId,generatedTdf]);
-        console.log(JSON.stringify(generatedTdf));
-      }catch(e){
-        serverConsole('error updating tdf data3',tdfFilename,e,e.stack)
-      }
+      tdfJSONtoUpsert = generatedTdf;
     } else {
       let rec = getNewTdfFormat(tdfJSON);
       rec.createdAt = new Date();
-      try{
-        await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3)',[ownerId,stimuliSetId,rec]);
-      }catch(e){
-        serverConsole('error updating tdf data4',tdfFilename,e,e.stack)
-      }
+      tdfJSONtoUpsert = rec.content;
+    }
+
+    try{
+      await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3)',[ownerId,stimuliSetId,tdfJSONtoUpsert]);
+      console.log(JSON.stringify(generatedTdf));
+    }catch(e){
+      serverConsole('error updating tdf data3',tdfFilename,e,e.stack)
     }
   }
 }

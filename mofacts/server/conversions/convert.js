@@ -6,11 +6,12 @@ const fs = require('fs');
 // stimIdMap = {
 //   fileName: stimId
 // }
-let stimIdMap = {};let stimuliSetId = 1;
+let stimIdMap = {};
+let stimuliSetId = 1;
 function generateStims(stimsJson){
   let jsonItems = [];
   stimsJson.forEach(stimFile => {
-    const items = getNewItemFormat(stimFile, stimuliSetId);
+    const items = getNewItemFormat(stimFile, stimuliSetId,localResponseKCMap);
     stimIdMap[stimFile.fileName] = stimuliSetId;
     jsonItems.push(items);
 
@@ -50,22 +51,34 @@ if(false){//switch to true to run via node
   generateTdfs(tdfsJson);
 }
 
-function getNewItemFormat(stimFile, stimuliSetId){
+let localResponseKCMap = {};
+let curResponseKCCtr = 0;
+function getNewItemFormat(stimFile, stimuliSetId, responseKCMap){
   let items = [];
+  let responseKCs = Object.values(responseKCMap);
+  for(let mapResponseKC of responseKCs){
+    if(mapResponseKC > curResponseKCCtr) 
+      curResponseKCCtr = mapResponseKC
+  }
 
   let baseKC = stimuliSetId * KC_MULTIPLE;
   let clusterKC = baseKC + 1;
   let stimKC = baseKC + 1;
   stimFile.stimuli.setspec.clusters.forEach((cluster, idx) => {
-    
-    let responseKC = 0;
     cluster.stims.forEach(stim => {
         let incorrectResponses = null;
         if (stim.response.incorrectResponses) {
           incorrectResponses = stim.response.incorrectResponses.join(",");
         }
 
-        responseKC = responseKC + 1;
+        let responseKC;
+        if(responseKCMap[stim.response.correctResponse]){
+          responseKC = responseKCMap[stim.response.correctResponse];
+        }else{
+          responseKC = curResponseKCCtr;
+          responseKCMap[stim.response.correctResponse] = curResponseKCCtr;
+          curResponseKCCtr += 1;
+        }
         let item = {
           stimuliSetId: stimuliSetId,
           clusterKC: clusterKC,
