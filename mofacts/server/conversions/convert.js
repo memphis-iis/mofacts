@@ -64,6 +64,7 @@ function getNewItemFormat(stimFile, stimuliSetId, responseKCMap){
   let baseKC = stimuliSetId * KC_MULTIPLE;
   let clusterKC = baseKC + 1;
   let stimKC = baseKC + 1;
+
   stimFile.stimuli.setspec.clusters.forEach((cluster, idx) => {
     cluster.stims.forEach(stim => {
         let incorrectResponses = null;

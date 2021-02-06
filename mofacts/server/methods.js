@@ -501,21 +501,29 @@ async function getTdfNamesAssignedByInstructor(instructorID){
 
 async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not currentTDFId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
-  const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
-  let experimentState = experimentStateRet[0].experimentState;
+  const experimentStateRet = await db.oneOrNone(query,[UserId,TDFId]);
+  let experimentState = experimentStateRet.experimentState;
   console.log("getExperimentState",TDFId,UserId,experimentState);
   return experimentState;
 }
 
 async function setExperimentState(UserId,TDFId,newExperimentState){ //by currentRootTDFId, not currentTDFId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
-  const experimentStateRet = await db.oneOrNone(query,[TDFId,UserId]);
-  let experimentState = experimentStateRet.length > 0 ? experimentStateRet[0].experimentstate : {};
-  let updatedExperimentState = Object.assign(experimentState,newExperimentState);
-  let updateQuery = "UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
-  const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
-  console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
-  return updatedExperimentState;
+  const experimentStateRet = await db.oneOrNone(query,[UserId,TDFId]);
+
+  if (experimentStateRet != null) {
+    let updatedExperimentState = Object.assign(experimentStateRet.experimentstate,newExperimentState);
+    let updateQuery = "UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
+    const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
+    console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
+
+    return updatedExperimentState;
+  }
+
+  let insertQuery = "INSERT INTO globalExperimentState (experimentState, userId, TDFId) VALUES ($1, $2, $3)";
+  await db.query(insertQuery,[{experimentstate: {}},UserId,TDFId]);
+
+  return experimentState;
 }
 
 async function insertHistory(historyRecord){
@@ -1264,33 +1272,34 @@ Meteor.startup(async function () {
     roleAdd("admins", "admin");
     roleAdd("teachers", "teacher");
 
-    if(!isProd){
-      serverConsole('start stims');
-      let stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => { return fn.indexOf('.json') >= 0; });
-      for(let filename of stimFilenames){
-        //try{
-          let json = getStimJSONFromFile('stims/' + filename);
-          await upsertStimFile(filename,json,adminUserId);
-        //}catch(e){
-        //  serverConsole('error loading stim file:',filename,e,e.stack);
-        //}
-      }
+    // if(!isProd){
+    //   serverConsole('start stims');
+    //   let stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => { return fn.indexOf('.json') >= 0; });
+    //   for(let filename of stimFilenames){
+    //     //try{
+    //       let json = getStimJSONFromFile('stims/' + filename);
+    //       console.log(JSON.stringify(json));
+    //       await upsertStimFile(filename,json,adminUserId);
+    //     //}catch(e){
+    //     //  serverConsole('error loading stim file:',filename,e,e.stack);
+    //     //}
+    //   }
 
-      setTimeout(async () => {
-        serverConsole('start tdfs');
-        let tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => { return fn.indexOf('.xml') >= 0; });
-        for(let filename of tdfFilenames){
-          //try{
-            let json = getTdfJSONFromFile('tdf/' + filename);
-            let rec = {'fileName':filename, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
-            await upsertTDFFile(filename,rec,adminUserId);
-          //}catch(e){
-          //  serverConsole('error loading tdf file:',filename,e);
-          //}
-        }
-      },2000);
+    //   setTimeout(async () => {
+    //     serverConsole('start tdfs');
+    //     let tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => { return fn.indexOf('.xml') >= 0; });
+    //     for(let filename of tdfFilenames){
+    //       //try{
+    //         let json = getTdfJSONFromFile('tdf/' + filename);
+    //         let rec = {'fileName':filename, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
+    //         await upsertTDFFile(filename,rec,adminUserId);
+    //       //}catch(e){
+    //       //  serverConsole('error loading tdf file:',filename,e);
+    //       //}
+    //     }
+    //   },2000);
       
-    }
+    // }
 
     //Make sure we create a default user profile record when a new Google user
     //shows up. We still want the default hook's 'profile' behavior, AND we want
@@ -1718,37 +1727,37 @@ Meteor.startup(async function () {
           try{
             if (type == "tdf") {
               //Parse the XML contents to make sure we can acutally handle the file
-              let jsonContents = xml2js.parseStringSync(filecontents);
-              let json = { tutor: jsonContents.tutor }
-              let lessonName = _.trim(tutor.setspec[0].lessonname[0]);
-              if (lessonName.length < 1) { throw "TDF has no lessonname - it cannot be valid"; }
+              //let jsonContents = xml2js.parseStringSync(filecontents);
+              // let json = { tutor: jsonContents.tutor }
+              // let lessonName = _.trim(tutor.setspec[0].lessonname[0]);
+              // if (lessonName.length < 1) { throw "TDF has no lessonname - it cannot be valid"; }
 
-              let rec;
-              if (hasGeneratedTdfs(json)) {
-                let stimulusFilename = json.tutor.setspec[0].stimulusfile[0];
-                if (!getAssociatedStimSetIdForStimFile(stimulusFilename)) {
-                  results.result = false;
-                  results.errmsg = "Please upload stimulus file before uploading a TDF"
+              // let rec;
+              // if (hasGeneratedTdfs(json)) {
+              //   let stimulusFilename = json.tutor.setspec[0].stimulusfile[0];
+              //   if (!getAssociatedStimSetIdForStimFile(stimulusFilename)) {
+              //     results.result = false;
+              //     results.errmsg = "Please upload stimulus file before uploading a TDF"
 
-                  return results;
-                } else {
-                  const stimSet = getStimuliSetByFilename(stimulusFilename);
-                  let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload', stimSet);
-                  let generatedTdf = tdfGenerator.getGeneratedTdf();
-                  rec = generatedTdf;
-                }             
-              } else {
-                //Set up for TDF save
-                rec = {'fileName':filename, 'tdfs':json, 'owner':ownerId, 'source':'upload'};
-              }
-              
-              await upsertTDFFile(filename,rec,ownerId);
+              //     return results;
+              //   } else {
+              //     const stimSet = getStimuliSetByFilename(stimulusFilename);
+              //     let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload', stimSet);
+              //     let generatedTdf = tdfGenerator.getGeneratedTdf();
+              //     rec = generatedTdf;
+              //   }             
+              // } else {
+              //   //Set up for TDF save
+              //   rec = {'fileName':filename, 'tdfs':json, 'owner':ownerId, 'source':'upload'};
+              // }
+              let jsonContents = JSON.parse(filecontents);
+              await upsertTDFFile(filename,jsonContents,ownerId);
             }
             else if (type === "stim") {
               let jsonContents = JSON.parse(filecontents);
               //Make sure the stim looks valid-ish
-              var clusterCount = jsonContents.setspec.clusters.length;
-              if (clusterCount < 1) { throw "Stimulus has no clusters - it cannot be valid"; }
+              // var clusterCount = jsonContents.setspec.clusters.length;
+              // if (clusterCount < 1) { throw "Stimulus has no clusters - it cannot be valid"; }
 
               //Set up for stim save
               let rec = {
@@ -1757,7 +1766,7 @@ Meteor.startup(async function () {
                 'owner': ownerId,
                 'source': 'upload'
               };
-              await upsertStimFile(filename,rec,ownerId);
+              await upsertStimFile(filename,jsonContents,ownerId);
             }
           }catch(e){
             serverConsole("ERROR saving content file:",e,e.stack);

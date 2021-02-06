@@ -1,6 +1,6 @@
 import { ReactiveVar } from 'meteor/reactive-var'
-import { haveMeteorUser } from '../../lib/currentTestingHelpers';
-import { getExperimentState } from '../experiment/card';
+import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+import { getExperimentState, updateExperimentState } from '../experiment/card';
 
 export { selectTdf };
 
@@ -248,7 +248,7 @@ Template.profile.rendered = async function () {
     //Check all the valid TDF's
     for(let tdf of allTdfs){
         let TDFId = tdf.tdfid;
-        let tdfObject = tdf.content;
+        let tdfObject = tdf.content.content;
         let isMultiTdf = tdfObject.isMultiTdf;
         let currentStimSetId = tdf.stimulisetid;
 
@@ -328,11 +328,11 @@ Template.profile.rendered = async function () {
         tdfObject.name = name;
         tdfObject.tdfid = TDFId;
         tdfObject.currentStimSetId = currentStimSetId;
+        //tdfObject.stimulusFile = stimulusFile;
         tdfObject.ignoreOutOfGrammarResponses = ignoreOutOfGrammarResponses;
         tdfObject.speechOutOfGrammarFeedback = speechOutOfGrammarFeedback;
         tdfObject.audioInputEnabled = audioInputEnabled;
         tdfObject.enableAudioPromptAndFeedback = enableAudioPromptAndFeedback;
-
 
         if (!!tdfObject.disabled) {
           disabledTdfs.push(tdfObject);
@@ -392,9 +392,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
     //current TDF should be changed due to an experimental condition
     Session.set("currentRootTdfId", currentTdfId);
     Session.set("currentTdfId", currentTdfId);
-    const curTdf = await meteorCallAsync('getTdfById',currentTdfId);
-    console.log("selectTdf,curTdf",curTdf);
-    Session.set("currentTdfFile",curTdf.content);
+    const tdfResponse = await meteorCallAsync('getTdfById',currentTdfId);
+    const curTdf = tdfResponse.content.content
+    Session.set("currentTdfFile",curTdf);
     Session.set("currentStimSetId", currentStimSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
@@ -427,8 +427,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
-    var tdfAudioPromptFeedbackEnabled = curTdf.content.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
-    var audioPromptTTSAPIKeyAvailable = !!curTdf.content.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    console.log(curTdf);
+    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
+    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     var audioPromptFeedbackEnabled = undefined;
     if(Session.get("experimentTarget")){
       audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
@@ -442,7 +443,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = curTdf.content.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = curTdf.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
