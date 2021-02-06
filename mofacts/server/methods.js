@@ -5,6 +5,7 @@ import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 import { getNewItemFormat, getNewTdfFormat } from "./conversions/convert";
 export { getTdfBy_id, getHistoryByTDFfileName };
+import { getItem, getComponentState, getCourse, getHistory } from './orm';
 
 /*jshint sub:true*/
 
@@ -241,7 +242,11 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
   query.substr(0,query.length-2); //cut off extra comma
   query += ") ORDER BY itemId";
   const stimSets = await db.many(query);
-  return stimSets;
+  let ret = [];
+  for(let stim of stimSets){
+    ret.push(getItem(stim));
+  }
+  return ret;
 }
 
 async function getProbabilityEstimatesByKCId(relevantKCIds){
@@ -259,14 +264,19 @@ async function getReponseKCMap(){
   let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
   let responseKCMap = {};
   for(let pair of responseKCStuff){
-    responseKCMap[pair.correctResponse] = pair.responseKC;
+    responseKCMap[pair.correctResponse] = pair.responsekc;
   }
   return responseKCMap;
 }
 
 //by currentTDFId, not currentRootTDFId
 async function getComponentStatesByUserIdAndTDFId(userId,TDFId){
-  return await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId',[userId,TDFId]);
+  let componentStatesRet = await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId',[userId,TDFId]);
+  let componentStates = [];
+  for(let componentState of componentStatesRet){
+    componentStates.push(getComponentState(componentState));
+  }
+  return componentStates;
 }
 
 async function setComponentStatesByUserIdAndTDFId(userId,TDFId,componentStates){
@@ -365,7 +375,11 @@ async function getSourceSentences(stimuliSetId){
 
 async function getAllCourses(){
   try{
-    const courses = await db.any("SELECT * from course");
+    const coursesRet = await db.any("SELECT * from course");
+    let courses = [];
+    for(let course of coursesRet){
+      courses.push(getCourse(course));
+    }
     return courses;
   }catch(e){
     console.log("getAllCourses ERROR,",e);
@@ -388,7 +402,11 @@ async function getAllCourseSections(){
 async function getAllCoursesForInstructor(instructorId){
   console.log("getAllCoursesForInstructor:",instructorId);
   let query = "SELECT * from course WHERE teacherUserId=$1 AND semester=$2";
-  const courses = await db.any(query,[instructorId,curSemester]);
+  const coursesRet = await db.any(query,[instructorId,curSemester]);
+  let courses = [];
+  for(let course of coursesRet){
+    courses.push(getCourse(course));
+  }
   return courses;
 }
 
@@ -645,68 +663,7 @@ async function getHistoryByTDFfileName(TDFfileName){
   const histories = await db.manyOrNone(query,[{"fileName":TDFfileName}]);
   let outputFormattedHistories = [];
   for(let history of histories){
-    outputFormattedHistories.push({
-      'Selection': '',
-      'Action': '',
-      'Tutor Response Subtype': '',
-      "KC Category(Default)": '',
-      "KC Category(Cluster)": '',
-      "CF (Overlearning)": false,
-      "CF (Note)": '',
-      dialoguehistory:history.dialoguehistory,
-      itemid:history.itemid,
-      useridtdfid:history.useridtdfid,
-      kcid:history.kcid,
-      eventstarttime:history.eventstarttime,
-      feedbackduration:history.feedbackduration,
-      stimulusduration:history.stimulusduration,
-      responseduration:history.responseduration,
-      probabilityestimate:history.probabilityestimate,
-      typeofresponse:history.typeofresponse,
-      responsevalue:history.responsevalue,
-      displayedstimulus:history.displayedstimulus,
-      "Anon Student Id":history.anon_student_id,
-      "Session ID":history.session_id,
-      "Condition Namea":history.condition_namea,
-      "Condition Typea":history.condition_typea,
-      "Condition Nameb":history.condition_nameb,
-      "Condition Typeb":history.condition_typeb,
-      "Condition Namec":history.condition_namec,
-      "Condition Typec":history.condition_typec,
-      "Condition Named":history.condition_named,
-      "Condition Typed":history.condition_typed,
-      "Level (Unit)":history.level_unit,
-      "Level (Unitname)":history.level_unitname,
-      "Problem Name":history.problem_name,
-      "Step Name":history.step_name,
-      "Time":history.time,
-      "Input":history.input,
-      "Outcome":history.outcome,
-      "Student Response Type":history.student_response_type,
-      "Student Response Subtype":history.student_response_subtype,
-      "Tutor Response Type":history.tutor_response_type,
-      "Tutor Response Subtype":history.kc_default,
-      "KC (Cluster)":history.kc_cluster,
-      "CF (GUI Source)":history.cf_gui_source,
-      "CF (Audio Input Enabled)":history.cf_audio_input_enabled,
-      "CF (Audio Output Enabled)":history.cf_audio_output_enabled,
-      "CF (Display Order)":history.cf_display_order,
-      "CF (Stim File Index)":history.cf_stim_file_index,
-      "CF (Set Shuffled Index)":history.cf_set_shuffled_index,
-      "CF (Alternate Display Index)":history.cf_alternate_display_index,
-      "CF (Stimulus Version)":history.cf_stimulus_version,
-      "CF (Correct Answer)":history.cf_correct_answer,
-      "CF (Correct Answer Syllables)":history.cf_correct_answer_syllables,
-      "CF (Correct Answer Syllables Count)":history.cf_correct_answer_syllables_count,
-      "CF (Display Syllable Indices)":history.cf_display_syllable_indices,
-      "CF (Response Time)":history.cf_response_time,
-      "CF (Start Latency)":history.cf_start_latency,
-      "CF (End Latency)":history.cf_end_latency,
-      "CF (Review Latency)":history.cf_review_latency,
-      "CF (Review Entry)":history.cf_review_entry,
-      "CF (Button Order)":history.cf_button_order,
-      "Feedback Text":history.feedback_text
-    });
+    outputFormattedHistories.push(getHistory(history));
   }
   return outputFormattedHistories;
 }
@@ -840,7 +797,12 @@ async function getStimuliSetById(stimuliSetId){
   let query = "SELECT * FROM item \
                WHERE stimuliSetId=$1 \
                ORDER BY itemId";
-  return await db.manyOrNone(query,stimuliSetId);
+  let itemRet = await db.manyOrNone(query,stimuliSetId);
+  let items = [];
+  for(let item of itemRet){
+    items.push(getItem(item));
+  }
+  return items;
 }
 
 async function getStimCountByStimuliSetId(stimuliSetId){
@@ -860,7 +822,13 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                WHERE s.userId=$1 AND t.TDFId=$2 AND s.currentUnitType = 'learningsession' \
                GROUP BY s.userId";
-  return await db.oneOrNone(query,[userId,TDFid]);
+  const perfRet = await db.oneOrNone(query,[userId,TDFid]);
+  if(!perfRet) return null;
+  return {
+    numCorrect: perfRet.numcorrect,
+    numIncorrect: perfRet.numincorrect,
+    totalPracticeDuration: perfRet.totalpracticeduration,
+  }
 }
 
 async function getStudentPerformanceForClassAndTdfId(instructorId){
@@ -888,12 +856,12 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
       userIdToUsernames[userid] = studentUsername;
     } 
 
-    let { courseid, userid, tdfid, correct, incorrect, totalPrompt, totalStudy } = studentPerformance;
+    let { courseid, userid, tdfid, correct, incorrect, totalprompt, totalstudy } = studentPerformance;
     if(!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
     if(!studentPerformanceForClass[courseid][tdfid]) studentPerformanceForClass[courseid][tdfid] = {count:0,totalTime:0,numCorrect:0}
     studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
     studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
-    studentPerformanceForClass[courseid][tdfid].totalTime += totalPrompt + totalStudy;
+    studentPerformanceForClass[courseid][tdfid].totalTime += totalprompt + totalstudy;
 
     if(!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
     if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
@@ -901,7 +869,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
     if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count:0,totalTime:0,numCorrect:0,username:studentUsername,userId:userid};
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalPrompt + totalStudy;
+    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalprompt + totalstudy;
   }
   for(let coursetotals of studentPerformanceForClass){
     for(let tdftotal of coursetotals){
@@ -1099,8 +1067,8 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
     let newStims = [];
     if(existingStims && existingStims.length > 0){//TODO: what if we find only some of the stims already exist?
       for(let newStim of newFormatItems){
-        let stimulusKC = newStim.stimuluskc;
-        let matchingStim = existingStims.find(x => x.stimulusKC == stimulusKC);
+        let stimulusKC = newStim.stimulusKC;
+        let matchingStim = existingStims.find(x => x.stimuluskc == stimulusKC);
         if(!matchingStim){
           newStims.push(newStim);
           continue;

@@ -30,7 +30,7 @@
  * filter                    - filter for user admin page
  * ignoreOutOfGrammarResponses - speech input, only transcribe if recognized word in answer set
  * loginMode                 - untouched in sessionCleanUp
- * needResume
+ * inResume
  * questionIndex
  * recording
  * runSimulation
@@ -91,7 +91,7 @@ sessionCleanUp = function() {
     Session.set("experimentPasswordRequired",false);
     Session.set("filter","@gmail.com");
     Session.set("ignoreOutOfGrammarResponses",false);
-    Session.set("needResume", false);
+    Session.set("inResume", false);
     Session.set("questionIndex", undefined);
     Session.set("recording",false);
     Session.set("sampleRate", undefined);

@@ -1,3 +1,4 @@
+import { KC_MULTIPLE } from '../../common/Definitions';
 import { dialogueSelectState } from '../views/home/profileDialogueToggles';
 
 export { 
@@ -151,26 +152,36 @@ function getCurrentClusterAndStimIndices(){
 
 //Return the total number of stim clusters
 function getStimCount() {
-  return Session.get("currentStimuliSet").length;
+  let stimSet = Session.get("currentStimuliSet");
+  let numClusters = 0;
+  let seenClusters = {};
+  for(let stim of stimSet){
+    if(!seenClusters[stim.clusterKC]){
+      seenClusters[stim.clusterKC] = true;
+      numClusters += 1;
+    }
+  }
+  return numClusters;
 };
 
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping. 
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-  let clusterMapping = Session.get("clusterMapping");
-    let rawIndex = clusterMapping ? clusterMapping[clusterMappedIndex] : clusterMappedIndex;
-    let stims = [];
-    for(let stim of Session.get("currentStimuliSet")){
-      if(stim.clusterKC == rawIndex){
-        stims.push(stim);
-      }
-    }
+    let isLearningSession = Session.get("sessionType") == "learningsession";
+    let clusterMapping = Session.get("clusterMapping");
+    let rawIndex = isLearningSession ? clusterMapping[clusterMappedIndex] : clusterMappedIndex; //Only learning sessions use cluster mapping
     let cluster = { 
       shufIndex: clusterMappedIndex,//Tack these on for later logging purposes
       clusterIndex: rawIndex,
-      stims
+      stims: []
     };
+    for(let stim of Session.get("currentStimuliSet")){
+      if(stim.clusterKC % KC_MULTIPLE == rawIndex){
+        cluster.stims.push(stim);
+      }
+    }
+    console.log('getStimCluster',cluster);
     //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
     return cluster;
 };
@@ -273,7 +284,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   console.log(stims);
   for(stim of stims){
     console.log(stim);
-    var responseParts = stim.correctresponse.toLowerCase().split(";");
+    var responseParts = stim.correctResponse.toLowerCase().split(";");
     var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
     if(answerArray.length > 0){
       var singularAnswer = answerArray[0].split("~")[0];
