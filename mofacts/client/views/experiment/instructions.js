@@ -349,7 +349,7 @@ instructContinue = function () {
 
         const res = await updateExperimentState(newExperimentState, "instructions.instructContinue");
         console.log("instructContinue",res);
-        Session.set("needResume", true);
+        Session.set("inResume", true);
         leavePage("/card");
         enterKeyLock = false;
         console.log("releasing enterKeyLock in instructContinue");

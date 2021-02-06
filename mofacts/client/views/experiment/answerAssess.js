@@ -111,7 +111,11 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
             let checkOtherAnswers = Session.get("currentDeliveryParams").checkOtherAnswers;
             //Check to see if the user answer is an exact match for any other answers in the stim file,
             //If not we'll do an edit distance calculation to determine if they were close enough to the correct answer
-            if(checkOtherAnswers && checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText)){
+            let matchOther;
+            if(checkOtherAnswers){
+                matchOther = checkIfUserAnswerMatchesOtherAnswers(s1,fullAnswerText);
+            }
+            if(checkOtherAnswers && matchOther){
               return 0;
             }else{
               let editDistance = getEditDistance(s1, s2)
@@ -142,11 +146,11 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
 function stringMatch(stimStr, userAnswer, lfparameter) {
     if (/^[\|A-Za-z0-9 \.\%]+$/i.test(stimStr)) {
         // They have the regex matching our special condition - check it manually
-        var checks = _.trim(stimStr).split('|');
-        for(var i = 0; i < checks.length; ++i) {
+        let checks = _.trim(stimStr).split('|');
+        for(let i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
-            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter, stimStr);
+            let matched = simpleStringMatch(userAnswer, checks[i], lfparameter, stimStr);
             if (matched !== 0) {
                 return matched; //Match!
             }
@@ -169,11 +173,11 @@ function regExMatch(regExStr, userAnswer, lfparameter,fullAnswer) {
     if (lfparameter && /^[\|A-Za-z0-9 ]+$/i.test(regExStr)) {
         // They have an edit distance parameter and the regex matching our
         // special condition - check it manually
-        var checks = _.trim(regExStr).split('|');
+        let checks = _.trim(regExStr).split('|');
         for(var i = 0; i < checks.length; ++i) {
             if (checks[i].length < 1)
                 continue;  //No blank checks
-            var matched = simpleStringMatch(userAnswer, checks[i], lfparameter, fullAnswer);
+            let matched = simpleStringMatch(userAnswer, checks[i], lfparameter, fullAnswer);
             if (matched !== 0) {
                 return matched; //Match!
             }
@@ -201,7 +205,7 @@ function matchBranching(answer, userAnswer, lfparameter) {
             continue;
 
         flds[0] = _.trim(flds[0]).toLowerCase();
-        var matched = regExMatch(flds[0], userAnswerCheck, lfparameter,answer);
+        let matched = regExMatch(flds[0], userAnswerCheck, lfparameter,answer);
         if (matched !== 0) {
             matchText = _.trim(flds[1]);
             if (matched === 2) {
@@ -229,6 +233,50 @@ function _branchingCorrectText(answer) {
 
     result = result.split('|');
     return result[0];
+}
+
+function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter){
+    let answerDisplay = originalAnswer || correctAnswer;
+    let isCorrect, matchText;
+    if (answerIsBranched(correctAnswer)) {
+        [isCorrect,matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
+    }
+    else {    
+        var dispAnswer = _.trim(answerDisplay);
+        if (dispAnswer.indexOf("|") >= 0) {
+            // Take first answer if it's a bar-delimited string
+            dispAnswer = _.trim(dispAnswer.split("|")[0]);
+        }
+
+        let match = stringMatch(correctAnswer, userAnswer, lfparameter);
+
+        if (match === 0) {
+            isCorrect = false;
+            matchText = "";
+        }
+        else if (match === 1) {
+            isCorrect = true;
+            matchText = "Correct.";
+        }
+        else if (match === 2) {
+            isCorrect = true;
+            matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+        }
+        else {
+            console.log("MATCH ERROR: something fails in our comparison");
+            isCorrect = false;
+            matchText = "";
+        }
+
+        if (!matchText) {
+            if (userAnswer === "") {
+                matchText = "The correct answer is " + dispAnswer + ".";
+            }else{
+              matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
+          }
+        }
+    }
+    return {isCorrect, matchText};
 }
 
 Answers = {
@@ -259,60 +307,16 @@ Answers = {
 
     //Return [isCorrect, matchText] if userInput correctly matches answer -
     //taking into account both branching answers and edit distance
-    answerIsCorrect: function(userInput, answer, originalAnswer, setspec,callback) {
+    answerIsCorrect: async function(userInput, answer, originalAnswer, setspec,callback) {
         //Note that a missing or invalid lfparameter will result in a null value
-        var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
+        let lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
         let feedbackType = Session.get("currentDeliveryParams").feedbackType;
 
-        checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
-            let answerDisplay = originalAnswer || correctAnswer;
-            let isCorrect, matchText;
-            if (answerIsBranched(correctAnswer)) {
-                [isCorrect,matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
-            }
-            else {    
-                var dispAnswer = _.trim(answerDisplay);
-                if (dispAnswer.indexOf("|") >= 0) {
-                    // Take first answer if it's a bar-delimited string
-                    dispAnswer = _.trim(dispAnswer.split("|")[0]);
-                }
-    
-                var match = stringMatch(correctAnswer, userAnswer, lfparameter);
-    
-                if (match === 0) {
-                    isCorrect = false;
-                    matchText = "";
-                }
-                else if (match === 1) {
-                    isCorrect = true;
-                    matchText = "Correct.";
-                }
-                else if (match === 2) {
-                    isCorrect = true;
-                    matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
-                }
-                else {
-                    console.log("MATCH ERROR: something fails in our comparison");
-                    isCorrect = false;
-                    matchText = "";
-                }
-    
-                if (!matchText) {
-                    if (userAnswer === "") {
-                        matchText = "The correct answer is " + dispAnswer + ".";
-                    }else{
-                      matchText = isCorrect ? "Correct" :  "Incorrect. The correct answer is " + dispAnswer + ".";
-                  }
-                }
-            }
-            return {isCorrect, matchText};
-        }
-
-        let fullTextIsCorrect = checkAnswer(userInput,answer,originalAnswer);
+        let fullTextIsCorrect = checkAnswer(userInput,answer,originalAnswer,lfparameter);
 
         //Try again with original answer in case we did a syllable answer and they input the full response
         if(!fullTextIsCorrect.isCorrect && !!originalAnswer){
-            fullTextIsCorrect = checkAnswer(userInput,originalAnswer,originalAnswer);
+            fullTextIsCorrect = checkAnswer(userInput,originalAnswer,originalAnswer,lfparameter);
         }
 
         if(!fullTextIsCorrect.isCorrect){
@@ -346,5 +350,5 @@ Answers = {
         }else{
             callback(fullTextIsCorrect);
         }
-    },
+    }
 };

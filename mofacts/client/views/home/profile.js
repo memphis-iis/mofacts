@@ -262,14 +262,6 @@ Template.profile.rendered = async function () {
         }
 
         let name = setspec.lessonname[0];
-        if(name == "Testing Tdf"){
-          console.log("Testing Tdf",tdf)
-        }
-        // if (!name) {
-        //     console.log("Skipping TDF with no name", setspec);
-        //     continue;
-        // }
-
         let ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ? setspec.speechIgnoreOutOfGrammarResponses[0].toLowerCase()  == "true" : false;
         let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ? setspec.speechOutOfGrammarFeedback[0] : "Response not in answer set";
 
@@ -469,7 +461,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     }
     await updateExperimentState(newExperimentState,"profile.selectTdf");
 
-    Session.set("needResume", true);
+    Session.set("inResume", true);
     if(isMultiTdf){
       navigateForMultiTdf();
     }else{

@@ -3,7 +3,10 @@ import {
     rangeVal,
     getStimCount, 
     getStimCluster, 
-    getTestType
+    getTestType,
+    shuffle,
+    randomChoice,
+    createStimClusterMapping
 } from '../../lib/currentTestingHelpers';
 import { updateExperimentState } from './card';
 import { KC_MULTIPLE } from '../../../common/Definitions';
@@ -162,8 +165,16 @@ function defaultUnitEngine(curExperimentData) {
         setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
             let newExperimentState = {};
             Session.set("alternateDisplayIndex",undefined);
-            let curStim = getStimCluster(cardIndex).stims[whichStim];
-            let currentDisplay = JSON.parse(JSON.stringify(curStim.display));
+            let cluster = getStimCluster(cardIndex);
+            console.log('setUpCardQuestionAndAnswerGlobals',cardIndex,whichStim,prob,cluster,cluster.stims[whichStim]);
+            let curStim = cluster.stims[whichStim];
+            let currentDisplay = JSON.parse(JSON.stringify({
+                text:curStim.textstimulus,
+                audioSrc:curStim.audioStimulus,
+                imgSrc:curStim.imageStimulus,
+                videoSrc:curStim.videoStimulus,
+                clozeText:curStim.clozeStimulus
+            }));
             if(curStim.alternateDisplays){
                 let numPotentialDisplays = curStim.alternateDisplays.length + 1;
                 let displayIndex = Math.floor(numPotentialDisplays * Math.random());
@@ -731,7 +742,6 @@ function modelUnitEngine() {
 
     //Our actual implementation
     return {
-        //Unfinished
         saveComponentStates: async function(){
             let userId = Meteor.userId();
             let TDFId = Session.set("currentTdfId");
@@ -813,6 +823,7 @@ function modelUnitEngine() {
             let numCorrectAnswers = 0;
             let probsMap = {};
             for(let card of cards){
+                console.log('card.clusterKC',card.clusterKC);
                 let modelCard = cardProbabilities.cards[card.clusterKC];
                 Object.assign(modelCard,card);
                 card.outcomeStack = card.outcomeStack.split(',');
@@ -891,7 +902,7 @@ function modelUnitEngine() {
           return unitMode;
         })(),
 
-        initImpl: function() {
+        initImpl: async function() {
             initializeActRModel();
         },
 
@@ -989,7 +1000,6 @@ function modelUnitEngine() {
                 console.log("Model selected stim:", displayify(stim));
 
                 // Log time stats in human-readable form
-                var secsStr = function(t) { return secs(t) + ' secs'; };
                 var elapsedStr = function(t) { return t < 1 ? 'Never Seen': secs(Date.now() - t); };
                 console.log(
                     'Card First Seen:', elapsedStr(card.firstSeen),
@@ -1030,8 +1040,6 @@ function modelUnitEngine() {
             
             this.saveComponentStates();
             await updateExperimentState(newExperimentState,"unitEngine.modelUnitEngine.selectNextCard");
-
-            return newProbIndex;
         },
 
         cardAnswered: function(wasCorrect) {
@@ -1130,9 +1138,9 @@ function modelUnitEngine() {
         },
 
         unitFinished: function() {
-            var session = this.curUnit.learningsession;
-            var minSecs = session.displayminseconds || 0;
-            var maxSecs = session.displaymaxseconds || 0;
+            let session = this.curUnit.learningsession;
+            let minSecs = session.displayminseconds || 0;
+            let maxSecs = session.displaymaxseconds || 0;
 
             //TODO: why are we using side effects to handle the unit being finished? Fix this
             if (minSecs > 0.0 || maxSecs > 0.0) {
@@ -1145,14 +1153,14 @@ function modelUnitEngine() {
 
             //TODO: we should probably remove this as it's been superceded by displayminseconds/displaymaxseconds
             // If we're still here, check practice seconds
-            var practiceSeconds = Session.get("currentDeliveryParams").practiceseconds;
+            let practiceSeconds = Session.get("currentDeliveryParams").practiceseconds;
             if (practiceSeconds < 1.0) {
                 //Less than a second is an error or a missing values
                 console.log("No Practice Time Found and display timer: user must quit with Continue button");
                 return false;
             }
 
-            var unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
+            let unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
             console.log("Model practice check", unitElapsedTime, ">", practiceSeconds);
             return (unitElapsedTime > practiceSeconds);
         }
@@ -1161,11 +1169,362 @@ function modelUnitEngine() {
 
 //Aka assessment session
 function scheduleUnitEngine(){
+    let schedule;
+    function createSchedule(setspec, unitNumber, unit) {
+        //First get the setting we'll use
+        let settings = loadAssessmentSettings(setspec, unit);
+        console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
+        console.log("settings:",JSON.parse(JSON.stringify(settings)));
+
+        //Shuffle clusters at start
+        if (settings.randomClusters) {
+            shuffle(settings.clusterNumbers);
+        }
+
+        //Our question array should be pre-populated
+        //Remember that addressing a javascript array index forces the
+        //expansion of the array to that index
+        let quests = [];
+        quests[settings.scheduleSize-1] = {};
+
+        //How you set a question
+        let setQuest = function(qidx, type, clusterIndex, condition, whichStim, forceButtonTrial) {
+            quests[qidx] = {
+                testType: type.toLowerCase(),
+                clusterIndex: clusterIndex,
+                condition: condition,
+                whichStim : whichStim,
+                forceButtonTrial: forceButtonTrial
+            };
+        };
+
+        let i, j, k, z; //Loop indices
+
+        //For each group
+        for (i = 0; i < settings.groupNames.length; ++i) {
+            //Get initial info for this group
+            let groupName = settings.groupNames[i];
+            let group = settings.groups[i]; //group = array of strings
+            let numTemplates = _.intval(settings.numTemplatesList[i]);
+            let templateSize = _.intval(settings.templateSizes[i]);
+
+            //Generate template indices
+            let indices = [];
+            for (z = 0; z < numTemplates; ++z) {
+                indices.push(z);
+            }
+            if (settings.randomConditions) {
+                shuffle(indices);
+            }
+
+            //For each template index
+            for (j = 0; j < indices.length; ++j) {
+                let index = indices[j];
+
+                //Find in initial position
+                let firstPos;
+                for(firstPos = 0; firstPos < settings.initialPositions.length; ++firstPos) {
+                    let entry = settings.initialPositions[firstPos];
+                    //Note the 1-based assumption for initial position values
+                    if (groupName === entry[0] && _.intval(entry.substring(2)) == index + 1) {
+                        break; //FOUND
+                    }
+                }
+
+                //Remove and use first cluster no matter what
+                let clusterNum = settings.clusterNumbers.shift();
+
+                //If we didn't find the group, move to next group
+                if (firstPos >= settings.initialPositions.length) {
+                    break;
+                }
+
+                //Work through the group elements
+                for (k = 0; k < templateSize; ++k) {
+                    //"parts" is a comma-delimited entry with 4 components:
+                    // 0 - the offset (whichStim) - can be numeric or "r" for random
+                    // 1 - legacy was f/b, now "b" forces a button trial
+                    // 2 - trial type (t, d, s, m, n, i, f)
+                    // 3 - location (added to qidx)
+                    var groupEntry = group[index * templateSize + k];
+                    var parts = groupEntry.split(",");
+
+                    var forceButtonTrial = false;
+                    if (parts[1].toLowerCase()[0] === "b") {
+                        forceButtonTrial = true;
+                    }
+
+                    var type = parts[2].toUpperCase()[0];
+
+                    if (type === "Z") {
+                        var stud = Math.floor(Math.random() * 10);
+                        if (stud === 0) {
+                            type = "S";
+                        } else
+                        {
+                            type = "D";
+                        }
+                    }
+
+                    var showHint = false;
+                    if (parts[2].length > 1) {
+                        showHint = (parts[2].toUpperCase()[1] === "H");
+                    }
+
+                    var location = _.intval(parts[3]);
+
+                    var offStr = parts[0].toLowerCase(); //Selects stim from cluster w/ multiple stims
+                    if (offStr === "m") {
+                        //Trial from model
+                        setQuest(firstPos + location, type, 0, "select_"+type, offStr, forceButtonTrial);
+                    }
+                    else {
+                        //Trial by other means
+                        var offset;
+                        if (offStr === "r") {
+                            //See loadAssessmentSettings below - ranChoices should
+                            //be populated with the possible offsets already
+                            if (settings.ranChoices.length < 1)
+                                throw "Random offset, but randomcchoices isn't set";
+                            offset = randomChoice(settings.ranChoices);
+                        }
+                        else {
+                            offset = _.intval(offStr);
+                        }
+
+                        var condition = groupName + "-" + index;
+
+                        var st = settings.specType.toLowerCase();
+                        if ( (st === "structuralpairs" || st === "structuralgroups") ) {
+                            condition += "-" + offset + "-0";
+                            offset = 0;
+                        }
+
+                        if (showHint) {
+                            condition += "-" + "H";
+                        }
+
+                        var pairNum = clusterNum;
+                        setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
+                    } //offset is Model or something else?
+                } //k (walk thru group elements)
+            } //j (each template index)
+        } //i (each group)
+
+        //NOW we can create the final ordering of the questions - we start with
+        //a default copy and then do any final permutation
+        var finalQuests = [];
+        _.each(quests, function(obj) {
+            finalQuests.push(obj);
+        });
+
+        // Shuffle and swap final question mapping based on permutefinalresult
+        // and swapfinalresults
+        if (finalQuests.length > 0) {
+            var shuffles = settings.finalPermute || [""];
+            var swaps = settings.finalSwap || [""];
+            var mapping = _.range(finalQuests.length);
+
+            while(shuffles.length > 0 || swaps.length > 0) {
+                mapping = createStimClusterMapping(
+                    finalQuests.length,
+                    shuffles.shift() || "",
+                    swaps.shift() || "",
+                    mapping
+                );
+            }
+
+            console.log("Question swap/shuffle mapping:", displayify(
+                _.map(mapping, function(val, idx) {
+                    return "q[" + idx + "].cluster==" + quests[idx].clusterIndex +
+                      " ==> q[" + val + "].cluster==" + quests[val].clusterIndex;
+                })
+            ));
+            for (j = 0; j < mapping.length; ++j) {
+                finalQuests[j] = quests[mapping[j]];
+            }
+        }
+
+        //Note that our card.js code has some fancy permutation
+        //logic, but that we don't currently use it from the assessment
+        //session
+        var schedule = {
+            unitNumber: unitNumber,
+            created: new Date(),
+            permute: null,
+            q: finalQuests,
+            isButtonTrial: settings.isButtonTrial
+        };
+
+        console.log("Created schedule for current unit:");
+        console.log(schedule);
+
+        return schedule;
+    }
+
+    //Given a unit object loaded from a TDF, populate and return a settings
+    //object with the parameters as specified by the Assessment Session
+    function loadAssessmentSettings(setspec, unit) {
+        let settings = {
+            specType: "unspecified",
+            groupNames: [],
+            templateSizes: [],
+            numTemplatesList: [],
+            initialPositions: [],
+            groups: [],
+            randomClusters: false,
+            randomConditions: false,
+            scheduleSize: 0,
+            finalSwap: [""],
+            finalPermute: [""],
+            clusterNumbers: [],
+            ranChoices: [],
+            isButtonTrial: false,
+        };
+
+        if (!unit || !unit.assessmentsession) {
+            return settings;
+        }
+
+        var rawAssess = _.safefirst(unit.assessmentsession);
+        if (!rawAssess) {
+            return settings;
+        }
+
+        //Everything comes from the asessment session as a single-value array,
+        //so just parse all that right now
+        var assess = {};
+        _.each(rawAssess, function(val, name) {
+            assess[name] = _.safefirst(val);
+        });
+
+        //Interpret TDF string booleans
+        var boolVal = function(src) {
+            return _.display(src).toLowerCase() === "true";
+        };
+
+        //Get the setspec settings first
+        settings.specType = _.display(setspec.clustermodel);
+
+        //We have a few parameters that we need in their "raw" states (as arrays)
+        settings.finalSwap = _.prop(rawAssess, "swapfinalresult") || [""];
+        settings.finalPermute = _.prop(rawAssess, "permutefinalresult") || [""];
+
+        //The "easy" "top-level" settings
+        extractDelimFields(assess.initialpositions, settings.initialPositions);
+        settings.randomClusters = boolVal(assess.assignrandomclusters);
+        settings.randomConditions = boolVal(assess.randomizegroups);
+        settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
+
+        //Unlike finalPermute, which is always a series of space-delimited
+        //strings that represent rangeVals, ranChoices can be a single number N
+        //(which is equivalent to [0,N) where N is that number) or a rangeVal
+        //([X,Y] where the string is X-Y). SO - we convert this into a list of
+        //all possible random choices
+        var randomChoicesParts = [];
+        extractDelimFields(assess.randomchoices, randomChoicesParts);
+        _.each(randomChoicesParts, function(item) {
+            if (item.indexOf('-') < 0) {
+                //Single number - convert to range
+                var val = _.intval(item);
+                if (!val) {
+                    throw "Invalid randomchoices paramter: " + assess.randomchoices;
+                }
+                item = "0-" + (val-1).toString();
+            }
+
+            _.each(rangeVal(item), function(subitem) {
+                settings.ranChoices.push(subitem);
+            });
+        });
+
+        //Condition by group, but remove the default single-val arrays
+        //Note: since there could be 0-N group entries, we leave that as an array
+        var by_group = {};
+        _.each(assess.conditiontemplatesbygroup, function(val, name) {
+            by_group[name] = name === "group" ? val : _.safefirst(val);
+        });
+
+        if (by_group) {
+            extractDelimFields(by_group.groupnames,        settings.groupNames);
+            extractDelimFields(by_group.clustersrepeated,  settings.templateSizes);
+            extractDelimFields(by_group.templatesrepeated, settings.numTemplatesList);
+            extractDelimFields(by_group.initialpositions,  settings.initialPositions);
+
+            _.each(by_group.group, function(tdf_group) {
+                var new_group = [];
+                extractDelimFields(tdf_group, new_group);
+                if (new_group.length > 0) {
+                    settings.groups.push(new_group);
+                }
+            });
+
+            if (settings.groups.length != settings.groupNames.length) {
+                console.log("WARNING! Num group names doesn't match num groups", settings.groupNames, settings.groups);
+            }
+        }
+
+        //Now that all possible changes to initial positions have been
+        //done, we know our schedule size
+        settings.scheduleSize = settings.initialPositions.length;
+
+        const currentTdfFile = Session.get("currentTdfFile");
+        const isMultiTdf = currentTdfFile.isMultiTdf;
+        let unitClusterList;
+
+        if(isMultiTdf){
+            const curUnitNumber = Session.get("currentUnitNumber");
+    
+            //NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
+            //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
+            if(curUnitNumber == 1){
+                const lastClusterIndex = getStimCount() - 1;
+                unitClusterList = lastClusterIndex + "-" + lastClusterIndex;
+            }else{
+                const subTdfIndex = Session.get("subTdfIndex");
+                unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
+            }
+        }else{
+            unitClusterList = assess.clusterlist
+        }
+
+        //Cluster Numbers
+        let clusterList = [];
+        extractDelimFields(unitClusterList, clusterList);
+        for (let i = 0; i < clusterList.length; ++i) {
+            let nums = rangeVal(clusterList[i]);
+            for (let j = 0; j < nums.length; ++j) {
+                settings.clusterNumbers.push(_.intval(nums[j]));
+            }
+        }
+
+        return settings;
+    }
+
     return {
         unitType: "schedule",
     
-        initImpl: function() {
-            //Nothing currently
+        initImpl: async function() {
+            //Retrieve current schedule
+            console.log("CREATING SCHEDULE, showing progress",getUserProgress());
+
+            let curUnitNum = Session.get("currentUnitNumber");
+            let file = Session.get("currentTdfFile");
+            const setSpec = file.tdfs.tutor.setspec[0];
+            let currUnit = file.tdfs.tutor.unit[curUnitNum];
+
+            console.log('creating schedule with params:',setSpec, curUnitNum, currUnit);
+            schedule = createSchedule(setSpec, curUnitNum, currUnit);
+            if (!schedule) {
+                alert("There is an issue with the TDF - experiment cannot continue");
+                throw new Error("There is an issue with the TDF - experiment cannot continue");
+            }
+
+            //We save the current schedule and also log it to the UserTime collection
+            Session.set("schedule",schedule);
+
+            let newExperimentState = { schedule };
+            await updateExperimentState(newExperimentState,"unitEngine.getSchedule");
         },
 
         saveComponentStates: function(){
@@ -1176,56 +1535,21 @@ function scheduleUnitEngine(){
             //No component data for assessments
         },
     
-        getSchedule: async function() {
-            //Retrieve current schedule
-            let progress = getUserProgress();
-            let curUnitNum = Session.get("currentUnitNumber");
-            console.log("getSchedule, curUnitNum",curUnitNum);
-            var schedule = null;
-            if (Session.get("currentSchedule") && Session.get("currentSchedule").unitNumber == curUnitNum) {
-                schedule = Session.get("currentSchedule");
-            }
-    
-            //Lazy create save if we don't have a correct schedule
-            if (schedule === null) {
-                console.log("CREATING SCHEDULE, showing progress");
-                console.log(progress);
-    
-                let file = Session.get("currentTdfFile");
-                const setSpec = file.tdfs.tutor.setspec[0];
-                var currUnit = file.tdfs.tutor.unit[curUnitNum];
-    
-                schedule = AssessmentSession.createSchedule(setSpec, curUnitNum, currUnit);
-                if (!schedule) {
-                    alert("There is an issue with the TDF - experiment cannot continue");
-                    throw new Error("There is an issue with the TDF - experiment cannot continue");
-                }
-    
-                //We save the current schedule and also log it to the UserTime collection
-                Session.set("schedule",schedule);
-    
-                let newExperimentState = { 
-                    schedule: schedule, 
-                    //lastAction: "schedule",
-                    //lastActionTimeStamp: Date.now()
-                }
-                await updateExperimentState(newExperimentState,"unitEngine.getSchedule");
-            }
-    
-            //Now they can have the schedule
+        getSchedule: function() {    
             return schedule;
         },
     
         selectNextCard: async function() {
             let questionIndex = Session.get("questionIndex");
-            let sched = await this.getSchedule();
+            let sched = this.getSchedule();
             let questInfo = sched.q[questionIndex];
+            console.log("schedule selectNextCard",questionIndex,questInfo);
             let curClusterIndex = questInfo.clusterIndex;
             let curStimIndex = questInfo.whichStim;
 
             let newExperimentState = { 
-                shufIndex:clusterIndex,
-                clusterIndex:clusterIndex,
+                shufIndex:curClusterIndex,
+                clusterIndex:curClusterIndex,
                 questionIndex: questionIndex + 1, 
                 whichStim: questInfo.whichStim,
                 testType: questInfo.testType,
@@ -1249,8 +1573,6 @@ function scheduleUnitEngine(){
             );
             
             await updateExperimentState(newExperimentState,"question");
-    
-            return curClusterIndex;
         },
     
         findCurrentCardInfo: function() {

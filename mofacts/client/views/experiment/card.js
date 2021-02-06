@@ -111,6 +111,7 @@ var unitStartTimestamp = 0;
 var trialTimestamp = 0;
 var keypressTimestamp = 0;
 var currentSound = null; //See later in this file for sound functions
+userFeedbackStart = null;
 
 //We need to track the name/ID for clear and reset. We need the function and
 //delay used for reset
@@ -130,7 +131,7 @@ function clearScrollList() {
     Session.set("scrollListCount", 0);
 }
 
-function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
+async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justAdded) {
     // We only store scroll history if it has been turned on in the TDF
     var params = Session.get("currentDeliveryParams");
     if (!params.showhistory) {
@@ -290,8 +291,9 @@ function findQTypeSimpified() {
 function getCurrentFalseResponses() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let cluster = getStimCluster(curClusterIndex);
+  console.log('getCurrentFalseResponses',curClusterIndex,curStimIndex,cluster);
 
-  if (typeof(cluster) == "undefined" || !!cluster.stims || cluster.stims.length == 0 || typeof(cluster.stims[curStimIndex].incorrectResponses) == "undefined") {
+  if (typeof(cluster) == "undefined" || !cluster.stims || cluster.stims.length == 0 || typeof(cluster.stims[curStimIndex].incorrectResponses) == "undefined") {
       return []; //No false responses
   }else{
     return cluster.stims[curStimIndex].incorrectResponses.split(',');
@@ -944,14 +946,14 @@ async function cardStart(){
   $("#finalInstructionsDlg").modal('hide');
 
   //the card loads frequently, but we only want to set this the first time
-  if(Session.get("needResume")) {
+  if(Session.get("inResume")) {
       Session.set("buttonTrial", false);
       clearButtonList();
 
       console.log("cards template rendered => Performing resume");
       Session.set("showOverlearningText", false);
 
-      Session.set("needResume", false); //Turn this off to keep from re-resuming
+      Session.set("inResume", false); //Turn this off to keep from re-resuming
       resumeFromComponentState();
   }
 }
@@ -1025,11 +1027,12 @@ function setUpButtonTrial(){
       correctButtonPopulated = true;
       console.log("buttonChoices==buttonOptions",buttonChoices);
   }else{
-      _.each(getCurrentFalseResponses(), function(ele) {
-          buttonChoices.push(ele);
-          correctButtonPopulated = false;
-      });
-      console.log("buttonChoices==falseresponses and correct answer",buttonChoices);
+    let currentFalseResponses = getCurrentFalseResponses();
+    for(let falseResponse of currentFalseResponses){
+      buttonChoices.push(falseResponse);
+      correctButtonPopulated = false;
+    }
+    console.log("buttonChoices==falseresponses and correct answer",buttonChoices);
   }
   if (correctButtonPopulated == null) {
       console.log("No correct button");
@@ -1207,11 +1210,12 @@ function handleUserInput(e, source, simAnswerCorrect) {
     } else if (source === "simulation") {
         userAnswer = simAnswerCorrect ? "SIM: Correct Answer" : "SIM: Wrong Answer";
     } else if (source === "voice"){
-        if(getButtonTrial()){
-          userAnswer = e.answer.name;
-        }else{
-          userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
-        }
+      const isButtonTrial = getButtonTrial();
+      if(isButtonTrial){
+        userAnswer = e.answer.name;
+      }else{
+        userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
+      }
     }
 
     var trialEndTimeStamp = Date.now();
@@ -1225,8 +1229,9 @@ function handleUserInput(e, source, simAnswerCorrect) {
 
 //Take care of user feedback - simCorrect will usually be undefined/null BUT if
 //it is true or false we know this is part of a simulation call
-function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
-    const setspec = !getButtonTrial() ? Session.get("currentTdfFile").tdfs.tutor.setspec[0] : undefined;
+async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedbackCb) {
+    let isButtonTrial = getButtonTrial();
+    const setspec = !isButtonTrial ? Session.get("currentTdfFile").tdfs.tutor.setspec[0] : undefined;
     var isCorrectAccumulator = null;
     let feedbackForAnswer = null;
     let userAnswerWithTimeout = null;
@@ -1250,10 +1255,10 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedba
     }
 
     //Make sure to record what they just did (and set justAdded)
-    writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
+    await writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
 
-    var afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null,isTimeout);
-    var afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,isCorrectAccumulator,feedbackForAnswer,afterAnswerFeedbackCbWithTimeout);
+    let afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null,isTimeout);
+    let afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,isCorrectAccumulator,feedbackForAnswer,afterAnswerFeedbackCbWithTimeout);
 
     //Answer assessment -> 
     if(userAnswerWithTimeout != null){
@@ -1279,15 +1284,17 @@ function afterAnswerAssessmentCb(isCorrect,feedbackForAnswer,afterAnswerFeedback
     }
     showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound);
   }else{
+    userFeedbackStart = null;
     afterAnswerFeedbackCbBound();
   }
 }
 
-function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
+async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
     console.log("showUserFeedback");
     userFeedbackStart = Date.now();
+    let isButtonTrial = getButtonTrial();
     //For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
-    if(!isCorrect && getButtonTrial() && getResponseType() == "image"){
+    if(!isCorrect && isButtonTrial && getResponseType() == "image"){
       $("#UserInteraction").removeClass("text-align alert alert-success alert-danger").html("");
       let buttonImageFeedback = "Incorrect.  The correct response is displayed below.";
       let correctImageSrc = Session.get("originalAnswer");
@@ -1402,8 +1409,8 @@ function msg() {
   return all.join(' ');
 }
 
-function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
-  let feedbackDuration = Date.now() - userFeedbackStart;
+async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
+  let feedbackDuration = !userFeedbackStart ? 0 : Date.now() - userFeedbackStart;
   let responseDuration = trialEndTimeStamp - keypressTimestamp;
   let firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
   let testType = getTestType();
@@ -1463,14 +1470,13 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   let shufIndex = cluster.shufIndex;
   let schedCondition =  "N/A" ;
   if(engine.unitType == "schedule"){
-    let sched = Session.get("currentSchedule");
+    let sched = Session.get("schedule");
     if (sched && sched.q && sched.q.length) {
       var schedItemIndex = Session.get("questionIndex") - 1;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
           schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
       }else {
-          note += msg( "SCHEDULE Q-INDEX MISMATCH => sched.q.length:",
-                  d(sched.q.length, 'missing'),", lastq.questionIndex-1:",d(schedItemIndex, 'missing')," ");
+          note += msg( "SCHEDULE Q-INDEX MISMATCH => sched.q.length:", sched.q.length||'missing',", lastq.questionIndex-1:",schedItemIndex||'missing'," ");
       }
     }
   }
@@ -1662,7 +1668,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
 async function prepareCard(writeAnswerLogCb) {
     if(writeAnswerLogCb) writeAnswerLogCb();
     Session.set("displayReady",false);
-    
+    console.log("displayReadyFalse, prepareCard");
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
     }else {
@@ -1761,14 +1767,15 @@ function recordProgress(isCorrect) {
 function getButtonTrial() {
   let curUnit = Session.get("currentTdfUnit");
   //Default to value given in the unit
-  var isButtonTrial = "true" === _.chain(curUnit).prop("buttontrial").first().trim().value().toLowerCase();
+  let isButtonTrial = "true" === _.chain(curUnit).prop("buttontrial").first().trim().value().toLowerCase();
 
-  if (_.prop(engine.findCurrentCardInfo(), 'forceButtonTrial')) {
+  let curCardInfo = engine.findCurrentCardInfo();
+  if (curCardInfo.forceButtonTrial) {
       //Did this question specifically override button trial?
       isButtonTrial = true;
   } else {
       // An entire schedule can override a button trial
-      var schedButtonTrial = !!(Session.get("currentSchedule")) ? Session.get("currentSchedule").isButtonTrial : false;
+      let schedButtonTrial = !!(Session.get("schedule")) ? Session.get("schedule").isButtonTrial : false;
       if (!!schedButtonTrial) {
           isButtonTrial = true;  //Entire schedule is a button trial
       }
@@ -1819,16 +1826,20 @@ function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQue
     let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
     console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
     Session.set("displayReady", false);
+    console.log("displayReadyFalse, checkAndDisplayPrestimulus1");
     Session.set("currentDisplay",prestimulusDisplayWrapper);
     Session.set("displayReady", true);
+    console.log("displayReadyTrue, checkAndDisplayPrestimulus2");
     let prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log("delaying for " + prestimulusdisplaytime + " ms then starting question", new Date());
     setTimeout(function(){
       console.log("done with prestimulusDisplay, switching to original display", new Date());
       Session.set("displayReady", false);
+      console.log("displayReadyFalse, checkAndDisplayPrestimulus3");
       Session.set("currentDisplay",currentDisplayEngine);
       Session.set("clozeQuestionParts",closeQuestionParts);
       Session.set("displayReady", true);
+      console.log("displayReadyTrue, checkAndDisplayPrestimulus4");
       console.log("past prestimulusdisplaytime, start two part question logic");
       nextStageCb();
     },prestimulusdisplaytime);
@@ -1852,6 +1863,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams,nextStageCb){
       Session.set("displayReady", false);
       Session.set("currentDisplay",twoPartQuestionWrapper);
       Session.set("displayReady", true);
+      console.log("displayReadyTrue, checkAndDisplayTwoPartQuestion");
       Session.set("currentQuestionPart2",undefined);
       redoCardImage();
       nextStageCb();
@@ -1958,7 +1970,7 @@ function makeGoogleTTSApiCall(message,ttsAPIKey,audioPromptSpeakingRate,callback
 
 //Speech recognition function to process audio data, this is called by the web worker
 //started with the recorder object when enough data is received to fill up the buffer
-function processLINEAR16(data){
+async function processLINEAR16(data){
   if(resetMainCardTimeout && timeoutFunc && !inputDisabled){
     resetMainCardTimeout(); //Give ourselves a bit more time for the speech api to return results
   }else{
@@ -1966,8 +1978,9 @@ function processLINEAR16(data){
   }
   recorder.clear();
   var userAnswer = $("#forceCorrectionEntry").is(":visible") ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
+  let isButtonTrial = getButtonTrial();
 
-  if(userAnswer || getButtonTrial() || DialogueUtils.isUserInDialogueLoop()){
+  if(userAnswer || isButtonTrial || DialogueUtils.isUserInDialogueLoop()){
     speechTranscriptionTimeoutsSeen += 1;
     var sampleRate = Session.get("sampleRate");
     const setSpec = Session.get("currentTdfFile").tdfs.tutor.setspec[0];
@@ -1980,7 +1993,7 @@ function processLINEAR16(data){
     }
 
     var phraseHints = [];
-    if(getButtonTrial()){
+    if(isButtonTrial){
       var curChar = 'a';
       phraseHints.push(curChar);
       for(i=1;i<26;i++){
@@ -1999,7 +2012,7 @@ function processLINEAR16(data){
     var request = generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,data);
 
     var answerGrammar = [];
-    if(getButtonTrial()) {
+    if(isButtonTrial) {
       answerGrammar = phraseHints;
     } else if (!DialogueUtils.isUserInDialogueLoop()){
       //We call getAllCurrentStimAnswers again but not excluding phrase hints that
@@ -2181,7 +2194,7 @@ function startUserMedia(stream) {
         console.log("VAD previously not initialized, now initialized");
         Session.set("VADInitialized",true);
         $("#voiceDetected").value = "Voice detected, refreshing now...";
-        Session.set("needResume", true);
+        Session.set("inResume", true);
         if(Session.get("pausedLocks")>0){
           var numRemainingLocks = Session.get("pausedLocks")-1;
           Session.set("pausedLocks",numRemainingLocks);
@@ -2279,7 +2292,7 @@ function allowUserInput() {
   startRecording();
 
   //Need timeout here so that the disable input timeout doesn't fire after this
-  setTimeout(function(){
+  setTimeout(async function(){
     if(typeof inputDisabled != "undefined"){
       //Use inputDisabled variable so that successive calls of stop and allow
       //are resolved synchronously i.e. whoever last set the inputDisabled variable
@@ -2313,15 +2326,13 @@ async function updateExperimentState(newState,codeCallLocation){
     Session.set("currentExperimentState", {});
   }
   let oldExperimentState = Session.get("currentExperimentState");
-  console.log(newState);
-  console.log(oldExperimentState);
   let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
   // if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
   //     let clientSideTimeStamp = Date.now();
   // }
   const res = await meteorCallAsync('setExperimentState',Meteor.userId(), Session.get("currentRootTdfId"),newExperimentState);
   Session.set("currentExperimentState",newExperimentState);
-  console.log("updateExperimentState",codeCallLocation,oldExperimentState,newExperimentState,res);
+  console.log("updateExperimentState",codeCallLocation,'old:',oldExperimentState,'new:',newExperimentState,res);
   return res;
 }
 
@@ -2527,7 +2538,7 @@ async function resumeFromComponentState() {
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);
 }
 
-function checkSyllableCacheForCurrentStimFile(cb){
+async function checkSyllableCacheForCurrentStimFile(cb){
   let currentStimuliSetId = Session.get("currentStimuliSetId");
   cachedSyllables = StimSyllables.findOne({filename:currentStimuliSetId});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
@@ -2596,7 +2607,6 @@ async function processUserTimesLog() {
 
         if (tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("assessmentsession")) {
             engine = createScheduleUnit(curExperimentData);
-            engine.getSchedule();//Make sure schedule is initialized
             Session.set("sessionType","assessmentsession");
         }
         else if(tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("learningsession")) {
@@ -2653,7 +2663,8 @@ async function processUserTimesLog() {
 
     //If we make it here, then we know we won't need a resume until something
     //else happens
-    Session.set("needResume", false);
+
+    Session.set("inResume", false);
 
     //Initialize client side student performance
     let curUser = Meteor.user();
