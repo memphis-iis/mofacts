@@ -62,8 +62,6 @@ sessionCleanUp = function() {
     Session.set("currentTdfId",undefined);
     Session.set("currentUnitNumber", undefined);
     Session.set("currentTdfUnit",undefined);
-    Session.set("currentTdfFile", undefined);
-    Session.set("currentStimSetId", undefined);
     Session.set("currentStimuliSet",undefined);
     Session.set("currentDeliveryParams",{});
 

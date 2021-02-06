@@ -49,11 +49,13 @@ sudo cp "$CFGBASE.new" $CFGSRC
 sudo systemctl restart mongod
 ###############################################################################
 
+# Install and configure postgres
+pushd mofacts/db
+initDb.sh
+popd
+
 # Install Java 8
 sudo apt-get install -y openjdk-8-jre
-
-# Set up dynamic config
-mofacts/scripts/server/setDynamicConfig.sh
 
 # Set up syllable systemd service
 sudo cp /vagrant/syllables_subsystem/syllable.service /etc/systemd/system/
@@ -87,6 +89,8 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 #meteor update
 meteor npm install --save babel-runtime --no-bin-links
 
+# Set up dynamic config
+mofacts/scripts/server/setDynamicConfig.sh
 
 # Remove Ubuntu's landscape stuff and clear login messages
 sudo apt-get purge -y landscape-client landscape-common

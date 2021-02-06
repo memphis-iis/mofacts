@@ -235,3 +235,7 @@ displayify = function(obj) {
 
     return JSON.stringify(dispObj, null, 2);
 };
+
+isEmpty = function(value){
+    return (value == null || value === '');
+}

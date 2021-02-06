@@ -68,7 +68,7 @@ Template.profile.events({
         selectTdf(
             target.data("tdfid"),
             target.data("lessonname"),
-            target.data("currentStimSetId"),
+            target.data("currentStimuliSetId"),
             target.data("ignoreoutofgrammarresponses"),
             target.data("speechoutofgrammarfeedback"),
             "User button click",
@@ -228,6 +228,7 @@ Template.profile.rendered = async function () {
     Session.set("showSpeechAPISetup",true);
     const allTdfs = await meteorCallAsync("getAllTdfs");
     Session.set("allTdfs",allTdfs);
+    console.log('allTdfs.length',allTdfs.length);
 
     $("#expDataDownloadContainer").html("");
 
@@ -248,12 +249,11 @@ Template.profile.rendered = async function () {
     //Check all the valid TDF's
     for(let tdf of allTdfs){
         let TDFId = tdf.tdfid;
-        let tdfObject = tdf.content.content;
+        let tdfObject = tdf.content;
         let isMultiTdf = tdfObject.isMultiTdf;
-        let currentStimSetId = tdf.stimulisetid;
+        let currentStimuliSetId = tdf.stimulisetid;
 
         //Make sure we have a valid TDF (with a setspec)
-        console.log("tdfObject",tdfObject);
         const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec[0] : null;
 
         if (!setspec) {
@@ -261,29 +261,26 @@ Template.profile.rendered = async function () {
             continue;
         }
 
-        var name = _.chain(setspec).prop("lessonname").first().value();
-        if (!name) {
-            console.log("Skipping TDF with no name", setspec);
-            return;
+        let name = setspec.lessonname[0];
+        if(name == "Testing Tdf"){
+          console.log("Testing Tdf",tdf)
         }
+        // if (!name) {
+        //     console.log("Skipping TDF with no name", setspec);
+        //     continue;
+        // }
 
-        var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
-        var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
-        if(!speechOutOfGrammarFeedback){
-          speechOutOfGrammarFeedback = "Response not in answer set"
-        }
+        let ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ? setspec.speechIgnoreOutOfGrammarResponses[0].toLowerCase()  == "true" : false;
+        let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ? setspec.speechOutOfGrammarFeedback[0] : "Response not in answer set";
 
         //Check to see if we have found a selected experiment target
         if (experimentTarget && !foundExpTarget) {
-            var tdfExperimentTarget = _.chain(setspec)
-                .prop("experimentTarget").first().trim()
-                .value().toLowerCase();
-
+            let tdfExperimentTarget = _.trim(setspec.experimentTarget[0]).toLowerCase();
             if (tdfExperimentTarget && experimentTarget == tdfExperimentTarget) {
                 foundExpTarget = {
                     tdfid: TDFId,
                     lessonName: name,
-                    currentStimSetId: currentStimSetId,
+                    currentStimuliSetId: currentStimuliSetId,
                     ignoreOutOfGrammarResponses: ignoreOutOfGrammarResponses,
                     speechOutOfGrammarFeedback: speechOutOfGrammarFeedback,
                     how: "Auto-selected by experiment target " + experimentTarget,
@@ -310,16 +307,8 @@ Template.profile.rendered = async function () {
 
         //Note that we defer checking for userselect in case something above
         //(e.g. experimentTarget) auto-selects the TDF
-        var userselectText = _.chain(setspec)
-            .prop("userselect").first().trim()
-            .value().toLowerCase();
-
-        var userselect = true;
-        if (userselectText === "false") userselect = false;
-
-        if (!userselect) {
-            //console.log("Skipping due to userselect=false for ", name);
-            return;
+        if(setspec.userselect){
+          if(setspec.userselect[0] == "false") continue;
         }
 
         let audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled[0] == "true" : false;
@@ -327,17 +316,16 @@ Template.profile.rendered = async function () {
 
         tdfObject.name = name;
         tdfObject.tdfid = TDFId;
-        tdfObject.currentStimSetId = currentStimSetId;
-        //tdfObject.stimulusFile = stimulusFile;
+        tdfObject.currentStimuliSetId = currentStimuliSetId;
         tdfObject.ignoreOutOfGrammarResponses = ignoreOutOfGrammarResponses;
         tdfObject.speechOutOfGrammarFeedback = speechOutOfGrammarFeedback;
         tdfObject.audioInputEnabled = audioInputEnabled;
         tdfObject.enableAudioPromptAndFeedback = enableAudioPromptAndFeedback;
 
-        if (!!tdfObject.disabled) {
-          disabledTdfs.push(tdfObject);
-        } else {
+        if (tdf.visibility == 'profileOnly' || tdf.visibility == 'enabled') {
           enabledTdfs.push(tdfObject);
+        } else {
+          disabledTdfs.push(tdfObject);
         }
 
         if (isAdmin) {
@@ -367,7 +355,7 @@ Template.profile.rendered = async function () {
         selectTdf(
             foundExpTarget.tdfid,
             foundExpTarget.lessonName,
-            foundExpTarget.currentStimSetId,
+            foundExpTarget.currentStimuliSetId,
             foundExpTarget.ignoreOutOfGrammarResponses,
             foundExpTarget.speechOutOfGrammarFeedback,
             foundExpTarget.how,
@@ -378,8 +366,8 @@ Template.profile.rendered = async function () {
 };
 
 //Actual logic for selecting and starting a TDF
-async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf,fromSouthwest) {
-    console.log("Starting Lesson", lessonName, currentTdfId, "currentStimSetId:", currentStimSetId);
+async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf,fromSouthwest) {
+    console.log("Starting Lesson", lessonName, currentTdfId, "currentStimuliSetId:", currentStimuliSetId);
 
     var audioPromptFeedbackView = Session.get("audioPromptFeedbackView");
 
@@ -393,9 +381,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimSetId, ignoreOutOf
     Session.set("currentRootTdfId", currentTdfId);
     Session.set("currentTdfId", currentTdfId);
     const tdfResponse = await meteorCallAsync('getTdfById',currentTdfId);
-    const curTdf = tdfResponse.content.content
+    const curTdf = tdfResponse.content;
     Session.set("currentTdfFile",curTdf);
-    Session.set("currentStimSetId", currentStimSetId);
+    Session.set("currentStimuliSetId", currentStimuliSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
 
