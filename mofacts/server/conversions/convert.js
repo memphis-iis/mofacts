@@ -111,14 +111,14 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
 
 function getNewTdfFormat(oldTdf, stimuliSetId, tdfId){
   let tdfObj = {
-    ownerId: oldTdf.owner,
+    ownerId: oldTdf.owner || oldTdf.ownerId,
     stimuliSetId: stimuliSetId,
     content: {
       tdfs: oldTdf.tdfs
-    }
+    },
+    visibility: oldTdf.visibility || 'profileOnly'
   };
   if(tdfId) tdfObj.TDFId = tdfId;
   
   return tdfObj;
 }
-

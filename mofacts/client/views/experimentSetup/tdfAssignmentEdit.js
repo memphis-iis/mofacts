@@ -33,7 +33,7 @@ Template.tdfAssignmentEdit.onRendered(async function(){
   let allTdfDisplays = [];
   for(var i in allTdfObjects){
     var tdf = allTdfObjects[i];
-    if(tdf.owner == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
+    if(tdf.ownerId == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
       allTdfDisplays.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
     }
   }

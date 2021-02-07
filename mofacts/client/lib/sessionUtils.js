@@ -95,7 +95,7 @@ sessionCleanUp = function() {
     Session.set("questionIndex", undefined);
     Session.set("recording",false);
     Session.set("sampleRate", undefined);
-    Session.set("sessionType",undefined);
+    Session.set("unitType",undefined);
     Session.set("showOverlearningText", undefined);
     Session.set("speechOutOfGrammarFeedback",undefined);
     Session.set("subTdfIndex",undefined);

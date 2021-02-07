@@ -9,7 +9,7 @@ import {
     createStimClusterMapping
 } from '../../lib/currentTestingHelpers';
 import { updateExperimentState } from './card';
-import { KC_MULTIPLE } from '../../../common/Definitions';
+import { KC_MULTIPLE, MODEL_UNIT, SCHEDULE_UNIT } from '../../../common/Definitions';
 
 function create(func,curExperimentData) {
     var engine = _.extend(defaultUnitEngine(curExperimentData), func());
@@ -244,6 +244,7 @@ function defaultUnitEngine(curExperimentData) {
 function emptyUnitEngine() {
     return {
         unitType: "instruction-only",
+        initImpl: function() { Session.set("unitType","instruction-only") },
         unitFinished: function() { return true; },
         selectNextCard: function() { },
         findCurrentCardInfo: function() { },
@@ -892,7 +893,7 @@ function modelUnitEngine() {
             setUpClusterList(cardProbabilities.cards);
         },
 
-        unitType: "model",
+        unitType: MODEL_UNIT,
 
         unitMode: (function(){
           var unitMode = _.chain(this.curUnit)
@@ -903,6 +904,7 @@ function modelUnitEngine() {
         })(),
 
         initImpl: async function() {
+            Session.set("unitType",MODEL_UNIT);
             initializeActRModel();
         },
 
@@ -980,7 +982,7 @@ function modelUnitEngine() {
             newExperimentState.testType = testType;
             newExperimentState.questionIndex = 1;
             
-            Session.set("questionIndex", 1);  //questionIndex doesn't have any meaning for a model
+            Session.set("questionIndex", 0);  //questionIndex doesn't have any meaning for a model
             Session.set("showOverlearningText", false);
 
             updateCardAndStimData(cardIndex, whichStim);
@@ -1502,11 +1504,12 @@ function scheduleUnitEngine(){
     }
 
     return {
-        unitType: "schedule",
+        unitType: SCHEDULE_UNIT,
     
         initImpl: async function() {
             //Retrieve current schedule
             console.log("CREATING SCHEDULE, showing progress",getUserProgress());
+            Session.set("unitType",SCHEDULE_UNIT);
 
             let curUnitNum = Session.get("currentUnitNumber");
             let file = Session.get("currentTdfFile");
@@ -1578,7 +1581,8 @@ function scheduleUnitEngine(){
         findCurrentCardInfo: function() {
             //selectNextCard increments questionIndex after setting all card
             //info, so we need to use -1 for this info
-            return this.getSchedule().q[Session.get("questionIndex") - 1];
+            let questionIndex = Math.max(Session.get("questionIndex")-1,0);
+            return this.getSchedule().q[questionIndex];
         },
     
         cardAnswered: function(wasCorrect) {

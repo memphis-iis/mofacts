@@ -7,14 +7,13 @@ function userFilesRefresh() {
     var userId = Meteor.user()._id;
 
     Session.get("allTdfs").forEach(function(tdf) {
-        let tdfObject = tdf.content;
-        if (userId === tdf.owner) {
+        if (userId === tdf.ownerId) {
             userFiles.insert({
                 'temp': 1,
-                '_id': tdf.tdfid,
+                '_id': tdf.TDFId,
                 'idx': count,
                 'type': 'tdf',
-                'fileName': tdfObject.fileName.trim().value()
+                'fileName': tdf.fileName.trim().value()
             });
             count += 1;
             let stimuliSetId = tdf.stimuliSetId;

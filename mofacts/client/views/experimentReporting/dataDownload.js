@@ -92,17 +92,18 @@ Template.dataDownload.helpers({
       });
     }
 
-    dataDownloads = Session.get("allTdfs").map(function(tdfObject) {
-      tdfObject.disp = name;
+    dataDownloads = Session.get("allTdfs").map(function(tdf) {
+      let name = tdf.content.tdfs.tutor.setspec[0].lessonname[0];
+      tdf.disp = name;
       
-      if (tdfObject.fileName != name) {
-        tdfObject.disp += " (" + tdfObject.fileName + ")";
+      if (tdf.fileName != name) {
+        tdf.disp += " (" + tdf.fileName + ")";
       }
 
-      return tdfObject;
-    }).filter(function(tdfObject) {
+      return tdf;
+    }).filter(function(tdf) {
       if (!_.isEmpty(Template.instance().selectedClassId.get())) {
-        if (!_.contains(classTdfNames, tdfObject.fileName)) {
+        if (!_.contains(classTdfNames, tdf.fileName)) {
           return false; // If a class is selected, reject any TDF data that does not belong to the selected class
         }
       }
@@ -112,14 +113,14 @@ Template.dataDownload.helpers({
           return true; // If no teacher is selected, view all available TDF data downloads
         } 
 
-        if (Template.instance().selectedTeacherId.get() == tdfObject.owner) {
+        if (Template.instance().selectedTeacherId.get() == tdf.ownerId) {
           return true; // If a teacher is selected, only return TDF data downloads where selected teacher is owner
         }
 
         return false;
       } 
 
-      if (Meteor.userId() == tdfObject.owner) {
+      if (Meteor.userId() == tdf.ownerId) {
         return true; // If user is not admin role, return only TDF data downloads where current user is owner
       }
 
