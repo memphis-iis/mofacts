@@ -1,6 +1,7 @@
 import { ReactiveVar } from 'meteor/reactive-var'
-import { haveMeteorUser, getTdfById } from '../../lib/currentTestingHelpers';
+import { haveMeteorUser } from '../../lib/currentTestingHelpers';
 import { getExperimentState, updateExperimentState } from '../experiment/card';
+import { DISABLED, ENABLED, MODEL_UNIT, SCHEDULE_UNIT } from '../../../common/Definitions';
 
 export { selectTdf };
 
@@ -162,11 +163,11 @@ Template.profile.events({
     },
 
     'click #disable-tdfs-btn': (event, instance) => {
-      toggleTdfPresence(instance, 'disable');
+      toggleTdfPresence(instance, DISABLED);
     },
 
     'click #enable-tdfs-btn': (event, instance) => {
-      toggleTdfPresence(instance, 'enable');
+      toggleTdfPresence(instance, ENABLED);
     },
 
     'click #tdf-admin-info': (event, instance) => {
@@ -176,10 +177,8 @@ Template.profile.events({
 });
 
 function toggleTdfPresence(instance, mode) {
-  const DISABLE = 'disable';
-
   let tdfsToChange = [];
-  if (mode === DISABLE) {
+  if (mode === DISABLED) {
     tdfsToChange = instance.tdfsToDisable.get();
   } else {
     tdfsToChange = instance.tdfsToEnable.get();      
@@ -189,7 +188,7 @@ function toggleTdfPresence(instance, mode) {
     let remainingTdfs = [];
     let tdfsToUpdate = []; 
     let tdfsInOtherModeState = []
-    if (mode === DISABLE) {
+    if (mode === DISABLED) {
       tdfsInOtherModeState = instance.enabledTdfs.get();
     } else {
       tdfsInOtherModeState = instance.disabledTdfs.get();
@@ -204,7 +203,7 @@ function toggleTdfPresence(instance, mode) {
     });
 
     let changedTdfs = [];
-    if (mode === DISABLE) {
+    if (mode === DISABLED) {
       instance.enabledTdfs.set(remainingTdfs);
       changedTdfs = instance.disabledTdfs.get();
       let newlyChangedTdfs = changedTdfs.concat(tdfsToUpdate);
@@ -228,7 +227,7 @@ Template.profile.rendered = async function () {
     Session.set("showSpeechAPISetup",true);
     const allTdfs = await meteorCallAsync("getAllTdfs");
     Session.set("allTdfs",allTdfs);
-    console.log('allTdfs.length',allTdfs.length);
+    console.log('allTdfs',allTdfs);
 
     $("#expDataDownloadContainer").html("");
 
@@ -248,10 +247,10 @@ Template.profile.rendered = async function () {
 
     //Check all the valid TDF's
     for(let tdf of allTdfs){
-        let TDFId = tdf.tdfid;
+        let TDFId = tdf.TDFId;
         let tdfObject = tdf.content;
         let isMultiTdf = tdfObject.isMultiTdf;
-        let currentStimuliSetId = tdf.stimulisetid;
+        let currentStimuliSetId = tdf.stimuliSetId;
 
         //Make sure we have a valid TDF (with a setspec)
         const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec[0] : null;
@@ -282,7 +281,7 @@ Template.profile.rendered = async function () {
         }
 
         // Show data download - note that this happens regardless of userselect
-        if (Meteor.userId() === tdfObject.owner || isAdmin) {
+        if (Meteor.userId() === tdf.ownerId || isAdmin) {
             var disp = name;
             if (tdfObject.fileName != name) {
                 disp += " (" + tdfObject.fileName + ")";
@@ -321,8 +320,8 @@ Template.profile.rendered = async function () {
         }
 
         if (isAdmin) {
-          if (!tdfOwnerIds.includes(tdfObject.owner)) {
-            tdfOwnerIds.push(tdfObject.owner);
+          if (!tdfOwnerIds.includes(tdf.ownerId)) {
+            tdfOwnerIds.push(tdf.ownerId);
           }
         }
 
@@ -373,8 +372,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     Session.set("currentRootTdfId", currentTdfId);
     Session.set("currentTdfId", currentTdfId);
     const tdfResponse = await meteorCallAsync('getTdfById',currentTdfId);
-    const curTdf = tdfResponse.content;
-    Session.set("currentTdfFile",curTdf);
+    const curTdfContent = tdfResponse.content;
+    Session.set("currentTdfFile",curTdfContent);
+    Session.set("currentTdfName",curTdfContent.fileName);
     Session.set("currentStimuliSetId", currentStimuliSetId);
     Session.set("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses);
     Session.set("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback);
@@ -407,9 +407,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
-    console.log(curTdf);
-    var tdfAudioPromptFeedbackEnabled = curTdf.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
-    var audioPromptTTSAPIKeyAvailable = !!curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    console.log(curTdfContent);
+    var tdfAudioPromptFeedbackEnabled = curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
+    var audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     var audioPromptFeedbackEnabled = undefined;
     if(Session.get("experimentTarget")){
       audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
@@ -423,7 +423,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = curTdf.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
@@ -436,7 +436,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       var tdfKeyPresent = !!curTdf.content.tdfs.tutor.setspec[0].speechAPIKey && !!curTdf.content.tdfs.tutor.setspec[0].speechAPIKey[0];
+       var tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey && !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey[0];
        if(!speechAPIKey && !tdfKeyPresent)
        {
          console.log("speech api key not found, showing modal for user to input");
@@ -474,9 +474,9 @@ navigateForMultiTdf = async function(){
   function getUnitType(curUnit){
     let unitType = "other";
     if(!!curUnit.assessmentsession){
-      unitType = "assessmentsession";
+      unitType = SCHEDULE_UNIT;
     }else if(!!curUnit.learningsession){
-      unitType = "learningsession";
+      unitType = MODEL_UNIT;
     }
     return unitType;
   }
@@ -492,9 +492,9 @@ navigateForMultiTdf = async function(){
     const curUnit = Session.get("currentTdfUnit");
     const curUnitType = getUnitType(curUnit);
     //We always want to lock users in to an assessment session
-    if(curUnitType === "assessmentsession"){
+    if(curUnitType === SCHEDULE_UNIT){
       unitLocked = true;
-    }else if(curUnitType === "learningsession"){
+    }else if(curUnitType === MODEL_UNIT){
       if(!!curUnit.displayMinSeconds || !!curUnit.displayMaxSeconds){
         unitLocked = true;
       }

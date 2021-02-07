@@ -13,6 +13,7 @@ import {
 } from '../../lib/currentTestingHelpers';
 import { redoCardImage } from '../../index';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
+import { SCHEDULE_UNIT } from '../../../common/Definitions';
 
 /*
 * card.js - the implementation behind card.html (and thus
@@ -243,13 +244,13 @@ function nextChar(c) {
 function curStimHasSoundDisplayType(){
   let currentStimuliSetId = Session.get("currentStimuliSetId");
   let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
-  return stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
+  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
 }
 
 function curStimHasImageDisplayType(){
   let currentStimuliSetId = Session.get("currentStimuliSetId");
   let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
-  return stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
+  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
 }
 
 function getCurrentStimDisplaySources(filterPropertyName="clozeText"){
@@ -1442,22 +1443,25 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
   //appropriate time
   let reviewBegin = Date.now();
   let answerLogAction = isTimeout ? "[timeout]" : "answer";
-  let currentAnswerSyllables;
+  let currentAnswerSyllables = {
+    syllableArray:[],
+    displaySyllableIndices:[]
+  };
   let sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
   if(typeof(sessCurrentAnswerSyllables) != "undefined"){
     currentAnswerSyllables = {
-      syllables:sessCurrentAnswerSyllables.syllableArray,
-      count:sessCurrentAnswerSyllables.syllableArray.length,
+      syllableArray:sessCurrentAnswerSyllables.syllableArray,
       displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
     };
   }
 
   let feedbackType = deliveryParams.feedbackType || "simple";
-  let {itemId,stimulusKC,clusterKC,dynamicTagFields} = getItemDataForCurClusterIndex(Session.get("clusterIndex"));
-  let {whichStim,probabilityEstimate,...rest} = engine.findCurrentCardInfo();
+  let {itemId,clusterKC,tags,...rest} = getStimCluster(Session.get("clusterIndex")).stims[0];
+  let {whichStim,probabilityEstimate,...restb} = engine.findCurrentCardInfo();
+  let stimulusKC = whichStim;
 
   let curTdf = Session.get("currentTdfFile");
-  let unitName = curTdf.content.tdfs.tutor.unit[unitNum].unitname.trim()
+  let unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get("currentUnitNumber")].unitname);
 
   let problemName = stringifyIfExists(Session.get("originalDisplay"));
   let stepName = problemName;
@@ -1466,29 +1470,38 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
   // stepName = stepCount + " " + stepName;
   let isStudy = testType === "s";
   let clusterIndex = Session.get("clusterIndex");
-  let cluster = getStimCluster(clusterIndex);
-  let shufIndex = cluster.shufIndex;
+  let cluster;
+  let shufIndex;
   let schedCondition =  "N/A" ;
-  if(engine.unitType == "schedule"){
+  if(engine.unitType == SCHEDULE_UNIT){
     let sched = Session.get("schedule");
     if (sched && sched.q && sched.q.length) {
-      var schedItemIndex = Session.get("questionIndex") - 1;
+      let schedItemIndex = Session.get("questionIndex") - 1;
+      clusterIndex = schedItemIndex;
       if (schedItemIndex >= 0 && schedItemIndex < sched.q.length) {
           schedCondition = parseSchedItemCondition(sched.q[schedItemIndex].condition);
+          shufIndex = sched.q[schedItemIndex].clusterIndex;
       }else {
           note += msg( "SCHEDULE Q-INDEX MISMATCH => sched.q.length:", sched.q.length||'missing',", lastq.questionIndex-1:",schedItemIndex||'missing'," ");
       }
     }
+  }else{
+    cluster = getStimCluster(clusterIndex);
+    shufIndex = cluster.shufIndex;
   }
   let originalAnswer = Session.get("originalAnswer");
   let currentAnswer = Session.get("currentAnswer");
   let fullAnswer = (typeof(originalAnswer) == "undefined" || originalAnswer == "") ? currentAnswer : originalAnswer;
-  let temp = _.trim(d(fullAnswer, '')).split('~');
+  let temp = _.trim((fullAnswer || '')).split('~');
   let correctAnswer = temp[0];
 
-  let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay));
-  if(lastq.selectedDisplay.clozeText){
+  let filledInDisplay = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+  if(Session.get("currentDisplay").clozeText){
       filledInDisplay.clozeText =  filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
+  }
+
+  if(!probabilityEstimate){
+    probabilityEstimate = null;
   }
 
   let answerLogRecord = {
@@ -1497,20 +1510,20 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
       'userId': Meteor.userId(),
       'TDFId': Session.get("currentTdfId"),
       'eventStartTime': trialTimestamp,
-      'outcome': wasCorrect ? 'correct' : 'incorrect',
+      'outcome': isCorrect ? 'correct' : 'incorrect',
+      'probabilityEstimate': probabilityEstimate,
       'typeOfResponse': getResponseType(),
       'responseValue': _.trim(userAnswer),
       'displayedStimulus': Session.get("currentDisplay"),
-      'dynamicTagFields': dynamicTagFields,
 
-      'Anon_Student_Id':Meteor.username(),
-      'Session_ID': (new Date(trialTimestamp)).toUTCString().substr(0, 16) + " " + tdfName, //hack
+      'Anon_Student_Id':Meteor.user().username,
+      'Session_ID': (new Date(trialTimestamp)).toUTCString().substr(0, 16) + " " + Session.get("currentTdfName"), //hack
 
       'Condition_Namea':'tdf file', 
-      'Condition_Typea':Session.get("currentTdfName"),
+      'Condition_Typea':Session.get("currentTdfName"),//Note: we use this to enrich the history record server side, change both places if at all
       'Condition_Nameb':'xcondition',
       'Condition_Typeb':Session.get("experimentXCond"),
-      'Condition_Namec':'schedule condition',//schedCondition
+      'Condition_Namec':'schedule condition',
       'Condition_Typec':schedCondition,
       'Condition_Named':'how answered',
       'Condition_Typed':_.trim(source),
@@ -1544,14 +1557,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
       "CF_Audio_Output_Enabled":Session.get('enableAudioPromptAndFeedback'),
       "CF_Display_Order": Session.get('questionIndex'),
       "CF_Stim_File_Index": clusterIndex,
-      "CF_Set_Shuffled_Index)": shufIndex || clusterIndex,
+      "CF_Set_Shuffled_Index": shufIndex || clusterIndex,
       "CF_Alternate_Display_Index": Session.get('alternateDisplayIndex'),
       "CF_Stimulus_Version": whichStim,
 
       "CF_Correct_Answer": correctAnswer,
-      "CF_Correct_Answer_Syllables": Session.get("currentAnswerSyllables").syllableArray, 
-      "CF_Correct_Answer_Syllables_Count": Session.get("currentAnswerSyllables").syllables.length,
-      "CF_Display Syllable_Indices": Session.get("currentAnswerSyllables").displaySyllableIndices, 
+      "CF_Correct_Answer_Syllables": currentAnswerSyllables.syllableArray, 
+      "CF_Correct_Answer_Syllables_Count": currentAnswerSyllables.syllableArray.length,
+      "CF_Display Syllable_Indices": currentAnswerSyllables.displaySyllableIndices, 
       "CF_Overlearning": false,
       "CF_Response_Time": trialEndTimeStamp,
       "CF_Start_Latency": startLatency,
@@ -1561,7 +1574,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
       "CF_Button_Order": buttonEntries,
       "CF_Note": '',
       "Feedback_Text": $("#UserInteraction").text() || "",
-      'dialogueHistory':undefined //We'll fill this in later
+      'dialogueHistory':{} //We'll fill this in later if we do a feedback dialogue
   };
   
   //Don't count test type trials in progress reporting
@@ -1594,6 +1607,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
         lastAction: answerLogAction,
         lastActionTimeStamp: Date.now()
       }
+      console.log("writing answerLogRecord to history:",answerLogRecord);
       await meteorCallAsync('insertHistory',answerLogRecord);
       await updateExperimentState(newExperimentState,"card.afterAnswerFeedbackCallback.writeAnswerLog");
   };
@@ -1726,7 +1740,7 @@ async function unitIsFinished(reason) {
       lastUnitCompleted: curUnitNum,
       lastUnitStarted: newUnitNum,
       currentUnitNumber: newUnitNum, 
-      currentTdfUnit: currentTdfUnit,
+      currentTdfUnit: curTdfUnit,
       lastAction: "unit-end",
       lastActionTimeStamp: Date.now()
     }
@@ -2428,6 +2442,7 @@ async function resumeFromComponentState() {
 
         const curTdf = await meteorCallAsync("getTdfById",conditionTdfId);
         Session.set("currentTdfFile",curTdf.content);
+        Session.set("currentTdfName",curTdf.content.fileName);
 
         //Also need to read new stimulus file (and note that we allow an exception
         //to kill us if the current tdf is broken and has no stimulus file)
@@ -2435,7 +2450,8 @@ async function resumeFromComponentState() {
         console.log("condition stimuliSetId",curTdf)
     }else {
         Session.set("currentTdfFile",rootTDF);
-        Session.set("currentStimuliSetId", rootTDFBoxed.stimulisetid);
+        Session.set("currentTdfName",rootTDF.fileName);
+        Session.set("currentStimuliSetId", rootTDFBoxed.stimuliSetId);
 
         //Just notify that we're skipping
         console.log("No Experimental condition is required: continuing",rootTDFBoxed);
@@ -2489,6 +2505,8 @@ async function resumeFromComponentState() {
         var shuffles = setSpec.shuffleclusters || [""];
         var swaps = setSpec.swapclusters || [""];
         clusterMapping = [];
+        console.log('shuffles.length',shuffles.length);
+        console.log('swaps.length',swaps.length);
 
         while(shuffles.length > 0 || swaps.length > 0) {
             clusterMapping = createStimClusterMapping(
@@ -2497,6 +2515,7 @@ async function resumeFromComponentState() {
                 swaps.shift() || "",
                 clusterMapping
             );
+            console.log('while',clusterMapping);
         }
         newExperimentState.clusterMapping = clusterMapping;
         console.log("Cluster mapping created", clusterMapping);
@@ -2607,18 +2626,17 @@ async function processUserTimesLog() {
 
         if (tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("assessmentsession")) {
             engine = createScheduleUnit(curExperimentData);
-            Session.set("sessionType","assessmentsession");
         }
         else if(tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("learningsession")) {
             engine = createModelUnit(curExperimentData);
-            Session.set("sessionType","learningsession");
         }
         else {
             engine = createEmptyUnit(curExperimentData); //used for instructional units
-            Session.set("sessionType","empty");
         }
     };
     clearScrollList();
+
+    let newExperimentState = {};
 
     switch(experimentState.lastAction) {
         case "instructions": break;
@@ -2659,6 +2677,8 @@ async function processUserTimesLog() {
     };
 
     resetEngine(Session.get("currentUnitNumber"));
+    newExperimentState.unitType = engine.unitType;
+    await updateExperimentState(newExperimentState,"card.processUserTimesLog");
     engine.loadComponentStates();
 
     //If we make it here, then we know we won't need a resume until something

@@ -3,9 +3,9 @@ import { curSemester, ALL_TDFS, KC_MULTIPLE } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
-import { getNewItemFormat, getNewTdfFormat } from "./conversions/convert";
-export { getTdfBy_id, getHistoryByTDFfileName };
-import { getItem, getComponentState, getCourse, getHistory } from './orm';
+import { getNewItemFormat } from "./conversions/convert";
+export { getTdfByFileName, getTdfBy_id, getHistoryByTDFfileName, getListOfStimTags, getStimuliSetById };
+import { getItem, getComponentState, getCourse, getTdf } from './orm';
 
 /*jshint sub:true*/
 
@@ -138,15 +138,13 @@ serverConsole = function() {
     console.log.apply(this, disp);
 };
 
-async function getAllTdfFileNames() {
-  const allTdfs = await getAllTdfs();
-  return allTdfs.map(x => x.content.fileName);
-}
-
 async function getTdfQueryNames(tdfFileName) {
-  let tdfQueryNames = {};
+  let tdfQueryNames = [];
   if (tdfFileName === ALL_TDFS) {
-    tdfQueryNames = await getAllTdfFileNames();
+    const tdfsRet = await db.any("SELECT content -> 'fileName' AS filename from tdf");
+    for(let tdfFileName of tdfsRet){
+      tdfQueryNames.push(tdfFileName);
+    }
   } else if (tdfFileName){
     tdfQueryNames = [tdfFileName];
   }
@@ -170,30 +168,17 @@ async function getLearningSessionItems(tdfFileName) {
   return learningSessionItems;
 }
 
-async function getTdfByOwnerId(ownerId){
-  try{
-    console.log("getTdfByOwnerId:",ownerId);
-    const tdfs = await db.any("SELECT * from tdf WHERE ownerid=$1",[ownerId]);
-    return tdfs;
-  }catch(e){
-    console.log("getTdfByOwnerId ERROR,",ownerId,",",e);
-    return null;
-  }
-}
-
 async function getTdfById(TDFId){
   const tdfs = await db.one("SELECT * from tdf WHERE TDFId=$1",TDFId);
-  let tdf = tdfs;
-  serverConsole('getTdfById',TDFId,tdf,tdfs);
+  let tdf = getTdf(tdfs);
   return tdf;
 }
 
 async function getTdfBy_id(_id){
   try{
-    console.log("getTdfBy_id:"+_id);
     let queryJSON = {"_id":_id};
-    const tdfs = await db.any("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
-    let tdf = tdfs;
+    const tdfs = await db.one("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
+    let tdf = getTdf(tdfs);
     return tdf;
   }catch(e){
     console.log("getTdfBy_id ERROR,",_id,",",e);
@@ -208,7 +193,7 @@ async function getTdfByFileName(filename){
     if(!tdfs){
       return null;
     }
-    let tdf = tdfs;
+    let tdf = getTdf(tdfs);
     return tdf;
   }catch(e){
     console.log("getTdfByFileName ERROR,",filename,",",e);
@@ -221,7 +206,7 @@ async function getTdfByExperimentTarget(experimentTarget){
     console.log("getTdfByExperimentTarget:"+experimentTarget);
     let queryJSON = {"tdfs":{"tutor":{"setspec":[{"experimentTarget":[experimentTarget]}]}}};
     const tdfs = await db.one("SELECT * from tdf WHERE content @> $1" + "::jsonb",[queryJSON]);
-    let tdf = tdfs;
+    let tdf = getTdf(tdfs);
     return tdf;
   }catch(e){
     console.log("getTdfByExperimentTarget ERROR,",experimentTarget,",",e);
@@ -232,7 +217,11 @@ async function getTdfByExperimentTarget(experimentTarget){
 async function getAllTdfs(){
   console.log("getAllTdfs");
   const tdfsRet = await db.any("SELECT * from tdf");
-  return tdfsRet;
+  let tdfs = [];
+  for(let tdf of tdfsRet){
+    tdfs.push(getTdf(tdf));
+  }
+  return tdfs;
 }
 
 async function getStimuliSetsForIdSet(stimuliSetIds){
@@ -250,21 +239,27 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
 }
 
 async function getProbabilityEstimatesByKCId(relevantKCIds){
-  return await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate) AS probabilityEstimates FROM history WHERE KCId = ANY($1) GROUP BY KCId ORDER BY eventId',[relevantKCIds]);
+  const ret = await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate) AS probabilityEstimates FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId ORDER BY eventId',[relevantKCIds]);
+  let estimates = [];
+  for(let pair of ret){
+    estimates.push({KCId:pair.kcid,probabilityEstimates:pair.probabilityestimates})
+  }
+  return estimates;
 }
 
 //by currentTDFId, not currentRootTDFId
 async function getOutcomeHistoryByUserAndTDFfileName(userId,TDFfileName){
   const tdfRet = await db.one('SELECT TDFId from tdf WHERE content @> $1' + '::jsonb',{"fileName":TDFfileName});
   let TDFId = tdfRet[0].tdfid;
-  return await db.manyOrNone('SELECT array_agg(outcome) AS outcomeHistory FROM history WHERE userId=$1 AND TDFId=$2 GROUP BY TDFId ORDER BY eventId',[userId,TDFId]);
+  const ret = await db.manyOrNone('SELECT array_agg(outcome) AS outcomeHistory FROM history WHERE userId=$1 AND TDFId=$2 GROUP BY TDFId ORDER BY eventId',[userId,TDFId]);
+  return {outcomeHistory:ret.outcomehistory};
 }
 
 async function getReponseKCMap(){
   let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
   let responseKCMap = {};
   for(let pair of responseKCStuff){
-    responseKCMap[pair.correctResponse] = pair.responsekc;
+    responseKCMap[pair.correctresponse] = pair.responsekc;
   }
   return responseKCMap;
 }
@@ -317,6 +312,7 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
   }
   let highestStimulusKCRet = await db.manyOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
   let curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE + 1;
+
   let curNewStimulusKC = curNewKCBase;
   let curNewClusterKC = curNewKCBase;
 
@@ -391,8 +387,8 @@ async function getAllCourseSections(){
   try{//  //sectionid, courseandsectionname
     console.log("getAllCourseSections");
     let query = "SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1";
-    const courses = await db.any(query,curSemester);
-    return courses;
+    const ret = await db.any(query,curSemester);
+    return ret;
   }catch(e){
     console.log("getAllCourseSections ERROR,",instructorId,inCurrentSemester,",",e);
     return null;
@@ -529,22 +525,24 @@ async function setExperimentState(UserId,TDFId,newExperimentState){ //by current
   if (experimentStateRet != null) {
     let updatedExperimentState = Object.assign(experimentStateRet.experimentstate,newExperimentState);
     let updateQuery = "UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId";
-    const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId])
-    console.log("setExperimentState",TDFId,UserId,updatedExperimentState,res);
-
+    const res = await db.one(updateQuery,[updatedExperimentState,UserId,TDFId]);
     return updatedExperimentState;
   }
 
   let insertQuery = "INSERT INTO globalExperimentState (experimentState, userId, TDFId) VALUES ($1, $2, $3)";
-  await db.query(insertQuery,[{experimentstate: {}},UserId,TDFId]);
+  await db.query(insertQuery,[{},UserId,TDFId]);
 
   return TDFId;
 }
 
 async function insertHistory(historyRecord){
+  let tdfFileName = historyhistoryRecord['Condition_Typea'];
+  let dynamicTagFields = await getListOfStimTags(tdfFileName);
+  historyRecord.dynamicTagFields = dynamicTagFields;
   let query = "INSERT INTO history \
                             (itemId, \
-                            userIdTDFId, \
+                            userId, \
+                            TDFId, \
                             KCId, \
                             eventStartTime, \
                             feedbackDuration, \
@@ -555,7 +553,6 @@ async function insertHistory(historyRecord){
                             typeOfResponse, \
                             responseValue, \
                             displayedStimulus, \
-                            dynamicTagFields, \
                             Anon_Student_Id, \
                             Condition_Namea, \
                             Condition_Typea, \
@@ -597,75 +594,72 @@ async function insertHistory(historyRecord){
                             CF_Review_Entry, \
                             CF_Button_Order, \
                             Feedback_Text, \
+                            dynamicTagFields, \
                             dialogueHistory)";
-  query += " VALUES( \
-              ${itemId}, \
-							${userId}, \
-							${TDFId}, \
-							${KCId}, \
-							${eventStartTime}, \
-							${feedbackDuration}, \
-							${stimulusDuration}, \
-							${responseDuration}, \
-							${outcome}, \
-							${probabilityEstimate}, \
-							${typeOfResponse}, \
-							${responseValue}, \
-							${displayedStimulus}, \
-							${dynamicTagFields}, \
-							${Anon_Student_Id}, \
-							${Condition_Namea}, \
-							${Condition_Typea}, \
-							${Condition_Nameb}, \
-							${Condition_Typeb}, \
-							${Condition_Namec}, \
-							${Condition_Typec}, \
-							${Condition_Named}, \
-							${Condition_Typed}, \
-							${Condition_Namee}, \
-							${Condition_Typee}, \
-							${Level_Unit}, \
-							${Level_Unitname}, \
-							${Problem_Name}, \
-							${Step_Name}, \
-							${Time}, \
-							${Input}, \
-							${Student_Response_Type}, \
-							${Student_Response_Subtype}, \
-							${Tutor_Response_Type}, \
-							${KC_Default}, \
-							${KC_Cluster}, \
-							${CF_GUI_Source}, \
-							${CF_Audio_Input_Enabled}, \
-							${CF_Audio_Output_Enabled}, \
-							${CF_Display_Order}, \
-							${CF_Stim_File_Index}, \
-							${CF_Set_Shuffled_Index}, \
-							${CF_Alternate_Display_Index}, \
-							${CF_Stimulus_Version}, \
-							${CF_Correct_Answer}, \
-							${CF_Correct_Answer_Syllables}, \
-							${CF_Correct_Answer_Syllables_Count}, \
-							${CF_Display_Syllable_Indices}, \
-							${CF_Response_Time}, \
-							${CF_Start_Latency}, \
-							${CF_End_Latency}, \
-							${CF_Review_Latency}, \
-							${CF_Review_Entry}, \
-							${CF_Button_Order}, \
-							${Feedback_Text}, \
-							${dialogueHistory})";
-  await db.none(query,historyRecord);
+  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55::jsonb,$56::jsonb)";
+              
+  await db.none(query, [
+    historyRecord.itemId,
+    historyRecord.userId,
+    historyRecord.TDFId,
+    historyRecord.KCId,
+    historyRecord.eventStartTime,
+    historyRecord.feedbackDuration,
+    historyRecord.stimulusDuration,
+    historyRecord.responseDuration,
+    historyRecord.outcome,
+    historyRecord.probabilityEstimate,
+    historyRecord.typeOfResponse,
+    historyRecord.responseValue,
+    historyRecord.displayedStimulus,
+    historyRecord.Anon_Student_Id,
+    historyRecord.Condition_Namea,
+    historyRecord.Condition_Typea,
+    historyRecord.Condition_Nameb,
+    historyRecord.Condition_Typeb || null,
+    historyRecord.Condition_Namec,
+    historyRecord.Condition_Typec,
+    historyRecord.Condition_Named,
+    historyRecord.Condition_Typed,
+    historyRecord.Condition_Namee,
+    historyRecord.Condition_Typee,
+    historyRecord.Level_Unit,
+    historyRecord.Level_Unitname,
+    historyRecord.Problem_Name,
+    historyRecord.Step_Name,
+    historyRecord.Time,
+    historyRecord.Input,
+    historyRecord.Student_Response_Type,
+    historyRecord.Student_Response_Subtype,
+    historyRecord.Tutor_Response_Type,
+    historyRecord.KC_Default,
+    historyRecord.KC_Cluster,
+    historyRecord.CF_GUI_Source,
+    historyRecord.CF_Audio_Input_Enabled,
+    historyRecord.CF_Audio_Output_Enabled,
+    historyRecord.CF_Display_Order,
+    historyRecord.CF_Stim_File_Index,
+    historyRecord.CF_Set_Shuffled_Index,
+    historyRecord.CF_Alternate_Display_Index,
+    historyRecord.CF_Stimulus_Version,
+    historyRecord.CF_Correct_Answer,
+    historyRecord.CF_Correct_Answer_Syllables,
+    historyRecord.CF_Correct_Answer_Syllables_Count,
+    historyRecord.CF_Display_Syllable_Indices,
+    historyRecord.CF_Response_Time,
+    historyRecord.CF_Start_Latency,
+    historyRecord.CF_End_Latency,
+    historyRecord.CF_Review_Latency,
+    historyRecord.CF_Review_Entry,
+    historyRecord.CF_Button_Order,
+    historyRecord.Feedback_Text,
+    historyRecord.dynamicTagFields,
+    historyRecord.dialogueHistory]);
 }
 
 async function getHistoryByTDFfileName(TDFfileName){
   let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
-  const histories = await db.manyOrNone(query,[{"fileName":TDFfileName}]);
-  let outputFormattedHistories = [];
-  for(let history of histories){
-    outputFormattedHistories.push(getHistory(history));
-  }
-  return outputFormattedHistories;
+  return await db.manyOrNone(query,[{"fileName":TDFfileName}]);
 }
 
 function getAllTeachers(southwestOnly=false){
@@ -784,6 +778,25 @@ async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
   }
 
   return practiceTimeIntervalsMap;
+}
+
+async function getListOfStimTags(tdfFileName){
+  serverConsole("getListOfStimTags, tdfFileName: " + tdfFileName);
+  const tdf = await getTdfByFileName(tdfFileName);
+  let stimuliSetId = tdf.stimuliSetId;
+  serverConsole("getListOfStimTags, stimuliSetId: " + stimuliSetId);
+  const stims = await getStimuliSetById(stimuliSetId);
+  let allTagsInStimFile = new Set();
+
+  for(let stim of stims){
+      if(stim.tags){
+          for(let tagName of Object.keys(stim.tags)){
+              allTagsInStimFile.add(tagName);
+          }
+      }
+  }
+
+  return Array.from(allTagsInStimFile);
 }
 
 async function getStimuliSetByFilename(stimFilename){
@@ -917,7 +930,7 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId,onlyWithLearningSess
 }
 
 function setLearningSessionItemsMulti(learningSessionItem, tdf) {
-  let lastStim = getStimCountByStimuliSetId(tdf.stimulisetid) - 1;
+  let lastStim = getStimCountByStimuliSetId(tdf.stimuliSetId) - 1;
   for (let i = 0; i < lastStim - 1; i++) {
     learningSessionItem[i] = true;
   }
@@ -1109,7 +1122,7 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId,stimuliSetId){
     skipStimSet = true;
   }
   if(!stimSet && !skipStimSet) throw new Error('no stimset for tdf:',tdfFilename);
-  if (prev && prev.tdfid) {
+  if (prev && prev.TDFId) {
     let tdfJSONtoUpsert;
     if(hasGeneratedTdfs(tdfJSON)){
       let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
@@ -1120,7 +1133,7 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId,stimuliSetId){
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
     try{
-      await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4'[ownerId, prev.stimulisetid, tdfJSONtoUpsert, prev.tdfid])
+      await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4'[ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId])
     }catch(e){
       serverConsole('error updating tdf data2',tdfFilename,e,e.stack)
     }
@@ -1131,9 +1144,8 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId,stimuliSetId){
       let generatedTdf = tdfGenerator.getGeneratedTdf();
       tdfJSONtoUpsert = JSON.stringify(generatedTdf);
     } else {
-      let rec = getNewTdfFormat(tdfJSON);
-      rec.createdAt = new Date();
-      tdfJSONtoUpsert = JSON.stringify(rec.content);
+      tdfJSON.createdAt = new Date();
+      tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
     try{
       await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)',[ownerId,stimuliSetId,tdfJSONtoUpsert]);
@@ -1211,7 +1223,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId){
               stimuliSetId =  JSON.parse(JSON.stringify(higheststimsetid));
             }
           }
-          let rec = {'fileName':filename, 'tdfs':json, 'owner':adminUserId, 'source':'repo'};
+          let rec = {'fileName':filename, 'tdfs':json, 'ownerId':adminUserId, 'source':'repo'};
           await upsertTDFFile(filename,rec,adminUserId,stimuliSetId);
         //}catch(e){
         //  serverConsole('error loading tdf file:',filename,e);
@@ -1356,14 +1368,14 @@ Meteor.startup(async function () {
 
     //Set up our server-side methods
     Meteor.methods({
-      getAllTdfs,getTdfById,getTdfByFileName,getTdfByExperimentTarget,getTdfByOwnerId,getTdfIDsAndDisplaysAttemptedByUserId,
+      getAllTdfs,getTdfById,getTdfByFileName,getTdfByExperimentTarget,getTdfIDsAndDisplaysAttemptedByUserId,
       getLearningSessionItems,getAllCourses,getAllCourseSections,getAllCoursesForInstructor,getAllCourseAssignmentsForInstructor,
       getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
       getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
       insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdAndTDFId,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
-      getSourceSentences,loadStimsAndTdfsFromPrivate,
+      getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,
 
       getAltServerUrl:function(){
         return altServerUrl;

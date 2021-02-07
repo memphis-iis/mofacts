@@ -37,7 +37,7 @@ export class DynamicTdfGenerator {
     this.generatedTdf_ = {
       isMultiTdf: true,
       fileName: fileName,
-      owner: ownerId,
+      ownerId: ownerId,
       source: source,
       tdfs: this.parentTdfJson_,
       subTdfs: []

@@ -1,4 +1,4 @@
-export { getItem, getComponentState, getCourse, getHistory };
+export { getItem, getComponentState, getCourse, getHistory, getTdf };
 
 function getItem(stim){
     return {
@@ -56,7 +56,7 @@ function getCourse(course){
 }
 
 function getHistory(history){
-    return {
+    let historyOutput = {
         'Selection': '',
         'Action': '',
         'Tutor Response Subtype': '',
@@ -116,6 +116,18 @@ function getHistory(history){
         "CF (Review Latency)":history.cf_review_latency,
         "CF (Review Entry)":history.cf_review_entry,
         "CF (Button Order)":history.cf_button_order,
-        "Feedback Text":history.feedback_text
+        "Feedback Text":history.feedback_text,
+        "dynamicTagFields":history.dynamicTagFields
     };
+    return historyOutput;
+}
+
+function getTdf(tdf){
+    return {
+        TDFId: tdf.tdfid,
+        ownerId: tdf.ownerid,
+        stimuliSetId: tdf.stimulisetid,
+        content: tdf.content,
+        visibility: tdf.visibility
+    }
 }

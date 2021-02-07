@@ -288,7 +288,7 @@ instructContinue = function () {
             'displayedStimulus': null,
             'dynamicTagFields': null,
         
-            'Anon_Student_Id':_.trim(Meteor.username()),
+            'Anon_Student_Id':_.trim(Meteor.user().username),
             'Session_ID': (new Date(_.intval(instructionClientStart))).toUTCString().substr(0, 16) + " " + tdfName, //hack
         
             'Condition_Namea':'tdf file', 
@@ -325,7 +325,7 @@ instructContinue = function () {
             "CF_Audio_Output_Enabled":Session.get('enableAudioPromptAndFeedback'),
             "CF_Display_Order": -1,
             "CF_Stim_File_Index": -1,
-            "CF_Set_Shuffled_Index)": -1,
+            "CF_Set_Shuffled_Index": -1,
             "CF_Alternate_Display_Index": null,
             "CF_Stimulus_Version": -1,
         

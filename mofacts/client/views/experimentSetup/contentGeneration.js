@@ -1,4 +1,4 @@
-import { curSemester, STIM_PARAMETER } from '../../../common/Definitions';
+import { curSemester, STIM_PARAMETER, MODEL_UNIT, SCHEDULE_UNIT } from '../../../common/Definitions';
 import { Tracker } from 'meteor/tracker';
 import { DynamicTdfGenerator } from "../../../common/DynamicTdfGenerator";
 import { rangeVal } from "../../lib/currentTestingHelpers";
@@ -35,16 +35,16 @@ function recordClozeEditHistory(oldCloze,newCloze){
 async function setAllTdfs(ownerMapCallback){
   allTdfs = [];
   let ownerIds = [];
-  let stimSetIds = Session.get("allTdfs").map(x => x.stimulisetid);
+  let stimSetIds = Session.get("allTdfs").map(x => x.stimuliSetId);
   let allStims = await meteorCallAsync('getStimuliSetsForIdSet',stimSetIds);
   Session.get("allTdfs").forEach(function(tdf){
     if(tdf.semester != curSemester) return;
 
-    let tdfid = tdf.tdfid;
-    let tdfStimSetId = tdf.stimulisetid;
+    let tdfid = tdf.TDFId;
+    let tdfStimSetId = tdf.stimuliSetId;
     let tdfFile = tdf.content;
     tdfIdToTdfFileMap[tdfid] = tdfFile;
-    tdfIdToStimuliSetMap[tdfid] = allStims.filter(x => x.stimulisetid == tdfStimSetId);
+    tdfIdToStimuliSetMap[tdfid] = allStims.filter(x => x.stimuliSetId == tdfStimSetId);
 
     var displayName = tdfFile.tdfs.tutor.setspec[0].lessonname[0];
     let displayDate = "";
@@ -52,9 +52,9 @@ async function setAllTdfs(ownerMapCallback){
       let date = new Date(tdfFile.createdAt);
       displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
     }
-    let ownerId = tdfFile.owner;
-    ownerIds.push(tdfFile.owner);
-    allTdfs.push({tdfid,displayName, ownerId, displayDate});
+    let ownerId = tdf.ownerId;
+    ownerIds.push(tdf.ownerId);
+    allTdfs.push({tdfid, displayName, ownerId, displayDate});
   });
   ownerMapCallback(ownerIds);
   Session.set("contentGenerationAllTdfs",allTdfs);
@@ -107,8 +107,8 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let isCoreference = !!(stim.tags.clozeCorefTransformation);
     let unitIndex = isMultiTdf ? MULTITDF_MAIN_CLUSTER_UNIT : stimUnitMappings[index];
-    let {sessionType,...rest} = stimUnitMappings[index];
-    if(isMultiTdf || sessionType == "learningsession"){
+    let {unitType,...rest} = stimUnitMappings[index];
+    if(isMultiTdf || unitType == MODEL_UNIT){
       allClozes.push({
         unitIndex, cloze, correctResponse, stimulusKC, clusterKC, paraphraseId, originalOrderIndex, isCoreference, sourceSentence,
         origStimIndex: index,
@@ -360,13 +360,13 @@ function generateTDFJSON(tdfFileName,displayName,stimFileName,newStimJSON){
     console.log("curTdf.subTdfs: " + JSON.stringify(curTdf.subTdfs));
   }else{
     for(var unitIndex in clusterListMappings){
-      var isLearningSession = clusterListMappings[unitIndex].sessionType === "learningsession";
+      var isLearningSession = clusterListMappings[unitIndex].unitType === MODEL_UNIT;
       var unit = curTdf.tdfs.tutor.unit[unitIndex];
       let clusterlist = isLearningSession ? unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
       clusterlist[0] = clusterListMappings[unitIndex].new;
     }
     curTdf.createdAt = new Date();
-    curTdf.owner = Meteor.userId();
+    curTdf.ownerId = Meteor.userId();
     curTdf.fileName = tdfFileName;
   }
 
@@ -728,7 +728,7 @@ Template.contentGeneration.events({
         var unit = units[unitIndex];
         if(!!unit.learningsession || !!unit.assessmentsession){
           var session = unit.learningsession || unit.assessmentsession;
-          var sessionType = !!unit.learningsession ? "learningsession" : "assessmentsession";
+          var unitType = !!unit.learningsession ? MODEL_UNIT : SCHEDULE_UNIT;
           let stimIndices = rangeVal(session[0].clusterlist[0]);
           clusterListMappings[unitIndex] = {
             orig:unitIndex,
@@ -738,7 +738,7 @@ Template.contentGeneration.events({
           for(let stimIndex of stimIndices){
             stimUnitMappings[stimIndex] = {
               unitIndex,
-              sessionType
+              unitType
             }
           }
         }
@@ -870,6 +870,6 @@ let templateTDFJSON = {
           ]
       }
   },
-  "owner" : "",
+  "ownerId" : "",
   "source" : "content_generation"
 }

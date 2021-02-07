@@ -23,8 +23,9 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-import { getTdfByFileName, getStimuliSetById, getHistoryByTDFfileName } from "./methods";
+import { getTdfByFileName, getStimuliSetById, getHistoryByTDFfileName, getListOfStimTags } from "./methods";
 import { outputFields } from "../common/Definitions";
+import { getHistory } from "../server/orm";
 
 (async function () { //Begin IIFE pattern
     let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
@@ -44,7 +45,7 @@ import { outputFields } from "../common/Definitions";
 
     getValuesOfStimTagList = async function(tdfFileName, clusterIndex,stimIndex,tagList){
         const tdf = await getTdfByFileName(tdfFileName);
-        const stimuliSetId = tdf.stimulisetid;
+        const stimuliSetId = tdf.stimuliSetId;
         const stimuliSet = await getStimuliSetById(stimuliSetId);
         let curStim = stimuliSet[clusterIndex][stimIndex];
         let valueDict = {};
@@ -58,25 +59,6 @@ import { outputFields } from "../common/Definitions";
         }
 
         return valueDict;
-    }
-
-    getListOfStimTags = async function(tdfFileName){
-        serverConsole("getListOfStimTags, tdfFileName: " + tdfFileName);
-        const tdf = await getTdfByFileName(tdfFileName);
-        const stimuliSetId = tdf.stimulisetid;
-        serverConsole("getListOfStimTags, stimuliSetId: " + stimuliSetId);
-        const stims = await getStimuliSetById(stimuliSetId);
-        let allTagsInStimFile = new Set();
-
-        for(let stim of stims){
-            if(stim.tags){
-                for(let tagName of Object.keys(stim.tags)){
-                    allTagsInStimFile.add(tagName);
-                }
-            }
-        }
-
-        return Array.from(allTagsInStimFile);
     }
 
     // Exported main function: call recordAcceptor with each record generated
@@ -124,11 +106,12 @@ import { outputFields } from "../common/Definitions";
             const histories = await getHistoryByTDFfileName(expName);
             for(let history of histories){
                 try {
+                    history = getHistory(history);
                     //history.cf_stimulus_version == whichStim
                     const dynamicStimTagValues = await getValuesOfStimTagList(expName, history.clusterindex, history.cf_stimulus_version, listOfDynamicStimTags);
         
                     for(let tag of Object.keys(dynamicStimTagValues)){
-                        history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
+                        history.dynamicTagFields["CF (" + tag + ")"] = dynamicStimTagValues[tag];
                     }
                     recordCount++;
                     recordAcceptor(delimitedRecord(history));

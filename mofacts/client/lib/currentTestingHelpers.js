@@ -1,4 +1,4 @@
-import { KC_MULTIPLE } from '../../common/Definitions';
+import { KC_MULTIPLE, MODEL_UNIT } from '../../common/Definitions';
 import { dialogueSelectState } from '../views/home/profileDialogueToggles';
 
 export { 
@@ -168,7 +168,7 @@ function getStimCount() {
 // current sessions cluster mapping. 
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-    let isLearningSession = Session.get("sessionType") == "learningsession";
+    let isLearningSession = Session.get("unitType") == MODEL_UNIT;
     let clusterMapping = Session.get("clusterMapping");
     let rawIndex = isLearningSession ? clusterMapping[clusterMappedIndex] : clusterMappedIndex; //Only learning sessions use cluster mapping
     let cluster = { 
@@ -320,7 +320,7 @@ function getCurrentDeliveryParams(){
     //If they didn't specify the unit, assume that current unit
     let currUnit = Session.get("currentTdfUnit");
 
-    let isLearningSession = Session.get("sessionType") == "learningsession";
+    let isLearningSession = Session.get("unitType") == MODEL_UNIT;
 
     //Note that we will only extract values that have a specified default
     //value here.
