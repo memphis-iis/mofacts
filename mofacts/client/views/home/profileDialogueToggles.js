@@ -3,7 +3,7 @@ import { ReactiveDict } from 'meteor/reactive-dict';
 const _state = new ReactiveDict('dialogueSelectState');
 const _availableDialogueTypes = ["simple", "refutational", "dialogue"];
 
-_randomizeSelectedDialogueType = () => {
+const _randomizeSelectedDialogueType = () => {
   const rIdx = Math.floor(Math.random() * Math.floor(_availableDialogueTypes.length));
   _state.set("randomSelectedDialogueType", _availableDialogueTypes[rIdx]);
   _state.set("selectedDialogueType", _state.get("randomSelectedDialogueType"));
