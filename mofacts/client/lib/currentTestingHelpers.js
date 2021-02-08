@@ -1,4 +1,5 @@
 import { curSemester } from '../../common/Definitions';
+import { dialogueSelectState } from '../views/home/profileDialogueToggles';
 export { getCurrentDeliveryParams };
 
 /* client/lib/currentTestingHelpers.js
@@ -433,6 +434,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'enhancedFeedback':false,
         'checkOtherAnswers':false,
         'feedbackType':'',
+        'allowFeedbackTypeSelect': false,
         'falseAnswerLimit':9999999
     };
 
@@ -459,6 +461,7 @@ getCurrentDeliveryParams = function (currUnit) {
         'studyFirst':xlateBool,
         'enhancedFeedback':xlateBool,
         'checkOtherAnswers':xlateBool,
+        'allowFeedbackTypeSelect': xlateBool,
         'falseAnswerLimit': _.intval
     };
 
@@ -512,6 +515,15 @@ getCurrentDeliveryParams = function (currUnit) {
                 deliveryParams[fieldName] = xlation(currVal);
             }
         }
+    }
+
+    // If there's no feedback type defined by the TDF author
+    // or if the user is allowed to select a feedback type,
+    // type selected with the profile page toggle
+    if (!deliveryParams["feedbackType"].length 
+      || deliveryParams["allowFeedbackTypeSelect"]) {
+      deliveryParams["feedbackType"] = 
+        dialogueSelectState.get("selectedDialogueType");
     }
 
     return deliveryParams;
