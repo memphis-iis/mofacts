@@ -442,16 +442,18 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         isMultiTdf: isMultiTdf
     });
 
+    const setspec = getCurrentTdfFile().tdfs.tutor.setspec[0];
+
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
-    var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
+    var tdfAudioPromptFeedbackEnabled = setspec.enableAudioPromptAndFeedback && setspec.enableAudioPromptAndFeedback[0] === "true";
     var audioPromptFeedbackEnabled = !Session.get("experimentTarget") ? (tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled) : tdfAudioPromptFeedbackEnabled;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = setspec.audioInputEnabled && setspec.audioInputEnabled[0] === "true";
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
@@ -464,7 +466,7 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
      //and going to the practice set
      Meteor.call('getUserSpeechAPIKey', function(error,key){
        speechAPIKey = key;
-       var tdfKeyPresent = !!getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey && !!getCurrentTdfFile().tdfs.tutor.setspec[0].speechAPIKey[0];
+       var tdfKeyPresent = !!setspec.speechAPIKey && !!setspec.speechAPIKey[0];
        if(!speechAPIKey && !tdfKeyPresent)
        {
          console.log("speech api key not found, showing modal for user to input");
