@@ -24,6 +24,8 @@
 		<unitname>Schedule Unit</unitname>
 		<buttontrial>true</buttontrial>
 		<deliveryparams>
+			<feedbackType>simple</feedbackType>
+			<allowFeedbackTypeSelect>true</allowFeedbackTypeSelect>
 			<practiceseconds>1000000</practiceseconds>
 			<drill>5000</drill>
 			<skipstudy>false</skipstudy>
