@@ -1,0 +1,20 @@
+<template name="profileDialogueToggles">
+  <div class="padLeftAndRight row toggleSwitchContainer">
+    <p>These buttons allow you to select an answer feedback type</p>
+    <div class="dialogue-select-containers">
+      <div class="flow">
+        
+        <div id="switch-input" class="switch-toggle switch-3 switch-candy">
+          <input class="dialogueSelectRadio" id="dialogueSelectSimple" name="dialogueSelectRadios" data-dialogue-type="simple" type="radio" checked="{{isChecked 'simple'}}" />
+          <label for="dialogueSelectSimple" onclick="">Simple</label>
+          <input class="dialogueSelectRadio" id="dialogueSelectRefutational" name="dialogueSelectRadios" data-dialogue-type="refutational" type="radio" checked="{{isChecked 'refutational'}}"  />
+          <label for="dialogueSelectRefutational" onclick="">Refutational</label>
+          <input class="dialogueSelectRadio" id="dialogueSelectDialogue" name="dialogueSelectRadios" data-dialogue-type="dialogue" type="radio" checked="{{isChecked 'dialogue'}}"  />
+          <label for="dialogueSelectDialogue" onclick="">Dialogue</label>
+        </div>
+        <br/>
+        <br/>
+      </div>
+    </div>
+  </div>
+</template>
