@@ -119,6 +119,31 @@ Template.profileSouthwest.rendered = function () {
           );
       });
     });
+
+    Meteor.call('getConsentTdfData',Meteor.userId(),function(err,res){
+        if(err){
+            alert("Error getting consent data:" + JSON.stringify(err));
+            Meteor.logout(() =>{
+                sessionCleanUp();
+                routeToSignin();
+            });
+        }else{
+            let {assignedConsentTdf,completed} = res;
+            console.log("Consent information:",assignedConsentTdf,',',completed);
+            if(!completed){
+                let tdfQuery = {fileName:assignedConsentTdf};
+                console.log("tdfQuery",tdfQuery);
+                let assignedTdf = Tdfs.findOne(tdfQuery);
+                console.log('assignedTdf',assignedTdf)
+                let lessonname = assignedTdf.tdfs.tutor.setspec[0].lessonname[0];
+                let stimulusFile = assignedTdf.tdfs.tutor.setspec[0].stimulusfile[0];
+                let ignoreOutOfGrammarResponses = assignedTdf.tdfs.tutor.setspec[0].speechIgnoreOutOfGrammarResponses ? assignedTdf.tdfs.tutor.setspec[0].speechIgnoreOutOfGrammarResponses[0] === "true" : false;
+                let outOfGrammarFeedback = assignedTdf.tdfs.tutor.setspec[0].speechOutOfGrammarFeedback ? assignedTdf.tdfs.tutor.setspec[0].speechOutOfGrammarFeedback[0] : undefined;
+
+                selectTdf(assignedTdf._id, lessonname, stimulusFile, assignedTdf.fileName, ignoreOutOfGrammarResponses, outOfGrammarFeedback, "auto consent select", assignedTdf.isMultiTdf);
+            }
+        }
+    })
 };
 
 //Actual logic for selecting and starting a TDF
@@ -175,17 +200,19 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
         isMultiTdf: isMultiTdf
     });
 
+    let tdfFile = getCurrentTdfFile();
+
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled and there's a tts key in the tdf then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (Session.get("audioPromptFeedbackView") == "feedback") || (Session.get("audioPromptFeedbackView") == "all");
-    var tdfAudioPromptFeedbackEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].enableAudioPromptAndFeedback;
-    var audioPromptTTSAPIKeyAvailable = !!getCurrentTdfFile().tdfs.tutor.setspec[0].textToSpeechAPIKey;
+    var tdfAudioPromptFeedbackEnabled = tdfFile.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback ? tdfFile.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] === "true" : false;
+    var audioPromptTTSAPIKeyAvailable = tdfFile.tdfs.tutor.setspec[0].textToSpeechAPIKey ? !!tdfFile.tdfs.tutor.setspec[0].textToSpeechAPIKey[0]: false;
     var audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
     Session.set("enableAudioPromptAndFeedback",audioPromptFeedbackEnabled);
 
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = getCurrentTdfFile().tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = tdfFile.tdfs.tutor.setspec[0].audioInputEnabled ? tdfFile.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true" : false;
    var audioEnabled = tdfAudioEnabled && userAudioToggled;
    Session.set("audioEnabled", audioEnabled);
 

@@ -593,6 +593,31 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+      getConsentTdfData:function(userId){
+        let username = Meteor.users.findOne({_id:userId}).username.toLowerCase();
+        let studentClass = Classes.findOne({'students': username});
+        let instructorId = studentClass.instructor;
+        let instructorUsername = Meteor.users.findOne({_id:instructorId}).username;
+        let assignedConsentTdf;
+        switch(instructorUsername){
+          case "kroy@southwest.tn.edu":
+            assignedConsentTdf = "Consent_Roy_xml";
+            break;
+          case "mrothschild@southwest.tn.edu":
+            assignedConsentTdf = "Consent_Rothschild_xml";
+            break;
+          case "ambanker@southwest.tn.edu":
+          default:
+            assignedConsentTdf = "Consent_Banker_xml";
+            break;
+        } 
+        let query = {_id:userId};
+        query[assignedConsentTdf] = {"$exists":true};
+        let consentHistory = UserTimesLog.findOne(query);
+        assignedConsentTdf = assignedConsentTdf.replace("_xml",".xml");
+        return {assignedConsentTdf,completed:!!consentHistory};
+      },
+
       getAltServerUrl:function(){
         return altServerUrl;
       },
