@@ -1221,6 +1221,14 @@ function afterAnswerAssessmentCb(userAnswer,isCorrect,feedbackForAnswer,afterAns
     }
     if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
       speechTranscriptionTimeoutsSeen = 0;
+      if (Session.get("buttonTrial")) {
+        let buttonEntries = _.map(
+              buttonList.find({}, {sort: {idx: 1}}).fetch(),
+              function(val) { return val.buttonValue; }
+          ).join(',');
+        Session.set("buttonEntriesTemp",buttonEntries);
+        clearButtonList();
+      }
       initiateDialogue(userAnswer,afterAnswerFeedbackCbBound,showUserFeedbackBound);
     }else{
       showUserFeedbackBound();
@@ -1377,11 +1385,9 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   let buttonEntries = "";
   let wasButtonTrial = Session.get("buttonTrial");
   if (wasButtonTrial) {
-      buttonEntries = _.map(
-          buttonList.find({}, {sort: {idx: 1}}).fetch(),
-          function(val) { return val.buttonValue; }
-      ).join(',');
-  }
+    JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+    Session.set("buttonEntriesTemp",undefined);
+  }            
 
   //Note that we need to log from data in the cluster returned from
   //getStimCluster so that we honor cluster mapping

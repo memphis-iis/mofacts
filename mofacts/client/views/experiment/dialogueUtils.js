@@ -135,6 +135,11 @@ async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback)
             dialogueContext = undefined;
             console.log("dialogueHistory",Session.get("dialogueHistory"));
             Session.set("dialogueLoopStage",undefined);
+            let buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+            Session.set("buttonEntriesTemp",undefined);
+            for(let button of buttonEntries){
+                buttonList.insert(button);
+            }
             lookupFailCallback();
         }else{
             dialogueContext = res.fields[0];
