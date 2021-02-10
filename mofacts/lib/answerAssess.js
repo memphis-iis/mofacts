@@ -209,6 +209,7 @@ Answers = {
         //Note that a missing or invalid lfparameter will result in a null value
         var lfparameter = _.chain(setspec).prop("lfparameter").first().floatval().value();
         let feedbackType = getCurrentDeliveryParams().feedbackType;
+        console.log("feedbackType:",feedbackType);
 
         checkAnswer = function(userAnswer,correctAnswer, originalAnswer){
             let answerDisplay = originalAnswer || correctAnswer;
@@ -265,27 +266,28 @@ Answers = {
             switch(feedbackType){
                 case "refutational":
                     let answerToCheck = originalAnswer || answer;
-                    Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
-                        console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
+                    Meteor.call('getElaboratedFeedbackForAnswer',userInput,answerToCheck,function(err,res){
+                        console.log("ElaboratedFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
                         if(typeof(err) != "undefined"){
-                            console.log("error with refutational feedback, meteor call: ",err);
+                            console.log("error with ElaboratedFeedback, meteor call: ",err);
                             console.log(res);
                             callback(fullTextIsCorrect);
                         }else if(res.tag != 0){
-                            console.log("error with refutational feedback, feedback call: " + res.name);
+                            console.log("error with ElaboratedFeedback, feedback call: " + res.name);
                             console.log(res);
                             callback(fullTextIsCorrect);
                         }else if(res.tag == 0){
-                            let refutationalFeedback = res.fields[0].feedback;
+                            console.log("elaborated feedback output:",res);
+                            let elaboratedFeedback = res.fields[0].feedback;
                             
-                            if(typeof(refutationalFeedback) != "undefined" && refutationalFeedback != null){
-                                fullTextIsCorrect.matchText = refutationalFeedback;
+                            if(typeof(elaboratedFeedback) != "undefined" && elaboratedFeedback != null){
+                                fullTextIsCorrect.matchText = elaboratedFeedback;
                             }
                             callback(fullTextIsCorrect);
                         }  
                     });
                 break;
-                case "dialogue":
+                case "dialogue": //We'll spawn the dialogue loop afterwards
                 default:
                     callback(fullTextIsCorrect);
             }

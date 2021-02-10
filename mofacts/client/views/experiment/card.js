@@ -1102,8 +1102,8 @@ function handleUserForceCorrectInput(e, source){
 }
 
 function handleUserInput(e, source, simAnswerCorrect) {
-    var isTimeout = false;
-    var key;
+  let isTimeout = false;
+    let key;
     if (source === "timeout") {
         key = ENTER_KEY;
         isTimeout = true;
@@ -1130,13 +1130,13 @@ function handleUserInput(e, source, simAnswerCorrect) {
     //We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose track of the fact that we were counting down to a recalculated delay after being on the error report modal
     if(!!timeoutName){
       if(Session.get("pausedLocks")>0){
-        var numRemainingLocks = Session.get("pausedLocks")-1;
+        let numRemainingLocks = Session.get("pausedLocks")-1;
         Session.set("pausedLocks",numRemainingLocks);
       }
     }
     clearCardTimeout();
 
-    var userAnswer;
+    let userAnswer;
     if (isTimeout) {
         userAnswer = "[timeout]";
     } else if (source === "keypress") {
@@ -1153,8 +1153,8 @@ function handleUserInput(e, source, simAnswerCorrect) {
         }
     }
 
-    var trialEndTimeStamp = Date.now();
-    var afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,trialEndTimeStamp,source,userAnswer);
+    let trialEndTimeStamp = Date.now();
+    let afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,trialEndTimeStamp,source,userAnswer);
     
     //Show user feedback and find out if they answered correctly
     //Note that userAnswerFeedback will display text and/or media - it is
@@ -1192,7 +1192,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedba
     writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, 1);
 
     var afterAnswerFeedbackCbWithTimeout = afterAnswerFeedbackCb.bind(null,isTimeout);
-    var afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,isCorrectAccumulator,feedbackForAnswer,afterAnswerFeedbackCbWithTimeout);
+    var afterAnswerAssessmentCbWithArgs = afterAnswerAssessmentCb.bind(null,userAnswer,isCorrectAccumulator,feedbackForAnswer,afterAnswerFeedbackCbWithTimeout);
 
     //Answer assessment -> 
     if(userAnswerWithTimeout != null){
@@ -1202,7 +1202,7 @@ function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswerFeedba
     }    
 }
 
-function afterAnswerAssessmentCb(isCorrect,feedbackForAnswer,afterAnswerFeedbackCb,correctAndText){
+function afterAnswerAssessmentCb(userAnswer,isCorrect,feedbackForAnswer,afterAnswerFeedbackCb,correctAndText){
   if(isCorrect == null && correctAndText != null){
     isCorrect = correctAndText.isCorrect;
   }
@@ -1213,10 +1213,18 @@ function afterAnswerAssessmentCb(isCorrect,feedbackForAnswer,afterAnswerFeedback
   let testType = getTestType();
   let isDrill = (testType === "d" || testType === "m" || testType === "n");
   if (isDrill) {
-    if(feedbackForAnswer == null && correctAndText != null){
-      feedbackForAnswer = correctAndText.matchText;
+    let showUserFeedbackBound = function(){
+      if(feedbackForAnswer == null && correctAndText != null){
+        feedbackForAnswer = correctAndText.matchText;
+      }
+      showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound);
     }
-    showUserFeedback(isCorrect, feedbackForAnswer, afterAnswerFeedbackCbBound);
+    if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
+      speechTranscriptionTimeoutsSeen = 0;
+      initiateDialogue(userAnswer,afterAnswerFeedbackCbBound,showUserFeedbackBound);
+    }else{
+      showUserFeedbackBound();
+    }
   }else{
     afterAnswerFeedbackCbBound();
   }
@@ -1300,146 +1308,9 @@ function hideUserFeedback() {
     $("#forceCorrectionEntry").hide();  // Container
 }
 
-function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
-  //Note that we must provide the client-side timestamp since we need it...
-  //Pretty much everywhere else relies on recordUserTime to provide it.
-  //We also get the timestamp of the first keypress for the current trial.
-  //Of course for things like a button trial, we won't have it
-  var firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
-  let testType = getTestType();
-
-  //Note that if something messed up and we can't calculate start/end
-  //latency, we'll punt and the output script (experiment_times.js) will
-  //need to construct the times
-  var startLatency, endLatency;
-  if (trialTimestamp) {
-      startLatency = firstActionTimestamp - trialTimestamp;
-      endLatency = trialEndTimeStamp - trialTimestamp;
-  }
-  else {
-      console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
-  }
-
-  //Don't count test type trials in progress reporting
-  if(testType === "t"){
-    endLatency = undefined;
-  }
-
-  //Figure out button trial entries
-  var buttonEntries = "";
-  var wasButtonTrial = !!Session.get("buttonTrial");
-  if (wasButtonTrial) {
-      buttonEntries = _.map(
-          buttonList.find({}, {sort: {idx: 1}}).fetch(),
-          function(val) { return val.buttonValue; }
-      ).join(',');
-  }
-
-  //Note that we need to log from data in the cluster returned from
-  //getStimCluster so that we honor cluster mapping
-  var currCluster = getStimCluster(getCurrentClusterIndex());
-  let deliveryParams = getCurrentDeliveryParams();
-
-  var assumedReviewLatency = 0;
-  if (testType === "d" && !isCorrect) {
-      assumedReviewLatency = _.intval(deliveryParams.reviewstudy); 
-  }
-
-  //Set up to log the answer they gave. We'll call the function below at the
-  //appropriate time
-  var reviewBegin = Date.now();
-  var answerLogAction = isTimeout ? "[timeout]" : "answer";
-  var currentAnswerSyllables;
-  var sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
-  if(typeof(sessCurrentAnswerSyllables) != "undefined"){
-    currentAnswerSyllables = {
-      syllables:sessCurrentAnswerSyllables.syllableArray,
-      count:sessCurrentAnswerSyllables.syllableArray.length,
-      displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
-    };
-  }
-
-  //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
-  let curUserPerformance = Session.get("curStudentPerformance");
-  curUserPerformance.count = curUserPerformance.count + 1;
-  if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
-  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
-  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
-  Session.set("curStudentPerformance",curUserPerformance);
-
-  let feedbackType = deliveryParams.feedbackType || "simple";
-
-  var answerLogRecord = {
-      'questionIndex': _.intval(Session.get("questionIndex"), -1),
-      'index': _.intval(currCluster.clusterIndex, -1),
-      'shufIndex': _.intval(currCluster.shufIndex, -1),
-      'ttype': _.trim(testType),
-      'qtype':  _.trim(findQTypeSimpified()),
-      'guiSource':  _.trim(source),
-      'answer':  _.trim(userAnswer),
-      'isCorrect': isCorrect,
-      'trialStartTimestamp': trialTimestamp,
-      'clientSideTimeStamp': trialEndTimeStamp,
-      'firstActionTimestamp': firstActionTimestamp,
-      'startLatency': startLatency,
-      'endLatency': endLatency,
-      'wasButtonTrial': wasButtonTrial,
-      'buttonOrder': buttonEntries,
-      'reviewLatency': 0,
-      'inferredReviewLatency': assumedReviewLatency,
-      'wasSim': (source === "simulation") ? 1 : 0,
-      'displayedSystemResponse': $("#UserInteraction").text() || "",
-      'forceCorrectFeedback': "",
-      'audioInputEnabled':Session.get("audioEnabled") || false,
-      'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
-      'currentAnswerSyllables':currentAnswerSyllables || "",
-      'feedbackType':feedbackType,
-      'dialogueHistory':undefined //We'll fill this in later
-  };
-  var writeAnswerLog = function() {
-      var realReviewLatency = Date.now() - reviewBegin;
-      if (realReviewLatency > 0) {
-          answerLogRecord.reviewLatency = realReviewLatency;
-      }
-      answerLogRecord.dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
-      Session.set("dialogueHistory",undefined);
-      //TODO: need a column for this in experiment_times
-      answerLogRecord.forceCorrectFeedback = _.trim($("#userForceCorrect").val());
-      recordUserTime(answerLogAction, answerLogRecord);
-  };
-
-  // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-  // is specified and we have seen that many (or more) timeouts in a row, then
-  // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-  // this feature MUST be turned on in the TDF.
-  if (!isTimeout) {
-      timeoutsSeen = 0;  // Reset count
-  }
-  else {
-      // Anothing timeout!
-      timeoutsSeen++;
-
-      // Figure out threshold (with default of 0)
-      // Also note: threshold < 1 means no autostop at all
-      var threshold = _.chain(deliveryParams)
-          .prop("autostopTimeoutThreshold")
-          .intval(0).value();
-
-      if (threshold > 0 && timeoutsSeen >= threshold) {
-          console.log("Hit timeout threshold", threshold, "Quitting");
-          leavePage("/profile");
-          return;  // We are totally done
-      }
-  }
-
-  //record progress in userProgress variable storage (note that this is
-  //helpful and used on the stats page, but the user times log is the
-  //"system of record")
-  recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
-
+function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory){
   //Figure out timeout and reviewLatency
-  var reviewTimeout = 0;
+  let reviewTimeout = 0;
 
   if (testType === "s" || testType === "f") {
       //Just a study - note that the purestudy timeout is used for the QUESTION
@@ -1464,26 +1335,162 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
       throw new Error("Unknown trial type was specified - no way to proceed");
   }
 
+  //Fast forward through feedback if we already did a dialogue feedback session
+  if(deliveryParams.feedbackType == "dialogue" && !isCorrect){
+    if(dialogueHistory.tag == 0){ //If we failed to do a dialogue, allow for feedback review
+      reviewTimeout = 1; 
+    }
+  }
+
   //We need at least a timeout of 1ms
   if (reviewTimeout < 1) throw new Error("No correct timeout specified");
+
+  return reviewTimeout
+}
+
+function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeout,isCorrect){
+  //Note that we must provide the client-side timestamp since we need it...
+  //Pretty much everywhere else relies on recordUserTime to provide it.
+  //We also get the timestamp of the first keypress for the current trial.
+  //Of course for things like a button trial, we won't have it
+  let firstActionTimestamp = keypressTimestamp || trialEndTimeStamp;
+  let testType = getTestType();
+
+  //Note that if something messed up and we can't calculate start/end
+  //latency, we'll punt and the output script (experiment_times.js) will
+  //need to construct the times
+  let startLatency, endLatency;
+  if (trialTimestamp) {
+      startLatency = firstActionTimestamp - trialTimestamp;
+      endLatency = trialEndTimeStamp - trialTimestamp;
+  }
+  else {
+      console.log("Missing trial start timestamp: will need to construct from question/answer gap?");
+  }
+
+  //Don't count test type trials in progress reporting
+  if(testType === "t"){
+    endLatency = undefined;
+  }
+
+  //Figure out button trial entries
+  let buttonEntries = "";
+  let wasButtonTrial = Session.get("buttonTrial");
+  if (wasButtonTrial) {
+      buttonEntries = _.map(
+          buttonList.find({}, {sort: {idx: 1}}).fetch(),
+          function(val) { return val.buttonValue; }
+      ).join(',');
+  }
+
+  //Note that we need to log from data in the cluster returned from
+  //getStimCluster so that we honor cluster mapping
+  let currCluster = getStimCluster(getCurrentClusterIndex());
+  let deliveryParams = getCurrentDeliveryParams();
+
+  let assumedReviewLatency = 0;
+  if (testType === "d" && !isCorrect) {
+      assumedReviewLatency = _.intval(deliveryParams.reviewstudy); 
+  }
+
+  //Set up to log the answer they gave. We'll call the function below at the
+  //appropriate time
+  let reviewBegin = Date.now();
+  let answerLogAction = isTimeout ? "[timeout]" : "answer";
+  let currentAnswerSyllables;
+  let sessCurrentAnswerSyllables = Session.get('currentAnswerSyllables');
+  if(typeof(sessCurrentAnswerSyllables) != "undefined"){
+    currentAnswerSyllables = {
+      syllables:sessCurrentAnswerSyllables.syllableArray,
+      count:sessCurrentAnswerSyllables.syllableArray.length,
+      displaySyllableIndices:sessCurrentAnswerSyllables.displaySyllableIndices
+    };
+  }
+
+  //Update running user metrics total, note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
+  let curUserPerformance = Session.get("curStudentPerformance");
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if(isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2)  + "%";  
+  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
+  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
+  Session.set("curStudentPerformance",curUserPerformance);
+
+  let feedbackType = deliveryParams.feedbackType || "simple";
+
+  let realReviewLatency = Date.now() - reviewBegin;
+  let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? "" : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
+
+  let answerLogRecord = {
+      'questionIndex': _.intval(Session.get("questionIndex"), -1),
+      'index': _.intval(currCluster.clusterIndex, -1),
+      'shufIndex': _.intval(currCluster.shufIndex, -1),
+      'ttype': _.trim(testType),
+      'qtype':  _.trim(findQTypeSimpified()),
+      'guiSource':  _.trim(source),
+      'answer':  _.trim(userAnswer),
+      'isCorrect': isCorrect,
+      'trialStartTimestamp': trialTimestamp,
+      'clientSideTimeStamp': trialEndTimeStamp,
+      'firstActionTimestamp': firstActionTimestamp,
+      'startLatency': startLatency,
+      'endLatency': endLatency,
+      'wasButtonTrial': wasButtonTrial,
+      'buttonOrder': buttonEntries,
+      'reviewLatency': realReviewLatency || 0,
+      'inferredReviewLatency': assumedReviewLatency,
+      'wasSim': (source === "simulation") ? 1 : 0,
+      'displayedSystemResponse': $("#UserInteraction").text() || "",
+      'forceCorrectFeedback': _.trim($("#userForceCorrect").val()),
+      'audioInputEnabled':Session.get("audioEnabled") || false,
+      'audioOutputEnabled':Session.get("enableAudioPromptAndFeedback") || false,
+      'currentAnswerSyllables':currentAnswerSyllables || "",
+      'feedbackType':feedbackType,
+      'dialogueHistory':dialogueHistory
+  };
+  Session.set("dialogueHistory",undefined);
+  //TODO: need a column for this in experiment_times
+  recordUserTime(answerLogAction, answerLogRecord);
+
+  // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+  // is specified and we have seen that many (or more) timeouts in a row, then
+  // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+  // this feature MUST be turned on in the TDF.
+  if (!isTimeout) {
+      timeoutsSeen = 0;  // Reset count
+  }
+  else {
+      // Anothing timeout!
+      timeoutsSeen++;
+
+      // Figure out threshold (with default of 0)
+      // Also note: threshold < 1 means no autostop at all
+      let threshold = deliveryParams.autostopTimeoutThreshold;
+
+      if (threshold > 0 && timeoutsSeen >= threshold) {
+          console.log("Hit timeout threshold", threshold, "Quitting");
+          leavePage("/profile");
+          return;  // We are totally done
+      }
+  }
+
+  //record progress in userProgress variable storage (note that this is
+  //helpful and used on the stats page, but the user times log is the
+  //"system of record")
+  recordProgress(Session.get("currentDisplay"), Session.get("currentAnswer"), userAnswer, isCorrect);
+
+  let reviewTimeout = getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   //Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(function(){
     hideUserFeedback();
     $("#userAnswer").val("");
-    let writeAnswerLogAndPrepareCardCb = prepareCard.bind(null,writeAnswerLog);
-    if(feedbackType == "dialogue" && !isCorrect){
-      speechTranscriptionTimeoutsSeen = 0;
-      initiateDialogue(writeAnswerLogAndPrepareCardCb);
-    }else{
-      writeAnswerLogAndPrepareCardCb();
-    }
+    prepareCard();
   },reviewTimeout);
 }
 
-function prepareCard(writeAnswerLogCb) {
-    if(writeAnswerLogCb) writeAnswerLogCb();
+function prepareCard() {
     Session.set("displayReady",false);
     if (Session.get("questionIndex") === undefined) {
         // At this point, a missing question index is assumed to mean "start
@@ -1634,6 +1641,7 @@ function startQuestionTimeout() {
 
   //We do this little shuffle of session variables so the display will update all at the same time
   let currentDisplayEngine = Session.get("currentDisplayEngine");
+  Session.set("currentDisplay",currentDisplayEngine);
   let closeQuestionParts = Session.get("clozeQuestionParts");
   Session.set("clozeQuestionParts",undefined);
   console.log('++++ CURRENT DISPLAY ++++');
@@ -2468,6 +2476,7 @@ function processUserTimesLog(userTimesLogs) {
         if (unitHasOption(currUnit, "assessmentsession")) {
             engine = createScheduleUnit(extensionData);
             Session.set("sessionType","assessmentsession");
+            console.log("schedule:",engine.getSchedule());
         }
         else if (unitHasOption(currUnit, "learningsession")) {
             engine = createModelUnit(extensionData);
