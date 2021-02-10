@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"MoFaCT.tdfs"}],"uuid":"6e37204ac00a4e8ea0b96a6a85c44968"}
