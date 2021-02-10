@@ -1,3 +1,4 @@
+import { MULTITDF_MAIN_CLUSTER_UNIT } from "../common/Definitions";
 /* AssessmentSession - this is the main logic for loading the necessary
  * data from the TDF and Stimulus files and creating a schedule based
  * on the assessment session configuration.
@@ -21,6 +22,7 @@ AssessmentSession = {
         var schedule;
 
         try {
+            console.log("CREATE SCHEDULE PARAMS:",setspec,unitNumber,unit)
             schedule = AssessmentSession.createScheduleImpl(setspec, unitNumber, unit);
         }
         catch(e) {
@@ -358,9 +360,9 @@ AssessmentSession = {
         if(isMultiTdf){
             const curUnitNumber = Session.get("currentUnitNumber");
     
-            //NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
+            //NOTE: We are currently assuming that multiTdfs will have only two units: an assessment session with exactly one question which is the last
             //item in the stim file, and a unit with all clusters specified in the generated subtdfs array
-            if(curUnitNumber == 1){
+            if(curUnitNumber == MULTITDF_MAIN_CLUSTER_UNIT - 1){
                 const lastClusterIndex = getStimClusterCount() - 1;
                 unitClusterList = lastClusterIndex + "-" + lastClusterIndex;
             }else{

@@ -14,10 +14,13 @@ exports.tokensToString = tokensToString;
 exports.getDeterminerPhraseFromTokens = getDeterminerPhraseFromTokens;
 exports.getDeterminerPhrase = getDeterminerPhrase;
 exports.getPredicate = getPredicate;
-exports.FeedbackRequest$reflection = FeedbackRequest$reflection;
+exports.HarnessFeedbackRequest$reflection = HarnessFeedbackRequest$reflection;
+exports.HarnessFeedbackRequest$$$InitializeTest = HarnessFeedbackRequest$$$InitializeTest;
 exports.GenerateFeedback = GenerateFeedback;
 exports.HarnessGenerateFeedback = HarnessGenerateFeedback;
-exports.FeedbackRequest = exports.wordSet = exports.determinerMap = exports.definitionMap = exports.EntryGloss = exports.Feedback = void 0;
+exports.GetDefinitionFromGlossary = GetDefinitionFromGlossary;
+exports.GetDefinitionFromGlossaryHighRecall = GetDefinitionFromGlossaryHighRecall;
+exports.HarnessFeedbackRequest = exports.wordSet = exports.determinerMap = exports.definitionMap = exports.EntryGloss = exports.Feedback = void 0;
 
 var _Types = require("./fable-library.2.10.2/Types");
 
@@ -116,12 +119,17 @@ function Initialize(jsonDictionary) {
     determinerMap((elements$$2 = (source$$8 = (source$$5 = (source$$4 = (source$$3 = (source$$2 = (table$$2 = definitionMap(), ((0, _Map.toSeq)(table$$2))), ((0, _Seq.collect)(function mapping$$2(tupledArg$$2) {
       return (0, _Seq.zip)(((0, _Array.map)(lower, tupledArg$$2[1].gloss, Array)), tupledArg$$2[1].glossTag);
     }, source$$2))), ((0, _Seq.pairwise)(source$$3))), ((0, _Seq.choose)(function chooser(tupledArg$$3) {
+      const w1Lower = tupledArg$$3[0][0].toLocaleLowerCase();
       const matchValue = [tupledArg$$3[0][1], (0, _Set.FSharpSet$$Contains$$2B595)(entryFirstWordSet, tupledArg$$3[1][0])];
       var $target$$26;
 
       if (matchValue[0] === "DT") {
         if (matchValue[1]) {
-          $target$$26 = 0;
+          if ((w1Lower === "a" ? true : w1Lower === "an") ? true : w1Lower === "the") {
+            $target$$26 = 0;
+          } else {
+            $target$$26 = 1;
+          }
         } else {
           $target$$26 = 1;
         }
@@ -261,14 +269,18 @@ function getPredicate(entry) {
   return verb + " " + (0, _String.trim)(completion, " ", ".");
 }
 
-const FeedbackRequest = (0, _Types.declare)(function DefinitionalFeedback_FeedbackRequest(CorrectAnswer, IncorrectAnswer) {
+const HarnessFeedbackRequest = (0, _Types.declare)(function DefinitionalFeedback_HarnessFeedbackRequest(CorrectAnswer, IncorrectAnswer) {
   this.CorrectAnswer = CorrectAnswer;
   this.IncorrectAnswer = IncorrectAnswer;
 }, _Types.Record);
-exports.FeedbackRequest = FeedbackRequest;
+exports.HarnessFeedbackRequest = HarnessFeedbackRequest;
 
-function FeedbackRequest$reflection() {
-  return (0, _Reflection.record_type)("DefinitionalFeedback.FeedbackRequest", [], FeedbackRequest, () => [["CorrectAnswer", _Reflection.string_type], ["IncorrectAnswer", _Reflection.string_type]]);
+function HarnessFeedbackRequest$reflection() {
+  return (0, _Reflection.record_type)("DefinitionalFeedback.HarnessFeedbackRequest", [], HarnessFeedbackRequest, () => [["CorrectAnswer", _Reflection.string_type], ["IncorrectAnswer", _Reflection.string_type]]);
+}
+
+function HarnessFeedbackRequest$$$InitializeTest() {
+  return new HarnessFeedbackRequest("ADH", "acetylcholine");
 }
 
 function GenerateFeedback(incorrectAnswer, correctAnswer) {
@@ -303,7 +315,7 @@ function GenerateFeedback(incorrectAnswer, correctAnswer) {
         }
     }
 
-    return Promise.resolve(new _Option.Result(0, "Ok", new Feedback(feedback)));
+    return feedback !== null ? Promise.resolve(new _Option.Result(0, "Ok", new Feedback(feedback))) : Promise.resolve(new _Option.Result(1, "Error", "Unable to generate definitional feedback. Definitional feedback cache is " + ((0, _Map.FSharpMap$$get_IsEmpty)(definitionMap()) ? "empty" : "full")));
   }));
 }
 
@@ -311,9 +323,36 @@ function HarnessGenerateFeedback(jsonFeedbackRequest) {
   let fr;
   fr = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(jsonFeedbackRequest, undefined, undefined, {
     ResolveType() {
-      return FeedbackRequest$reflection();
+      return HarnessFeedbackRequest$reflection();
     }
 
   });
   return GenerateFeedback(fr.IncorrectAnswer, fr.CorrectAnswer);
+}
+
+function GetDefinitionFromGlossary(term) {
+  var input$$1;
+  const matchValue$$5 = (0, _Map.FSharpMap$$TryFind$$2B595)(definitionMap(), term);
+
+  if (matchValue$$5 == null) {
+    return undefined;
+  } else {
+    const entry$$1 = matchValue$$5;
+    const arg0 = (input$$1 = getDeterminerPhrase(term), (firstLetterUpper(input$$1))) + " " + getPredicate(entry$$1) + ".";
+    return arg0;
+  }
+}
+
+function GetDefinitionFromGlossaryHighRecall(term$$1) {
+  let candidateTerms;
+  const array$$4 = [term$$1, term$$1.split(" ")[0]];
+  candidateTerms = array$$4.filter(function predicate(t) {
+    return (0, _Map.FSharpMap$$ContainsKey$$2B595)(definitionMap(), t);
+  });
+
+  if (candidateTerms.length > 0) {
+    return GetDefinitionFromGlossary(candidateTerms[0]);
+  } else {
+    return undefined;
+  }
 }

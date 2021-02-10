@@ -19,8 +19,9 @@ dialogueContext = undefined;
 let dialogueUserPrompts = [];
 let dialogueCurrentDisplaySaver = undefined;
 let dialogueCallbackSaver = undefined;
-let dialogueTransitionInstructions = "  Press the button to continue.";
 let endDialogueNotice = " Press the button to continue practice.";
+
+let dialogueTransitionInstructions = "  Press the button to continue.";
 let dialogueTransitionStatements = [
     "That wasn’t right, so to help you build the knowledge let’s chat about it for a little.",
     "That wasn’t the answer we are looking for. To help you construct the understanding, let’s have a short discussion.",
@@ -48,14 +49,13 @@ function updateDialogueDisplay(newDisplay){
 function dialogueLoop(err,res){
     console.log("dialogue loop");
     stopRecording();
+    console.log("dialogueLoop-res",res);
     if(typeof(err) != "undefined"){
         console.log("error with dialogue loop, meteor call: ",err);
         console.log(res);
-        callback(fullTextIsCorrect); //TODO: are these in scope?
     }else if(res.tag != 0){
         console.log("error with dialog loop, dialogue call: " + res.name);
         console.log(res);
-        callback(fullTextIsCorrect);
     }else if(res.tag == 0){
         let result = res.fields[0];
         let newDisplay = result.Display;
@@ -108,22 +108,42 @@ function dialogueContinue(){
     }
 }
 
-function initiateDialogue(callback){
+async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
+  dialogueContext = undefined;
   Session.set("clozeQuestionParts",undefined);
   Session.set("dialogueLoopStage","intro");
   dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
   let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
   let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
-  dialogueContext = {
-      "ClozeItem": clozeItem,
-      "ClozeAnswer": clozeAnswer
-  };
   
-  let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
-  updateDialogueDisplay(transitionStatement);
-  speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
+  //let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+  //updateDialogueDisplay(transitionStatement);
+  //speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
   
   dialogueCallbackSaver = callback;
   //wait for user to hit enter to make sure they read the transition statement
   //execution thread continues at keypress #dialogueUserAnswer in card.js
+  console.log("starting dialogue loop:",clozeAnswer, incorrectUserAnswer, clozeItem);
+  Meteor.call('initializeTutorialDialogue',clozeAnswer, incorrectUserAnswer, clozeItem, (err,res)=>{
+      if(err){
+        console.log("ERROR initializing tutorial dialogue:",err);
+      }else{
+        if(res.tag != 0){
+            console.log("cache miss, showing normal feedback:");
+            Session.set("dialogueHistory",res);
+            dialogueCallbackSaver = undefined;
+            dialogueContext = undefined;
+            console.log("dialogueHistory",Session.get("dialogueHistory"));
+            Session.set("dialogueLoopStage",undefined);
+            lookupFailCallback();
+        }else{
+            dialogueContext = res.fields[0];
+            if(!dialogueContext){
+                console.log("ERROR getting context during dialogue initialization");
+            }else{
+                dialogueContinue();
+            }
+        }
+      }
+  });
 }

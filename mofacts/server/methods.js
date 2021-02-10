@@ -1,7 +1,8 @@
 import { DynamicTdfGenerator } from "../common/DynamicTdfGenerator";
 import { curSemester, ALL_TDFS } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
-import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
+import * as ElaboratedFeedback from "./lib/CachedElaboratedFeedback";
+import * as DefinitionalFeedback from "./lib/DefinitionalFeedback";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 
 /*jshint sub:true*/
@@ -60,10 +61,14 @@ if(Meteor.settings.saml){
 }
 
 if(Meteor.settings.definitionalFeedbackDataLocation){
-  console.log("reading feedbackdata");
-  var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
-  console.log("initializing feedback");
-  DefinitionalFeedback.Initialize(feedbackData);
+  //console.log("reading feedbackdata");
+  console.log("initializing definitional feedback");
+  DefinitionalFeedback.Initialize(fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation));
+}
+
+if(Meteor.settings.elaboratedFeedbackDataLocation){
+  console.log("initializing elaborated feedback");
+  ElaboratedFeedback.Initialize(fs.readFileSync(Meteor.settings.elaboratedFeedbackDataLocation));
 }
 
 //Helper functions
@@ -597,10 +602,16 @@ Meteor.startup(function () {
         return clozes;
       },
 
-      getSimpleFeedbackForAnswer:function(userAnswer,correctAnswer){
-        let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
+      getElaboratedFeedbackForAnswer:async function(userAnswer,correctAnswer){
+        let result = await ElaboratedFeedback.GenerateFeedback(userAnswer,correctAnswer);
         console.log("result: " + JSON.stringify(result));
         return result;
+      },
+
+      initializeTutorialDialogue:function(correctAnswer, userIncorrectAnswer, clozeItem){
+        console.log('initializeTutorialDialogue',correctAnswer,userIncorrectAnswer,clozeItem);
+        let initialState = TutorialDialogue.GetElaboratedDialogueState(correctAnswer,userIncorrectAnswer,clozeItem);
+        return initialState;
       },
 
       getDialogFeedbackForAnswer:function(state){

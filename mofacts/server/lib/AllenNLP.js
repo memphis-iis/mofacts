@@ -33,11 +33,15 @@ exports.removePrePunctuationSpaces = removePrePunctuationSpaces;
 exports.collapseDependencies = collapseDependencies;
 exports.getDependentIndices = getDependentIndices;
 exports.srlArgToIndexMap = srlArgToIndexMap;
+exports.srlArgToIndexMapWithCollapsedReferents = srlArgToIndexMapWithCollapsedReferents;
 exports.getSubjectIndex = getSubjectIndex;
 exports.getBeRootIndex = getBeRootIndex;
 exports.getInvertAuxIndex = getInvertAuxIndex;
 exports.getPredicateIndex = getPredicateIndex;
+exports.getObjectIndices = getObjectIndices;
+exports.getRootOfSpan = getRootOfSpan;
 exports.resolveReferents = resolveReferents;
+exports.ResolveTextReferents = ResolveTextReferents;
 exports.prePunctuationSpaceRegex = exports.endpoints = exports.EntailmentRequest = exports.TextRequest = exports.DocumentRequest = exports.SentenceRequest = exports.Entailment = exports.DocumentAnnotation = exports.SentenceAnnotation = exports.SentenceCoreference = exports.Coreference = exports.DependencyParse = exports.SRL = exports.SRLVerb = exports.Endpoints = void 0;
 
 require("isomorphic-fetch");
@@ -590,19 +594,19 @@ function getDependentIndices(start, sa$$1) {
     copulaIndex = (0, _Seq.tryFindIndex)(function predicate$$1(tupledArg) {
       return sa$$1.dep.predicted_dependencies[tupledArg[0]] === "cop";
     }, source$$6);
-    var $target$$67;
+    var $target$$71;
 
     if (copulaIndex != null) {
       if (i$$7 = copulaIndex | 0, i$$7 < dependents.length - 1) {
-        $target$$67 = 0;
+        $target$$71 = 0;
       } else {
-        $target$$67 = 1;
+        $target$$71 = 1;
       }
     } else {
-      $target$$67 = 1;
+      $target$$71 = 1;
     }
 
-    switch ($target$$67) {
+    switch ($target$$71) {
       case 0:
         {
           let source$$8;
@@ -640,15 +644,35 @@ function srlArgToIndexMap(srlTags) {
   });
 }
 
+function srlArgToIndexMapWithCollapsedReferents(srlTags$$1) {
+  let elements$$2;
+  let array$$22;
+  array$$22 = (0, _Array.mapIndexed)(function mapping$$15(i$$10, t$$1) {
+    return [(0, _String.substring)(t$$1, t$$1.lastIndexOf("-") + 1), i$$10];
+  }, srlTags$$1, Array);
+  elements$$2 = (0, _Array.groupBy)(function projection$$1(tuple$$1) {
+    return tuple$$1[0];
+  }, array$$22, Array, {
+    Equals($x$$15, $y$$16) {
+      return $x$$15 === $y$$16;
+    },
+
+    GetHashCode: _Util.structuralHash
+  });
+  return (0, _Map.ofArray)(elements$$2, {
+    Compare: _Util.comparePrimitives
+  });
+}
+
 function getSubjectIndex(sa$$2) {
   let rootIndex;
   rootIndex = sa$$2.dep.predicted_heads.findIndex(function predicate$$2(h) {
     return h === 0;
   });
-  const array$$22 = sa$$2.dep.predicted_dependencies.slice(0, rootIndex + 1);
+  const array$$24 = sa$$2.dep.predicted_dependencies.slice(0, rootIndex + 1);
   return (0, _Array.tryFindIndexBack)(function predicate$$3(h$$1) {
     return h$$1.indexOf("nsubj") === 0;
-  }, array$$22);
+  }, array$$24);
 }
 
 function getBeRootIndex(sa$$3) {
@@ -686,97 +710,141 @@ function getPredicateIndex(sa$$5) {
   });
 
   if (sa$$5.dep.pos[rootIndex$$3].indexOf("VB") === 0) {
-    let array$$29;
-    array$$29 = (0, _Array.mapIndexed)(function mapping$$15(i$$10, h$$7) {
-      return [i$$10, h$$7 - 1];
+    let array$$31;
+    array$$31 = (0, _Array.mapIndexed)(function mapping$$16(i$$11, h$$7) {
+      return [i$$11, h$$7 - 1];
     }, sa$$5.dep.predicted_heads, Array);
     return (0, _Array.tryFindIndex)(function predicate$$9(tupledArg$$1) {
       if (tupledArg$$1[1] === rootIndex$$3) {
-        return sa$$5.dep.predicted_dependencies[tupledArg$$1[0]] === "dobj";
+        return tupledArg$$1[0] > rootIndex$$3;
       } else {
         return false;
       }
-    }, array$$29);
+    }, array$$31);
   } else {
     return rootIndex$$3;
   }
 }
 
+function getObjectIndices(sa$$6) {
+  let rootIndex$$4;
+  rootIndex$$4 = sa$$6.dep.predicted_heads.findIndex(function predicate$$10(h$$9) {
+    return h$$9 === 0;
+  });
+
+  if (sa$$6.dep.pos[rootIndex$$4].indexOf("VB") === 0) {
+    let array$$35;
+    let array$$34;
+    array$$34 = (0, _Array.mapIndexed)(function mapping$$17(i$$13, h$$10) {
+      return [i$$13, h$$10 - 1];
+    }, sa$$6.dep.predicted_heads, Array);
+    array$$35 = array$$34.filter(function predicate$$11(tupledArg$$2) {
+      if (sa$$6.dep.predicted_dependencies[tupledArg$$2[0]] === "dobj") {
+        return true;
+      } else {
+        return sa$$6.dep.predicted_dependencies[tupledArg$$2[0]] === "iobj";
+      }
+    });
+    return (0, _Array.map)(function mapping$$18(tupledArg$$3) {
+      return tupledArg$$3[0];
+    }, array$$35, Array);
+  } else {
+    return new Array(0);
+  }
+}
+
+function getRootOfSpan(start$$1, stop, sa$$7) {
+  let spanHeads;
+  const array$$36 = sa$$7.dep.predicted_heads.slice(start$$1, stop + 1);
+  spanHeads = (0, _Array.map)(function mapping$$19(h$$13) {
+    return h$$13 - 1;
+  }, array$$36, Int32Array);
+  let spanHeadIndex;
+  spanHeadIndex = spanHeads.findIndex(function predicate$$12(h$$14) {
+    if (h$$14 < start$$1) {
+      return true;
+    } else {
+      return h$$14 > stop;
+    }
+  });
+  return start$$1 + spanHeadIndex | 0;
+}
+
 function resolveReferents(da) {
   let clusterSentenceMap;
-  let elements$$2;
-  let array$$33;
-  let array$$32;
-  array$$32 = (0, _Array.mapIndexed)(function mapping$$17(i$$12, s) {
-    return (0, _Array.mapIndexed)(function mapping$$16(j$$1, c$$1) {
-      return [c$$1, i$$12, j$$1];
+  let elements$$3;
+  let array$$41;
+  let array$$40;
+  array$$40 = (0, _Array.mapIndexed)(function mapping$$21(i$$16, s) {
+    return (0, _Array.mapIndexed)(function mapping$$20(j$$1, c$$1) {
+      return [c$$1, i$$16, j$$1];
     }, s.cor.clusters, Array);
   }, da.sentences, Array);
-  array$$33 = (0, _Array.collect)(function mapping$$18(x$$2) {
+  array$$41 = (0, _Array.collect)(function mapping$$22(x$$2) {
     return x$$2;
-  }, array$$32, Array);
-  elements$$2 = (0, _Array.groupBy)(function projection$$1(tupledArg$$2) {
-    return tupledArg$$2[0];
-  }, array$$33, Array, {
-    Equals($x$$15, $y$$16) {
-      return $x$$15 === $y$$16;
+  }, array$$40, Array);
+  elements$$3 = (0, _Array.groupBy)(function projection$$2(tupledArg$$4) {
+    return tupledArg$$4[0];
+  }, array$$41, Array, {
+    Equals($x$$19, $y$$20) {
+      return $x$$19 === $y$$20;
     },
 
     GetHashCode: _Util.structuralHash
   });
-  clusterSentenceMap = (0, _Map.ofArray)(elements$$2, {
+  clusterSentenceMap = (0, _Map.ofArray)(elements$$3, {
     Compare: _Util.comparePrimitives
   });
   const demonstrativeRegex = (0, _RegExp.create)("(this|that|these|those)", 1);
 
-  const spanIsPronominal = function spanIsPronominal(sa$$6, span$$2) {
-    if (sa$$6.dep.pos[span$$2[0]].indexOf("PRP") === 0) {
+  const spanIsPronominal = function spanIsPronominal(sa$$8, span$$2) {
+    if (sa$$8.dep.pos[span$$2[0]].indexOf("PRP") === 0) {
       return true;
     } else {
-      return (0, _RegExp.isMatch)(demonstrativeRegex, sa$$6.dep.words[span$$2[0]]);
+      return (0, _RegExp.isMatch)(demonstrativeRegex, sa$$8.dep.words[span$$2[0]]);
     }
   };
 
   let resolvedSentences;
-  resolvedSentences = (0, _Array.map)(function mapping$$22(sa$$7) {
+  resolvedSentences = (0, _Array.map)(function mapping$$26(sa$$9) {
     let clusterReferents;
-    clusterReferents = (0, _Array.map)(function mapping$$20(clusterId) {
+    clusterReferents = (0, _Array.map)(function mapping$$24(clusterId) {
       let nominalReferents;
-      let array$$36;
-      let array$$35;
-      const array$$34 = (0, _Map.FSharpMap$$get_Item$$2B595)(clusterSentenceMap, clusterId);
-      array$$35 = (0, _Array.map)(function mapping$$19(tupledArg$$3) {
-        return [tupledArg$$3[1], tupledArg$$3[2]];
-      }, array$$34, Array);
-      array$$36 = (0, _Array.sortBy)(function projection$$2(tuple$$1) {
-        return tuple$$1[0];
-      }, array$$35, {
+      let array$$44;
+      let array$$43;
+      const array$$42 = (0, _Map.FSharpMap$$get_Item$$2B595)(clusterSentenceMap, clusterId);
+      array$$43 = (0, _Array.map)(function mapping$$23(tupledArg$$5) {
+        return [tupledArg$$5[1], tupledArg$$5[2]];
+      }, array$$42, Array);
+      array$$44 = (0, _Array.sortBy)(function projection$$3(tuple$$2) {
+        return tuple$$2[0];
+      }, array$$43, {
         Compare: _Util.comparePrimitives
       });
-      nominalReferents = (0, _Array.choose)(function chooser$$2(tupledArg$$4) {
+      nominalReferents = (0, _Array.choose)(function chooser$$2(tupledArg$$6) {
         var strings$$3;
-        const span$$3 = da.sentences[tupledArg$$4[0]].cor.spans[tupledArg$$4[1]];
+        const span$$3 = da.sentences[tupledArg$$6[0]].cor.spans[tupledArg$$6[1]];
 
-        if (spanIsPronominal(da.sentences[tupledArg$$4[0]], span$$3)) {
+        if (spanIsPronominal(da.sentences[tupledArg$$6[0]], span$$3)) {
           return undefined;
         } else {
-          return [tupledArg$$4[0], (strings$$3 = da.sentences[tupledArg$$4[0]].dep.words.slice(span$$3[0], span$$3[1] + 1), ((0, _String.join)(" ", strings$$3)))];
+          return [tupledArg$$6[0], (strings$$3 = da.sentences[tupledArg$$6[0]].dep.words.slice(span$$3[0], span$$3[1] + 1), ((0, _String.join)(" ", strings$$3)))];
         }
-      }, array$$36, Array);
+      }, array$$44, Array);
 
       if (!(0, _Array.equalsWith)(_Util.compareArrays, nominalReferents, null) ? nominalReferents.length === 0 : false) {
         return undefined;
       } else {
         let matchValue$$1;
-        let array$$38;
-        array$$38 = (0, _Array.sortBy)(function projection$$3(tuple$$2) {
-          return tuple$$2[0];
+        let array$$46;
+        array$$46 = (0, _Array.sortBy)(function projection$$4(tuple$$3) {
+          return tuple$$3[0];
         }, nominalReferents, {
           Compare: _Util.comparePrimitives
         });
-        matchValue$$1 = (0, _Array.tryFindBack)(function predicate$$10(tupledArg$$5) {
-          return tupledArg$$5[0] < sa$$7.id;
-        }, array$$38);
+        matchValue$$1 = (0, _Array.tryFindBack)(function predicate$$13(tupledArg$$7) {
+          return tupledArg$$7[0] < sa$$9.id;
+        }, array$$46);
 
         if (matchValue$$1 != null) {
           const w$$2 = matchValue$$1[1];
@@ -785,19 +853,19 @@ function resolveReferents(da) {
           return undefined;
         }
       }
-    }, sa$$7.cor.clusters, Array);
+    }, sa$$9.cor.clusters, Array);
     let indexedWords;
-    indexedWords = (0, _Array.copy)(sa$$7.dep.words, Array);
+    indexedWords = (0, _Array.copy)(sa$$9.dep.words, Array);
 
-    for (let i$$14 = 0; i$$14 <= sa$$7.cor.spans.length - 1; i$$14++) {
+    for (let i$$18 = 0; i$$18 <= sa$$9.cor.spans.length - 1; i$$18++) {
       let originalWords;
-      const strings$$4 = sa$$7.dep.words.slice(sa$$7.cor.spans[i$$14][0], sa$$7.cor.spans[i$$14][1] + 1);
+      const strings$$4 = sa$$9.dep.words.slice(sa$$9.cor.spans[i$$18][0], sa$$9.cor.spans[i$$18][1] + 1);
       originalWords = (0, _String.join)(" ", strings$$4);
 
-      if (spanIsPronominal(sa$$7, sa$$7.cor.spans[i$$14]) ? clusterReferents[i$$14] != null : false) {
-        indexedWords[sa$$7.cor.spans[i$$14][0]] = clusterReferents[i$$14];
+      if (spanIsPronominal(sa$$9, sa$$9.cor.spans[i$$18]) ? clusterReferents[i$$18] != null : false) {
+        indexedWords[sa$$9.cor.spans[i$$18][0]] = clusterReferents[i$$18];
 
-        for (let j$$2 = sa$$7.cor.spans[i$$14][0] + 1; j$$2 <= sa$$7.cor.spans[i$$14][1]; j$$2++) {
+        for (let j$$2 = sa$$9.cor.spans[i$$18][0] + 1; j$$2 <= sa$$9.cor.spans[i$$18][1]; j$$2++) {
           indexedWords[j$$2] = "";
         }
       } else {
@@ -808,13 +876,13 @@ function resolveReferents(da) {
     let str;
     let input$$23;
     let strings$$5;
-    strings$$5 = indexedWords.filter(function predicate$$11(w$$3) {
+    strings$$5 = indexedWords.filter(function predicate$$14(w$$3) {
       return w$$3.length > 0;
     });
     input$$23 = (0, _String.join)(" ", strings$$5);
     str = removePrePunctuationSpaces(input$$23);
-    return Array.from((0, _Seq.mapIndexed)(function mapping$$21(i$$15, c$$3) {
-      if (i$$15 === 0) {
+    return Array.from((0, _Seq.mapIndexed)(function mapping$$25(i$$19, c$$3) {
+      if (i$$19 === 0) {
         return c$$3.toLocaleUpperCase();
       } else {
         return c$$3;
@@ -822,4 +890,21 @@ function resolveReferents(da) {
     }, str.split(""))).join("");
   }, da.sentences, Array);
   return resolvedSentences;
+}
+
+function ResolveTextReferents(inputText$$1) {
+  return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
+    return GetNLP(undefined, inputText$$1).then(function (_arg1$$2) {
+      if (_arg1$$2.tag === 1) {
+        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$2.fields[0]));
+      } else {
+        let resolvedSentences$$1;
+        resolvedSentences$$1 = resolveReferents(_arg1$$2.fields[0]);
+        return Promise.resolve(new _Option.Result(0, "Ok", (0, _Types.anonRecord)({
+          documentAnnotation: _arg1$$2.fields[0],
+          resolvedSentences: resolvedSentences$$1
+        })));
+      }
+    });
+  }));
 }

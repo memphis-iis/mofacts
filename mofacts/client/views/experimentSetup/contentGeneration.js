@@ -1,4 +1,4 @@
-import { curSemester } from '../../../common/Definitions';
+import { curSemester, MULTITDF_MAIN_CLUSTER_UNIT } from '../../../common/Definitions';
 import { Tracker } from 'meteor/tracker';
 import { DynamicTdfGenerator } from "../../../common/DynamicTdfGenerator";
 
@@ -154,7 +154,6 @@ findClusterUnitData = function(index){
 
 setClozesFromStimObject = function(stimObject,isMultiTdf){
   console.log("setClozesFromStimObject");
-  const MULTITDF_MAIN_CLUSTER_UNIT = 2;
   let allClozes = [];
   let sourceSentences = stimObject.sourceSentences || [];
   fillOutSentenceLookupMap(sourceSentences);
