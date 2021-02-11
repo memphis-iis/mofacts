@@ -50,7 +50,7 @@ Template.dataDownload.helpers({
       uid = Meteor.userId();
     }
 
-    return Classes.find({'instructor': uid});
+    return Classes.find({'instructor': uid,"curSemester":curSemester});
   },
   'selectedTeacherId': function() {
     return Template.instance().selectedTeacherId.get();
@@ -73,7 +73,7 @@ Template.dataDownload.helpers({
         uid = Meteor.userId();
       }
 
-      var classes = Classes.find({'instructor': uid});
+      var classes = Classes.find({'instructor': uid, "curSemester":curSemester});
 
       classes.forEach(function(classObject) {
         if (classObject._id == Template.instance().selectedClassId.get()) {

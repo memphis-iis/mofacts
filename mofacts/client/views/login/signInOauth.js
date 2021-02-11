@@ -1,3 +1,5 @@
+import { clearExperimentCookies } from '../../lib/currentTestingHelpers';
+
 function testUserEnabled() {
     return _.chain(Meteor.settings).prop("public").prop("testLogin").value();
 }
@@ -77,6 +79,7 @@ var waitOnConfig = function(){
     routeToSignin();
     return;
   }
+  clearExperimentCookies();
 
   if(!Accounts.loginServicesConfigured()){
     console.log('+++++ Config not loaded! Waiting... +++++');
