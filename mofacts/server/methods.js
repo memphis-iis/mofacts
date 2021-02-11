@@ -176,15 +176,6 @@ function defaultUserProfile() {
     };
 }
 
-// Append a row to CSV file that serves as a log of online users
-function logNumOnlineUsers() {
-  var now = (new Date()).toString();
-  var numUsers = Meteor.call('numOnlineUsers');
-  var rowToWrite = now + ',' + numUsers + '\n';
-  activeUserLogStream.write(rowToWrite);
-  serverConsole('Logged ' + numUsers + ' active users.');
-}
-
 function sendErrorReportSummaries(){
   serverConsole("sendErrorReportSummaries");
   var unsentErrorReports = ErrorReports.find({"emailed":false}).fetch();
@@ -338,7 +329,7 @@ Meteor.publish(null, function () {
             use_sandbox: 1
         }}),
         UserMetrics.find({_id:userId}),
-        Classes.find({})
+        Classes.find({"curSemester":curSemester})
     ];
 
     return defaultData;
@@ -377,7 +368,7 @@ Meteor.publish('allUsers', function () {
 });
 
 Meteor.publish('classesForInstructor',function(instructorID){
-  return Classes.find({"instructor":instructorID});
+  return Classes.find({"instructor":instructorID,"curSemester":curSemester});
 })
 
 Meteor.publish('allTeachers', function(){
@@ -595,7 +586,7 @@ Meteor.startup(function () {
     Meteor.methods({
       getConsentTdfData:function(userId){
         let username = Meteor.users.findOne({_id:userId}).username.toLowerCase();
-        let studentClass = Classes.findOne({'students': username});
+        let studentClass = Classes.findOne({'students': username,"curSemester":curSemester});
         let instructorId = studentClass.instructor;
         let instructorUsername = Meteor.users.findOne({_id:instructorId}).username;
         let assignedConsentTdf;
@@ -607,8 +598,9 @@ Meteor.startup(function () {
             assignedConsentTdf = "Consent_Rothschild_xml";
             break;
           case "ambanker@southwest.tn.edu":
-          default:
             assignedConsentTdf = "Consent_Banker_xml";
+          default:
+            assignedConsentTdf = "Consent_Default_xml";
             break;
         } 
         let query = {_id:userId};
@@ -737,7 +729,7 @@ Meteor.startup(function () {
       },
 
       getStudentPerformanceForClassAndTdf: function(classID, tdfFileName){
-        let curClass = Classes.findOne({_id:classID});
+        let curClass = Classes.findOne({_id:classID,"curSemester":curSemester});
         studentTotals = {
           numCorrect: 0,
           count: 0,
@@ -822,7 +814,7 @@ Meteor.startup(function () {
         var user = Meteor.users.findOne({_id:instructorID});
         var instructorClasses;
         if(Roles.userIsInRole(user, ['admin'])){
-          instructorClasses = Classes.find({}).fetch();
+          instructorClasses = Classes.find({"curSemester":curSemester}).fetch();
         }else{
           instructorClasses = Classes.find({"instructor":instructorID,"curSemester":curSemester}).fetch();
         }
@@ -866,7 +858,7 @@ Meteor.startup(function () {
         var teacher = Meteor.users.find({"username": teacherUsername}) || {};
         var teacherID = teacher._id;
         console.log("teacherUsername: " + teacherUsername + ", teacherID: " + teacherID);
-        var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName}).fetch();
+        var teacherClasses = Classes.find({"instructor":teacherID,"name":teacherClassName,"curSemester":curSemester}).fetch();
         console.log("teacherClasses: " + JSON.stringify(teacherClasses));
         var studentInAClass = false;
         for(var index in teacherClasses){
@@ -886,7 +878,7 @@ Meteor.startup(function () {
 
       getTdfsAssignedToStudent: function(user){
         console.log('user: ' + user);
-        var classesWithStudent = Classes.find({"students":user}).fetch();
+        var classesWithStudent = Classes.find({"students":user,"curSemester":curSemester}).fetch();
         console.log("classesWithStudent: " + JSON.stringify(classesWithStudent));
         tdfs = new Set([]);
         for(var index in classesWithStudent){
@@ -1404,7 +1396,7 @@ Router.route("data-by-teacher", {
       return;
     }
 
-    var classes = Classes.find({'instructor': uid});
+    var classes = Classes.find({'instructor': uid, "curSemester":curSemester});
   
     if (!classes) {
       response.writeHead(404);
@@ -1472,7 +1464,7 @@ Router.route("data-by-class", {
       return;
     }
 
-    var foundClass = Classes.findOne({'_id': classId});
+    var foundClass = Classes.findOne({'_id': classId, "curSemester":curSemester});
   
     if (!foundClass) {
       response.writeHead(404);

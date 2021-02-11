@@ -1,4 +1,5 @@
 import { curSemester } from '../../../common/Definitions';
+import { clearExperimentCookies } from '../../lib/currentTestingHelpers';
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
@@ -162,6 +163,7 @@ Template.signInSouthwest.onCreated(function(){
 });
 
 Template.signInSouthwest.onRendered(function(){
+  clearExperimentCookies();
   window.onpopstate = function(event){
     console.log("window popstate signin southwest");
     if(document.location.pathname == "/signInSouthwest"){

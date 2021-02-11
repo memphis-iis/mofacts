@@ -1,7 +1,10 @@
+import { clearExperimentCookies } from '../../lib/currentTestingHelpers';
+
 Template.signIn.onRendered(function(){
   if(Session.get("loginMode") !== "experiment"){
     console.log("password signin, setting login mode");
     Session.set('loginMode','password');
+    clearExperimentCookies();
   }
 })
 

@@ -1,6 +1,6 @@
 import { curSemester } from '../../common/Definitions';
 import { dialogueSelectState } from '../views/home/profileDialogueToggles';
-export { getCurrentDeliveryParams };
+export { getCurrentDeliveryParams, clearExperimentCookies };
 
 /* client/lib/currentTestingHelpers.js
  *
@@ -9,6 +9,12 @@ export { getCurrentDeliveryParams };
  * but has been moved here for easier use. See also lib/sessionUtils.js for
  * a better list of Session variables we currently use.
  * */
+
+function clearExperimentCookies(){
+  Cookie.set("isExperiment", undefined); 
+  Cookie.set("experimentTarget", undefined);
+  Cookie.set("experimentXCond", undefined);
+}
 
 search = function(key, prop, array){
   for(var i=0;i<array.length;i++){
@@ -22,7 +28,7 @@ getAllClassesForCurrentInstructor = function(instructorID){
   console.log("getAllClassesForCurrentInstructor, instructorID:" + instructorID);
   if (Roles.userIsInRole(Meteor.user(), ["admin"])){
     console.log("admin role, getAllClassesForCurrentInstructor");
-    return Classes.find({}).fetch();
+    return Classes.find({"curSemester":curSemester}).fetch();
   }else{
     console.log("teacher role, getAllClassesForCurrentInstructor");
     return Classes.find({instructor:instructorID,"curSemester":curSemester}).fetch();
