@@ -190,7 +190,7 @@ Template.signInSouthwest.helpers({
     },
 
     'systemOverloaded': function(){
-      return Session.get("systemOverloaded");
+      return Session.get("systemOverloaded") && !Session.get("showTestLogins");
     },
 
     'showTestLogins': function(){
