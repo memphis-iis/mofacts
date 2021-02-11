@@ -956,7 +956,6 @@ function setUpButtonTrial(){
   let buttonOrder = _.chain(currUnit).prop("buttonorder").first().trim().value().toLowerCase();
   let buttonOptions = _.chain(currUnit).prop("buttonOptions").first().trim().value();
   let correctButtonPopulated = null;
-
   if (buttonOptions) {
       buttonChoices = buttonOptions.split(",");
       correctButtonPopulated = true;
@@ -976,6 +975,7 @@ function setUpButtonTrial(){
   let currentAnswer = Session.get("originalAnswer");
   let correctAnswer = Answers.getDisplayAnswerText(currentAnswer);
   let wrongButtonLimit = deliveryParams.falseAnswerLimit;
+
   if (wrongButtonLimit) {
       let foundIsCurrentAnswer = undefined;
       let correctAnswerIndex = undefined;
@@ -999,9 +999,8 @@ function setUpButtonTrial(){
         buttonChoices.splice(randomIndex,1);
       }
 
-      if(correctAnswerIndex) buttonChoices.unshift(foundIsCurrentAnswer ? currentAnswer : correctAnswer);
+      if(correctAnswerIndex || correctAnswerIndex==0) buttonChoices.unshift(foundIsCurrentAnswer ? currentAnswer : correctAnswer);
   }
-
   if(!correctButtonPopulated){
     buttonChoices.unshift(correctAnswer);
   }
@@ -1226,7 +1225,7 @@ function afterAnswerAssessmentCb(userAnswer,isCorrect,feedbackForAnswer,afterAns
               buttonList.find({}, {sort: {idx: 1}}).fetch(),
               function(val) { return val.buttonValue; }
           ).join(',');
-        Session.set("buttonEntriesTemp",buttonEntries);
+        Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
         clearButtonList();
       }
       initiateDialogue(userAnswer,afterAnswerFeedbackCbBound,showUserFeedbackBound);
@@ -1385,7 +1384,14 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   let buttonEntries = "";
   let wasButtonTrial = Session.get("buttonTrial");
   if (wasButtonTrial) {
-    JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+    if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
+      JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+    }else{
+      buttonEntries = _.map(
+        buttonList.find({}, {sort: {idx: 1}}).fetch(),
+        function(val) { return val.buttonValue; }
+      ).join(',');
+    }
     Session.set("buttonEntriesTemp",undefined);
   }            
 
