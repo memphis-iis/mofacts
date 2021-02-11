@@ -2420,6 +2420,7 @@ function checkSyllableCacheForCurrentStimFile(cb){
   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
   if(!cachedSyllables){
+    if(!Session.get("currentUnitNumber")) Session.set("currentUnitNumber", 0);
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers();
     Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){

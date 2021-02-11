@@ -4,16 +4,12 @@ Session.set("classes",[]);
 Session.set("allTdfFilenamesAndDisplayNames",[]);
 Session.set("tdfsSelected",[]);
 Session.set("tdfsNotSelected",[]);
-
-curClass = {tdfs:[]};
+Session.set("curClass",undefined); //{tdfs:[]};
 
 Template.tdfAssignmentEdit.onRendered(function(){
+  Session.set("curClass",{ tdfs: [] });
   console.log("tdfAssignmentEdit rendered");
   Session.set("classes",getAllClassesForCurrentInstructor(Meteor.userId()));
-  curClass = {
-    tdfs: []
-  };
-
   Meteor.subscribe('tdfs',function () {
     var allTdfs = [];
     var allTdfObjects = Tdfs.find({}).fetch();
@@ -41,11 +37,11 @@ Template.tdfAssignmentEdit.helpers({
   },
 
   tdfsSelected: function(){
-    return Session.get("tdfsSelected");
+    return Session.get("curClass").name ? Session.get("tdfsSelected") : [];
   },
 
   tdfsNotSelected: function(){
-    return Session.get("tdfsNotSelected");
+    return Session.get("curClass").name ? Session.get("tdfsNotSelected") : [];
   }
 });
 
@@ -54,27 +50,33 @@ Template.tdfAssignmentEdit.events({
     console.log("change class-select");
     var curClassName = $(event.currentTarget).val();
     var classes = Session.get("classes");
-    curClass = search(curClassName,"name",classes);
+    let curClass = search(curClassName,"name",classes);
     curClass.tdfs = curClass.tdfs || [];
+    Session.set("curClass",curClass);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #selectTdf": function(event, template){
     console.log("select tdf: ");
     var selectedTdfs = getselectedItems("notSelectedTdfs");
+    let curClass = Session.get("curClass");
     curClass.tdfs = curClass.tdfs.concat(selectedTdfs);
+    Session.set("curClass",curClass);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #unselectTdf": function(event, template){
     console.log("unselect tdf: ");
     var unselectedTdfs = getselectedItems("selectedTdfs");
+    let curClass = Session.get("curClass");
     curClass.tdfs = curClass.tdfs.filter(x => unselectedTdfs.findIndex(y => y.fileName == x.fileName) == -1);
+    Session.set("curClass",curClass);
     updateTdfsSelectedAndNotSelected();
   },
 
   "click #saveAssignment": function(event, template){
     console.log("save assignment");
+    let curClass = Session.get("curClass");
 
     if(!curClass.name){
       alert("Please select a class to assign Chapters to.");
@@ -114,6 +116,6 @@ function getselectedItems(itemSelector){
 
 function updateTdfsSelectedAndNotSelected(){
   console.log("updateTdfsSelectedAndNotSelected");
-  Session.set("tdfsSelected",curClass.tdfs);
-  Session.set("tdfsNotSelected",Session.get("allTdfFilenamesAndDisplayNames").filter(x => curClass.tdfs.findIndex(y => y.fileName == x.fileName) == -1));
+  Session.set("tdfsSelected",Session.get("curClass").tdfs);
+  Session.set("tdfsNotSelected",Session.get("allTdfFilenamesAndDisplayNames").filter(x => Session.get("curClass").tdfs.findIndex(y => y.fileName == x.fileName) == -1));
 }
