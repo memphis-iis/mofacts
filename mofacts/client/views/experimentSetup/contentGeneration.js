@@ -32,6 +32,18 @@ recordClozeEditHistory = function(oldCloze,newCloze){
   clozeEdits.push({startingCloze:oldCloze,endingCloze:newCloze,timestamp:timestamp});
 }
 
+function sortByDisplayDate(a,b){
+  let aParts = a.displayDate.split('/');//MM/DD/YYYY
+  let bParts = b.displayDate.split('/');
+  if(a.displayDate == b.displayDate) return 0;
+  if(aParts[2] < bParts[2]) return -1;
+  if(aParts[2] > bParts[2]) return 1;
+  if(aParts[0] < bParts[0]) return -1;
+  if(aParts[0] > bParts[0]) return 1;
+  if(aParts[1] < bParts[1]) return -1;
+  if(aParts[1] > bParts[1]) return 1;
+}
+
 setAllTdfs = function(ownerMapCallback){
   allTdfs = [];
   let ownerIds = [];
@@ -45,7 +57,13 @@ setAllTdfs = function(ownerMapCallback){
           let displayDate = "";
           if (entry.createdAt) {
             let date = new Date(entry.createdAt);
-            displayDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear(); 
+            let day = date.getDate();
+            if(("" + day).length == 1) day = "0" + day;
+
+            let month = date.getMonth() + 1;
+            if(("" + month).length == 1) month = "0" + month;
+
+            displayDate = month + '/' + day + '/' + date.getFullYear(); 
           }
  
           let ownerId = entry.owner;
@@ -60,6 +78,7 @@ setAllTdfs = function(ownerMapCallback){
       }
     });
     ownerMapCallback(ownerIds);
+    allTdfs.sort(sortByDisplayDate);
     Session.set('contentGenerationAllTdfs',allTdfs);
   });
 }
@@ -270,11 +289,20 @@ generateAndSubmitTDFAndStimFiles = function(){
       saveEditHistory(originalClozes,clozes);
       //Update session variable used in tdfAssignmentEdit so that we can assign a tdf immediately after generation without reloading the page
       Session.set("allTdfFilenamesAndDisplayNames",Session.get("allTdfFilenamesAndDisplayNames").concat({fileName:tdfFileName,displayName:displayName}));
+      
+      let day = curDate.getDate();
+      if(("" + day).length == 1) day = "0" + day;
 
-      let displayDate = (curDate.getMonth() + 1) + '/' + curDate.getDate() + '/' + curDate.getFullYear(); 
+      let month = curDate.getMonth() + 1;
+      if(("" + month).length == 1) month = "0" + month;
+
+      let displayDate = month + '/' + day + '/' + curDate.getFullYear(); 
       let ownerId = Meteor.userId();
       let newTdfInfo = {'fileName':tdfFileName,'displayName':displayName, 'ownerId': ownerId, "displayDate": displayDate};
-      Session.set("contentGenerationAllTdfs",Session.get("contentGenerationAllTdfs").concat(newTdfInfo));
+      let allTdfs = Session.get("contentGenerationAllTdfs");
+      allTdfs.concat(newTdfInfo);
+      allTdfs.sort(sortByDisplayDate);
+      Session.set("contentGenerationAllTdfs",allTdfs);
 
       let tempTdfOwnersMap = Session.get("tdfOwnersMap");
       tempTdfOwnersMap[ownerId] = Meteor.user().username;
