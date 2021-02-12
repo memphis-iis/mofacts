@@ -2426,7 +2426,6 @@ function checkSyllableCacheForCurrentStimFile(cb){
   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
   if(!cachedSyllables){
-    console.log("checkSyllableCacheForCurrentStimFile,session",JSON.parse(JSON.stringify(Session.all())));
     if(!Session.get("currentUnitNumber")) Session.set("currentUnitNumber", 0);
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers(false);

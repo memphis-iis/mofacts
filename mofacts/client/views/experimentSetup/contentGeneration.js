@@ -552,7 +552,16 @@ Template.contentGeneration.onRendered(function(){
       $('.cloze-checkbox').shiftSelectable();
     });
   });
-
+  $('#templateTDFSelect').one('select2:open', function(e) {
+    $('input.select2-search__field').prop('placeholder', 'Search Here');
+  });
+  $('#templateTDFSelect').on('select2:open', function (e) {
+    var container = $(this).select('select2-container');
+    var position = container.offset().top;
+    var availableHeight = $(window).height() - position - container.outerHeight();
+    var bottomPadding = 50; // Set as needed
+    $('ul.select2-results__options').css('max-height', (availableHeight - bottomPadding) + 'px');
+  });
   $("#templateTDFSelect").select2();
 });
 

@@ -621,12 +621,10 @@ Meteor.startup(function () {
 
       getElaboratedFeedbackForAnswer:async function(userAnswer,correctAnswer){
         let result = await ElaboratedFeedback.GenerateFeedback(userAnswer,correctAnswer);
-        console.log("result: " + JSON.stringify(result));
         return result;
       },
 
       initializeTutorialDialogue:function(correctAnswer, userIncorrectAnswer, clozeItem){
-        console.log('initializeTutorialDialogue',correctAnswer,userIncorrectAnswer,clozeItem);
         let initialState = TutorialDialogue.GetElaboratedDialogueState(correctAnswer,userIncorrectAnswer,clozeItem);
         return initialState;
       },
