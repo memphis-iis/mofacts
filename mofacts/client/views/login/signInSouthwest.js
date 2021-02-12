@@ -119,6 +119,21 @@ setClass = function(curClassID){
 }
 
 Template.signInSouthwest.onCreated(function(){
+  
+});
+
+Template.signInSouthwest.onRendered(function(){
+  clearExperimentCookies();
+  window.onpopstate = function(event){
+    console.log("window popstate signin southwest");
+    if(document.location.pathname == "/signInSouthwest"){
+      Session.set("curTeacher",{});
+      Session.set("curClass",{});
+      $("#initialInstructorSelection").prop('hidden','');
+      $("#classSelection").prop('hidden','true');
+      $(".login").prop('hidden','true');
+    }
+  }
   Session.set("loginMode","southwest");
   Meteor.call('isSystemDown',function(err, systemDown){
     console.log("SYSTEM_DOWN:",systemDown);
@@ -160,20 +175,6 @@ Template.signInSouthwest.onCreated(function(){
     }
     Session.set("teachers",verifiedTeachers);
   });
-});
-
-Template.signInSouthwest.onRendered(function(){
-  clearExperimentCookies();
-  window.onpopstate = function(event){
-    console.log("window popstate signin southwest");
-    if(document.location.pathname == "/signInSouthwest"){
-      Session.set("curTeacher",{});
-      Session.set("curClass",{});
-      $("#initialInstructorSelection").prop('hidden','');
-      $("#classSelection").prop('hidden','true');
-      $(".login").prop('hidden','true');
-    }
-  }
 });
 
 Template.signInSouthwest.helpers({

@@ -110,15 +110,12 @@ function dialogueContinue(){
 
 async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
   dialogueContext = undefined;
+  let clozeQuestionParts = Session.get("clozeQuestionParts");
   Session.set("clozeQuestionParts",undefined);
   Session.set("dialogueLoopStage","intro");
   dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
   let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
   let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
-  
-  //let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
-  //updateDialogueDisplay(transitionStatement);
-  //speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
   
   dialogueCallbackSaver = callback;
   //wait for user to hit enter to make sure they read the transition statement
@@ -135,18 +132,22 @@ async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback)
             dialogueContext = undefined;
             console.log("dialogueHistory",Session.get("dialogueHistory"));
             Session.set("dialogueLoopStage",undefined);
-            let buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+            let buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp") || ""));
             Session.set("buttonEntriesTemp",undefined);
             for(let button of buttonEntries){
                 buttonList.insert(button);
             }
+            Session.set("clozeQuestionParts",clozeQuestionParts);
             lookupFailCallback();
         }else{
             dialogueContext = res.fields[0];
             if(!dialogueContext){
                 console.log("ERROR getting context during dialogue initialization");
             }else{
-                dialogueContinue();
+                let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+                updateDialogueDisplay(transitionStatement);
+                speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
+                //dialogueContinue();
             }
         }
       }

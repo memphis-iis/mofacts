@@ -256,7 +256,6 @@ getCurrentStimDisplaySources = function(filterPropertyName = "clozeText"){
 }
 
 getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
-  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let clusters = Stimuli.findOne({fileName: getCurrentStimName()}).stimuli.setspec.clusters
   let allAnswers = new Set;
 
@@ -274,6 +273,7 @@ getAllCurrentStimAnswers = function(removeExcludedPhraseHints) {
   allAnswers = Array.from(allAnswers);
 
   if(removeExcludedPhraseHints){
+    let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
     let curSpeechHintExclusionListText = clusters[curClusterIndex].stims[curStimIndex].speechHintExclusionList || "";
     let exclusionList = curSpeechHintExclusionListText.split(',');
     //Remove the optional phrase hint exclusions
@@ -526,11 +526,13 @@ getCurrentDeliveryParams = function (currUnit) {
     // If there's no feedback type defined by the TDF author
     // or if the user is allowed to select a feedback type,
     // type selected with the profile page toggle
-    if (!deliveryParams["feedbackType"].length 
-      || deliveryParams["allowFeedbackTypeSelect"]) {
-      deliveryParams["feedbackType"] = 
-        dialogueSelectState.get("selectedDialogueType");
-    }
+
+    //Make feedbackType driven by user selected option for now, we'll enable allowFeedbackTypeSelect later
+    // if (!deliveryParams["feedbackType"].length 
+    //   || deliveryParams["allowFeedbackTypeSelect"]) {
+      if(dialogueSelectState.get("selectedDialogueType"))
+        deliveryParams["feedbackType"] = dialogueSelectState.get("selectedDialogueType");
+    //}
 
     return deliveryParams;
 };

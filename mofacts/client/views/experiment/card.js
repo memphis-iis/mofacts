@@ -1345,12 +1345,12 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory){
   //Fast forward through feedback if we already did a dialogue feedback session
   if(deliveryParams.feedbackType == "dialogue" && !isCorrect){
     if(dialogueHistory.tag == 0){ //If we failed to do a dialogue, allow for feedback review
-      reviewTimeout = 1; 
+      reviewTimeout = 0.1; 
     }
   }
 
   //We need at least a timeout of 1ms
-  if (reviewTimeout < 1) throw new Error("No correct timeout specified");
+  if (reviewTimeout < 0.1) throw new Error("No correct timeout specified");
 
   return reviewTimeout
 }
@@ -2426,9 +2426,10 @@ function checkSyllableCacheForCurrentStimFile(cb){
   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
   console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
   if(!cachedSyllables){
+    console.log("checkSyllableCacheForCurrentStimFile,session",JSON.parse(JSON.stringify(Session.all())));
     if(!Session.get("currentUnitNumber")) Session.set("currentUnitNumber", 0);
     console.log("no cached syllables for this stim, calling server method to create them");
-    let curAnswers = getAllCurrentStimAnswers();
+    let curAnswers = getAllCurrentStimAnswers(false);
     Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
       cachedSyllables = StimSyllables.findOne({filename:curStimFile});
       console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
