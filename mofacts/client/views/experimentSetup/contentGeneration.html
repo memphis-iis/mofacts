@@ -1,187 +1,180 @@
 <template name="contentGeneration">
-  <br><br>
-    <div id="edit-modal" class="modal fade">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title"><b>Edit</b></h4>
-          </div> <!-- .modal-header -->
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-12 nav-box">
-                <b>Original Sentence:</b>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-12">
-                {{editingSentence}}
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4 nav-box">
-                <b><p>Previous cloze/response:</p></b>
-              </div>
-              <div class="col-md-4 nav-box">
-                <b><p>New cloze:</p></b>
-              </div>
-              <div class="col-md-4 nav-box">
-                <b><p>Correct Response:</p></b>
-              </div>
-            </div>
-            <div class="row flexContent">
-              <div class="col-md-4">
-                {{editingCloze}}&nbsp;/&nbsp;{{editingClozeResponse}}
-              </div>
-              <div class="col-md-4">
-                <textarea id="clozeTextEdit">{{editingCloze}}</textarea>
-              </div>
-              <div class="col-md-4">
-                <input id="clozeResponseEdit" type="text" />
-              </div>
+  <div id="edit-modal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><b>Edit</b></h4>
+        </div> <!-- .modal-header -->
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-12 nav-box">
+              <b>Original Sentence:</b>
             </div>
           </div>
-          <div class="modal-footer row">
+          <div class="row">
+            <div class="col-md-12">
+              {{editingSentence}}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4 nav-box">
+              <b><p>Previous cloze/response:</p></b>
+            </div>
+            <div class="col-md-4 nav-box">
+              <b><p>New cloze:</p></b>
+            </div>
+            <div class="col-md-4 nav-box">
+              <b><p>Correct Response:</p></b>
+            </div>
+          </div>
+          <div class="row flexContent">
+            <div class="col-md-4">
+              {{editingCloze}}&nbsp;/&nbsp;{{editingClozeResponse}}
+            </div>
+            <div class="col-md-4">
+              <textarea id="clozeTextEdit">{{editingCloze}}</textarea>
+            </div>
+            <div class="col-md-4">
+              <input id="clozeResponseEdit" type="text" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer row">
+          <div class="col-md-3">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+          <div class="col-md-6"></div>
+          <div class="col-md-3">
+            <button type="button" id="editClozeSaveButton" class="btn btn-primary">Save changes</button>
+          </div>
+        </div> <!-- .modal-footer -->
+      </div> <!-- .modal-content -->
+    </div> <!-- .modal-dialog -->
+  </div> <!-- .modal -->
+
+  <div id="save-modal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Submit</h4>
+        </div> <!-- .modal-header -->
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6 nav-box">
+              <b>Display Name:</b>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <input type="text" id="tdfDisplayNameTextBox" placeholder="Enter a display name" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="row">
             <div class="col-md-3">
-              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
             <div class="col-md-6"></div>
             <div class="col-md-3">
-              <button type="button" id="editClozeSaveButton" class="btn btn-primary">Save changes</button>
-            </div>
-          </div> <!-- .modal-footer -->
-        </div> <!-- .modal-content -->
-      </div> <!-- .modal-dialog -->
-    </div> <!-- .modal -->
-
-    <div id="save-modal" class="modal fade">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title">Submit</h4>
-          </div> <!-- .modal-header -->
-          <div class="modal-body">
-            <div class="row">
-              <div class="col-md-6 nav-box">
-                <b>Display Name:</b>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-6">
-                <input type="text" id="tdfDisplayNameTextBox" placeholder="Enter a display name" />
-              </div>
+              <button type="button" class="btn btn-primary" id="save-btn-final">Submit</button>
             </div>
           </div>
-          <div class="modal-footer">
-            <div class="row">
-              <div class="col-md-3">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-              </div>
-              <div class="col-md-6"></div>
-              <div class="col-md-3">
-                <button type="button" class="btn btn-primary" id="save-btn-final">Submit</button>
-              </div>
-            </div>
-          </div> <!-- .modal-footer -->
-        </div> <!-- .modal-content -->
-      </div> <!-- .modal-dialog -->
-    </div> <!-- .modal -->
+        </div> <!-- .modal-footer -->
+      </div> <!-- .modal-content -->
+    </div> <!-- .modal-dialog -->
+  </div> <!-- .modal -->
 
-    <div class="row">
-      <div class="col-md-5">
-        <h3>Either paste in source material and click "Submit"</h3>
-      </div>
-      <div class="col-md-1">
-        <center><h3><b>or</b></h3></center>
-      </div>
-      <div class="col-md-6">
-        <h3>Choose an existing file as a template</h3>
-      </div>
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Choose an existing file as a template</h3>
     </div>
+  </div>
 
-    <div class="row">
-      <div class="col-md-5 form-group" id="textbox-div">
-        <textarea class="form-control" id="source-text" placeholder="Paste source material here"></textarea>
-      </div>
-      <div class="col-md-1"></div>
-      <div class="col-md-6">
-        <select id="templateTDFSelect">
-          <option value="invalid" disabled="true" selected="true">Select a template</option>
-          {{#each tdfs}}
-            <option value="{{this.fileName}}">
-              {{this.displayName}} - {{tdfOwnersMap this.ownerId}} - {{this.displayDate}}
-            </option>
-          {{/each}}
-        </select>
-      </div>
+  <div class="row">
+    <div class="col-md-12">
+      <select id="templateTDFSelect">
+        <option value="invalid" disabled="true" selected="true">Select a template</option>
+        {{#each tdfs}}
+          <option value="{{this.fileName}}">
+            {{this.displayName}} - {{tdfOwnersMap this.ownerId}} - {{this.displayDate}}
+          </option>
+        {{/each}}
+      </select>
     </div>
-    <div class="row">
-      <div class="col-md-5" id="submit-btn-div">
-        <button class="btn btn-primary" type="button" id="submit-btn"> Submit </button>
-      </div>
-      <div class="col-md-1"></div>
-      <div class="col-md-6">
-        <h3 id="fileTemplateLabel">Select a file template</h3>
-      </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h3>Reorder clozes</h3>
+      <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="originalOrderIndex">Sort by original order</button></div>
+      <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="sentenceWeight">Sort by sentence importance</button></div>
+      <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="coreference">Sort by coreference</button></div>
+      <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="paraphrase"> Sort by paraphrase</button></div>
     </div>
+  </div>
 
-    <div class="row">
-      <div class="col-md-12">
-        <h3>Reorder clozes</h3>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="originalOrderIndex">Sort by original order</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="sentenceWeight">Sort by sentence importance</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="coreference">Sort by coreference</button></div>
-        <div class="col-md-2"><button class="btn btn-primary sortingBtn" type="button" sortProperty="paraphrase"> Sort by paraphrase</button></div>
-      </div>
-    </div>
+  <div class="row">
+    <div class="col-md-12" id="clozes-div">
+      {{#if clozesSelected}}
+        <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
+      {{/if}}
+      
+      <h3>Clozes</h3>
 
-    <div class="row">
-      <div class="col-md-12" id="clozes-div">
-        {{#if clozesSelected}}
-          <a class="btn btn-default" id="delete-selected">Delete selected clozes</a>
-        {{/if}}
-        
-        <h3>Clozes</h3>
-
-        <div id="extracted-clozes">
-          {{#each clozes}}
-            <div id="cloze-display">
-              <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
-              <div class="row" id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
-                <ul class="ul-no-bullets">
-                  {{#if isCurrentPair this.itemId}}
-                    <li><span class="cur-sentence">Current Version: {{this.cloze}}</span></li>
-                  {{else}}
-                    <li><span>Current Version: {{this.cloze}}</span></li>
+      <div id="extracted-clozes">
+        {{#each clozes}}
+          <div id="cloze-display">
+            <input disabled type="checkbox" class="cloze-checkbox" id="select-delete" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}"/>
+            <div class="row" id="cloze" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">
+              <ul class="ul-no-bullets">
+                {{#if isCurrentPair this.itemId}}
+                  <li><span class="cur-sentence">Current Version: {{this.cloze}}</span></li>
+                {{else}}
+                  <li><span>Current Version: {{this.cloze}}</span></li>
+                {{/if}}
+                <li><span>Original Version: {{this.originalVersion}}</span></li>
+                <li>
+                  <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
+                  <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
+                  <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
+                  <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
+                  <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
+                  <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
+                  {{#if isCoreference this.paraphraseId}}
+                    <span class="col-md-2">
+                      {{#if isCorefReverted this.paraphraseId}}
+                      <button type="button" id="redoCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
+                      {{else}}
+                      <button type="button" id="revertCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
+                      {{/if}}
+                    </span>
                   {{/if}}
-                  <li><span>Original Version: {{this.originalVersion}}</span></li>
-                  <li>
-                    <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
-                    <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
-                    <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
-                    <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
-                    <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
-                    <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
-                    {{#if isCoreference this.paraphraseId}}
-                      <span class="col-md-2">
-                        {{#if isCorefReverted this.paraphraseId}}
-                        <button type="button" id="redoCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Redo coreference</button>
-                        {{else}}
-                        <button type="button" id="revertCoreference" class="btn btn-primary" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}">Revert to original</button>
-                        {{/if}}
-                      </span>
-                    {{/if}}
-                  </li>
-                </ul>
-              </div>
+                </li>
+              </ul>
             </div>
-          {{/each}}
-        </div>
+          </div>
+        {{/each}}
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12" id="footer"><button class="btn btn-primary" type="button" id="save-btn">Save</button></div>
+  </div>
+  <div class="row">
+    <div class="col-md-12" id="footer"><button class="btn btn-primary" type="button" id="save-btn">Save</button></div>
+  </div>
+
+  <br><br><br>
+  <div class="row">
+    <div class="col-md-2">
+      <button id="tdfPracticeBtn" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#source-text-container" aria-expanded="false" aria-controls="source-text-container">
+          Source Text Generation (Advanced)
+      </button>
     </div>
-  <!-- </div> -->
+  </div>
+  <div class="row collapse" id="source-text-container">
+    <h3>Paste in source material and click "Submit"</h3>
+    <textarea class="form-control" id="source-text" placeholder="Paste source material here"></textarea>
+    <button class="btn btn-primary" type="button" id="submit-btn"> Submit </button>
+  </div>
 </template>
