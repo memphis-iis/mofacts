@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "spinal cord",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -13,18 +13,18 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "The first cloze is __________ here."
+                                "clozeText": "The nervous system is the __________ _______ ."
                             },
                             "alternateDisplays": [
                                 {
-                                    "clozeText": "Alt 0 ____ here"
+                                    "clozeText": "Alt 0 ____ ______ here"
                                 }
                             ],
                             "parameter": "-0.479299999999998"
                         },
                         {
                             "response": {
-                                "correctResponse": "correct",
+                                "correctResponse": "spinal cord",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -32,7 +32,7 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "The myofibrils are essentially __________ joined end to end."
+                                "clozeText": "The nervous system is the __________ _______ .."
                             },
                             "parameter": "-0.479299999999998"
                         }

@@ -25,7 +25,7 @@ function answerIsBranched(answer) {
 }
 
 checkIfUserAnswerMatchesOtherAnswers = function(userAnswer,correctAnswer){
-  otherQuestionAnswers = getAllCurrentStimAnswers().filter(x => x !== correctAnswer);
+  otherQuestionAnswers = getAllCurrentStimAnswers(false).filter(x => x !== correctAnswer);
   for(var i=0;i<otherQuestionAnswers.length;i++){
     var stimStr = otherQuestionAnswers[i];
     //split on ; and take first value because the first value is the correct branch in an answer
