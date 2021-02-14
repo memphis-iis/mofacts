@@ -179,28 +179,11 @@ Template.body.events({
 });
 
 //Global template helpers
-Template.registerHelper('isLoggedIn', function (){
-  return haveMeteorUser();
-});
-
 Template.registerHelper('showPerformanceDetails', function(){
   return (Session.get("curModule") == "card" || Session.get("curModule") == "instructions") && Session.get("scoringEnabled");
-  // var curLocation = Router.current().location.get().path;
-  // if(curLocation == "/card" || curLocation == "/instructions"){
-  //   return true;
-  // }else{
-  //   return false;
-  // }
 });
 
-Template.registerHelper('currentScore', function() {
-    return Session.get("currentScore");
-});
-
-Template.registerHelper('isNormal', function() {
-    return Session.get("loginMode") !== "experiment";
-});
-
-Template.registerHelper('curStudentPerformance', function() {
-  return Session.get("curStudentPerformance");
-});
+Template.registerHelper('isLoggedIn', () => haveMeteorUser());
+Template.registerHelper('currentScore', () => Session.get("currentScore"));
+Template.registerHelper('isNormal', () => Session.get("loginMode") !== "experiment");
+Template.registerHelper('curStudentPerformance', () => Session.get("curStudentPerformance"));

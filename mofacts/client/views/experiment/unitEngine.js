@@ -146,7 +146,7 @@ function defaultUnitEngine(extensionData) {
     
         replaceClozeWithSyllables: function(question,currentAnswerSyllables, origAnswer){
             console.log("replaceClozeWithSyllables: " + question);
-            if(!question){
+            if(typeof(question) == undefined){
                 return {
                     clozeQuestion: undefined,
                     clozeMissingSyllables: undefined

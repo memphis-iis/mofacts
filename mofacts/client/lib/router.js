@@ -174,11 +174,6 @@ for(let route of defaultBehaviorRoutes){
 Router.route('/', {
     name: "client.index",
     action: function () {
-        // If they are navigating to "/" then we clear the (possible) cookie
-        // keeping them in experiment mode
-        Cookie.set("isExperiment", "0", 1);  // 1 day
-        Cookie.set("experimentTarget", "", 1);
-        Cookie.set("experimentXCond", "", 1);
         Session.set("curModule","signinoauth");
         this.render('signInOauth');
     }
