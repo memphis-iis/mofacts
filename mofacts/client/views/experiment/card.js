@@ -1383,7 +1383,7 @@ function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,isTimeo
   let wasButtonTrial = Session.get("buttonTrial");
   if (wasButtonTrial) {
     if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
-      JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp")));
+      buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp") || ""));
     }else{
       buttonEntries = _.map(
         buttonList.find({}, {sort: {idx: 1}}).fetch(),

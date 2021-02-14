@@ -118,10 +118,6 @@ setClass = function(curClassID){
   $(".login").prop('hidden','');
 }
 
-Template.signInSouthwest.onCreated(function(){
-  
-});
-
 Template.signInSouthwest.onRendered(function(){
   clearExperimentCookies();
   window.onpopstate = function(event){

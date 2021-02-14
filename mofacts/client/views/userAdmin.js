@@ -1,8 +1,5 @@
-Template.userAdmin.created = function(){
-  Session.set("filter","@gmail.com");
-}
-
 Session.set("allUsers",undefined);
+Session.set("filter","@gmail.com");
 
 Template.userAdmin.rendered = function () {
     //Init the modal dialog

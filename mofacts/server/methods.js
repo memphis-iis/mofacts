@@ -584,6 +584,10 @@ Meteor.startup(function () {
 
     //Set up our server-side methods
     Meteor.methods({
+      setUserDialogueTypeState:function(userId,selectedDialogueType){
+        Meteor.users.update({_id:userId},{'$set':{dialogueTypeState:selectedDialogueType}});
+      },
+
       getConsentTdfData:function(userId){
         let username = Meteor.users.findOne({_id:userId}).username.toLowerCase();
         let studentClass = Classes.findOne({'students': username,"curSemester":curSemester});
