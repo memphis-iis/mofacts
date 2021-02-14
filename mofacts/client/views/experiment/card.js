@@ -1,4 +1,4 @@
-export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording };
+export { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording, clearScrollList, scrollList };
 import { getCurrentDeliveryParams } from '../../lib/currentTestingHelpers';
 import { DialogueUtils, dialogueContinue, dialogueLoop, initiateDialogue } from './dialogueUtils';
 
@@ -1343,14 +1343,12 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory){
   }
 
   //Fast forward through feedback if we already did a dialogue feedback session
-  if(deliveryParams.feedbackType == "dialogue" && !isCorrect){
-    if(dialogueHistory.tag == 0){ //If we failed to do a dialogue, allow for feedback review
-      reviewTimeout = 0.1; 
-    }
+  if(deliveryParams.feedbackType == "dialogue" && !isCorrect && dialogueHistory.LastStudentAnswer){//If we failed to do a dialogue, allow for feedback review
+    reviewTimeout = 0.001; 
   }
 
   //We need at least a timeout of 1ms
-  if (reviewTimeout < 0.1) throw new Error("No correct timeout specified");
+  if (reviewTimeout < 0.001) throw new Error("No correct timeout specified");
 
   return reviewTimeout
 }
