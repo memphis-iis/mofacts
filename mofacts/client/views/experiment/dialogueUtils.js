@@ -1,4 +1,4 @@
-import { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording } from './card.js';
+import { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording, clearScrollList, scrollList } from './card.js';
 export { dialogueLoop, dialogueContinue, initiateDialogue };
 export const DialogueUtils = {
     isUserInDialogueLoop: function() {
@@ -38,6 +38,27 @@ function updateDialogueDisplay(newDisplay){
     let displayWrapper = { 'text': newDisplay }
     Session.set("currentDisplay",displayWrapper);
     $("#dialogueUserAnswer").prop("disabled",false);
+
+    if(dialogueContext.LastQuestion){//previous context exists
+        let historyPrompt = dialogueContext.LastQuestion.Text;
+        let historyUserAnswer = dialogueContext.LastStudentAnswer;
+        let currCount = Session.get("scrollListCount") || 0;
+    
+        scrollList.insert({
+            'temp': 1,                       // Deleted when clearing
+            'justAdded': 0,          // All 1's set to 0 on next question
+            'idx': currCount,                // Our ordering field
+            'answer': historyUserAnswer,
+            'question': historyPrompt,
+            'userCorrect': true
+        }, function(err, newId) {
+            if (!!err) {
+                console.log("ERROR inserting scroll list member:", displayify(err));
+            }
+            Session.set("scrollListCount", currCount + 1);
+        });
+    }
+
     $("#dialogueUserAnswer").val("");
     Session.set("displayReady",true);
     Tracker.afterFlush(function(){
@@ -100,6 +121,7 @@ function dialogueContinue(){
             dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
             dialogueUserPrompts = [];
             dialogueUserAnswers = [];
+            clearScrollList();
             Session.set("dialogueHistory",dialogueContext);
             dialogueCallbackSaver();
         default:
@@ -147,7 +169,6 @@ async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback)
                 let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
                 updateDialogueDisplay(transitionStatement);
                 speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
-                //dialogueContinue();
             }
         }
       }
