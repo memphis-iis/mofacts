@@ -75,7 +75,12 @@ restartMainCardTimeoutIfNecessary = function(){
     var numRemainingLocks = Session.get("pausedLocks")-1;
     Session.set("pausedLocks",numRemainingLocks);
     if(numRemainingLocks <= 0){
-      timeoutFunc();
+      if (typeof timeoutFunc === "function") {
+        timeoutFunc();
+      }else{
+        //This can be normal if we did error report when card timeout wasn't going, such as in the dialogue loop
+        console.log("function???: " + JSON.stringify(timeoutFunc));
+      }
     }else{
       console.log("timeout reached but there are " + numRemainingLocks + " locks outstanding");
     }
