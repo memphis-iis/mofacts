@@ -90,7 +90,7 @@ function doFileUpload(fileElementSelector, fileDescrip) {
 
     _.each($(fileElementSelector).prop("files"), function(file) {
         count += 1;
-        console.log("file:" + JSON.stringify(file));
+        console.log("file:",file);
         var name = file.name;
         var fileReader = new FileReader();
 
@@ -98,14 +98,14 @@ function doFileUpload(fileElementSelector, fileDescrip) {
             console.log("Upload attempted for", name);
 
             Meteor.call('saveUsersFile', name, fileReader.result, function(error, result) {
-                console.log("result:" + JSON.stringify(result));
+                console.log("result:",result);
                 if (!!error) {
                     console.log("Critical failure saving " + fileDescrip, error);
                     alert("There was a critical failure saving your " + fileDescrip + " file:" + error);
                 }
                 else if (result.length > 0) {
                     console.log(fileDescrip + " save failed", result);
-                    alert("The " + fileDescrip + " file was not saved: " + JSON.stringify(result));
+                    alert("The " + fileDescrip + " file was not saved: ",result);
                 }
                 else {
                     console.log(fileDescrip + " Saved:", result);

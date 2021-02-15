@@ -133,7 +133,7 @@ function defaultUnitEngine(extensionData) {
         },
 
         getSubClozeAnswerSyllables: function(answer,displaySyllableIndices,cachedSyllables){
-            console.log("!!!displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
+            console.log("!!!displaySyllableIndices: ",displaySyllableIndices,", this.cachedSyllables: ",cachedSyllables);
             if(typeof(displaySyllableIndices) === "undefined" || !cachedSyllables || displaySyllableIndices.length == 0){
                 console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
                 return undefined;
@@ -145,8 +145,7 @@ function defaultUnitEngine(extensionData) {
         },
     
         replaceClozeWithSyllables: function(question,currentAnswerSyllables, origAnswer){
-            console.log("replaceClozeWithSyllables: " + question);
-            if(typeof(question) == undefined){
+            if(typeof(question) === "undefined"){
                 return {
                     clozeQuestion: undefined,
                     clozeMissingSyllables: undefined
@@ -207,7 +206,7 @@ function defaultUnitEngine(extensionData) {
 
             let clozeQuestion = question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
 
-            console.log("replaceClozeWithSyllables:",clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
+            console.log("replaceClozeWithSyllables:",question,clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
             
             return { clozeQuestion, clozeMissingSyllables, clozeQuestionParts };
         },
@@ -288,7 +287,7 @@ function defaultUnitEngine(extensionData) {
             Session.set("currentDisplayEngine",currentDisplay);
         }
     };
-    console.log("extension data: " + JSON.stringify(extensionData));
+    console.log("extension data: ",extensionData);
     return _.extend(engine,extensionData);
 }
 

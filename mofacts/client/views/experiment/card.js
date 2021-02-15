@@ -860,7 +860,7 @@ function preloadAudioFiles(){
 
 function preloadImages(){
   let curStimImgSrcs = getCurrentStimDisplaySources("imgSrc");
-  console.log("curStimImgSrcs: " + JSON.stringify(curStimImgSrcs));
+  console.log("curStimImgSrcs: ",curStimImgSrcs);
   imagesDict = {};
   var img;
   for(var src of curStimImgSrcs){
@@ -869,7 +869,7 @@ function preloadImages(){
     console.log("img:" + img);
     imagesDict[src] = img;
   }
-  console.log("imagesDict: " + JSON.stringify(imagesDict));
+  console.log("imagesDict: ",imagesDict);
   console.log("img.src:" + img.src);
 }
 
@@ -1636,7 +1636,7 @@ function startQuestionTimeout() {
   if (!deliveryParams) {
       throw new Error("No delivery params");
   }
-  console.log("startQuestionTimeout deliveryParams", JSON.stringify(deliveryParams));
+  console.log("startQuestionTimeout deliveryParams",deliveryParams);
 
   var delayMs = 0;
   if (getTestType() === "s" || getTestType() === "f") { //Study
@@ -1669,7 +1669,7 @@ function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQue
 
   if(prestimulusDisplay){
     let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
-    console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
+    console.log("prestimulusDisplay detected, displaying",prestimulusDisplayWrapper);
     Session.set("displayReady", false);
     Session.set("currentDisplay",prestimulusDisplayWrapper);
     Session.set("displayReady", true);
@@ -1799,7 +1799,7 @@ function makeGoogleTTSApiCall(message,ttsAPIKey,audioPromptSpeakingRate,callback
 
       HTTP.call("POST",ttsURL,{"data":request}, function(err,response){
         if(!!err){
-          console.log("err: " + JSON.stringify(err));
+          console.log("err: ",err);
         }else{
           var audioDataEncoded = response.data.audioContent;
           var audioData = decodeBase64AudioContent(audioDataEncoded);
@@ -1895,7 +1895,7 @@ function generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,da
     }
   }
 
-  console.log("Request:" + JSON.stringify(request));
+  console.log("Request:",request);
 
   return request;
 }
@@ -1903,7 +1903,7 @@ function generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,da
 function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
   const speechURL = "https://speech.googleapis.com/v1/speech:recognize?key=" + speechAPIKey;
   HTTP.call("POST",speechURL,{"data":request}, function(err,response){
-      console.log(JSON.stringify(response));
+      console.log("makeGoogleSpeechAPICall",response);
       var transcript = '';
       var ignoreOutOfGrammarResponses = Session.get("ignoreOutOfGrammarResponses");
       var speechOutOfGrammarFeedback = "Please try again or press enter or say skip";//Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
@@ -2422,14 +2422,14 @@ function resumeFromUserTimesLog() {
 function checkSyllableCacheForCurrentStimFile(cb){
   let curStimFile = getCurrentStimName().replace(/\./g,'_');
   cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-  console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
+  console.log("cachedSyllables start: ",cachedSyllables);
   if(!cachedSyllables){
     if(!Session.get("currentUnitNumber")) Session.set("currentUnitNumber", 0);
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers(false);
     Meteor.call('updateStimSyllableCache',curStimFile,curAnswers,function(){
       cachedSyllables = StimSyllables.findOne({filename:curStimFile});
-      console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
+      console.log("new cachedSyllables: ",cachedSyllables);
       cb();
     });
   }else{
