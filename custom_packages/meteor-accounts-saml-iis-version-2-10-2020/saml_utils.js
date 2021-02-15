@@ -52,7 +52,7 @@ SAML.prototype.initialize = function(options) {
 
     options.signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
-    console.log("saml init options: " + JSON.stringify(options));
+    console.log("saml init options: ",options);
 
     return options;
 };

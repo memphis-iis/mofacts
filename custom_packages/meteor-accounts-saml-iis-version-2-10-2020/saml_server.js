@@ -27,10 +27,10 @@ Accounts.registerLoginHandler(function(loginRequest) {
     }
     serverConsole("samlLoginHandler, request:",loginRequest);
     var loginResult = Accounts.saml.retrieveCredential(loginRequest.credentialToken);
-    serverConsole("samlLoginHandler, result:" + JSON.stringify(loginResult));
+    serverConsole("samlLoginHandler, result:",loginResult);
     try{
         if (loginResult && loginResult.profile) {
-            serverConsole("samlLoginHandler, profile: " + JSON.stringify(loginResult.profile));
+            serverConsole("samlLoginHandler, profile: ",loginResult.profile);
             var localProfileMatchAttribute = Meteor.settings.saml[0].localProfileMatchAttribute.replace(/\./g,'_');
             var localFindStructure;
             var nameIDFormat;
@@ -75,7 +75,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
                     }
                     // console.log("User not found. Will dynamically create one with '" + Meteor.settings.saml[0].localProfileMatchAttribute + "' = " + loginResult.profile[localProfileMatchAttribute]);
                     // console.log("Identity handle: " + profileOrEmail + " || username = " + profileOrEmailValue);
-                    // console.log("Create user: " + JSON.stringify(newUser));
+                    // console.log("Create user: ",newUser);
 
                     Accounts.createUser(newUser);
 
@@ -87,8 +87,8 @@ Accounts.registerLoginHandler(function(loginRequest) {
                     });
 
                     // update user profile w attrs from SAML Attr Satement
-                    //console.log("Profile for attributes: " + JSON.stringify(loginResult.profile));
-                    serverConsole("samlLoginHandler, Created User: " + JSON.stringify(user));
+                    //console.log("Profile for attributes: ",loginResult.profile);
+                    serverConsole("samlLoginHandler, Created User: ",user);
 
                     var attributeNames = Meteor.settings.saml[0].attributesSAML;
                     var meteorProfile = {};
@@ -97,7 +97,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
                             meteorProfile[attribute] = loginResult.profile[attribute];
                         });
                     }
-                    serverConsole("samlLoginHandler, Profile for Meteor: " + JSON.stringify(meteorProfile));
+                    serverConsole("samlLoginHandler, Profile for Meteor: ",meteorProfile);
                     Meteor.users.update(user, {
                         $set: {
                             "profile": updateProfile(user.profile, meteorProfile)
@@ -117,7 +117,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
                     });
                 }
                 var newProfile = updateProfile(user.profile, meteorProfile);
-                serverConsole("samlLoginHandler, New Profile: " + JSON.stringify(newProfile));
+                serverConsole("samlLoginHandler, New Profile: ",newProfile);
                 Meteor.users.update({ _id: user._id },{
                     $set: {
                         'profile': newProfile
@@ -134,7 +134,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
                 nameIDNameQualifier: loginResult.profile.nameIDNameQualifier
             };
 
-            serverConsole("samlLoginHandler, samlLogin: " + JSON.stringify(samlLogin));
+            serverConsole("samlLoginHandler, samlLogin: ",samlLogin);
 
             Meteor.users.update({ _id: user._id },{
                 $set: {
@@ -152,7 +152,7 @@ Accounts.registerLoginHandler(function(loginRequest) {
 
             var result = { userId: user._id };
 
-            serverConsole("samlLoginHandler, result: " + JSON.stringify(result));
+            serverConsole("samlLoginHandler, result: ",result);
 
             //loginRequest.userCallback(null,result);
 
@@ -174,10 +174,10 @@ Accounts.saml._loginResultForCredentialToken = {};
 // }
 
 Accounts.saml.retrieveCredential = function(credentialToken) {
-    serverConsole("retrieveCredential: ",credentialToken,JSON.stringify(Accounts.saml._loginResultForCredentialToken));
+    serverConsole("retrieveCredential: ",credentialToken,Accounts.saml._loginResultForCredentialToken);
     // The credentialToken in all these functions corresponds to SAMLs inResponseTo field and is mandatory to check.
     var result = JSON.parse(JSON.stringify((Accounts.saml._loginResultForCredentialToken[credentialToken] || {})));
-    serverConsole("retrieveCredential, result: " + JSON.stringify(result));
+    serverConsole("retrieveCredential, result: ",result);
     delete Accounts.saml._loginResultForCredentialToken[credentialToken];
     return result;
 }
@@ -221,8 +221,7 @@ middleware = function(req, res, next) {
             throw new Error("Unexpected SAML service " + samlObject.serviceName);
         }
 
-        serverConsole("saml_server,middleware","request, body: " + JSON.stringify(req.body) + ", query: " + JSON.stringify(req.query) + ", headers: " + JSON.stringify(req.headers));
-        serverConsole("saml_server,middleware","request2, body: ",req.body,", query: ",req.query,", headers: ",req.headers);
+        serverConsole("saml_server,middleware","request, body: ",req.body,", query: ",req.query,", headers: ",req.headers);
             
         switch (samlObject.actionName) {
             case "metadata":
@@ -271,7 +270,7 @@ middleware = function(req, res, next) {
                         });
                         res.end();
                     } else {
-                        serverConsole("error validating logout response: " + JSON.stringify(err));
+                        serverConsole("error validating logout response: ",err);
                     }
                 })
                 break;
@@ -291,7 +290,7 @@ middleware = function(req, res, next) {
                 _saml = new SAML(service);
                 _saml.getAuthorizeForm(req, function(err, data) {
                     if (err){
-                        serverConsole("saml_server,middleware","error in authorize: " + JSON.stringify(err) + ", url: " + url);
+                        serverConsole("saml_server,middleware","error in authorize: ",err,", url: " + url);
                         throw new Error("Unable to generate authorize url");
                     }
                     serverConsole("saml_server,middleware","obj keys: " + Object.keys(req));
@@ -310,7 +309,7 @@ middleware = function(req, res, next) {
                 Accounts.saml.RelayState = req.body.RelayState;
                 _saml.validateResponse(req.body.SAMLResponse, req.body.RelayState, function(err, profile, loggedOut) {
                     if (err){
-                        serverConsole("saml_server,middleware","error validating response: " + JSON.stringify(err));
+                        serverConsole("saml_server,middleware","error validating response: ",err);
                         throw new Error("Unable to validate response url: " + err);
                     }
 
@@ -326,7 +325,7 @@ middleware = function(req, res, next) {
                     Accounts.saml._loginResultForCredentialToken[credentialToken] = {
                         profile: profile
                     };
-                    serverConsole("saml_server,middleware","postResponse, validateResponse closePopup: " + JSON.stringify(Accounts.saml._loginResultForCredentialToken));
+                    serverConsole("saml_server,middleware","postResponse, validateResponse closePopup: ",Accounts.saml._loginResultForCredentialToken);
                     closePopup(res);
                 });
                 break;
@@ -344,7 +343,7 @@ var samlUrlToObject = function(url) {
         return null;
 
     var splitPath = url.split('/');
-    serverConsole("samlUrlToObject: ",JSON.stringify(url),JSON.stringify(splitPath));
+    serverConsole("samlUrlToObject: ",url,splitPath);
 
     // Any non-saml request will continue down the default middlewares.
     if (splitPath[1] !== 'sw-adfs')
@@ -366,7 +365,7 @@ var closePopup = function(res, err) {
         '<html><head><script>window.close()</script></head><body><H1>Verified</H1></body></html>';
     if (err){
         content = '<html><body><h2>Sorry, an error occured</h2><div>' + err + '</div><a onclick="window.close();">Close Window</a></body></html>';
-        serverConsole("closePopupError:",JSON.stringify(err));
+        serverConsole("closePopupError:",err);
     }
     res.end(content, 'utf-8');
 };

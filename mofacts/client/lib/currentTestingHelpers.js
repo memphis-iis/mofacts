@@ -183,7 +183,7 @@ getCurrentClusterAndStimIndices = function(){
     let currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
-    console.log("getCurrentClusterAndStimIndices, engine: " + JSON.stringify(currentQuest));
+    console.log("getCurrentClusterAndStimIndices, engine: ",currentQuest);
   }
 
   return {curClusterIndex,curStimIndex};

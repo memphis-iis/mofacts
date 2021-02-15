@@ -95,7 +95,7 @@ Meteor.loginWithSaml = function (options, callback) {
     options.credentialToken = credentialToken;
 
     Accounts.saml.initiateLogin(options, function (error, result) {
-        console.log("initiatelogin callback, error: " + JSON.stringify(error) + ", result: " + JSON.stringify(result));
+        console.log("initiatelogin callback, error: ",error,", result: ",result);
         Accounts.callLoginMethod({
             methodArguments: [{
                 saml: true,
