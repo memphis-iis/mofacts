@@ -11,12 +11,16 @@ var showHideAudioEnabledGroup = function(show)
 };
 
 getAudioPromptModeFromPage = function(){
-  if($("#audioPromptOff")[0].checked){
-    return "silent";
-  }else if ($("#audioPromptFeedbackOnly")[0].checked) {
-    return "feedback";
-  }else if($("#audioPromptAll")[0].checked){
-    return "all";
+  if($("#audioPromptOff")[0]){
+    if($("#audioPromptOff")[0].checked){
+      return "silent";
+    }else if ($("#audioPromptFeedbackOnly")[0].checked) {
+      return "feedback";
+    }else if($("#audioPromptAll")[0].checked){
+      return "all";
+    }else{
+      return "silent";
+    }
   }else{
     return "silent";
   }
@@ -37,7 +41,7 @@ setAudioPromptModeOnPage = function(audioPromptMode){
 }
 
 getAudioInputFromPage = function(){
-  return !$("#audioInputOff")[0].checked;
+  return $("#audioInputOff")[0] ? !$("#audioInputOff")[0].checked : false;
 }
 
 setAudioInputOnPage = function(audioInputEnabled){

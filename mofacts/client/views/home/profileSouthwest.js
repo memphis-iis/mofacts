@@ -1,3 +1,4 @@
+Session.set("profileSWDisplayReady",false);
 ////////////////////////////////////////////////////////////////////////////
 // Template storage and helpers
 
@@ -10,6 +11,7 @@ Template.profileSouthwest.helpers({
             return Meteor.user().username;
         }
     },
+    profileSWDisplayReady: () => Session.get("profileSWDisplayReady"),
 });
 
 ////////////////////////////////////////////////////////////////////////////
@@ -53,73 +55,6 @@ Template.profileSouthwest.rendered = function () {
     Session.set("showSpeechAPISetup",false);
     $("#expDataDownloadContainer").html("");
 
-    Meteor.call('getTdfsAssignedToStudent',Meteor.user().username.toLowerCase(),function(err,result){
-      console.log("err: " + err + ", res: " + result);
-      var assignedTdfs = result;
-      var allTdfs = Tdfs.find({});
-      console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
-      //Check all the valid TDF's
-      allTdfs.forEach( function (tdfObject) {
-          let isMultiTdf = tdfObject.isMultiTdf;
-
-          //Make sure we have a valid TDF (with a setspec)
-          var setspec = _.chain(tdfObject)
-              .prop("tdfs")
-              .prop("tutor")
-              .prop("setspec").first()
-              .value();
-
-          if (!setspec) {
-              console.log("Invalid TDF - it will never work", tdfObject);
-              return;
-          }
-
-          var name = _.chain(setspec).prop("lessonname").first().value();
-          if (!name) {
-              console.log("Skipping TDF with no name", setspec);
-              return;
-          }
-
-          //Make sure we only present the tdfs assigned to the classes the user is in
-          if(assignedTdfs.findIndex(x => x.fileName == tdfObject.fileName) == -1){
-            return;
-          }
-
-          var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
-
-          var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
-          var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
-          if(!speechOutOfGrammarFeedback){
-            speechOutOfGrammarFeedback = "Response not in answer set"
-          }
-
-          var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value() == "true";
-          var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value() == "true";
-
-          var audioInputSpeechAPIKeyAvailable = !!_.chain(setspec).prop("speechAPIKey").first().value();
-
-          //Only display the audio input available if enabled in tdf and tdf has key for it
-          audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
-          var audioPromptTTSAPIKeyAvailable = !!_.chain(setspec).prop("textToSpeechAPIKey").first().value();
-
-          //Only display the audio output available if enabled in tdf and tdf has key for it
-          var audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
-
-          addButton(
-              $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
-                  .addClass("btn btn-block btn-responsive tdfButton")
-                  .data("lessonname", name)
-                  .data("stimulusfile", stimulusFile)
-                  .data("tdfkey", tdfObject._id)
-                  .data("tdffilename", tdfObject.fileName)
-                  .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
-                  .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
-                  .data("isMultiTdf",isMultiTdf)
-                  .html(name),audioInputEnabled,audioOutputEnabled
-          );
-      });
-    });
-
     Meteor.call('getConsentTdfData',Meteor.userId(),function(err,res){
         if(err){
             alert("Error getting consent data:" + JSON.stringify(err));
@@ -141,6 +76,74 @@ Template.profileSouthwest.rendered = function () {
                 let outOfGrammarFeedback = assignedTdf.tdfs.tutor.setspec[0].speechOutOfGrammarFeedback ? assignedTdf.tdfs.tutor.setspec[0].speechOutOfGrammarFeedback[0] : undefined;
 
                 selectTdf(assignedTdf._id, lessonname, stimulusFile, assignedTdf.fileName, ignoreOutOfGrammarResponses, outOfGrammarFeedback, "auto consent select", assignedTdf.isMultiTdf);
+            }else{
+                Session.set("profileSWDisplayReady",true);
+                Meteor.call('getTdfsAssignedToStudent',Meteor.user().username.toLowerCase(),function(err,result){
+                    console.log("err: " + err + ", res: " + result);
+                    var assignedTdfs = result;
+                    var allTdfs = Tdfs.find({});
+                    console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
+                    //Check all the valid TDF's
+                    allTdfs.forEach( function (tdfObject) {
+                        let isMultiTdf = tdfObject.isMultiTdf;
+              
+                        //Make sure we have a valid TDF (with a setspec)
+                        var setspec = _.chain(tdfObject)
+                            .prop("tdfs")
+                            .prop("tutor")
+                            .prop("setspec").first()
+                            .value();
+              
+                        if (!setspec) {
+                            console.log("Invalid TDF - it will never work", tdfObject);
+                            return;
+                        }
+              
+                        var name = _.chain(setspec).prop("lessonname").first().value();
+                        if (!name) {
+                            console.log("Skipping TDF with no name", setspec);
+                            return;
+                        }
+              
+                        //Make sure we only present the tdfs assigned to the classes the user is in
+                        if(assignedTdfs.findIndex(x => x.fileName == tdfObject.fileName) == -1){
+                          return;
+                        }
+              
+                        var stimulusFile = _.chain(setspec).prop("stimulusfile").first().value();
+              
+                        var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
+                        var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();
+                        if(!speechOutOfGrammarFeedback){
+                          speechOutOfGrammarFeedback = "Response not in answer set"
+                        }
+              
+                        var audioInputEnabled = _.chain(setspec).prop("audioInputEnabled").first().value() == "true";
+                        var enableAudioPromptAndFeedback = _.chain(setspec).prop("enableAudioPromptAndFeedback").first().value() == "true";
+              
+                        var audioInputSpeechAPIKeyAvailable = !!_.chain(setspec).prop("speechAPIKey").first().value();
+              
+                        //Only display the audio input available if enabled in tdf and tdf has key for it
+                        audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
+                        var audioPromptTTSAPIKeyAvailable = !!_.chain(setspec).prop("textToSpeechAPIKey").first().value();
+              
+                        //Only display the audio output available if enabled in tdf and tdf has key for it
+                        var audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
+              
+                        addButton(
+                            $("<button type='button' id='"+tdfObject._id+"' name='"+name+"'>")
+                                .addClass("btn btn-block btn-responsive tdfButton")
+                                .data("lessonname", name)
+                                .data("stimulusfile", stimulusFile)
+                                .data("tdfkey", tdfObject._id)
+                                .data("tdffilename", tdfObject.fileName)
+                                .data("ignoreOutOfGrammarResponses",ignoreOutOfGrammarResponses)
+                                .data("speechOutOfGrammarFeedback",speechOutOfGrammarFeedback)
+                                .data("isMultiTdf",isMultiTdf)
+                                .html(name),audioInputEnabled,audioOutputEnabled
+                        );
+                    });
+                  });
             }
         }
     })
@@ -168,9 +171,9 @@ function selectTdf(tdfkey, lessonName, stimulusfile, tdffilename, ignoreOutOfGra
     Session.set("audioPromptFeedbackView",audioPromptMode);
     var audioInputEnabled = getAudioInputFromPage();
     Session.set("audioEnabledView",audioInputEnabled);
-    var audioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate").value;
+    var audioPromptSpeakingRate = document.getElementById("audioPromptSpeakingRate") ? document.getElementById("audioPromptSpeakingRate").value : 1;
     Session.set("audioPromptSpeakingRateView",audioPromptSpeakingRate);
-    var audioInputSensitivity = document.getElementById("audioInputSensitivity").value;
+    var audioInputSensitivity = document.getElementById("audioInputSensitivity") ? document.getElementById("audioInputSensitivity").value : 20;
     Session.set("audioInputSensitivityView",audioInputSensitivity);
 
     //Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
