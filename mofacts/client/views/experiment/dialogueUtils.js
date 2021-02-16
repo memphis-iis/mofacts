@@ -84,6 +84,7 @@ function dialogueLoop(err,res){
         if(result.Finished){
             newDisplay = result.Display + endDialogueNotice;
             Session.set("dialogueLoopStage","exit");
+            trialEndTimestamp = Date.now();
         }else{
             startRecording();
         }
