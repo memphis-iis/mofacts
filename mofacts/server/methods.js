@@ -1317,6 +1317,8 @@ Meteor.startup(function () {
             ownerMap[id] = foundUser.username;
           }
         });
+        //TODO remove hard coding
+        ownerMap["9QdrxsSGv5gfi2NfG"] = "ambanker@southwest.tn.edu";
         return ownerMap;
       }
     });
