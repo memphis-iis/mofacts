@@ -321,7 +321,7 @@ function GetDialogue(state) {
               finishedOption = true;
             }
 
-            return Promise.resolve(new _Option.Result(0, "Ok", (Questions = (patternInput[1]), (Display = (arg0$$8 = ((0, _String.join)(" ", display)), (arg0$$8)), new DialogueState(state.ClozeItem, state.ClozeAnswer, Questions, patternInput[0], state.LastStudentAnswer, feedbackOption, elaborationOption, patternInput[0], Display, finishedOption)))));
+            return (state.LastQuestion == null ? patternInput[0] == null : false) ? Promise.resolve(new _Option.Result(1, "Error", "Aborting dialogue: unable to generate questions")) : Promise.resolve(new _Option.Result(0, "Ok", (Questions = (patternInput[1]), (Display = (arg0$$8 = ((0, _String.join)(" ", display)), (arg0$$8)), new DialogueState(state.ClozeItem, state.ClozeAnswer, Questions, patternInput[0], state.LastStudentAnswer, feedbackOption, elaborationOption, patternInput[0], Display, finishedOption)))));
           }));
         } else {
           const errorPayload = [];
