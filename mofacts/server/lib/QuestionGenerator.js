@@ -200,154 +200,171 @@ function nominalSpanRootOption(sa$$6, indices) {
 
 function whSrlSubstitutions(sa$$8) {
   let arg00$$1;
+  let array$$24;
   let array$$23;
-  let array$$22;
-  array$$22 = (0, _Array.map)(function mapping$$2(verb) {
+  array$$23 = (0, _Array.map)(function mapping$$2(verb) {
     let table;
     table = (0, _AllenNLP.srlArgToIndexMapWithCollapsedReferents)(verb.tags);
     return (0, _Map.toArray)(table);
   }, sa$$8.srl.verbs, Array);
-  array$$23 = (0, _Array.choose)(function chooser(mapArr) {
-    const frameTags = [];
-    let debugAlignment;
-    let array$$7;
-    let array$$6;
-    array$$6 = (0, _Array.collect)(function mapping$$3(tuple) {
-      return tuple[1];
-    }, mapArr, Array);
-    array$$7 = (0, _Array.sortBy)(function projection(tuple$$1) {
-      return tuple$$1[1];
-    }, array$$6, {
-      Compare: _Util.comparePrimitives
+  array$$24 = (0, _Array.choose)(function chooser(mapArr) {
+    let hasArguments;
+    hasArguments = mapArr.some(function predicate$$2(tupledArg$$1) {
+      return tupledArg$$1[0].indexOf("A") === 0;
     });
-    debugAlignment = (0, _Array.map)(function mapping$$4(tupledArg$$1) {
-      const word = sa$$8.dep.words[tupledArg$$1[1]];
-      return (0, _Types.anonRecord)({
-        arg: tupledArg$$1[0],
-        pos: sa$$8.dep.pos[tupledArg$$1[1]],
-        word: word
-      });
-    }, array$$7, Array);
-    let argNs;
-    let array$$9;
-    array$$9 = mapArr.filter(function predicate$$2(tupledArg$$2) {
-      if (tupledArg$$2[0].indexOf("ARG") === 0) {
-        const value = tupledArg$$2[0].indexOf("ARGM") === 0;
-        return !value;
-      } else {
-        return false;
+
+    if (hasArguments) {
+      try {
+        const frameTags = [];
+        let debugAlignment;
+        let array$$8;
+        let array$$7;
+        array$$7 = (0, _Array.collect)(function mapping$$3(tuple) {
+          return tuple[1];
+        }, mapArr, Array);
+        array$$8 = (0, _Array.sortBy)(function projection(tuple$$1) {
+          return tuple$$1[1];
+        }, array$$7, {
+          Compare: _Util.comparePrimitives
+        });
+        debugAlignment = (0, _Array.map)(function mapping$$4(tupledArg$$2) {
+          const word = sa$$8.dep.words[tupledArg$$2[1]];
+          return (0, _Types.anonRecord)({
+            arg: tupledArg$$2[0],
+            pos: sa$$8.dep.pos[tupledArg$$2[1]],
+            word: word
+          });
+        }, array$$8, Array);
+        let argNs;
+        let array$$10;
+        array$$10 = mapArr.filter(function predicate$$3(tupledArg$$3) {
+          if (tupledArg$$3[0].indexOf("ARG") === 0) {
+            const value = tupledArg$$3[0].indexOf("ARGM") === 0;
+            return !value;
+          } else {
+            return false;
+          }
+        });
+        argNs = (0, _Array.distinctBy)(function projection$$1(tuple$$2) {
+          return tuple$$2[0];
+        }, array$$10, {
+          Equals($x$$7, $y$$8) {
+            return $x$$7 === $y$$8;
+          },
+
+          GetHashCode: _Util.structuralHash
+        });
+        let disfluentArgN;
+        disfluentArgN = argNs.filter(function predicate$$4(tupledArg$$4) {
+          let argNIndices;
+          argNIndices = (0, _Array.map)(function mapping$$5(tuple$$3) {
+            return tuple$$3[1];
+          }, tupledArg$$4[1], Int32Array);
+          const startPos = sa$$8.dep.pos[argNIndices[0]];
+          const stopPos = sa$$8.dep.pos[((0, _Array.last)(argNIndices))];
+
+          if ((startPos === "IN" ? true : startPos === "WDT") ? true : stopPos === "IN") {
+            return true;
+          } else {
+            return stopPos === "WDT";
+          }
+        });
+        let finalArgNs;
+        const matchValue$$1 = disfluentArgN.length | 0;
+
+        switch (matchValue$$1) {
+          case 0:
+            {
+              finalArgNs = argNs;
+              break;
+            }
+
+          case 1:
+            {
+              void frameTags.push(new Tag(7, "DisfluentArg"));
+              finalArgNs = disfluentArgN;
+              break;
+            }
+
+          default:
+            {
+              finalArgNs = [];
+            }
+        }
+
+        let indices$$1;
+        indices$$1 = (0, _Array.collect)(function mapping$$7(tupledArg$$5) {
+          return (0, _Array.map)(function mapping$$6(tuple$$4) {
+            return tuple$$4[1];
+          }, tupledArg$$5[1], Int32Array);
+        }, argNs, Int32Array);
+        let start$$1;
+        start$$1 = (0, _Array.min)(indices$$1, {
+          Compare: _Util.comparePrimitives
+        });
+        let stop$$1;
+        stop$$1 = (0, _Array.max)(indices$$1, {
+          Compare: _Util.comparePrimitives
+        });
+        const replaceFocusTuples = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+          return (0, _Seq.collect)(function (a$$1) {
+            let argNsList;
+            argNsList = Array.from(argNs);
+            const value$$1 = (0, _Array.removeInPlace)(a$$1, argNsList);
+            void value$$1;
+            return (0, _Seq.singleton)([a$$1, argNsList]);
+          }, finalArgNs);
+        }), Array);
+        let arg0$$3;
+        arg0$$3 = (0, _Array.mapIndexed)(function mapping$$10(i$$5, tupledArg$$6) {
+          const tags$$3 = [];
+          (0, _Array.addRangeInPlace)(frameTags, tags$$3);
+          void tags$$3.push((new Tag(6, "WhArg", tupledArg$$6[0][0])));
+          let argNIndices$$1;
+          argNIndices$$1 = (0, _Array.map)(function mapping$$8(tuple$$5) {
+            return tuple$$5[1];
+          }, tupledArg$$6[0][1], Int32Array);
+          const argNRoot = (0, _AllenNLP.getRootOfSpan)(argNIndices$$1[0], ((0, _Array.last)(argNIndices$$1)), sa$$8) | 0;
+          let patternInput;
+          const isNominative$$1 = (0, _String.endsWith)(tupledArg$$6[0][0], "0");
+          patternInput = wh(argNRoot, isNominative$$1, sa$$8);
+          (0, _Array.addRangeInPlace)(patternInput[1], tags$$3);
+          let focusIndices$$1;
+
+          if (tupledArg$$6[1].length > 0) {
+            let indices$$2;
+            let array$$20;
+            const tuple$$6 = tupledArg$$6[1][0];
+            array$$20 = tuple$$6[1];
+            indices$$2 = (0, _Array.map)(function mapping$$9(tuple$$7) {
+              return tuple$$7[1];
+            }, array$$20, Int32Array);
+            const focusIndex = (0, _AllenNLP.getRootOfSpan)(indices$$2[0], ((0, _Array.last)(indices$$2)), sa$$8) | 0;
+            const focusWord = sa$$8.dep.words[focusIndex];
+            void tags$$3.push(new Tag(4, "FocusTarget", focusIndex, focusWord));
+            focusIndices$$1 = indices$$2;
+          } else {
+            focusIndices$$1 = new Int32Array([]);
+          }
+
+          if (focusIndices$$1.length === 0) {
+            return undefined;
+          } else {
+            const arg0$$2 = Substitution$$$Create$$17EA372C(sa$$8, start$$1, stop$$1, argNIndices$$1, patternInput[0], focusIndices$$1, tags$$3.slice());
+            return arg0$$2;
+          }
+        }, replaceFocusTuples, Array);
+        return arg0$$3;
+      } catch (matchValue$$2) {
+        return undefined;
       }
-    });
-    argNs = (0, _Array.distinctBy)(function projection$$1(tuple$$2) {
-      return tuple$$2[0];
-    }, array$$9, {
-      Equals($x$$7, $y$$8) {
-        return $x$$7 === $y$$8;
-      },
-
-      GetHashCode: _Util.structuralHash
-    });
-    let disfluentArgN;
-    disfluentArgN = argNs.filter(function predicate$$3(tupledArg$$3) {
-      let argNIndices;
-      argNIndices = (0, _Array.map)(function mapping$$5(tuple$$3) {
-        return tuple$$3[1];
-      }, tupledArg$$3[1], Int32Array);
-      const startPos = sa$$8.dep.pos[argNIndices[0]];
-      const stopPos = sa$$8.dep.pos[((0, _Array.last)(argNIndices))];
-
-      if ((startPos === "IN" ? true : startPos === "WDT") ? true : stopPos === "IN") {
-        return true;
-      } else {
-        return stopPos === "WDT";
-      }
-    });
-    let finalArgNs;
-    const matchValue$$1 = disfluentArgN.length | 0;
-
-    switch (matchValue$$1) {
-      case 0:
-        {
-          finalArgNs = argNs;
-          break;
-        }
-
-      case 1:
-        {
-          void frameTags.push(new Tag(7, "DisfluentArg"));
-          finalArgNs = disfluentArgN;
-          break;
-        }
-
-      default:
-        {
-          finalArgNs = [];
-        }
+    } else {
+      return undefined;
     }
-
-    let indices$$1;
-    indices$$1 = (0, _Array.collect)(function mapping$$7(tupledArg$$4) {
-      return (0, _Array.map)(function mapping$$6(tuple$$4) {
-        return tuple$$4[1];
-      }, tupledArg$$4[1], Int32Array);
-    }, argNs, Int32Array);
-    let start$$1;
-    start$$1 = (0, _Array.min)(indices$$1, {
-      Compare: _Util.comparePrimitives
-    });
-    let stop$$1;
-    stop$$1 = (0, _Array.max)(indices$$1, {
-      Compare: _Util.comparePrimitives
-    });
-    const replaceFocusTuples = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
-      return (0, _Seq.collect)(function (a$$1) {
-        let argNsList;
-        argNsList = Array.from(argNs);
-        const value$$1 = (0, _Array.removeInPlace)(a$$1, argNsList);
-        void value$$1;
-        return (0, _Seq.singleton)([a$$1, argNsList]);
-      }, finalArgNs);
-    }), Array);
-    let arg0$$3;
-    arg0$$3 = (0, _Array.mapIndexed)(function mapping$$10(i$$5, tupledArg$$5) {
-      const tags$$3 = [];
-      (0, _Array.addRangeInPlace)(frameTags, tags$$3);
-      void tags$$3.push((new Tag(6, "WhArg", tupledArg$$5[0][0])));
-      let argNIndices$$1;
-      argNIndices$$1 = (0, _Array.map)(function mapping$$8(tuple$$5) {
-        return tuple$$5[1];
-      }, tupledArg$$5[0][1], Int32Array);
-      const argNRoot = (0, _AllenNLP.getRootOfSpan)(argNIndices$$1[0], ((0, _Array.last)(argNIndices$$1)), sa$$8) | 0;
-      let patternInput;
-      const isNominative$$1 = (0, _String.endsWith)(tupledArg$$5[0][0], "0");
-      patternInput = wh(argNRoot, isNominative$$1, sa$$8);
-      (0, _Array.addRangeInPlace)(patternInput[1], tags$$3);
-      let focusIndices$$1;
-
-      if (tupledArg$$5[1].length > 0) {
-        let indices$$2;
-        let array$$19;
-        const tuple$$6 = tupledArg$$5[1][0];
-        array$$19 = tuple$$6[1];
-        indices$$2 = (0, _Array.map)(function mapping$$9(tuple$$7) {
-          return tuple$$7[1];
-        }, array$$19, Int32Array);
-        const focusIndex = (0, _AllenNLP.getRootOfSpan)(indices$$2[0], ((0, _Array.last)(indices$$2)), sa$$8) | 0;
-        const focusWord = sa$$8.dep.words[focusIndex];
-        void tags$$3.push(new Tag(4, "FocusTarget", focusIndex, focusWord));
-        focusIndices$$1 = indices$$2;
-      } else {
-        focusIndices$$1 = new Int32Array([]);
-      }
-
-      const arg0$$2 = Substitution$$$Create$$17EA372C(sa$$8, start$$1, stop$$1, argNIndices$$1, patternInput[0], focusIndices$$1, tags$$3.slice());
-      return arg0$$2;
-    }, replaceFocusTuples, Array);
-    return arg0$$3;
-  }, array$$22, Array);
+  }, array$$23, Array);
   arg00$$1 = (0, _Array.collect)(function mapping$$11(x$$1) {
     return x$$1;
-  }, array$$23, Array);
+  }, array$$24, Array);
   return Array.from(arg00$$1);
 }
 
@@ -421,20 +438,20 @@ function prompt(sa$$16, sub$$1) {
   } else {
     let text$$4;
     let strings$$2;
-    const array$$25 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+    const array$$26 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
       return (0, _Seq.map)(function (i$$8) {
         return [i$$8, sa$$16.dep.words[i$$8]];
       }, (0, _Seq.rangeNumber)(sub$$1.Start, 1, sub$$1.Stop));
     }), Array);
-    strings$$2 = (0, _Array.choose)(function chooser$$2(tupledArg$$6) {
-      if (tupledArg$$6[0] === (0, _Set.FSharpSet$$get_MinimumElement)(subIndiceSet)) {
+    strings$$2 = (0, _Array.choose)(function chooser$$2(tupledArg$$7) {
+      if (tupledArg$$7[0] === (0, _Set.FSharpSet$$get_MinimumElement)(subIndiceSet)) {
         return sub$$1.ReplacementString;
-      } else if ((0, _Set.FSharpSet$$Contains$$2B595)(subIndiceSet, tupledArg$$6[0])) {
+      } else if ((0, _Set.FSharpSet$$Contains$$2B595)(subIndiceSet, tupledArg$$7[0])) {
         return undefined;
       } else {
-        return tupledArg$$6[1];
+        return tupledArg$$7[1];
       }
-    }, array$$25, Array);
+    }, array$$26, Array);
     text$$4 = (0, _String.join)(" ", strings$$2);
     const arg0$$6 = Question$$$Create$$ZCEA50A7("prompt", (questionCase(text$$4)), (indicesToSubstring(sa$$16, sub$$1.FocusIndices)), (indicesToSubstring(sa$$16, sub$$1.ReplacementIndices)), tags$$4.slice());
     return arg0$$6;
@@ -471,28 +488,32 @@ function hint(sa$$17, sub$$2) {
 
 function GetQuestions(sa$$18) {
   let plans;
-  let array$$28;
-  array$$28 = getSubstitutions(sa$$18);
+  let array$$29;
+  array$$29 = getSubstitutions(sa$$18);
   plans = (0, _Array.sortBy)(function projection$$2(s) {
-    let array$$27;
-    array$$27 = (0, _Array.map)(function mapping$$14(i$$10) {
-      const word$$1 = sa$$18.dep.words[i$$10];
-      return (0, _WordFrequency.Get)(word$$1);
-    }, s.FocusIndices, Float64Array);
-    return (0, _Array.min)(array$$27, {
-      Compare: _Util.comparePrimitives
-    });
-  }, array$$28, {
+    if (s.FocusIndices.length > 0) {
+      let array$$28;
+      array$$28 = (0, _Array.map)(function mapping$$14(i$$10) {
+        const word$$1 = sa$$18.dep.words[i$$10];
+        return (0, _WordFrequency.Get)(word$$1);
+      }, s.FocusIndices, Float64Array);
+      return (0, _Array.min)(array$$28, {
+        Compare: _Util.comparePrimitives
+      });
+    } else {
+      return 1;
+    }
+  }, array$$29, {
     Compare: _Util.comparePrimitives
   });
   let prompts;
-  let array$$30;
-  array$$30 = (0, _Array.choose)(function chooser$$3(sub$$3) {
+  let array$$31;
+  array$$31 = (0, _Array.choose)(function chooser$$3(sub$$3) {
     return prompt(sa$$18, sub$$3);
   }, plans, Array);
   prompts = (0, _Array.distinctBy)(function projection$$3(p) {
     return p.Answer;
-  }, array$$30, {
+  }, array$$31, {
     Equals($x$$23, $y$$24) {
       return $x$$23 === $y$$24;
     },
@@ -500,13 +521,13 @@ function GetQuestions(sa$$18) {
     GetHashCode: _Util.structuralHash
   });
   let hints;
-  let array$$32;
-  array$$32 = (0, _Array.choose)(function chooser$$4(sub$$4) {
+  let array$$33;
+  array$$33 = (0, _Array.choose)(function chooser$$4(sub$$4) {
     return hint(sa$$18, sub$$4);
   }, plans, Array);
   hints = (0, _Array.distinctBy)(function projection$$4(h) {
     return h.Answer;
-  }, array$$32, {
+  }, array$$33, {
     Equals($x$$25, $y$$26) {
       return $x$$25 === $y$$26;
     },
@@ -520,12 +541,12 @@ function GetQuestions(sa$$18) {
 }
 
 function GetQuotedQuestions(clozeAnswer, sa$$20) {
-  let array$$33;
-  array$$33 = GetQuestions(sa$$20);
+  let array$$34;
+  array$$34 = GetQuestions(sa$$20);
   return (0, _Array.map)(function mapping$$15(q) {
     const Text$ = (0, _RegExp.replace)(q.Text, "\\b" + clozeAnswer + "\\b", "\"" + clozeAnswer + "\"");
     return new Question(q.QuestionType, Text$, q.Focus, q.Answer, q.Tags);
-  }, array$$33, Array);
+  }, array$$34, Array);
 }
 
 function HarnessGetQuestions(sentence) {
