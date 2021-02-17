@@ -149,26 +149,26 @@ Template.signInSouthwest.onRendered(function(){
   });
 
   Meteor.subscribe('allTeachers',function () {
-    var teachers = Meteor.users.find({}).fetch();
-    var verifiedTeachers = teachers.filter(x => x.username.indexOf("southwest") != -1);
+    console.log("allTeachers, subscribe return");
+    let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
 
     //Hack to redirect rblaudow classes to ambanker
-    var ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
+    let ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
     if(!!ambanker){
-      var rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
+      let rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
       if(!!rblaudow){
         rblaudow._id = ambanker._id;
       }
     }
-    console.log("got teachers");
-    var urlVars = getUrlVars();
+    let urlVars = getUrlVars();
     if(!urlVars['showTestLogins']){
       Session.set("showTestLogins",false);
-      var testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
+      let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
       verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
     }else{
       Session.set("showTestLogins",true);
     }
+
     Session.set("teachers",verifiedTeachers);
   });
 });
