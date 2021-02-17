@@ -1170,24 +1170,18 @@ Meteor.startup(function () {
       },
 
       isCurrentServerLoadTooHigh: function(){
-        let last50Logins = LoginTimes.find({},{sort:{$natural:-1},limit:50});
-        let last50UtlQueries = UtlQueryTimes.find({},{sort:{$natural:-1},limit:50}).fetch();
-        let curConfig = DynamicConfig.findOne({});
-        let { loginsWithinAHalfHourLimit,utlQueriesWithinFifteenMinLimit } = curConfig.serverLoadConstants;//10,8
-
-        let loginsWithinAHalfHour = new Set();
-        let utlQueriesWithinFifteenMin = [];
         let now = new Date();
         let thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
         let fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
+        
+        let curConfig = DynamicConfig.findOne({});
+        let { loginsWithinAHalfHourLimit,utlQueriesWithinFifteenMinLimit } = curConfig.serverLoadConstants;//10,8
 
-        for(var loginData of last50Logins){
-          if(loginData.timestamp > thirtyMinAgo){
-            loginsWithinAHalfHour.add(loginData.userId);
-          }
-        }
+        let loginsWithinAHalfHour = LoginTimes.find({timestamp: {$gt: thirtyMinAgo}},{sort:{$natural:-1},limit:50});
+        let utlQueriesWithinFifteenMin = UtlQueryTimes.find({timestamp: {$gt: fifteenMinAgo}},{sort:{$natural:-1},limit:50}).fetch();
 
-        utlQueriesWithinFifteenMin = last50UtlQueries.filter(x => x.timestamp > fifteenMinAgo);
+        console.log("loginsWithinAHalfHour",loginsWithinAHalfHour)
+
         let currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit || utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
         serverConsole("isCurrentServerLoadTooHigh:" + currentServerLoadIsTooHigh + ", loginsWithinAHalfHour:" + loginsWithinAHalfHour.size + "/" + loginsWithinAHalfHourLimit + ", utlQueriesWithinFifteenMin:" + utlQueriesWithinFifteenMin.length + "/" + utlQueriesWithinFifteenMinLimit);
