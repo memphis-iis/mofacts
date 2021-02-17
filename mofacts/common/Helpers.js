@@ -1,6 +1,110 @@
-/* Helpers - Simple helper functions that we might use across multiple
- * files (on both the client and the server)
- * */
+import { ALL_TDFS } from "./Definitions";
+
+function getTdfQueryNames(tdfFileName) {
+    let tdfQueryNames = {};
+    if (tdfFileName === ALL_TDFS) {
+        tdfQueryNames = getAllTdfFileNames();
+    } else if (tdfFileName){
+        tdfQueryNames = [tdfFileName];
+    }
+    return tdfQueryNames;
+}
+  
+function getAllTdfFileNames() {
+    return Tdfs.find({}).fetch().map(x => x.fileName);
+}
+
+function getLearningSessionItems(tdfFileName) {
+    let learningSessionItems = [];
+    let tdfQueryNames = getTdfQueryNames(tdfFileName);
+    tdfQueryNames.forEach(tdfQueryName => {
+        let tdf = Tdfs.findOne({fileName: tdfQueryName});
+        if (!learningSessionItems[tdfQueryName]) {
+        learningSessionItems[tdfQueryName] = {};
+        }
+        if (tdf.isMultiTdf) {
+        setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
+        } else {
+        setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
+        }
+    });
+    return learningSessionItems;
+}
+
+//for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
+function setLearningSessionItemsMulti(learningSessionItem, tdf) {
+    let stimFileName = tdf.tdfs.tutor.setspec[0].stimulusfile[0];
+    let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
+    for (let i = 0; i < lastStim - 1; i++) {
+        learningSessionItem[i] = true;
+    }
+}
+
+function setLearningSessionItems(learningSessionItem, tdf) {
+    let units = tdf.tdfs.tutor.unit;
+    if (!_.isEmpty(units)) {
+        units.forEach(unit => {
+            if (!!unit.learningsession) {
+                let clusterList = getClusterListsFromUnit(unit);
+                clusterList.forEach(clusterRange => {
+                    let [start, end] = clusterRange;
+                    for (let i = start; i <= end; i++) {
+                        learningSessionItem[i] = true;
+                    }
+                });
+            }
+        });
+    }
+}
+
+function getClusterListsFromUnit(unit) {
+    let clustersToParse = unit.learningsession[0].clusterlist[0];
+    return clustersToParse.split(' ').map(x => x.split('-').map(y => parseInt(y)));
+}
+
+getStudentPerformanceForUsernameAndTdf = function(studentUsername,tdfFileName){
+    Meteor.call("updatePerformanceData","utlQuery","Helpers.getStudentPerformanceForUsernameAndTdf",Meteor.userId());
+    if(studentUsername.indexOf("@") == -1){
+        studentUsername = studentUsername.toUpperCase();
+      }
+      let student = Meteor.users.findOne({"username":studentUsername}) || {};
+      let studentID = student._id;
+      let count = 0;
+      let numCorrect = 0;
+      let totalTime = 0;
+      let learningSessionItems = getLearningSessionItems(tdfFileName);
+      let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
+      let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
+      UserMetrics.find({_id: studentID}).forEach(function(entry){
+        let tdfEntries;
+        if(usingAllTdfs){
+            tdfEntries = Object.keys(entry);
+        }else{
+            tdfEntries = _.filter(Object.keys(entry), x => x == tdfQueryName);
+        }
+        
+        for(var index in tdfEntries){
+          let key = tdfEntries[index];
+          let tdf = entry[key];
+          let tdfKey = key.replace('_xml', '.xml');
+          for(var index in tdf){
+            //Only count items in learning sessions
+            if(!!learningSessionItems[tdfKey] && !!learningSessionItems[tdfKey][index]){
+              var stim = tdf[index];
+              count += stim.questionCount || 0;
+              numCorrect += stim.correctAnswerCount || 0;
+              var answerTimes = stim.answerTimes;
+              for(var index in answerTimes){
+                var time = answerTimes[index];
+                totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
+              }
+            }
+          }
+        }
+      });
+
+    return { count, numCorrect, totalTime };
+}
 
 Helpers = {
     //Given a user ID, return the "dummy" password that stands in for a blank
