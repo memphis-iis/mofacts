@@ -134,42 +134,44 @@ Template.signInSouthwest.onRendered(function(){
   Meteor.call('isSystemDown',function(err, systemDown){
     console.log("SYSTEM_DOWN:",systemDown);
     Session.set("systemDown",systemDown);
-  });
-  Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
-    console.log("systemOverloaded?",res,err);
-    Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
-  });
-  Meteor.call("getAltServerUrl",function(err,res){
-    if(!(err || !res)){
-      console.log("altServerUrl: " + res);
-      Session.set("altServerUrl",res);
-    }else{
-      console.log("can't get alt server url:",err,res);
-    }
-  });
 
-  Meteor.subscribe('allTeachers',function () {
-    console.log("allTeachers, subscribe return");
-    let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
-
-    //Hack to redirect rblaudow classes to ambanker
-    let ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
-    if(!!ambanker){
-      let rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
-      if(!!rblaudow){
-        rblaudow._id = ambanker._id;
+    Meteor.call("getAltServerUrl",function(err,res){
+      if(!(err || !res)){
+        console.log("altServerUrl: " + res);
+        Session.set("altServerUrl",res);
+      }else{
+        console.log("can't get alt server url:",err,res);
       }
-    }
-    let urlVars = getUrlVars();
-    if(!urlVars['showTestLogins']){
-      Session.set("showTestLogins",false);
-      let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
-      verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
-    }else{
-      Session.set("showTestLogins",true);
-    }
-
-    Session.set("teachers",verifiedTeachers);
+      Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
+        console.log("systemOverloaded?",res,err);
+        Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
+        if(!Session.get("systemOverloaded")){
+          Meteor.subscribe('allTeachers',function () {
+            console.log("allTeachers, subscribe return");
+            let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
+        
+            //Hack to redirect rblaudow classes to ambanker
+            let ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
+            if(!!ambanker){
+              let rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
+              if(!!rblaudow){
+                rblaudow._id = ambanker._id;
+              }
+            }
+            let urlVars = getUrlVars();
+            if(!urlVars['showTestLogins']){
+              Session.set("showTestLogins",false);
+              let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
+              verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+            }else{
+              Session.set("showTestLogins",true);
+            }
+        
+            Session.set("teachers",verifiedTeachers);
+          });
+        }
+      });
+    });
   });
 });
 
