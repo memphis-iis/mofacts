@@ -1,5 +1,6 @@
 import { curSemester } from '../../../common/Definitions';
 import { clearExperimentCookies } from '../../lib/currentTestingHelpers';
+import { Tracker } from 'meteor/tracker'
 
 Session.set("teachers",[]);
 Session.set("curTeacher",{});
@@ -118,7 +119,7 @@ setClass = function(curClassID){
   $(".login").prop('hidden','');
 }
 
-Template.signInSouthwest.onRendered(function(){
+Template.signInSouthwest.onRendered(async function(){
   clearExperimentCookies();
   window.onpopstate = function(event){
     console.log("window popstate signin southwest");
@@ -131,47 +132,45 @@ Template.signInSouthwest.onRendered(function(){
     }
   }
   Session.set("loginMode","southwest");
-  Meteor.call('isSystemDown',function(err, systemDown){
-    console.log("SYSTEM_DOWN:",systemDown);
-    Session.set("systemDown",systemDown);
 
-    Meteor.call("getAltServerUrl",function(err,res){
-      if(!(err || !res)){
-        console.log("altServerUrl: " + res);
-        Session.set("altServerUrl",res);
-      }else{
-        console.log("can't get alt server url:",err,res);
-      }
-      Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
-        console.log("systemOverloaded?",res,err);
-        Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
-        if(!Session.get("systemOverloaded")){
-          Meteor.subscribe('allTeachers',function () {
-            console.log("allTeachers, subscribe return");
-            let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
-        
-            //Hack to redirect rblaudow classes to ambanker
-            let ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
-            if(!!ambanker){
-              let rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
-              if(!!rblaudow){
-                rblaudow._id = ambanker._id;
-              }
-            }
-            let urlVars = getUrlVars();
-            if(!urlVars['showTestLogins']){
-              Session.set("showTestLogins",false);
-              let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
-              verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
-            }else{
-              Session.set("showTestLogins",true);
-            }
-        
-            Session.set("teachers",verifiedTeachers);
-          });
+  let systemDown = await meteorCallAsync("isSystemDown")
+  console.log("SYSTEM_DOWN:",systemDown);
+  Session.set("systemDown",systemDown);
+
+  let altServerUrl = await meteorCallAsync("getAltServerUrl");
+  console.log("altServerUrl: ",altServerUrl);
+  Session.set("altServerUrl",altServerUrl);
+
+  Tracker.flush();
+
+  Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
+    console.log("systemOverloaded?",res,err);
+    Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
+    if(!Session.get("systemOverloaded")){
+      Meteor.subscribe('allTeachers',function () {
+        console.log("allTeachers, subscribe return");
+        let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
+    
+        //Hack to redirect rblaudow classes to ambanker
+        let ambanker = verifiedTeachers.find(x => x.username === "ambanker@southwest.tn.edu");
+        if(!!ambanker){
+          let rblaudow = verifiedTeachers.find(x => x.username === "rblaudow@southwest.tn.edu");
+          if(!!rblaudow){
+            rblaudow._id = ambanker._id;
+          }
         }
+        let urlVars = getUrlVars();
+        if(!urlVars['showTestLogins']){
+          Session.set("showTestLogins",false);
+          let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','peperone@southwest.tn.edu','tackett@southwest.tn.edu'];
+          verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
+        }else{
+          Session.set("showTestLogins",true);
+        }
+    
+        Session.set("teachers",verifiedTeachers);
       });
-    });
+    }
   });
 });
 
@@ -199,6 +198,8 @@ Template.signInSouthwest.helpers({
     'teachers': function() {
         return Session.get('teachers');
     },
+
+    'teachersLoading': () => { Session.get("teachers") ? Session.get("teachers").length == 0 : true },
 
     'curTeacherClasses': function(){
       return Session.get("curTeacherClasses");

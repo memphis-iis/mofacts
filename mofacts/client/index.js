@@ -1,6 +1,10 @@
+import Promise from "bluebird";
+import {Meteor} from "meteor/meteor";
 import { dialogueContinue } from './views/experiment/dialogueUtils.js';
 ENTER_KEY = 13;
 enterKeyLock = false;
+
+meteorCallAsync = Promise.promisify(Meteor.call);
 
 //This will be setup for window resize, but is made global so that the
 //card template page can hook it up as well
