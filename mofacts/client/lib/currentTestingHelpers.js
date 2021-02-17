@@ -46,84 +46,25 @@ hasLearningSessionItems = function(tdfQueryName){
   return false;
 }
 
-//TODO: refactor to combine with server method and put in common
-getLearningSessionItems = function(tdfQueryName){
-  // var tdfQueryNames = [];
-  // if(tdfFileName === ALL_TDFS){
-  //   tdfQueryNames = Session.get("studentReportingTdfs").map(x => x.fileName);
-  // }else if(tdfFileName){
-  //   tdfQueryNames = [tdfFileName];
-  // }
-
-  learningSessionItems = {};
-  console.log("getLearningSessionItems, tdfQueryName:" + tdfQueryName);
-  
-  let tdfObject = Tdfs.findOne({fileName:tdfQueryName});
-  if(tdfObject.isMultiTdf){
-    learningSessionItems = {};
-    let stimFileName = tdfObject.tdfs.tutor.setspec[0].stimulusfile[0];
-    let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
-    for(let i=0;i<lastStim -1;i++){ //for multiTdfs we assume all items but the last are learning session TODO: update when this assumptions changes
-      learningSessionItems[i] = true;
-    }
-  }
-  _.each(tdfObject.tdfs.tutor.unit,function(unit){
-    if(!!unit.learningsession){
-      clusterList = unit.learningsession[0].clusterlist[0];
-      clusterLists = clusterList.split(' ').map(x => x.split('-').map(y => parseInt(y))); //TODO: Could probably do Helpers.RangeVal here or something
-      _.each(clusterLists,function(clusterStartEnd){
-        for(var i=clusterStartEnd[0];i<=clusterStartEnd[1];i++){
-          learningSessionItems[i] = true;
-        }
-      });
-    }
-  });
-
-  return learningSessionItems;
-}
-
 setStudentPerformance = function(studentID,studentUsername,tdfFileName){
   console.log("setStudentPerformance:",studentID,studentUsername);
   Meteor.subscribe('specificUserMetrics',studentID,function(){
-    var count = 0;
-    var numCorrect = 0;
-    var totalTime = 0;
-
+    let count = 0;
+    let numCorrect = 0;
+    let totalTime = 0;
     if(tdfFileName){
-      var learningSessionItems = getLearningSessionItems(tdfFileName);
-
-      var tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-
-      console.log("usermetrics:",UserMetrics.find({_id:studentID}).fetch());
-
-      UserMetrics.find({_id:studentID}).forEach(function(entry){
-        var tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-        for(var index in tdfEntries){
-          var tdfUserMetricsName = tdfEntries[index];
-          var tdf = entry[tdfUserMetricsName];
-          for(var index in tdf){
-            //Ignore assessment entries
-            if(!!learningSessionItems && !!learningSessionItems[index]){
-              var stim = tdf[index];
-              count += stim.questionCount || 0;
-              numCorrect += stim.correctAnswerCount || 0;
-              var answerTimes = stim.answerTimes;
-              for(var index in answerTimes){
-                var time = answerTimes[index];
-                totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-              }
-            }
-          }
-        }
-      });
+      let { count:serverCount, numCorrect:serverNumCorrect, totalTime:serverTotalTime } = getStudentPerformanceForUsernameAndTdf(studentUsername,tdfFileName);
+      count = serverCount;
+      numCorrect = serverNumCorrect;
+      totalTime = serverTotalTime;
     }
     
-    var percentCorrect = "N/A";
+    let percentCorrect = "N/A";
     if(count != 0){
       percentCorrect = ((numCorrect / count)*100).toFixed(2)  + "%";
       console.log('percentCorrect: ' + percentCorrect + ", numCorrect: " + numCorrect + ", count: " + count);
     }
-    var studentObj = {
+    let studentObj = {
       "username":studentUsername,
       "count":count,
       "percentCorrect":percentCorrect,

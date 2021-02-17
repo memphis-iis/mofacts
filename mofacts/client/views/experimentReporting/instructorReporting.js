@@ -65,30 +65,33 @@ Template.instructorReporting.helpers({
 Template.instructorReporting.events({
 
   "click .nav-tabs": function(event, template){
-    Session.set("curClassStudents",[]);
-    Session.set("curClassStudentTotals",undefined);
-
-    //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
-    setTimeout(function(){
-      //Need to strip newlines because chrome appends them for some reason
-      let curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-      var classes = Session.get("classes");
-      curClass = search(curClassName,"name",classes);
-      let curClassTdfs = Session.get("instructorReportingTdfs")[curClass._id];
-      Session.set("curInstructorReportingTdfs",curClassTdfs);
-      console.log("click nav tabs after timeout, curClass: ", curClass);
-      curTdf = INVALID_TDF;
-      $("#tdf-select").val(INVALID_TDF);
-    },200);
+    if($(".nav-tabs > .active")[0]){
+      Session.set("curClassStudents",[]);
+      Session.set("curClassStudentTotals",undefined);
+  
+      //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
+      setTimeout(function(){
+        //Need to strip newlines because chrome appends them for some reason
+        let curClassName = $(".nav-tabs > .active")[0].innerText.replace('\n','');
+        var classes = Session.get("classes");
+        curClass = search(curClassName,"name",classes);
+        let curClassTdfs = Session.get("instructorReportingTdfs")[curClass._id];
+        Session.set("curInstructorReportingTdfs",curClassTdfs);
+        console.log("click nav tabs after timeout, curClass: ", curClass);
+        curTdf = INVALID_TDF;
+        $("#tdf-select").val(INVALID_TDF);
+      },200);
+    }
   },
   
   "change #tdf-select": function(event, template){
-    curTdf = $(event.currentTarget).val();
-    console.log("tdf change: " + curTdf);
-    if(curClass){
+    if(curClass._id){
+      curTdf = $(event.currentTarget).val();
+      console.log("tdf change: " + curTdf);
       setCurClassStudents(curClass,curTdf);
     }else {
-      alert('Please select a class');
+      $("#tdf-select").val(INVALID_TDF);
+      alert('Please select a class first');
     }
   }
 });

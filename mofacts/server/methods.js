@@ -1,5 +1,5 @@
 import { DynamicTdfGenerator } from "../common/DynamicTdfGenerator";
-import { curSemester, ALL_TDFS } from "../common/Definitions";
+import { curSemester } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
 import * as ElaboratedFeedback from "./lib/CachedElaboratedFeedback";
 import * as DefinitionalFeedback from "./lib/DefinitionalFeedback";
@@ -80,67 +80,6 @@ serverConsole = function() {
     }
     console.log.apply(this, disp);
 };
-
-function getTdfQueryNames(tdfFileName) {
-  let tdfQueryNames = {};
-  if (tdfFileName === ALL_TDFS) {
-    tdfQueryNames = getAllTdfFileNames();
-  } else if (tdfFileName){
-    tdfQueryNames = [tdfFileName];
-  }
-  return tdfQueryNames;
-}
-
-function getAllTdfFileNames() {
-  return Tdfs.find({}).fetch().map(x => x.fileName);
-}
-
-function getLearningSessionItems(tdfFileName) {
-  let learningSessionItems = [];
-  let tdfQueryNames = getTdfQueryNames(tdfFileName);
-  tdfQueryNames.forEach(tdfQueryName => {
-    let tdf = Tdfs.findOne({fileName: tdfQueryName});
-    if (!learningSessionItems[tdfQueryName]) {
-      learningSessionItems[tdfQueryName] = {};
-    }
-    if (tdf.isMultiTdf) {
-      setLearningSessionItemsMulti(learningSessionItems[tdfQueryName], tdf);
-    } else {
-      setLearningSessionItems(learningSessionItems[tdfQueryName], tdf);
-    }
-  });
-  return learningSessionItems;
-}
-
-function setLearningSessionItemsMulti(learningSessionItem, tdf) {
-  let stimFileName = tdf.tdfs.tutor.setspec[0].stimulusfile[0];
-  let lastStim = Stimuli.findOne({fileName: stimFileName}).stimuli.setspec.clusters.length - 1;
-  for (let i = 0; i < lastStim - 1; i++) {
-    learningSessionItem[i] = true;
-  }
-}
-
-function setLearningSessionItems(learningSessionItem, tdf) {
-  let units = tdf.tdfs.tutor.unit;
-  if (!_.isEmpty(units)) {
-    units.forEach(unit => {
-      if (!!unit.learningsession) {
-        let clusterList = getClusterListsFromUnit(unit);
-        clusterList.forEach(clusterRange => {
-          let [start, end] = clusterRange;
-          for (let i = start; i <= end; i++) {
-            learningSessionItem[i] = true;
-          }
-        });
-      }
-    });
-  }
-}
-
-function getClusterListsFromUnit(unit) {
-  let clustersToParse = unit.learningsession[0].clusterlist[0];
-  return clustersToParse.split(' ').map(x => x.split('-').map(y => parseInt(y)));
-}
 
 function getStimJSON(fileName) {
   var future = new Future();
@@ -746,61 +685,29 @@ Meteor.startup(function () {
             curClassTdfs.push(tdf.fileName);
           }
           curClass.students.forEach(function(studentUsername){
-            if(studentUsername.indexOf("@") == -1){
-              studentUsername = studentUsername.toUpperCase();
-            }
-            let student = Meteor.users.findOne({"username":studentUsername}) || {};
-            let studentID = student._id;
-            let count = 0;
-            let numCorrect = 0;
-            let totalTime = 0;
-            assessmentItems = {};
-            let learningSessionItems = getLearningSessionItems(tdfFileName);
-            let tdfQueryName = tdfFileName.replace(/[.]/g,'_');
-            let usingAllTdfs = tdfFileName === ALL_TDFS ? true : false;
-            UserMetrics.find({_id: studentID}).forEach(function(entry){
-              let tdfEntries = _.filter(_.keys(entry), x => x.indexOf(tdfQueryName) != -1);
-              tdfEntries = tdfEntries.filter(x => curClassTdfs.indexOf(x.replace("_xml",".xml")) != -1);
-              for(var index in tdfEntries){
-                var key = tdfEntries[index];
-                var tdf = entry[key];
-                let tdfKey = usingAllTdfs ? key.replace('_xml', '.xml') : tdfFileName;
-                for(var index in tdf){
-                  //Only count items in learning sessions
-                  if(!!learningSessionItems[tdfKey] 
-                      && !!learningSessionItems[tdfKey][index]){
-                    var stim = tdf[index];
-                    count += stim.questionCount || 0;
-                    numCorrect += stim.correctAnswerCount || 0;
-                    var answerTimes = stim.answerTimes;
-                    for(var index in answerTimes){
-                      var time = answerTimes[index];
-                      totalTime += (time / (1000*60)); //Covert to minutes from milliseconds
-                    }
-                  }
-                }
+            if(studentUsername){
+              let { count, numCorrect, totalTime } = getStudentPerformanceForUsernameAndTdf(studentUsername,tdfFileName)
+              let percentCorrect = "N/A";
+              if(count != 0){
+                percentCorrect = ((numCorrect / count)*100);
+                studentTotals.percentCorrectsSum  += percentCorrect;
+                studentTotals.numStudentsWithData += 1;
+                percentCorrect = percentCorrect.toFixed(2) + "%";
               }
-            });
-            var percentCorrect = "N/A";
-            if(count != 0){
-              percentCorrect = ((numCorrect / count)*100);
-              studentTotals.percentCorrectsSum  += percentCorrect;
-              studentTotals.numStudentsWithData += 1;
-              percentCorrect = percentCorrect.toFixed(2) + "%";
+              totalTime = totalTime.toFixed(1);
+              var studentPerformance = {
+                "username":studentUsername,
+                "count":count,
+                "percentCorrect":percentCorrect,
+                "numCorrect":numCorrect,
+                "totalTime":totalTime
+              }
+              studentTotals.count += studentPerformance.count;
+              studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
+              studentTotals.numCorrect += studentPerformance.numCorrect;
+              students.push(studentPerformance);
             }
-            totalTime = totalTime.toFixed(1);
-            var studentPerformance = {
-              "username":studentUsername,
-              "count":count,
-              "percentCorrect":percentCorrect,
-              "numCorrect":numCorrect,
-              "totalTime":totalTime
-            }
-            studentTotals.count += studentPerformance.count;
-            studentTotals.totalTime += parseFloat(studentPerformance.totalTime);
-            studentTotals.numCorrect += studentPerformance.numCorrect;
-            students.push(studentPerformance);
-          })
+          });
         }
         studentTotals.percentCorrect = (studentTotals.numCorrect / studentTotals.count * 100).toFixed(4) + "%";
         studentTotals.totalTime = studentTotals.totalTime.toFixed(1);
