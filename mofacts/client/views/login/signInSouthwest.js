@@ -133,15 +133,17 @@ Template.signInSouthwest.onRendered(async function(){
   }
   Session.set("loginMode","southwest");
 
-  let systemDown = await meteorCallAsync("isSystemDown")
-  console.log("SYSTEM_DOWN:",systemDown);
-  Session.set("systemDown",systemDown);
+  Meteor.apply("isSystemDown",[],{onResultReceived:(err,res) => { 
+    let systemDown = res;
+    console.log("SYSTEM_DOWN:",systemDown,err);
+    Session.set("systemDown",systemDown);
+  }});
 
-  let altServerUrl = await meteorCallAsync("getAltServerUrl");
-  console.log("altServerUrl: ",altServerUrl);
-  Session.set("altServerUrl",altServerUrl);
-
-  Tracker.flush();
+  Meteor.apply("getAltServerUrl",[],{onResultReceived:(err,res) => { 
+    let altServerUrl = res;
+    console.log("altServerUrl: ",altServerUrl,err);
+    Session.set("altServerUrl",altServerUrl);
+  }});
 
   Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
     console.log("systemOverloaded?",res,err);
