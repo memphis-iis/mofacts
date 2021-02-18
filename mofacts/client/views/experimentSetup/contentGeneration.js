@@ -334,7 +334,8 @@ getStimForCloze = function(clozeID,cloze){
       }
     }
     if(!stim.display.clozeText){
-      stim.display.clozeText = stim.alternateDisplays.pop();
+      let newDisplay = stim.alternateDisplays.pop();
+      stim.display.clozeText = newDisplay.clozeText;
       if(stim.alternateDisplays.length == 0){
         delete stim.alternateDisplays;
       }
