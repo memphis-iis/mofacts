@@ -139,8 +139,8 @@
                 <li>
                   <span class="cloze-answers">Answer: {{this.correctResponse}},</span>
                   <span>Sentence Weight: {{this.tags.sentenceWeight}},</span>
-                  <span>Has Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
-                  <span>Has Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
+                  <span>Is Coreference: {{convertBoolToYesNo this.isCoreference}},</span>
+                  <span>Is Paraphrase: {{convertBoolToYesNo this.isParaphrase}},</span>
                   <input type="image" id="delete-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/trash.svg" />
                   <input type="image" id="edit-btn" uid="{{this.itemId}}" cloze-uid="{{this.clozeId}}" paraphrase-id="{{this.paraphraseId}}" src="images/edit.svg" />
                   {{#if isCoreference this.paraphraseId}}
