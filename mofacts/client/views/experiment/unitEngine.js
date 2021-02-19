@@ -145,6 +145,7 @@ function defaultUnitEngine(extensionData) {
         },
     
         replaceClozeWithSyllables: function(question,currentAnswerSyllables, origAnswer){
+            console.log("replaceClozeWithSyllables1",question,currentAnswerSyllables, origAnswer);
             if(typeof(question) === "undefined"){
                 return {
                     clozeQuestion: undefined,
@@ -189,7 +190,7 @@ function defaultUnitEngine(extensionData) {
                     nextChar = reconstructedAnswer.length;
                 }
             }
-    
+
             let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
             clozeQuestionParts.splice(1,1);
             clozeQuestionParts.splice(1,0,clozeAnswerNoUnderscores.trim());
@@ -205,14 +206,12 @@ function defaultUnitEngine(extensionData) {
             }
 
             let clozeQuestion = question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
-
-            console.log("replaceClozeWithSyllables:",question,clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
             
             return { clozeQuestion, clozeMissingSyllables, clozeQuestionParts };
         },
 
         setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2, currentStimAnswer,prob){
-            console.log("setUpCardQuestionSyllables: ",currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
+            console.log("setUpCardQuestionSyllables1: ",currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
             let currentAnswer = currentStimAnswer;
             let clozeQuestionParts = undefined;
             let currentAnswerSyllables = undefined;
@@ -232,9 +231,9 @@ function defaultUnitEngine(extensionData) {
                         currentQuestionPart2,currentAnswerSyllables,currentStimAnswer);
                     currentQuestionPart2 = clozeQuestion2; //TODO we should use clozeMissingSyllables2 probably, doubtful that syllables will work with two part questions for now
                 }
-            }          
+            }     
 
-            console.log("setUpCardQuestionSyllables:",currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer);
+            console.log("setUpCardQuestionSyllables2:",currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer);
             return {currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
         },
 
@@ -268,6 +267,7 @@ function defaultUnitEngine(extensionData) {
             Session.set("originalQuestion2",currentQuestionPart2);
             
             let currentAnswerSyllables, clozeQuestionParts, currentAnswer;
+
             ({currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer} = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob));
 
             if(currentAnswerSyllables){

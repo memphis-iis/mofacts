@@ -30,7 +30,7 @@ echo "MONGO_URL=$MONGO_URL"
 CL=$*
 if [ ${#CL} -lt 1 ]; then
     echo "Running meteor with --settings ./settings.json"
-    meteor --settings ./settings.json
+    meteor run --settings ./settings.json # --inspect-brk=3001
 else
     echo "Running meteor with your command line (did you remember --settings?)"
     meteor "$@"

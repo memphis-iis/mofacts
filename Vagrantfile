@@ -9,6 +9,7 @@ Vagrant.configure(2) do |config|
   config.vm.box = "ubuntu/bionic64"
   config.vm.network "forwarded_port", guest: 27017, host: 30017, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 3000, host: 3000, host_ip: "0.0.0.0"
+  config.vm.network "forwarded_port", guest: 3001, host: 3001, host_ip: "0.0.0.0"
   config.vm.provider "virtualbox" do |vb|
     vb.gui = false
     vb.memory = "4096"

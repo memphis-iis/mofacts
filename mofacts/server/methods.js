@@ -1218,6 +1218,10 @@ Meteor.startup(function () {
         });
         //TODO remove hard coding
         ownerMap["9QdrxsSGv5gfi2NfG"] = "ambanker@southwest.tn.edu";
+        ownerMap["N2cvXBasXD79z8FeP"] = "mrothschild@southwest.tn.edu";
+        ownerMap["N3cvxBasXd79z8FdP"] = "kroy@southwest.tn.edu";
+        ownerMap["N3cvXBasXD79z8Ffp"] = "iyounger@southwest.tn.edu";
+        ownerMap["N4dvXBasXD79z8Ffp"] = "gkaushik@southwest.tn.edu";
         return ownerMap;
       }
     });
