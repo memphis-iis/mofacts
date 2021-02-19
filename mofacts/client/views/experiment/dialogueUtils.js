@@ -133,14 +133,10 @@ function dialogueContinue(){
 
 async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
   dialogueContext = undefined;
-  let clozeQuestionParts = Session.get("clozeQuestionParts");
-  Session.set("clozeQuestionParts",undefined);
-  Session.set("dialogueLoopStage","intro");
-  dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+  dialogueCallbackSaver = undefined;
   let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
   let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
-  
-  dialogueCallbackSaver = callback;
+
   //wait for user to hit enter to make sure they read the transition statement
   //execution thread continues at keypress #dialogueUserAnswer in card.js
   console.log("starting dialogue loop:",clozeAnswer, incorrectUserAnswer, clozeItem);
@@ -151,18 +147,22 @@ async function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback)
         if(res.tag != 0){
             console.log("cache miss, showing normal feedback:");
             Session.set("dialogueHistory",res);
-            dialogueCallbackSaver = undefined;
-            dialogueContext = undefined;
             console.log("dialogueHistory",Session.get("dialogueHistory"));
             Session.set("dialogueLoopStage",undefined);
-            let buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp") || ""));
-            Session.set("buttonEntriesTemp",undefined);
-            for(let button of buttonEntries){
-                buttonList.insert(button);
-            }
-            Session.set("clozeQuestionParts",clozeQuestionParts);
             lookupFailCallback();
         }else{
+            if (Session.get("buttonTrial")) {
+                let buttonEntries = _.map(
+                    buttonList.find({}, {sort: {idx: 1}}).fetch(),
+                    function(val) { return val.buttonValue; }
+                ).join(',');
+                Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
+                clearButtonList();
+            }
+            Session.set("clozeQuestionParts",undefined);
+            Session.set("dialogueLoopStage","intro");
+            dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+            dialogueCallbackSaver = callback;
             dialogueContext = res.fields[0];
             if(!dialogueContext){
                 console.log("ERROR getting context during dialogue initialization");

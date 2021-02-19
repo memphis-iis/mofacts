@@ -1220,14 +1220,6 @@ function afterAnswerAssessmentCb(userAnswer,isCorrect,feedbackForAnswer,afterAns
     }
     if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
       speechTranscriptionTimeoutsSeen = 0;
-      if (Session.get("buttonTrial")) {
-        let buttonEntries = _.map(
-              buttonList.find({}, {sort: {idx: 1}}).fetch(),
-              function(val) { return val.buttonValue; }
-          ).join(',');
-        Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
-        clearButtonList();
-      }
       initiateDialogue(userAnswer,afterAnswerFeedbackCbBound,showUserFeedbackBound);
     }else{
       showUserFeedbackBound();
@@ -1685,6 +1677,7 @@ function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQue
       nextStageCb();
     },prestimulusdisplaytime);
   }else{
+    Session.set("clozeQuestionParts",closeQuestionParts);
     console.log("no prestimulusDisplay detected, continuing to next stage");
     nextStageCb();
   }  

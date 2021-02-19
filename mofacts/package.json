@@ -19,7 +19,12 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "vagrant ssh -c 'pushd mofacts/mofacts;./run_meteor'",
+    "debug": "vagrant ssh -c 'pushd mofacts/mofacts;./run_meteor'",
+    "testerDoo": "echo hello",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "vagrantUp": "vagrant up",
+    "killNode": "vagrant ssh -c 'sudo killall node'"
   },
   "author": "",
   "license": "ISC"
