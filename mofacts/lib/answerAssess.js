@@ -236,7 +236,7 @@ Answers = {
                 }
                 else if (match === 2) {
                     isCorrect = true;
-                    matchText = "Close enough to the correct answer '"+ dispAnswer + "'.";
+                    matchText = "Close enough."; // to the correct answer '"+ dispAnswer + "'.";
                 }
                 else {
                     console.log("MATCH ERROR: something fails in our comparison");
