@@ -25,6 +25,7 @@ meteor npm install --no-bin-links
 
 export MONGO_URL=mongodb://localhost:27017/MoFaCT
 echo "MONGO_URL=$MONGO_URL"
+#export NODE_OPTIONS="--max_old_space_size=4096"
 
 # Figure command line
 CL=$*
