@@ -5,7 +5,7 @@
                     "stims": [
                         {
                             "response": {
-                                "correctResponse": "spinal cord",
+                                "correctResponse": "nervous system",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -13,7 +13,7 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "The nervous system is the __________ _______ ."
+                                "clozeText": "Structures called sensory receptors at the ends of neurons in the peripheral __________ __________ provide the sensory function of the __________ __________."
                             },
                             "alternateDisplays": [
                                 {
@@ -24,7 +24,7 @@
                         },
                         {
                             "response": {
-                                "correctResponse": "spinal cord",
+                                "correctResponse": "nervous system",
                                 "incorrectResponses": [
                                     "wrong 1",
                                     "wrong 2",
@@ -32,7 +32,7 @@
                                 ]
                             },
                             "display": {
-                                "clozeText": "The nervous system is the __________ _______ .."
+                                "clozeText": "Structures called sensory receptors at the ends of neurons in the peripheral __________ __________ provide the sensory function of the __________ __________."
                             },
                             "parameter": "-0.479299999999998"
                         }
