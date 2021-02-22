@@ -817,6 +817,22 @@ function initializeAudio(){
     .then(startUserMedia)
     .catch(function(err) {
       console.log("Error getting user media: " + err.name + ": " + err.message);
+      alert("Audio input mode requires you grant permission to record in the browser, please refresh and try again.");
+      if (Session.get("loginMode") === "experiment") {
+        leavePage(routeToSignin);
+        Meteor.logout( function (error) {
+          if (typeof error !== "undefined") {
+              //something happened during logout
+              console.log("User:", Meteor.user(), "Error:", error);
+          }else {
+              sessionCleanUp();
+              routeToSignin();
+          }
+      });
+      }else {
+        sessionCleanUp();
+        leavePage("/profile");
+      }
     });
 
   } catch (e) {
