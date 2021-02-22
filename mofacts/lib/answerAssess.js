@@ -277,8 +277,7 @@ Answers = {
                             console.log(res);
                             callback(fullTextIsCorrect);
                         }else if(res.tag == 0){
-                            console.log("elaborated feedback output:",res);
-                            let elaboratedFeedback = res.fields[0].feedback;
+                            let elaboratedFeedback = res.fields[0].Feedback;
                             
                             if(typeof(elaboratedFeedback) != "undefined" && elaboratedFeedback != null){
                                 fullTextIsCorrect.matchText = elaboratedFeedback;

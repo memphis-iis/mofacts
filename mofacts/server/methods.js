@@ -1169,21 +1169,18 @@ Meteor.startup(function () {
         return curConfig.isSystemDown;
       },
 
-      isCurrentServerLoadTooHigh: function(){
+      isCurrentServerLoadTooHigh: async function(){
         let now = new Date();
         let thirtyMinAgo = new Date(now - (30*60*1000)); // Down from an hour to 30 min
         let fifteenMinAgo = new Date(now - (15*60*1000)); // Up from 5 min to 15 min
-        
         let curConfig = DynamicConfig.findOne({});
         let { loginsWithinAHalfHourLimit,utlQueriesWithinFifteenMinLimit } = curConfig.serverLoadConstants;//10,8
 
         let loginsWithinAHalfHour = LoginTimes.find({timestamp: {$gt: thirtyMinAgo}},{sort:{$natural:-1},limit:50}).fetch();
         let utlQueriesWithinFifteenMin = UtlQueryTimes.find({timestamp: {$gt: fifteenMinAgo}},{sort:{$natural:-1},limit:50}).fetch();
-
         let currentServerLoadIsTooHigh = (loginsWithinAHalfHour.length > loginsWithinAHalfHourLimit || utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
         serverConsole("isCurrentServerLoadTooHigh:" + currentServerLoadIsTooHigh + ", loginsWithinAHalfHour:" + loginsWithinAHalfHour.length + "/" + loginsWithinAHalfHourLimit + ", utlQueriesWithinFifteenMin:" + utlQueriesWithinFifteenMin.length + "/" + utlQueriesWithinFifteenMinLimit);
-
         return currentServerLoadIsTooHigh;
       },
 
