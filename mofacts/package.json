@@ -8,14 +8,15 @@
     "test": "tests"
   },
   "dependencies": {
-    "@babel/runtime": "^7.7.7",
-    "aws-sdk": "^2.502.0",
+    "@babel/runtime": "^7.13.7",
+    "aws-sdk": "^2.852.0",
     "babel-runtime": "^6.26.0",
     "bluebird": "^3.7.2",
-    "core-js": "^2.5.7",
+    "core-js": "^2.6.12",
     "diff": "^5.0.0",
     "isomorphic-fetch": "^2.2.1",
-    "transliteration": "^2.1.7"
+    "scss": "^0.2.4",
+    "transliteration": "^2.2.0"
   },
   "devDependencies": {},
   "scripts": {

@@ -4,7 +4,7 @@
 # but you can also edit it by hand.
 
 standard-app-packages@1.0.9
-accounts-password@1.5.0
+accounts-password@1.7.0
 peerlibrary:xml2js
 underscore@1.0.10
 bojicas:howler2
@@ -13,25 +13,25 @@ alanning:roles
 http@1.4.0
 percolate:synced-cron
 mfpierre:chartist-js
-standard-minifier-css@1.4.0
-tracker@1.1.3
+standard-minifier-css@1.7.2
+tracker@1.2.0
 service-configuration@1.0.11
-accounts-google@1.3.1
-shell-server@0.3.1
-promise
+accounts-google@1.3.3
+shell-server@0.5.0
+promise@0.11.2
 
 #iron:router@=1.0.12
 #iron:router@1.1.1
 iron:router
 mizzao:bootstrap-3
-google-config-ui
-dynamic-import
-fourseven:scss@=4.9.0
-check
-random
+google-config-ui@1.0.1
+dynamic-import@0.6.0
+check@1.3.1
+random@1.2.0
 harrison:papa-parse
-ecmascript
-email
+ecmascript@0.15.0
+email@2.0.0
 steffo:meteor-accounts-saml-iis-version-2-10-2020
-standard-minifier-js
+standard-minifier-js@2.6.0
 natestrauser:select2
+fourseven:scss
