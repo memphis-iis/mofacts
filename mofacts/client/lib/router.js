@@ -121,18 +121,10 @@ Router.route('/experiment/:target?/:xcond?', {
         Cookie.set("experimentTarget", target, 21);
         Cookie.set("experimentXCond", xcond, 21);
 
-        var tdf = Tdfs.findOne({"tdfs.tutor.setspec.experimentTarget":target});
-        if(!!tdf){
-          console.log("tdf found");
-          var experimentPasswordRequired = !!tdf.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
-          Session.set("experimentPasswordRequired",experimentPasswordRequired);
-          console.log("experimentPasswordRequired:" + experimentPasswordRequired);
-
-          console.log("EXPERIMENT target:", target, "xcond", xcond);
-
-          Session.set("clusterMapping", "");
-          this.render('signIn');
-        }
+        Session.set("experimentPasswordRequired",false);
+        Session.set("clusterMapping", "");
+        console.log("EXPERIMENT target:", target, "xcond", xcond);
+        this.render('signIn');
     }
 });
 
