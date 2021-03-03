@@ -141,20 +141,25 @@ Template.signInSouthwest.onRendered(async function(){
     Session.set("altServerUrl",altServerUrl);
   }});
 
-  Meteor.defer(()=>{Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
+  Meteor.defer(()=>{
+    let urlVars = getUrlVars();
+    if(!urlVars['showTestLogins']){
+      Session.set("showTestLogins",false);
+    }else{
+      Session.set("showTestLogins",true);
+    }
+    
+    Meteor.call("isCurrentServerLoadTooHigh",function(err,res){
     console.log("systemOverloaded?",res,err);
     Session.set("systemOverloaded",(typeof(err) != "undefined" || res));
-    if(!Session.get("systemOverloaded")){
+
+    if(!Session.get("systemOverloaded") || Session.get("showTestLogins")){
       Meteor.subscribe('allTeachers',function () {
         console.log("allTeachers, subscribe return");
         let verifiedTeachers = Meteor.users.find({"username":/southwest[.]tn[.]edu/i}).fetch();
-        let urlVars = getUrlVars();
-        if(!urlVars['showTestLogins']){
-          Session.set("showTestLogins",false);
+        if(!Session.get("showTestLogins")){
           let testLogins = ['olney@southwest.tn.edu','pavlik@southwest.tn.edu','tackett@southwest.tn.edu'];
           verifiedTeachers = verifiedTeachers.filter(x => testLogins.indexOf(x.username) == -1);
-        }else{
-          Session.set("showTestLogins",true);
         }
     
         Session.set("teachers",verifiedTeachers);
