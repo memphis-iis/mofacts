@@ -5,23 +5,30 @@ export const settings = {
 	// loopCount: 1,
 	// Automatically wait for elements before trying to interact with them
 	waitUntil: 'visible',
+	waitTimeout: 60000,
 	stepDelay: 2.5
 }
 
 export default () => {
 	step('Startup', async browser => {
-		await browser.visit('')
+		await browser.visit('https://mofacts.optimallearning.org/signinSouthwest?showTestLogins=true')
 		await browser.wait(Until.elementIsVisible(By.visibleText('pavlik@southwest.tn.edu')))
 		await browser.click(By.visibleText('pavlik@southwest.tn.edu'))
-		await browser.click(By.visibleText('Test class'))
+		await browser.click(By.visibleText('Test Class 3'))
 
 		let randomUserName =
 			Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 		await browser.type(By.css('#username'), randomUserName)
 
 		await browser.click(By.visibleText('Sign In'))
-		await browser.click(By.visibleText('Chapter 1'))
-		await browser.click(By.visibleText('Chapter 1 All Items'))
+
+		await browser.click(By.visibleText('Continue'))
+		await browser.click(By.visibleText('Continue'))
+
+		await browser.click(By.visibleText('Simple'))
+
+		await browser.click(By.visibleText('Chapter 9 Test'))
+		await browser.click(By.visibleText('Chapter 9 All Items'))
 		await browser.click(By.visibleText('Continue'))
 		await browser.click(By.css('#userAnswer'))
 		await browser.type(By.css('#userAnswer'), 'yes')

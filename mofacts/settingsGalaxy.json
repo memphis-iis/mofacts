@@ -1,0 +1,27 @@
+{
+    "galaxy.meteor.com": {
+      "env": {
+            "ROOT_URL":"https://mofactsTest.meteorapp.com",
+            "ALT_URL":"https://mofactsTest2.meteorapp.com",
+            "MAIL_URL":"smtp://localhost:587", 
+            "MONGO_URL":"mongodb://mofacts:azxvniu912nzq239u1mn0a8@mofacts.optimallearning.org:555041/MoFaCT",
+            "logNotice": "Test Config",
+            "public": {
+                "testLogin": true
+            },
+            "google": {
+                "clientId": "938765863389-m5mpja3mfbrnv8cmv9il0itarepk4dla.apps.googleusercontent.com",
+                "secret": "JTTZZDv6vzubmZzeGQC3sAb7"
+            },
+            "owner": "andrew.tackett@gmail.com",
+            "initRoles": {
+                "admins": ["andrew.tackett@gmail.com","vagrant@vagrant-ubuntu-trusty-64"],
+                "teachers": []
+            },
+            "definitionalFeedbackDataLocation":"2021-01-17-glossary-machine-dictionary-tagged.json",
+            "elaboratedFeedbackDataLocation":"2021-02-25-elaboratedFeedbackCache.json",
+            "debug":true
+        }
+    }
+}
+  
