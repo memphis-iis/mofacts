@@ -50,9 +50,7 @@ sudo systemctl restart mongod
 ###############################################################################
 
 # Install and configure postgres
-pushd mofacts/db
-initDb.sh
-popd
+bash /vagrant/db/initDb.sh
 
 # Install Java 8
 sudo apt-get install -y openjdk-8-jre
