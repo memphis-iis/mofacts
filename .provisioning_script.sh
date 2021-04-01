@@ -88,7 +88,7 @@ sudo mount --bind "$HOME/.meteor/packages" packages
 meteor npm install --save babel-runtime --no-bin-links
 
 # Set up dynamic config
-mofacts/scripts/server/setDynamicConfig.sh
+bash /vagrant/scripts/server/setDynamicConfig.sh
 
 # Remove Ubuntu's landscape stuff and clear login messages
 sudo apt-get purge -y landscape-client landscape-common
