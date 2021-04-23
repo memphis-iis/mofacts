@@ -24,6 +24,7 @@ exports.GetModifiedNPClozable = GetModifiedNPClozable;
 exports.GetClozables = GetClozables;
 exports.GetAllCloze = GetAllCloze;
 exports.GetAllClozeLukeFormat20200714 = GetAllClozeLukeFormat20200714;
+exports.GetAllClozeLukeFormat20201218 = GetAllClozeLukeFormat20201218;
 exports.RemoveOverlappingClozables = RemoveOverlappingClozables;
 exports.MakeItemWithTranformations = MakeItemWithTranformations;
 exports.MakeItem = MakeItem;
@@ -530,7 +531,7 @@ function GetClozables(da$$4) {
       void tags.push((arg0$$26 = (GetTotalWeight(da$$4.coreference, sa$$1)) | 0, (new Tag(10, "SentenceWeight", arg0$$26))));
       void tags.push((arg0$$27 = clozable$$1[i$$12].prob, (new Tag(11, "ClozeProbability", arg0$$27))));
       void tags.push((arg0$$28 = corefresolvedSentences[sa$$1.id], (new Tag(12, "ClozeCorefTransformation", arg0$$28))));
-      void tags.push((arg0$$29 = ((0, _Paraphrase.getParaphrase)(sa$$1.sen)), (new Tag(14, "ClozeParaphraseTransformation", arg0$$29))));
+      void tags.push((arg0$$29 = ((0, _Paraphrase.getCachedParaphrase)(sa$$1.sen)), (new Tag(14, "ClozeParaphraseTransformation", arg0$$29))));
       const inputRecord = clozable$$1[i$$12];
       let tags$$1;
       tags$$1 = (0, _List.ofSeq)(tags);
@@ -685,20 +686,149 @@ function GetAllClozeLukeFormat20200714(nlpJsonOption$$1, stringArrayJsonOption$$
   }));
 }
 
-function RemoveOverlappingClozables(clozables$$2) {
-  const clozablesOut = Array.from((clozables$$2.filter(function predicate$$9(cl$$1) {
-    return cl$$1.words.length < 4;
+function GetAllClozeLukeFormat20201218(nlpJsonOption$$2, stringArrayJsonOption$$2, inputText$$2) {
+  return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
+    var nlpJson$$3, input$$3;
+    return (nlpJsonOption$$2 == null ? (0, _AllenNLP.GetNLP)(stringArrayJsonOption$$2, inputText$$2) : (nlpJson$$3 = nlpJsonOption$$2, (input$$3 = ((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(nlpJson$$3, undefined, undefined, {
+      ResolveType() {
+        return (0, _AllenNLP.DocumentAnnotation$reflection)();
+      }
+
+    })), ((0, _AllenNLP.Promisify)(input$$3))))).then(function (_arg1$$4) {
+      if (_arg1$$4.tag === 1) {
+        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$4.fields[0]));
+      } else {
+        let clozables$$2;
+        let array$$26;
+        array$$26 = GetClozables(_arg1$$4.fields[0]);
+        clozables$$2 = (0, _Array.map)(function mapping$$17(ra$$2) {
+          return ra$$2.slice();
+        }, array$$26, Array);
+        let output$$1;
+        output$$1 = (0, _Array.mapIndexed)(function mapping$$19(i$$14, sa$$3) {
+          let totalWeight$$3;
+          totalWeight$$3 = GetTotalWeight(_arg1$$4.fields[0].coreference, sa$$3);
+          const array$$27 = clozables$$2[i$$14];
+          return (0, _Array.map)(function mapping$$18(cl$$1) {
+            let cloze$$1;
+            cloze$$1 = (0, _String.join)(" ", cl$$1.words);
+            let sentence$$3;
+            sentence$$3 = (0, _AllenNLP.removePrePunctuationSpaces)(sa$$3.sen);
+            let crOption$$1;
+            let list$$3;
+            list$$3 = (0, _List.choose)(function chooser$$1(_arg2$$3) {
+              if (_arg2$$3.tag === 12) {
+                return _arg2$$3.fields[0];
+              } else {
+                return undefined;
+              }
+            }, cl$$1.tags);
+            crOption$$1 = (0, _List.tryHead)(list$$3);
+
+            if (crOption$$1 != null) {
+              const cr$$1 = crOption$$1;
+              const diffList$$1 = diff.diffWords(sa$$3.sen, cr$$1, (0, _Types.anonRecord)({
+                ignoreCase: true
+              }));
+              let diffMap$$1;
+              const elements$$1 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+                const removeList$$1 = [];
+                const addList$$1 = [];
+                return (0, _Seq.collect)(function (d$$4) {
+                  if (d$$4.removed != null) {
+                    void removeList$$1.push(d$$4.value);
+                    return (0, _Seq.empty)();
+                  } else if (d$$4.added != null) {
+                    void addList$$1.push(d$$4.value);
+                    return (0, _Seq.empty)();
+                  } else if (d$$4.value.trim() === "") {
+                    void null;
+                    return (0, _Seq.empty)();
+                  } else if (removeList$$1.length > 0) {
+                    return (0, _Seq.append)((0, _Seq.singleton)([((0, _String.join)(" ", removeList$$1)), ((0, _String.join)(" ", addList$$1)).trim()]), (0, _Seq.delay)(function () {
+                      (0, _Util.clear)(removeList$$1);
+                      (0, _Util.clear)(addList$$1);
+                      return (0, _Seq.empty)();
+                    }));
+                  } else {
+                    return (0, _Seq.empty)();
+                  }
+                }, diffList$$1);
+              }), Array);
+              diffMap$$1 = (0, _Map.ofArray)(elements$$1, {
+                Compare: _Util.comparePrimitives
+              });
+              let crCloze$$1;
+              const matchValue$$3 = (0, _Map.FSharpMap$$TryFind$$2B595)(diffMap$$1, cloze$$1);
+
+              if (matchValue$$3 == null) {
+                crCloze$$1 = cloze$$1;
+              } else {
+                const diffCloze$$1 = matchValue$$3;
+                crCloze$$1 = diffCloze$$1;
+              }
+
+              if (sentence$$3 !== cr$$1) {
+                const itemId = (0, _Util.structuralHash)(sa$$3) | 0;
+                const clozeId = (0, _Util.structuralHash)(cloze$$1) | 0;
+                return (0, _Types.anonRecord)({
+                  Cloze: crCloze$$1,
+                  OriginalSentence: sentence$$3,
+                  Sentence: cr$$1,
+                  Tags: (0, _List.append)(cl$$1.tags, cl$$1.trace),
+                  clozeId: clozeId,
+                  itemId: itemId
+                });
+              } else {
+                let Cloze$$2;
+                Cloze$$2 = (0, _String.join)(" ", cl$$1.words);
+                const itemId$$1 = (0, _Util.structuralHash)(sa$$3) | 0;
+                const clozeId$$1 = (0, _Util.structuralHash)(cloze$$1) | 0;
+                return (0, _Types.anonRecord)({
+                  Cloze: Cloze$$2,
+                  OriginalSentence: sentence$$3,
+                  Sentence: sentence$$3,
+                  Tags: (0, _List.append)(cl$$1.tags, cl$$1.trace),
+                  clozeId: clozeId$$1,
+                  itemId: itemId$$1
+                });
+              }
+            } else {
+              let Cloze$$3;
+              Cloze$$3 = (0, _String.join)(" ", cl$$1.words);
+              const itemId$$2 = (0, _Util.structuralHash)(sa$$3) | 0;
+              const clozeId$$2 = (0, _Util.structuralHash)(cloze$$1) | 0;
+              return (0, _Types.anonRecord)({
+                Cloze: Cloze$$3,
+                OriginalSentence: sentence$$3,
+                Sentence: sentence$$3,
+                Tags: (0, _List.append)(cl$$1.tags, cl$$1.trace),
+                clozeId: clozeId$$2,
+                itemId: itemId$$2
+              });
+            }
+          }, array$$27, Array);
+        }, _arg1$$4.fields[0].sentences, Array);
+        return Promise.resolve(new _Option.Result(0, "Ok", output$$1));
+      }
+    });
+  }));
+}
+
+function RemoveOverlappingClozables(clozables$$3) {
+  const clozablesOut = Array.from((clozables$$3.filter(function predicate$$9(cl$$2) {
+    return cl$$2.words.length < 4;
   })));
 
-  for (let ci = 0; ci <= clozables$$2.length - 1; ci++) {
-    for (let cj = ci; cj <= clozables$$2.length - 1; cj++) {
-      const overlap = (ci !== cj ? clozables$$2[ci].start <= clozables$$2[cj].stop : false) ? clozables$$2[cj].start <= clozables$$2[ci].stop : false;
+  for (let ci = 0; ci <= clozables$$3.length - 1; ci++) {
+    for (let cj = ci; cj <= clozables$$3.length - 1; cj++) {
+      const overlap = (ci !== cj ? clozables$$3[ci].start <= clozables$$3[cj].stop : false) ? clozables$$3[cj].start <= clozables$$3[ci].stop : false;
 
-      if (overlap ? clozables$$2[ci].stop - clozables$$2[ci].start >= clozables$$2[cj].stop - clozables$$2[cj].start : false) {
-        const value$$11 = (0, _Array.removeInPlace)(clozables$$2[cj], clozablesOut);
+      if (overlap ? clozables$$3[ci].stop - clozables$$3[ci].start >= clozables$$3[cj].stop - clozables$$3[cj].start : false) {
+        const value$$11 = (0, _Array.removeInPlace)(clozables$$3[cj], clozablesOut);
         void value$$11;
       } else if (overlap) {
-        const value$$12 = (0, _Array.removeInPlace)(clozables$$2[ci], clozablesOut);
+        const value$$12 = (0, _Array.removeInPlace)(clozables$$3[ci], clozablesOut);
         void value$$12;
       } else {
         void null;
@@ -709,42 +839,42 @@ function RemoveOverlappingClozables(clozables$$2) {
   return clozablesOut.slice();
 }
 
-function MakeItemWithTranformations(sa$$3, cl$$2) {
+function MakeItemWithTranformations(sa$$4, cl$$3) {
   let blank;
-  const strings$$5 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+  const strings$$10 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
     return (0, _Seq.map)(function (_) {
       return "__________";
-    }, (0, _Seq.rangeNumber)(cl$$2.start, 1, cl$$2.stop));
+    }, (0, _Seq.rangeNumber)(cl$$3.start, 1, cl$$3.stop));
   }), Array);
-  blank = (0, _String.join)(" ", strings$$5);
-  let sentence$$3;
-  const strings$$6 = (0, _Array.copy)(sa$$3.srl.words, Array);
-  sentence$$3 = (0, _String.join)(" ", strings$$6);
-  let cloze$$1;
-  cloze$$1 = (0, _String.join)(" ", cl$$2.words);
+  blank = (0, _String.join)(" ", strings$$10);
+  let sentence$$4;
+  const strings$$11 = (0, _Array.copy)(sa$$4.srl.words, Array);
+  sentence$$4 = (0, _String.join)(" ", strings$$11);
+  let cloze$$2;
+  cloze$$2 = (0, _String.join)(" ", cl$$3.words);
   let item;
-  const input$$3 = (0, _RegExp.replace)(sentence$$3, "\\b" + cloze$$1 + "\\b", blank);
-  item = (0, _AllenNLP.removePrePunctuationSpaces)(input$$3);
-  let crOption$$1;
-  let list$$3;
-  list$$3 = (0, _List.choose)(function chooser$$1(_arg1$$4) {
-    if (_arg1$$4.tag === 12) {
-      return _arg1$$4.fields[0];
-    } else {
-      return undefined;
-    }
-  }, cl$$2.tags);
-  crOption$$1 = (0, _List.tryHead)(list$$3);
-  let paOption;
+  const input$$5 = (0, _RegExp.replace)(sentence$$4, "\\b" + cloze$$2 + "\\b", blank);
+  item = (0, _AllenNLP.removePrePunctuationSpaces)(input$$5);
+  let crOption$$2;
   let list$$5;
-  list$$5 = (0, _List.choose)(function chooser$$2(_arg2$$3) {
-    if (_arg2$$3.tag === 14) {
-      return _arg2$$3.fields[0];
+  list$$5 = (0, _List.choose)(function chooser$$2(_arg1$$5) {
+    if (_arg1$$5.tag === 12) {
+      return _arg1$$5.fields[0];
     } else {
       return undefined;
     }
-  }, cl$$2.tags);
-  paOption = (0, _List.tryHead)(list$$5);
+  }, cl$$3.tags);
+  crOption$$2 = (0, _List.tryHead)(list$$5);
+  let paOption;
+  let list$$7;
+  list$$7 = (0, _List.choose)(function chooser$$3(_arg2$$4) {
+    if (_arg2$$4.tag === 14) {
+      return _arg2$$4.fields[0];
+    } else {
+      return undefined;
+    }
+  }, cl$$3.tags);
+  paOption = (0, _List.tryHead)(list$$7);
   let tags$$2;
   tags$$2 = (0, _List.filter)(function predicate$$10(_arg3$$1) {
     switch (_arg3$$1.tag) {
@@ -759,75 +889,75 @@ function MakeItemWithTranformations(sa$$3, cl$$2) {
           return true;
         }
     }
-  }, cl$$2.tags);
-  var $target$$130, cr$$1, pa;
+  }, cl$$3.tags);
+  var $target$$140, cr$$2, pa;
 
-  if (crOption$$1 != null) {
+  if (crOption$$2 != null) {
     if (paOption != null) {
-      $target$$130 = 0;
-      cr$$1 = crOption$$1;
+      $target$$140 = 0;
+      cr$$2 = crOption$$2;
       pa = paOption;
     } else {
-      $target$$130 = 1;
+      $target$$140 = 1;
     }
   } else {
-    $target$$130 = 1;
+    $target$$140 = 1;
   }
 
-  switch ($target$$130) {
+  switch ($target$$140) {
     case 0:
       {
-        const paItem = (0, _RegExp.replace)(pa, "\\b" + cloze$$1 + "\\b", blank);
-        const diffList$$1 = diff.diffWords(sa$$3.sen, cr$$1, (0, _Types.anonRecord)({
+        const paItem = (0, _RegExp.replace)(pa, "\\b" + cloze$$2 + "\\b", blank);
+        const diffList$$2 = diff.diffWords(sa$$4.sen, cr$$2, (0, _Types.anonRecord)({
           ignoreCase: true
         }));
-        let diffMap$$1;
-        const elements$$1 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
-          const removeList$$1 = [];
-          const addList$$1 = [];
-          return (0, _Seq.collect)(function (d$$4) {
-            if (d$$4.removed != null) {
-              void removeList$$1.push(d$$4.value);
+        let diffMap$$2;
+        const elements$$2 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+          const removeList$$2 = [];
+          const addList$$2 = [];
+          return (0, _Seq.collect)(function (d$$5) {
+            if (d$$5.removed != null) {
+              void removeList$$2.push(d$$5.value);
               return (0, _Seq.empty)();
-            } else if (d$$4.added != null) {
-              void addList$$1.push(d$$4.value);
+            } else if (d$$5.added != null) {
+              void addList$$2.push(d$$5.value);
               return (0, _Seq.empty)();
-            } else if (d$$4.value.trim() === "") {
+            } else if (d$$5.value.trim() === "") {
               void null;
               return (0, _Seq.empty)();
-            } else if (removeList$$1.length > 0) {
-              return (0, _Seq.append)((0, _Seq.singleton)([((0, _String.join)(" ", removeList$$1)), ((0, _String.join)(" ", addList$$1)).trim()]), (0, _Seq.delay)(function () {
-                (0, _Util.clear)(removeList$$1);
-                (0, _Util.clear)(addList$$1);
+            } else if (removeList$$2.length > 0) {
+              return (0, _Seq.append)((0, _Seq.singleton)([((0, _String.join)(" ", removeList$$2)), ((0, _String.join)(" ", addList$$2)).trim()]), (0, _Seq.delay)(function () {
+                (0, _Util.clear)(removeList$$2);
+                (0, _Util.clear)(addList$$2);
                 return (0, _Seq.empty)();
               }));
             } else {
               return (0, _Seq.empty)();
             }
-          }, diffList$$1);
+          }, diffList$$2);
         }), Array);
-        diffMap$$1 = (0, _Map.ofArray)(elements$$1, {
+        diffMap$$2 = (0, _Map.ofArray)(elements$$2, {
           Compare: _Util.comparePrimitives
         });
-        let crCloze$$1;
-        const matchValue$$4 = (0, _Map.FSharpMap$$TryFind$$2B595)(diffMap$$1, cloze$$1);
+        let crCloze$$2;
+        const matchValue$$5 = (0, _Map.FSharpMap$$TryFind$$2B595)(diffMap$$2, cloze$$2);
 
-        if (matchValue$$4 == null) {
-          crCloze$$1 = cloze$$1;
+        if (matchValue$$5 == null) {
+          crCloze$$2 = cloze$$2;
         } else {
-          const diffCloze$$1 = matchValue$$4;
-          crCloze$$1 = diffCloze$$1;
+          const diffCloze$$2 = matchValue$$5;
+          crCloze$$2 = diffCloze$$2;
         }
 
-        const crItem = (0, _RegExp.replace)(cr$$1, "\\b" + crCloze$$1 + "\\b", blank);
+        const crItem = (0, _RegExp.replace)(cr$$2, "\\b" + crCloze$$2 + "\\b", blank);
 
-        if (cr$$1 === sa$$3.sen ? pa === sa$$3.sen : false) {
-          return [item, cloze$$1, tags$$2];
-        } else if ((cr$$1 === sa$$3.sen ? pa !== sa$$3.sen : false) ? pa !== paItem : false) {
-          return [item, cloze$$1, new _Types.List(new Tag(14, "ClozeParaphraseTransformation", paItem), tags$$2)];
-        } else if ((cr$$1 !== sa$$3.sen ? pa === sa$$3.sen : false) ? cr$$1 !== crItem : false) {
-          return [item, cloze$$1, new _Types.List(new Tag(12, "ClozeCorefTransformation", crItem), new _Types.List(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$1), tags$$2))];
-        } else if (cr$$1 !== sa$$3.sen ? pa !== sa$$3.sen : false) {
+        if (cr$$2 === sa$$4.sen ? pa === sa$$4.sen : false) {
+          return [item, cloze$$2, tags$$2];
+        } else if ((cr$$2 === sa$$4.sen ? pa !== sa$$4.sen : false) ? pa !== paItem : false) {
+          return [item, cloze$$2, new _Types.List(new Tag(14, "ClozeParaphraseTransformation", paItem), tags$$2)];
+        } else if ((cr$$2 !== sa$$4.sen ? pa === sa$$4.sen : false) ? cr$$2 !== crItem : false) {
+          return [item, cloze$$2, new _Types.List(new Tag(12, "ClozeCorefTransformation", crItem), new _Types.List(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$2), tags$$2))];
+        } else if (cr$$2 !== sa$$4.sen ? pa !== sa$$4.sen : false) {
           let tempTags;
           tempTags = Array.from(tags$$2);
 
@@ -837,63 +967,63 @@ function MakeItemWithTranformations(sa$$3, cl$$2) {
             void null;
           }
 
-          if (cr$$1 !== crItem) {
+          if (cr$$2 !== crItem) {
             void tempTags.push(new Tag(12, "ClozeCorefTransformation", crItem));
-            void tempTags.push(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$1));
+            void tempTags.push(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$2));
           } else {
             void null;
           }
 
-          return [item, cloze$$1, ((0, _List.ofSeq)(tempTags))];
+          return [item, cloze$$2, ((0, _List.ofSeq)(tempTags))];
         } else {
-          return [item, cloze$$1, tags$$2];
+          return [item, cloze$$2, tags$$2];
         }
       }
 
     case 1:
       {
-        return [item, cloze$$1, tags$$2];
+        return [item, cloze$$2, tags$$2];
       }
   }
 }
 
-function MakeItem(sa$$4, cl$$3) {
+function MakeItem(sa$$5, cl$$4) {
   let blank$$1;
-  const strings$$10 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+  const strings$$15 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
     return (0, _Seq.map)(function (_$$1) {
       return "__________";
-    }, (0, _Seq.rangeNumber)(cl$$3.start, 1, cl$$3.stop));
+    }, (0, _Seq.rangeNumber)(cl$$4.start, 1, cl$$4.stop));
   }), Array);
-  blank$$1 = (0, _String.join)(" ", strings$$10);
-  let sentence$$4;
-  const strings$$11 = (0, _Array.copy)(sa$$4.srl.words, Array);
-  sentence$$4 = (0, _String.join)(" ", strings$$11);
-  let cloze$$2;
-  cloze$$2 = (0, _String.join)(" ", cl$$3.words);
+  blank$$1 = (0, _String.join)(" ", strings$$15);
+  let sentence$$5;
+  const strings$$16 = (0, _Array.copy)(sa$$5.srl.words, Array);
+  sentence$$5 = (0, _String.join)(" ", strings$$16);
+  let cloze$$3;
+  cloze$$3 = (0, _String.join)(" ", cl$$4.words);
   let item$$1;
-  const input$$4 = (0, _RegExp.replace)(sentence$$4, "\\b" + cloze$$2 + "\\b", blank$$1);
-  item$$1 = (0, _AllenNLP.removePrePunctuationSpaces)(input$$4);
-  return [item$$1, cloze$$2];
+  const input$$6 = (0, _RegExp.replace)(sentence$$5, "\\b" + cloze$$3 + "\\b", blank$$1);
+  item$$1 = (0, _AllenNLP.removePrePunctuationSpaces)(input$$6);
+  return [item$$1, cloze$$3];
 }
 
-function GetAcronymMap(input$$5) {
+function GetAcronymMap(input$$7) {
   const acronymRegex = (0, _RegExp.create)("\\(([A-Z]+)\\)");
-  const matches = (0, _RegExp.matches)(acronymRegex, input$$5);
+  const matches = (0, _RegExp.matches)(acronymRegex, input$$7);
   let acronymMap;
 
   if (matches.length !== 0) {
-    const elements$$2 = (0, _Seq.delay)(function () {
+    const elements$$3 = (0, _Seq.delay)(function () {
       return (0, _Seq.collect)(function (m) {
         const acronym = m[1] || "";
         const index$$1 = m.index | 0;
         const start$$5 = (index$$1 - 50 > 0 ? index$$1 - 50 : 0) | 0;
         let words$$1;
-        const input$$6 = (0, _String.substring)(input$$5, start$$5, 50);
+        const input$$8 = (0, _String.substring)(input$$7, start$$5, 50);
         const pattern = " ";
-        words$$1 = (0, _AllenNLP.Split)(pattern, input$$6);
+        words$$1 = (0, _AllenNLP.Split)(pattern, input$$8);
         let firstLetterString;
         let arg00$$1;
-        arg00$$1 = (0, _Array.map)(function mapping$$17(w) {
+        arg00$$1 = (0, _Array.map)(function mapping$$20(w) {
           return w[0];
         }, words$$1, Array);
         firstLetterString = arg00$$1.join("");
@@ -902,8 +1032,8 @@ function GetAcronymMap(input$$5) {
 
         if (lm != null) {
           let phrase;
-          const strings$$13 = words$$1.slice(lm.index, acronym.length + 1);
-          phrase = (0, _String.join)(" ", strings$$13);
+          const strings$$18 = words$$1.slice(lm.index, acronym.length + 1);
+          phrase = (0, _String.join)(" ", strings$$18);
           return (0, _Seq.append)((0, _Seq.singleton)([phrase, acronym]), (0, _Seq.delay)(function () {
             return (0, _Seq.singleton)([acronym, phrase]);
           }));
@@ -912,7 +1042,7 @@ function GetAcronymMap(input$$5) {
         }
       }, (matches));
     });
-    acronymMap = (0, _Map.ofSeq)(elements$$2, {
+    acronymMap = (0, _Map.ofSeq)(elements$$3, {
       Compare: _Util.comparePrimitives
     });
   } else {
@@ -929,21 +1059,21 @@ function GetAcronymMap(input$$5) {
   });
 }
 
-function GetSelectCloze(nlpJsonOption$$2, sentenceCountOption, itemCountOption, doTrace, stringArrayJsonOption$$2, inputText$$2) {
+function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, doTrace, stringArrayJsonOption$$3, inputText$$3) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return GetAllCloze(nlpJsonOption$$2, stringArrayJsonOption$$2, inputText$$2).then(function (_arg1$$5) {
-      var list$$12, count;
+    return GetAllCloze(nlpJsonOption$$3, stringArrayJsonOption$$3, inputText$$3).then(function (_arg1$$6) {
+      var list$$14, count;
 
-      if (_arg1$$5.tag === 1) {
-        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$5.fields[0]));
+      if (_arg1$$6.tag === 1) {
+        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$6.fields[0]));
       } else {
         let sentenceCount$$1;
 
         if (sentenceCountOption == null) {
           let sentences$$1;
-          sentences$$1 = (0, _Array.map)(function mapping$$18(x$$6) {
+          sentences$$1 = (0, _Array.map)(function mapping$$21(x$$6) {
             return x$$6.sen;
-          }, _arg1$$5.fields[0].sentences, Array);
+          }, _arg1$$6.fields[0].sentences, Array);
           sentenceCount$$1 = EstimateDesiredSentences(sentences$$1);
         } else {
           const sentenceCount = sentenceCountOption | 0;
@@ -960,187 +1090,187 @@ function GetSelectCloze(nlpJsonOption$$2, sentenceCountOption, itemCountOption, 
         }
 
         let patternInput$$1;
-        let list$$7;
+        let list$$9;
+        let array$$40;
+        let array$$39;
         let array$$37;
         let array$$36;
         let array$$34;
         let array$$33;
-        let array$$31;
-        let array$$30;
-        array$$30 = (0, _Array.mapIndexed)(function mapping$$19(i$$14, s$$1) {
-          return [s$$1, _arg1$$5.fields[0].clozables[i$$14]];
-        }, _arg1$$5.fields[0].sentences, Array);
-        array$$31 = array$$30.filter(function predicate$$11(tupledArg$$9) {
+        array$$33 = (0, _Array.mapIndexed)(function mapping$$22(i$$15, s$$1) {
+          return [s$$1, _arg1$$6.fields[0].clozables[i$$15]];
+        }, _arg1$$6.fields[0].sentences, Array);
+        array$$34 = array$$33.filter(function predicate$$11(tupledArg$$9) {
           let value$$13;
           value$$13 = (0, _RegExp.isMatch)(badSentenceRegex, tupledArg$$9[0].sen);
           return !value$$13;
         });
-        array$$33 = (0, _Array.map)(function mapping$$20(tupledArg$$10) {
+        array$$36 = (0, _Array.map)(function mapping$$23(tupledArg$$10) {
           return [tupledArg$$10[0], (RemoveOverlappingClozables(tupledArg$$10[1]))];
-        }, array$$31, Array);
-        array$$34 = (0, _Array.map)(function mapping$$21(tupledArg$$11) {
-          return [tupledArg$$11[0], (tupledArg$$11[1].filter(function predicate$$12(cl$$5) {
-            return cl$$5.words.length < 4;
+        }, array$$34, Array);
+        array$$37 = (0, _Array.map)(function mapping$$24(tupledArg$$11) {
+          return [tupledArg$$11[0], (tupledArg$$11[1].filter(function predicate$$12(cl$$6) {
+            return cl$$6.words.length < 4;
           }))];
-        }, array$$33, Array);
-        array$$36 = array$$34.filter(function predicate$$13(tupledArg$$12) {
+        }, array$$36, Array);
+        array$$39 = array$$37.filter(function predicate$$13(tupledArg$$12) {
           return tupledArg$$12[1].length > 0;
         });
-        array$$37 = (0, _Array.map)(function mapping$$22(tupledArg$$13) {
-          return [tupledArg$$13[0], ((0, _Array.distinctBy)(function projection$$5(cl$$7) {
-            return cl$$7.words;
+        array$$40 = (0, _Array.map)(function mapping$$25(tupledArg$$13) {
+          return [tupledArg$$13[0], ((0, _Array.distinctBy)(function projection$$5(cl$$8) {
+            return cl$$8.words;
           }, tupledArg$$13[1], {
-            Equals($x$$31, $y$$32) {
-              return (0, _Array.equalsWith)(_Util.comparePrimitives, $x$$31, $y$$32);
+            Equals($x$$33, $y$$34) {
+              return (0, _Array.equalsWith)(_Util.comparePrimitives, $x$$33, $y$$34);
             },
 
             GetHashCode: _Util.structuralHash
           }))];
-        }, array$$36, Array);
-        list$$7 = (0, _Array.toList)(array$$37);
+        }, array$$39, Array);
+        list$$9 = (0, _Array.toList)(array$$40);
         patternInput$$1 = (0, _List.partition)(function predicate$$15(tupledArg$$14) {
           let chainsLengthTwoOrMore;
-          let array$$39;
-          array$$39 = (0, _Array.map)(function mapping$$23(id$$3) {
-            return _arg1$$5.fields[0].coreference.clusters[id$$3];
+          let array$$42;
+          array$$42 = (0, _Array.map)(function mapping$$26(id$$3) {
+            return _arg1$$6.fields[0].coreference.clusters[id$$3];
           }, tupledArg$$14[0].cor.clusters, Array);
-          chainsLengthTwoOrMore = array$$39.filter(function predicate$$14(c$$2) {
+          chainsLengthTwoOrMore = array$$42.filter(function predicate$$14(c$$2) {
             return c$$2.length > 1;
           });
           return chainsLengthTwoOrMore.length > 2;
-        }, list$$7);
+        }, list$$9);
         let clozeTuples;
         const hardFilterSentenceCount = (0, _List.length)(patternInput$$1[0]) | 0;
 
         if (hardFilterSentenceCount > sentenceCount$$1) {
-          let list$$10;
-          let list$$9;
-          list$$9 = (0, _List.sortByDescending)(function projection$$6(tupledArg$$15) {
-            return GetTotalWeight(_arg1$$5.fields[0].coreference, tupledArg$$15[0]) | 0;
+          let list$$12;
+          let list$$11;
+          list$$11 = (0, _List.sortByDescending)(function projection$$6(tupledArg$$15) {
+            return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$15[0]) | 0;
           }, patternInput$$1[0], {
             Compare: _Util.comparePrimitives
           });
-          list$$10 = (0, _List.take)(sentenceCount$$1, list$$9);
+          list$$12 = (0, _List.take)(sentenceCount$$1, list$$11);
           clozeTuples = (0, _List.sortBy)(function projection$$7(tupledArg$$16) {
             return tupledArg$$16[0].id;
-          }, list$$10, {
+          }, list$$12, {
             Compare: _Util.comparePrimitives
           });
         } else {
-          const list$$13 = (0, _List.append)(patternInput$$1[0], (list$$12 = ((0, _List.sortByDescending)(function projection$$8(tupledArg$$17) {
-            return GetTotalWeight(_arg1$$5.fields[0].coreference, tupledArg$$17[0]) | 0;
+          const list$$15 = (0, _List.append)(patternInput$$1[0], (list$$14 = ((0, _List.sortByDescending)(function projection$$8(tupledArg$$17) {
+            return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$17[0]) | 0;
           }, patternInput$$1[1], {
             Compare: _Util.comparePrimitives
-          })), (count = sentenceCount$$1 - (0, _List.length)(patternInput$$1[0]) | 0, (0, _List.take)(count, list$$12))));
+          })), (count = sentenceCount$$1 - (0, _List.length)(patternInput$$1[0]) | 0, (0, _List.take)(count, list$$14))));
           clozeTuples = (0, _List.sortBy)(function projection$$9(tupledArg$$18) {
             return tupledArg$$18[0].id;
-          }, list$$13, {
+          }, list$$15, {
             Compare: _Util.comparePrimitives
           });
         }
 
         let clozeProbTuples;
-        clozeProbTuples = (0, _List.map)(function mapping$$24(tupledArg$$19) {
+        clozeProbTuples = (0, _List.map)(function mapping$$27(tupledArg$$19) {
           let sorted;
-          let array$$41;
-          array$$41 = (0, _Array.sortBy)(function projection$$10(cl$$8) {
-            return cl$$8.prob;
+          let array$$44;
+          array$$44 = (0, _Array.sortBy)(function projection$$10(cl$$9) {
+            return cl$$9.prob;
           }, tupledArg$$19[1], {
             Compare: _Util.comparePrimitives
           });
-          sorted = (0, _Array.toList)(array$$41);
+          sorted = (0, _Array.toList)(array$$44);
           return [tupledArg$$19[0], (0, _List.head)(sorted), (0, _List.tail)(sorted)];
         }, clozeTuples);
         let restClozableMap;
-        let elements$$3;
+        let elements$$4;
+        let list$$21;
+        let list$$20;
         let list$$19;
-        let list$$18;
-        let list$$17;
-        list$$17 = (0, _List.collect)(function mapping$$26(tupledArg$$20) {
-          return (0, _List.map)(function mapping$$25(c$$3) {
+        list$$19 = (0, _List.collect)(function mapping$$29(tupledArg$$20) {
+          return (0, _List.map)(function mapping$$28(c$$3) {
             return [tupledArg$$20[0], c$$3];
           }, tupledArg$$20[2]);
         }, clozeProbTuples);
-        list$$18 = (0, _List.sortBy)(function projection$$11(tupledArg$$21) {
+        list$$20 = (0, _List.sortBy)(function projection$$11(tupledArg$$21) {
           return tupledArg$$21[1].prob;
-        }, list$$17, {
+        }, list$$19, {
           Compare: _Util.comparePrimitives
         });
         const count$$1 = itemCount$$1 - sentenceCount$$1 | 0;
-        list$$19 = (0, _List.take)(count$$1, list$$18);
-        elements$$3 = (0, _List.groupBy)(function projection$$12(tuple$$7) {
+        list$$21 = (0, _List.take)(count$$1, list$$20);
+        elements$$4 = (0, _List.groupBy)(function projection$$12(tuple$$7) {
           return tuple$$7[0];
-        }, list$$19, {
+        }, list$$21, {
           Equals: _Util.equals,
           GetHashCode: _Util.structuralHash
         });
-        restClozableMap = (0, _Map.ofList)(elements$$3, {
-          Compare($x$$49, $y$$50) {
-            return $x$$49.CompareTo($y$$50);
-          }
-
-        });
-        let allClozableMap;
-        let elements$$4;
-        elements$$4 = (0, _List.map)(function mapping$$28(tupledArg$$22) {
-          let cl$$10;
-          const matchValue$$5 = (0, _Map.FSharpMap$$TryFind$$2B595)(restClozableMap, tupledArg$$22[0]);
-
-          if (matchValue$$5 == null) {
-            cl$$10 = new _Types.List();
-          } else {
-            const t$$3 = matchValue$$5;
-            cl$$10 = (0, _List.map)(function mapping$$27(tuple$$8) {
-              return tuple$$8[1];
-            }, t$$3);
-          }
-
-          return [tupledArg$$22[0], new _Types.List(tupledArg$$22[1], cl$$10)];
-        }, clozeProbTuples);
-        allClozableMap = (0, _Map.ofList)(elements$$4, {
+        restClozableMap = (0, _Map.ofList)(elements$$4, {
           Compare($x$$51, $y$$52) {
             return $x$$51.CompareTo($y$$52);
           }
 
         });
-        let importantClozeMap;
+        let allClozableMap;
         let elements$$5;
-        let array$$47;
-        let array$$46;
-        let array$$44;
-        let array$$43;
-        let array$$42;
-        array$$42 = (0, _Map.toArray)(allClozableMap);
-        array$$43 = (0, _Array.sortByDescending)(function projection$$13(tupledArg$$23) {
-          return GetTotalWeight(_arg1$$5.fields[0].coreference, tupledArg$$23[0]) | 0;
-        }, array$$42, {
-          Compare: _Util.comparePrimitives
-        });
-        array$$44 = (0, _Array.collect)(function mapping$$29(tupledArg$$24) {
-          return (0, _Array.ofList)(tupledArg$$24[1], Array);
-        }, array$$43, Array);
-        array$$46 = (0, _Array.chunkBySize)(30, array$$44);
-        array$$47 = (0, _Array.mapIndexed)(function mapping$$31(i$$15, cl$$12) {
-          return (0, _Array.map)(function mapping$$30(cl$$13) {
-            return [cl$$13, i$$15];
-          }, cl$$12, Array);
-        }, array$$46, Array);
-        elements$$5 = (0, _Array.collect)(function mapping$$32(x$$7) {
-          return x$$7;
-        }, array$$47, Array);
-        importantClozeMap = (0, _Map.ofArray)(elements$$5, {
-          Compare($x$$55, $y$$56) {
-            return $x$$55.CompareTo($y$$56);
+        elements$$5 = (0, _List.map)(function mapping$$31(tupledArg$$22) {
+          let cl$$11;
+          const matchValue$$6 = (0, _Map.FSharpMap$$TryFind$$2B595)(restClozableMap, tupledArg$$22[0]);
+
+          if (matchValue$$6 == null) {
+            cl$$11 = new _Types.List();
+          } else {
+            const t$$3 = matchValue$$6;
+            cl$$11 = (0, _List.map)(function mapping$$30(tuple$$8) {
+              return tuple$$8[1];
+            }, t$$3);
+          }
+
+          return [tupledArg$$22[0], new _Types.List(tupledArg$$22[1], cl$$11)];
+        }, clozeProbTuples);
+        allClozableMap = (0, _Map.ofList)(elements$$5, {
+          Compare($x$$53, $y$$54) {
+            return $x$$53.CompareTo($y$$54);
           }
 
         });
-        let input$$7;
+        let importantClozeMap;
+        let elements$$6;
+        let array$$50;
+        let array$$49;
+        let array$$47;
+        let array$$46;
+        let array$$45;
+        array$$45 = (0, _Map.toArray)(allClozableMap);
+        array$$46 = (0, _Array.sortByDescending)(function projection$$13(tupledArg$$23) {
+          return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$23[0]) | 0;
+        }, array$$45, {
+          Compare: _Util.comparePrimitives
+        });
+        array$$47 = (0, _Array.collect)(function mapping$$32(tupledArg$$24) {
+          return (0, _Array.ofList)(tupledArg$$24[1], Array);
+        }, array$$46, Array);
+        array$$49 = (0, _Array.chunkBySize)(30, array$$47);
+        array$$50 = (0, _Array.mapIndexed)(function mapping$$34(i$$16, cl$$13) {
+          return (0, _Array.map)(function mapping$$33(cl$$14) {
+            return [cl$$14, i$$16];
+          }, cl$$13, Array);
+        }, array$$49, Array);
+        elements$$6 = (0, _Array.collect)(function mapping$$35(x$$7) {
+          return x$$7;
+        }, array$$50, Array);
+        importantClozeMap = (0, _Map.ofArray)(elements$$6, {
+          Compare($x$$57, $y$$58) {
+            return $x$$57.CompareTo($y$$58);
+          }
 
-        if (stringArrayJsonOption$$2 == null) {
-          input$$7 = [inputText$$2];
+        });
+        let input$$9;
+
+        if (stringArrayJsonOption$$3 == null) {
+          input$$9 = [inputText$$3];
         } else {
-          const chunksJson = stringArrayJsonOption$$2;
-          input$$7 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, undefined, undefined, {
+          const chunksJson = stringArrayJsonOption$$3;
+          input$$9 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, undefined, undefined, {
             ResolveType() {
               return (0, _Reflection.array_type)(_Reflection.string_type);
             }
@@ -1149,11 +1279,11 @@ function GetSelectCloze(nlpJsonOption$$2, sentenceCountOption, itemCountOption, 
         }
 
         let acronymMap$$1;
-        let json$$8;
-        let input$$8;
-        input$$8 = (0, _String.join)(" ", input$$7);
-        json$$8 = GetAcronymMap(input$$8);
-        acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(json$$8, undefined, undefined, {
+        let json$$10;
+        let input$$10;
+        input$$10 = (0, _String.join)(" ", input$$9);
+        json$$10 = GetAcronymMap(input$$10);
+        acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(json$$10, undefined, undefined, {
           ResolveType() {
             return (0, _Reflection.class_type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string_type, _Reflection.string_type]);
           }
@@ -1161,19 +1291,19 @@ function GetSelectCloze(nlpJsonOption$$2, sentenceCountOption, itemCountOption, 
         });
         const sentences$$2 = [];
         const clozes = [];
-        (0, _Seq.iterate)(function action$$1(sa$$17) {
-          const matchValue$$6 = (0, _Map.FSharpMap$$TryFind$$2B595)(allClozableMap, sa$$17);
+        (0, _Seq.iterate)(function action$$1(sa$$18) {
+          const matchValue$$7 = (0, _Map.FSharpMap$$TryFind$$2B595)(allClozableMap, sa$$18);
 
-          if (matchValue$$6 != null) {
-            const clozables$$4 = matchValue$$6;
-            void sentences$$2.push(new SentenceAPI(sa$$17.sen, (0, _Util.structuralHash)(sa$$17), true));
-            (0, _Seq.iterate)(function action(cl$$14) {
+          if (matchValue$$7 != null) {
+            const clozables$$5 = matchValue$$7;
+            void sentences$$2.push(new SentenceAPI(sa$$18.sen, (0, _Util.structuralHash)(sa$$18), true));
+            (0, _Seq.iterate)(function action(cl$$15) {
               var arg0$$30;
-              const patternInput$$2 = MakeItemWithTranformations(sa$$17, cl$$14);
+              const patternInput$$2 = MakeItemWithTranformations(sa$$18, cl$$15);
               let tags$$3;
               let li;
-              const list$$23 = (0, _List.append)(new _Types.List((arg0$$30 = (0, _Map.FSharpMap$$get_Item$$2B595)(importantClozeMap, cl$$14) | 0, (new Tag(0, "WeightGroup", arg0$$30))), patternInput$$2[2]), cl$$14.trace);
-              li = (0, _List.choose)(function chooser$$3(t$$4) {
+              const list$$25 = (0, _List.append)(new _Types.List((arg0$$30 = (0, _Map.FSharpMap$$get_Item$$2B595)(importantClozeMap, cl$$15) | 0, (new Tag(0, "WeightGroup", arg0$$30))), patternInput$$2[2]), cl$$15.trace);
+              li = (0, _List.choose)(function chooser$$4(t$$4) {
                 switch (t$$4.tag) {
                   case 17:
                     {
@@ -1190,35 +1320,35 @@ function GetSelectCloze(nlpJsonOption$$2, sentenceCountOption, itemCountOption, 
                       return t$$4;
                     }
                 }
-              }, list$$23);
+              }, list$$25);
               tags$$3 = (0, _Util.createObj)(li, 1);
               let correctResponses;
-              const matchValue$$7 = (0, _Map.FSharpMap$$TryFind$$2B595)(acronymMap$$1, patternInput$$2[1]);
+              const matchValue$$8 = (0, _Map.FSharpMap$$TryFind$$2B595)(acronymMap$$1, patternInput$$2[1]);
 
-              if (matchValue$$7 == null) {
+              if (matchValue$$8 == null) {
                 correctResponses = patternInput$$2[1];
               } else {
-                const acronym$$1 = matchValue$$7;
+                const acronym$$1 = matchValue$$8;
                 correctResponses = patternInput$$2[1] + "|" + acronym$$1;
               }
 
-              void clozes.push(new ClozableAPI(patternInput$$2[0], (0, _Util.structuralHash)(sa$$17), (0, _Util.structuralHash)(patternInput$$2[0]), correctResponses, tags$$3));
-            }, clozables$$4);
+              void clozes.push(new ClozableAPI(patternInput$$2[0], (0, _Util.structuralHash)(sa$$18), (0, _Util.structuralHash)(patternInput$$2[0]), correctResponses, tags$$3));
+            }, clozables$$5);
           } else {
-            void sentences$$2.push(new SentenceAPI(sa$$17.sen, (0, _Util.structuralHash)(sa$$17), false));
+            void sentences$$2.push(new SentenceAPI(sa$$18.sen, (0, _Util.structuralHash)(sa$$18), false));
           }
-        }, _arg1$$5.fields[0].sentences);
+        }, _arg1$$6.fields[0].sentences);
         return Promise.resolve(new _Option.Result(0, "Ok", new ClozeAPI(sentences$$2.slice(), clozes.slice())));
       }
     });
   }));
 }
 
-function DoSimpleComputation(input$$9) {
-  let strings$$15;
+function DoSimpleComputation(input$$11) {
+  let strings$$20;
   let source$$30;
-  const source$$29 = input$$9.split("");
+  const source$$29 = input$$11.split("");
   source$$30 = (0, _Seq.reverse)(source$$29);
-  strings$$15 = source$$30;
-  return (0, _String.join)("", strings$$15);
+  strings$$20 = source$$30;
+  return (0, _String.join)("", strings$$20);
 }

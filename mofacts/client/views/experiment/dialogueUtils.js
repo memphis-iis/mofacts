@@ -2,7 +2,11 @@ import { speakMessageIfAudioPromptFeedbackEnabled, startRecording, stopRecording
 export { dialogueLoop, dialogueContinue, initiateDialogue };
 export const DialogueUtils = {
     isUserInDialogueLoop: function() {
-      return Session.get("dialogueLoopStage") != undefined;
+      return typeof(Session.get("dialogueLoopStage")) != "undefined";
+    },
+
+    isUserInDialogueIntroExit: function() {
+        return Session.get("dialogueLoopStage") == "intro" || Session.get("dialogueLoopStage") == "exit";
     },
   
     setDialogueUserAnswerValue: function(val) {
@@ -87,6 +91,7 @@ function dialogueContinue(){
             //Enter dialogue loop
             Session.set("displayReady",false); //This will get flipped back after we update the display inside dialogueLoop
             Session.set("dialogueLoopStage","insideLoop");
+            console.log("getDialogFeedbackForAnswer3",JSON.parse(JSON.stringify(dialogueContext)));
             Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
         break;
         case "exit":
@@ -110,7 +115,7 @@ function dialogueContinue(){
     }
 }
 
-function initiateDialogue(callback){
+function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
   closeQuestionPartsSaver = Session.get("clozeQuestionParts");
   Session.set("clozeQuestionParts",undefined);
   Session.set("dialogueLoopStage","intro");
@@ -129,4 +134,39 @@ function initiateDialogue(callback){
   dialogueCallbackSaver = callback;
   //wait for user to hit enter to make sure they read the transition statement
   //execution thread continues at keypress #dialogueUserAnswer in card.js
+
+  Meteor.call('initializeTutorialDialogue',clozeAnswer, incorrectUserAnswer, clozeItem, (err,res)=>{
+    if(err){
+      console.log("ERROR initializing tutorial dialogue:",err);
+    }else{
+      if(res.tag != 0){
+          console.log("cache miss, showing normal feedback:");
+          Session.set("dialogueHistory",res);
+          console.log("dialogueHistory",Session.get("dialogueHistory"));
+          Session.set("dialogueLoopStage",undefined);
+          lookupFailCallback();
+      }else{
+          if (Session.get("buttonTrial")) {
+              let buttonEntries = _.map(
+                  buttonList.find({}, {sort: {idx: 1}}).fetch(),
+                  function(val) { return val.buttonValue; }
+              ).join(',');
+              Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
+              clearButtonList();
+          }
+          Session.set("clozeQuestionParts",undefined);
+          Session.set("dialogueLoopStage","intro");
+          dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+          dialogueCallbackSaver = callback;
+          dialogueContext = res.fields[0];
+          if(!dialogueContext){
+              console.log("ERROR getting context during dialogue initialization");
+          }else{
+              let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+              updateDialogueDisplay(transitionStatement);
+              speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
+          }
+      }
+    }
+});
 }
