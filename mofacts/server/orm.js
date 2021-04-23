@@ -117,6 +117,7 @@ function getHistory(history){
         "CF (Review Entry)":history.cf_review_entry,
         "CF (Button Order)":history.cf_button_order,
         "Feedback Text":history.feedback_text,
+        "feedbackType":history.feedbackType,
         "dynamicTagFields":history.dynamicTagFields
     };
     return historyOutput;

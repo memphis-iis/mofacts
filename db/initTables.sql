@@ -74,6 +74,7 @@ CREATE TABLE item (
 );
 
 CREATE TYPE outcomeType AS ENUM ('correct','incorrect');
+CREATE TYPE feedbackTypeOptions AS ENUM ('simple','refutational','dialogue');
 
 CREATE TABLE history ( 
     eventId SERIAL PRIMARY KEY,
@@ -90,9 +91,9 @@ CREATE TABLE history (
     typeOfResponse responseType NOT NULL,
     responseValue VARCHAR(255) NOT NULL,
     displayedStimulus VARCHAR(255) NOT NULL,
-    dynamicTagFields JSONB,
+    dynamicTagFields JSON[],
     Anon_Student_Id VARCHAR(255) NOT NULL,
-    SessionId VARCHAR(255) NOT NULL,
+    Session_Id VARCHAR(255) NOT NULL,
     Condition_Namea VARCHAR(50),
     Condition_Typea VARCHAR(1024),
     Condition_Nameb VARCHAR(50),
@@ -107,7 +108,7 @@ CREATE TABLE history (
     Level_Unitname VARCHAR(255) NOT NULL,
     Problem_Name VARCHAR(255) NOT NULL,
     Step_Name VARCHAR(255) NOT NULL,
-    Time INTEGER NOT NULL,
+    Time BIGINT NOT NULL,
     Input VARCHAR(255) NOT NULL,
     Student_Response_Type VARCHAR(50) NOT NULL,
     Student_Response_Subtype VARCHAR(50) NOT NULL,
@@ -133,6 +134,7 @@ CREATE TABLE history (
     CF_Review_Entry VARCHAR(1024),
     CF_Button_Order VARCHAR(2048),
     Feedback_Text VARCHAR(1024),
+    feedbackType feedbackTypeOptions,
     dialogueHistory JSONB
 );
 

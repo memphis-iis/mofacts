@@ -93,19 +93,19 @@
         {{/if}}
 
         {{#if testordrill}}
-            {{#unless buttonTrial}}
+            {{#if notButtonTrialOrInDialogueLoop}}
                 <div class="row" id="textEntryRow">
                     <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
                         {{> inputF}}
                     </div>
                 </div>  <!-- close row -->
-            {{/unless}}
-
+            {{else}}
+                
             <div class="row">
                 {{#if buttonTrial}}
-                {{#if audioEnabled}}
-                    <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
-                {{/if}}
+                    {{#if audioEnabled}}
+                        <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                    {{/if}}
                 {{/if}}
                 <div class="col-md-12">
                     <div id="multipleChoiceContainer">
@@ -147,6 +147,7 @@
                     </div>
                 </div>
             </div> <!-- close row -->
+            {{/if}}
         {{/if}}
 
         <div class="userInteractionContainer">

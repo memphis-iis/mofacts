@@ -536,9 +536,9 @@ async function setExperimentState(UserId,TDFId,newExperimentState){ //by current
 }
 
 async function insertHistory(historyRecord){
-  let tdfFileName = historyhistoryRecord['Condition_Typea'];
+  let tdfFileName = historyRecord['Condition_Typea'];
   let dynamicTagFields = await getListOfStimTags(tdfFileName);
-  historyRecord.dynamicTagFields = dynamicTagFields;
+  historyRecord.dynamicTagFields = dynamicTagFields || [];
   let query = "INSERT INTO history \
                             (itemId, \
                             userId, \
@@ -553,7 +553,9 @@ async function insertHistory(historyRecord){
                             typeOfResponse, \
                             responseValue, \
                             displayedStimulus, \
+                            dynamicTagFields, \
                             Anon_Student_Id, \
+                            Session_ID, \
                             Condition_Namea, \
                             Condition_Typea, \
                             Condition_Nameb, \
@@ -594,11 +596,11 @@ async function insertHistory(historyRecord){
                             CF_Review_Entry, \
                             CF_Button_Order, \
                             Feedback_Text, \
-                            dynamicTagFields, \
+                            feedbackType, \
                             dialogueHistory)";
-  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55::jsonb,$56::jsonb)";
+  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::json[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb)";
               
-  await db.none(query, [
+  let historyVals = [
     historyRecord.itemId,
     historyRecord.userId,
     historyRecord.TDFId,
@@ -612,7 +614,9 @@ async function insertHistory(historyRecord){
     historyRecord.typeOfResponse,
     historyRecord.responseValue,
     historyRecord.displayedStimulus,
+    historyRecord.dynamicTagFields,
     historyRecord.Anon_Student_Id,
+    historyRecord.Session_ID,
     historyRecord.Condition_Namea,
     historyRecord.Condition_Typea,
     historyRecord.Condition_Nameb,
@@ -653,8 +657,10 @@ async function insertHistory(historyRecord){
     historyRecord.CF_Review_Entry,
     historyRecord.CF_Button_Order,
     historyRecord.Feedback_Text,
-    historyRecord.dynamicTagFields,
-    historyRecord.dialogueHistory]);
+    historyRecord.feedbackType,
+    historyRecord.dialogueHistory];
+  console.log("insertHistory Array:",historyVals)
+  await db.none(query, historyVals);
 }
 
 async function getHistoryByTDFfileName(TDFfileName){
@@ -1390,6 +1396,11 @@ Meteor.startup(async function () {
         let result = DefinitionalFeedback.GenerateFeedback(userAnswer,correctAnswer);
         console.log("result: " + JSON.stringify(result));
         return result;
+      },
+
+      initializeTutorialDialogue:function(correctAnswer, userIncorrectAnswer, clozeItem){
+        let initialState = TutorialDialogue.GetElaboratedDialogueState(correctAnswer,userIncorrectAnswer,clozeItem);
+        return initialState;
       },
 
       getDialogFeedbackForAnswer:function(state){

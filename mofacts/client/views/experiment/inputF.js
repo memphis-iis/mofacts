@@ -1,8 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+import { DialogueUtils } from './dialogueUtils';
+
 Template.inputF.rendered = function() {
     this.$('input').focus();
 };
@@ -13,11 +10,11 @@ Template.inputF.helpers({
     },
 
     'inDialogueLoop': function(){
-      return typeof(Session.get("dialogueLoopStage")) != "undefined";
+      return DialogueUtils.isUserInDialogueLoop();
     },
     
     'dialogueIntroExit': function(){
-        return Session.get("dialogueLoopStage") == "intro" || Session.get("dialogueLoopStage") == "exit";
+      return DialogueUtils.isUserInDialogueIntroExit();
     }
 });
 

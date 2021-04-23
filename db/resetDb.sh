@@ -1,7 +1,7 @@
 #!/bin/bash
 
-sudo -u mofacts psql -c "DROP TABLE IF EXISTS componentstate,globalexperimentstate,history,item,itemsourcesentences,section_user_map,section,course,tdf,assignment CASCADE;"
-sudo -u mofacts psql -c "DROP TYPE tdfVisibility, responseType, outcomeType, componentStateType, unitType CASCADE;"
+sudo -u mofacts psql -c "DROP TABLE IF EXISTS tdf, item,componentstate,globalexperimentstate,history,itemsourcesentences,section_user_map,section,course,assignment CASCADE;"
+sudo -u mofacts psql -c "DROP TYPE tdfVisibility, responseType, outcomeType, componentStateType, unitType, feedbackTypeOptions CASCADE;"
 # sudo -u mofacts psql -c "drop table globalexperimentstate;"
 # sudo -u mofacts psql -c "drop table history; drop table item;"
 # sudo -u mofacts psql -c "drop table itemsourcesentences;"
