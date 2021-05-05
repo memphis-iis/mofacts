@@ -62,8 +62,8 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
   }
 
   let baseKC = stimuliSetId * KC_MULTIPLE;
-  let clusterKC = baseKC + 1;
-  let stimKC = baseKC + 1;
+  let clusterKC = baseKC;
+  let stimKC = baseKC;
 
   stimFile.stimuli.setspec.clusters.forEach((cluster, idx) => {
     cluster.stims.forEach(stim => {
@@ -91,15 +91,18 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
           correctResponse: stim.response.correctResponse,
           incorrectResponses: incorrectResponses,
           itemResponseType: cluster.responseType || "text",
-          speechHintExclusionList: stim.speechHintExclusionList || null,
-          clozeStimulus: stim.display.clozeText || null,
-          textStimulus: stim.display.text || null,
-          audioStimulus: stim.display.audioSrc || null,
-          imageStimulus: stim.display.imageSrc || null,
-          videoStimulus: stim.display.videoSrc || null,
+          speechHintExclusionList: stim.speechHintExclusionList,
+          clozeStimulus: stim.display.clozeText,
+          textStimulus: stim.display.text,
+          audioStimulus: stim.display.audioSrc,
+          imageStimulus: stim.display.imgSrc,
+          videoStimulus: stim.display.videoSrc,
           alternateDisplays: stim.alternateDisplays,
           tags: stim.tags
         }
+
+        if(stimulusFilename.indexOf("test") != -1)
+          console.log("stim:",JSON.stringify(stim),item,stim.display,stim.display.text);
 
         items.push(item);
         stimKC++;

@@ -3,6 +3,7 @@ import {
     rangeVal,
     getStimCount, 
     getStimCluster, 
+    getStimKCBaseForCurrentStimuliSet,
     getTestType,
     shuffle,
     randomChoice,
@@ -169,7 +170,7 @@ function defaultUnitEngine(curExperimentData) {
             console.log('setUpCardQuestionAndAnswerGlobals',cardIndex,whichStim,prob,cluster,cluster.stims[whichStim]);
             let curStim = cluster.stims[whichStim];
             let currentDisplay = JSON.parse(JSON.stringify({
-                text:curStim.textstimulus,
+                text:curStim.textStimulus,
                 audioSrc:curStim.audioStimulus,
                 imgSrc:curStim.imageStimulus,
                 videoSrc:curStim.videoStimulus,
@@ -235,7 +236,7 @@ function defaultUnitEngine(curExperimentData) {
     };
     engine.experimentState = curExperimentData.experimentState;
     engine.cachedSyllables = curExperimentData.cachedSyllables;
-    console.log("curExperimentData: " + JSON.stringify(curExperimentData));
+    console.log("curExperimentData: " + curExperimentData);
     return engine;
 }
 
@@ -346,6 +347,7 @@ function modelUnitEngine() {
             }
         }else{
             // Figure out which cluster numbers that they want
+            console.log("setupclusterlist:",this.curUnit);
             const unitClusterList = _.chain(this.curUnit)
             .prop("learningsession").first()
             .prop("clusterlist").trim().value();
@@ -371,11 +373,14 @@ function modelUnitEngine() {
         var initCards = [];
         var initResponses = {};
         var initProbs = [];
-        let stimulusKC = 1;
+        let curKCBase = getStimKCBaseForCurrentStimuliSet();
+        let stimulusKC = curKCBase;
+        console.log("initializeActRModel",numQuestions,curKCBase);
         const reponseKCMap = await meteorCallAsync('getReponseKCMap');
-        for (i = 1; i <= numQuestions; ++i) {
+        console.log("initializeActRModel,reponseKCMap",reponseKCMap);
+        for (i = 0; i < numQuestions; ++i) {
             var card = {
-                clusterKC: i,
+                clusterKC: (curKCBase + i),
                 priorCorrect: 0,
                 priorIncorrect: 0,
                 hasBeenIntroduced: false,
@@ -392,13 +397,13 @@ function modelUnitEngine() {
             };
 
             // We keep per-stim and re-response-text results as well
-            var cluster = getStimCluster(i-1);
+            var cluster = getStimCluster(i);
             var numStims = cluster.stims.length;
-            for (j = 1; j <= numStims; ++j) {
-                var parameter = getStimParameterArray(i-1,j-1); //Note this may be a single element array for older stims or a 3 digit array for newer ones
+            for (j = 0; j < numStims; ++j) {
+                var parameter = getStimParameterArray(i,j); //Note this may be a single element array for older stims or a 3 digit array for newer ones
                 // Per-stim counts
                 card.stims.push({
-                    clusterKC: i,
+                    clusterKC: (curKCBase + i),
                     stimIndex: j,
                     stimulusKC,
                     priorCorrect: 0,
@@ -422,7 +427,7 @@ function modelUnitEngine() {
                 });
 
                 // Per-response counts
-                let rawResponse = cluster.stims[j-1].correctResponse;
+                let rawResponse = cluster.stims[j].correctResponse;
                 var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(rawResponse));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
@@ -449,6 +454,8 @@ function modelUnitEngine() {
             responses: initResponses,                   // Dictionary of text responses for
             probs: initProbs,                           // "Flat" list of probabilities
         });
+
+        console.log("initCards:",initCards,initProbs);
 
         //has to be done once ahead of time to give valid values for the beginning of the test.
         calculateCardProbabilities();
@@ -745,16 +752,17 @@ function modelUnitEngine() {
     return {
         saveComponentStates: async function(){
             let userId = Meteor.userId();
-            let TDFId = Session.set("currentTdfId");
-            let cardKC = 1;
+            let TDFId = Session.get("currentTdfId");
             let currentUnit = Session.get("currentUnitNumber");
             let componentStates = [];
-            for(let card of cardProbabilities.cards){
+            for(let cardIndex=0;cardIndex<cardProbabilities.cards.length;cardIndex++){
+                let card = cardProbabilities.cards[cardIndex];
                 let cardState = {
                     userId,
                     TDFId,
-                    KCId:cardKC,
+                    KCId:card.clusterKC,
                     componentType:'cluster',
+                    probabilityEstimate: null,
                     firstSeen:card.firstSeen,
                     lastSeen:card.lastSeen,
                     priorCorrect:card.priorCorrect,
@@ -766,14 +774,15 @@ function modelUnitEngine() {
                     outcomeStack: card.outcomeStack.join(',')
                 };
                 componentStates.push(cardState);
-                cardKC += 1;
-                let stimKC = 1;
-                for(let stim of card.stims){
+                for(let stimIndex=0;stimIndex<card.stims.length;stimIndex++){
+                    let stim = card.stims[stimIndex];
+                    let stimProb = cardProbabilities.probs.find(x => x.stimIndex==stimIndex && x.cardIndex==cardIndex);
                     let stimState = {
                         userId,
                         TDFId,
-                        KCId:stimKC,
+                        KCId:stim.stimulusKC,
                         componentType:'stimulus',
+                        probabilityEstimate: stimProb ? stimProb.probability : null,
                         firstSeen:stim.firstSeen,
                         lastSeen:stim.lastSeen,
                         priorCorrect:stim.priorCorrect,
@@ -785,7 +794,6 @@ function modelUnitEngine() {
                         outcomeStack: stim.outcomeStack.join(',')
                     };
                     componentStates.push(stimState);
-                    stimKC += 1;
                 }
             }
 
@@ -795,6 +803,7 @@ function modelUnitEngine() {
                     userId,
                     TDFId,
                     componentType:'response',
+                    probabilityEstimate: null,
                     firstSeen:response.firstSeen,
                     lastSeen:response.lastSeen,
                     priorCorrect:response.priorCorrect,
@@ -809,65 +818,99 @@ function modelUnitEngine() {
                 componentStates.push(responseState);
             }
             //let probs = cardProbabilities.probs;//We grab this from the history table
-            await meteorCallAsync('setComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"),componentStates);
+            console.log("saveComponentStates",JSON.parse(JSON.stringify(componentStates)));
+            await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),currentUnit,componentStates);
         },
         loadComponentStates: async function(){//componentStates [{},{}]
-            let componentStates = await meteorCallAsync('getComponentStatesByUserIdAndTDFId',Meteor.userId(),Session.get("currentTDFId"));
-            let overallOutcomeHistory = Session.get("currentExperimentState").overallOutcomeHistory;
+            console.log("loadComponentStates start");
+
+            //TODO: is this necessary?
+            let overallOutcomeHistory = Session.get("currentExperimentState").overallOutcomeHistory || [];
             initUserProgress({ overallOutcomeHistory });
-            let stims = componentStates.filter(x => x.componentType == 'stimulus');
-            let cards = componentStates.filter(x => x.componentType == 'cluster');
-            let responses = componentStates.filter(x => x.componentType == 'response');
-            let stimulusKCs = stims.map(x => x.stimulusKC);
-            const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
+
             let numQuestionsAnswered = 0;
             let numCorrectAnswers = 0;
             let probsMap = {};
-            for(let card of cards){
-                console.log('card.clusterKC',card.clusterKC);
-                let modelCard = cardProbabilities.cards[card.clusterKC];
-                Object.assign(modelCard,card);
-                card.outcomeStack = card.outcomeStack.split(',');
-                card.hasBeenIntroduced = true;
-                let clusterProbs = stimProbabilityEstimates.filter(x => x.kcid == card.clusterKC) || {};
-                card.previousCalculatedProbabilities = clusterProbs.probabilityEstimates;
-            }
-            for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
-                let card = cardProbabilities.cards[cardIndex];
-                let clusterKC = cardIndex + 1;
-                if(!probsMap[clusterKC]) probsMap[clusterKC] = {};
-                card.otherPracticeTime = cards.filter(x => x.clusterKC != clusterKC).reduce((acc,card) => acc + card.totalPracticeDuration);
-                let curStims = stims.filter(x => x.clusterKC == clusterKC);
-                for(let stim of curStims){
-                    let stimulusKC = stim.stimulusKC % KC_MULTIPLE;
-                    let modelStim = card.stims.find(x => x.stimulusKC == stimulusKC);
-                    let stimIndex = modelStim.stimIndex;
-                    Object.assign(modelStim,stim);
-                    let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == stim.stimulusKC) || {};
-                    modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates;
-                    if(!probsMap[clusterKC][stimIndex]) probsMap[clusterKC][stimIndex] = 0;
-                    probsMap[clusterKC][stimIndex] = stim.probabilityEstimate;
-                    numCorrectAnswers += stim.priorCorrect;
-                    numQuestionsAnswered += stim.priorCorrect + stim.priorIncorrect;
+            let cards = cardProbabilities.cards;
+            console.log("loadComponentStates test:",JSON.parse(JSON.stringify(cardProbabilities)));
+
+            let componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),Session.get("currentUnitNumber"));
+            if(componentStates.length == 0){  //No prior history, we assume KCs could have been affected by other units using them
+                let stimulusKCs = [];
+                for(let curCard of cards){
+                    for(let curStim of curCard.stims){
+                        stimulusKCs.push(curStim.stimulusKC);
+                    }
                 }
+                const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
+                for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
+                    let card = cardProbabilities.cards[cardIndex];
+                    if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
+                    for(let stim of card.stims){
+                        let stimIndex = stim.stimIndex;
+                        let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == stim.stimulusKC) || {};
+                        stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
+                        if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
+                        probsMap[cardIndex][stimIndex] = stim.previousCalculatedProbabilities;
+                    }
+                }
+                console.log("loadComponentStates",probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
+            }else{ 
+                let componentCards = componentStates.filter(x => x.componentType == 'cluster');
+                let stims = componentStates.filter(x => x.componentType == 'stimulus');
+
+                let stimulusKCs = stims.map(x => x.stimulusKC);
+                const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
+                for(let componentCard of componentCards){
+                    //console.log('card.clusterKC',card.clusterKC);
+                    let clusterKC = componentCard.clusterKC;
+                    componentCard.outcomeStack = componentCard.outcomeStack.split(',');
+                    componentCard.hasBeenIntroduced = true;
+
+                    let modelCard = cards[clusterKC];
+                    Object.assign(modelCard,componentCard);
+                    let clusterProbs = stimProbabilityEstimates.filter(x => x.kcid == clusterKC) || {};
+                    modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates || [];
+                }
+                for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
+                    let modelCard = cards[cardIndex];
+                    if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
+                    modelCard.otherPracticeTime = cards.filter(x => x.clusterKC != cardIndex).reduce((acc,card) => acc + card.totalPracticeDuration);
+                    let curStims = stims.filter(x => x.clusterKC == cardIndex);
+                    for(let componentStim of curStims){
+                        let stimulusKC = componentStim.stimulusKC % KC_MULTIPLE;
+                        let modelStim = modelCard.stims.find(x => x.stimulusKC == stimulusKC);
+                        Object.assign(modelStim,componentStim);
+                        let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == componentStim.stimulusKC) || {};
+                        modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
+                        let stimIndex = modelStim.stimIndex;
+                        if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
+                        probsMap[cardIndex][stimIndex] = componentStim.probabilityEstimate;
+                        numCorrectAnswers += componentStim.priorCorrect;
+                        numQuestionsAnswered += componentStim.priorCorrect + componentStim.priorIncorrect;
+                    }
+                }
+
+                let responses = componentStates.filter(x => x.componentType == 'response');
+                for(let response of responses){
+                    let modelResponse = cardProbabilities.responses.find(x => x.KCId == response.KCId);
+                    Object.assign(modelResponse,response);
+                }
+                console.log("loadComponentStates",probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
             }
 
+            var initProbs = [];
             var numQuestions = getStimCount();
-            for (i = 1; i <= numQuestions; ++i) {
-                var cluster = getStimCluster(i-1);
+            for (i = 0; i < numQuestions; ++i) {
+                var cluster = getStimCluster(i);
                 var numStims = cluster.stims.length;
-                for (j = 1; j <= numStims; ++j) {
+                for (j = 0; j < numStims; ++j) {
                     initProbs.push({
                         cardIndex: i,//clusterKC
-                        stimIndex: j,//whichstim/stimIndex+1
+                        stimIndex: j,//whichstim/stimIndex
                         probability: probsMap[i][j] || 0
                     });
                 }
-            }            
-            
-            for(let response of responses){
-                let modelResponse = cardProbabilities.responses.find(x => x.KCId == response.KCId);
-                Object.assign(modelResponse,response);
             }
 
             Object.assign(cardProbabilities,{
@@ -894,6 +937,8 @@ function modelUnitEngine() {
         },
 
         unitType: MODEL_UNIT,
+
+        curUnit: (() => JSON.parse(JSON.stringify(Session.get("currentTdfUnit"))))(),
 
         unitMode: (function(){
           var unitMode = _.chain(this.curUnit)
@@ -960,7 +1005,7 @@ function modelUnitEngine() {
             Session.set("clusterIndex", cardIndex);
 
             let clusterMapping = Session.get("clusterMapping");
-            let unmappedIndex = clusterMapping.indexOf(index);
+            let unmappedIndex = clusterMapping.indexOf(cardIndex);
             newExperimentState = {
                 clusterIndex:cardIndex,
                 shufIndex:unmappedIndex,
@@ -970,8 +1015,11 @@ function modelUnitEngine() {
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
+            console.log("!!!!!!!!!! select next card:",cardIndex,whichStim);
 
-            newExperimentState = Object.assign(newExperimentState,this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob));// Find objects we'll be touching
+
+            let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
+            newExperimentState = Object.assign(newExperimentState,stateChanges);// Find objects we'll be touching
 
             let testType = "d";
             if(Session.get("currentDeliveryParams").studyFirst && card.priorStudy == 0){
@@ -1040,7 +1088,7 @@ function modelUnitEngine() {
             //   lastSeen: Date.now()
             // };
             
-            this.saveComponentStates();
+            await this.saveComponentStates();
             await updateExperimentState(newExperimentState,"unitEngine.modelUnitEngine.selectNextCard");
         },
 

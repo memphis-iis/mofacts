@@ -149,7 +149,7 @@ CREATE TABLE componentState (
     TDFId INTEGER REFERENCES tdf (TDFId),
     KCId INTEGER NOT NULL,
     componentType componentStateType NOT NULL,
-    probabilityEstimate NUMERIC(4,3) NOT NULL,
+    probabilityEstimate NUMERIC(4,3),
     firstSeen BIGINT NOT NULL,
     lastSeen BIGINT NOT NULL,
     priorCorrect INTEGER NOT NULL,

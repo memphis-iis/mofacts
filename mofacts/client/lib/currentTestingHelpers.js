@@ -13,6 +13,7 @@ export {
   setStudentPerformance,
   getStimCount,
   getStimCluster,
+  getStimKCBaseForCurrentStimuliSet,
   createStimClusterMapping,
   getAllCurrentStimAnswers,
   getTestType,
@@ -117,6 +118,12 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
       numIncorrect: 0,
       totalpracticeduration: 0
     }
+  }else{
+    studentPerformanceData = {
+      numCorrect: parseInt(studentPerformanceDataRet.numCorrect),
+      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect),
+      totalpracticeduration: parseInt(studentPerformanceDataRet.totalpracticeduration)
+    }
   }
   let count = (studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect);
   let studentPerformance = {
@@ -185,6 +192,13 @@ function getStimCluster(clusterMappedIndex=0) {
     //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
     return cluster;
 };
+
+function getStimKCBaseForCurrentStimuliSet(){
+  if(Session.get("currentStimuliSet")){
+    let oneOrderOfMagnitudeLess = (KC_MULTIPLE / 10);
+    return Math.round((Session.get("currentStimuliSet")[0].clusterKC) / oneOrderOfMagnitudeLess) * oneOrderOfMagnitudeLess;
+  }
+}
 
 //Given a cluster count, a shuffleclusters string, and a swapclusters string,
 //create a mapping vector. The idea is that for cluster x, mapping[x] returns

@@ -35,11 +35,11 @@ doInsert('INSERT INTO tdf(ownerId, stimuliSetId, content, visibility) VALUES($1,
     var myassignment = [1,1];
     doInsert('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)',myassignment);
 
-    var myitem = [1, 1, 1, 1, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "The _____ brown fox jumped over..."];
+    var myitem = [1, 0, 0, 0, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "The _____ brown fox jumped over..."];
     doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, incorrectResponses, clozeStimulus) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',myitem);
-    var myitem = [1, 2, 1, 1, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "sounds/music2/1.mp3"];
+    var myitem = [1, 1, 0, 0, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "sounds/music2/1.mp3"];
     doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, incorrectResponses, audioStimulus) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',myitem);
-    var myitem = [1, 3, 1, 1, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "images/TNplants/6151_IMG00293.JPG"];
+    var myitem = [1, 2, 0, 0, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "images/TNplants/6151_IMG00293.JPG"];
     doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, incorrectResponses, imageStimulus) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',myitem);
 });
 
@@ -49,7 +49,7 @@ doInsert('INSERT INTO tdf(ownerId, stimuliSetId, content, visibility) VALUES($1,
 
 
 
-var myitem = [1, 1, 2, 3, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "How do you say correct?"];
+var myitem = [0, 0, 1, 2, "-0.479299999999998", 0.91, 'correct', 'incorrect1,incorrect2', "How do you say correct?"];
 doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, incorrectResponses, textStimulus) VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)',myitem);
 
 

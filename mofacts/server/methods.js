@@ -239,7 +239,8 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
 }
 
 async function getProbabilityEstimatesByKCId(relevantKCIds){
-  const ret = await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate) AS probabilityEstimates FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId ORDER BY eventId',[relevantKCIds]);
+  console.log("getProbabilityEstimatesByKCId,KCIds:",relevantKCIds)
+  const ret = await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId',[relevantKCIds]);
   let estimates = [];
   for(let pair of ret){
     estimates.push({KCId:pair.kcid,probabilityEstimates:pair.probabilityestimates})
@@ -247,7 +248,7 @@ async function getProbabilityEstimatesByKCId(relevantKCIds){
   return estimates;
 }
 
-//by currentTDFId, not currentRootTDFId
+//by currentTdfId, not currentRootTDFId
 async function getOutcomeHistoryByUserAndTDFfileName(userId,TDFfileName){
   const tdfRet = await db.one('SELECT TDFId from tdf WHERE content @> $1' + '::jsonb',{"fileName":TDFfileName});
   let TDFId = tdfRet[0].tdfid;
@@ -256,17 +257,21 @@ async function getOutcomeHistoryByUserAndTDFfileName(userId,TDFfileName){
 }
 
 async function getReponseKCMap(){
-  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
+  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT correctResponse, responseKC FROM item');
+  //console.log("getResponseKCMap:",responseKCStuff);
   let responseKCMap = {};
-  for(let pair of responseKCStuff){
-    responseKCMap[pair.correctresponse] = pair.responsekc;
+  for(let row of responseKCStuff){
+    let correctresponse = row.correctresponse;
+    let responsekc = row.responsekc;
+    responseKCMap[correctresponse] = responsekc;
   }
+  //console.log("getResponseKCMap2:",responseKCMap);
   return responseKCMap;
 }
 
-//by currentTDFId, not currentRootTDFId
-async function getComponentStatesByUserIdAndTDFId(userId,TDFId){
-  let componentStatesRet = await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId',[userId,TDFId]);
+//by currentTdfId, not currentRootTDFId
+async function getComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,curUnitNum){
+  let componentStatesRet = await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 AND currentUnit = $3 ORDER BY componentStateId',[userId,TDFId,curUnitNum]);
   let componentStates = [];
   for(let componentState of componentStatesRet){
     componentStates.push(getComponentState(componentState));
@@ -274,9 +279,10 @@ async function getComponentStatesByUserIdAndTDFId(userId,TDFId){
   return componentStates;
 }
 
-async function setComponentStatesByUserIdAndTDFId(userId,TDFId,componentStates){
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,currentUnit,componentStates){
+  let responseComponentStates = componentStates.filter(x => x.componentType == 'response');
+  console.log("SetComponentTest",responseComponentStates.length,responseComponentStates);
   const res = await db.tx(async t => {
-    let responseComponentStates = componentStates.map(x => x.componenttype == 'response');
     let responseKCMap = await getReponseKCMap();
     const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
     let newResponseKC = newResponseKCRet.responsekc + 1;
@@ -290,13 +296,13 @@ async function setComponentStatesByUserIdAndTDFId(userId,TDFId,componentStates){
       delete responseState.responseText;
     }
     for(let componentState of componentStates){
-      await t.none('DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3',[userId,TDFId,componentState.KCId]);
+      await t.none('DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND currentUnit=$3 AND KCId=$4',[userId,TDFId,currentUnit,componentState.KCId]);
       await t.none('INSERT INTO componentState(userId,TDFId,KCId,componentType,probabilityEstimate, \
         firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, \
         currentUnit,currentUnitType, outcomeStack) VALUES(${userId},${TDFId}, \
         ${KCId}, ${componentType}, ${probabilityEstimate}, ${firstSeen}, ${lastSeen}, \
-        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${currentUnit} \
-        ${currentUnitType},${outcomeStack}) RETURNING TDFId',componentState);
+        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${currentUnit}, \
+        ${currentUnitType},${outcomeStack})',componentState);
     }
     return {userId,TDFId};
   })
@@ -311,7 +317,7 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
     stim.stimuliSetId = newStimuliSetId;
   }
   let highestStimulusKCRet = await db.manyOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
-  let curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE + 1;
+  let curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
 
   let curNewStimulusKC = curNewKCBase;
   let curNewClusterKC = curNewKCBase;
@@ -509,16 +515,16 @@ async function getTdfNamesAssignedByInstructor(instructorID){
   }
 }
 
-async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not currentTDFId
+async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not currentTdfId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[UserId,TDFId]);
-  let experimentState = experimentStateRet.experimentState;
-  console.log("getExperimentState",TDFId,UserId,experimentState);
+  let experimentState = experimentStateRet.experimentstate;
+  serverConsole("getExperimentState",TDFId,UserId,experimentState);
   return experimentState;
 }
 
 //UPSERT not INSERT
-async function setExperimentState(UserId,TDFId,newExperimentState){ //by currentRootTDFId, not currentTDFId
+async function setExperimentState(UserId,TDFId,newExperimentState){ //by currentRootTDFId, not currentTdfId
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[UserId,TDFId]);
 
@@ -659,7 +665,6 @@ async function insertHistory(historyRecord){
     historyRecord.Feedback_Text,
     historyRecord.feedbackType,
     historyRecord.dialogueHistory];
-  console.log("insertHistory Array:",historyVals)
   await db.none(query, historyVals);
 }
 
@@ -753,11 +758,11 @@ async function getStimDisplayTypeMap(){
     let map = {};
     for(let count of counts){
       map[count.stimulisetid] = {
-        hasCloze: count.clozeItemCount > 0,
-        hasText:  count.textItemCount  > 0,
-        hasAudio: count.audioItemCount > 0,
-        hasImage: count.imageItemCount > 0,
-        hasVideo: count.videoItemCount > 0
+        hasCloze: parseInt(count.clozeitemcount) > 0,
+        hasText:  parseInt(count.textitemcount)  > 0,
+        hasAudio: parseInt(count.audioitemcount) > 0,
+        hasImage: parseInt(count.imageitemcount) > 0,
+        hasVideo: parseInt(count.videoitemcount) > 0
       }
     }
     return map;
@@ -1082,9 +1087,12 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
 
     const responseKCMap = await getReponseKCMap();
     const newFormatItems = getNewItemFormat(oldStimFormat,stimFilename,stimuliSetId,responseKCMap);
+    if(stimFilename.indexOf('test') != -1){
+      console.log("newFormatItems",newFormatItems);
+    }
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1',stimFilename);
     let newStims = [];
-    if(existingStims && existingStims.length > 0){//TODO: what if we find only some of the stims already exist?
+    if(existingStims && existingStims.length > 0){
       for(let newStim of newFormatItems){
         let stimulusKC = newStim.stimulusKC;
         let matchingStim = existingStims.find(x => x.stimuluskc == stimulusKC);
@@ -1106,9 +1114,10 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
     for(let stim of newStims){
       if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
       await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, \
-        incorrectResponses, itemResponseType, clozeStimulus, alternateDisplays, tags) \
+        incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
       VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${optimalProb}, ${correctResponse}, \
-        ${incorrectResponses}, ${itemResponseType}, ${clozeStimulus}, ${alternateDisplays}::jsonb, ${tags})',stim);
+        ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, \
+        ${imageStimulus}, ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})',stim);
     }
     
     return {ownerId};
@@ -1189,8 +1198,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId){
   if(!isProd){
     console.log('loading stims and tdfs from asset dir');
     serverConsole('start stims');
-    let highestStimSetIdRet = await db.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
-    let higheststimsetid = highestStimSetIdRet.higheststimsetid || 0;
+    let higheststimsetid = 0;
     let stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => { return fn.indexOf('.json') >= 0; });
     for(let filename of stimFilenames){
       //try{
@@ -1211,8 +1219,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId){
 
     setTimeout(async () => {
       serverConsole('start tdfs');
-      let highestStimSetIdRet = await db.one('SELECT MAX(stimuliSetId) AS highestStimSetId FROM item');
-      let higheststimsetid = highestStimSetIdRet.higheststimsetid || 0;
+      let higheststimsetid = 0;
       let tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => { return fn.indexOf('.xml') >= 0; });
       for(let filename of tdfFilenames){
         //try{
@@ -1379,8 +1386,8 @@ Meteor.startup(async function () {
       getAllTeachers,getTdfNamesAssignedByInstructor,addCourse,editCourse,editCourseAssignments,addUserToTeachersClass,
       getTdfsAssignedToStudent,getStimDisplayTypeMap,getStimuliSetById,getStudentPerformanceByIdAndTDFId,getExperimentState,
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
-      getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdAndTDFId,
-      insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdAndTDFId,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
+      getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdTDFIdAndUnitNum,
+      insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdTDFIdAndUnitNum,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
       getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,
 
       getAltServerUrl:function(){
