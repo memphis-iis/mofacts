@@ -93,10 +93,6 @@ function setDispTimeoutText(txt) {
 function lockoutPeriodicCheck() {
     if (!lockoutFreeTime) {
         var unitStartTimestamp = Session.get("currentUnitStartTime");
-        if (!unitStartTimestamp) {
-            unitStartTimestamp = Date.now();
-        }
-
         var lockoutMins = currLockOutMinutes();
         if (lockoutMins) {
             lockoutFreeTime = unitStartTimestamp + lockoutMins * (60 * 1000); //Minutes to millisecs

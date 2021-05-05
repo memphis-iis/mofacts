@@ -108,7 +108,6 @@ Session.set("inResume", false);
 cachedSyllables = null;
 var speechTranscriptionTimeoutsSeen = 0;
 var timeoutsSeen = 0;  // Reset to zero on resume or non-timeout
-var unitStartTimestamp = 0;
 var trialStartTimestamp = 0;
 var firstKeypressTimestamp = 0;
 var currentSound = null; //See later in this file for sound functions
@@ -123,12 +122,9 @@ var varLenTimeoutName = null;
 var simTimeoutName = null;
 
 // Helper - return elapsed seconds since unit started. Note that this is
-// technically seconds since unit RESUME began (when we set unitStartTimestamp)
+// technically seconds since unit RESUME began (when we set currentUnitStartTime)
 function elapsedSecs() {
-    if (!unitStartTimestamp) {
-        return 0.0;
-    }
-    return (Date.now() - unitStartTimestamp) / 1000.0;
+    return (Date.now() - Session.get("currentUnitStartTime")) / 1000.0;
 }
 
 function nextChar(c) {
@@ -274,10 +270,6 @@ function setDispTimeoutText(txt) {
 }
 
 function varLenDisplayTimeout() {
-    if (!unitStartTimestamp) {
-        return;
-    }
-
     var display = getDisplayTimeouts();
     if (!(display.minSecs > 0.0 || display.maxSecs > 0.0)) {
         // No variable display parameters - we can stop the interval
@@ -735,7 +727,8 @@ function initializeAudio(){
 }
 
 function preloadAudioFiles(){
-  let allSrcs = getCurrentStimDisplaySources('audioSrc');
+  let allSrcs = getCurrentStimDisplaySources('audioStimulus');
+  console.log("allSrcs,audio",allSrcs);
   for(let index in allSrcs){
     let source = allSrcs[index];
     soundsDict[source] = new Howl({
@@ -770,7 +763,7 @@ function preloadAudioFiles(){
 }
 
 function preloadImages(){
-  let curStimImgSrcs = getCurrentStimDisplaySources("imgSrc");
+  let curStimImgSrcs = getCurrentStimDisplaySources("imageStimulus");
   console.log("curStimImgSrcs: " + JSON.stringify(curStimImgSrcs));
   imagesDict = {};
   var img;
@@ -781,14 +774,13 @@ function preloadImages(){
     imagesDict[src] = img;
   }
   console.log("imagesDict: " + JSON.stringify(imagesDict));
-  console.log("img.src:" + img.src);
 }
 
-function getCurrentStimDisplaySources(filterPropertyName="clozeText"){
+function getCurrentStimDisplaySources(filterPropertyName="clozeStimulus"){
   let displaySrcs = [];
   let stims = Session.get("currentStimuliSet");
   for(let stim of stims){
-    if(typeof(stim[filterPropertyName]) != "undefined"){
+    if(stim[filterPropertyName]){
       displaySrcs.push(stim[filterPropertyName]);
     }
   }
@@ -1557,7 +1549,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
       filledInDisplay.clozeText = filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
   }
 
-  if(!probabilityEstimate) probabilityEstimate = null;
+  if(!probabilityEstimate){
+    probabilityEstimate = null;
+  }else{
+    probabilityEstimate = probabilityEstimate.probability;
+  }
 
   let answerLogRecord = {
     'itemId': itemId,
@@ -1588,7 +1584,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
     'feedbackDuration':feedbackDuration,
     'stimulusDuration':endLatency,
     'responseDuration':responseDuration,
-    'probabilityEstimate':probabilityEstimate,
 
     'Level_Unit': Session.get("currentUnitNumber"),
     'Level_Unitname':unitName,
@@ -1764,7 +1759,7 @@ async function unitIsFinished(reason) {
 
     let newExperimentState = { 
       questionIndex: 0,
-      clusterIndex: -1,
+      clusterIndex: 0,
       lastUnitCompleted: curUnitNum,
       lastUnitStarted: newUnitNum,
       currentUnitNumber: newUnitNum, 
@@ -2350,12 +2345,16 @@ function stopRecording() {
 
 async function getExperimentState() {
     const curExperimentState = await meteorCallAsync('getExperimentState',Meteor.userId(), Session.get("currentRootTdfId"));
+    var sessExpState = Session.get("currentExperimentState");
+    console.log("getExperimentState:",curExperimentState,sessExpState);
     Meteor.call("updatePerformanceData","utlQuery","card.getExperimentState",Meteor.userId());
     Session.set("currentExperimentState",curExperimentState);
     return curExperimentState || {};
 }
 
 async function updateExperimentState(newState,codeCallLocation){
+  var test = Session.get("currentExperimentState");
+  console.log("currentExperimentState:",test);
   if (!Session.get("currentExperimentState")) {
     Session.set("currentExperimentState", {});
   }
@@ -2390,22 +2389,8 @@ async function resumeFromComponentState() {
     timeoutsSeen = 0;
     firstKeypressTimestamp = 0;
     trialStartTimestamp = 0;
-    unitStartTimestamp = Date.now();
     clearScrollList();
     clearCardTimeout();
-
-    //Clear any previous session data about unit/question/answer
-    Session.set("clusterMapping", undefined);
-    Session.set("currentUnitNumber", undefined);
-    Session.set("currentTdfUnit", undefined);
-    Session.set("questionIndex", undefined);
-    Session.set("clusterIndex", undefined);
-    Session.set("currentDisplay", undefined);
-    Session.set("currentDisplayEngine", undefined);
-    Session.set("originalDisplay", undefined);
-    Session.set("currentQuestionPart2", undefined);
-    Session.set("currentAnswer", undefined);
-    Session.set("testType", undefined);
 
     //Disallow continuing (it will be turned on somewhere else)
     setDispTimeoutText("");
@@ -2428,7 +2413,7 @@ async function resumeFromComponentState() {
     let needExpCondition = (setspec.condition && setspec.condition.length);
 
     const experimentState = await getExperimentState();
-    let newExperimentState = {};
+    let newExperimentState = JSON.parse(JSON.stringify(experimentState));
 
     //We must always check for experiment condition
     if (needExpCondition) {
@@ -2471,6 +2456,7 @@ async function resumeFromComponentState() {
     }else {
         Session.set("currentTdfFile",rootTDF);
         Session.set("currentTdfName",rootTDF.fileName);
+        Session.set("currentTdfId", Session.get("currentRootTdfId"));
         Session.set("currentStimuliSetId", rootTDFBoxed.stimuliSetId);
 
         //Just notify that we're skipping
@@ -2727,7 +2713,7 @@ async function processUserTimesLog() {
         if (engine.unitFinished()) {
             let lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
             if (lockoutMins > 0) {
-                let unitStartTimestamp = Session.get("currentUnitStartTime") || Date.now();
+                let unitStartTimestamp = Session.get("currentUnitStartTime");
                 let lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
                 if (Date.now() < lockoutFreeTime) {
                     console.log("RESUME FINISHED: showing lockout instructions");

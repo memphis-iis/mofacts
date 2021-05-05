@@ -15,7 +15,7 @@ function getItem(stim){
         itemResponseType: stim.itemresponsetype,
         speechHintExclusionList: stim.speechhintexclusionlist,
         clozeStimulus: stim.clozestimulus,
-        textstimulus: stim.textstimulus,
+        textStimulus: stim.textstimulus,
         audioStimulus: stim.audiostimulus,
         imageStimulus: stim.imagestimulus,
         videoStimulus: stim.videostimulus,

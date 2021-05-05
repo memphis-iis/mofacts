@@ -144,6 +144,8 @@ function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
           Session.set("dialogueHistory",res);
           console.log("dialogueHistory",Session.get("dialogueHistory"));
           Session.set("dialogueLoopStage",undefined);
+          Session.set("currentDisplay",dialogueCurrentDisplaySaver);
+          Session.set("closeQuestionParts",closeQuestionPartsSaver);
           lookupFailCallback();
       }else{
           if (Session.get("buttonTrial")) {
