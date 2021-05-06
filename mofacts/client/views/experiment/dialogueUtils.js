@@ -116,58 +116,52 @@ function dialogueContinue(){
 }
 
 function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
-  closeQuestionPartsSaver = Session.get("clozeQuestionParts");
-  Session.set("clozeQuestionParts",undefined);
-  Session.set("dialogueLoopStage","intro");
-  dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
   let clozeItem = Session.get("originalQuestion") || Session.get("currentDisplay").clozeText;
   let clozeAnswer = Session.get("originalAnswer") || Session.get("currentAnswer");
-  dialogueContext = {
-      "ClozeItem": clozeItem,
-      "ClozeAnswer": clozeAnswer
-  };
-  
-  let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
-  updateDialogueDisplay(transitionStatement);
-  speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
-  
-  dialogueCallbackSaver = callback;
-  //wait for user to hit enter to make sure they read the transition statement
-  //execution thread continues at keypress #dialogueUserAnswer in card.js
 
   Meteor.call('initializeTutorialDialogue',clozeAnswer, incorrectUserAnswer, clozeItem, (err,res)=>{
     if(err){
       console.log("ERROR initializing tutorial dialogue:",err);
     }else{
+      console.log("initializeTutorialDialogue,res:",res);
       if(res.tag != 0){
           console.log("cache miss, showing normal feedback:");
           Session.set("dialogueHistory",res);
           console.log("dialogueHistory",Session.get("dialogueHistory"));
           Session.set("dialogueLoopStage",undefined);
-          Session.set("currentDisplay",dialogueCurrentDisplaySaver);
-          Session.set("closeQuestionParts",closeQuestionPartsSaver);
+          //Session.set("currentDisplay",dialogueCurrentDisplaySaver);
+          //Session.set("closeQuestionParts",closeQuestionPartsSaver);
+          let test = JSON.parse(JSON.stringify($("#userAnswer").val() || "it was undefined"));
+          console.log("dialogue loop lookup fail, cur userAnswer:",test);
+          Tracker.afterFlush(()=>$("#userAnswer").val(incorrectUserAnswer));
           lookupFailCallback();
       }else{
-          if (Session.get("buttonTrial")) {
-              let buttonEntries = _.map(
-                  buttonList.find({}, {sort: {idx: 1}}).fetch(),
-                  function(val) { return val.buttonValue; }
-              ).join(',');
-              Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
-              clearButtonList();
-          }
-          Session.set("clozeQuestionParts",undefined);
-          Session.set("dialogueLoopStage","intro");
-          dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
-          dialogueCallbackSaver = callback;
-          dialogueContext = res.fields[0];
-          if(!dialogueContext){
-              console.log("ERROR getting context during dialogue initialization");
-          }else{
-              let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
-              updateDialogueDisplay(transitionStatement);
-              speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
-          }
+        dialogueContext = res.fields[0];
+        if(!dialogueContext){
+            console.log("ERROR getting context during dialogue initialization");
+        }else{
+            closeQuestionPartsSaver = Session.get("clozeQuestionParts");
+            Session.set("clozeQuestionParts",undefined);
+            Session.set("dialogueLoopStage","intro");
+            dialogueCurrentDisplaySaver = JSON.parse(JSON.stringify(Session.get("currentDisplay")));
+            dialogueCallbackSaver = callback;
+          
+            if (Session.get("buttonTrial")) {
+                let buttonEntries = _.map(
+                    buttonList.find({}, {sort: {idx: 1}}).fetch(),
+                    function(val) { return val.buttonValue; }
+                ).join(',');
+                Session.set("buttonEntriesTemp", JSON.parse(JSON.stringify(buttonEntries)));
+                clearButtonList();
+            }
+
+            let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+            updateDialogueDisplay(transitionStatement);
+            speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
+
+            //wait for user to hit enter to make sure they read the transition statement
+            //execution thread continues at keypress #dialogueUserAnswer in card.js
+        }
       }
     }
 });

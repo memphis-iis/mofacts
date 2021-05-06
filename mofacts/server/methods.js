@@ -1,6 +1,7 @@
 import { DynamicTdfGenerator } from "../common/DynamicTdfGenerator";
 import { curSemester, ALL_TDFS, KC_MULTIPLE } from "../common/Definitions";
 import * as TutorialDialogue from "../server/lib/TutorialDialogue";
+import * as ElaboratedFeedback from "./lib/CachedElaboratedFeedback";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 import { getNewItemFormat } from "./conversions/convert";
@@ -84,6 +85,11 @@ if(Meteor.settings.definitionalFeedbackDataLocation){
   var feedbackData = fs.readFileSync(Meteor.settings.definitionalFeedbackDataLocation);
   console.log("initializing feedback");
   DefinitionalFeedback.Initialize(feedbackData);
+}
+
+if(Meteor.settings.elaboratedFeedbackDataLocation){
+  console.log("initializing elaborated feedback");
+  ElaboratedFeedback.Initialize(fs.readFileSync(Meteor.settings.elaboratedFeedbackDataLocation));
 }
 
 const pgp = require('pg-promise')();
@@ -519,7 +525,6 @@ async function getExperimentState(UserId,TDFId){ //by currentRootTDFId, not curr
   let query = "SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2";
   const experimentStateRet = await db.oneOrNone(query,[UserId,TDFId]);
   let experimentState = experimentStateRet.experimentstate;
-  serverConsole("getExperimentState",TDFId,UserId,experimentState);
   return experimentState;
 }
 

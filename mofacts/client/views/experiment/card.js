@@ -6,6 +6,7 @@ import {
   setStudentPerformance, 
   getStimCount, 
   getStimCluster, 
+  getStimKCBaseForCurrentStimuliSet,
   createStimClusterMapping,
   getCurrentClusterAndStimIndices,
   getAllCurrentStimAnswers,
@@ -1509,7 +1510,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
   let clusterIndex = Session.get("clusterIndex");
   let {itemId,clusterKC,tags,...rest} = getStimCluster(clusterIndex).stims[0];
   let {whichStim,probabilityEstimate,...restb} = engine.findCurrentCardInfo();
-  let stimulusKC = whichStim;
+  let curKCBase = getStimKCBaseForCurrentStimuliSet();
+  clusterKC = clusterKC + curKCBase;
+  let stimulusKC = whichStim + curKCBase;
 
   let curTdf = Session.get("currentTdfFile");
   let unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get("currentUnitNumber")].unitname);
@@ -1549,6 +1552,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
       filledInDisplay.clozeText = filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
   }
 
+  console.log("!!!!!!!!gatherAnswerLog:",probabilityEstimate);
   if(!probabilityEstimate){
     probabilityEstimate = null;
   }else{
@@ -2624,20 +2628,20 @@ async function processUserTimesLog() {
     let moduleCompleted = false;
 
     //Reset current engine
-    function resetEngine(curUnitNum) {
+    async function resetEngine(curUnitNum) {
         let curExperimentData = {
           cachedSyllables,
           experimentState
         }
 
         if (tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("assessmentsession")) {
-            engine = createScheduleUnit(curExperimentData);
+            engine = await createScheduleUnit(curExperimentData);
         }
         else if(tdfFile.tdfs.tutor.unit[curUnitNum].hasOwnProperty("learningsession")) {
-            engine = createModelUnit(curExperimentData);
+            engine = await createModelUnit(curExperimentData);
         }
         else {
-            engine = createEmptyUnit(curExperimentData); //used for instructional units
+            engine = await createEmptyUnit(curExperimentData); //used for instructional units
         }
     };
     clearScrollList();
@@ -2673,7 +2677,7 @@ async function processUserTimesLog() {
             break;
     };
 
-    resetEngine(Session.get("currentUnitNumber"));
+    await resetEngine(Session.get("currentUnitNumber"));
     newExperimentState.unitType = engine.unitType;
     await updateExperimentState(newExperimentState,"card.processUserTimesLog");
     engine.loadComponentStates();

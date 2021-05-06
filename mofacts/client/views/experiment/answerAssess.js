@@ -323,7 +323,7 @@ Answers = {
             switch(feedbackType){
                 case "refutational":
                     let answerToCheck = originalAnswer || answer;
-                    Meteor.call('getSimpleFeedbackForAnswer',userInput,answerToCheck,function(err,res){
+                    Meteor.call('getElaboratedFeedbackForAnswer',userInput,answerToCheck,function(err,res){
                         console.log("simpleFeedback, err: " + JSON.stringify(err) + ", res: " + JSON.stringify(res));
                         if(typeof(err) != "undefined"){
                             console.log("error with refutational feedback, meteor call: ",err);
@@ -334,7 +334,8 @@ Answers = {
                             console.log(res);
                             callback(fullTextIsCorrect);
                         }else if(res.tag == 0){
-                            let refutationalFeedback = res.fields[0].feedback;
+                            console.log("refutationalFeedback,return:",res)
+                            let refutationalFeedback = res.fields[0].Feedback;
                             
                             if(typeof(refutationalFeedback) != "undefined" && refutationalFeedback != null){
                                 fullTextIsCorrect.matchText = refutationalFeedback;
