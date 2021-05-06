@@ -25,6 +25,7 @@ let closeQuestionPartsSaver = undefined;
 let dialogueCurrentDisplaySaver = undefined;
 let dialogueCallbackSaver = undefined;
 let dialogueTransitionInstructions = "  Press the button to continue.";
+let dialogueTransitionInstructionsVoiceTrigger = "  Press the button or say 'continue' to continue.";
 let endDialogueNotice = " Press the button to continue practice.";
 let dialogueTransitionStatements = [
     "That wasn’t right, so to help you build the knowledge let’s chat about it for a little.",
@@ -68,11 +69,13 @@ function dialogueLoop(err,res){
         if(result.Finished){
             newDisplay = result.Display + endDialogueNotice;
             Session.set("dialogueLoopStage","exit");
-        }else{
-            startRecording();
         }
         updateDialogueDisplay(newDisplay);
         speakMessageIfAudioPromptFeedbackEnabled(newDisplay, false, "dialogue");
+
+        if(Session.get("audioEnabled")){
+            startRecording();
+        }
         dialogueContext = result;
         dialogueUserPrompts.push(newDisplay);
         //wait for user input
@@ -129,10 +132,6 @@ function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
           Session.set("dialogueHistory",res);
           console.log("dialogueHistory",Session.get("dialogueHistory"));
           Session.set("dialogueLoopStage",undefined);
-          //Session.set("currentDisplay",dialogueCurrentDisplaySaver);
-          //Session.set("closeQuestionParts",closeQuestionPartsSaver);
-          let test = JSON.parse(JSON.stringify($("#userAnswer").val() || "it was undefined"));
-          console.log("dialogue loop lookup fail, cur userAnswer:",test);
           Tracker.afterFlush(()=>$("#userAnswer").val(incorrectUserAnswer));
           lookupFailCallback();
       }else{
@@ -155,10 +154,17 @@ function initiateDialogue(incorrectUserAnswer,callback,lookupFailCallback){
                 clearButtonList();
             }
 
-            let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)] + dialogueTransitionInstructions;
+
+            let transitionStatement = dialogueTransitionStatements[Math.floor(Math.random() * dialogueTransitionStatements.length)];
+            
+            if(Session.get("audioEnabled")){
+                startRecording();
+                transitionStatement = transitionStatement + dialogueTransitionInstructionsVoiceTrigger;
+            }else{
+                transitionStatement = transitionStatement + dialogueTransitionInstructions;
+            }
             updateDialogueDisplay(transitionStatement);
             speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, "dialogue");
-
             //wait for user to hit enter to make sure they read the transition statement
             //execution thread continues at keypress #dialogueUserAnswer in card.js
         }

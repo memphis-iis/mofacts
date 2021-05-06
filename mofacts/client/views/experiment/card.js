@@ -2133,7 +2133,7 @@ function generateRequestJSON(sampleRate,speechRecognitionLanguage,phraseHints,da
     }
   }
 
-  console.log("Request:" + JSON.stringify(request));
+  console.log("Request:" + _.pick(request,"config"));
 
   return request;
 }
@@ -2182,8 +2182,12 @@ function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
           ignoredOrSilent = true;
         }
       } else if (DialogueUtils.isUserInDialogueLoop()) {
-        console.log("dialogue loop -> transcribe to dialogue user answer");
-        DialogueUtils.setDialogueUserAnswerValue(transcript);
+        if(DialogueUtils.isUserInDialogueIntroExit()){
+          speechTranscriptionTimeoutsSeen = 0;
+        }else{
+          console.log("dialogue loop -> transcribe to dialogue user answer");
+          DialogueUtils.setDialogueUserAnswerValue(transcript);
+        }
       } else {
         userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') : document.getElementById('userAnswer');
         console.log("regular trial, transcribing user response to user answer box");
@@ -2214,11 +2218,20 @@ function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
         if (getButtonTrial()) {
           handleUserInput({answer:userAnswer},"voice");
         } else if (DialogueUtils.isUserInDialogueLoop()) {
-          const answer = DialogueUtils.getDialogueUserAnswerValue();
-          dialogueUserAnswers.push(answer);
-          dialogueContext.LastStudentAnswer = answer;
-          console.log("getDialogFeedbackForAnswer2",JSON.parse(JSON.stringify(dialogueContext)));
-          Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+          speechTranscriptionTimeoutsSeen = 0;
+          if(DialogueUtils.isUserInDialogueIntroExit()){
+            if(transcript === "continue"){
+              dialogueContinue();
+            }else{
+              startRecording(); //continue trying to see if they do voice continue
+            }
+          }else{
+            const answer = DialogueUtils.getDialogueUserAnswerValue();
+            dialogueUserAnswers.push(answer);
+            dialogueContext.LastStudentAnswer = answer;
+            console.log("getDialogFeedbackForAnswer2",JSON.parse(JSON.stringify(dialogueContext)));
+            Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
+          }
         } else {
             if(inUserForceCorrect){
               handleUserForceCorrectInput({},"voice");
