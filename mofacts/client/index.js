@@ -136,7 +136,6 @@ Template.body.events({
       if(!!window.currentAudioObj){
         window.currentAudioObj.pause();
       }
-      sdfasd
       //Clear out studentUsername in case we are a teacher/admin who previously
       //navigated to this page for a particular student and want to see our own progress
       Session.set("studentUsername",null);
@@ -194,12 +193,6 @@ Template.registerHelper('isLoggedIn', function (){
 
 Template.registerHelper('showPerformanceDetails', function(){
   return (Session.get("curModule") == "card" || Session.get("curModule") == "instructions") && Session.get("scoringEnabled");
-  // var curLocation = Router.current().location.get().path;
-  // if(curLocation == "/card" || curLocation == "/instructions"){
-  //   return true;
-  // }else{
-  //   return false;
-  // }
 });
 
 Template.registerHelper('currentScore', function() {

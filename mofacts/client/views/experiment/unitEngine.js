@@ -764,7 +764,7 @@ function modelUnitEngine() {
                     TDFId,
                     KCId:card.clusterKC,
                     componentType:'cluster',
-                    probabilityEstimate: null,
+                    probabilityEstimate: -1,
                     firstSeen:card.firstSeen,
                     lastSeen:card.lastSeen,
                     priorCorrect:card.priorCorrect,
@@ -805,7 +805,7 @@ function modelUnitEngine() {
                     userId,
                     TDFId,
                     componentType:'response',
-                    probabilityEstimate: null,
+                    probabilityEstimate: -1,
                     firstSeen:response.firstSeen,
                     lastSeen:response.lastSeen,
                     priorCorrect:response.priorCorrect,
@@ -815,11 +815,10 @@ function modelUnitEngine() {
                     currentUnit,
                     currentUnitType: 'learningsession',
                     outcomeStack: response.outcomeStack.join(','),
-                    responseText //not actually in db, need to lookup/assign kcid
+                    responseText //not actually in db, need to lookup/assign kcid when loading
                 };
                 componentStates.push(responseState);
             }
-            //let probs = cardProbabilities.probs;//We grab this from the history table
             console.log("saveComponentStates",JSON.parse(JSON.stringify(componentStates)));
             await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),currentUnit,componentStates);
         },
@@ -834,7 +833,6 @@ function modelUnitEngine() {
             let numCorrectAnswers = 0;
             let probsMap = {};
             let cards = cardProbabilities.cards;
-            console.log("loadComponentStates test:",JSON.parse(JSON.stringify(cardProbabilities)));
 
             let componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),Session.get("currentUnitNumber"));
             console.log("loadComponentStates,componentStates:",componentStates)
@@ -846,7 +844,7 @@ function modelUnitEngine() {
                     }
                 }
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
-                console.log("loadcomponentstates,length==0:",cards,stimulusKCs,stimProbabilityEstimates);
+                console.log("loadcomponentstates,length==0:",cards);
                 for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
                     let card = cardProbabilities.cards[cardIndex];
                     if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
@@ -858,16 +856,15 @@ function modelUnitEngine() {
                         probsMap[cardIndex][stimIndex] = stim.previousCalculatedProbabilities;
                     }
                 }
-                console.log("loadComponentStates",probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
+                console.log("loadComponentStates1",cards,probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
             }else{ 
                 let componentCards = componentStates.filter(x => x.componentType == 'cluster');
                 let stims = componentStates.filter(x => x.componentType == 'stimulus');
 
                 let stimulusKCs = stims.map(x => x.KCId);
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
-                console.log("loadcomponentstates,length!=0:",stims,stimulusKCs,stimProbabilityEstimates);
+                console.log("loadcomponentstates,length!=0:",cards,stims);
                 for(let componentCard of componentCards){
-                    //console.log('card.clusterKC',card.clusterKC);
                     let clusterKC = componentCard.clusterKC;
                     componentCard.outcomeStack = componentCard.outcomeStack.split(',');
                     componentCard.hasBeenIntroduced = true;
@@ -901,7 +898,7 @@ function modelUnitEngine() {
                     let modelResponse = cardProbabilities.responses.find(x => x.KCId == response.KCId);
                     Object.assign(modelResponse,response);
                 }
-                console.log("loadComponentStates",probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
+                console.log("loadComponentStates2",cards,stims,probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
             }
 
             var initProbs = [];
@@ -988,10 +985,8 @@ function modelUnitEngine() {
                 break;
               default:
                 newProbIndex = findMaxProbCard(cards, probs, 0.90);
-                console.log("!!!!!! select next card:",newProbIndex);
                 if (newProbIndex === -1) {
                     newProbIndex = findMinProbCard(cards, probs);
-                    console.log("!!!!!! select next card2:",newProbIndex);
                 }
                 break;
             }
@@ -1085,16 +1080,6 @@ function modelUnitEngine() {
                     card.trialsSinceLastSeen += 1;
                 }
             });
-
-            
-            //let idx = Session.get("clusterIndex");
-            //let card = cardProbabilities.cards[idx];
-            //let cluster = getStimCluster(idx);
-            // let responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].correctResponse));
-            // let responseData = {
-            //   responseText: responseText,
-            //   lastSeen: Date.now()
-            // };
             
             await this.saveComponentStates();
             await updateExperimentState(newExperimentState,"unitEngine.modelUnitEngine.selectNextCard");
@@ -1150,9 +1135,7 @@ function modelUnitEngine() {
                 if (wasCorrect) card.priorCorrect += 1;
                 else            card.priorIncorrect += 1;
 
-                console.log("cardoutcomehistory before: " + JSON.stringify(card.outcomeStack));
                 card.outcomeStack.push(wasCorrect ? 1 : 0);
-                console.log("cardoutcomehistory after: " + JSON.stringify(card.outcomeStack));
                 let stim = currentCardInfo.whichStim;
                 if (stim >= 0 && stim < card.stims.length) {
                     if (wasCorrect) card.stims[stim].priorCorrect += 1;
@@ -1170,11 +1153,8 @@ function modelUnitEngine() {
                 if (wasCorrect) resp.priorCorrect += 1;
                 else            resp.priorIncorrect += 1;
 
-                console.log("resp.outcomeStack before: " + JSON.stringify(resp.outcomeStack));
                 resp.outcomeStack.push(wasCorrect ? 1 : 0);
-                console.log("resp.outcomeStack after: " + JSON.stringify(resp.outcomeStack));
-            }
-            else {
+            } else {
                 console.log("COULD NOT STORE RESPONSE METRICS",
                     answerText,
                     currentCardInfo.whichStim,
