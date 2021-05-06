@@ -31,7 +31,7 @@ function getComponentState(componentState){
         TDFId: componentState.tdfid,
         KCId: componentState.kcid,
         componentType: componentState.componenttype,
-        probabilityEstimate: componentState.probabilityestimate,
+        probabilityEstimate: parseFloat(componentState.probabilityestimate),
         firstSeen: componentState.firstseen,
         lastSeen: componentState.lastseen,
         priorCorrect: componentState.priorcorrect,

@@ -12,9 +12,9 @@ import {
 import { updateExperimentState } from './card';
 import { KC_MULTIPLE, MODEL_UNIT, SCHEDULE_UNIT } from '../../../common/Definitions';
 
-function create(func,curExperimentData) {
+async function create(func,curExperimentData) {
     var engine = _.extend(defaultUnitEngine(curExperimentData), func());
-    engine.init();
+    await engine.init();
     return engine;
 }
 
@@ -30,11 +30,11 @@ function getStimAnswer(clusterIndex, whichAnswer) {
     return getStimCluster(clusterIndex).stims[whichAnswer].correctResponse;
 };
 
-createEmptyUnit = function(curExperimentData) { return create(emptyUnitEngine,curExperimentData); };
+createEmptyUnit = async function(curExperimentData) { return await create(emptyUnitEngine,curExperimentData); };
 
-createModelUnit = function(curExperimentData) { return create(modelUnitEngine,curExperimentData); };
+createModelUnit = async function(curExperimentData) { return await create(modelUnitEngine,curExperimentData); };
 
-createScheduleUnit = function(curExperimentData) { return create(scheduleUnitEngine,curExperimentData); };
+createScheduleUnit = async function(curExperimentData) { return await create(scheduleUnitEngine,curExperimentData); };
 
 // Return an instance of the "base" engine
 function defaultUnitEngine(curExperimentData) {
@@ -48,13 +48,13 @@ function defaultUnitEngine(curExperimentData) {
         loadComponentStates: function() { },
 
         // Optional functions that engines can replace if they want
-        initImpl: function() { },
+        initImpl: async function() { },
         reinitializeClusterListsFromCurrentSessionData: function() { },
 
         // Functions we supply
-        init: function() {
+        init: async function() {
             console.log("Engine created for unit:", this.unitType);
-            this.initImpl();
+            await this.initImpl();
         },
 
         getSubClozeAnswerSyllables: function(answer,displaySyllableIndices,cachedSyllables){
@@ -346,9 +346,10 @@ function modelUnitEngine() {
                 throw new Error("We shouldn't ever get here, dynamic tdf cluster list error");
             }
         }else{
+            let sessCurUnit = JSON.parse(JSON.stringify(Session.get("currentTdfUnit")));
             // Figure out which cluster numbers that they want
-            console.log("setupclusterlist:",this.curUnit);
-            const unitClusterList = _.chain(this.curUnit)
+            console.log("setupclusterlist:",this.curUnit,sessCurUnit);
+            const unitClusterList = _.chain(this.curUnit || sessCurUnit)
             .prop("learningsession").first()
             .prop("clusterlist").trim().value();
             extractDelimFields(unitClusterList, clusterList);
@@ -360,6 +361,7 @@ function modelUnitEngine() {
                 cards[_.intval(nums[j])].canUse = true;
             }
         }
+        console.log("setupClusterList,cards:",cards);
     }
 
     // Initialize cards as we'll need them for the created engine (for current
@@ -587,7 +589,7 @@ function modelUnitEngine() {
 
         //console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
 
-        console.log("model user data:",JSON.stringify(p));
+        console.log("model user data:",p);
         return probFunction(p);
     }
 
@@ -835,6 +837,7 @@ function modelUnitEngine() {
             console.log("loadComponentStates test:",JSON.parse(JSON.stringify(cardProbabilities)));
 
             let componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),Session.get("currentUnitNumber"));
+            console.log("loadComponentStates,componentStates:",componentStates)
             if(componentStates.length == 0){  //No prior history, we assume KCs could have been affected by other units using them
                 let stimulusKCs = [];
                 for(let curCard of cards){
@@ -843,6 +846,7 @@ function modelUnitEngine() {
                     }
                 }
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
+                console.log("loadcomponentstates,length==0:",cards,stimulusKCs,stimProbabilityEstimates);
                 for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
                     let card = cardProbabilities.cards[cardIndex];
                     if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
@@ -859,8 +863,9 @@ function modelUnitEngine() {
                 let componentCards = componentStates.filter(x => x.componentType == 'cluster');
                 let stims = componentStates.filter(x => x.componentType == 'stimulus');
 
-                let stimulusKCs = stims.map(x => x.stimulusKC);
+                let stimulusKCs = stims.map(x => x.KCId);
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
+                console.log("loadcomponentstates,length!=0:",stims,stimulusKCs,stimProbabilityEstimates);
                 for(let componentCard of componentCards){
                     //console.log('card.clusterKC',card.clusterKC);
                     let clusterKC = componentCard.clusterKC;
@@ -949,6 +954,7 @@ function modelUnitEngine() {
         })(),
 
         initImpl: async function() {
+            console.log("!!!! initImpl, curUnit:",JSON.parse(JSON.stringify(this.curUnit || "blah")));
             Session.set("unitType",MODEL_UNIT);
             initializeActRModel();
         },
@@ -982,8 +988,10 @@ function modelUnitEngine() {
                 break;
               default:
                 newProbIndex = findMaxProbCard(cards, probs, 0.90);
+                console.log("!!!!!! select next card:",newProbIndex);
                 if (newProbIndex === -1) {
                     newProbIndex = findMinProbCard(cards, probs);
+                    console.log("!!!!!! select next card2:",newProbIndex);
                 }
                 break;
             }
@@ -1015,7 +1023,7 @@ function modelUnitEngine() {
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
-            console.log("!!!!!!!!!! select next card:",cardIndex,whichStim);
+            console.log("select next card:",newProbIndex,cardIndex,whichStim);
 
 
             let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
