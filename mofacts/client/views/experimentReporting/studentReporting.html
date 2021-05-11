@@ -11,8 +11,8 @@
     <div>
       <h2>Select Chapter</h2>
       <select id="tdf-select">
-          <option value="invalid" disabled="true">Select a tdf</option>
-          <option value="xml">All</option>
+          <option value="invalid">Select a tdf</option> <!-- disabled="false" -->
+          <!-- <option value="xml">All</option> -->
           {{#each studentReportingTdfs}}
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
@@ -36,6 +36,19 @@
           </tr>
         {{/if}}
       </table>
+    </div>
+    <div>
+      <h2>Progress Charts</h2>
+      <div>
+        <h3>Corrrectness Across Repetitions of the Same Fill-in</h3>
+        <div class="graphs halfWidth centerForDesktop">
+         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
+        </div>
+        <h3>Current Estimate of Recall</h3>
+        <div class="graphs halfWidth centerForDesktop">
+         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="cardProbsChart"></div>
+        </div>
+      </div>
     </div>
     <div>
       <p>To see progress on a given chapter, you may select it from the "Select Chapter" dropdown.  If you don't see a chapter in the dropdown, that means you haven't practiced it.</p>

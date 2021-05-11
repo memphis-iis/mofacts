@@ -433,7 +433,7 @@ function modelUnitEngine() {
                 var response = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(rawResponse));
                 if (!(response in initResponses)) {
                     initResponses[response] = {
-                        KCId: reponseKCMap[rawResponse],
+                        KCId: reponseKCMap[response],
                         priorCorrect: 0,
                         priorIncorrect: 0,
                         firstSeen: 0,
@@ -755,7 +755,6 @@ function modelUnitEngine() {
         saveComponentStates: async function(){
             let userId = Meteor.userId();
             let TDFId = Session.get("currentTdfId");
-            let currentUnit = Session.get("currentUnitNumber");
             let componentStates = [];
             for(let cardIndex=0;cardIndex<cardProbabilities.cards.length;cardIndex++){
                 let card = cardProbabilities.cards[cardIndex];
@@ -764,15 +763,14 @@ function modelUnitEngine() {
                     TDFId,
                     KCId:card.clusterKC,
                     componentType:'cluster',
-                    probabilityEstimate: -1,
+                    probabilityEstimate: null, //probabilityEstimates only exist for stimuli, not clusters or responses
                     firstSeen:card.firstSeen,
                     lastSeen:card.lastSeen,
+                    trialsSinceLastSeen:card.trialsSinceLastSeen,
                     priorCorrect:card.priorCorrect,
                     priorIncorrect:card.priorIncorrect,
                     priorStudy:card.priorStudy,
                     totalPracticeDuration: card.totalPracticeDuration,
-                    currentUnit,
-                    currentUnitType: 'learningsession',
                     outcomeStack: card.outcomeStack.join(',')
                 };
                 componentStates.push(cardState);
@@ -791,8 +789,6 @@ function modelUnitEngine() {
                         priorIncorrect:stim.priorIncorrect,
                         priorStudy:stim.priorStudy,
                         totalPracticeDuration: stim.totalPracticeDuration,
-                        currentUnit,
-                        currentUnitType: 'learningsession',
                         outcomeStack: stim.outcomeStack.join(',')
                     };
                     componentStates.push(stimState);
@@ -805,22 +801,20 @@ function modelUnitEngine() {
                     userId,
                     TDFId,
                     componentType:'response',
-                    probabilityEstimate: -1,
+                    probabilityEstimate: null, //probabilityEstimates only exist for stimuli, not clusters or responses
                     firstSeen:response.firstSeen,
                     lastSeen:response.lastSeen,
                     priorCorrect:response.priorCorrect,
                     priorIncorrect:response.priorIncorrect,
                     priorStudy:response.priorStudy,
                     totalPracticeDuration: response.totalPracticeDuration,
-                    currentUnit,
-                    currentUnitType: 'learningsession',
                     outcomeStack: response.outcomeStack.join(','),
                     responseText //not actually in db, need to lookup/assign kcid when loading
                 };
                 componentStates.push(responseState);
             }
             console.log("saveComponentStates",JSON.parse(JSON.stringify(componentStates)));
-            await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),currentUnit,componentStates);
+            await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),componentStates);
         },
         loadComponentStates: async function(){//componentStates [{},{}]
             console.log("loadComponentStates start");
@@ -834,7 +828,7 @@ function modelUnitEngine() {
             let probsMap = {};
             let cards = cardProbabilities.cards;
 
-            let componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),Session.get("currentUnitNumber"));
+            let componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"));
             console.log("loadComponentStates,componentStates:",componentStates)
             if(componentStates.length == 0){  //No prior history, we assume KCs could have been affected by other units using them
                 let stimulusKCs = [];
@@ -844,7 +838,7 @@ function modelUnitEngine() {
                     }
                 }
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
-                console.log("loadcomponentstates,length==0:",cards);
+                console.log("loadcomponentstates,length==0:",cardProbabilities);
                 for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
                     let card = cardProbabilities.cards[cardIndex];
                     if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
@@ -853,37 +847,44 @@ function modelUnitEngine() {
                         let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == stim.stimulusKC) || {};
                         stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
                         if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
-                        probsMap[cardIndex][stimIndex] = stim.previousCalculatedProbabilities;
                     }
                 }
                 console.log("loadComponentStates1",cards,probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
             }else{ 
+                let curKCBase = getStimKCBaseForCurrentStimuliSet();
                 let componentCards = componentStates.filter(x => x.componentType == 'cluster');
                 let stims = componentStates.filter(x => x.componentType == 'stimulus');
+                let responses = componentStates.filter(x => x.componentType == 'response');
 
                 let stimulusKCs = stims.map(x => x.KCId);
                 const stimProbabilityEstimates = await meteorCallAsync('getProbabilityEstimatesByKCId',stimulusKCs);
-                console.log("loadcomponentstates,length!=0:",cards,stims);
+                console.log("loadcomponentstates,length!=0:",cards,stims,responses,cardProbabilities);
                 for(let componentCard of componentCards){
-                    let clusterKC = componentCard.clusterKC;
-                    componentCard.outcomeStack = componentCard.outcomeStack.split(',');
-                    componentCard.hasBeenIntroduced = true;
-
-                    let modelCard = cards[clusterKC];
-                    Object.assign(modelCard,componentCard);
+                    let clusterKC = componentCard.KCId;
+                    let cardIndex = clusterKC % curKCBase;
+                    let modelCard = cards[cardIndex];
+                    let componentData = _.pick(componentCard,['firstSeen','lastSeen','priorCorrect','priorIncorrect','priorStudy','totalPracticeDuration']);
+                    componentData.clusterKC = clusterKC;
+                    componentData.outcomeStack = componentCard.outcomeStack;
+                    componentData.hasBeenIntroduced = true;
+                    Object.assign(modelCard,componentData);
                     let clusterProbs = stimProbabilityEstimates.filter(x => x.kcid == clusterKC) || {};
                     modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates || [];
                 }
                 for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
                     let modelCard = cards[cardIndex];
+
+                    let clusterKC = modelCard.KCId;
                     if(!probsMap[cardIndex]) probsMap[cardIndex] = {};
-                    modelCard.otherPracticeTime = cards.filter(x => x.clusterKC != cardIndex).reduce((acc,card) => acc + card.totalPracticeDuration);
+                    let filter1 = cards.filter(x => x.clusterKC != clusterKC);
+                    modelCard.otherPracticeTime = filter1.reduce((acc,card) => acc + card.totalPracticeDuration,0);
                     let curStims = stims.filter(x => x.clusterKC == cardIndex);
                     for(let componentStim of curStims){
                         let stimulusKC = componentStim.stimulusKC % KC_MULTIPLE;
                         let modelStim = modelCard.stims.find(x => x.stimulusKC == stimulusKC);
                         Object.assign(modelStim,componentStim);
                         let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == componentStim.stimulusKC) || {};
+                        modelStim.otherPracticeTime = cards.reduce((acc,card) => acc + card.stims.filter(x => x.stimulusKC != stimulusKC).reduce((acc,stim) => acc + stim.totalPracticeDuration,0),0);
                         modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
                         let stimIndex = modelStim.stimIndex;
                         if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
@@ -893,12 +894,11 @@ function modelUnitEngine() {
                     }
                 }
 
-                let responses = componentStates.filter(x => x.componentType == 'response');
                 for(let response of responses){
-                    let modelResponse = cardProbabilities.responses.find(x => x.KCId == response.KCId);
+                    let modelResponse = Object.values(cardProbabilities.responses).find(x => x.KCId == response.KCId);
                     Object.assign(modelResponse,response);
                 }
-                console.log("loadComponentStates2",cards,stims,probsMap,componentStates,stimulusKCs,stimProbabilityEstimates)
+                console.log("loadComponentStates2",cards,stims,probsMap,componentStates,stimulusKCs,stimProbabilityEstimates);
             }
 
             var initProbs = [];

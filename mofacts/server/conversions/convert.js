@@ -1,5 +1,6 @@
 export { getNewItemFormat, getNewTdfFormat };
 import { STIM_PARAMETER, KC_MULTIPLE } from '../../common/Definitions';
+import { getDisplayAnswerText } from '../methods';
 
 const fs = require('fs');
 
@@ -73,11 +74,13 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
         }
 
         let responseKC;
-        if(responseKCMap[stim.response.correctResponse] || responseKCMap[stim.response.correctResponse] == 0){
-          responseKC = responseKCMap[stim.response.correctResponse];
+        let answerText = getDisplayAnswerText(stim.response.correctResponse);
+        
+        if(responseKCMap[answerText] || responseKCMap[answerText] == 0){
+          responseKC = responseKCMap[answerText];
         }else{
           responseKC = curResponseKCCtr;
-          responseKCMap[stim.response.correctResponse] = JSON.parse(JSON.stringify(curResponseKCCtr));
+          responseKCMap[answerText] = JSON.parse(JSON.stringify(curResponseKCCtr));
           curResponseKCCtr += 1;
         }
         let item = {

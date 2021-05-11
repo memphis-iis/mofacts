@@ -188,7 +188,6 @@ function getStimCluster(clusterMappedIndex=0) {
         cluster.stims.push(stim);
       }
     }
-    console.log('getStimCluster',cluster);
     //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
     return cluster;
 };
