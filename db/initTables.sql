@@ -152,12 +152,11 @@ CREATE TABLE componentState (
     probabilityEstimate NUMERIC(4,3),
     firstSeen BIGINT NOT NULL,
     lastSeen BIGINT NOT NULL,
+    trialsSinceLastSeen INTEGER,
     priorCorrect INTEGER NOT NULL,
     priorIncorrect INTEGER NOT NULL,
     priorStudy INTEGER NOT NULL,
     totalPracticeDuration INTEGER NOT NULL,
-    currentUnit INTEGER NOT NULL,
-    currentUnitType unitType NOT NULL,
     outcomeStack VARCHAR(255)
 );
 

@@ -110,7 +110,6 @@ doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, para
 //     totalPromptDuration INTEGER NOT NULL,
 //     totalStudyDuration INTEGER NOT NULL,
 //     totalInterference INTEGER NOT NULL,
-//     currentUnit INTEGER NOT NULL,
 //     outcomeStack VARCHAR(255)
 // );
 

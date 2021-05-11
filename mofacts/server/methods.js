@@ -5,7 +5,7 @@ import * as ElaboratedFeedback from "./lib/CachedElaboratedFeedback";
 import * as DefinitionalFeedback from "../server/lib/DefinitionalFeedback.js";
 import * as ClozeAPI from "../server/lib/ClozeAPI.js";
 import { getNewItemFormat } from "./conversions/convert";
-export { getTdfByFileName, getTdfBy_id, getHistoryByTDFfileName, getListOfStimTags, getStimuliSetById };
+export { getTdfByFileName, getTdfBy_id, getHistoryByTDFfileName, getListOfStimTags, getStimuliSetById, getDisplayAnswerText };
 import { getItem, getComponentState, getCourse, getTdf } from './orm';
 
 /*jshint sub:true*/
@@ -264,20 +264,21 @@ async function getOutcomeHistoryByUserAndTDFfileName(userId,TDFfileName){
 
 async function getReponseKCMap(){
   let responseKCStuff = await db.manyOrNone('SELECT DISTINCT correctResponse, responseKC FROM item');
-  //console.log("getResponseKCMap:",responseKCStuff);
   let responseKCMap = {};
   for(let row of responseKCStuff){
     let correctresponse = row.correctresponse;
     let responsekc = row.responsekc;
-    responseKCMap[correctresponse] = responsekc;
+
+    let answerText = getDisplayAnswerText(correctresponse);
+    responseKCMap[answerText] = responsekc;
   }
-  //console.log("getResponseKCMap2:",responseKCMap);
+  
   return responseKCMap;
 }
 
 //by currentTdfId, not currentRootTDFId
-async function getComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,curUnitNum){
-  let componentStatesRet = await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 AND currentUnit = $3 ORDER BY componentStateId',[userId,TDFId,curUnitNum]);
+async function getComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId){
+  let componentStatesRet = await db.manyOrNone('SELECT * FROM componentState WHERE userId = $1 AND TDFId = $2 ORDER BY componentStateId',[userId,TDFId]);
   let componentStates = [];
   for(let componentState of componentStatesRet){
     componentStates.push(getComponentState(componentState));
@@ -285,7 +286,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,curUnitNum
   return componentStates;
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,currentUnit,componentStates){
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,componentStates){
   let responseComponentStates = componentStates.filter(x => x.componentType == 'response');
   console.log("SetComponentTest",responseComponentStates.length,responseComponentStates);
   const res = await db.tx(async t => {
@@ -302,17 +303,42 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,currentUni
       delete responseState.responseText;
     }
     for(let componentState of componentStates){
-      await t.none('DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND currentUnit=$3 AND KCId=$4',[userId,TDFId,currentUnit,componentState.KCId]);
+      await t.none('DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3',[userId,TDFId,componentState.KCId]);
       await t.none('INSERT INTO componentState(userId,TDFId,KCId,componentType,probabilityEstimate, \
-        firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, \
-        currentUnit,currentUnitType, outcomeStack) VALUES(${userId},${TDFId}, \
+        firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, outcomeStack) VALUES(${userId},${TDFId}, \
         ${KCId}, ${componentType}, ${probabilityEstimate}, ${firstSeen}, ${lastSeen}, \
-        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${currentUnit}, \
-        ${currentUnitType},${outcomeStack})',componentState);
+        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${outcomeStack})',componentState);
     }
     return {userId,TDFId};
   })
   return res;
+}
+
+stripSpacesAndLowerCase = function(input){
+  return input.replace(/ /g,'').toLowerCase();
+}
+
+function getDisplayAnswerText(answer) {
+  return answerIsBranched(answer) ? stripSpacesAndLowerCase(_branchingCorrectText(answer)) : stripSpacesAndLowerCase(answer);
+}
+
+function answerIsBranched(answer) {
+  return _.trim(answer).indexOf(';') >= 0;
+}
+
+function _branchingCorrectText(answer) {
+  var result = "";
+
+  var branches = _.trim(answer).split(';');
+  if (branches.length > 0) {
+      var flds = branches[0].split('~');
+      if (flds.length == 2) {
+          result = flds[0];
+      }
+  }
+
+  result = result.split('|');
+  return result[0];
 }
 
 async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
@@ -332,7 +358,8 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
   let responseKCMap = {};
   let maxResponseKC = 1;
   for(let pair of responseKCStuff){
-    responseKCMap[pair.correctResponse] = pair.responsekc;
+    let answerText = getDisplayAnswerText(pair.correctResponse);
+    responseKCMap[answerText] = pair.responsekc;
     if(pair.responsekc > maxResponseKC){
       maxResponseKC = pair.responsekc;
     }
@@ -350,12 +377,14 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
       clusterKCTranslationMap[stim.clusterKC] = curNewClusterKC;
       curNewClusterKC += 1;
     }
-    if(isEmpty(responseKCMap[stim.correctResponse])){
-      responseKCMap[stim.correctResponse] = curNewResponseKC;
+
+    let stimAnswerText = getDisplayAnswerText(stim.correctResponse);
+    if(isEmpty(responseKCMap[stimAnswerText])){
+      responseKCMap[stimAnswerText] = curNewResponseKC;
       curNewResponseKC += 1;
     }
     stim.stimulusKC = stimulusKCTranslationMap[stim.stimulusKC];
-    stim.responseKC = responseKCMap[stim.correctResponse]
+    stim.responseKC = responseKCMap[stimAnswerText]
     stim.clusterKC = clusterKCTranslationMap[stim.clusterKC];
   }
   const res = await db.tx(async t => {
@@ -842,15 +871,42 @@ async function getStimCountByStimuliSetId(stimuliSetId){
   return ret.count;
 }
 
+async function getStudentReportingData(userId, TDFid){
+  let query = "SELECT ordinality, SUM(CASE WHEN outcome='1' THEN 1 ELSE 0 END) as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
+               unnest(string_to_array(outcomestack,',')) WITH ORDINALITY as outcome WHERE componentType='stimulus' AND USERId=$1 AND TDFId=$2 GROUP BY ordinality ORDER BY ORDINALITY ASC LIMIT 5;";
+  const dataRet = await db.manyOrNone(query,[userId, TDFid]);
+  let correctnessAcrossRepetitions = [];
+  for(let curData of dataRet){
+    let numCorrect = parseInt(curData.numcorrect);
+    let numTotal = parseInt(curData.numtotal);
+    correctnessAcrossRepetitions.push({
+      numCorrect,
+      numTotal,
+      percentCorrect: Math.round( (numCorrect / numTotal) * 100 )
+    });
+  }
+
+  let query2 = "SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, componentState.KCId from componentState JOIN item ON componentState.kcid=item.stimuluskc WHERE componentType='stimulus' AND userId=$1 AND TDFId=$2;";
+  const dataRet2 = await db.manyOrNone(query2,[userId, TDFid]);
+  let probEstimates = [];
+  for(let curData of dataRet2){
+    probEstimates.push({
+      stimulus: curData.clozestimulus || curData.textstimulus,
+      probabilityEstimate: Math.round(100 * parseFloat(curData.probabilityestimate))
+    })
+  }
+  return {correctnessAcrossRepetitions,probEstimates};
+}
+
 async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
+  console.log("getStudentPerformanceByIdAndTDFId",userId, TDFid);
   let query = "SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration \
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.currentUnitType = 'learningsession' \
-               GROUP BY s.userId";
+               WHERE s.userId=$1 AND t.TDFId=$2";
   const perfRet = await db.oneOrNone(query,[userId,TDFid]);
   if(!perfRet) return null;
   return {
@@ -872,7 +928,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                 INNER JOIN assignment AS a on a.TDFId = t.TDFId \
                 INNER JOIN course AS c on c.courseId = t.courseId \
-                WHERE c.semester = $1, c.teacherUserId = $2 AND s.currentUnitType = 'learningsession' \
+                WHERE c.semester = $1, c.teacherUserId = $2 \
                 GROUP BY s.userId, t.TDFId, c.courseId";
 
   const studentPerformanceRet = await db.oneOrNone(query,[curSemester,instructorId]);
@@ -925,7 +981,9 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId,onlyWithLearningSess
   let tdfsAttempted = [];
   for(let obj of tdfRet){
     let tdfid = obj.tdfid;
-    let tdfObject = allTdfs.findOne(x => x.tdfid == tdfid).content;
+    let tdf = allTdfs.find(x => x.TDFId == tdfid);
+    if(!tdf) continue; //Handle a case where user has data from a no longer existing tdf
+    let tdfObject = tdf.content;
     if(!tdfObject.tdfs.tutor.unit) continue;//TODO: fix root/condition tdfs
 
     if(onlyWithLearningSessions){
@@ -1393,7 +1451,7 @@ Meteor.startup(async function () {
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
       getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdTDFIdAndUnitNum,
       insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdTDFIdAndUnitNum,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
-      getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,
+      getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,getStudentReportingData,
 
       getAltServerUrl:function(){
         return altServerUrl;

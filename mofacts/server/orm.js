@@ -25,23 +25,26 @@ function getItem(stim){
 }
 
 function getComponentState(componentState){
-    return {
+    let outputComponentState = {
         componentStateId: componentState.componentstateid,
         userId: componentState.userid,
         TDFId: componentState.tdfid,
         KCId: componentState.kcid,
         componentType: componentState.componenttype,
-        probabilityEstimate: parseFloat(componentState.probabilityestimate),
-        firstSeen: componentState.firstseen,
-        lastSeen: componentState.lastseen,
+        firstSeen: parseInt(componentState.firstseen),
+        lastSeen: parseInt(componentState.lastseen),
         priorCorrect: componentState.priorcorrect,
         priorIncorrect: componentState.priorincorrect,
         priorStudy: componentState.priorstudy,
         totalPracticeDuration: componentState.totalPracticeDuration,
-        currentUnit: componentState.currentUnit,
-        currentUnitType: componentState.currentunittype,
-        outcomeStack: componentState.outcomestack
+        outcomeStack: componentState.outcomestack.split(',').filter(x => x!=="").map(x => parseInt(x))
     }
+    if(componentState.componenttype==='stimulus'){
+        outputComponentState.probabilityEstimate = parseFloat(componentState.probabilityestimate);
+    }else if(componentState.componenttype==='cluster'){
+        outputComponentState.trialsSinceLastSeen = componentState.trialsSinceLastSeen;
+    }
+    return outputComponentState;
 }
 
 function getCourse(course){
