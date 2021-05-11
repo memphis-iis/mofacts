@@ -438,7 +438,7 @@ async function getAllCourseSections(){
 
 async function getAllCoursesForInstructor(instructorId){
   console.log("getAllCoursesForInstructor:",instructorId);
-  let query = "SELECT * from course WHERE teacherUserId=$1 AND semester=$2";
+  let query = "SELECT *, (SELECT array_agg(section.sectionName) as sectionNames FROM section WHERE courseId=course.courseId) from course WHERE teacherUserId=$1 AND semester=$2";
   const coursesRet = await db.any(query,[instructorId,curSemester]);
   let courses = [];
   for(let course of coursesRet){
@@ -486,15 +486,16 @@ async function editCourseAssignments(newCourseAssignment){ //Shape: {coursename:
       let tdfsRemoved = getSetAMinusB(existingTdfs,newTdfs);
 
       const tdfNamesAndIDs = await t.manyOrNone("SELECT TDFId, content -> 'fileName' AS filename from tdf");
-      console.log("tdfNamesAndIDs",tdfNamesAndIDs);
+      //console.log("tdfNamesAndIDs",tdfNamesAndIDs);
       let tdfNameIDMap = {};
       for(let tdfNamesAndID of tdfNamesAndIDs){
         tdfNameIDMap[tdfNamesAndID.filename] = tdfNamesAndID.tdfid;
       }
-      console.log("tdfNameIDMap",tdfNameIDMap);
+      //console.log("tdfNameIDMap",tdfNameIDMap);
   
       for(let tdfName of tdfsAdded){
         let TDFId = tdfNameIDMap[tdfName];
+        console.log("editCourseAssignments tdf:",TDFId,tdfName,tdfsAdded,tdfsRemoved,curCourseAssignments,existingTdfs,newTdfs)
         await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)',[newCourseAssignment.courseid,TDFId]);
       }
       for(let tdfName of tdfsRemoved){
@@ -512,7 +513,7 @@ async function editCourseAssignments(newCourseAssignment){ //Shape: {coursename:
 
 async function getTdfAssignmentsByCourseIdMap(instructorId){
     console.log("getTdfAssignmentsByCourseIdMap",instructorId);
-    let query = "SELECT t.content -> 'tdfs.tutor.setspec[0].lessonname[0]' AS displayname, TDFId, a.courseId \
+    let query = "SELECT t.content #> array['tdfs','tutor','setspec','0','lessonname','0'] AS displayname, a.TDFId, a.courseId \
                  FROM assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
@@ -720,7 +721,7 @@ function getAllTeachers(southwestOnly=false){
 async function addCourse(mycourse){
   console.log("addCourse:" + JSON.stringify(mycourse));
   const res = await db.tx(async t => {
-    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) VALUES(${coursename}, ${teacheruserid}, ${semester}, ${beginDate}) RETURNING courseId',mycourse)
+    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) VALUES(${courseName}, ${teacherUserId}, ${semester}, ${beginDate}) RETURNING courseId',mycourse)
     .then(async row => {
       let courseId = row.courseid;
       for(let sectionName of mycourse.sections){
@@ -918,7 +919,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid){
 
 async function getStudentPerformanceForClassAndTdfId(instructorId){
   let query =  "SELECT MAX(t.TDFId) AS tdfid, \
-                MAX(t.courseId) AS courseid, \
+                MAX(c.courseId) AS courseid, \
                 MAX(s.userId) AS userid, \
                 SUM(s.priorCorrect) AS correct, \
                 SUM(s.priorIncorrect) AS incorrect, \
@@ -927,11 +928,14 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
                 INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                 INNER JOIN assignment AS a on a.TDFId = t.TDFId \
-                INNER JOIN course AS c on c.courseId = t.courseId \
-                WHERE c.semester = $1, c.teacherUserId = $2 \
+                INNER JOIN course AS c on c.courseId = a.courseId \
+                WHERE c.semester = $1 AND c.teacherUserId = $2 \
                 GROUP BY s.userId, t.TDFId, c.courseId";
 
   const studentPerformanceRet = await db.oneOrNone(query,[curSemester,instructorId]);
+  console.log("studentPerformanceRet",studentPerformanceRet);
+  if(studentPerformanceRet==null)
+    return [];
   let studentPerformanceForClass = {};
   let studentPerformanceForClassAndTdfIdMap = {};
   for(let studentPerformance of studentPerformanceRet){
@@ -1299,6 +1303,7 @@ async function loadStimsAndTdfsFromPrivate(adminUserId){
               stimuliSetId =  JSON.parse(JSON.stringify(higheststimsetid));
             }
           }
+          filename = filename.replace(".xml",curSemester + ".xml");
           let rec = {'fileName':filename, 'tdfs':json, 'ownerId':adminUserId, 'source':'repo'};
           await upsertTDFFile(filename,rec,adminUserId,stimuliSetId);
         //}catch(e){
@@ -1451,7 +1456,7 @@ Meteor.startup(async function () {
       setExperimentState,getStudentPerformanceForClassAndTdfId,getUserIdforUsername,getStimuliSetsForIdSet,insertStimTDFPair,
       getProbabilityEstimatesByKCId,getOutcomeHistoryByUserAndTDFfileName,getReponseKCMap,getComponentStatesByUserIdTDFIdAndUnitNum,
       insertHistory,getHistoryByTDFfileName,setComponentStatesByUserIdTDFIdAndUnitNum,getPracticeTimeIntervalsMap,getStimuliSetByFilename,
-      getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,getStudentReportingData,
+      getSourceSentences,loadStimsAndTdfsFromPrivate,getListOfStimTags,getStudentReportingData,getTdfAssignmentsByCourseIdMap,
 
       getAltServerUrl:function(){
         return altServerUrl;

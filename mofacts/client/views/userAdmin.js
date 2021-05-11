@@ -22,7 +22,7 @@ Template.userAdmin.helpers({
         var userList = [];
         var allUsers = Session.get("allUsers") || [];
         allUsers.forEach(function(user) {
-            var username = user.username.trim().value();
+            var username = user.username.trim();
 
             // Only show users for admin work if the username is an email addr
             // (and yes, we're using a HUGE shortcut here - this check is only

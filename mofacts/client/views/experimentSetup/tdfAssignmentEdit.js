@@ -33,7 +33,7 @@ Template.tdfAssignmentEdit.onRendered(async function(){
   let allTdfDisplays = [];
   for(var i in allTdfObjects){
     var tdf = allTdfObjects[i];
-    if(tdf.ownerId == Meteor.userId() && tdf.fileName.indexOf(curSemester) != -1){
+    if(tdf.fileName.indexOf(curSemester) != -1){ //tdf.ownerId == Meteor.userId() && 
       allTdfDisplays.push({fileName:tdf.fileName,displayName:tdf.tdfs.tutor.setspec[0].lessonname[0]});
     }
   }
@@ -83,7 +83,7 @@ Template.tdfAssignmentEdit.events({
       alert("Please select a class to assign Chapters to.");
     }else{
       let dbCurCourseAssignment = JSON.parse(JSON.stringify(curCourseAssignment));
-      dbCurCourseAssignment.tdfs = dbCurCourseAssignment.tdfs.map(x => x.fileName);
+      //dbCurCourseAssignment.tdfs = dbCurCourseAssignment.tdfs.map(x => x.fileName);
       Meteor.call('editCourseAssignments',dbCurCourseAssignment, function(err,res){
         if(!!err ){
           alert("Error saving class: " + err);
