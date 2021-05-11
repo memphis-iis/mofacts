@@ -6,9 +6,9 @@ Session.set("classes",[]);
 var isNewClass = true;
 
 curClass = {
-  courseid: undefined,
-  coursename: "",
-  teacheruserid: Meteor.userId(),
+  courseId: undefined,
+  courseName: "",
+  teacherUserId: Meteor.userId(),
   semester: curSemester,
   beginDate: new Date(),
   sections: []
@@ -17,7 +17,7 @@ curClass = {
 function classSelectedSetup(curClassName){
     $("#class-select").children('[value="' + curClassName + '"]').attr('selected',true);
     $("#newClassName").val(curClassName);
-    var foundClass = search(curClassName,"coursename",Session.get("classes"));
+    var foundClass = search(curClassName,"courseName",Session.get("classes"));
     $("#sectionNames").val(foundClass.sections.map(x => x + '\n').join(''));
     isNewClass = false;
 }
@@ -55,9 +55,9 @@ Template.classEdit.events({
     if(isNewClass){
       curClassName = $("#newClassName").val();
       curClass = {
-        courseid: undefined,
-        coursename: curClassName,
-        teacheruserid: Meteor.userId(),
+        courseId: undefined,
+        courseName: curClassName,
+        teacherUserId: Meteor.userId(),
         semester: curSemester,
         beginDate: new Date(),
         sections: []
@@ -65,9 +65,9 @@ Template.classEdit.events({
       classes.push(curClass);
     }else{
       curClassName = $("#class-select").val();
-      curClass = search(curClassName,"coursename",classes);
+      curClass = search(curClassName,"courseName",classes);
       newClassName = $("#newClassName").val();
-      curClass.coursename = newClassName;
+      curClass.courseName = newClassName;
     }
 
     var newSections = $("#sectionNames").val().trim().split('\n');
@@ -78,12 +78,12 @@ Template.classEdit.events({
         alert("Error saving class: " + err);
       }else{
         alert("Saved class successfully!");
-        curClass.courseid = res;
+        curClass.courseId = res;
         console.log("curClass:" + JSON.stringify(curClass));
         Session.set("classes",classes);
         //Need a delay here so the reactive session var can update the template
         setTimeout(function(){
-          classSelectedSetup(curClass.coursename);
+          classSelectedSetup(curClass.courseName);
         },200);
       }
     }
