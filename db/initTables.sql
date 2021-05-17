@@ -91,7 +91,7 @@ CREATE TABLE history (
     typeOfResponse responseType NOT NULL,
     responseValue VARCHAR(255) NOT NULL,
     displayedStimulus VARCHAR(255) NOT NULL,
-    dynamicTagFields JSON[],
+    dynamicTagFields TEXT[],
     Anon_Student_Id VARCHAR(255) NOT NULL,
     Session_Id VARCHAR(255) NOT NULL,
     Condition_Namea VARCHAR(50),

@@ -296,7 +296,6 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
 
   console.log(stims);
   for(stim of stims){
-    console.log(stim);
     var responseParts = stim.correctResponse.toLowerCase().split(";");
     var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
     if(answerArray.length > 0){

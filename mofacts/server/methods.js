@@ -24,7 +24,7 @@ if(!!Meteor.settings.public.testLogin){
   process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
   console.log("dev environment, allow insecure tls");
 }
-//console.log("meteor settings: " + JSON.stringify(Meteor.settings));
+
 process.env.MAIL_URL = Meteor.settings.MAIL_URL;
 var adminUsers = Meteor.settings.initRoles.admins;
 var ownerEmail = Meteor.settings.owner;
@@ -288,7 +288,6 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId){
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId,TDFId,componentStates){
   let responseComponentStates = componentStates.filter(x => x.componentType == 'response');
-  console.log("SetComponentTest",responseComponentStates.length,responseComponentStates);
   const res = await db.tx(async t => {
     let responseKCMap = await getReponseKCMap();
     const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
@@ -486,12 +485,10 @@ async function editCourseAssignments(newCourseAssignment){ //Shape: {coursename:
       let tdfsRemoved = getSetAMinusB(existingTdfs,newTdfs);
 
       const tdfNamesAndIDs = await t.manyOrNone("SELECT TDFId, content -> 'fileName' AS filename from tdf");
-      //console.log("tdfNamesAndIDs",tdfNamesAndIDs);
       let tdfNameIDMap = {};
       for(let tdfNamesAndID of tdfNamesAndIDs){
         tdfNameIDMap[tdfNamesAndID.filename] = tdfNamesAndID.tdfid;
       }
-      //console.log("tdfNameIDMap",tdfNameIDMap);
   
       for(let tdfName of tdfsAdded){
         let TDFId = tdfNameIDMap[tdfName];
@@ -639,7 +636,7 @@ async function insertHistory(historyRecord){
                             Feedback_Text, \
                             feedbackType, \
                             dialogueHistory)";
-  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::json[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb)";
+  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb)";
               
   let historyVals = [
     historyRecord.itemId,
@@ -857,6 +854,7 @@ async function getStimuliSetById(stimuliSetId){
                WHERE stimuliSetId=$1 \
                ORDER BY itemId";
   let itemRet = await db.manyOrNone(query,stimuliSetId);
+
   let items = [];
   for(let item of itemRet){
     items.push(getItem(item));
@@ -1143,7 +1141,7 @@ async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
 
 //TODO rework for input in a new format as well as the current assumption of the old format
 async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
-  console.log("upsertStimFile",stimFilename);
+  console.log("upsertStimFile",stimFilename,stimuliSetId);
   await db.tx(async t => {
     let oldStimFormat = {
       'fileName': stimFilename,
@@ -1154,9 +1152,6 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
 
     const responseKCMap = await getReponseKCMap();
     const newFormatItems = getNewItemFormat(oldStimFormat,stimFilename,stimuliSetId,responseKCMap);
-    if(stimFilename.indexOf('test') != -1){
-      console.log("newFormatItems",newFormatItems);
-    }
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1',stimFilename);
     let newStims = [];
     if(existingStims && existingStims.length > 0){
@@ -1167,7 +1162,9 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
           newStims.push(newStim);
           continue;
         }
+        matchingStim = getItem(matchingStim);
         let mergedStim = Object.assign(matchingStim,newStim);
+        if(mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
         await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, stimulusKC = ${stimulusKC}, \
                       clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, optimalProb = ${optimalProb}, \
                       correctResponse = ${correctResponse}, incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
@@ -1207,22 +1204,18 @@ async function upsertTDFFile(tdfFilename,tdfJSON,ownerId,stimuliSetId){
   if (prev && prev.TDFId) {
     let tdfJSONtoUpsert;
     if(hasGeneratedTdfs(tdfJSON)){
-      let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
+      let tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
       let generatedTdf = tdfGenerator.getGeneratedTdf();
       delete generatedTdf.createdAt;
       tdfJSONtoUpsert = JSON.stringify(generatedTdf);
     }else{
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
-    try{
-      await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4'[ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId])
-    }catch(e){
-      serverConsole('error updating tdf data2',tdfFilename,e,e.stack)
-    }
+    await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4',[ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
   }else{
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
-      let tdfGenerator = new DynamicTdfGenerator(tdfJSON, tdfFilename, ownerId, 'repo',stimSet);
+      let tdfGenerator = new DynamicTdfGenerator(tdfJSON.tdfs, tdfFilename, ownerId, 'repo', stimSet);
       let generatedTdf = tdfGenerator.getGeneratedTdf();
       tdfJSONtoUpsert = JSON.stringify(generatedTdf);
     } else {
@@ -1811,47 +1804,50 @@ Meteor.startup(async function () {
 
           try{
             if (type == "tdf") {
-              //Parse the XML contents to make sure we can acutally handle the file
-              //let jsonContents = xml2js.parseStringSync(filecontents);
-              // let json = { tutor: jsonContents.tutor }
-              // let lessonName = _.trim(tutor.setspec[0].lessonname[0]);
-              // if (lessonName.length < 1) { throw "TDF has no lessonname - it cannot be valid"; }
-
-              // let rec;
-              // if (hasGeneratedTdfs(json)) {
-              //   let stimulusFilename = json.tutor.setspec[0].stimulusfile[0];
-              //   if (!getAssociatedStimSetIdForStimFile(stimulusFilename)) {
-              //     results.result = false;
-              //     results.errmsg = "Please upload stimulus file before uploading a TDF"
-
-              //     return results;
-              //   } else {
-              //     const stimSet = getStimuliSetByFilename(stimulusFilename);
-              //     let tdfGenerator = new DynamicTdfGenerator(json, filename, ownerId, 'upload', stimSet);
-              //     let generatedTdf = tdfGenerator.getGeneratedTdf();
-              //     rec = generatedTdf;
-              //   }             
-              // } else {
-              //   //Set up for TDF save
-              //   rec = {'fileName':filename, 'tdfs':json, 'owner':ownerId, 'source':'upload'};
-              // }
               let jsonContents = JSON.parse(filecontents);
-              await upsertTDFFile(filename,jsonContents,ownerId,stimuliSetId);
+              let json = { tutor: jsonContents.tutor }
+              let lessonName = _.trim(jsonContents.tutor.setspec[0].lessonname[0]);
+              if (lessonName.length < 1) { 
+                results.result = false;
+                results.errmsg = "TDF has no lessonname - it cannot be valid"
+
+                return results;
+              }
+
+              let stimFileName = json.tutor.setspec[0].stimulusfile ? json.tutor.setspec[0].stimulusfile[0] : "INVALID";
+              if(stimFileName == "INVALID"){
+                //Note this means root tdfs will have NULL stimulisetid
+                results.result = false;
+                results.errmsg = "Please upload stimulus file before uploading a TDF"
+
+                return results;
+              }else{
+                let stimuliSetId = await getAssociatedStimSetIdForStimFile(stimFileName);
+                if(isEmpty(stimuliSetId)){
+                  results.result = false;
+                  results.errmsg = "Please upload stimulus file before uploading a TDF"
+                }else{
+                  try{
+                    let rec = {'fileName':filename, 'tdfs':json, 'ownerId':ownerId, 'source':'upload'};
+                    await upsertTDFFile(filename,rec,ownerId,stimuliSetId);
+                    results.result = true;
+                  }catch(err){
+                    results.result=false;
+                    results.errmsg=err.toString();
+                  }
+                }
+                return results;
+              }
             }
             else if (type === "stim") {
               let jsonContents = JSON.parse(filecontents);
-              //Make sure the stim looks valid-ish
-              // var clusterCount = jsonContents.setspec.clusters.length;
-              // if (clusterCount < 1) { throw "Stimulus has no clusters - it cannot be valid"; }
-
-              //Set up for stim save
-              let rec = {
-                'fileName': filename,
-                'stimuli': jsonContents,
-                'owner': ownerId,
-                'source': 'upload'
-              };
-              await upsertStimFile(filename,rec,ownerId);
+              
+              let stimuliSetId = await getAssociatedStimSetIdForStimFile(filename);
+              if(isEmpty(stimuliSetId)){
+                let highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
+                stimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
+              }
+              await upsertStimFile(filename,jsonContents,ownerId,stimuliSetId);
             }
           }catch(e){
             serverConsole("ERROR saving content file:",e,e.stack);
