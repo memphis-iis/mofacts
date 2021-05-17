@@ -852,6 +852,7 @@ async function newQuestionHandler() {
 
     clearButtonList();
     Session.set("currentDisplay",{});
+    Session.set("clozeQuestionParts",undefined);
     speechTranscriptionTimeoutsSeen = 0;
     let isButtonTrial = getButtonTrial();
     Session.set("buttonTrial", isButtonTrial);
@@ -1826,16 +1827,18 @@ function startQuestionTimeout() {
   //We do this little shuffle of session variables so the display will update all at the same time
   let currentDisplayEngine = Session.get("currentDisplayEngine");
   let closeQuestionParts = Session.get("clozeQuestionParts");
+
+  Session.set("displayReady",false);
   Session.set("clozeQuestionParts",undefined);
   console.log('++++ CURRENT DISPLAY ++++');
   console.log(currentDisplayEngine);
   
   let beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null,delayMs,deliveryParams);
-  let pipeline = checkAndDisplayTwoPartQuestion.bind(null,deliveryParams,beginQuestionAndInitiateUserInputBound);
-  checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQuestionParts,pipeline);
+  let pipeline = checkAndDisplayTwoPartQuestion.bind(null,deliveryParams,currentDisplayEngine,closeQuestionParts,beginQuestionAndInitiateUserInputBound);
+  checkAndDisplayPrestimulus(deliveryParams,pipeline);
 }
 
-function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQuestionParts,nextStageCb){
+function checkAndDisplayPrestimulus(deliveryParams,nextStageCb){
   console.log("checking for prestimulus display");
   let prestimulusDisplay = Session.get("currentTdfFile").tdfs.tutor.setspec[0].prestimulusDisplay; //we'll [0], if it exists
   console.log("prestimulusDisplay:",prestimulusDisplay);
@@ -1843,21 +1846,12 @@ function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQue
   if(prestimulusDisplay){
     let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
     console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
-    Session.set("displayReady", false);
-    console.log("displayReadyFalse, checkAndDisplayPrestimulus1");
     Session.set("currentDisplay",prestimulusDisplayWrapper);
+    Session.set("clozeQuestionParts",undefined);
     Session.set("displayReady", true);
-    console.log("displayReadyTrue, checkAndDisplayPrestimulus2");
     let prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
     console.log("delaying for " + prestimulusdisplaytime + " ms then starting question", new Date());
     setTimeout(function(){
-      console.log("done with prestimulusDisplay, switching to original display", new Date());
-      Session.set("displayReady", false);
-      console.log("displayReadyFalse, checkAndDisplayPrestimulus3");
-      Session.set("currentDisplay",currentDisplayEngine);
-      Session.set("clozeQuestionParts",closeQuestionParts);
-      Session.set("displayReady", true);
-      console.log("displayReadyTrue, checkAndDisplayPrestimulus4");
       console.log("past prestimulusdisplaytime, start two part question logic");
       nextStageCb();
     },prestimulusdisplaytime);
@@ -1867,12 +1861,18 @@ function checkAndDisplayPrestimulus(deliveryParams,currentDisplayEngine,closeQue
   }  
 }
 
-function checkAndDisplayTwoPartQuestion(deliveryParams,nextStageCb){
+function checkAndDisplayTwoPartQuestion(deliveryParams,currentDisplayEngine,closeQuestionParts,nextStageCb){
+  //In either case we want to set up the current display now
+  Session.set("displayReady", false);
+  Session.set("currentDisplay",currentDisplayEngine);
+  Session.set("clozeQuestionParts",closeQuestionParts);
+  Session.set("displayReady", true);
+  
   console.log("checking for two part questions");
   //Handle two part questions
   var currentQuestionPart2 = Session.get("currentQuestionPart2");
   if(currentQuestionPart2){
-    console.log("two part question detected, displaying");
+    console.log("two part question detected, displaying first part");
     let twoPartQuestionWrapper = { 'text': currentQuestionPart2 };
     var initialviewTimeDelay = deliveryParams.initialview;
     console.log("two part question detected, delaying for " + initialviewTimeDelay + " ms then continuing with question");
@@ -1880,6 +1880,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams,nextStageCb){
       console.log("after timeout, displaying question part two", new Date());
       Session.set("displayReady", false);
       Session.set("currentDisplay",twoPartQuestionWrapper);
+      Session.set("clozeQuestionParts",undefined);
       Session.set("displayReady", true);
       console.log("displayReadyTrue, checkAndDisplayTwoPartQuestion");
       Session.set("currentQuestionPart2",undefined);
@@ -1894,7 +1895,6 @@ function checkAndDisplayTwoPartQuestion(deliveryParams,nextStageCb){
 
 function beginQuestionAndInitiateUserInput(delayMs,deliveryParams){
   console.log("beginQuestionAndInitiateUserInput");
-  Session.set("displayReady", true);
   firstKeypressTimestamp = 0;
   trialStartTimestamp = Date.now();
   let currentDisplay = Session.get("currentDisplay");

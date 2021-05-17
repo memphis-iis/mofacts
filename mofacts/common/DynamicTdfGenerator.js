@@ -1,3 +1,5 @@
+import { KC_MULTIPLE } from "./Definitions";
+
 export class DynamicTdfGenerator {
   constructor(parentTdfJson, fileName, ownerId, source, stimJson) {
     /** @private {object} */
@@ -76,9 +78,10 @@ export class DynamicTdfGenerator {
     let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
     let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
 
-    this.stimFileClusters_.forEach((cluster, idx) => {
+    Object.values(this.stimFileClusters_).forEach(cluster => {
+      let idx = Object.values(cluster)[0].clusterKC % KC_MULTIPLE;
       let allClusterTags = [];
-      for(let stim of cluster){
+      for(let stim of Object.values(cluster)){
         if(stim.tags){
           allClusterTags.push(stim.tags);
         }
@@ -88,7 +91,7 @@ export class DynamicTdfGenerator {
       if (start === -1 && isIncludedInStimCluster) {
         start = idx;
       } else if (start > -1 && isIncludedInStimCluster) {
-        if (idx === this.stimFileClusters_.length - 1) {
+        if (idx === Object.keys(this.stimFileClusters_).length - 1) {
           end = idx;
           clusterListString += ' ' + start + '-' + end + ' ';
         }
@@ -161,9 +164,10 @@ export class DynamicTdfGenerator {
    * This map is used to determine TDF order group validity 
    */
   setOrderGroupValuesMap() {
-    this.stimFileClusters_.forEach(cluster => {
-      if (cluster[0].tags && cluster[0].tags.orderGroup) {
-        let orderGroupValueKey = (cluster[0].tags.orderGroup[0] || cluster[0].tags.orderGroup).toString();
+    Object.values(this.stimFileClusters_).forEach(cluster => {
+      let firstStim = Object.values(cluster)[0];
+      if (firstStim.tags && firstStim.tags.orderGroup) {
+        let orderGroupValueKey = (firstStim.tags.orderGroup[0] || firstStim.tags.orderGroup).toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
           let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;

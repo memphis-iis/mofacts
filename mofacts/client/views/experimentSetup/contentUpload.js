@@ -1,40 +1,60 @@
 var userFiles = new Mongo.Collection(null); //local-only - no database;
 
 function userFilesRefresh() {
+    console.log("userFilesRefresh");
     userFiles.remove({'temp': 1});
 
     var count = 0;
-    var userId = Meteor.user()._id;
+    var userId = Meteor.userId();
 
-    Session.get("allTdfs").forEach(function(tdf) {
+    for(let tdf of Session.get("allTdfs")){
         if (userId === tdf.ownerId) {
-            userFiles.insert({
-                'temp': 1,
-                '_id': tdf.TDFId,
-                'idx': count,
-                'type': 'tdf',
-                'fileName': tdf.fileName.trim().value()
-            });
-            count += 1;
+            try{
+                userFiles.insert({
+                    'temp': 1,
+                    '_id': "" + tdf.TDFId,
+                    'idx': count,
+                    'type': 'tdf',
+                    'fileName': tdf.content.fileName.trim()
+                });
+                count += 1;
+            }catch(err){
+                if(err.name !== "MinimongoError"){
+                    throw err;
+                }
+            }
             let stimuliSetId = tdf.stimuliSetId;
-            userFiles.insert({
-                'temp': 1,
-                '_id': stimuliSetId,
-                'idx': count,
-                'type': 'stim',
-                'fileName': stimuliSetId
-            });
-            count += 1;
+            let stimFileName = tdf.content.tdfs.tutor.setspec[0].stimulusfile;
+            if(stimFileName) stimFileName = stimFileName[0];
+            if(stimuliSetId && stimFileName){
+                try{
+                    userFiles.insert({
+                        'temp': 1,
+                        '_id': "" + stimuliSetId,
+                        'idx': count,
+                        'type': 'stim',
+                        'fileName': stimFileName
+                    });
+                    count += 1;
+                }catch(err){
+                    if(err.name !== "MinimongoError"){
+                        throw err;
+                    }
+                }
+            }
         }
-    });
+    }
 }
 
 Template.contentUpload.helpers({
     userFiles: function() {
-        userFilesRefresh();
         return userFiles.find();
     },
 });
+
+Template.contentUpload.onRendered(function(){
+    userFilesRefresh();
+})
 
 
 ////////////////////////////////////////////////////////////////////////////
