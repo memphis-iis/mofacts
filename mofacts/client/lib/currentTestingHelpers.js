@@ -364,7 +364,7 @@ function getCurrentDeliveryParams(){
         'checkOtherAnswers':false,
         'feedbackType':'',
         'allowFeedbackTypeSelect': false,
-        'falseAnswerLimit':9999999
+        'falseAnswerLimit': undefined
     };
 
     //We've defined defaults - also define translatations for values

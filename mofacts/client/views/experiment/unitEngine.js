@@ -49,7 +49,7 @@ function defaultUnitEngine(curExperimentData) {
 
         // Optional functions that engines can replace if they want
         initImpl: async function() { },
-        reinitializeClusterListsFromCurrentSessionData: function() { },
+        //reinitializeClusterListsFromCurrentSessionData: function() { },
 
         // Functions we supply
         init: async function() {
@@ -354,6 +354,7 @@ function modelUnitEngine() {
             .prop("clusterlist").trim().value();
             extractDelimFields(unitClusterList, clusterList);
         }
+        console.log("clusterList",clusterList);
 
         for (i = 0; i < clusterList.length; ++i) {
             var nums = rangeVal(clusterList[i]);
@@ -589,7 +590,7 @@ function modelUnitEngine() {
 
         //console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
 
-        console.log("model user data:",p);
+        //console.log("model user data:",p);
         return probFunction(p);
     }
 
@@ -934,9 +935,9 @@ function modelUnitEngine() {
             return currentCardInfo;
         },
 
-        reinitializeClusterListsFromCurrentSessionData: function(){
-            setUpClusterList(cardProbabilities.cards);
-        },
+        // reinitializeClusterListsFromCurrentSessionData: function(){
+        //     setUpClusterList(cardProbabilities.cards);
+        // },
 
         unitType: MODEL_UNIT,
 
@@ -951,7 +952,6 @@ function modelUnitEngine() {
         })(),
 
         initImpl: async function() {
-            console.log("!!!! initImpl, curUnit:",JSON.parse(JSON.stringify(this.curUnit || "blah")));
             Session.set("unitType",MODEL_UNIT);
             initializeActRModel();
         },
@@ -1026,7 +1026,7 @@ function modelUnitEngine() {
 
             let testType = "d";
             if(Session.get("currentDeliveryParams").studyFirst && card.priorStudy == 0){
-              console.log("!!! STUDY FOR FIRST TRIAL");
+              console.log("STUDY FOR FIRST TRIAL !!!");
               testType = 's';
             }
             Session.set("testType", testType);

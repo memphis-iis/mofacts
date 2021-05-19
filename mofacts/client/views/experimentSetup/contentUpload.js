@@ -62,9 +62,12 @@ Template.contentUpload.onRendered(function(){
 
 Template.contentUpload.events({
     // Admin/Teachers - upload a TDF file
-    'click #doUploadTDF': function(event) {
+    'click #doUploadTDF': async function(event) {
         event.preventDefault();
         doFileUpload("#upload-tdf", "tdf", "TDF");
+
+        const stimDisplayTypeMap = await meteorCallAsync("getStimDisplayTypeMap");
+        Session.set("stimDisplayTypeMap",stimDisplayTypeMap);
     },
 
     // Admin/Teachers - upload a Stimulus file

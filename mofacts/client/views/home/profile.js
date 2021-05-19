@@ -408,8 +408,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     //Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
     var userAudioPromptFeedbackToggled = (audioPromptFeedbackView == "feedback") || (audioPromptFeedbackView == "all");
     console.log(curTdfContent);
-    var tdfAudioPromptFeedbackEnabled = curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
-    var audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    var tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback && curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == "true";
+    var audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey && !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     var audioPromptFeedbackEnabled = undefined;
     if(Session.get("experimentTarget")){
       audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled
@@ -423,7 +423,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
    //If we're in experiment mode and the tdf file defines whether audio input is enabled
    //forcibly use that, otherwise go with whatever the user set the audio input toggle to
    var userAudioToggled = audioInputEnabled;
-   var tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true";
+   var tdfAudioEnabled = !!curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled ? curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == "true" : false;
    var audioEnabled = !Session.get("experimentTarget") ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
    Session.set("audioEnabled", audioEnabled);
 
