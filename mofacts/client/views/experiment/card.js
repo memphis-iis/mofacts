@@ -432,7 +432,7 @@ Template.card.rendered = async function() {
   if(audioInputEnabled){
     if(!Session.get("audioInputSensitivity")){
       //Default to 20 in case tdf doesn't specify and we're in an experiment
-      var audioInputSensitivity = _.intval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity[0]) || 20;
+      var audioInputSensitivity = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity ? _.intval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity[0]) : 20;
       Session.set("audioInputSensitivity",audioInputSensitivity);
     }
   }
@@ -441,7 +441,7 @@ Template.card.rendered = async function() {
   if(audioOutputEnabled){
     if(!Session.get("audioPromptSpeakingRate")){
       //Default to 1 in case tdf doesn't specify and we're in an experiment
-      var audioPromptSpeakingRate = _.floatval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate[0]) || 1;
+      var audioPromptSpeakingRate = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate ? _.floatval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate[0]) : 1;
       Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
     }
   }
@@ -1553,7 +1553,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
       filledInDisplay.clozeText = filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
   }
 
-  console.log("!!!!!!!!gatherAnswerLog:",probabilityEstimate);
   if(!probabilityEstimate){
     probabilityEstimate = null;
   }else{
@@ -1714,20 +1713,6 @@ async function prepareCard() {
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
     }else {
-        // Not finished - we have another card to show...
-        // Before we change anything, if we are showing an image we will change
-        // it to a 1x1 pixel (so the old image doesn't stick around if there is
-        // lag while loading the new image)
-        $('#cardQuestionImg').attr('src', 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==');
-        // Actual next card logic
-
-        //Do some cleanup for multiTdfs so users can continually select other sub sections to practice
-        if(typeof(Session.get("subTdfIndex")) != "undefined"){
-          console.log("reinitializeclusterlists for subTdfIndex: " + Session.get("subTdfIndex"));
-          engine.reinitializeClusterListsFromCurrentSessionData();
-        }else{
-          console.log("not reinitializing clusterlists");
-        }
         await engine.selectNextCard();
         newQuestionHandler();
     }
@@ -1773,7 +1758,7 @@ async function unitIsFinished(reason) {
       lastActionTimeStamp: Date.now()
     }
 
-    if(curTdfUnit.learningsession){
+    if(curTdfUnit && curTdfUnit.learningsession){
       newExperimentState.schedule = null; 
     }else{
       //nothing for now
@@ -2098,7 +2083,7 @@ async function processLINEAR16(data){
       answerGrammar = getAllCurrentStimAnswers(false);
     }
 
-    var tdfSpeechAPIKey = Session.get("currentTdfFile").tdfs.tutor.setspec[0].speechAPIKey[0];
+    var tdfSpeechAPIKey = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].speechAPIKey ? Session.get("currentTdfFile").tdfs.tutor.setspec[0].speechAPIKey[0] : undefined;
     //Make the actual call to the google speech api with the audio data for transcription
     if(tdfSpeechAPIKey && tdfSpeechAPIKey != ""){
       console.log("tdf key detected");
@@ -2667,10 +2652,10 @@ async function processUserTimesLog() {
         case "unit-end":
             //Logged completion of unit - if this is the final unit we also
             //know that the TDF is completed
-            var finishedUnit = experimentState.currentUnitNumber;
+            var newUnitNum = experimentState.currentUnitNumber;
             var checkUnit = Session.get("currentUnitNumber");
-            if ((!!finishedUnit && !!checkUnit) && checkUnit === finishedUnit) {
-                if (finishedUnit === tdfFile.tdfs.tutor.unit.length - 1) {
+            if ((!!newUnitNum && !!checkUnit) && checkUnit === newUnitNum) {
+                if (newUnitNum >= tdfFile.tdfs.tutor.unit.length - 1) {
                     moduleCompleted = true; //TODO: what do we do in the case of multiTdfs?  Depends on structure of template parentTdf
                 }
             }else{
@@ -2690,56 +2675,58 @@ async function processUserTimesLog() {
             break;
     };
 
-    await resetEngine(Session.get("currentUnitNumber"));
-    newExperimentState.unitType = engine.unitType;
-    await updateExperimentState(newExperimentState,"card.processUserTimesLog");
-    engine.loadComponentStates();
-
-    //If we make it here, then we know we won't need a resume until something
-    //else happens
-
-    Session.set("inResume", false);
-
-    //Initialize client side student performance
-    let curUser = Meteor.user();
-    let currentTdfId = Session.get("currentTdfId");
-    setStudentPerformance(curUser._id,curUser.username,currentTdfId);
-
-    if (needFirstUnitInstructions) {
-        //They haven't seen our first instruction yet
-        console.log("RESUME FINISHED: displaying initial instructions");
-        leavePage("/instructions");
-    }else if (resumeToQuestion) {
-        //Question outstanding: force question display and let them give an answer
-        console.log("RESUME FINISHED: displaying current question");
-        newQuestionHandler();
-    }else if (moduleCompleted) {
-        //They are DONE!
-        console.log("TDF already completed - leaving for profile page.");
-        if (Session.get("loginMode") === "experiment") {
-            // Experiment users don't *have* a normal page
-            leavePage(routeToSignin);
-        }else {
-            // "Normal" user - they just go back to their root page
-            leavePage("/profile");
-        }
-    }else {
-        // If we get this far and the unit engine thinks the unit is finished,
-        // we might need to stick with the instructions *IF AND ONLY IF* the
-        // lockout period hasn't finished (which prepareCard won't handle)
-        if (engine.unitFinished()) {
-            let lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
-            if (lockoutMins > 0) {
-                let unitStartTimestamp = Session.get("currentUnitStartTime");
-                let lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-                if (Date.now() < lockoutFreeTime) {
-                    console.log("RESUME FINISHED: showing lockout instructions");
-                    leavePage("/instructions");
-                    return;
-                }
-            }
-        }
-        console.log("RESUME FINISHED: next-question logic to commence");
-        prepareCard();
+    if(moduleCompleted){
+      //They are DONE!
+      console.log("TDF already completed - leaving for profile page.");
+      if (Session.get("loginMode") === "experiment") {
+          // Experiment users don't *have* a normal page
+          leavePage(routeToSignin);
+      }else {
+          // "Normal" user - they just go back to their root page
+          leavePage("/profile");
+      }
+    }else{
+      await resetEngine(Session.get("currentUnitNumber"));
+      newExperimentState.unitType = engine.unitType;
+      await updateExperimentState(newExperimentState,"card.processUserTimesLog");
+      engine.loadComponentStates();
+  
+      //If we make it here, then we know we won't need a resume until something
+      //else happens
+  
+      Session.set("inResume", false);
+  
+      //Initialize client side student performance
+      let curUser = Meteor.user();
+      let currentTdfId = Session.get("currentTdfId");
+      setStudentPerformance(curUser._id,curUser.username,currentTdfId);
+  
+      if (needFirstUnitInstructions) {
+          //They haven't seen our first instruction yet
+          console.log("RESUME FINISHED: displaying initial instructions");
+          leavePage("/instructions");
+      }else if (resumeToQuestion) {
+          //Question outstanding: force question display and let them give an answer
+          console.log("RESUME FINISHED: displaying current question");
+          newQuestionHandler();
+      }else {
+          // If we get this far and the unit engine thinks the unit is finished,
+          // we might need to stick with the instructions *IF AND ONLY IF* the
+          // lockout period hasn't finished (which prepareCard won't handle)
+          if (engine.unitFinished()) {
+              let lockoutMins = Session.get("currentDeliveryParams").lockoutminutes;
+              if (lockoutMins > 0) {
+                  let unitStartTimestamp = Session.get("currentUnitStartTime");
+                  let lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
+                  if (Date.now() < lockoutFreeTime) {
+                      console.log("RESUME FINISHED: showing lockout instructions");
+                      leavePage("/instructions");
+                      return;
+                  }
+              }
+          }
+          console.log("RESUME FINISHED: next-question logic to commence");
+          prepareCard();
+      }
     }
 }
