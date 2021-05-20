@@ -135,7 +135,8 @@ CREATE TABLE history (
     CF_Button_Order VARCHAR(2048),
     Feedback_Text VARCHAR(1024),
     feedbackType feedbackTypeOptions,
-    dialogueHistory JSONB
+    dialogueHistory JSONB,
+    recordedServerTime BIGINT NOT NULL
 );
 
 CREATE INDEX idx_history_userId_TDFId on history (userId,TDFId);

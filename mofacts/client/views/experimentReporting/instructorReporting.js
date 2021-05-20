@@ -1,11 +1,11 @@
 import { ReactiveDict } from 'meteor/reactive-dict';
+import { INVALID } from '../../../common/Definitions';
 
 const _state = new ReactiveDict('instructorReportingState');
 
-const INVALID_TDF = "invalid";
-curTdf = INVALID_TDF;
+curTdf = INVALID;
 
-async function navigateToStudentReporting(studentUsername){
+navigateToStudentReporting = async function(studentUsername){
   console.log("navigateToStudentReporting:",studentUsername);
   Session.set("studentUsername",studentUsername);
   Session.set("instructorSelectedTdf",curTdf);
@@ -18,39 +18,70 @@ async function navigateToStudentReporting(studentUsername){
   Router.go("/studentReporting");
 }
 
-function setCurClassStudents(curClass,currentTdf){
-  Session.set("curClassStudentPerformance",Session.get("studentPerformanceForClassAndTdfIdMap")[curClass.courseid][currentTdf]);//PER STUDENT
-  Session.set("curClassPerformance",Session.get("studentPerformanceForClass")[curClass.courseid]);//AGGREGATED BY CLASS
-}
+function setCurClassStudents(curClassId,currentTdf){
+  console.log("setCurClassStudents",curClassId,currentTdf);
+  if(_.isEmpty(Session.get("studentPerformanceForClassAndTdfIdMap")) || _.isEmpty(Session.get("studentPerformanceForClassAndTdfIdMap")[curClassId])
+        || _.isEmpty(Session.get("studentPerformanceForClassAndTdfIdMap")[curClassId][currentTdf])){
+    console.log("curClassStudentPerformance:is empty")
+    Session.set("curClassStudentPerformance",[{percentCorrect:"No attempts for this tdf"}]);
+  }else{
+    let curClassStudentPerformance =  Session.get("studentPerformanceForClassAndTdfIdMap")[curClassId][currentTdf];
+    Session.set("curClassStudentPerformance",Object.values(curClassStudentPerformance));//PER STUDENT
+    console.log("curClassStudentPerformance:",Object.values(curClassStudentPerformance))
+  }
 
-const generateUserMetThresholdMap = threshold => {
-  const practiceTimeIntervalsMap = _state.get("practiceTimeIntervalsMap")
-  let userMetThresholdMap = {};
-  practiceTimeIntervalsMap.forEach(m => {
-    if (m.duration < threshold) {
-      userMetThresholdMap[m.userId] = `NO - ${m.duration}`;
-    } else {
-      userMetThresholdMap[m.userId] = `YES - ${m.duration}`;
-    }
-  });
-
-  _state.set("userMetThresholdMap", userMetThresholdMap);
-}
-
-const getPracticeTimeIntervalsMap = async (date, tdfId) => {
-  try {
-    Meteor.call('getPracticeTimeIntervalsMap', date, tdfId, (err, res) => {
-      if (err)
-        throw 'Error fetching practice time intervals ->' + err;
-      
-      _state.set("practiceTimeIntervalsMap", res);
-    });
-  } catch (err) {
-    console.log(err);
+  if(_.isEmpty(Session.get("studentPerformanceForClass")) || _.isEmpty(Session.get("studentPerformanceForClass")[curClassId]) 
+        || _.isEmpty(Session.get("studentPerformanceForClass")[curClassId][currentTdf])){
+    console.log("studentPerformanceForClass:is empty");
+    Session.set("curClassPerformance",{});//AGGREGATED BY CLASS
+  }else{
+    let curClassPerformance = Session.get("studentPerformanceForClass")[curClassId][currentTdf];
+    Session.set("curClassPerformance",curClassPerformance);//AGGREGATED BY CLASS
+    console.log("curClassPerformance:",curClassPerformance);
   }
 }
 
+function fetchAndSetPracticeTimeIntervalsMap(date, tdfId){
+  console.log("fetch",Session.get("curClassStudentPerformance"));
+  let userIds = Session.get("curClassStudentPerformance").map( x => x.userId );
+  Meteor.call('getPracticeTimeIntervalsMap', userIds, tdfId, date, function(err, res){
+    if (err){
+      throw 'Error fetching practice time intervals ->' + err;
+    }else{
+      console.log("getPracticeTimeIntervalsMap",res);
+      _state.set("practiceTimeIntervalsMap", res);
+    }
+  });
+}
+
+function generateUserMetThresholdMap(threshold){
+  const practiceTimeIntervalsMap = _state.get("practiceTimeIntervalsMap")
+  let userMetThresholdMap = {};
+
+  let userIds = Session.get("curClassStudentPerformance").map(x => x.userId );
+
+  Object.entries(practiceTimeIntervalsMap).forEach(([userId,duration]) => {
+    duration = duration / (60 * 1000); //convert back from ms to min for display
+    if (duration < threshold) {
+      userMetThresholdMap[userId] = "NO - " + duration.toFixed(1);
+    } else {
+      userMetThresholdMap[userId] = "YES - " + duration.toFixed(1);
+    }
+  });
+
+
+  userIds.forEach(uid => {
+    if(!userMetThresholdMap[uid] && userMetThresholdMap[uid] != 0){
+      userMetThresholdMap[uid] = "NO ATTEMPT BEFORE DEADLINE";
+    }
+  });
+
+  console.log("generateUserMetThresholdMap:",threshold,userMetThresholdMap);
+  _state.set("userMetThresholdMap", userMetThresholdMap);
+}
+
 Template.instructorReporting.helpers({
+  INVALID: INVALID,
   curClassStudentPerformance: () => Session.get("curClassStudentPerformance"),
   curInstructorReportingTdfs: () => Session.get("curInstructorReportingTdfs"),
   classes: () => Session.get("classes"),
@@ -58,44 +89,55 @@ Template.instructorReporting.helpers({
   performanceLoading: () => Session.get("performanceLoading"),
   replaceSpacesWithUnderscores: (string) => string.replace(" ","_"),
   getUserMetThresholdStatus: userId => {
-    return _state.get("userMetThresholdMap")[userId];
+    console.log("getUserMetThresholdStatus:",userId);
+    if(_state.get("userMetThresholdMap")){
+      return _state.get("userMetThresholdMap")[userId];
+    }else{
+      return "Not set";
+    }
   }
 });
 
 Template.instructorReporting.events({
-  "click .nav-tabs": function(){
+  "change #class-select": function(event){
     Session.set("curClassStudentPerformance",[]);
     Session.set("curClassPerformance",undefined);
+    curClassId = parseInt($(event.currentTarget).val());
+    let curClass = Session.get("classes").find(x => x.courseId == curClassId);
+    Session.set("curClass",curClass);
+    let curClassTdfs = Session.get("instructorReportingTdfs")[curClassId];
+    console.log("change class-select, curClass: ", curClass, curClassTdfs);
+    Session.set("curInstructorReportingTdfs",curClassTdfs);
 
-    //Need a timeout here to wait for the DOM to updated so we can read the active tab from it
-    Tracker.afterFlush(function(){
-      //Need to strip newlines because chrome appends them for some reason
-      let curClassId = $(".nav-tabs > .active")[0].innerText.replace('\n','');
-      let curClass = Session.get("classes").find(x => x.courseid == curClassId);
-      Session.set("curClass",curClass);
-      let curClassTdfs = Session.get("instructorReportingTdfs")[curClassId];
-      console.log("click nav tabs after timeout, curClass: ", curClass, curClassTdfs);
-      Session.set("curInstructorReportingTdfs",curClassTdfs);
-
-      curTdf = INVALID_TDF;
-      $("#tdf-select").val(INVALID_TDF);
-    });
+    curTdf = INVALID;
+    $("#tdf-select").val(INVALID);
+    $("#tdf-select").prop('disabled',false);
+    $("#practice-deadline-date").prop('disabled',true);
+    $("#practice-time-select").prop('disabled',true);
+    _state.set("userMetThresholdMap", undefined);
   },
   
   "change #tdf-select": function(event){
-    curTdf = $(event.currentTarget).val();
-    _state.set("currentSelectedTdf", curTdf);
-    console.log("tdf change: " + curTdf);
+    curTdf = parseInt($(event.currentTarget).val());
+    _state.set("currentTdf", curTdf);
+    console.log("tdf change: ",curTdf,Session.get("curClass").courseId);
     if(Session.get("curClass")){
-      setCurClassStudents(curClass,curTdf);
+      setCurClassStudents(Session.get("curClass").courseId,curTdf);
     }else {
       alert('Please select a class');
     }
+    _state.set("userMetThresholdMap", undefined);
+    $("#practice-deadline-date").prop('disabled',false);
   },
 
   "change #practice-deadline-date": async event => {
     const date = event.currentTarget.value;
-    getPracticeTimeIntervalsMap(date, _state.get("currentTdf"));
+    let dateInt = new Date(date).getTime();
+    console.log("practice deadline:",dateInt);
+    fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get("currentTdf"));
+    _state.set("userMetThresholdMap", undefined);
+    $("#practice-time-select").val(INVALID);
+    $("#practice-time-select").prop('disabled',false);
   },
 
   "change #practice-time-select": event => {
@@ -128,8 +170,9 @@ Template.instructorReporting.onRendered(async function(){
   Session.set("instructorReportingTdfs",instructorReportingTdfs);
   
   const courses = await meteorCallAsync("getAllCoursesForInstructor",Meteor.userId());
-  console.log("classes: " + JSON.stringify(courses));
   Session.set("classes",courses);
 
   Session.set("performanceLoading", false);
+
+  console.log("instructorReporting rendered:",studentPerformance,instructorReportingTdfs,courses);
 })
