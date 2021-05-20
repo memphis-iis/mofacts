@@ -116,13 +116,13 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     studentPerformanceData = {
       numCorrect: 0,
       numIncorrect: 0,
-      totalpracticeduration: 0
+      totalPracticeDuration: 0
     }
   }else{
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect),
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect),
-      totalpracticeduration: parseInt(studentPerformanceDataRet.totalpracticeduration)
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration)
     }
   }
   let count = (studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect);
@@ -131,8 +131,8 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     "count":count,
     "percentCorrect":((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%",
     "numCorrect":studentPerformanceData.numCorrect,
-    "totalTime":studentPerformanceData.totalpracticeduration,
-    "totalTimeDisplay":(studentPerformanceData.totalpracticeduration).toFixed(1)
+    "totalTime":studentPerformanceData.totalPracticeDuration,
+    "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration).toFixed(1)
   }
   Session.set("curStudentPerformance",studentPerformance);
   console.log("setStudentPerformance,output:",studentPerformance);

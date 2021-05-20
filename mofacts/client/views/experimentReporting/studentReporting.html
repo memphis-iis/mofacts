@@ -11,7 +11,7 @@
     <div>
       <h2>Select Chapter</h2>
       <select id="tdf-select">
-          <option value="invalid">Select a tdf</option> <!-- disabled="false" -->
+          <option value="{{INVALID}}" disabled="false">Select a tdf</option>
           <!-- <option value="xml">All</option> -->
           {{#each studentReportingTdfs}}
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
@@ -21,21 +21,24 @@
     <div>
       <h2>Progress Data</h2>
       <table border="0" class="halfWidth centerForDesktop">
-        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (minutes)</th></tr>
+        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (min)</th></tr>
         <tr>
           <td>{{curStudentPerformance.percentCorrect}}</td>
           <td>{{curStudentPerformance.count}}</td>
           <td>{{curStudentPerformance.totalTimeDisplay}}</td>
         </tr>
-        {{#if curClassPerformance}}
-          <tr><th class="thWide">{{curClass.name}} - Average % Correct</th><th class="thWide">{{curClass.name}} - Average Count</th><th class="thWide">{{curClass.name}} - Average Total Time (minutes)</th></tr>
-          <tr>
-            <td>{{curClassPerformance.averagePercentCorrect}}</td>
-            <td>{{curClassPerformance.averageCount}}</td>
-            <td>{{curClassPerformance.averageTotalTime}}</td>
-          </tr>
-        {{/if}}
       </table>
+
+      {{#if curClassPerformance}}
+        <table border="0" class="halfWidth centerForDesktop">
+          <tr><th class="thWide">{{curClass.courseName}} - Avg % Correct</th><th class="thWide">{{curClass.courseName}} - Avg Count</th><th class="thWide">{{curClass.courseName}} - Avg Total Time (min)</th></tr>
+          <tr>
+            <td>{{curClassPerformance.percentCorrect}}</td>
+            <td>{{curClassPerformance.count}}</td>
+            <td>{{curClassPerformance.totalTimeDisplay}}</td>
+          </tr>
+        </table>
+      {{/if}}
     </div>
     <div>
       <h2>Progress Charts</h2>

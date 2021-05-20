@@ -4,15 +4,16 @@
     <legend class="text-center">Instructor Reporting</legend>
     <div id="mainContent">
       <h3>Class Selection</h3>
-      <ul class="nav nav-tabs">
+      <select id="class-select">
+        <option selected="selected" value="{{INVALID}}" disabled="true">Select a class</option>
         {{#each classes}}
-          <li><a data-toggle="tab" href="#{{this.courseId}}" class="myNavTab">{{this.courseName}}</a></li>
+          <option value="{{this.courseId}}">{{this.courseName}}</option>
         {{/each}}
-      </ul>
+      </select>
       <div>
         <h3>Select Chapter</h3>
-        <select id="tdf-select">
-            <option selected="selected" value="invalid" disabled="true">Select a tdf</option>
+        <select id="tdf-select" disabled="true">
+            <option selected="selected" value="{{INVALID}}" disabled="true">Select a tdf</option>
             <option value="xml">All</option>
             {{#each curInstructorReportingTdfs}}
               <option value="{{this.tdfid}}">{{this.displayname}}</option>
@@ -24,13 +25,12 @@
       </div>
       <div>
         <h3>Practice Deadline</h3>
-        <input type="date" id="practice-deadline-date"
-          value="2021-01-01" 
-          name="practice-deadline-date-select">
+        <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
       </div>
       <div>
         <h3>Practice Time Threshold</h3>
-        <select id="practice-time-select">
+        <select id="practice-time-select" disabled="true">
+          <option selected="selected" value="{{INVALID}}" disabled="true">Select a time threshold</option>
           <option value="10">10 min</option>
           <option value="20">20 min</option>
           <option value="30">30 min</option>
@@ -44,13 +44,13 @@
       </div>
       <h3>Class Data</h3>
         <table border="1">
-          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (minutes)</th><th>Completed Before Deadline</th></tr>
+          <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (min)</th><th>Completed Before Deadline</th></tr>
           {{#each curClassStudentPerformance}}
             <tr>
               <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>
-              <td>{{this.totalTime}}</td>
+              <td>{{this.totalTimeDisplay}}</td>
               <td>{{getUserMetThresholdStatus this.userId}}</td>
             </tr>
           {{/each}}
@@ -58,7 +58,7 @@
             <td>Total</td>
             <td>{{curClassPerformance.percentCorrect}}</td>
             <td>{{curClassPerformance.count}}</td>
-            <td>{{curClassPerformance.totalTime}}</td>
+            <td>{{curClassPerformance.totalTimeDisplay}}</td>
           </tr>
         </table>
     </div>

@@ -1,4 +1,5 @@
 import { setStudentPerformance } from '../../lib/currentTestingHelpers';
+import { INVALID } from '../../../common/Definitions';
 
 Session.set("studentReportingTdfs",[]);
 Session.set("curStudentPerformance",{});
@@ -8,7 +9,8 @@ Template.studentReporting.helpers({
   curClassPerformance: () => Session.get("curClassPerformance"),
   curClass: () => Session.get("curClass"),
   curStudentPerformance: () => Session.get("curStudentPerformance"),
-  studentUsername: () => Session.get("studentUsername")
+  studentUsername: () => Session.get("studentUsername"),
+  INVALID: INVALID
 });
 
 Template.studentReporting.rendered = async function(){
@@ -22,51 +24,36 @@ Template.studentReporting.rendered = async function(){
   }
   console.log("studentReporting rendered!!!");
 
-  Session.set("studentReportingTdfs",[]);
-  Tracker.afterFlush(async function(){
-    console.log("afterFlush");
+  let studentUsername = Session.get("studentUsername") || Meteor.user().username;
+  let studentID = Session.get("curStudentID") || Meteor.userId();
+  console.log("student,",studentUsername,studentID);
 
-    let studentUsername = Session.get("studentUsername") || Meteor.user().username;
-    let studentID = Session.get("curStudentID") || Meteor.userId();
-    console.log("student,",studentUsername,studentID);
+  const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId',studentID);
+  Session.set("studentReportingTdfs",tdfsAttempted);
+  console.log("studentReportingTdfs",tdfsAttempted);
 
-    const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId',studentID);
-    Session.set("studentReportingTdfs",tdfsAttempted);
-    console.log("studentReportingTdfs",tdfsAttempted);
-
-    //let dataAlreadyInCache = false;
-    if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
-      console.log("admin/teacher");
-      //dataAlreadyInCache = true;
-    }else{
-      Session.set("curStudentID",studentID);
-      Session.set("studentUsername",studentUsername);
-    }
-    // if(tdfsAttempted.length == 1){
-    //   Tracker.afterFlush(async function(){
-    //     let tdfToSelect = Session.get("instructorSelectedTdf") || Session.get("studentReportingTdfs")[0].tdfid;
-    //     $("#tdf-select").val(tdfToSelect);
-    //     if($("#tdf-select").val() != null){
-    //       let selectedTdfId = $("#tdf-select").val();
-  
-    //       //if(!dataAlreadyInCache){
-    //         setStudentPerformance(studentID,studentUsername,selectedTdfId);
-  
-    //         let studentData = await meteorCallAsync('getStudentReportingData',studentID,selectedTdfId);
-    //         console.log("studentData",studentData,studentID,studentUsername,selectedTdfId);
-    //       //}
-    //     }
-    //   });
-    // }
-  });
+  //let dataAlreadyInCache = false;
+  if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
+    console.log("admin/teacher");
+  }else{
+    Session.set("curStudentID",studentID);
+    Session.set("studentUsername",studentUsername);
+  }
+  if(Session.get("instructorSelectedTdf")){
+    Tracker.afterFlush(async function(){
+      let tdfToSelect = Session.get("instructorSelectedTdf");
+      $("#tdf-select").val(tdfToSelect);
+      setStudentPerformance(studentID,studentUsername,tdfToSelect);
+    });
+  }
 };
 
 Template.studentReporting.events({
   "change #tdf-select": async function(event){
     let selectedTdfId = $(event.currentTarget).val();
     console.log("change tdf select",selectedTdfId);
-    if(selectedTdfId!=="invalid"){
-      $('#tdf-select option[value="invalid"]').prop('disabled',true);
+    if(selectedTdfId!==INVALID){
+      $(`#tdf-select option[value="${INVALID}"]`).prop('disabled',true);
       let studentID = Session.get("curStudentID") || Meteor.userId();
       let studentUsername = Session.get("studentUsername") || Meteor.user().username;
   

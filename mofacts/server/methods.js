@@ -577,6 +577,7 @@ async function insertHistory(historyRecord){
   let tdfFileName = historyRecord['Condition_Typea'];
   let dynamicTagFields = await getListOfStimTags(tdfFileName);
   historyRecord.dynamicTagFields = dynamicTagFields || [];
+  historyRecord.recordedServerTime = (new Date()).getTime();
   let query = "INSERT INTO history \
                             (itemId, \
                             userId, \
@@ -635,8 +636,9 @@ async function insertHistory(historyRecord){
                             CF_Button_Order, \
                             Feedback_Text, \
                             feedbackType, \
-                            dialogueHistory)";
-  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb)";
+                            dialogueHistory, \
+                            recordedServerTime)";
+  query += " VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb,$59)";
               
   let historyVals = [
     historyRecord.itemId,
@@ -696,7 +698,9 @@ async function insertHistory(historyRecord){
     historyRecord.CF_Button_Order,
     historyRecord.Feedback_Text,
     historyRecord.feedbackType,
-    historyRecord.dialogueHistory];
+    historyRecord.dialogueHistory,
+    historyRecord.recordedServerTime
+  ];
   await db.none(query, historyVals);
 }
 
@@ -805,19 +809,16 @@ async function getStimDisplayTypeMap(){
 }
 
 async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
-  let query = `SELECT userId, SUM(responseDuration) AS duration
-    FROM history
-    WHERE eventStartTime < ${date}
-    AND
-    userId IN (${userIds.join(",")})
-    AND TDFId = ${tdfId}
-    GROUP BY userId`;
+  console.log("getPracticeTimeIntervalsMap",userIds, tdfId,date,userIds.join(','));
+  let query = "SELECT userId, SUM(responseDuration) AS duration \
+    FROM history WHERE recordedServerTime < $1 \
+    AND userId IN ($2) AND TDFId = $3 \
+    GROUP BY userId";
   
-  const res = await db.one(query);
-
+  const res = await db.manyOrNone(query,[date,userIds.join(','),tdfId]);
   let practiceTimeIntervalsMap = {};
   for (let row of res) {
-    practiceItemIntervalMap[row.userId] = row.duration; 
+    practiceTimeIntervalsMap[row.userid] = parseInt(row.duration); 
   }
 
   return practiceTimeIntervalsMap;
@@ -930,7 +931,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
                 WHERE c.semester = $1 AND c.teacherUserId = $2 \
                 GROUP BY s.userId, t.TDFId, c.courseId";
 
-  const studentPerformanceRet = await db.oneOrNone(query,[curSemester,instructorId]);
+  const studentPerformanceRet = await db.manyOrNone(query,[curSemester,instructorId]);
   console.log("studentPerformanceRet",studentPerformanceRet);
   if(studentPerformanceRet==null)
     return [];
@@ -943,12 +944,16 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
       userIdToUsernames[userid] = studentUsername;
     } 
 
-    let { courseid, userid, tdfid, correct, incorrect, totalprompt, totalstudy } = studentPerformance;
+    let { courseid, userid, tdfid, correct, incorrect, totalpracticeduration } = studentPerformance;
+    correct = parseInt(correct);
+    incorrect = parseInt(incorrect);
+    totalpracticeduration = parseInt(totalpracticeduration);
+
     if(!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
     if(!studentPerformanceForClass[courseid][tdfid]) studentPerformanceForClass[courseid][tdfid] = {count:0,totalTime:0,numCorrect:0}
     studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
     studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
-    studentPerformanceForClass[courseid][tdfid].totalTime += totalprompt + totalstudy;
+    studentPerformanceForClass[courseid][tdfid].totalTime += totalpracticeduration;
 
     if(!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
     if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
@@ -956,19 +961,25 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
     if(!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count:0,totalTime:0,numCorrect:0,username:studentUsername,userId:userid};
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
-    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalprompt + totalstudy;
+    studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
   }
-  for(let coursetotals of studentPerformanceForClass){
-    for(let tdftotal of coursetotals){
+  console.log("studentPerformanceForClass:",JSON.stringify(studentPerformanceForClass));
+  for(let index of Object.keys(studentPerformanceForClass)){
+    let coursetotals = studentPerformanceForClass[index];
+    for(let index2 of Object.keys(coursetotals)){
+      let tdftotal = coursetotals[index2];
       tdftotal.percentCorrect = ((tdftotal.numCorrect / tdftotal.count)*100).toFixed(2) + "%",
-      tdftotal.totalTimeDisplay = tdftotal.totalTime.toFixed(1)
+      tdftotal.totalTimeDisplay = (tdftotal.totalTime / (60 * 1000) ).toFixed(1) //convert to minutes from ms
     }
   }
-  for(let coursetotals of studentPerformanceForClassAndTdfIdMap){
-    for(let tdftotals of coursetotals){
-      for( let studenttotal of tdftotals){
+  console.log("studentPerformanceForClassAndTdfIdMap:",JSON.stringify(studentPerformanceForClassAndTdfIdMap));
+  for(let index3 of Object.keys(studentPerformanceForClassAndTdfIdMap)){
+    let coursetotals = studentPerformanceForClassAndTdfIdMap[index3];
+    for(let index4 of Object.keys(coursetotals)){
+      let tdftotals = coursetotals[index4];
+      for( let studenttotal of Object.values(tdftotals)){
         studenttotal.percentCorrect = ((studenttotal.numCorrect / studenttotal.count)*100).toFixed(2) + "%",
-        studenttotal.totalTimeDisplay = studenttotal.totalTime.toFixed(1)
+        studenttotal.totalTimeDisplay = (studenttotal.totalTime / (60 * 1000) ).toFixed(1)
       }
     }
   }
