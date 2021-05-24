@@ -185,7 +185,7 @@ export class DynamicTdfGenerator {
    */
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
-    try { 
+    // try { 
       let clusterMap = [];
       for(let stim of stimJson){//[{},{}]
         let clusterIndex = stim.clusterKC;
@@ -194,9 +194,9 @@ export class DynamicTdfGenerator {
         clusterMap[clusterIndex][stimIndex] = stim;
       }
       clusters = clusterMap;
-    } catch (error) {
-     throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
-    }
+    // } catch (error) {
+    //  throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
+    // }
     return clusters;
   }
 

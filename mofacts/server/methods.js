@@ -232,10 +232,9 @@ async function getAllTdfs(){
 
 async function getStimuliSetsForIdSet(stimuliSetIds){
   if(!stimuliSetIds.length)stimuliSetIds = [stimuliSetIds];
-  let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (";
-  stimuliSetIds.map(stimSetId => query += stimSetId + ", ");
-  query.substr(0,query.length-2); //cut off extra comma
-  query += ") ORDER BY itemId";
+  let stimSetsStr = stimuliSetIds.join(",");
+  let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (" + stimSetsStr + ") ORDER BY itemId";
+  console.log("getStimuliSetsForIdSet",query)
   const stimSets = await db.many(query);
   let ret = [];
   for(let stim of stimSets){
@@ -426,7 +425,7 @@ async function getAllCourses(){
 async function getAllCourseSections(){
   try{//  //sectionid, courseandsectionname
     console.log("getAllCourseSections");
-    let query = "SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1";
+    let query = "SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1";
     const ret = await db.any(query,curSemester);
     return ret;
   }catch(e){

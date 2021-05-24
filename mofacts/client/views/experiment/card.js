@@ -341,6 +341,53 @@ function leavePage(dest) {
     }
 }
 
+Template.card.rendered = async function() {
+  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  //Catch page navigation events (like pressing back button) so we can call our cleanup method
+  window.onpopstate = function(event){
+    if(document.location.pathname == "/card"){
+      leavePage("/card");
+    }
+  }
+  Session.set("scoringEnabled",undefined);
+
+  if(!Session.get("stimDisplayTypeMap")){
+    const stimDisplayTypeMap = await meteorCallAsync("getStimDisplayTypeMap");
+    Session.set("stimDisplayTypeMap",stimDisplayTypeMap);
+  }
+
+  var audioInputEnabled = Session.get("audioEnabled");
+  if(audioInputEnabled){
+    if(!Session.get("audioInputSensitivity")){
+      //Default to 20 in case tdf doesn't specify and we're in an experiment
+      var audioInputSensitivity = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity ? _.intval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity[0]) : 20;
+      Session.set("audioInputSensitivity",audioInputSensitivity);
+    }
+  }
+
+  var audioOutputEnabled = Session.get("enableAudioPromptAndFeedback");
+  if(audioOutputEnabled){
+    if(!Session.get("audioPromptSpeakingRate")){
+      //Default to 1 in case tdf doesn't specify and we're in an experiment
+      var audioPromptSpeakingRate = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate ? _.floatval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate[0]) : 1;
+      Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
+    }
+  }
+  var audioInputDetectionInitialized = Session.get("VADInitialized");
+
+  window.AudioContext = window.webkitAudioContext || window.AudioContext;
+  window.URL = window.URL || window.webkitURL;
+  audioContext = new AudioContext();
+  //If user has enabled audio input initialize web audio (this takes a bit)
+  //(this will eventually call cardStart after we redirect through the voice
+  //interstitial and get back here again)
+  if(audioInputEnabled && !audioInputDetectionInitialized){
+    initializeAudio();
+  }else{
+    cardStart();
+  }
+};
+
 Template.card.events({
     'focus #userAnswer' : function() {
         //Not much right now
@@ -412,53 +459,6 @@ Template.card.events({
         unitIsFinished('Continue Button Pressed');
     },
 });
-
-Template.card.rendered = async function() {
-  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-  //Catch page navigation events (like pressing back button) so we can call our cleanup method
-  window.onpopstate = function(event){
-    if(document.location.pathname == "/card"){
-      leavePage("/card");
-    }
-  }
-  Session.set("scoringEnabled",undefined);
-
-  if(!Session.get("stimDisplayTypeMap")){
-    const stimDisplayTypeMap = await meteorCallAsync("getStimDisplayTypeMap");
-    Session.set("stimDisplayTypeMap",stimDisplayTypeMap);
-  }
-
-  var audioInputEnabled = Session.get("audioEnabled");
-  if(audioInputEnabled){
-    if(!Session.get("audioInputSensitivity")){
-      //Default to 20 in case tdf doesn't specify and we're in an experiment
-      var audioInputSensitivity = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity ? _.intval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioInputSensitivity[0]) : 20;
-      Session.set("audioInputSensitivity",audioInputSensitivity);
-    }
-  }
-
-  var audioOutputEnabled = Session.get("enableAudioPromptAndFeedback");
-  if(audioOutputEnabled){
-    if(!Session.get("audioPromptSpeakingRate")){
-      //Default to 1 in case tdf doesn't specify and we're in an experiment
-      var audioPromptSpeakingRate = !!Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate ? _.floatval(Session.get("currentTdfFile").tdfs.tutor.setspec[0].audioPromptSpeakingRate[0]) : 1;
-      Session.set("audioPromptSpeakingRate",audioPromptSpeakingRate);
-    }
-  }
-  var audioInputDetectionInitialized = Session.get("VADInitialized");
-
-  window.AudioContext = window.webkitAudioContext || window.AudioContext;
-  window.URL = window.URL || window.webkitURL;
-  audioContext = new AudioContext();
-  //If user has enabled audio input initialize web audio (this takes a bit)
-  //(this will eventually call cardStart after we redirect through the voice
-  //interstitial and get back here again)
-  if(audioInputEnabled && !audioInputDetectionInitialized){
-    initializeAudio();
-  }else{
-    cardStart();
-  }
-};
 
 Template.card.helpers({
     'isExperiment': () => Session.get("loginMode") === "experiment",
@@ -814,81 +814,6 @@ function curStimHasImageDisplayType(){
   let currentStimuliSetId = Session.get("currentStimuliSetId");
   let stimDisplayTypeMap = Session.get("stimDisplayTypeMap");
   return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
-}
-
-async function cardStart(){
-  //Reset resizing for card images (see also index.js)
-  $("#cardQuestionImg").load(function(evt) {
-      redoCardImage();
-  });
-
-  //Always hide the final instructions box
-  $("#finalInstructionsDlg").modal('hide');
-
-  //the card loads frequently, but we only want to set this the first time
-  if(Session.get("inResume")) {
-      Session.set("buttonTrial", false);
-      clearButtonList();
-
-      console.log("cards template rendered => Performing resume");
-      Session.set("showOverlearningText", false);
-
-      Session.set("inResume", false); //Turn this off to keep from re-resuming
-      resumeFromComponentState();
-  }
-}
-
-async function newQuestionHandler() {
-    console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
-
-    scrollList.update(
-        {'justAdded': 1},          
-        {'$set': {'justAdded': 0}}, 
-        {'multi': true},          
-        function(err, numrecs) {
-            if (err) console.log("UDPATE ERROR:", displayify(err));
-        }
-    );
-
-    clearButtonList();
-    Session.set("currentDisplay",{});
-    Session.set("clozeQuestionParts",undefined);
-    speechTranscriptionTimeoutsSeen = 0;
-    let isButtonTrial = getButtonTrial();
-    Session.set("buttonTrial", isButtonTrial);
-    console.log("newQuestionHandler, isButtonTrial",isButtonTrial);
-
-    if (isButtonTrial) {
-      $("#textEntryRow").hide();
-      setUpButtonTrial();  
-    }else {      
-      $("#textEntryRow").show();
-    }
-
-    //If this is a study-trial and we are displaying a cloze, then we should
-    //construct the question to display the actual information. Note that we
-    //use a regex so that we can do a global(all matches) replace on 3 or
-    //more underscores
-    if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplayEngine").clozeText)) {
-      let currentDisplay = Session.get("currentDisplayEngine");
-      let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
-      currentDisplay.clozeText = clozeQuestionFilledIn;
-      let newExperimentState = { currentDisplayEngine: currentDisplay };
-      await updateExperimentState(newExperimentState,"card.newQuestionHandler");
-      Session.set("currentDisplayEngine",currentDisplay);
-    }
-
-    startQuestionTimeout();
-    checkSimulation();
-
-    if (Session.get("showOverlearningText")) {
-        $("#overlearningRow").show();
-    }
-}
-
-function clearButtonList() {
-  buttonList.remove({'temp': 1});
-  buttonList.remove({'temp': 2});  // Also delete the temp record
 }
 
 // Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:
@@ -1707,17 +1632,6 @@ function hideUserFeedback() {
   $("#forceCorrectionEntry").hide();  // Container
 }
 
-async function prepareCard() {
-    Session.set("displayReady",false);
-    console.log("displayReadyFalse, prepareCard");
-    if (engine.unitFinished()) {
-        unitIsFinished('Unit Engine');
-    }else {
-        await engine.selectNextCard();
-        newQuestionHandler();
-    }
-}
-
 // Called when the current unit is done. This should be either unit-defined (see
 // prepareCard) or user-initiated (see the continue button event and the var
 // len display timeout function)
@@ -1788,6 +1702,93 @@ function getButtonTrial() {
   return isButtonTrial;
 }
 
+function clearButtonList() {
+  buttonList.remove({'temp': 1});
+  buttonList.remove({'temp': 2});  // Also delete the temp record
+}
+
+async function cardStart(){
+  //Reset resizing for card images (see also index.js)
+  $("#cardQuestionImg").load(function(evt) {
+      redoCardImage();
+  });
+
+  //Always hide the final instructions box
+  $("#finalInstructionsDlg").modal('hide');
+
+  //the card loads frequently, but we only want to set this the first time
+  if(Session.get("inResume")) {
+      Session.set("buttonTrial", false);
+      clearButtonList();
+
+      console.log("cards template rendered => Performing resume");
+      Session.set("showOverlearningText", false);
+
+      Session.set("inResume", false); //Turn this off to keep from re-resuming
+      resumeFromComponentState();
+  }
+}
+
+async function prepareCard() {
+    Session.set("displayReady",false);
+    Session.set("currentDisplay",{});
+    Session.set("clozeQuestionParts",undefined);
+    console.log("displayReadyFalse, prepareCard");
+    if (engine.unitFinished()) {
+        unitIsFinished('Unit Engine');
+    }else {
+        await engine.selectNextCard();
+        newQuestionHandler();
+    }
+}
+
+//TODO: this probably no longer needs to be separate from prepareCard
+async function newQuestionHandler() {
+  console.log("newQuestionHandler - Secs since unit start:", elapsedSecs());
+
+  scrollList.update(
+      {'justAdded': 1},          
+      {'$set': {'justAdded': 0}}, 
+      {'multi': true},          
+      function(err, numrecs) {
+          if (err) console.log("UDPATE ERROR:", displayify(err));
+      }
+  );
+
+  clearButtonList();
+  speechTranscriptionTimeoutsSeen = 0;
+  let isButtonTrial = getButtonTrial();
+  Session.set("buttonTrial", isButtonTrial);
+  console.log("newQuestionHandler, isButtonTrial",isButtonTrial);
+
+  if (isButtonTrial) {
+    $("#textEntryRow").hide();
+    setUpButtonTrial();  
+  }else {      
+    $("#textEntryRow").show();
+  }
+
+  //If this is a study-trial and we are displaying a cloze, then we should
+  //construct the question to display the actual information. Note that we
+  //use a regex so that we can do a global(all matches) replace on 3 or
+  //more underscores
+  if ((getTestType() === "s" || getTestType() === "f") && !!(Session.get("currentDisplayEngine").clozeText)) {
+    let currentDisplay = Session.get("currentDisplayEngine");
+    let clozeQuestionFilledIn = Answers.clozeStudy(currentDisplay.clozeText,Session.get("currentAnswer"));
+    currentDisplay.clozeText = clozeQuestionFilledIn;
+    let newExperimentState = { currentDisplayEngine: currentDisplay };
+    await updateExperimentState(newExperimentState,"card.newQuestionHandler");
+    Session.set("currentDisplayEngine",currentDisplay);
+  }
+
+  startQuestionTimeout();
+  checkSimulation();
+
+  if (Session.get("showOverlearningText")) {
+      $("#overlearningRow").show();
+  }
+}
+
 function startQuestionTimeout() {
   stopUserInput(); //No user input (re-enabled below) and reset keypress timestamp.
   clearCardTimeout(); //No previous timeout now
@@ -1812,6 +1813,8 @@ function startQuestionTimeout() {
   //We do this little shuffle of session variables so the display will update all at the same time
   let currentDisplayEngine = Session.get("currentDisplayEngine");
   let closeQuestionParts = Session.get("clozeQuestionParts");
+
+  console.log("startQuestionTimeout, closeQuestionParts",closeQuestionParts);
 
   Session.set("displayReady",false);
   Session.set("clozeQuestionParts",undefined);
@@ -2549,6 +2552,7 @@ async function resumeFromComponentState() {
 
     let curTdfUnit = Session.get("currentTdfFile").tdfs.tutor.unit[Session.get("currentUnitNumber")];
     Session.set("currentTdfUnit",curTdfUnit);
+    console.log("resume, currentTdfUnit:",curTdfUnit);
 
     if(experimentState.questionIndex){
       Session.set("questionIndex", experimentState.questionIndex);
