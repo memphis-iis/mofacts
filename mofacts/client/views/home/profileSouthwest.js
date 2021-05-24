@@ -26,7 +26,7 @@ Template.profileSouthwest.events({
             target.data("ignoreoutofgrammarresponses"),
             target.data("speechoutofgrammarfeedback"),
             "User button click",
-            target.data("ismultitdf"),
+            target.data("isMultiTdf"),
             true
         );
     },
@@ -77,7 +77,7 @@ Template.profileSouthwest.rendered = async function () {
               return;
           }
 
-          var currentStimuliSetId = tdf.currentStimuliSetId;
+          var currentStimuliSetId = tdf.stimuliSetId;
 
           var ignoreOutOfGrammarResponses = (_.chain(setspec).prop("speechIgnoreOutOfGrammarResponses").first().value() || "").toLowerCase()  == "true";
           var speechOutOfGrammarFeedback = _.chain(setspec).prop("speechOutOfGrammarFeedback").first().value();

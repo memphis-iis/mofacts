@@ -29,9 +29,26 @@ function noClassSelectedSetup(){
 }
 
 Template.classEdit.onRendered(async function(){
-  const courses = await meteorCallAsync("getAllCoursesForInstructor",Meteor.userId());
-  console.log("classEdit.onRendered,classes:",courses);
-  Session.set("classes",courses);
+  const courseSections = await meteorCallAsync("getAllCourseSections");
+  let classes = {};
+  for(let courseSection of courseSections){
+    if(courseSection.teacheruserid != Meteor.userId()) continue;
+    if(!classes[courseSection.courseid]){
+      classes[courseSection.courseid] = {
+        courseId: courseSection.courseid,
+        courseName: courseSection.coursename,
+        teacherUserId: courseSection.teacheruserid,
+        semester: courseSection.semester,
+        beginDate: courseSection.begindate,
+        sections: [courseSection.sectionname]
+      };
+    }else{
+      classes[courseSection.courseid].sections.push(courseSection.sectionname);
+    }
+  }
+  console.log("classesFromCourseSections:",classes,courseSections)
+
+  Session.set("classes",Object.values(classes));
 });
 
 Template.classEdit.helpers({

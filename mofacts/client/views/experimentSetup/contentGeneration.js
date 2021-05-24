@@ -38,7 +38,7 @@ async function setAllTdfs(ownerMapCallback){
   let stimSetIds = Session.get("allTdfs").map(x => x.stimuliSetId);
   let allStims = await meteorCallAsync('getStimuliSetsForIdSet',stimSetIds);
   Session.get("allTdfs").forEach(function(tdf){
-    if(tdf.semester != curSemester) return;
+    if(tdf.content.fileName.indexOf(curSemester) == -1) return;
 
     let tdfid = tdf.TDFId;
     let tdfStimSetId = tdf.stimuliSetId;
@@ -81,9 +81,10 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
   fillOutSentenceLookupMap(sourceSentences);
   let originalOrderIndex = 0;
 
-  for(let index=0;index<stimObject.length;i++){ //[{},{}]
+  for(let index=0;index<stimObject.length;index++){ //[{},{}]
     let stim = stimObject[index];
-    if(stim.clozeText == "Did you read the chapter (yes/no)?"){
+    console.log("stim " + index + ", ",stim);
+    if(stim.clozeStimulus == "Did you read the chapter (yes/no)?"){
       finalDidYouReadQuestion = stim;
       continue;
     }
@@ -99,15 +100,28 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
       clusterKC = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     }
 
-    let cloze = stim.clozeText;
+    let cloze = stim.clozeStimulus || stim.textStimulus;
+    console.log("stim " + index + ", ",cloze);
+
     let correctResponse = stim.correctResponse;
     let stimulusKC = stim.stimulusKC ? stim.stimulusKC :
                      stim.tags && stim.tags.clozeId ? stim.tags.clozeId : 
                      _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
-    let isCoreference = !!(stim.tags.clozeCorefTransformation);
+    let isCoreference = !!stim.tags && !!stim.tags.clozeCorefTransformation;
     let unitIndex = isMultiTdf ? MULTITDF_MAIN_CLUSTER_UNIT : stimUnitMappings[index];
-    let {unitType,...rest} = stimUnitMappings[index];
+    let unitType = undefined;
+    if(!stimUnitMappings[index] || _.isEmpty(stimUnitMappings[index])){
+      if(isMultiTdf){
+        //do nothing, multitdfs ignore a lot of mapping
+      }else{
+        console.log("no stim unit mappings for index:",index,stimUnitMappings[index]);
+        continue;
+      }
+    }else{
+      unitType = stimUnitMappings[index].unitType;
+    }
+    console.log("unitType:",unitType,isMultiTdf);
     if(isMultiTdf || unitType == MODEL_UNIT){
       allClozes.push({
         unitIndex, cloze, correctResponse, stimulusKC, clusterKC, paraphraseId, originalOrderIndex, isCoreference, sourceSentence,
@@ -192,7 +206,7 @@ function saveEditHistory(originalClozes,newClozes){
 
 function generateAndSubmitTDFAndStimFiles(){
   var clozes = Session.get('clozeSentencePairs').clozes;
-  console.log('Generating TDF with clozes: ' + JSON.stringify(clozes));
+  console.log('Generating TDF with clozes: ',clozes);
   var displayName = $("#tdfDisplayNameTextBox").val();
   var curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g,"_");
   let curDate = new Date();
@@ -716,7 +730,7 @@ Template.contentGeneration.events({
     origTdfId = $(event.currentTarget).val();
     console.log("origTdfId: " + origTdfId);
     var stimObject = tdfIdToStimuliSetMap[origTdfId];
-    console.log("stimObject: " + JSON.stringify(stimObject));
+    console.log("stimObject: ",stimObject);
     var tdfObject = tdfIdToTdfFileMap[origTdfId];
     var units = tdfObject.tdfs.tutor.unit;
     //NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
@@ -775,7 +789,7 @@ Template.contentGeneration.helpers({
   },
 
   isCoreference: function(paraphraseId){
-    let cloze = Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId);
+    let cloze = !!Session.get("clozeSentencePairs") && Session.get("clozeSentencePairs").clozes ? Session.get("clozeSentencePairs").clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
     if(!cloze) console.log("isCoreference, not found: " + paraphraseId)
     return !!(cloze) ? cloze.isCoreference : false;
   },

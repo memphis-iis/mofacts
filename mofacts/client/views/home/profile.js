@@ -358,7 +358,7 @@ Template.profile.rendered = async function () {
 
 //Actual logic for selecting and starting a TDF
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback,how,isMultiTdf,fromSouthwest) {
-    console.log("Starting Lesson", lessonName, currentTdfId, "currentStimuliSetId:", currentStimuliSetId);
+    console.log("Starting Lesson", lessonName, currentTdfId, "currentStimuliSetId:", currentStimuliSetId,"isMultiTdf:",isMultiTdf);
 
     var audioPromptFeedbackView = Session.get("audioPromptFeedbackView");
 

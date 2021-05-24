@@ -58,7 +58,7 @@ function defaultUnitEngine(curExperimentData) {
         },
 
         getSubClozeAnswerSyllables: function(answer,displaySyllableIndices,cachedSyllables){
-            console.log("!!!displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: " + JSON.stringify(cachedSyllables));
+            console.log("getSubClozeAnswerSyllables, displaySyllableIndices: " + JSON.stringify(displaySyllableIndices) + ", this.cachedSyllables: ",cachedSyllables);
             if(typeof(displaySyllableIndices) === "undefined" || !cachedSyllables || displaySyllableIndices.length == 0){
                 console.log("no syllable index or cachedSyllables, defaulting to no subclozeanswer");
                 return undefined;
@@ -70,7 +70,7 @@ function defaultUnitEngine(curExperimentData) {
         },
     
         replaceClozeWithSyllables: function(question,currentAnswerSyllables, origAnswer){
-            console.log("replaceClozeWithSyllables: " + question);
+            console.log("replaceClozeWithSyllables1: " + question);
             if(!question){
                 return {
                     clozeQuestion: undefined,
@@ -132,7 +132,7 @@ function defaultUnitEngine(curExperimentData) {
 
             let clozeQuestion = question.replace(/([_]+[ ]?)+/,clozeAnswer + " ");
 
-            console.log("replaceClozeWithSyllables:",clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
+            console.log("replaceClozeWithSyllables2:",clozeQuestion,clozeMissingSyllables,clozeQuestionParts);
             
             return { clozeQuestion, clozeMissingSyllables, clozeQuestionParts };
         },
@@ -160,7 +160,7 @@ function defaultUnitEngine(curExperimentData) {
             }          
 
             console.log("setUpCardQuestionSyllables:",currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer);
-            return {currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
+            return {currentQuestion_2:currentQuestion,currentQuestionPart2_2:currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
         },
 
         setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
@@ -207,8 +207,16 @@ function defaultUnitEngine(curExperimentData) {
             newExperimentState.originalQuestion = currentQuestion;
             newExperimentState.originalQuestion2 = currentQuestionPart2;
             
-            let currentAnswerSyllables, clozeQuestionParts, currentAnswer;
-            ({currentQuestion,currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer} = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob));
+            let {
+                    currentQuestion_2,
+                    currentQuestionPart2_2,
+                    currentAnswerSyllables,
+                    clozeQuestionParts,
+                    currentAnswer
+                } = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
+            
+            console.log("setUpCardQuestionAndAnswerGlobals2:",currentQuestion_2,currentQuestionPart2_2);
+            console.log("setUpCardQuestionAndAnswerGlobals3:",currentAnswerSyllables,clozeQuestionParts,currentAnswer);
 
             if(currentAnswerSyllables){
                 curStim.answerSyllables = currentAnswerSyllables;
@@ -216,16 +224,17 @@ function defaultUnitEngine(curExperimentData) {
             Session.set("currentAnswerSyllables",currentAnswerSyllables);
             Session.set("currentAnswer",currentAnswer);
             Session.set("clozeQuestionParts",clozeQuestionParts);
-            Session.set("currentQuestionPart2",currentQuestionPart2);
+            console.log("setUpCardQuestionAndAnswerGlobals4",Session.get("clozeQuestionParts"));
+            Session.set("currentQuestionPart2",currentQuestionPart2_2);
             newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
             newExperimentState.currentAnswer = currentAnswer;
             newExperimentState.clozeQuestionParts = clozeQuestionParts;
-            newExperimentState.currentQuestionPart2 = currentQuestionPart2;
+            newExperimentState.currentQuestionPart2 = currentQuestionPart2_2;
     
             if(!!(currentDisplay.text)){
-                currentDisplay.text = currentQuestion;
+                currentDisplay.text = currentQuestion_2;
             }else if(!!(currentDisplay.clozeText)){
-                currentDisplay.clozeText = currentQuestion;
+                currentDisplay.clozeText = currentQuestion_2;
             }
     
             Session.set("currentDisplayEngine",currentDisplay);
@@ -349,9 +358,9 @@ function modelUnitEngine() {
             let sessCurUnit = JSON.parse(JSON.stringify(Session.get("currentTdfUnit")));
             // Figure out which cluster numbers that they want
             console.log("setupclusterlist:",this.curUnit,sessCurUnit);
-            const unitClusterList = _.chain(this.curUnit || sessCurUnit)
+            const unitClusterList = _.chain(this.curUnit || sessCurUnit) //TODO: shouldn't need both
             .prop("learningsession").first()
-            .prop("clusterlist").trim().value();
+            .prop("clusterlist").first().trim().value();
             extractDelimFields(unitClusterList, clusterList);
         }
         console.log("clusterList",clusterList);
@@ -507,11 +516,11 @@ function modelUnitEngine() {
     }
 
     // See if they specified a probability function
-    var probFunction = _.chain(this.curUnit)
+    var probFunction = _.chain(Session.get("currentTdfUnit"))
         .prop("learningsession").first()
         .prop("calculateProbability").first().trim().value();
     var probFunctionHasHintSylls = typeof(probFunction) == "undefined" ? false : probFunction.indexOf("hintsylls") > -1;
-    console.log("probFunctionHasHintSylls: " + probFunctionHasHintSylls);
+    console.log("probFunctionHasHintSylls: " + probFunctionHasHintSylls,typeof(probFunction),probFunction,Session.get("currentTdfUnit"),"test");
     if (!!probFunction) {
         probFunction = new Function("p", "'use strict';\n" + probFunction);  // jshint ignore:line
     }
@@ -528,6 +537,8 @@ function modelUnitEngine() {
 
         // Store parameters in an object for easy logging/debugging
         var p = {};
+
+        p.i = prob.i;
 
         //Current Indices
         p.clusterIndex = prob.cardIndex;
@@ -584,13 +595,12 @@ function modelUnitEngine() {
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
         p.stimOutcomeHistory = stim.outcomeStack;
-        //console.log("stimOutcomeHistory: " + p.stimOutcomeHistory);
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
 
-        //console.log("p.overallOutcomeHistory: " + p.overallOutcomeHistory);
-
-        //console.log("model user data:",p);
+        if(p.i<15){
+            console.log("cardProbability parameters:",JSON.parse(JSON.stringify(p)));
+        }
         return probFunction(p);
     }
 
@@ -603,6 +613,7 @@ function modelUnitEngine() {
         var probs = cardProbabilities.probs;
         var ptemp = [];
         for (var i = 0; i < probs.length; ++i) {
+            probs[i]['i'] = i;
             // card.canUse is true if and only if it is in the clusterlist
             // for the current unit. You could just return here if these clusters
             // should be ignored (or do nothing if they should be included below)
@@ -668,7 +679,6 @@ function modelUnitEngine() {
             //console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
           }
-          //console.log("!!!parameters: " + JSON.stringify(parameters) + ", optimalProb: " + optimalProb);
 
           if (card.canUse && card.trialsSinceLastSeen > 1) {
               var dist = Math.abs(prob.probability - optimalProb)
@@ -700,7 +710,6 @@ function modelUnitEngine() {
           //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
             thresholdCeiling = 0.90;
           }
-          //console.log("!!!parameters: " + JSON.stringify(parameters) + ", thresholdCeiling: " + thresholdCeiling + ", card: " + JSON.stringify(card));
 
           if (card.canUse && card.trialsSinceLastSeen > 1) {
               // Note that we are checking stim probability
@@ -944,7 +953,7 @@ function modelUnitEngine() {
         curUnit: (() => JSON.parse(JSON.stringify(Session.get("currentTdfUnit"))))(),
 
         unitMode: (function(){
-          var unitMode = _.chain(this.curUnit)
+          var unitMode = _.chain(Session.get("currentTdfUnit"))
               .prop("learningsession").first()
               .prop("unitMode").trim().value() || "default";
           console.log("UNIT MODE: " + unitMode);
@@ -1022,6 +1031,7 @@ function modelUnitEngine() {
 
 
             let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
+            console.log("selectNextCard,",Session.get("clozeQuestionParts"));
             newExperimentState = Object.assign(newExperimentState,stateChanges);// Find objects we'll be touching
 
             let testType = "d";
