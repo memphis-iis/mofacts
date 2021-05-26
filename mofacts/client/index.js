@@ -40,11 +40,11 @@ Meteor.startup(function() {
     console.log = function() {
       for(var index in arguments){
         var arg = arguments[index];
-        if(typeof(arg) != "object"){
+        //if(typeof(arg) != "object"){
           console.logs.unshift(arg);
-        }
+        //}
       }
-      console.logs = console.logs.slice(0,1000);
+      console.logs = console.logs.slice(0,2000);
       console.defaultLog.apply(console,arguments);
       //TODO: uncomment this when log rotation is set up
       // try{

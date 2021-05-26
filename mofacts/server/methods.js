@@ -960,7 +960,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
   }
-  console.log("studentPerformanceForClass:",JSON.stringify(studentPerformanceForClass));
+  console.log("studentPerformanceForClass:",studentPerformanceForClass);
   for(let index of Object.keys(studentPerformanceForClass)){
     let coursetotals = studentPerformanceForClass[index];
     for(let index2 of Object.keys(coursetotals)){
@@ -969,7 +969,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId){
       tdftotal.totalTimeDisplay = (tdftotal.totalTime / (60 * 1000) ).toFixed(1) //convert to minutes from ms
     }
   }
-  console.log("studentPerformanceForClassAndTdfIdMap:",JSON.stringify(studentPerformanceForClassAndTdfIdMap));
+  console.log("studentPerformanceForClassAndTdfIdMap:",studentPerformanceForClassAndTdfIdMap);
   for(let index3 of Object.keys(studentPerformanceForClassAndTdfIdMap)){
     let coursetotals = studentPerformanceForClassAndTdfIdMap[index3];
     for(let index4 of Object.keys(coursetotals)){
@@ -1271,7 +1271,6 @@ async function loadStimsAndTdfsFromPrivate(adminUserId){
     for(let filename of stimFilenames){
       //try{
         let json = getStimJSONFromFile('stims/' + filename);
-        //console.log('stim json',JSON.stringify(json));
         let stimuliSetId = await getAssociatedStimSetIdForStimFile(filename);
         serverConsole('insert stim',filename,stimuliSetId)
         if(isEmpty(stimuliSetId)){

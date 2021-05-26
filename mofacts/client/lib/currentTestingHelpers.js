@@ -120,22 +120,23 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     }
   }else{
     studentPerformanceData = {
-      numCorrect: parseInt(studentPerformanceDataRet.numCorrect),
-      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect),
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration)
+      numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
+      numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0
     }
   }
-  let count = (studentPerformanceData.numCorrect + studentPerformanceData.numIncorrect);
+  let count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
+  let percentCorrect = (count > 0) ? ((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%" : "N/A";
   let studentPerformance = {
     "username":studentUsername,
     "count":count,
-    "percentCorrect":((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%",
+    "percentCorrect":percentCorrect,
     "numCorrect":studentPerformanceData.numCorrect,
     "totalTime":studentPerformanceData.totalPracticeDuration,
     "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration).toFixed(1)
   }
   Session.set("curStudentPerformance",studentPerformance);
-  console.log("setStudentPerformance,output:",studentPerformance);
+  console.log("setStudentPerformance,output:",studentPerformance,studentPerformanceData);
 }
 
 function getCurrentClusterAndStimIndices(){
@@ -329,10 +330,11 @@ function getTestType() {
 //IMPORTANT: we also support selecting one of multiple delivery params via
 //experimentXCond (which can be specified in the URL or system-assigned)
 function getCurrentDeliveryParams(){
-    //If they didn't specify the unit, assume that current unit
     let currUnit = Session.get("currentTdfUnit");
 
     let isLearningSession = Session.get("unitType") == MODEL_UNIT;
+
+    console.log("getCurrentDeliveryParams:",currUnit,isLearningSession);
 
     //Note that we will only extract values that have a specified default
     //value here.
