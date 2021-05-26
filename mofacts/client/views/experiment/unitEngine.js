@@ -245,7 +245,7 @@ function defaultUnitEngine(curExperimentData) {
     };
     engine.experimentState = curExperimentData.experimentState;
     engine.cachedSyllables = curExperimentData.cachedSyllables;
-    console.log("curExperimentData: " + curExperimentData);
+    console.log("curExperimentData:",curExperimentData);
     return engine;
 }
 
@@ -254,7 +254,7 @@ function defaultUnitEngine(curExperimentData) {
 function emptyUnitEngine() {
     return {
         unitType: "instruction-only",
-        initImpl: function() { Session.set("unitType","instruction-only") },
+        initImpl: function() { },
         unitFinished: function() { return true; },
         selectNextCard: function() { },
         findCurrentCardInfo: function() { },
@@ -855,7 +855,7 @@ function modelUnitEngine() {
                     for(let stim of card.stims){
                         let stimIndex = stim.stimIndex;
                         let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == stim.stimulusKC) || {};
-                        stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
+                        stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || stim.previousCalculatedProbabilities;
                         if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
                     }
                 }
@@ -879,7 +879,7 @@ function modelUnitEngine() {
                     componentData.hasBeenIntroduced = true;
                     Object.assign(modelCard,componentData);
                     let clusterProbs = stimProbabilityEstimates.filter(x => x.kcid == clusterKC) || {};
-                    modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates || [];
+                    modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates || modelCard.previousCalculatedProbabilities;
                 }
                 for(let cardIndex=0;cardIndex<cards.length;cardIndex++){
                     let modelCard = cards[cardIndex];
@@ -895,7 +895,7 @@ function modelUnitEngine() {
                         Object.assign(modelStim,componentStim);
                         let stimProbs = stimProbabilityEstimates.filter(x => x.kcid == componentStim.stimulusKC) || {};
                         modelStim.otherPracticeTime = cards.reduce((acc,card) => acc + card.stims.filter(x => x.stimulusKC != stimulusKC).reduce((acc,stim) => acc + stim.totalPracticeDuration,0),0);
-                        modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || [];
+                        modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || modelStim.previousCalculatedProbabilities;
                         let stimIndex = modelStim.stimIndex;
                         if(!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
                         probsMap[cardIndex][stimIndex] = componentStim.probabilityEstimate;
@@ -1171,7 +1171,7 @@ function modelUnitEngine() {
                     displayify(cluster.stims[currentCardInfo.whichStim].correctResponse),
                     displayify(cardProbabilities.responses));
             }
-            if(wasCorrect && getTestType() !== "i"){
+            if(getTestType() !== "i"){
                 let prog = getUserProgress();
                 prog.overallOutcomeHistory.push(wasCorrect ? 1 : 0);
                 let newExperimentState = {overallOutcomeHistory:prog.overallOutcomeHistory};

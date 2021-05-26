@@ -489,7 +489,7 @@ navigateForMultiTdf = async function(){
   //If we haven't finished the unit yet, we may want to lock into the current unit
   //so the user can't mess up the data
   if(lastUnitStarted > lastUnitCompleted){
-    const curUnit = Session.get("currentTdfUnit");
+    const curUnit = experimentState.currentTdfUnit; //Session.get("currentTdfUnit");
     const curUnitType = getUnitType(curUnit);
     //We always want to lock users in to an assessment session
     if(curUnitType === SCHEDULE_UNIT){

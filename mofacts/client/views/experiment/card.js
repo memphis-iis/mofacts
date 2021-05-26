@@ -2365,9 +2365,6 @@ async function updateExperimentState(newState,codeCallLocation){
   }
   let oldExperimentState = Session.get("currentExperimentState");
   let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
-  // if (_.contains(["instructions", "schedule", "question", "answer", "[timeout]"], newExperimentState.lastAction)) {
-  //     let clientSideTimeStamp = Date.now();
-  // }
   const res = await meteorCallAsync('setExperimentState',Meteor.userId(), Session.get("currentRootTdfId"),newExperimentState);
   Session.set("currentExperimentState",newExperimentState);
   console.log("updateExperimentState",codeCallLocation,'old:',oldExperimentState,'new:',newExperimentState,res);
@@ -2596,8 +2593,6 @@ async function processUserTimesLog() {
     
     Session.set("schedule",experimentState.schedule);
     Session.set("currentUnitStartTime", Date.now());
-    Session.set("currentDeliveryParams",getCurrentDeliveryParams());
-    Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
 
     //shufIndex is mapped, clusterIndex is raw
     Session.set("clusterIndex",           experimentState.shufIndex || experimentState.clusterIndex);
@@ -2692,6 +2687,11 @@ async function processUserTimesLog() {
     }else{
       await resetEngine(Session.get("currentUnitNumber"));
       newExperimentState.unitType = engine.unitType;
+
+      //Depends on unitType being set in initialized unit engine
+      Session.set("currentDeliveryParams",getCurrentDeliveryParams());
+      Session.set("scoringEnabled",Session.get("currentDeliveryParams").scoringEnabled);
+
       await updateExperimentState(newExperimentState,"card.processUserTimesLog");
       engine.loadComponentStates();
   
