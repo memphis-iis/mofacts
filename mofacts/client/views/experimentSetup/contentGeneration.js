@@ -35,7 +35,8 @@ function recordClozeEditHistory(oldCloze,newCloze){
 async function setAllTdfs(ownerMapCallback){
   allTdfs = [];
   let ownerIds = [];
-  let stimSetIds = Session.get("allTdfs").map(x => x.stimuliSetId);
+  let stimSetIds = Session.get("allTdfs").map(x => x.stimuliSetId).filter(x => x!=null);
+  stimSetIds = Array.from(new Set(stimSetIds));
   let allStims = await meteorCallAsync('getStimuliSetsForIdSet',stimSetIds);
   Session.get("allTdfs").forEach(function(tdf){
     if(tdf.content.fileName.indexOf(curSemester) == -1) return;
@@ -83,7 +84,6 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
 
   for(let index=0;index<stimObject.length;index++){ //[{},{}]
     let stim = stimObject[index];
-    console.log("stim " + index + ", ",stim);
     if(stim.clozeStimulus == "Did you read the chapter (yes/no)?"){
       finalDidYouReadQuestion = stim;
       continue;
@@ -100,13 +100,21 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
       clusterKC = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     }
 
-    let cloze = stim.clozeStimulus || stim.textStimulus;
-    console.log("stim " + index + ", ",cloze);
+    let clozeStimulus = stim.clozeStimulus || stim.clozeText || stim.textStimulus;
 
     let correctResponse = stim.correctResponse;
+    let incorrectResponses = stim.incorrectResponses || undefined;
+    let itemResponseType = stim.itemResponseType;
+    let speechHintExclusionList = stim.speechHintExclusionList;
+    let textStimulus = stim.textStimulus;
+    let audioStimulus = null; //ASSUMED
+    let imageStimulus = null; //ASSUMED
+    let videoStimulus = null; //ASSUMED
+
     let stimulusKC = stim.stimulusKC ? stim.stimulusKC :
                      stim.tags && stim.tags.clozeId ? stim.tags.clozeId : 
                      _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
+    let params = stim.params;
     let paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
     let isCoreference = !!stim.tags && !!stim.tags.clozeCorefTransformation;
     let unitIndex = isMultiTdf ? MULTITDF_MAIN_CLUSTER_UNIT : stimUnitMappings[index];
@@ -121,10 +129,25 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
     }else{
       unitType = stimUnitMappings[index].unitType;
     }
-    console.log("unitType:",unitType,isMultiTdf);
     if(isMultiTdf || unitType == MODEL_UNIT){
       allClozes.push({
-        unitIndex, cloze, correctResponse, stimulusKC, clusterKC, paraphraseId, originalOrderIndex, isCoreference, sourceSentence,
+        unitIndex, 
+        clozeStimulus, 
+        correctResponse, 
+        incorrectResponses,
+        itemResponseType,
+        speechHintExclusionList,
+        textStimulus,
+        audioStimulus,
+        imageStimulus,
+        videoStimulus, 
+        stimulusKC, 
+        clusterKC, 
+        params,
+        paraphraseId, 
+        originalOrderIndex, 
+        isCoreference, 
+        sourceSentence,
         origStimIndex: index,
         isParaphrase: false,
         tags:stim.tags,
@@ -134,14 +157,28 @@ async function setClozesFromStimObject(stimObject,isMultiTdf){
       if(stim.alternateDisplays){
         for(let altDisplay of stim.alternateDisplays){
           paraphraseId = _.random(LOWER_BOUND_RANDOM,UPPER_BOUND_RANDOM);
-          let altCloze = altDisplay.clozeText;
+          let altCloze = altDisplay.clozeStimulus || altDisplay.clozeText; //clozeText is a prior schema name
           allClozes.push({
-            unitIndex, correctResponse, stimulusKC, clusterKC, paraphraseId, originalOrderIndex, sourceSentence,
-            cloze:altCloze,
+            unitIndex, 
+            correctResponse, 
+            incorrectResponses,
+            itemResponseType,
+            speechHintExclusionList,
+            textStimulus,
+            audioStimulus,
+            imageStimulus,
+            videoStimulus, 
+            stimulusKC, 
+            clusterKC, 
+            params,
+            paraphraseId, 
+            originalOrderIndex, 
+            sourceSentence,
+            clozeStimulus:altCloze,
             origStimIndex: index,
             isParaphrase: true,
             tags:stim.tags,
-            originalVersion: cloze,
+            originalVersion: clozeStimulus,
             isCoreference: false, //for now we don't layer coref resolution and paraphrasing
           });
           originalOrderIndex += 1;
@@ -213,15 +250,25 @@ function generateAndSubmitTDFAndStimFiles(){
   var curDateTime = curDate.toISOString().replace(/-/g,'_').replace(/:/g,'_').replace(/[.]/g,'_');
   var tdfFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_TDF.xml";
 
+  let stimulusFileName = undefined;
+  let parentStimulusFileName = undefined;
   let isMultiTdf = false;
   if(clozesComeFromTemplate){
-    var tdfTemplateId = $("#templateTDFSelect").val();
-    var originalTDF = tdfIdToTdfFileMap[tdfTemplateId];
+    let tdfTemplateId = $("#templateTDFSelect").val();
+    let originalTDF = tdfIdToTdfFileMap[tdfTemplateId];
     isMultiTdf = originalTDF.isMultiTdf;
+
+    stimulusFileName = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
+    stimulusFileName = stimulusFileName.slice(0,stimulusFileName.length-5) + "_" + curUserName + "_" + curDateTime + "_" + curSemester + ".json";
+
+    parentStimulusFileName = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
+  }else{
+    stimulusFileName = displayName.replace(/ /g,"_") + "_" + curUserName + "_" + curDateTime + "_" + curSemester + "_autoNamed_Stim.json";
+    parentStimulusFileName = null;
   }
   
-  var newStimJSON = generateStimJSON(clozes,isMultiTdf);
-  var newTDFJSON = generateTDFJSON(tdfFileName,displayName,newStimJSON);
+  let newStimJSON = generateStimJSON(clozes,isMultiTdf,stimulusFileName,parentStimulusFileName);
+  let newTDFJSON = generateTDFJSON(tdfFileName,displayName,stimulusFileName,newStimJSON);
   let wrappedTDF = {
     ownerId: Meteor.userId(),
     visibility: 'profileSouthwestOnly',
@@ -235,6 +282,7 @@ function generateAndSubmitTDFAndStimFiles(){
     clusterListMappings[unitIndex].new = undefined;
   }
 
+  console.log("!!!generateAndSubmitTDFAndStimFiles",newStimJSON,wrappedTDF,sourceSentences);
   Meteor.call("insertStimTDFPair",newStimJSON,wrappedTDF,sourceSentences,function(err,res){
     if(!!err){
       console.log("Error inserting stim/tdf pair: " + err);
@@ -260,38 +308,67 @@ function generateAndSubmitTDFAndStimFiles(){
       $("#save-modal").modal('hide');
     }
   });
-  console.log("newStimJSON: " + JSON.stringify(newStimJSON));
-  console.log("newTDFJSON: " + JSON.stringify(newTDFJSON));
 }
 
-function getStimForCloze(stimulusKC,cloze){
-  let stim = {clozeText:"",response:{},params:STIM_PARAMETER,tags:[]};
+function getStimForCloze(stimulusKC,stimulusFileName,parentStimulusFileName){
   let curStimClozes = stimulusKCtoClozesMap[stimulusKC];
-  stim.correctResponse = curStimClozes[0].correctResponse;
-  stim.tags = curStimClozes[0].tags;
+
+  let clusterKC = curStimClozes[0].clusterKC;
+  let params = curStimClozes[0].params;
+  let correctResponse = curStimClozes[0].correctResponse;
+  let incorrectResponses = curStimClozes[0].incorrectResponses || undefined;
+  let itemResponseType = curStimClozes[0].itemResponseType;
+  let speechHintExclusionList = curStimClozes[0].speechHintExclusionList;
+  let textStimulus = curStimClozes[0].textStimulus;
+  let audioStimulus = null; //ASSUMED
+  let imageStimulus = null; //ASSUMED
+  let videoStimulus = null; //ASSUMED
+  let tags = curStimClozes[0].tags;
+
+  let stim = {
+    stimulusFileName,
+    parentStimulusFileName,
+    stimulusKC,
+    clusterKC,
+    params:params || STIM_PARAMETER,
+    correctResponse,
+    incorrectResponses,
+    itemResponseType,
+    speechHintExclusionList,
+    audioStimulus,
+    imageStimulus,
+    videoStimulus,
+    clozeStimulus:"",
+    textStimulus,
+    alternateDisplays:[],
+    tags
+  };
+
   if(curStimClozes.length > 1){ //this means there are paraphrases as they share the same cloze id
-    stim.alternateDisplays = [];
     for(let cloze2 of curStimClozes){
+      let cloze2Stimulus = cloze2.clozeStimulus || cloze2.clozeText;
       if(cloze2.isParaphrase){
-        stim.alternateDisplays.push({"clozeText":cloze2.cloze});
+        stim.alternateDisplays.push({"clozeStimulus":cloze2Stimulus});
       }else{
-        stim.clozeText = cloze2.cloze;
+        stim.clozeStimulus = cloze2Stimulus;
       }
     }
-    if(!stim.clozeText){
-      stim.clozeText = stim.alternateDisplays.pop();
+    if(!stim.clozeStimulus){
+      stim.clozeStimulus = stim.alternateDisplays.pop();
       if(stim.alternateDisplays.length == 0){
         delete stim.alternateDisplays;
       }
     }
   }else{
-    stim.clozeText = cloze.cloze;
+    delete stim.alternateDisplays;
+    stim.clozeStimulus = curStimClozes[0].clozeStimulus;
   }
 
   return stim;
 }
 
-function generateStimJSON(clozes,isMultiTdf){
+function generateStimJSON(clozes,isMultiTdf,stimulusFileName,parentStimulusFileName){
+  console.log("generateStimJSON:",isMultiTdf,clozes,stimulusFileName);
   origStim = tdfIdToStimuliSetMap[origTdfId];
   curStim = [];
 
@@ -316,7 +393,7 @@ function generateStimJSON(clozes,isMultiTdf){
       for(let cloze of curSentenceClozes){
         let stimulusKC = cloze.stimulusKC;
         if(!completedStimulusKCs[stimulusKC]){
-          let stim = getStimForCloze(stimulusKC,cloze);
+          let stim = getStimForCloze(stimulusKC,stimulusFileName,parentStimulusFileName);
           curStim.push(stim);//[{},{}]
           completedStimulusKCs[stimulusKC] = true;
         }
@@ -324,6 +401,8 @@ function generateStimJSON(clozes,isMultiTdf){
       curClusterIndex += 1;
     }
   }
+
+  console.log("!!!generateStimJSON",curClusterIndex,completedClusterKCs,curStim);
 
   //Add back assessment session/non learning session clusters
   if(!isMultiTdf){
@@ -348,8 +427,9 @@ function generateStimJSON(clozes,isMultiTdf){
   return curStim;
 }
 
-function generateTDFJSON(tdfFileName,displayName,stimFileName,newStimJSON){
-  console.log("clusterListMappings: " + JSON.stringify(clusterListMappings));
+function generateTDFJSON(tdfFileName,displayName,stimulusFileName,newStimJSON){
+  console.log("generateTDFJSON:",tdfFileName,displayName,stimulusFileName,newStimJSON);
+  console.log("clusterListMappings: ", clusterListMappings);
   let curTdf = undefined;
 
   if(clozesComeFromTemplate){
@@ -385,7 +465,7 @@ function generateTDFJSON(tdfFileName,displayName,stimFileName,newStimJSON){
   }
 
   curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
-  curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimFileName];
+  curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimulusFileName];
   
   if(typeof(speechAPIKey) !== "undefined"){
     curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
@@ -529,7 +609,7 @@ Template.contentGeneration.events({
 
     let originalText = JSON.parse(JSON.stringify(newCloze.tags.originalItem));
     delete newCloze.tags.originalItem;
-    newCloze.cloze = originalText;
+    newCloze.clozeStimulus = originalText;
 
     updateLookupMaps(stimulusKC,clusterKC,curParaphraseId,oldCloze,newCloze);
   },
@@ -543,9 +623,9 @@ Template.contentGeneration.events({
     let oldCloze = JSON.parse(JSON.stringify(clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == curParaphraseId)));
     let newCloze = JSON.parse(JSON.stringify(oldCloze));
 
-    let originalText = JSON.parse(JSON.stringify(newCloze.cloze));
+    let originalText = JSON.parse(JSON.stringify(newCloze.clozeStimulus));
     newCloze.tags.originalItem = originalText;
-    newCloze.cloze = JSON.parse(JSON.stringify(newCloze.tags.clozeCorefTransformation));
+    newCloze.clozeStimulus = JSON.parse(JSON.stringify(newCloze.tags.clozeCorefTransformation));
 
     updateLookupMaps(stimulusKC,clusterKC,curParaphraseId,oldCloze,newCloze);
   },
@@ -624,9 +704,9 @@ Template.contentGeneration.events({
       alert("Please enter a correct response");
     }else{
       let oldCloze = stimulusKCtoClozesMap[stimulusKC].find((elem) => elem.paraphraseId == paraphraseId);
-      let originalVersion = oldCloze.originalVersion === "Same" ? oldCloze.cloze : oldCloze.originalVersion;
+      let originalVersion = oldCloze.originalVersion === "Same" ? oldCloze.clozeStimulus : oldCloze.originalVersion;
 
-      let newCloze = {...oldCloze,originalVersion,cloze:newClozeText,correctResponse,clusterKC,stimulusKC,origStimIndex:oldCloze.origStimIndex};
+      let newCloze = {...oldCloze,originalVersion,clozeStimulus:newClozeText,correctResponse,clusterKC,stimulusKC,origStimIndex:oldCloze.origStimIndex};
       recordClozeEditHistory(oldCloze,newCloze);
 
       stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter((clozeItem) => clozeItem.paraphraseId != paraphraseId);
@@ -808,7 +888,7 @@ Template.contentGeneration.helpers({
     var curClozeClusterKC = Session.get("curClozeSentencePairClusterKC");
     var curClozeText;
     _.map(Session.get("clozeSentencePairs").clozes, function(c) {
-      if (c.clusterKC === curClozeClusterKC) { curClozeText = c.cloze }
+      if (c.clusterKC === curClozeClusterKC) { curClozeText = c.clozeStimulus }
     });
     return curClozeText;
   }

@@ -55,6 +55,7 @@ CREATE TABLE item (
     itemId SERIAL PRIMARY KEY,
     stimuliSetId INTEGER,
     stimulusFilename VARCHAR(1024),
+    parentStimulusFileName VARCHAR(1024),
     stimulusKC INTEGER,
     clusterKC INTEGER NOT NULL,
     responseKC INTEGER,
