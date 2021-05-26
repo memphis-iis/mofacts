@@ -5,6 +5,7 @@ function getItem(stim){
         itemId: stim.itemid,
         stimuliSetId: stim.stimulisetid,
         stimulusFilename: stim.stimulusfilename,
+        parentStimulusFileName: stim.parentStimulusFileName,
         stimulusKC: stim.stimuluskc,
         clusterKC: stim.clusterkc,
         responseKC: stim.responsekc,

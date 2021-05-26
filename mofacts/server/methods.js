@@ -231,10 +231,8 @@ async function getAllTdfs(){
 }
 
 async function getStimuliSetsForIdSet(stimuliSetIds){
-  if(!stimuliSetIds.length)stimuliSetIds = [stimuliSetIds];
   let stimSetsStr = stimuliSetIds.join(",");
   let query = "SELECT * FROM ITEM WHERE stimuliSetId IN (" + stimSetsStr + ") ORDER BY itemId";
-  console.log("getStimuliSetsForIdSet",query)
   const stimSets = await db.many(query);
   let ret = [];
   for(let stim of stimSets){
@@ -339,29 +337,23 @@ function _branchingCorrectText(answer) {
   return result[0];
 }
 
+//TODO: move this to function through existing upsert functions
 async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
-  let highestStimuliSetIdRet = await db.manyOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
-  let newStimuliSetId = highestStimuliSetIdRet.higheststimulisetid + 1;
+  let highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
+  let newStimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
   for(let stim of newStimJSON){
     stim.stimuliSetId = newStimuliSetId;
   }
-  let highestStimulusKCRet = await db.manyOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
+  let highestStimulusKCRet = await db.oneOrNone('SELECT MAX(stimulusKC) AS stimulusKC FROM item');
   let curNewKCBase = (Math.floor(highestStimulusKCRet.stimuluskc / KC_MULTIPLE) * KC_MULTIPLE) + KC_MULTIPLE;// + 1
 
   let curNewStimulusKC = curNewKCBase;
   let curNewClusterKC = curNewKCBase;
 
-  let responseKCStuff = await db.manyOrNone('SELECT DISTINCT(correctResponse, responseKC) FROM item');
-  let responseKCMap = {};
+  let responseKCMap = await getReponseKCMap();
   let maxResponseKC = 1;
-  for(let pair of responseKCStuff){
-    let answerText = getDisplayAnswerText(pair.correctResponse);
-    responseKCMap[answerText] = pair.responsekc;
-    if(pair.responsekc > maxResponseKC){
-      maxResponseKC = pair.responsekc;
-    }
-  }
+  console.log("!!!insertStimTDFPair:",highestStimuliSetIdRet,newStimuliSetId,highestStimulusKCRet,curNewKCBase);
   let curNewResponseKC = maxResponseKC + 1;
 
   let stimulusKCTranslationMap = {};
@@ -390,9 +382,15 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
     .then(async row => {
       let TDFId = row.tdfid;
       for(let stim of newStimJSON){
-        //if(stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
-        await t.none('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, clozeStimulus, alternateDisplays, tags) \
-                      VALUES(${stimuliSetId}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${clozeStimulus}, ${alternateDisplays}, ${tags})',stim);
+        if(!stim.incorrectResponses) stim.incorrectResponses = null;
+        if(!stim.alternateDisplays){
+          stim.alternateDisplays = null;
+        }else{
+          stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
+        }
+
+        await t.none('INSERT INTO item(stimuliSetId, stimulusFileName, parentStimulusFileName, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
+                      VALUES(${stimuliSetId}, ${stimulusFileName}, ${parentStimulusFileName}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})',stim);
       }
       if(sourceSentences){
         await t.none('INSERT INTO itemSourceSentences (stimuliSetId, sourceSentences) VALUES($1,$2)',[newStimuliSetId,sourceSentences]);
@@ -1175,8 +1173,8 @@ async function upsertStimFile(stimFilename,stimJSON,ownerId,stimuliSetId){
         matchingStim = getItem(matchingStim);
         let mergedStim = Object.assign(matchingStim,newStim);
         if(mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
-        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, stimulusKC = ${stimulusKC}, \
-                      clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, optimalProb = ${optimalProb}, \
+        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, parentStimulusFileName = ${parentStimulusFileName}, \
+                      stimulusKC = ${stimulusKC}, clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, optimalProb = ${optimalProb}, \
                       correctResponse = ${correctResponse}, incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
                       speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, textStimulus = ${textStimulus}, \
                       audioStimulus = ${audioStimulus}, imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \

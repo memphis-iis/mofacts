@@ -187,6 +187,7 @@ export class DynamicTdfGenerator {
     let clusters = [];
     // try { 
       let clusterMap = [];
+      console.log("!!!getStimFileClusters:",stimJson);
       for(let stim of stimJson){//[{},{}]
         let clusterIndex = stim.clusterKC;
         let stimIndex = stim.stimulusKC;
