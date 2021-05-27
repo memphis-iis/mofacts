@@ -133,7 +133,7 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     "percentCorrect":percentCorrect,
     "numCorrect":studentPerformanceData.numCorrect,
     "totalTime":studentPerformanceData.totalPracticeDuration,
-    "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration).toFixed(1)
+    "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1) //convert from ms to min
   }
   Session.set("curStudentPerformance",studentPerformance);
   console.log("setStudentPerformance,output:",studentPerformance,studentPerformanceData);

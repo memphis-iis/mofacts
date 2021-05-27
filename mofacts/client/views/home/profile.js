@@ -224,6 +224,8 @@ function toggleTdfPresence(instance, mode) {
 speechAPIKey = null;
 
 Template.profile.rendered = async function () {
+    Session.set("currentExperimentState",undefined);
+    Session.set("subTdfIndex",undefined);
     Session.set("showSpeechAPISetup",true);
     const allTdfs = await meteorCallAsync("getAllTdfs");
     Session.set("allTdfs",allTdfs);

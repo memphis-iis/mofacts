@@ -43,18 +43,22 @@ import { getHistory } from "../server/orm";
         return vals.join('\t');
     }
 
-    getValuesOfStimTagList = async function(tdfFileName, clusterIndex,stimIndex,tagList){
+    getValuesOfStimTagList = async function(tdfFileName, clusterKC,stimulusKC,tagList){
+        console.log("getValuesOfStimTagList:",tdfFileName,clusterIndex,stimIndex,tagList);
         const tdf = await getTdfByFileName(tdfFileName);
         const stimuliSetId = tdf.stimuliSetId;
         const stimuliSet = await getStimuliSetById(stimuliSetId);
-        let curStim = stimuliSet[clusterIndex][stimIndex];
+        let curStimSet = stimuliSet.find(x => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
+        console.log("getValuesOfStimTagList:",typeof(curStimSet),Object.keys(curStimSet || {}));
         let valueDict = {};
 
         for(var tag of tagList){
-            if(curStim.tags){
-                valueDict[tag] = curStim.tags[tag] || "";
-            }else{
-                valueDict[tag] = "";
+            for(let stim of curStimSet){
+                if(!valueDict[tag] && stim.tags){
+                    valueDict[tag] = stim.tags[tag] || "";
+                }else{
+                    valueDict[tag] = "";
+                }
             }
         }
 
@@ -106,9 +110,11 @@ import { getHistory } from "../server/orm";
             const histories = await getHistoryByTDFfileName(expName);
             for(let history of histories){
                 try {
+                    let clusterKC = history.kc_cluster;
+                    let stimulusKC = history.cf_stimulus_version;
+                    console.log("history:",history.kc_cluster,clusterKC,stimulusKC,history);
                     history = getHistory(history);
-                    //history.cf_stimulus_version == whichStim
-                    const dynamicStimTagValues = await getValuesOfStimTagList(expName, history.clusterindex, history.cf_stimulus_version, listOfDynamicStimTags);
+                    const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
         
                     for(let tag of Object.keys(dynamicStimTagValues)){
                         history.dynamicTagFields["CF (" + tag + ")"] = dynamicStimTagValues[tag];

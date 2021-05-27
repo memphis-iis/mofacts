@@ -242,7 +242,6 @@ async function getStimuliSetsForIdSet(stimuliSetIds){
 }
 
 async function getProbabilityEstimatesByKCId(relevantKCIds){
-  console.log("getProbabilityEstimatesByKCId,KCIds:",relevantKCIds)
   const ret = await db.manyOrNone('SELECT KCId, array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId',[relevantKCIds]);
   let estimates = [];
   for(let pair of ret){
@@ -421,7 +420,7 @@ async function getAllCourses(){
 }
 
 async function getAllCourseSections(){
-  try{//  //sectionid, courseandsectionname
+  try{
     console.log("getAllCourseSections");
     let query = "SELECT s.sectionid, s.sectionname, c.courseid, c.coursename, c.teacheruserid, c.semester, c.beginDate from course AS c INNER JOIN section AS s ON c.courseid = s.courseid WHERE c.semester=$1";
     const ret = await db.any(query,curSemester);
@@ -702,8 +701,14 @@ async function insertHistory(historyRecord){
 }
 
 async function getHistoryByTDFfileName(TDFfileName){
-  let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
-  return await db.manyOrNone(query,[{"fileName":TDFfileName}]);
+  let query = 'SELECT h.* FROM history AS h INNER JOIN item AS i ON i.itemId=h.itemId INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE t.content @> $1::jsonb'
+  //let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
+  let historyRet = await db.manyOrNone(query,[{"fileName":TDFfileName}]);
+  let histories = null;
+  //console.log("historyRet:",historyRet);
+
+
+  return historyRet;
 }
 
 function getAllTeachers(southwestOnly=false){

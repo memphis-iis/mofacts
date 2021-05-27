@@ -1434,11 +1434,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
   }
 
   let clusterIndex = Session.get("clusterIndex");
-  let {itemId,clusterKC,tags,...rest} = getStimCluster(clusterIndex).stims[0];
+  let {itemId,clusterKC,stimulusKC,tags,...rest} = getStimCluster(clusterIndex).stims[0];
   let {whichStim,probabilityEstimate,...restb} = engine.findCurrentCardInfo();
-  let curKCBase = getStimKCBaseForCurrentStimuliSet();
-  clusterKC = clusterKC + curKCBase;
-  let stimulusKC = whichStim + curKCBase;
+  //let curKCBase = getStimKCBaseForCurrentStimuliSet();
+  clusterKC = clusterKC;
+  //let stimulusKC = whichStim + curKCBase;
 
   let curTdf = Session.get("currentTdfFile");
   let unitName = _.trim(curTdf.tdfs.tutor.unit[Session.get("currentUnitNumber")].unitname);

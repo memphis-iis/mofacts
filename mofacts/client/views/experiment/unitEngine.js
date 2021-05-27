@@ -584,7 +584,7 @@ function modelUnitEngine() {
         p.resp = cardProbabilities.responses[p.stimResponseText];
         p.responseSuccessCount = p.resp.priorCorrect;
         p.responseFailureCount = p.resp.priorIncorrect;
-        p.responseOutcomeHistory = p.resp.outcomeStack;
+        p.responseOutcomeHistory = JSON.parse(JSON.stringify(p.resp.outcomeStack));
         p.responseSecsSinceLastShown = elapsed(p.resp.lastSeen);
         p.responseStudyTrialCount = p.resp.priorStudy;
 
@@ -594,7 +594,7 @@ function modelUnitEngine() {
         p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
 
         p.stimPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(stim.previousCalculatedProbabilities));
-        p.stimOutcomeHistory = stim.outcomeStack;
+        p.stimOutcomeHistory = JSON.parse(JSON.stringify(stim.outcomeStack));
 
         p.overallOutcomeHistory = getUserProgress().overallOutcomeHistory;
 
@@ -875,7 +875,8 @@ function modelUnitEngine() {
                     let modelCard = cards[cardIndex];
                     let componentData = _.pick(componentCard,['firstSeen','lastSeen','priorCorrect','priorIncorrect','priorStudy','totalPracticeDuration']);
                     componentData.clusterKC = clusterKC;
-                    componentData.outcomeStack = componentCard.outcomeStack;
+                    console.log("componentCard.outcomeStack:",componentCard.outcomeStack);
+                    componentData.outcomeStack = !!componentCard.outcomeStack && typeof(componentCard.outcomeStack)==="string" ? componentCard.outcomeStack.split(",").map(x => parseInt(x)) : [];
                     componentData.hasBeenIntroduced = true;
                     Object.assign(modelCard,componentData);
                     let clusterProbs = stimProbabilityEstimates.filter(x => x.kcid == clusterKC) || {};
@@ -930,6 +931,9 @@ function modelUnitEngine() {
                 numQuestionsAnswered,
                 numCorrectAnswers              
             });
+            let cardIndex = Session.get("currentExperimentState").shufIndex;
+            let whichStim = Session.get("currentExperimentState").whichStim;
+            setCurrentCardInfo(cardIndex, whichStim);
         },
         getCardProbabilitiesNoCalc: function(){
             return cardProbabilities;
@@ -1157,6 +1161,7 @@ function modelUnitEngine() {
             }
 
             // "Response" stats
+            console.log("!!!currentCardInfo",JSON.parse(JSON.stringify(currentCardInfo)),currentCardInfo.whichStim);
             let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].correctResponse));
             if (answerText && answerText in cardProbabilities.responses) {
                 let resp = cardProbabilities.responses[answerText];
