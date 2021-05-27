@@ -40,9 +40,9 @@ Meteor.startup(function() {
     console.log = function() {
       for(var index in arguments){
         var arg = arguments[index];
-        //if(typeof(arg) != "object"){
+        if(typeof(arg) != "object"){
           console.logs.unshift(arg);
-        //}
+        }
       }
       console.logs = console.logs.slice(0,2000);
       console.defaultLog.apply(console,arguments);
@@ -81,7 +81,7 @@ function restartMainCardTimeoutIfNecessary(){
     var numRemainingLocks = Session.get("pausedLocks")-1;
     Session.set("pausedLocks",numRemainingLocks);
     if(numRemainingLocks <= 0){
-      timeoutFunc();
+      if(timeoutFunc) timeoutFunc();
     }else{
       console.log("timeout reached but there are " + numRemainingLocks + " locks outstanding");
     }

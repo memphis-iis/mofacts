@@ -96,8 +96,8 @@ Template.dataDownload.helpers({
       let name = !!tdf.content.tdfs.tutor.setspec[0].lessonname ? tdf.content.tdfs.tutor.setspec[0].lessonname[0] : "NO NAME";
       tdf.disp = name;
       
-      if (tdf.fileName != name) {
-        tdf.disp += " (" + tdf.fileName + ")";
+      if (tdf.content.fileName != name) {
+        tdf.disp += " (" + tdf.content.fileName + ")";
       }
 
       return tdf;

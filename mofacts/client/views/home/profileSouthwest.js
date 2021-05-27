@@ -47,6 +47,8 @@ var addButton = function(btnObj,audioInputEnabled,enableAudioPromptAndFeedback) 
 };
 
 Template.profileSouthwest.rendered = async function () {
+    Session.set("currentExperimentState",undefined);
+    Session.set("subTdfIndex",undefined);
     Session.set("showSpeechAPISetup",false);
     $("#expDataDownloadContainer").html("");
     const allTdfs = await meteorCallAsync("getAllTdfs");

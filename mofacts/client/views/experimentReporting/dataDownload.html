@@ -40,7 +40,7 @@
         <ul class="downloadContainerList" id="expDataDownloadContainer">
             <li><a class="exp-data-link" target="_blank" href="/data-by-teacher/{{currentUser}}/datashop">Download all TDF data for current user: {{user}}</a></li>
             {{#each dataDownloads}}
-                <li><a class="exp-data-link" target="_blank" href="/experiment-data/{{this.fileName}}/datashop">Download: {{this.disp}}</a></li>
+                <li><a class="exp-data-link" target="_blank" href="/experiment-data/{{this.content.fileName}}/datashop">Download: {{this.disp}}</a></li>
             {{/each}}
         </ul>
     </div>
