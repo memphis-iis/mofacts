@@ -75,8 +75,12 @@ export class DynamicTdfGenerator {
     let clusterListString = '';
     let start = -1;
     let end = -1;
+    let last = -1;
     let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
     let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
+    let numStimFileClusters = Object.values(this.stimFileClusters_).length;
+
+    Object.values(this.stimFileClusters_).sort((a,b) => a.clusterKC >= b.clusterKC);
 
     Object.values(this.stimFileClusters_).forEach(cluster => {
       let idx = Object.values(cluster)[0].clusterKC % KC_MULTIPLE;
@@ -91,16 +95,22 @@ export class DynamicTdfGenerator {
       if (start === -1 && isIncludedInStimCluster) {
         start = idx;
       } else if (start > -1 && isIncludedInStimCluster) {
-        if (idx === Object.keys(this.stimFileClusters_).length - 1) {
+        if (idx === numStimFileClusters + 1) { //Numbering of KCs starts at 1
           end = idx;
           clusterListString += ' ' + start + '-' + end + ' ';
+        }else if(idx-1 > last){//We skipped one or more
+          end = last;
+          clusterListString += ' ' + start + '-' + end + ' ';
+          start = idx;
+          end = -1;
         }
       } else if (start > -1 && !isIncludedInStimCluster) {
-        end = idx - 1;
+        end = idx - 2; //Numbering of KCs starts at 1 in addition to 0-based indexing
         clusterListString += ' ' + start + '-' + end + ' ';
         start = -1;
         end = -1; 
       }
+      last = idx;
     });
     clusterListString = clusterListString.trim();
     return clusterListString;
@@ -185,15 +195,17 @@ export class DynamicTdfGenerator {
    */
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
+    let count = 0;
     // try { 
-      let clusterMap = [];
+      let clusterMap = {};
       for(let stim of stimJson){//[{},{}]
         let clusterIndex = stim.clusterKC;
         let stimIndex = stim.stimulusKC;
-        if(!clusterMap[clusterIndex]) clusterMap[clusterIndex] = [];
+        if(!clusterMap[clusterIndex]) clusterMap[clusterIndex] = {};
         clusterMap[clusterIndex][stimIndex] = stim;
       }
       clusters = clusterMap;
+      console.log("getStimFileClusters:",clusterMap);
     // } catch (error) {
     //  throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
     // }

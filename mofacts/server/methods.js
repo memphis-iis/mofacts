@@ -388,8 +388,8 @@ async function insertStimTDFPair(newStimJSON,wrappedTDF,sourceSentences){
           stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
         }
 
-        await t.none('INSERT INTO item(stimuliSetId, stimulusFileName, parentStimulusFileName, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
-                      VALUES(${stimuliSetId}, ${stimulusFileName}, ${parentStimulusFileName}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})',stim);
+        await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, parentStimulusFileName, stimulusKC, clusterKC, responseKC, params, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
+                      VALUES(${stimuliSetId}, ${stimulusFilename}, ${parentStimulusFileName}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})',stim);
       }
       if(sourceSentences){
         await t.none('INSERT INTO itemSourceSentences (stimuliSetId, sourceSentences) VALUES($1,$2)',[newStimuliSetId,sourceSentences]);
