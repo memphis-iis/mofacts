@@ -66,57 +66,6 @@ Template.studentReporting.events({
   }
 });
 
-// Template.studentReporting.rendered = function(){
-//   curTracker = Tracker.autorun(function(thisTracker){
-//     if(document.location.pathname != "/studentReporting"){
-//       console.log("navigated away from student reporting. stop tracker");
-//       thisTracker.stop();
-//     }
-//     var user = Meteor.user();
-//     if(!!user){
-//       var studentUsername = "";
-//       var studentID = "";
-//       if (Roles.userIsInRole(Meteor.user(), ["admin","teacher"])){
-//         console.log("admin/teacher");
-//         studentUsername = Template.studentReporting.__helpers[" studentUsername"]();
-//         if(studentUsername.indexOf("@") == -1){
-//           studentUsername = studentUsername.toUpperCase();
-//         }
-//         Session.set("curStudentUsername",studentUsername);
-//         Meteor.subscribe("specificUser",studentUsername,function(){
-//           console.log("specificUser subscription done");
-//           var student = Meteor.users.findOne({"username":studentUsername});
-//           console.log("student: " + JSON.stringify(student));
-//           if(!!student){
-//             studentID = student._id;
-//           }
-//           Session.set("curStudentID",studentID);
-//           console.log("studentUsername:" + studentUsername);
-//           console.log("studentID:" + studentID);
-//           Meteor.subscribe('specificUserTimesLog',studentID,function(){
-//             currentUserTimeLogs = UserTimesLog.findOne({_id:studentID});
-//             console.log("currentUserTimeLogs subscription done");
-//             setTdfFileNamesAndDisplayValues();
-//           });
-//         });
-//       }else{
-//         studentUsername = Meteor.user().username;
-//         studentID = Meteor.userId();
-
-//         console.log("studentUsername:" + studentUsername);
-//         console.log("studentID:" + studentID);
-//         Session.set("curStudentUsername",studentUsername);
-//         Session.set("curStudentID",studentID);
-//         Meteor.subscribe('specificUserTimesLog',studentID,function(){
-//           currentUserTimeLogs = UserTimesLog.findOne({_id:studentID});
-//           console.log("currentUserTimeLogs subscription done");
-//           setTdfFileNamesAndDisplayValues();
-//         });
-//       }
-//     }
-//   });
-// };
-
 function updateDataAndCharts(curTdf,curTdfFileName){
   console.log("curTdfFileName: " + curTdfFileName);
   var studentUsername = Session.get("curStudentUsername");
@@ -132,8 +81,6 @@ function updateDataAndCharts(curTdf,curTdfFileName){
   }
 }
 
-test = "";
-
 function drawCharts(studentData) {
     $("#correctnessChart").attr('data-x-axis-label','Repetition Number');
     $("#correctnessChart").attr('data-y-axis-label','Correctness (%)');
@@ -145,7 +92,7 @@ function drawCharts(studentData) {
     // }
     // Get our series and populate a range array for chart labeling
     let correctSeries = correctnessAcrossRepetitions.map(x => x.percentCorrect);
-    let probSeries = probEstimates.map(x => x.probabilityEstimate);
+    let probSeries = probEstimates.map(x => x.probabilityEstimate).reverse();
 
     var itemDataCorLabels = _.range(1, correctSeries.length+1);  // from 1 to len
     var itemDataProbLabels = probEstimates.map(x => x.stimulus);
@@ -256,7 +203,6 @@ function drawProbBars(targetSelector, labels, series, dataDescrip, chartConfig) 
       }, chartConfig);
 
       new Chartist.Bar(target, chartData, fullConfig).on("draw", function(data) {
-        test = data;
         if (data.type === "bar") {
           data.element._node.setAttribute("title", "Item: " + lookUpLabelByDataValue(data.value) + " Value: " + data.value.toFixed(2));
           data.element._node.setAttribute("data-chart-tooltip", target);
