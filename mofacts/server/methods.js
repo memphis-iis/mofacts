@@ -1935,6 +1935,7 @@ Meteor.startup(async function () {
       toggleTdfPresence: async function(tdfIds, mode){
         await db.tx(async t => {
           tdfIds.forEach(tdfid => {
+            console.log("!!!toggleTdfPresence:",[mode,tdfid]);
             t.none("UPDATE tdf SET visibility = $1 WHERE TDFId=$2",[mode,tdfid]);
           });
         })
