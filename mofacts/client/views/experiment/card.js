@@ -588,7 +588,8 @@ Template.card.helpers({
 
     'fontSizeClass': function() {
         // Take advantage of Bootstrap h1-h5 classes
-        return 'h' + Session.get("currentDeliveryParams").fontsize.toString();
+        let hSize = !!Session.get("currentDeliveryParams") ? Session.get("currentDeliveryParams").fontsize.toString() : 2;
+        return 'h' + hSize;
     },
 
     'skipstudy': () => Session.get("currentDeliveryParams").skipstudy,
@@ -1481,6 +1482,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
   if(!probabilityEstimate){
     probabilityEstimate = null;
   }else{
+    console.log("!!!fullProb:",probabilityEstimate);
     probabilityEstimate = probabilityEstimate.probability;
   }
 
@@ -1737,6 +1739,7 @@ async function prepareCard() {
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
     }else {
+        console.log("!!!prepareCard, curCardInfo",JSON.parse(JSON.stringify(engine.findCurrentCardInfo())));
         await engine.selectNextCard();
         newQuestionHandler();
     }

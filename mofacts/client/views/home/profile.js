@@ -183,6 +183,11 @@ function toggleTdfPresence(instance, mode) {
   } else {
     tdfsToChange = instance.tdfsToEnable.get();      
   }
+  var en1 = instance.enabledTdfs.get();
+  var dis1 = instance.disabledTdfs.get();
+
+
+  console.log("toggleTdfPresence, mode: ", mode, tdfsToChange, en1, dis1, instance);
 
   Meteor.call('toggleTdfPresence', tdfsToChange, mode, () =>{
     let remainingTdfs = [];

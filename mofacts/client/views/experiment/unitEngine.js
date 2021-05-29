@@ -315,6 +315,7 @@ function modelUnitEngine() {
             "whichStim:", whichStim,
             "parameter", getStimParameterArray(clusterIndex, whichStim)
         );
+        console.log("!!!setCurrentCardInfo:",clusterIndex,whichStim,JSON.parse(JSON.stringify(currentCardInfo.probabilityEstimate)));
     }
 
     //Initialize card probabilities, with optional initial data
@@ -470,7 +471,7 @@ function modelUnitEngine() {
         console.log("initCards:",initCards,initProbs);
 
         //has to be done once ahead of time to give valid values for the beginning of the test.
-        calculateCardProbabilities();
+        //calculateCardProbabilities();
     }
 
     // Helpers for time/display/calc below
@@ -606,7 +607,7 @@ function modelUnitEngine() {
 
     // Calculate current card probabilities for every card - see selectNextCard
     // the actual card/stim (cluster/version) selection
-    calculateCardProbabilities = function(callback) {
+    calculateCardProbabilities = function() {
         // We use a "flat" probability structure - this is faster than a loop
         // over our nested data structure, but it also gives us more readable
         // code when we're setting something per stimulus
@@ -618,13 +619,15 @@ function modelUnitEngine() {
             // for the current unit. You could just return here if these clusters
             // should be ignored (or do nothing if they should be included below)
             var parms = calculateSingleProb(probs[i]);
+            if(parms.probability==0){
+                console.log("!!!zerocardprob:",JSON.parse(JSON.stringify(parms)),JSON.parse(JSON.stringify(i)));
+            }
             probs[i].probFunctionsParameters = parms;
             probs[i].probability = parms.probability;
             ptemp[i]=Math.round(100*parms.probability)/100;
 
         }
-        console.log(JSON.stringify(ptemp));
-        if(callback) callback();
+        console.log("calculateCardProbabilities",JSON.stringify(ptemp));
     }
 
     function findMinProbCard(cards, probs) {
@@ -933,6 +936,7 @@ function modelUnitEngine() {
             });
             let cardIndex = Session.get("currentExperimentState").shufIndex;
             let whichStim = Session.get("currentExperimentState").whichStim;
+            console.log("!!!loadcomponentstates, test1",cardIndex,whichStim,Session.get("currentExperimentState"))
             setCurrentCardInfo(cardIndex, whichStim);
         },
         getCardProbabilitiesNoCalc: function(){
@@ -974,6 +978,7 @@ function modelUnitEngine() {
             // whether or not we should show the overlearning text is determined
             // here. See calculateCardProbabilities for how prob.probability is
             // calculated
+            calculateCardProbabilities();
             let newProbIndex;
             let cards = cardProbabilities.cards;
             let probs = cardProbabilities.probs;
@@ -1031,7 +1036,8 @@ function modelUnitEngine() {
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
-            console.log("select next card:",newProbIndex,cardIndex,whichStim);
+            console.log("select next card:",newProbIndex,cardIndex,whichStim,prob);
+            console.log("currentCardInfo:",JSON.parse(JSON.stringify(engine.findCurrentCardInfo())))
 
 
             let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
@@ -1133,7 +1139,7 @@ function modelUnitEngine() {
             // the only place we call it after init *and* something might have
             // changed during question selection
             if (getTestType() === 's') {
-                calculateCardProbabilities(this.saveComponentStates);
+                this.saveComponentStates;
                 return;
             }
 
@@ -1145,19 +1151,25 @@ function modelUnitEngine() {
 
             // "Card-level" stats (and below - e.g. stim-level stats)
             if (card) {
-                console.log("card exists");
+                let {clusterIndex,whichStim,...rest} = this.findCurrentCardInfo();
+                let stim = card.stims[whichStim];
+                
+                let curProb = cardProbabilities.probs.find(x => x.cardIndex==clusterIndex && x.stimIndex==whichStim);
+                let currentStimProbability = curProb.probability;
+                stim.previousCalculatedProbabilities.push(currentStimProbability);
+                card.previousCalculatedProbabilities.push(currentStimProbability);
+
+                console.log("cardAnswered, curTrialInfo:",JSON.stringify(currentStimProbability),JSON.stringify(curProb),JSON.stringify(card),JSON.stringify(stim));
                 if (wasCorrect) card.priorCorrect += 1;
                 else            card.priorIncorrect += 1;
 
                 card.outcomeStack.push(wasCorrect ? 1 : 0);
-                let stim = currentCardInfo.whichStim;
-                if (stim >= 0 && stim < card.stims.length) {
-                    if (wasCorrect) card.stims[stim].priorCorrect += 1;
-                    else            card.stims[stim].priorIncorrect += 1;
 
-                    //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
-                    card.stims[stim].outcomeStack.push(wasCorrect ? 1 : 0);
-                }
+                if (wasCorrect) stim.priorCorrect += 1;
+                else            stim.priorIncorrect += 1;
+
+                //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+                stim.outcomeStack.push(wasCorrect ? 1 : 0);
             }
 
             // "Response" stats
@@ -1187,7 +1199,7 @@ function modelUnitEngine() {
             //Need a delay so that the outcomeStack arrays can be properly updated
             //before we use them in calculateCardProbabilities
             //Meteor.setTimeout(calculateCardProbabilities,20); //TODO: why did we need this?  Make sure we are calculating correct values now
-            calculateCardProbabilities(this.saveComponentStates);
+            this.saveComponentStates;
         },
 
         unitFinished: function() {
