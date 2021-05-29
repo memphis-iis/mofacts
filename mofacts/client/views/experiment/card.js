@@ -1481,9 +1481,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
 
   if(!probabilityEstimate){
     probabilityEstimate = null;
-  }else{
-    console.log("!!!fullProb:",probabilityEstimate);
-    probabilityEstimate = probabilityEstimate.probability;
   }
 
   let answerLogRecord = {
@@ -1739,7 +1736,6 @@ async function prepareCard() {
     if (engine.unitFinished()) {
         unitIsFinished('Unit Engine');
     }else {
-        console.log("!!!prepareCard, curCardInfo",JSON.parse(JSON.stringify(engine.findCurrentCardInfo())));
         await engine.selectNextCard();
         newQuestionHandler();
     }

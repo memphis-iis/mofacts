@@ -137,15 +137,15 @@ function defaultUnitEngine(curExperimentData) {
             return { clozeQuestion, clozeMissingSyllables, clozeQuestionParts };
         },
 
-        setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2, currentStimAnswer,prob){
-            console.log("setUpCardQuestionSyllables: ",currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
+        setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2, currentStimAnswer,probFunctionsParameters){
+            console.log("setUpCardQuestionSyllables: ",currentQuestion,currentQuestionPart2,currentStimAnswer,probFunctionsParameters);
             let currentAnswer = currentStimAnswer;
             let clozeQuestionParts = undefined;
             let currentAnswerSyllables = undefined;
 
             //For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
-            if(prob){
-                currentAnswerSyllables = this.getSubClozeAnswerSyllables(currentStimAnswer,prob.probFunctionsParameters.hintsylls,this.cachedSyllables);
+            if(probFunctionsParameters){
+                currentAnswerSyllables = this.getSubClozeAnswerSyllables(currentStimAnswer,probFunctionsParameters.hintsylls,this.cachedSyllables);
                 if(currentAnswerSyllables){
                     let {clozeQuestion,clozeMissingSyllables,clozeQuestionParts:cQuestionParts} = this.replaceClozeWithSyllables(
                         currentQuestion,currentAnswerSyllables,currentStimAnswer);
@@ -163,11 +163,11 @@ function defaultUnitEngine(curExperimentData) {
             return {currentQuestion_2:currentQuestion,currentQuestionPart2_2:currentQuestionPart2,currentAnswerSyllables,clozeQuestionParts,currentAnswer};
         },
 
-        setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, prob){
+        setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, probFunctionsParameters){
             let newExperimentState = {};
             Session.set("alternateDisplayIndex",undefined);
             let cluster = getStimCluster(cardIndex);
-            console.log('setUpCardQuestionAndAnswerGlobals',cardIndex,whichStim,prob,cluster,cluster.stims[whichStim]);
+            console.log('setUpCardQuestionAndAnswerGlobals',cardIndex,whichStim,probFunctionsParameters,cluster,cluster.stims[whichStim]);
             let curStim = cluster.stims[whichStim];
             let currentDisplay = JSON.parse(JSON.stringify({
                 text:curStim.textStimulus,
@@ -182,7 +182,14 @@ function defaultUnitEngine(curExperimentData) {
                 if(displayIndex < curStim.alternateDisplays.length){
                     Session.set("alternateDisplayIndex",displayIndex);
                     newExperimentState.alternateDisplayIndex = displayIndex;
-                    currentDisplay = JSON.parse(JSON.stringify(curStim.alternateDisplays[displayIndex]));
+                    let curAltDisplay = curStim.alternateDisplays[displayIndex];
+                    currentDisplay = JSON.parse(JSON.stringify({
+                        text:curAltDisplay.textStimulus,
+                        audioSrc:curAltDisplay.audioStimulus,
+                        imgSrc:curAltDisplay.imageStimulus,
+                        videoSrc:curAltDisplay.videoStimulus,
+                        clozeText:curAltDisplay.clozeStimulus
+                    }));
                 }
             }
             let originalDisplay = JSON.parse(JSON.stringify(currentDisplay));
@@ -213,7 +220,7 @@ function defaultUnitEngine(curExperimentData) {
                     currentAnswerSyllables,
                     clozeQuestionParts,
                     currentAnswer
-                } = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,prob);
+                } = this.setUpCardQuestionSyllables(currentQuestion,currentQuestionPart2,currentStimAnswer,probFunctionsParameters);
             
             console.log("setUpCardQuestionAndAnswerGlobals2:",currentQuestion_2,currentQuestionPart2_2);
             console.log("setUpCardQuestionAndAnswerGlobals3:",currentAnswerSyllables,clozeQuestionParts,currentAnswer);
@@ -309,13 +316,12 @@ function modelUnitEngine() {
     function setCurrentCardInfo(clusterIndex, whichStim) {
         currentCardInfo.clusterIndex = clusterIndex;
         currentCardInfo.whichStim = whichStim;
-        currentCardInfo.probabilityEstimate = cardProbabilities.probs.find(x => x.cardIndex == clusterIndex && x.stimIndex == whichStim);
+        currentCardInfo.probabilityEstimate = cardProbabilities.cards[clusterIndex].stims[whichStim].probabilityEstimate;
         console.log("MODEL UNIT card selection => ",
             "cluster-idx:", clusterIndex,
             "whichStim:", whichStim,
             "parameter", getStimParameterArray(clusterIndex, whichStim)
         );
-        console.log("!!!setCurrentCardInfo:",clusterIndex,whichStim,JSON.parse(JSON.stringify(currentCardInfo.probabilityEstimate)));
     }
 
     //Initialize card probabilities, with optional initial data
@@ -532,18 +538,18 @@ function modelUnitEngine() {
     // Given a single item from the cardProbabilities.probs array, calculate the
     // current probability. IMPORTANT: this function only returns ALL parameters
     // used which include probability. The caller is responsible for storing it.
-    function calculateSingleProb(prob) {
-        var card = cardProbabilities.cards[prob.cardIndex];
-        var stim = card.stims[prob.stimIndex];
+    function calculateSingleProb(cardIndex,stimIndex,i) {
+        var card = cardProbabilities.cards[cardIndex];
+        var stim = card.stims[stimIndex];
 
         // Store parameters in an object for easy logging/debugging
         var p = {};
 
-        p.i = prob.i;
+        p.i = i;
 
         //Current Indices
-        p.clusterIndex = prob.cardIndex;
-        p.stimIndex = prob.stimIndex;
+        p.clusterIndex = cardIndex;
+        p.stimIndex = stimIndex;
 
         // Top-level metrics
         p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
@@ -566,7 +572,7 @@ function modelUnitEngine() {
         p.stimSuccessCount = stim.priorCorrect;
         p.stimFailureCount = stim.priorIncorrect;
         p.stimStudyTrialCount = stim.priorStudy;
-        let answerText = Answers.getDisplayAnswerText(getStimAnswer(prob.cardIndex, prob.stimIndex)).toLowerCase();
+        let answerText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, stimIndex)).toLowerCase();
         p.stimResponseText = stripSpacesAndLowerCase(answerText); //Yes, lowercasing here is redundant. TODO: fix/cleanup
         let currentStimuliSetId = Session.get("currentStimuliSetId");
         answerText = answerText.replace(/\./g,'_');
@@ -589,7 +595,7 @@ function modelUnitEngine() {
         p.responseSecsSinceLastShown = elapsed(p.resp.lastSeen);
         p.responseStudyTrialCount = p.resp.priorStudy;
 
-        p.stimParameters = getStimParameterArray(prob.cardIndex,prob.stimIndex);
+        p.stimParameters = getStimParameterArray(cardIndex,stimIndex);
 
         p.clusterPreviousCalculatedProbabilities = JSON.parse(JSON.stringify(card.previousCalculatedProbabilities));
         p.clusterOutcomeHistory = JSON.parse(JSON.stringify(card.outcomeStack));
@@ -608,122 +614,130 @@ function modelUnitEngine() {
     // Calculate current card probabilities for every card - see selectNextCard
     // the actual card/stim (cluster/version) selection
     calculateCardProbabilities = function() {
-        // We use a "flat" probability structure - this is faster than a loop
-        // over our nested data structure, but it also gives us more readable
-        // code when we're setting something per stimulus
-        var probs = cardProbabilities.probs;
-        var ptemp = [];
-        for (var i = 0; i < probs.length; ++i) {
-            probs[i]['i'] = i;
-            // card.canUse is true if and only if it is in the clusterlist
-            // for the current unit. You could just return here if these clusters
-            // should be ignored (or do nothing if they should be included below)
-            var parms = calculateSingleProb(probs[i]);
-            if(parms.probability==0){
-                console.log("!!!zerocardprob:",JSON.parse(JSON.stringify(parms)),JSON.parse(JSON.stringify(i)));
+        var count=0;
+        var ptemp=[];
+        for(var i=0; i<cardProbabilities.cards.length;i++){
+            let card = cardProbabilities.cards[i];
+            for(var j=0;j<card.stims.length;j++){
+                let stim = card.stims[j];
+                var parms = calculateSingleProb(i,j,count);
+                stim.probFunctionsParameters = parms;
+                stim.probabilityEstimate = parms.probability;
+                ptemp[count]=Math.round(100*parms.probability)/100;
+                count++;
             }
-            probs[i].probFunctionsParameters = parms;
-            probs[i].probability = parms.probability;
-            ptemp[i]=Math.round(100*parms.probability)/100;
-
         }
         console.log("calculateCardProbabilities",JSON.stringify(ptemp));
     }
 
-    function findMinProbCard(cards, probs) {
-        var currentMin = 1.00001;
-        var indexToReturn = 0;
+    function findMinProbCard(cards) {
+        let currentMin = 1.00001;
+        let clusterIndex=-1;
+        let stimIndex=-1;
 
-        for (var i = probs.length - 1; i >= 0; --i) {
-            var prob = probs[i];
-            var card = cards[prob.cardIndex];
-
-            if (card.canUse && card.trialsSinceLastSeen > 1) {
-                if (prob.probability <= currentMin) {   // Note that this is stim probability
-                    currentMin = prob.probability;
-                    indexToReturn = i;
+        for(let i=0;i<cards.length;i++){
+            let card = cards[i];
+            if(!card.canUse || !(card.trialsSinceLastSeen > 1)){
+                continue;
+            }else{
+                for(let j=0;j<card.stims.length;j++){
+                    let stim = card.stims[j];
+                    if(stim.probabilityEstimate <= currentMin){
+                        currentMin = stim.probabilityEstimate;
+                        clusterIndex=i;
+                        stimIndex=j;
+                    }
                 }
             }
         }
 
-        return indexToReturn;
+        return {clusterIndex,stimIndex};
     }
 
-    function findMaxProbCard(cards, probs, ceiling) {
-        var currentMax = 0;
-        var indexToReturn = -1;
+    function findMaxProbCard(cards, ceiling) {
+        let currentMax = 0;
+        let clusterIndex=-1;
+        let stimIndex=-1;
 
-        for (var i = probs.length - 1; i >= 0; --i) {
-            var prob = probs[i];
-            var card = cards[prob.cardIndex];
-
-            if (card.canUse && card.trialsSinceLastSeen > 1) {
-                // Note that we are checking stim probability
-                if (prob.probability > currentMax && prob.probability < ceiling) {
-                    currentMax = prob.probability;
-                    indexToReturn = i;
+        for(let i=0;i<cards.length;i++){
+            let card = cards[i];
+            if(!card.canUse || !(card.trialsSinceLastSeen > 1)){
+                continue;
+            }else{
+                for(let j=0;j<card.stims.length;j++){
+                    let stim = card.stims[j];
+                    if(stim.probabilityEstimate > currentMax && stim.probabilityEstimate < ceiling){
+                        currentMax = stim.probabilityEstimate;
+                        clusterIndex=i;
+                        stimIndex=j;
+                    }
                 }
             }
         }
 
-        return indexToReturn;
+        return {clusterIndex,stimIndex};
     }
 
-    function findMinProbDistCard(cards,probs){
-      var currentMin = 1.00001; //Magic number to indicate greater than highest possible distance to start
-      var indexToReturn = 0;
+    function findMinProbDistCard(cards){
+      let currentMin = 1.00001;
+      let clusterIndex=-1;
+      let stimIndex=-1;
 
-      for (var i = probs.length - 1; i >= 0; --i) {
-          var prob = probs[i];
-          var card = cards[prob.cardIndex];
-          var parameters = card.stims[prob.stimIndex].parameter;
-          var optimalProb = parameters[1];
-          if(!optimalProb){
-            //console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            optimalProb = 0.90;
-          }
-
-          if (card.canUse && card.trialsSinceLastSeen > 1) {
-              var dist = Math.abs(prob.probability - optimalProb)
-
-            //  console.log(dist)
-              // Note that we are checking stim probability
-              if (dist <= currentMin) {
-                  currentMin = dist;
-                  indexToReturn = i;
+      for(let i=0;i<cards.length;i++){
+          let card = cards[i];
+          if(!card.canUse || !(card.trialsSinceLastSeen > 1)){
+              continue;
+          }else{
+              for(let j=0;j<card.stims.length;j++){
+                  let stim = card.stims[j];
+                  var parameters = stim.parameter;
+                  var optimalProb = parameters[1];
+                  if(!optimalProb){
+                    //console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+                    optimalProb = 0.90;
+                  }
+                  var dist = Math.abs(stim.probabilityprobabilityEstimate - optimalProb)
+                  if(dist <= currentMin){
+                      currentMin = dist;
+                      clusterIndex=i;
+                      stimIndex=j;
+                  }
               }
           }
       }
 
-      return indexToReturn;
+      return {clusterIndex,stimIndex};
     }
 
-    function findMaxProbCardThresholdCeilingPerCard(cards,probs){
+    function findMaxProbCardThresholdCeilingPerCard(cards){
 
-      var currentMax = 0;
-      var indexToReturn = -1;
+       let currentMax = 0;
+       let clusterIndex=-1;
+       let stimIndex=-1;
 
-      for (var i = probs.length - 1; i >= 0; --i) {
-          var prob = probs[i];
-          var card = cards[prob.cardIndex];
-          var parameters = card.stims[prob.stimIndex].parameter;
+       for(let i=0;i<cards.length;i++){
+           let card = cards[i];
+           if(!card.canUse || !(card.trialsSinceLastSeen > 1)){
+               continue;
+           }else{
+               for(let j=0;j<card.stims.length;j++){
+                   let stim = card.stims[j];
+                   var parameters = stim.parameter;
+                   var thresholdCeiling=parameters[1];
+                   if(!thresholdCeiling){
+                    //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
+                      thresholdCeiling = 0.90;
+                    }
+                   if(stim.probabilityEstimate > currentMax && stim.probabilityEstimate < thresholdCeiling){
+                       currentMax = stim.probabilityEstimate;
+                       clusterIndex=i;
+                       stimIndex=j;
+                   }
+               }
+           }
+       }
 
-          var thresholdCeiling = parameters[1];
-          if(!thresholdCeiling){
-          //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
-            thresholdCeiling = 0.90;
-          }
-
-          if (card.canUse && card.trialsSinceLastSeen > 1) {
-              // Note that we are checking stim probability
-              if (prob.probability >= currentMax && prob.probability < thresholdCeiling) {
-                  currentMax = prob.probability;
-                  indexToReturn = i;
-              }
-          }
-      }
-
-      return indexToReturn;
+       return {clusterIndex,stimIndex};
     }
 
     function updateCardAndStimData(cardIndex, whichStim){
@@ -789,13 +803,13 @@ function modelUnitEngine() {
                 componentStates.push(cardState);
                 for(let stimIndex=0;stimIndex<card.stims.length;stimIndex++){
                     let stim = card.stims[stimIndex];
-                    let stimProb = cardProbabilities.probs.find(x => x.stimIndex==stimIndex && x.cardIndex==cardIndex);
+                    //let stimProb = cardProbabilities.probs.find(x => x.stimIndex==stimIndex && x.cardIndex==cardIndex);
                     let stimState = {
                         userId,
                         TDFId,
                         KCId:stim.stimulusKC,
                         componentType:'stimulus',
-                        probabilityEstimate: stimProb ? stimProb.probability : null,
+                        probabilityEstimate:stim.probabilityEstimate, //: stimProb ? stimProb.probability : null,
                         firstSeen:stim.firstSeen,
                         lastSeen:stim.lastSeen,
                         priorCorrect:stim.priorCorrect,
@@ -936,16 +950,10 @@ function modelUnitEngine() {
             });
             let cardIndex = Session.get("currentExperimentState").shufIndex;
             let whichStim = Session.get("currentExperimentState").whichStim;
-            console.log("!!!loadcomponentstates, test1",cardIndex,whichStim,Session.get("currentExperimentState"))
             setCurrentCardInfo(cardIndex, whichStim);
         },
         getCardProbabilitiesNoCalc: function(){
             return cardProbabilities;
-        },
-
-        getCardProbs: function(){
-          calculateCardProbabilities();
-          return cardProbabilities.probs;
         },
 
         findCurrentCardInfo: function() {
@@ -979,47 +987,48 @@ function modelUnitEngine() {
             // here. See calculateCardProbabilities for how prob.probability is
             // calculated
             calculateCardProbabilities();
+            let newClusterIndex = -1;
+            let newStimIndex = -1;
             let newProbIndex;
             let cards = cardProbabilities.cards;
-            let probs = cardProbabilities.probs;
 
             console.log("selectNextCard unitMode: " + this.unitMode);
 
             switch(this.unitMode){
               case 'thresholdCeiling':
-                newProbIndex = findMaxProbCardThresholdCeilingPerCard(cards, probs);
-                if (newProbIndex === -1) {
-                    newProbIndex = findMinProbCard(cards, probs);
+                var indices = findMaxProbCardThresholdCeilingPerCard(cards);
+                console.log("thresholdCeiling, indicies:",JSON.parse(JSON.stringify(indices)));
+                if (indices.clusterIndex === -1) {
+                    console.log("thresholdCeiling failed, reverting to min prob");
+                    indices = findMinProbCard(cards);
                 }
                 break;
               case 'distance':
-                newProbIndex = findMinProbDistCard(cards,probs);
+                var indices = findMinProbDistCard(cards);
                 break;
               case 'highest':
-                newProbIndex = findMaxProbCard(cards, probs, 1.00001); //Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-                if (newProbIndex === -1) {
-                    newProbIndex = findMinProbCard(cards, probs);
+                var indices = findMaxProbCard(cards, 1.00001); //Magic number to indicate there is no real ceiling (probs should max out at 1.0)
+                if (indices.clusterIndex === -1) {
+                    indices = findMinProbCard(cards);
                 }
                 break;
               default:
-                newProbIndex = findMaxProbCard(cards, probs, 0.90);
-                if (newProbIndex === -1) {
-                    newProbIndex = findMinProbCard(cards, probs);
+                var indices = findMaxProbCard(cards, 0.90);
+                if (indices.clusterIndex === -1) {
+                    indices = findMinProbCard(cards);
                 }
                 break;
             }
 
-            // Found! Update everything and grab a reference to the card and stim
-            let prob = cardProbabilities.probs[newProbIndex];
-            let cardIndex = prob.cardIndex;
-            let card = cardProbabilities.cards[cardIndex];
-            let whichStim = prob.stimIndex;
-            let stim = card.stims[whichStim];
+            newClusterIndex = indices.clusterIndex;
+            newStimIndex = indices.stimIndex;
 
-            // Store calculated probability for selected stim/cluster
-            let currentStimProbability = prob.probability;
-            stim.previousCalculatedProbabilities.push(currentStimProbability);
-            card.previousCalculatedProbabilities.push(currentStimProbability);
+            console.log("selectNextCard indices:",newClusterIndex,newStimIndex,indices);
+            // Found! Update everything and grab a reference to the card and stim
+            let cardIndex = newClusterIndex;
+            let card = cardProbabilities.cards[cardIndex];
+            let whichStim = newStimIndex;
+            let stim = card.stims[whichStim];
 
             // Save the card selection
             // Note that we always take the first stimulus and it's always a drill
@@ -1036,11 +1045,11 @@ function modelUnitEngine() {
 
             //Save for returning the info later (since we don't have a schedule)
             setCurrentCardInfo(cardIndex, whichStim);
-            console.log("select next card:",newProbIndex,cardIndex,whichStim,prob);
+            console.log("select next card:",newProbIndex,cardIndex,whichStim);
             console.log("currentCardInfo:",JSON.parse(JSON.stringify(engine.findCurrentCardInfo())))
 
 
-            let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, prob);
+            let stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, stim.probFunctionsParameters);
             console.log("selectNextCard,",Session.get("clozeQuestionParts"));
             newExperimentState = Object.assign(newExperimentState,stateChanges);// Find objects we'll be touching
 
@@ -1068,7 +1077,6 @@ function modelUnitEngine() {
                 );
 
                 // Log selections - note that the card output will also include the stim
-                console.log("Model selected prob:", displayify(prob));
                 console.log("Model selected card:", displayify(card));
                 console.log("Model selected stim:", displayify(stim));
 
@@ -1150,30 +1158,26 @@ function modelUnitEngine() {
             }
 
             // "Card-level" stats (and below - e.g. stim-level stats)
-            if (card) {
-                let {clusterIndex,whichStim,...rest} = this.findCurrentCardInfo();
-                let stim = card.stims[whichStim];
-                
-                let curProb = cardProbabilities.probs.find(x => x.cardIndex==clusterIndex && x.stimIndex==whichStim);
-                let currentStimProbability = curProb.probability;
-                stim.previousCalculatedProbabilities.push(currentStimProbability);
-                card.previousCalculatedProbabilities.push(currentStimProbability);
+            let {clusterIndex,whichStim,...rest} = this.findCurrentCardInfo();
+            let stim = card.stims[whichStim];
+            
+            let currentStimProbability = stim.probabilityEstimate;
+            stim.previousCalculatedProbabilities.push(currentStimProbability);
+            card.previousCalculatedProbabilities.push(currentStimProbability);
 
-                console.log("cardAnswered, curTrialInfo:",JSON.stringify(currentStimProbability),JSON.stringify(curProb),JSON.stringify(card),JSON.stringify(stim));
-                if (wasCorrect) card.priorCorrect += 1;
-                else            card.priorIncorrect += 1;
+            console.log("cardAnswered, curTrialInfo:",JSON.stringify(currentStimProbability),JSON.stringify(card),JSON.stringify(stim));
+            if (wasCorrect) card.priorCorrect += 1;
+            else            card.priorIncorrect += 1;
 
-                card.outcomeStack.push(wasCorrect ? 1 : 0);
+            card.outcomeStack.push(wasCorrect ? 1 : 0);
 
-                if (wasCorrect) stim.priorCorrect += 1;
-                else            stim.priorIncorrect += 1;
+            if (wasCorrect) stim.priorCorrect += 1;
+            else            stim.priorIncorrect += 1;
 
-                //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
-                stim.outcomeStack.push(wasCorrect ? 1 : 0);
-            }
+            //This is called from processUserTimesLog() so this both works in memory and restoring from userTimesLog
+            stim.outcomeStack.push(wasCorrect ? 1 : 0);
 
             // "Response" stats
-            console.log("!!!currentCardInfo",JSON.parse(JSON.stringify(currentCardInfo)),currentCardInfo.whichStim);
             let answerText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(cluster.stims[currentCardInfo.whichStim].correctResponse));
             if (answerText && answerText in cardProbabilities.responses) {
                 let resp = cardProbabilities.responses[answerText];
