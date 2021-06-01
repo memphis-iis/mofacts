@@ -528,24 +528,24 @@ Meteor.startup(function () {
       },
 
       getConsentTdfData:function(userId){
-        let username = Meteor.users.findOne({_id:userId}).username.toLowerCase();
-        let studentClass = Classes.findOne({'students': username,"curSemester":curSemester});
-        let instructorId = studentClass.instructor;
-        let instructorUsername = Meteor.users.findOne({_id:instructorId}).username;
-        let assignedConsentTdf;
-        switch(instructorUsername){
-          case "kroy@southwest.tn.edu":
-            assignedConsentTdf = "Consent_Roy_xml";
-            break;
-          case "mrothschild@southwest.tn.edu":
-            assignedConsentTdf = "Consent_Rothschild_xml";
-            break;
-          case "ambanker@southwest.tn.edu":
-            assignedConsentTdf = "Consent_Banker_xml";
-          default:
-            assignedConsentTdf = "Consent_Default_xml";
-            break;
-        } 
+        //let username = Meteor.users.findOne({_id:userId}).username.toLowerCase();
+        //let studentClass = Classes.findOne({'students': username,"curSemester":curSemester});
+        //let instructorId = studentClass.instructor;
+        //let instructorUsername = Meteor.users.findOne({_id:instructorId}).username;
+        let assignedConsentTdf = "Consent_New_Default_xml";
+        // switch(instructorUsername){
+        //   case "kroy@southwest.tn.edu":
+        //     assignedConsentTdf = "Consent_Roy_xml";
+        //     break;
+        //   case "mrothschild@southwest.tn.edu":
+        //     assignedConsentTdf = "Consent_Rothschild_xml";
+        //     break;
+        //   case "ambanker@southwest.tn.edu":
+        //     assignedConsentTdf = "Consent_Banker_xml";
+        //   default:
+        //     assignedConsentTdf = "Consent_Default_xml";
+        //     break;
+        // } 
         let query = {_id:userId};
         query[assignedConsentTdf] = {"$exists":true};
         let consentHistory = UserTimesLog.findOne(query);
