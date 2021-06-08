@@ -312,16 +312,18 @@
 
         let currentAnswerSyllablesArray = "";
         let currentAnswerSyllableIndices = "";
+        let currentAnswerSyllableCount = "";
         if(typeof(lasta.currentAnswerSyllables) !== "undefined"){
             currentAnswerSyllablesArray = lasta.currentAnswerSyllables.syllables;
             currentAnswerSyllableIndices = lasta.currentAnswerSyllables.displaySyllableIndices;
             currentAnswerSyllableCount = lasta.currentAnswerSyllables.count;
         }
 
-
-        let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay));
-        if(lastq.selectedDisplay.clozeText){
+        let filledInDisplay = JSON.parse(JSON.stringify(lastq.selectedDisplay || lastq.selectedQuestion));
+        if(lastq.selectedDisplay && lastq.selectedDisplay.clozeText){
             filledInDisplay.clozeText =  filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
+        }else if(lastq.selectedAnswer){
+            filledInDisplay =  filledInDisplay.replace(/___+/g, correctAnswer);
         }
         let kcCluster = d(lastq.clusterIndex + " " + stringifyIfExists(filledInDisplay), '');
 
