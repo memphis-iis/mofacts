@@ -239,3 +239,11 @@ displayify = function(obj) {
 isEmpty = function(value){
     return (value == null || value === '');
 }
+
+stringifyIfExists = function(json){
+    if(json){
+        return JSON.stringify(json);
+    }else{
+        return "";
+    }
+  }

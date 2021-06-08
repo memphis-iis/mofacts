@@ -364,7 +364,7 @@ function modelUnitEngine() {
         }else{
             let sessCurUnit = JSON.parse(JSON.stringify(Session.get("currentTdfUnit")));
             // Figure out which cluster numbers that they want
-            console.log("setupclusterlist:",this.curUnit,sessCurUnit);
+            console.log("setupclusterlist:",stringifyIfExists(this.curUnit),stringifyIfExists(sessCurUnit));
             const unitClusterList = _.chain(this.curUnit || sessCurUnit) //TODO: shouldn't need both
             .prop("learningsession").first()
             .prop("clusterlist").first().trim().value();
@@ -840,7 +840,7 @@ function modelUnitEngine() {
                 };
                 componentStates.push(responseState);
             }
-            console.log("saveComponentStates",JSON.parse(JSON.stringify(componentStates)));
+            console.log("saveComponentStates",JSON.stringify(componentStates));
             await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',Meteor.userId(),Session.get("currentTdfId"),componentStates);
         },
         loadComponentStates: async function(){//componentStates [{},{}]
@@ -1243,7 +1243,7 @@ function scheduleUnitEngine(){
         //First get the setting we'll use
         let settings = loadAssessmentSettings(setspec, unit);
         console.log("ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION");
-        console.log("settings:",JSON.parse(JSON.stringify(settings)));
+        console.log("settings:",JSON.stringify(settings));
 
         //Shuffle clusters at start
         if (settings.randomClusters) {

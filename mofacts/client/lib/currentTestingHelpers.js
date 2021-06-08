@@ -136,7 +136,7 @@ async function setStudentPerformance(studentID,studentUsername,tdfId){
     "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1) //convert from ms to min
   }
   Session.set("curStudentPerformance",studentPerformance);
-  console.log("setStudentPerformance,output:",studentPerformance,studentPerformanceData);
+  console.log("setStudentPerformance,output:",JSON.stringify(studentPerformance),JSON.stringify(studentPerformanceData));
 }
 
 function getCurrentClusterAndStimIndices(){
@@ -152,7 +152,7 @@ function getCurrentClusterAndStimIndices(){
     let currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
-    console.log("getCurrentClusterAndStimIndices, engine: " + JSON.stringify(currentQuest));
+    console.log("getCurrentClusterAndStimIndices, engine: " + stringifyIfExists(currentQuest));
   }
 
   return {curClusterIndex,curStimIndex};
@@ -334,7 +334,7 @@ function getCurrentDeliveryParams(){
 
     let isLearningSession = Session.get("unitType") == MODEL_UNIT;
 
-    console.log("getCurrentDeliveryParams:",currUnit,isLearningSession);
+    console.log("getCurrentDeliveryParams:",JSON.stringify(currUnit),isLearningSession);
 
     //Note that we will only extract values that have a specified default
     //value here.

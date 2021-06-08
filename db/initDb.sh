@@ -10,5 +10,5 @@ echo "listen_addresses = '*'" | sudo tee -a /etc/postgresql/10/main/postgresql.c
 cd /vagrant/db
 sudo apt-get install -y npm
 npm install pg-promise
-sudo -u mofacts node initFixtures.js
+#sudo -u mofacts node initFixtures.js
 #sudo systemctl restart postgresql

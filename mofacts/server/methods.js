@@ -1324,7 +1324,7 @@ function getSyllablesForWord(word){
   let syllablesURL = baseSyllableURL + word;
   const result = HTTP.call('GET',syllablesURL);
   let syllableArray = result.content.replace(/\[|\]/g,'').split(',').map(x => x.trim());
-  console.log("syllables for word, " + word + ": " + JSON.stringify(syllableArray) );
+  console.log("syllables for word, " + word + ": " + stringifyIfExists(syllableArray) );
   return syllableArray;
 }
 
