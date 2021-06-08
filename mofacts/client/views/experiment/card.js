@@ -132,14 +132,6 @@ function nextChar(c) {
   return String.fromCharCode(c.charCodeAt(0) + 1);
 }
 
-function stringifyIfExists(json){
-  if(json){
-      return JSON.stringify(json);
-  }else{
-      return "";
-  }
-}
-
 //String together all arguments using the disp function
 function msg() {
   if (!arguments) {
@@ -342,7 +334,7 @@ function leavePage(dest) {
 }
 
 Template.card.rendered = async function() {
-  console.log('RENDERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+  console.log('RENDERED----------------------------------------------');
   //Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function(event){
     if(document.location.pathname == "/card"){
@@ -411,7 +403,7 @@ Template.card.events({
           $("#dialogueUserAnswer").val("");
           dialogueUserAnswers.push(answer);
           dialogueContext.LastStudentAnswer = answer;
-          console.log("getDialogFeedbackForAnswer",JSON.parse(JSON.stringify(dialogueContext)));
+          console.log("getDialogFeedbackForAnswer",stringifyIfExists(dialogueContext));
           Meteor.call('getDialogFeedbackForAnswer',dialogueContext,dialogueLoop);
         }
       }
@@ -766,7 +758,7 @@ function preloadAudioFiles(){
 
 function preloadImages(){
   let curStimImgSrcs = getCurrentStimDisplaySources("imageStimulus");
-  console.log("curStimImgSrcs: " + JSON.stringify(curStimImgSrcs));
+  console.log("curStimImgSrcs: " + stringifyIfExists(curStimImgSrcs));
   imagesDict = {};
   var img;
   for(var src of curStimImgSrcs){
@@ -775,7 +767,7 @@ function preloadImages(){
     console.log("img:" + img);
     imagesDict[src] = img;
   }
-  console.log("imagesDict: " + JSON.stringify(imagesDict));
+  console.log("imagesDict: " + stringifyIfExists(imagesDict));
 }
 
 function getCurrentStimDisplaySources(filterPropertyName="clozeStimulus"){
@@ -907,7 +899,7 @@ function setUpButtonTrial(){
 function getCurrentFalseResponses() {
   let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
   let cluster = getStimCluster(curClusterIndex);
-  console.log('getCurrentFalseResponses',curClusterIndex,curStimIndex,cluster);
+  console.log('getCurrentFalseResponses',curClusterIndex,curStimIndex,stringifyIfExists(cluster));
 
   if (typeof(cluster) == "undefined" || !cluster.stims || cluster.stims.length == 0 || typeof(cluster.stims[curStimIndex].incorrectResponses) == "undefined") {
       return []; //No false responses
@@ -1288,7 +1280,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
   let testType = getTestType();
   let deliveryParams = Session.get("currentDeliveryParams");
 
-  let dialogueHistory = typeof(Session.get("dialogueHistory")) == "undefined" ? {} : JSON.parse(JSON.stringify(Session.get("dialogueHistory")));
+  let dialogueHistory = JSON.parse(stringifyIfExists(Session.get("dialogueHistory")));
   let reviewTimeout = getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   //Stop previous timeout, log response data, and clear up any other vars for next question
@@ -1301,7 +1293,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp,source,userAnswer,i
       lastAction: answerLogAction,
       lastActionTimeStamp: Date.now()
     }
-    console.log("writing answerLogRecord to history:",answerLogRecord);
+    console.log("writing answerLogRecord to history:",JSON.stringify(answerLogRecord));
     await meteorCallAsync('insertHistory',answerLogRecord);
     await updateExperimentState(newExperimentState,"card.afterAnswerFeedbackCallback");
 
@@ -1410,7 +1402,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp,source,userAnswer,isCorrect,rev
   let wasButtonTrial = !!Session.get("buttonTrial");
   if (wasButtonTrial){
     if(getCurrentDeliveryParams().feedbackType == "dialogue" && !isCorrect){
-      buttonEntries = JSON.parse(JSON.stringify(Session.get("buttonEntriesTemp") || ""));
+      buttonEntries = JSON.parse(stringifyIfExists(Session.get("buttonEntriesTemp")));
     }else{
       buttonEntries = _.map(
         buttonList.find({}, {sort: {idx: 1}}).fetch(),
@@ -1677,7 +1669,7 @@ async function unitIsFinished(reason) {
       //nothing for now
     } 
     const res = await updateExperimentState(newExperimentState,"card.unitIsFinished");
-    console.log("unitIsFinished,updateExperimentState",res);
+    console.log("unitIsFinished,updateExperimentState",JSON.stringify(res));
     leavePage(leaveTarget);
 }
 
@@ -1818,7 +1810,7 @@ function startQuestionTimeout() {
   Session.set("displayReady",false);
   Session.set("clozeQuestionParts",undefined);
   console.log('++++ CURRENT DISPLAY ++++');
-  console.log(currentDisplayEngine);
+  console.log(JSON.stringify(currentDisplayEngine));
   
   let beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null,delayMs,deliveryParams);
   let pipeline = checkAndDisplayTwoPartQuestion.bind(null,deliveryParams,currentDisplayEngine,closeQuestionParts,beginQuestionAndInitiateUserInputBound);
@@ -1828,11 +1820,11 @@ function startQuestionTimeout() {
 function checkAndDisplayPrestimulus(deliveryParams,nextStageCb){
   console.log("checking for prestimulus display");
   let prestimulusDisplay = Session.get("currentTdfFile").tdfs.tutor.setspec[0].prestimulusDisplay; //we'll [0], if it exists
-  console.log("prestimulusDisplay:",prestimulusDisplay);
+  console.log("prestimulusDisplay:",stringifyIfExists(prestimulusDisplay));
 
   if(prestimulusDisplay){
     let prestimulusDisplayWrapper = { 'text': prestimulusDisplay[0] };
-    console.log("prestimulusDisplay detected, displaying",JSON.stringify(prestimulusDisplayWrapper));
+    console.log("prestimulusDisplay detected, displaying",stringifyIfExists(prestimulusDisplayWrapper));
     Session.set("currentDisplay",prestimulusDisplayWrapper);
     Session.set("clozeQuestionParts",undefined);
     Session.set("displayReady", true);
@@ -2216,7 +2208,7 @@ function makeGoogleSpeechAPICall(request,speechAPIKey,answerGrammar){
             const answer = DialogueUtils.getDialogueUserAnswerValue();
             dialogueUserAnswers.push(answer);
             dialogueContext.LastStudentAnswer = answer;
-            console.log("getDialogFeedbackForAnswer2",JSON.parse(JSON.stringify(dialogueContext)));
+            console.log("getDialogFeedbackForAnswer2",JSON.stringify(dialogueContext));
             Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
           }
         } else {
@@ -2350,7 +2342,7 @@ function stopRecording() {
 async function getExperimentState() {
     const curExperimentState = await meteorCallAsync('getExperimentState',Meteor.userId(), Session.get("currentRootTdfId"));
     var sessExpState = Session.get("currentExperimentState");
-    console.log("getExperimentState:",curExperimentState,sessExpState);
+    console.log("getExperimentState:",stringifyIfExists(curExperimentState),stringifyIfExists(sessExpState));
     Meteor.call("updatePerformanceData","utlQuery","card.getExperimentState",Meteor.userId());
     Session.set("currentExperimentState",curExperimentState);
     return curExperimentState || {};
@@ -2363,7 +2355,7 @@ async function updateExperimentState(newState,codeCallLocation){
     Session.set("currentExperimentState", {});
   }
   let oldExperimentState = Session.get("currentExperimentState");
-  let newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)),newState);
+  let newExperimentState = Object.assign(JSON.parse(stringifyIfExists(oldExperimentState)),newState);
   const res = await meteorCallAsync('setExperimentState',Meteor.userId(), Session.get("currentRootTdfId"),newExperimentState);
   Session.set("currentExperimentState",newExperimentState);
   console.log("updateExperimentState",codeCallLocation,'old:',oldExperimentState,'new:',newExperimentState,res);
@@ -2568,13 +2560,13 @@ async function resumeFromComponentState() {
 async function checkSyllableCacheForCurrentStimFile(cb){
   let currentStimuliSetId = Session.get("currentStimuliSetId");
   cachedSyllables = StimSyllables.findOne({filename:currentStimuliSetId});
-  console.log("cachedSyllables start: " + JSON.stringify(cachedSyllables));
+  console.log("cachedSyllables start: " + stringifyIfExists(cachedSyllables));
   if(!cachedSyllables){
     console.log("no cached syllables for this stim, calling server method to create them");
     let curAnswers = getAllCurrentStimAnswers();
     Meteor.call('updateStimSyllableCache',currentStimuliSetId,curAnswers,function(){
       cachedSyllables = StimSyllables.findOne({filename:currentStimuliSetId});
-      console.log("new cachedSyllables: " + JSON.stringify(cachedSyllables));
+      console.log("new cachedSyllables: " + stringifyIfExists(cachedSyllables));
       cb();
     });
   }else{

@@ -231,7 +231,7 @@ function saveEditHistory(originalClozes,newClozes){
   };
   Meteor.call('insertClozeEditHistory',history,function(err,result){
     if(!!err){
-      console.log("error saving cloze edit history: " + JSON.stringify(err));
+      console.log("error saving cloze edit history: " + stringifyIfExists(err));
     }else{
       console.log("saving cloze edit history results: " + JSON.stringify(result));
     }

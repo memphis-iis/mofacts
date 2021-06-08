@@ -57,7 +57,7 @@ Template.profileSouthwest.rendered = async function () {
     Meteor.call('getTdfsAssignedToStudent',Meteor.userId(),function(err,result){
       console.log("err: " + err + ", res: " + result);
       var assignedTdfs = result;
-      console.log("assignedTdfs: " + JSON.stringify(assignedTdfs));
+      console.log("assignedTdfs: " + stringifyIfExists(assignedTdfs));
       //Check all the valid TDF's
       assignedTdfs.forEach( function (tdf) {
           let TDFId = tdf.TDFId;
