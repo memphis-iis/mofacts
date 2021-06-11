@@ -1576,12 +1576,10 @@ Meteor.startup(async function () {
       //participants who are created on the fly)
       signUpUser: function (newUserName, newUserPassword, previousOK) {
           serverConsole("signUpUser", newUserName, "previousOK == ", previousOK);
-          var checks = [];
 
           if (!newUserName) {
-              checks.push("Blank user names aren't allowed");
-          }
-          else {
+              throw new Error("Blank user names aren't allowed");
+          } else {
               var prevUser = Accounts.findUserByUsername(newUserName);
               if (!!prevUser) {
                   if (previousOK) {
@@ -1591,17 +1589,13 @@ Meteor.startup(async function () {
                       Accounts.setPassword(prevUser._id, newUserPassword);
                       return prevUser._id; //User has already been created - nothing to do
                   }else{
-                    checks.push("User is already in use");
+                    throw new Error("User is already in use");
                   }
               }
           }
 
           if (!newUserPassword || newUserPassword.length < 6) {
-              checks.push("Passwords must be at least 6 characters long");
-          }
-
-          if (checks.length > 0) {
-              throw new Error(checks[0]) //Nothing to create
+            throw new Error("Passwords must be at least 6 characters long");
           }
 
           // Now we can actually create the user
@@ -1785,9 +1779,6 @@ Meteor.startup(async function () {
           Meteor.call('signUpUser',username,password,true,function(error,result){
             if(!!error){
               allErrors.push({username:error});
-            }
-            if(!!result){
-              allErrors.push({username:result});
             }
           });
         }
