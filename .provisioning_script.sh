@@ -50,6 +50,7 @@ sudo systemctl restart mongod
 ###############################################################################
 
 # Install and configure postgres
+dos2unix /vagrant/db/initDb.sh
 bash /vagrant/db/initDb.sh
 
 # Install Java 8
