@@ -116,6 +116,9 @@ function doFileUpload(fileElementSelector, fileDescrip) {
                     //Now we can clear the selected file
                     $(fileElementSelector).val('');
                     $(fileElementSelector).parent().find('.file-info').html('');
+                    var newAllUsers = Meteor.users.find({},{ fields: {username: 1}, sort: [['username', 'asc']] }).fetch();
+                    console.log("newAllUsers:",newAllUsers,JSON.parse(JSON.stringify(Session.get("allUsers"))));
+                    Session.set("allUsers",newAllUsers);
                 }
             });
         };
