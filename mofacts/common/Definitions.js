@@ -1,6 +1,7 @@
 export const curSemester = "SU_2021";
 export const ALL_TDFS = "xml";
 export const INVALID = "invalid";
+export const ENTER_KEY = 13;
 export const KC_MULTIPLE = 10000;
 export const STIM_PARAMETER = "0,.7";
 export const DISABLED = 'disabled';

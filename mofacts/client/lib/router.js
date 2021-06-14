@@ -1,4 +1,10 @@
-import { haveMeteorUser } from '../lib/currentTestingHelpers';
+import {meteorCallAsync} from '..';
+import {haveMeteorUser} from '../lib/currentTestingHelpers';
+import {instructContinue} from '../views/experiment/instructions';
+import {Cookie} from './cookies';
+import {displayify} from '../../common/globalHelpers';
+
+export {routeToSignin};
 /* router.js - the routing logic we use for the application.
 
 If you need to create a new route, note that you should specify a name and an
@@ -59,82 +65,82 @@ a cookie scheme to insure experimental participants stay in experiment mode:
 
 // Note that these three session variables aren't touched by the helpers in
 // lib/sessionUtils.js. They are only set here in our client-side routing
-Session.set("loginMode", "normal");
-Session.set("experimentTarget", "");
-Session.set("experimentXCond", "");
-Session.set("clusterMapping", "");
+Session.set('loginMode', 'normal');
+Session.set('experimentTarget', '');
+Session.set('experimentXCond', '');
+Session.set('clusterMapping', '');
 
 
-routeToSignin = function() {
-    console.log("routeToSignin");
-    // If the isExperiment cookie is set we always for experiment mode. This
-    // handles an experimental participant refreshing the browser
-    var expCookie = _.chain(Cookie.get("isExperiment")).trim().intval().value();
-    if (expCookie) {
-        Session.set("loginMode", "experiment");
-        Session.set("experimentTarget", Cookie.get("experimentTarget"));
-        Session.set("experimentXCond", Cookie.get("experimentXCond"));
+function routeToSignin() {
+  console.log('routeToSignin');
+  // If the isExperiment cookie is set we always for experiment mode. This
+  // handles an experimental participant refreshing the browser
+  const expCookie = _.chain(Cookie.get('isExperiment')).trim().intval().value();
+  if (expCookie) {
+    Session.set('loginMode', 'experiment');
+    Session.set('experimentTarget', Cookie.get('experimentTarget'));
+    Session.set('experimentXCond', Cookie.get('experimentXCond'));
+  }
+
+  const loginMode = Session.get('loginMode');
+  console.log('loginMode: ' + loginMode);
+
+  if (loginMode === 'experiment') {
+    console.log('loginMode === experiment');
+    const routeParts = ['/experiment'];
+
+    const target = Session.get('experimentTarget');
+    if (target) {
+      routeParts.push(target);
+      const xcond = Session.get('experimentXCond');
+      if (xcond) {
+        routeParts.push(xcond);
+      }
     }
 
-    var loginMode = Session.get("loginMode");
-    console.log("loginMode: " + loginMode);
-
-    if (loginMode === "experiment") {
-        console.log("loginMode === experiment");
-        var routeParts = ['/experiment'];
-
-        var target = Session.get("experimentTarget");
-        if (target) {
-            routeParts.push(target);
-            var xcond = Session.get("experimentXCond");
-            if (xcond) {
-                routeParts.push(xcond);
-            }
-        }
-
-        Router.go(routeParts.join('/'));
-    }else if(loginMode === "southwest"){
-      console.log("southwest login, routing to southwest login");
-      Router.go("/signInSouthwest");
-    }else if(loginMode === "password"){
-      console.log("password login");
-      Router.go("/signIn");
-    }else{ //Normal login mode
-      console.log("else, signin");
-      Router.go("/");
-    }
-};
+    Router.go(routeParts.join('/'));
+  } else if (loginMode === 'southwest') {
+    console.log('southwest login, routing to southwest login');
+    Router.go('/signInSouthwest');
+  } else if (loginMode === 'password') {
+    console.log('password login');
+    Router.go('/signIn');
+  } else { // Normal login mode
+    console.log('else, signin');
+    Router.go('/');
+  }
+}
 
 Router.route('/experiment/:target?/:xcond?', {
-    name: "client.experiment",
-    action: async function() {
-        Session.set("curModule","experiment");
-        // We set our session variable and also set a cookie (so that we still
-        // know they're an experimental participant after browser refresh)
-        var target = this.params.target || "";
-        var xcond = this.params.xcond || "";
+  name: 'client.experiment',
+  action: async function() {
+    Session.set('curModule', 'experiment');
+    // We set our session variable and also set a cookie (so that we still
+    // know they're an experimental participant after browser refresh)
+    const target = this.params.target || '';
+    const xcond = this.params.xcond || '';
 
-        Session.set("loginMode", "experiment");
-        Session.set("experimentTarget", target);
-        Session.set("experimentXCond", xcond);
+    Session.set('loginMode', 'experiment');
+    Session.set('experimentTarget', target);
+    Session.set('experimentXCond', xcond);
 
-        Cookie.set("isExperiment", "1", 21);  // 21 days
-        Cookie.set("experimentTarget", target, 21);
-        Cookie.set("experimentXCond", xcond, 21);
+    Cookie.set('isExperiment', '1', 21); // 21 days
+    Cookie.set('experimentTarget', target, 21);
+    Cookie.set('experimentXCond', xcond, 21);
 
-        const tdf = await meteorCallAsync("getTdfByExperimentTarget",target);
-        if(!!tdf){
-          console.log("tdf found");
-          var experimentPasswordRequired = !!tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
-          Session.set("experimentPasswordRequired",experimentPasswordRequired);
-          console.log("experimentPasswordRequired:" + experimentPasswordRequired);
+    const tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
+    if (tdf) {
+      console.log('tdf found');
+      const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired ? eval(tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
+      Session.set('experimentPasswordRequired', experimentPasswordRequired);
+      console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
-          console.log("EXPERIMENT target:", target, "xcond", xcond);
+      console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
-          Session.set("clusterMapping", "");
-          this.render('signIn');
-        }
+      Session.set('clusterMapping', '');
+      this.render('signIn');
     }
+  },
 });
 
 const defaultBehaviorRoutes = [
@@ -153,101 +159,100 @@ const defaultBehaviorRoutes = [
   'tdfAssignmentEdit',
   'instructorReporting',
   'studentReporting',
-  'voice' //Voice interstitial to delay the user until voice input can recognize voice start and voice stop with VAD.js
+  'voice', // Voice interstitial to delay the user until voice input can recognize voice start and voice stop with VAD.js
 ];
 
-var getDefaultRouteAction = function(routeName){
-  return function(){
-    Session.set("curModule",routeName.toLowerCase());
-    console.log(routeName + " ROUTE");
+const getDefaultRouteAction = function(routeName) {
+  return function() {
+    Session.set('curModule', routeName.toLowerCase());
+    console.log(routeName + ' ROUTE');
     this.render(routeName);
-  }
-}
+  };
+};
 
-//set up all routes with default behavior
-for(let route of defaultBehaviorRoutes){
-  Router.route('/' + route,{
-    name: "client." + route,
-    action: getDefaultRouteAction(route)
+// set up all routes with default behavior
+for (const route of defaultBehaviorRoutes) {
+  Router.route('/' + route, {
+    name: 'client.' + route,
+    action: getDefaultRouteAction(route),
   });
 }
 
 Router.route('/', {
-    name: "client.index",
-    action: function () {
-        // If they are navigating to "/" then we clear the (possible) cookie
-        // keeping them in experiment mode
-        Cookie.set("isExperiment", "0", 1);  // 1 day
-        Cookie.set("experimentTarget", "", 1);
-        Cookie.set("experimentXCond", "", 1);
-        Session.set("curModule","signinoauth");
-        this.render('signInOauth');
-    }
+  name: 'client.index',
+  action: function() {
+    // If they are navigating to "/" then we clear the (possible) cookie
+    // keeping them in experiment mode
+    Cookie.set('isExperiment', '0', 1); // 1 day
+    Cookie.set('experimentTarget', '', 1);
+    Cookie.set('experimentXCond', '', 1);
+    Session.set('curModule', 'signinoauth');
+    this.render('signInOauth');
+  },
 });
 
 Router.route('/profile', {
-    name: "client.profile",
-    action: function () {
-        if(Meteor.user()){
-          if (Roles.userIsInRole(Meteor.user(), ["admin"])) {
-              this.subscribe('allUsers').wait();
-          }
-          var loginMode = Session.get("loginMode");
-          console.log("loginMode: " + loginMode);
+  name: 'client.profile',
+  action: function() {
+    if (Meteor.user()) {
+      if (Roles.userIsInRole(Meteor.user(), ['admin'])) {
+        this.subscribe('allUsers').wait();
+      }
+      const loginMode = Session.get('loginMode');
+      console.log('loginMode: ' + loginMode);
 
-          if(loginMode === "southwest"){
-            console.log("southwest login, routing to southwest profile");
-            Session.set("curModule","profileSouthwest");
-            this.render("/profileSouthwest");
-          }else{ //Normal login mode
-            console.log("else, progress");
-            Session.set("curModule","profile");
-            this.render('profile');
-          }
-        }else{
-          this.redirect('/');
-        }
+      if (loginMode === 'southwest') {
+        console.log('southwest login, routing to southwest profile');
+        Session.set('curModule', 'profileSouthwest');
+        this.render('/profileSouthwest');
+      } else { // Normal login mode
+        console.log('else, progress');
+        Session.set('curModule', 'profile');
+        this.render('profile');
+      }
+    } else {
+      this.redirect('/');
     }
+  },
 });
 
 Router.route('/card', {
-    name: "client.card",
-    action: function () {
-      if(Meteor.user()){
-        Session.set("curModule","card");
-        this.render('card');
-      }else{
-        this.redirect('/');
-      }
+  name: 'client.card',
+  action: function() {
+    if (Meteor.user()) {
+      Session.set('curModule', 'card');
+      this.render('card');
+    } else {
+      this.redirect('/');
     }
+  },
 });
 
 // We track the start time for instructions, which means we need to track
 // them here at the instruction route level
-Session.set("instructionClientStart", 0);
+Session.set('instructionClientStart', 0);
 Router.route('/instructions', {
-    name: "client.instructions",
-    action: function () {
-        Session.set("instructionClientStart", Date.now());
-        Session.set("curModule","instructions");
-        this.render('instructions');
-    },
-    onAfterAction: function() {
-        // If we've routed to the instructions but there's nothing to do then
-        // it's time to move on. We do NOT do this in onBeforeAction because
-        // we have instruction logic that needs to have handled and Iron Router
-        // doesn't like us setting up async re-routes.
-        if (!haveMeteorUser()) {
-            console.log("No one logged in - allowing template to handle");
-        }
-        else {
-            let unit = Session.get("currentTdfUnit");
-            let txt = _.chain(unit).prop("unitinstructions").first().trim().value();
-            let pic = _.chain(unit).prop("picture").first().trim().value();
-            if (!txt && !pic) {
-                console.log("Instructions empty: skipping", displayify(unit));
-                instructContinue();
-            }
-        }
-    },
+  name: 'client.instructions',
+  action: function() {
+    Session.set('instructionClientStart', Date.now());
+    Session.set('curModule', 'instructions');
+    this.render('instructions');
+  },
+  onAfterAction: function() {
+    // If we've routed to the instructions but there's nothing to do then
+    // it's time to move on. We do NOT do this in onBeforeAction because
+    // we have instruction logic that needs to have handled and Iron Router
+    // doesn't like us setting up async re-routes.
+    if (!haveMeteorUser()) {
+      console.log('No one logged in - allowing template to handle');
+    } else {
+      const unit = Session.get('currentTdfUnit');
+      const txt = _.chain(unit).prop('unitinstructions').first().trim().value();
+      const pic = _.chain(unit).prop('picture').first().trim().value();
+      if (!txt && !pic) {
+        console.log('Instructions empty: skipping', displayify(unit));
+        instructContinue();
+      }
+    }
+  },
 });

@@ -18,7 +18,14 @@
     "pg-promise": "^10.8.7",
     "transliteration": "^2.1.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/jquery": "^3.5.5",
+    "@types/meteor": "^1.4.70",
+    "@types/meteor-roles": "^1.2.32",
+    "@types/underscore": "^1.11.2",
+    "eslint": "^7.28.0",
+    "eslint-config-google": "^0.14.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

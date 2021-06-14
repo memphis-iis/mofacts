@@ -1,4 +1,4 @@
-import { KC_MULTIPLE } from "./Definitions";
+import {KC_MULTIPLE} from './Definitions';
 
 export class DynamicTdfGenerator {
   constructor(parentTdfJson, fileName, ownerId, source, stimJson) {
@@ -42,24 +42,24 @@ export class DynamicTdfGenerator {
       ownerId: ownerId,
       source: source,
       tdfs: this.parentTdfJson_,
-      subTdfs: []
+      subTdfs: [],
     };
   }
 
   /**
    * Get a TDF with subTDFs generated based on parent TDF criteria
-   * @returns {object}
+   * @return {object}
    */
   getGeneratedTdf() {
     this.setOrderGroupValuesMap();
-    this.parentGeneratedTdfs_.forEach(spec => {
-      let clusterList = this.getBuiltClusterList(spec)
+    this.parentGeneratedTdfs_.forEach((spec) => {
+      const clusterList = this.getBuiltClusterList(spec);
 
       if (!_.isEmpty(clusterList)) { // Ignore cluster lists where criteria was not met
         this.generatedTdf_.subTdfs.push({
           lessonName: spec.name,
-          clusterList: clusterList
-        })
+          clusterList: clusterList,
+        });
       }
     });
     this.generatedTdf_.createdAt = new Date();
@@ -69,46 +69,46 @@ export class DynamicTdfGenerator {
   /**
    * Creates a cluster list based on tag criteria
    * @param {object} spec
-   * @returns {array} 
+   * @return {array}
    */
   getBuiltClusterList(spec) {
     let clusterListString = '';
     let start = -1;
     let end = -1;
     let last = -1;
-    let [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
-    let orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
-    let numStimFileClusters = Object.values(this.stimFileClusters_).length;
+    const [weightStart, weightEnd] = this.getWeightValues(spec.criteria[0]) || [-1, -1];
+    const orderGroup = this.getOrderGroupValue(spec.criteria[0]) || -1;
+    const numStimFileClusters = Object.values(this.stimFileClusters_).length;
 
-    Object.values(this.stimFileClusters_).sort((a,b) => a.clusterKC >= b.clusterKC);
+    Object.values(this.stimFileClusters_).sort((a, b) => a.clusterKC >= b.clusterKC);
 
-    Object.values(this.stimFileClusters_).forEach(cluster => {
-      let idx = Object.values(cluster)[0].clusterKC % KC_MULTIPLE;
-      let allClusterTags = [];
-      for(let stim of Object.values(cluster)){
-        if(stim.tags){
+    Object.values(this.stimFileClusters_).forEach((cluster) => {
+      const idx = Object.values(cluster)[0].clusterKC % KC_MULTIPLE;
+      const allClusterTags = [];
+      for (const stim of Object.values(cluster)) {
+        if (stim.tags) {
           allClusterTags.push(stim.tags);
         }
       }
-      let isIncludedInStimCluster = this.isIncludedCluster(allClusterTags, weightStart, weightEnd, orderGroup);
-      
+      const isIncludedInStimCluster = this.isIncludedCluster(allClusterTags, weightStart, weightEnd, orderGroup);
+
       if (start === -1 && isIncludedInStimCluster) {
         start = idx;
       } else if (start > -1 && isIncludedInStimCluster) {
-        if (idx === numStimFileClusters + 1) { //Numbering of KCs starts at 1
+        if (idx === numStimFileClusters + 1) { // Numbering of KCs starts at 1
           end = idx;
           clusterListString += ' ' + start + '-' + end + ' ';
-        }else if(idx-1 > last){//We skipped one or more
+        } else if (idx-1 > last) {// We skipped one or more
           end = last;
           clusterListString += ' ' + start + '-' + end + ' ';
           start = idx;
           end = -1;
         }
       } else if (start > -1 && !isIncludedInStimCluster) {
-        end = idx - 2; //Numbering of KCs starts at 1 in addition to 0-based indexing
+        end = idx - 2; // Numbering of KCs starts at 1 in addition to 0-based indexing
         clusterListString += ' ' + start + '-' + end + ' ';
         start = -1;
-        end = -1; 
+        end = -1;
       }
       last = idx;
     });
@@ -119,34 +119,34 @@ export class DynamicTdfGenerator {
   /**
    * Determine if a cluster is eligible for selection based on weight
    * or order group criteria
-   * @param {object} stimTagsList 
-   * @param {number} weightStart 
-   * @param {number} weightEnd 
+   * @param {object} stimTagsList
+   * @param {number} weightStart
+   * @param {number} weightEnd
    * @param {number} orderGroup
-   * @returns {boolean} isIncludedStimCluster
+   * @return {boolean} isIncludedStimCluster
    */
   isIncludedCluster(stimTagsList, weightStart, weightEnd, orderGroup) {
     let isIncludedStimCluster = false;
     if (stimTagsList && stimTagsList.length) {
-      stimTagsList.forEach(stimTags => {
-        let tagOrderGroupProperty = stimTags.orderGroup[0]||stimTags.orderGroup;
-        let tagOrderGroup = this.isValidOrderGroup(tagOrderGroupProperty) 
-          ? parseInt(tagOrderGroupProperty) : -1;
-        let tagWeightGroupProperty = stimTags.weightGroup[0]||stimTags.weightGroup;
-        let tagWeightGroup = tagWeightGroupProperty || tagWeightGroupProperty == 0
-          ? parseInt(tagWeightGroupProperty) : -1;
+      stimTagsList.forEach((stimTags) => {
+        const tagOrderGroupProperty = stimTags.orderGroup[0]||stimTags.orderGroup;
+        const tagOrderGroup = this.isValidOrderGroup(tagOrderGroupProperty) ?
+          parseInt(tagOrderGroupProperty) : -1;
+        const tagWeightGroupProperty = stimTags.weightGroup[0]||stimTags.weightGroup;
+        const tagWeightGroup = tagWeightGroupProperty || tagWeightGroupProperty == 0 ?
+          parseInt(tagWeightGroupProperty) : -1;
         if (tagOrderGroup > -1) {
           if (tagOrderGroup === orderGroup) {
             isIncludedStimCluster = true;
           }
         }
         if (tagWeightGroup > -1) {
-          if (tagWeightGroup >= weightStart 
-            && tagWeightGroup <= weightEnd) {
-              isIncludedStimCluster = true;
+          if (tagWeightGroup >= weightStart &&
+            tagWeightGroup <= weightEnd) {
+            isIncludedStimCluster = true;
           }
         }
-      });      
+      });
     }
     return isIncludedStimCluster;
   }
@@ -155,14 +155,15 @@ export class DynamicTdfGenerator {
    * Determine if an order group is valid based on the criteria
    * 1. Order group exists in stim object
    * 2. Stim object has at least 6 items in that order group
-   * @param {boolean}
+   * @param {string} orderGroupTag
+   * @return {boolean} isValidOrderGroup
    */
   isValidOrderGroup(orderGroupTag) {
     if (!orderGroupTag && orderGroupTag != 0) return false;
 
-    let orderGroup = parseInt(orderGroupTag);
-    if (this.orderGroupValuesMap_[orderGroup] 
-      && this.orderGroupValuesMap_[orderGroup] > 5) {
+    const orderGroup = parseInt(orderGroupTag);
+    if (this.orderGroupValuesMap_[orderGroup] &&
+      this.orderGroupValuesMap_[orderGroup] > 5) {
       return true;
     }
 
@@ -171,15 +172,15 @@ export class DynamicTdfGenerator {
 
   /**
    * Set a map of all order group value counts
-   * This map is used to determine TDF order group validity 
+   * This map is used to determine TDF order group validity
    */
   setOrderGroupValuesMap() {
-    Object.values(this.stimFileClusters_).forEach(cluster => {
-      let firstStim = Object.values(cluster)[0];
+    Object.values(this.stimFileClusters_).forEach((cluster) => {
+      const firstStim = Object.values(cluster)[0];
       if (firstStim.tags && firstStim.tags.orderGroup) {
-        let orderGroupValueKey = (firstStim.tags.orderGroup[0] || firstStim.tags.orderGroup).toString();
+        const orderGroupValueKey = (firstStim.tags.orderGroup[0] || firstStim.tags.orderGroup).toString();
         if (this.orderGroupValuesMap_[orderGroupValueKey]) {
-          let orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
+          const orderGroupValueCount = this.orderGroupValuesMap_[orderGroupValueKey];
           this.orderGroupValuesMap_[orderGroupValueKey] = orderGroupValueCount + 1;
         } else {
           this.orderGroupValuesMap_[orderGroupValueKey] = 1;
@@ -191,21 +192,21 @@ export class DynamicTdfGenerator {
   /**
    * Returns clusters based on stimulus file name
    * @param {string} stimFileName
-   * @returns {object} clusters 
+   * @param {json} stimJson
+   * @return {object} clusters
    */
   getStimFileClusters(stimFileName, stimJson) {
     let clusters = [];
-    let count = 0;
-    // try { 
-      let clusterMap = {};
-      for(let stim of stimJson){//[{},{}]
-        let clusterIndex = stim.clusterKC;
-        let stimIndex = stim.stimulusKC;
-        if(!clusterMap[clusterIndex]) clusterMap[clusterIndex] = {};
-        clusterMap[clusterIndex][stimIndex] = stim;
-      }
-      clusters = clusterMap;
-      console.log("getStimFileClusters:",clusterMap);
+    // try {
+    const clusterMap = {};
+    for (const stim of stimJson) {// [{},{}]
+      const clusterIndex = stim.clusterKC;
+      const stimIndex = stim.stimulusKC;
+      if (!clusterMap[clusterIndex]) clusterMap[clusterIndex] = {};
+      clusterMap[clusterIndex][stimIndex] = stim;
+    }
+    clusters = clusterMap;
+    console.log('getStimFileClusters:', clusterMap);
     // } catch (error) {
     //  throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
     // }
@@ -214,8 +215,8 @@ export class DynamicTdfGenerator {
 
   /**
    * Returns starting and ending weight values for cluster criteria test
-   * @param {object} spec
-   * @returns {array} [weightStart, weightEnd]
+   * @param {object} criteria
+   * @return {array} [weightStart, weightEnd]
    */
   getWeightValues(criteria) {
     let [weightStart, weightEnd] = [-1, -1];
@@ -228,7 +229,7 @@ export class DynamicTdfGenerator {
   /**
    * Returns the order group value for cluster criteria test
    * @param {object} criteria
-   * @returns {number} orderGroup 
+   * @return {number} orderGroup
    */
   getOrderGroupValue(criteria) {
     let orderGroup = -1;
@@ -241,12 +242,12 @@ export class DynamicTdfGenerator {
   /**
    * Helper to parse weight start and end values from a given weight range
    * @param {string} weights
-   * @returns {array} [weightStart, weightEnd] 
+   * @return {array} [weightStart, weightEnd]
    */
   getSplitWeights(weights) {
-    let weightStart, weightEnd;
+    let weightStart; let weightEnd;
     if (weights.indexOf('-') !== -1) {
-      let weightValues = weights.split('-');
+      const weightValues = weights.split('-');
       weightStart = parseInt(weightValues[0]);
       weightEnd = parseInt(weightValues[1]);
     } else {
