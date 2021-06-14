@@ -26,4 +26,4 @@ Template.profileDialogueToggles.helpers({
   }
 });
 
-exports.dialogueSelectState = _state;
+export { _state as dialogueSelectState }

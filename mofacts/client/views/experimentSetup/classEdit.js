@@ -1,115 +1,120 @@
-import { curSemester } from '../../../common/Definitions';
-import { search } from '../../lib/currentTestingHelpers';
+import {meteorCallAsync} from '../..';
+import {curSemester} from '../../../common/Definitions';
+import {search} from '../../lib/currentTestingHelpers';
 
-Session.set("classes",[]);
+Session.set('classes', []);
 
-var isNewClass = true;
+let isNewClass = true;
 
-curClass = {
+let curClass = {
   courseId: undefined,
-  courseName: "",
+  courseName: '',
   teacherUserId: Meteor.userId(),
   semester: curSemester,
   beginDate: new Date(),
-  sections: []
+  sections: [],
 };
 
-function classSelectedSetup(curClassName){
-    $("#class-select").children('[value="' + curClassName + '"]').attr('selected',true);
-    $("#newClassName").val(curClassName);
-    var foundClass = search(curClassName,"courseName",Session.get("classes"));
-    $("#sectionNames").val(foundClass.sections.map(x => x + '\n').join(''));
-    isNewClass = false;
+function classSelectedSetup(curClassName) {
+  $('#class-select').children('[value="' + curClassName + '"]').attr('selected', true);
+  $('#newClassName').val(curClassName);
+  const foundClass = search(curClassName, 'courseName', Session.get('classes'));
+  $('#sectionNames').val(foundClass.sections.map((x) => x + '\n').join(''));
+  isNewClass = false;
 }
 
-function noClassSelectedSetup(){
-  $("#newClassName").val("");
-  $("#sectionNames").val("");
+function noClassSelectedSetup() {
+  $('#newClassName').val('');
+  $('#sectionNames').val('');
   isNewClass = true;
 }
 
-Template.classEdit.onRendered(async function(){
-  const courseSections = await meteorCallAsync("getAllCourseSections");
-  let classes = {};
-  for(let courseSection of courseSections){
-    if(courseSection.teacheruserid != Meteor.userId()) continue;
-    if(!classes[courseSection.courseid]){
+Template.classEdit.onRendered(async function() {
+  const courseSections = await meteorCallAsync('getAllCourseSections');
+  const classes = {};
+  for (const courseSection of courseSections) {
+    if (courseSection.teacheruserid != Meteor.userId()) continue;
+    if (!classes[courseSection.courseid]) {
       classes[courseSection.courseid] = {
         courseId: courseSection.courseid,
         courseName: courseSection.coursename,
         teacherUserId: courseSection.teacheruserid,
         semester: courseSection.semester,
         beginDate: courseSection.begindate,
-        sections: [courseSection.sectionname]
+        sections: [courseSection.sectionname],
       };
-    }else{
+    } else {
       classes[courseSection.courseid].sections.push(courseSection.sectionname);
     }
   }
-  console.log("classesFromCourseSections:",classes,courseSections)
+  console.log('classesFromCourseSections:', classes, courseSections);
 
-  Session.set("classes",Object.values(classes));
+  Session.set('classes', Object.values(classes));
 });
 
 Template.classEdit.helpers({
-  classes: () => Session.get("classes")
+  classes: () => Session.get('classes'),
 });
 
 Template.classEdit.events({
-  "change #class-select": function(event, template){
-    console.log("change class-select");
-    var curClassName = $(event.currentTarget).val();
-    if(!!curClassName){
+  'change #class-select': function(event, template) {
+    console.log('change class-select');
+    const curClassName = $(event.currentTarget).val();
+    if (curClassName) {
       classSelectedSetup(curClassName);
-    }else{
-      //Creating a new class with name from $textBox
+    } else {
+      // Creating a new class with name from $textBox
       noClassSelectedSetup();
     }
   },
 
-  "click #saveClass": function(event,template){
-    var classes = Session.get("classes");
-    if(isNewClass){
-      curClassName = $("#newClassName").val();
+  'click #saveClass': function(event, template) {
+    const classes = Session.get('classes');
+    if (isNewClass) {
+      const curClassName = $('#newClassName').val();
       curClass = {
         courseId: undefined,
         courseName: curClassName,
         teacherUserId: Meteor.userId(),
         semester: curSemester,
         beginDate: new Date(),
-        sections: []
+        sections: [],
       };
       classes.push(curClass);
-    }else{
-      curClassName = $("#class-select").val();
-      curClass = search(curClassName,"courseName",classes);
-      newClassName = $("#newClassName").val();
+    } else {
+      const curClassName = $('#class-select').val();
+      curClass = search(curClassName, 'courseName', classes);
+      const newClassName = $('#newClassName').val();
       curClass.courseName = newClassName;
     }
 
-    var newSections = $("#sectionNames").val().trim().split('\n');
+    const newSections = $('#sectionNames').val().trim().split('\n');
     curClass.sections = newSections;
 
-    addEditClassCallback = function(err,res){
-      if(!!err){
-        alert("Error saving class: " + err);
-      }else{
-        alert("Saved class successfully!");
+    function addEditClassCallback(err, res) {
+      if (err) {
+        alert('Error saving class: ' + err);
+      } else {
+        alert('Saved class successfully!');
         curClass.courseId = res;
-        console.log("curClass:" + JSON.stringify(curClass));
-        Session.set("classes",classes);
-        //Need a delay here so the reactive session var can update the template
-        setTimeout(function(){
+        console.log('curClass:' + JSON.stringify(curClass));
+        console.log('curClass:', curClass);
+        let test = {1: 'thing', 2: 2};
+        test.blah = test;
+        console.log('curClass:', test);
+        Session.set('classes', classes);
+        // Need a delay here so the reactive session var can update the template
+        setTimeout(function() {
           classSelectedSetup(curClass.courseName);
-        },200);
+        }, 200);
       }
     }
 
-    if(isNewClass){
+    if (isNewClass) {
       curClass.beginDate = new Date();
-      Meteor.call('addCourse',curClass,addEditClassCallback);
-    }else{
-      Meteor.call('editCourse',curClass,addEditClassCallback);
+      Meteor.call('addCourse', curClass, addEditClassCallback);
+    } else {
+      Meteor.call('editCourse', curClass, addEditClassCallback);
     }
-  }
-})
+  },
+});

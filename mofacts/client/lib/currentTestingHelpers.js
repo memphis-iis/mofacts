@@ -1,7 +1,10 @@
-import { KC_MULTIPLE, MODEL_UNIT } from '../../common/Definitions';
-import { dialogueSelectState } from '../views/home/profileDialogueToggles';
+import {meteorCallAsync} from '..';
+import {KC_MULTIPLE, MODEL_UNIT} from '../../common/Definitions';
+import {dialogueSelectState} from '../views/home/profileDialogueToggles';
+import {isEmpty} from '../../common/globalHelpers';
+import {getCurrentClusterAndStimIndices} from '../views/experiment/card';
 
-export { 
+export {
   blankPassword,
   extractDelimFields,
   rangeVal,
@@ -9,7 +12,6 @@ export {
   randomChoice,
   search,
   haveMeteorUser,
-  getCurrentClusterAndStimIndices,
   setStudentPerformance,
   getStimCount,
   getStimCluster,
@@ -17,154 +19,135 @@ export {
   createStimClusterMapping,
   getAllCurrentStimAnswers,
   getTestType,
-  getCurrentDeliveryParams
+  getCurrentDeliveryParams,
 };
 
-//Given a user ID, return the "dummy" password that stands in for a blank
-//password. This is because we REALLY do want to use blanks passwords for
-//some users
+// Given a user ID, return the "dummy" password that stands in for a blank
+// password. This is because we REALLY do want to use blanks passwords for
+// some users
 function blankPassword(userName) {
-    return (userName + "BlankPassword").toUpperCase();
+  return (userName + 'BlankPassword').toUpperCase();
 }
 
-//Extract space-delimited fields from src and push them to dest. Note that
-//dest is changed, but is NOT cleared before commencing. Also note that
-//false-ish values and whitespace-only strings are silently discarded
+// Extract space-delimited fields from src and push them to dest. Note that
+// dest is changed, but is NOT cleared before commencing. Also note that
+// false-ish values and whitespace-only strings are silently discarded
 function extractDelimFields(src, dest) {
-    if (!src) {
-        return;
+  if (!src) {
+    return;
+  }
+  const fields = _.trim(src).split(/\s/);
+  for (let i = 0; i < fields.length; ++i) {
+    const fld = _.trim(fields[i]);
+    if (fld && fld.length > 0) {
+      dest.push(fld);
     }
-    var fields = _.trim(src).split(/\s/);
-    for(var i = 0; i < fields.length; ++i) {
-        var fld = _.trim(fields[i]);
-        if (fld && fld.length > 0) {
-            dest.push(fld);
-        }
-    }
+  }
 }
 
-//Given a string of format "a-b", return an array containing all
-//numbers from a to b inclusive.  On errors, return an empty array
+// Given a string of format "a-b", return an array containing all
+// numbers from a to b inclusive.  On errors, return an empty array
 function rangeVal(src) {
-    src = _.trim(src);
-    var idx = src.indexOf("-");
-    if (idx < 1) {
-        return [];
-    }
+  src = _.trim(src);
+  const idx = src.indexOf('-');
+  if (idx < 1) {
+    return [];
+  }
 
-    var first = _.intval(src.substring(0, idx));
-    var last  = _.intval(src.substring(idx+1));
-    if (last < first) {
-        return [];
-    }
+  const first = _.intval(src.substring(0, idx));
+  const last = _.intval(src.substring(idx+1));
+  if (last < first) {
+    return [];
+  }
 
-    var range = [];
-    for (var r = first; r <= last; ++r) {
-        range.push(r);
-    }
+  const range = [];
+  for (let r = first; r <= last; ++r) {
+    range.push(r);
+  }
 
-    return range;
+  return range;
 }
 
-//Given an array, shuffle IN PLACE and then return the array
+// Given an array, shuffle IN PLACE and then return the array
 function shuffle(array) {
-    if (!array || !array.length) {
-        return array;
-    }
-
-    var currentIndex = array.length;
-
-    while (currentIndex > 0) {
-        var randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex -= 1;
-
-        var tmp = array[currentIndex];
-        array[currentIndex] = array[randomIndex];
-        array[randomIndex] = tmp;
-    }
-
+  if (!array || !array.length) {
     return array;
+  }
+
+  let currentIndex = array.length;
+
+  while (currentIndex > 0) {
+    const randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    const tmp = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = tmp;
+  }
+
+  return array;
 }
 
-//Given an array, select and return one item at random. If the array is
-//empty, then undefined is returned
+// Given an array, select and return one item at random. If the array is
+// empty, then undefined is returned
 function randomChoice(array) {
-    var choice;
-    if (array && array.length) {
-        choice = array[Math.floor(Math.random() * array.length)];
-    }
-    return choice;
+  let choice;
+  if (array && array.length) {
+    choice = array[Math.floor(Math.random() * array.length)];
+  }
+  return choice;
 }
 
-function search(key, prop, searchObj){
-  for(let item of searchObj){
-    if(item[prop] == key){
+function search(key, prop, searchObj) {
+  for (const item of searchObj) {
+    if (item[prop] == key) {
       return item;
     }
-  }  
+  }
 }
 
 function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 };
 
-async function setStudentPerformance(studentID,studentUsername,tdfId){
-  console.log("setStudentPerformance:",studentID,studentUsername,tdfId);
-  const studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,tdfId);
+async function setStudentPerformance(studentID, studentUsername, tdfId) {
+  console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
+  const studentPerformanceDataRet = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, tdfId);
   let studentPerformanceData;
-  if(isEmpty(studentPerformanceDataRet)){
+  if (isEmpty(studentPerformanceDataRet)) {
     studentPerformanceData = {
       numCorrect: 0,
       numIncorrect: 0,
-      totalPracticeDuration: 0
-    }
-  }else{
+      totalPracticeDuration: 0,
+    };
+  } else {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
-      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0
-    }
+      totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
+    };
   }
-  let count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
-  let percentCorrect = (count > 0) ? ((studentPerformanceData.numCorrect / count)*100).toFixed(2)  + "%" : "N/A";
-  let studentPerformance = {
-    "username":studentUsername,
-    "count":count,
-    "percentCorrect":percentCorrect,
-    "numCorrect":studentPerformanceData.numCorrect,
-    "totalTime":studentPerformanceData.totalPracticeDuration,
-    "totalTimeDisplay":(studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1) //convert from ms to min
-  }
-  Session.set("curStudentPerformance",studentPerformance);
-  console.log("setStudentPerformance,output:",JSON.stringify(studentPerformance),JSON.stringify(studentPerformanceData));
+  const count = (parseInt(studentPerformanceData.numCorrect) + parseInt(studentPerformanceData.numIncorrect));
+  const percentCorrect = (count > 0) ? ((studentPerformanceData.numCorrect / count)*100).toFixed(2) + '%' : 'N/A';
+  const studentPerformance = {
+    'username': studentUsername,
+    'count': count,
+    'percentCorrect': percentCorrect,
+    'numCorrect': studentPerformanceData.numCorrect,
+    'totalTime': studentPerformanceData.totalPracticeDuration,
+    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1), // convert from ms to min
+  };
+  Session.set('curStudentPerformance', studentPerformance);
+  console.log('setStudentPerformance,output:', JSON.stringify(studentPerformance), JSON.stringify(studentPerformanceData));
 }
 
-function getCurrentClusterAndStimIndices(){
-  let curClusterIndex = null;
-  let curStimIndex = null;
-
-  console.log("getCurrentClusterAndStimIndices: " + !engine);
-
-  if(!engine){
-    console.log("getCurrentClusterAndStimIndices, no engine: " + Session.get("clusterIndex"));
-    curClusterIndex = Session.get("clusterIndex");
-  }else{
-    let currentQuest = engine.findCurrentCardInfo();
-    curClusterIndex = currentQuest.clusterIndex;
-    curStimIndex = currentQuest.whichStim;
-    console.log("getCurrentClusterAndStimIndices, engine: " + stringifyIfExists(currentQuest));
-  }
-
-  return {curClusterIndex,curStimIndex};
-}
-
-//Return the total number of stim clusters
+// Return the total number of stim clusters
 function getStimCount() {
-  let stimSet = Session.get("currentStimuliSet");
+  const stimSet = Session.get('currentStimuliSet');
   let numClusters = 0;
-  let seenClusters = {};
-  for(let stim of stimSet){
-    if(!seenClusters[stim.clusterKC]){
+  const seenClusters = {};
+  for (const stim of stimSet) {
+    if (!seenClusters[stim.clusterKC]) {
       seenClusters[stim.clusterKC] = true;
       numClusters += 1;
     }
@@ -173,144 +156,146 @@ function getStimCount() {
 };
 
 // Return the stim file cluster matching the index AFTER mapping it per the
-// current sessions cluster mapping. 
+// current sessions cluster mapping.
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file
 function getStimCluster(clusterMappedIndex=0) {
-    let isLearningSession = Session.get("unitType") == MODEL_UNIT;
-    let clusterMapping = Session.get("clusterMapping");
-    let rawIndex = isLearningSession ? clusterMapping[clusterMappedIndex] : clusterMappedIndex; //Only learning sessions use cluster mapping
-    let cluster = { 
-      shufIndex: clusterMappedIndex,//Tack these on for later logging purposes
-      clusterIndex: rawIndex,
-      stims: []
-    };
-    for(let stim of Session.get("currentStimuliSet")){
-      if(stim.clusterKC % KC_MULTIPLE == rawIndex){
-        cluster.stims.push(stim);
-      }
+  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
+  const clusterMapping = Session.get('clusterMapping');
+  const rawIndex = isLearningSession ? clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
+  const cluster = {
+    shufIndex: clusterMappedIndex, // Tack these on for later logging purposes
+    clusterIndex: rawIndex,
+    stims: [],
+  };
+  for (const stim of Session.get('currentStimuliSet')) {
+    if (stim.clusterKC % KC_MULTIPLE == rawIndex) {
+      cluster.stims.push(stim);
     }
-    //let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
-    return cluster;
+  }
+  // let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
+  return cluster;
 };
 
-function getStimKCBaseForCurrentStimuliSet(){
-  if(Session.get("currentStimuliSet")){
-    let oneOrderOfMagnitudeLess = (KC_MULTIPLE / 10);
-    return Math.round((Session.get("currentStimuliSet")[0].clusterKC) / oneOrderOfMagnitudeLess) * oneOrderOfMagnitudeLess;
+function getStimKCBaseForCurrentStimuliSet() {
+  if (Session.get('currentStimuliSet')) {
+    const oneOrderOfMagnitudeLess = (KC_MULTIPLE / 10);
+    return Math.round((Session.get('currentStimuliSet')[0].clusterKC) / oneOrderOfMagnitudeLess) * oneOrderOfMagnitudeLess;
   }
 }
 
-//Given a cluster count, a shuffleclusters string, and a swapclusters string,
-//create a mapping vector. The idea is that for cluster x, mapping[x] returns
-//a translated index. Note that the default mapping is identity, so that
-//mapping[x] = x HOWEVER, the user may submit a different default mapping.
-//This is mainly so that multiple shuffle/swap pairs can be run. ALSO important
-//is the fact that additional elements will be added if
-//mapping.length < stimCount
+// Given a cluster count, a shuffleclusters string, and a swapclusters string,
+// create a mapping vector. The idea is that for cluster x, mapping[x] returns
+// a translated index. Note that the default mapping is identity, so that
+// mapping[x] = x HOWEVER, the user may submit a different default mapping.
+// This is mainly so that multiple shuffle/swap pairs can be run. ALSO important
+// is the fact that additional elements will be added if
+// mapping.length < stimCount
 function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, startMapping) {
-  if (stimCount < 1)
-      return [];
+  if (stimCount < 1) {
+    return [];
+  }
 
-  var i;
+  let i;
 
-  //Default mapping is identity - mapping[x] == x
-  //We also need to make sure we have stimCount elements
-  var mapping = (startMapping || []).slice(); //they get a copy back
+  // Default mapping is identity - mapping[x] == x
+  // We also need to make sure we have stimCount elements
+  let mapping = (startMapping || []).slice(); // they get a copy back
   while (mapping.length < stimCount) {
-      mapping.push(mapping.length);
+    mapping.push(mapping.length);
   }
 
-  //Shufle the given ranges of cards (like permutefinalresult)
+  // Shufle the given ranges of cards (like permutefinalresult)
   if (!!shuffleclusters) {
-      var shuffleRanges = [];
-      extractDelimFields(shuffleclusters, shuffleRanges);
+    const shuffleRanges = [];
+    extractDelimFields(shuffleclusters, shuffleRanges);
 
-      var shuffled = mapping.slice(); //work on a copy
+    const shuffled = mapping.slice(); // work on a copy
 
-      _.each(shuffleRanges, function(rng) {
-          var targetIndexes = rangeVal(rng);
-          var randPerm = targetIndexes.slice(); //clone
-          shuffle(randPerm);
+    _.each(shuffleRanges, function(rng) {
+      const targetIndexes = rangeVal(rng);
+      const randPerm = targetIndexes.slice(); // clone
+      shuffle(randPerm);
 
-          for(j = 0; j < targetIndexes.length; ++j) {
-              shuffled[targetIndexes[j]] = mapping[randPerm[j]];
-          }
-      });
+      for (j = 0; j < targetIndexes.length; ++j) {
+        shuffled[targetIndexes[j]] = mapping[randPerm[j]];
+      }
+    });
 
-      mapping = shuffled.slice();
+    mapping = shuffled.slice();
   }
 
-  //Swap out sections of clusters (one step up from our shuffle above)
+  // Swap out sections of clusters (one step up from our shuffle above)
   if (!!swapclusters) {
-      //Get the chunks that we'll be swapping. Each chunk is in the format
-      //of an array of integral indexes (after the map). We actually get
-      //TWO lists of chunks - one in order and one that is the actual swap
-      var ranges = [];
-      extractDelimFields(swapclusters, ranges);
-      var swapChunks = _.map(ranges, rangeVal);
-      var sortChunks = _.map(ranges, rangeVal);
+    // Get the chunks that we'll be swapping. Each chunk is in the format
+    // of an array of integral indexes (after the map). We actually get
+    // TWO lists of chunks - one in order and one that is the actual swap
+    const ranges = [];
+    extractDelimFields(swapclusters, ranges);
+    const swapChunks = _.map(ranges, rangeVal);
+    const sortChunks = _.map(ranges, rangeVal);
 
-      //Now insure our sorted chunks are actually in order - we sort
-      //numerically by the first index
-      sortChunks.sort(function(lhs, rhs) {
-          var lv = lhs[0], rv = rhs[0];
-          if      (lv < rv) return -1;
-          else if (lv > rv) return 1;
-          else              return 0;
-      });
+    // Now insure our sorted chunks are actually in order - we sort
+    // numerically by the first index
+    sortChunks.sort(function(lhs, rhs) {
+      const lv = lhs[0]; const rv = rhs[0];
+      if (lv < rv) return -1;
+      else if (lv > rv) return 1;
+      else return 0;
+    });
 
-      //Now get a permuted copy of our chunks
-      shuffle(swapChunks);
+    // Now get a permuted copy of our chunks
+    shuffle(swapChunks);
 
-      var swapped = [];
-      i = 0;
-      while (i < mapping.length) {
-          if (sortChunks.length > 0 && i == sortChunks[0][0]) {
-              //Swap chunk - grab the permuted chunk and add the mapped numbers
-              var chunk = swapChunks.shift();
-              for (var chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
-                  swapped.push(mapping[chunk[chunkIdx]]);
-              }
+    const swapped = [];
+    i = 0;
+    while (i < mapping.length) {
+      if (sortChunks.length > 0 && i == sortChunks[0][0]) {
+        // Swap chunk - grab the permuted chunk and add the mapped numbers
+        const chunk = swapChunks.shift();
+        for (let chunkIdx = 0; chunkIdx < chunk.length; ++chunkIdx) {
+          swapped.push(mapping[chunk[chunkIdx]]);
+        }
 
-              //advance to the next chunk
-              i += sortChunks.shift().length;
-          }
-          else {
-              //Not part of a swapped chunk - keep this number and just move
-              //to the next number
-              swapped.push(mapping[i]);
-              i++;
-          }
+        // advance to the next chunk
+        i += sortChunks.shift().length;
+      } else {
+        // Not part of a swapped chunk - keep this number and just move
+        // to the next number
+        swapped.push(mapping[i]);
+        i++;
       }
+    }
 
-      //All done
-      mapping = swapped.slice();
+    // All done
+    mapping = swapped.slice();
   }
 
   return mapping;
 };
 
 function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
-  let {curClusterIndex,curStimIndex} = getCurrentClusterAndStimIndices();
-  let stims = Session.get("currentStimuliSet");
+  const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
+  const stims = Session.get('currentStimuliSet');
   let allAnswers = new Set();
 
   console.log(stims);
-  for(stim of stims){
-    var responseParts = stim.correctResponse.toLowerCase().split(";");
-    var answerArray = responseParts.filter(function(entry){ return entry.indexOf("incorrect") == -1});
-    if(answerArray.length > 0){
-      var singularAnswer = answerArray[0].split("~")[0];
+  for (stim of stims) {
+    const responseParts = stim.correctResponse.toLowerCase().split(';');
+    const answerArray = responseParts.filter(function(entry) {
+      return entry.indexOf('incorrect') == -1;
+    });
+    if (answerArray.length > 0) {
+      const singularAnswer = answerArray[0].split('~')[0];
       allAnswers.add(singularAnswer);
     }
   }
 
   allAnswers = Array.from(allAnswers);
 
-  if(removeExcludedPhraseHints){
-    let curSpeechHintExclusionListText = getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || "";
-    let exclusionList = curSpeechHintExclusionListText.split(',');
-    //Remove the optional phrase hint exclusions
+  if (removeExcludedPhraseHints) {
+    const curSpeechHintExclusionListText = getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || '';
+    const exclusionList = curSpeechHintExclusionListText.split(',');
+    // Remove the optional phrase hint exclusions
     allAnswers = allAnswers.filter((el)=>exclusionList.indexOf(el)==-1);
   }
 
@@ -318,144 +303,146 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
 }
 
 function getTestType() {
-    return _.trim(Session.get("testType")).toLowerCase();
+  return _.trim(Session.get('testType')).toLowerCase();
 };
 
-//Return the delivery parms for the current unit. Note that we provide default
-//values AND eliminate the single-value array issue from our XML-2-JSON mapping
+// Return the delivery parms for the current unit. Note that we provide default
+// values AND eliminate the single-value array issue from our XML-2-JSON mapping
 //
-//Note that the default mode is to use the current unit (thus the name), but we
-//allow callers to override the unit assumed to be current
+// Note that the default mode is to use the current unit (thus the name), but we
+// allow callers to override the unit assumed to be current
 //
-//IMPORTANT: we also support selecting one of multiple delivery params via
-//experimentXCond (which can be specified in the URL or system-assigned)
-function getCurrentDeliveryParams(){
-    let currUnit = Session.get("currentTdfUnit");
+// IMPORTANT: we also support selecting one of multiple delivery params via
+// experimentXCond (which can be specified in the URL or system-assigned)
+function getCurrentDeliveryParams() {
+  const currUnit = Session.get('currentTdfUnit');
 
-    let isLearningSession = Session.get("unitType") == MODEL_UNIT;
+  const isLearningSession = Session.get('unitType') == MODEL_UNIT;
 
-    console.log("getCurrentDeliveryParams:",JSON.stringify(currUnit),isLearningSession);
+  console.log('getCurrentDeliveryParams:', JSON.stringify(currUnit), isLearningSession);
 
-    //Note that we will only extract values that have a specified default
-    //value here.
-    var deliveryParams = {
-        'showhistory': false,
-        'forceCorrection': false,
-        'scoringEnabled':isLearningSession,
-        'purestudy': 0,
-        'initialview': 0,
-        'drill': 0,
-        'reviewstudy': 0,
-        'correctprompt': 0,
-        'skipstudy': false,
-        'lockoutminutes': 0,
-        'fontsize': 3,
-        'numButtonListImageColumns': 2,
-        'correctscore': 1,
-        'incorrectscore': 0,
-        'practiceseconds': 0,
-        'autostopTimeoutThreshold': 0,
-        'autostopTranscriptionAttemptLimit': 3,
-        'timeuntilaudio' : 0,
-        'timeuntilaudiofeedback' : 0,
-        'prestimulusdisplaytime' : 0,
-        'forcecorrectprompt':'',
-        'forcecorrecttimeout':0,
-        'studyFirst':false,
-        'enhancedFeedback':false,
-        'checkOtherAnswers':false,
-        'feedbackType':'',
-        'allowFeedbackTypeSelect': false,
-        'falseAnswerLimit': undefined
-    };
+  // Note that we will only extract values that have a specified default
+  // value here.
+  const deliveryParams = {
+    'showhistory': false,
+    'forceCorrection': false,
+    'scoringEnabled': isLearningSession,
+    'purestudy': 0,
+    'initialview': 0,
+    'drill': 0,
+    'reviewstudy': 0,
+    'correctprompt': 0,
+    'skipstudy': false,
+    'lockoutminutes': 0,
+    'fontsize': 3,
+    'numButtonListImageColumns': 2,
+    'correctscore': 1,
+    'incorrectscore': 0,
+    'practiceseconds': 0,
+    'autostopTimeoutThreshold': 0,
+    'autostopTranscriptionAttemptLimit': 3,
+    'timeuntilaudio': 0,
+    'timeuntilaudiofeedback': 0,
+    'prestimulusdisplaytime': 0,
+    'forcecorrectprompt': '',
+    'forcecorrecttimeout': 0,
+    'studyFirst': false,
+    'enhancedFeedback': false,
+    'checkOtherAnswers': false,
+    'feedbackType': '',
+    'allowFeedbackTypeSelect': false,
+    'falseAnswerLimit': undefined,
+  };
 
-    //We've defined defaults - also define translatations for values
-    function xlateBool(v) {
-        return  v ? _.trim(v).toLowerCase() === "true" : false;
-    };
+  // We've defined defaults - also define translatations for values
+  function xlateBool(v) {
+    return v ? _.trim(v).toLowerCase() === 'true' : false;
+  };
 
-    var xlations = {
-        'showhistory': xlateBool,
-        'forceCorrection': xlateBool,
-        'scoringEnabled': xlateBool,
-        'purestudy': _.intval,
-        'skipstudy': xlateBool,
-        'reviewstudy': _.intval,
-        'correctprompt': _.intval,
-        'lockoutminutes': _.intval,
-        'fontsize': _.intval,
-        'numButtonListImageColumns': _.intval,
-        'practiceseconds': _.intval,
-        'timeuntilaudio': _.intval,
-        'timeuntilaudiofeedback': _.intval,
-        'prestimulusdisplaytime': _.intval, 
-        'studyFirst':xlateBool,
-        'enhancedFeedback':xlateBool,
-        'checkOtherAnswers':xlateBool,
-        'allowFeedbackTypeSelect': xlateBool,
-        'falseAnswerLimit': _.intval
-    };
+  const xlations = {
+    'showhistory': xlateBool,
+    'forceCorrection': xlateBool,
+    'scoringEnabled': xlateBool,
+    'purestudy': _.intval,
+    'skipstudy': xlateBool,
+    'reviewstudy': _.intval,
+    'correctprompt': _.intval,
+    'lockoutminutes': _.intval,
+    'fontsize': _.intval,
+    'numButtonListImageColumns': _.intval,
+    'correctscore': _.intval,
+    'incorrectscore': _.intval,
+    'practiceseconds': _.intval,
+    'timeuntilaudio': _.intval,
+    'timeuntilaudiofeedback': _.intval,
+    'prestimulusdisplaytime': _.intval,
+    'studyFirst': xlateBool,
+    'enhancedFeedback': xlateBool,
+    'checkOtherAnswers': xlateBool,
+    'allowFeedbackTypeSelect': xlateBool,
+    'falseAnswerLimit': _.intval,
+  };
 
-    var modified = false;
-    var fieldName; //Used in loops below
+  let modified = false;
+  let fieldName; // Used in loops below
 
-    //Use the current unit specified to get the deliveryparams array. If there
-    //isn't a unit then we use the top-level deliveryparams (if there are)
-    var sourceDelParams = null;
-    if(!!currUnit){
-        //We have a unit
-        if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
-            sourceDelParams = currUnit.deliveryparams;
-        }
-    }else{
-        //No unit - we look for the top-level deliveryparams
-        let tdf = Session.get("currentTdfFile");
-        if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== "undefined") {
-            sourceDelParams = tdf.tdfs.tutor.deliveryparams;
-        }
+  // Use the current unit specified to get the deliveryparams array. If there
+  // isn't a unit then we use the top-level deliveryparams (if there are)
+  let sourceDelParams = null;
+  if (!!currUnit) {
+    // We have a unit
+    if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
+      sourceDelParams = currUnit.deliveryparams;
     }
+  } else {
+    // No unit - we look for the top-level deliveryparams
+    const tdf = Session.get('currentTdfFile');
+    if (tdf && typeof tdf.tdfs.tutor.deliveryparams !== 'undefined') {
+      sourceDelParams = tdf.tdfs.tutor.deliveryparams;
+    }
+  }
 
-    if (sourceDelParams && sourceDelParams.length) {
-        //Note that if there is no XCond or if they specify something
-        //wacky we'll just go with index 0
-        var xcondIndex = _.intval(Session.get("experimentXCond"));
-        if (xcondIndex < 0 || xcondIndex >= sourceDelParams.length) {
-            xcondIndex = 0; //Incorrect index gets 0
-        }
-        var found = sourceDelParams[xcondIndex];
+  if (sourceDelParams && sourceDelParams.length) {
+    // Note that if there is no XCond or if they specify something
+    // wacky we'll just go with index 0
+    let xcondIndex = _.intval(Session.get('experimentXCond'));
+    if (xcondIndex < 0 || xcondIndex >= sourceDelParams.length) {
+      xcondIndex = 0; // Incorrect index gets 0
+    }
+    const found = sourceDelParams[xcondIndex];
 
-        //If found del params, then use any values we find
-      if (found) {
-        for(fieldName in deliveryParams) {
-          var fieldVal = _.first(found[fieldName]);
-          if (fieldVal) {
-            deliveryParams[fieldName] = fieldVal;
-            modified = true;
-          }
+    // If found del params, then use any values we find
+    if (found) {
+      for (fieldName in deliveryParams) {
+        const fieldVal = _.first(found[fieldName]);
+        if (fieldVal) {
+          deliveryParams[fieldName] = fieldVal;
+          modified = true;
         }
       }
     }
+  }
 
-    //If we changed anything from the default, we should make sure
-    //everything is properly xlated
-    if (modified) {
-        for(fieldName in deliveryParams) {
-            var currVal = deliveryParams[fieldName];
-            var xlation = xlations[fieldName];
-            if (xlation) {
-                deliveryParams[fieldName] = xlation(currVal);
-            }
-        }
+  // If we changed anything from the default, we should make sure
+  // everything is properly xlated
+  if (modified) {
+    for (fieldName in deliveryParams) {
+      const currVal = deliveryParams[fieldName];
+      const xlation = xlations[fieldName];
+      if (xlation) {
+        deliveryParams[fieldName] = xlation(currVal);
+      }
     }
+  }
 
-    // If there's no feedback type defined by the TDF author
-    // or if the user is allowed to select a feedback type,
-    // type selected with the profile page toggle
-    if (!deliveryParams["feedbackType"].length 
-      || deliveryParams["allowFeedbackTypeSelect"]) {
-      deliveryParams["feedbackType"] = 
-        dialogueSelectState.get("selectedDialogueType");
-    }
+  // If there's no feedback type defined by the TDF author
+  // or if the user is allowed to select a feedback type,
+  // type selected with the profile page toggle
+  if (!deliveryParams['feedbackType'].length ||
+      deliveryParams['allowFeedbackTypeSelect']) {
+    deliveryParams['feedbackType'] =
+        dialogueSelectState.get('selectedDialogueType');
+  }
 
-    return deliveryParams;
+  return deliveryParams;
 };

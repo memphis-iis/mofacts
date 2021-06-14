@@ -1,63 +1,63 @@
-import { updateExperimentState } from './card';
+import {updateExperimentState} from './card';
 
 Template.multiTdfSelect.helpers({
-    //None
+  // None
 });
 
 Template.multiTdfSelect.events({
-    // Start a Sub TDF
-    'click .subTdfButton' : async function (event) {
-        event.preventDefault();
-        console.log(event);
+  // Start a Sub TDF
+  'click .subTdfButton': async function(event) {
+    event.preventDefault();
+    console.log(event);
 
-        var target = $(event.currentTarget);
-        selectSubTdf(
-            target.data("lessonName"),
-            target.data("clusterList"),
-            target.data("subTdfIndex")
-        );
-    },
+    const target = $(event.currentTarget);
+    selectSubTdf(
+        target.data('lessonName'),
+        target.data('clusterList'),
+        target.data('subTdfIndex'),
+    );
+  },
 });
 
-Template.multiTdfSelect.rendered = function () {
-    //this is called whenever the template is rendered.
-    const subTdfs = Session.get("currentTdfFile").subTdfs;
+Template.multiTdfSelect.rendered = function() {
+  // this is called whenever the template is rendered.
+  const subTdfs = Session.get('currentTdfFile').subTdfs;
 
-    $("#expDataDownloadContainer").html("");
+  $('#expDataDownloadContainer').html('');
 
-    //Check all the valid TDF's
-    subTdfs.forEach( function (subTdfObject,index) {
-        let lessonName = subTdfObject.lessonName;
-        let clusterList = subTdfObject.clusterList;
+  // Check all the valid TDF's
+  subTdfs.forEach( function(subTdfObject, index) {
+    const lessonName = subTdfObject.lessonName;
+    const clusterList = subTdfObject.clusterList;
 
-        addSubTdfButton(
-            $("<button type='button' name='"+lessonName+"'>")
-                .addClass("btn btn-block btn-responsive subTdfButton")
-                .data("lessonName", lessonName)
-                .data("clusterList", clusterList)
-                .data("subTdfIndex",index)
-                .html(lessonName)
-        );
-    });
+    addSubTdfButton(
+        $('<button type=\'button\' name=\''+lessonName+'\'>')
+            .addClass('btn btn-block btn-responsive subTdfButton')
+            .data('lessonName', lessonName)
+            .data('clusterList', clusterList)
+            .data('subTdfIndex', index)
+            .html(lessonName),
+    );
+  });
 };
 
-function addSubTdfButton(btnObj){
-    console.log("ADD BUTTON CALLED: " + JSON.stringify(btnObj));
-    var container = "<div class='col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center'><br></div>";
-    container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
-    container = $(container).prepend(btnObj);
-    $("#testButtonContainer").append(container);
+function addSubTdfButton(btnObj) {
+  console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
+  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
+  container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
+  container = $(container).prepend(btnObj);
+  $('#testButtonContainer').append(container);
 }
 
-//Actual logic for selecting and starting a TDF
+// Actual logic for selecting and starting a TDF
 async function selectSubTdf(lessonName, clusterList, subTdfIndex) {
-    console.log("Selected subtdf: " + lessonName + " with clusterList: " + clusterList + " and subTdfIndex: " + subTdfIndex);
+  console.log('Selected subtdf: ' + lessonName + ' with clusterList: ' + clusterList + ' and subTdfIndex: ' + subTdfIndex);
 
-    Session.set("subTdfIndex",subTdfIndex);
-    let newExperimentState = { 
-        subTdfIndex: subTdfIndex
-    }
-    await updateExperimentState(newExperimentState,"multiTdfSelect.selectSubTdf");
+  Session.set('subTdfIndex', subTdfIndex);
+  const newExperimentState = {
+    subTdfIndex: subTdfIndex,
+  };
+  await updateExperimentState(newExperimentState, 'multiTdfSelect.selectSubTdf');
 
-    Router.go("/card");
+  Router.go('/card');
 }

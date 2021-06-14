@@ -38,53 +38,54 @@ following is true:
 **/
 
 import {Promise} from 'meteor/promise';
+import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
 
 (function() {
   // var TURK_URL = "https://mechanicalturk.amazonaws.com";
   // var SANDBOX_URL = "https://mechanicalturk.sandbox.amazonaws.com";
-  var AWS = Npm.require("aws-sdk")
+  const AWS = Npm.require('aws-sdk');
   // var TURK_URL = "https://mturk-requester.us-east-1.amazonaws.com";
   // var SANDBOX_URL = "https://mturk-requester-sandbox.us-east-1.amazonaws.com";
 
-  
+
   function validateField(fld, err) {
     if (!fld) {
-      serverConsole("Validation err:")
-      serverConsole(err)
+      serverConsole('Validation err:');
+      serverConsole(err);
       throw err;
     }
   }
 
   function validateUser(userProfile) {
     serverConsole(userProfile);
-    validateField(userProfile.have_aws_id, "AWS request user has no ID");
-    validateField(userProfile.aws_id, "AWS request user ID is invalid");
-    validateField(userProfile.have_aws_secret, "AWS request user has secret key");
-    validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+    validateField(userProfile.have_aws_id, 'AWS request user has no ID');
+    validateField(userProfile.aws_id, 'AWS request user ID is invalid');
+    validateField(userProfile.have_aws_secret, 'AWS request user has secret key');
+    validateField(userProfile.aws_secret_key, 'AWS request user secret key is invalid');
   }
 
-  function getClient(userProfile){
+  function getClient(userProfile) {
     validateUser(userProfile);
     return new AWS.MTurk({
       accessKeyId: decryptUserData(userProfile.aws_id),
       secretAccessKey: decryptUserData(userProfile.aws_secret_key),
-      region: 'us-east-1'
+      region: 'us-east-1',
     });
   }
 
   function createTurkRequest(userProfile, requestParams) {
     // Validate userProfile
-    validateField(userProfile.have_aws_id, "AWS request user has no ID");
-    validateField(userProfile.aws_id, "AWS request user ID is invalid");
-    validateField(userProfile.have_aws_secret, "AWS request user has secret key");
-    validateField(userProfile.aws_secret_key, "AWS request user secret key is invalid");
+    validateField(userProfile.have_aws_id, 'AWS request user has no ID');
+    validateField(userProfile.aws_id, 'AWS request user ID is invalid');
+    validateField(userProfile.have_aws_secret, 'AWS request user has secret key');
+    validateField(userProfile.aws_secret_key, 'AWS request user secret key is invalid');
 
     // Base url from userProfile use_sandbox
-    var url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
+    const url = userProfile.use_sandbox ? SANDBOX_URL : TURK_URL;
 
     // Actual request data from default + requestParams
-    var req = _.extend({
+    const req = _.extend({
       'AWSAccessKeyId': decryptUserData(userProfile.aws_id),
       'Service': 'AWSMechanicalTurkRequester',
       'Timestamp': new Date(Date.now()).toISOString(),
@@ -92,175 +93,172 @@ import {Promise} from 'meteor/promise';
       'Signature': '',
     }, requestParams);
 
-    //No spaces
-    for (var key in req) {
+    // No spaces
+    for (const key in req) {
       req[key] = _.trim(req[key]);
     }
 
     // Add HMAC signature for request from the fields as defined by AWS
-    var sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
+    const sigSrc = [req.Service, req.Operation, req.Timestamp].join('');
     req.Signature = createAwsHmac(decryptUserData(userProfile.aws_secret_key), sigSrc);
 
-    serverConsole("About to send AWS MechTurk request", url, JSON.stringify(req, null, 2));
+    serverConsole('About to send AWS MechTurk request', url, JSON.stringify(req, null, 2));
 
     // All done
-    var response = HTTP.post(url, {
-      'params': req
+    const response = HTTP.post(url, {
+      'params': req,
     });
 
     if (response.statusCode !== 200) {
-      //Error!
-      serverConsole("Response failure:", response);
-      throw "Turk request '" + req.Operation + "' failed";
+      // Error!
+      serverConsole('Response failure:', response);
+      throw 'Turk request \'' + req.Operation + '\' failed';
     }
 
-    //Add parsed JSON to the response
+    // Add parsed JSON to the response
     try {
       response.json = xml2js.parseStringSync(response.content);
-    }
-    catch(e) {
-      serverConsole("JSON parse on returned contents failed", e);
+    } catch (e) {
+      serverConsole('JSON parse on returned contents failed', e);
     }
 
-    //serverConsole("TURK response:", JSON.stringify(response.json, null, 2));
+    // serverConsole("TURK response:", JSON.stringify(response.json, null, 2));
     return response;
   }
 
-    turk = {
-      getAccountBalance: function(userProfile) {
-        var req = {};
-        validateUser(userProfile);
-        
-        var client = getClient(userProfile);
+  turk = {
+    getAccountBalance: function(userProfile) {
+      const req = {};
+      validateUser(userProfile);
 
-        var res = client.getAccountBalance(req).promise();
-        
-        return res;
-      },
-      
-      //Required parameters: none
-      //Optional parameters: SortProperty, SortDirection
-      getAvailableHITs: function(userProfile) {
-        var req = {
-          'MaxResults' : 99
-        };
+      const client = getClient(userProfile);
 
-        var client = getClient(userProfile);
+      const res = client.getAccountBalance(req).promise();
 
-        var hitlist = [];
-        var rejected = 0;
-        
-        return client.listHITs(req).promise().then(function(data) {
-          data.HITs.forEach(function(hit) {
-            var max = hit.MaxAssignments;
-            var pend = hit.NumberOfAssignmentsPending;
-            var avail = hit.NumberOfAssignmentsAvailable;
-            var complete = hit.NumberOfAssignmentsCompleted;
+      return res;
+    },
 
-            if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
-              serverConsole("Something wrong with this HIT's stats - including for safety. hit was", hit);
-              hitlist.push(hit.HITId);
-            }
-            else if (pend > 0 || avail > 0 || complete < max) {
-              hitlist.push(hit.HITId);
-            }
-            else {
-              rejected +=1
-            }
-          });
-          serverConsole("Searched HITs returning", hitlist.length, "as possible, rejected", rejected);
-          return hitlist;
-        });
-      },
-      
-      //Required parameters: HITId
-      //Optional parameters: AssignmentStatus
-      getAssignmentsForHIT: function(userProfile, hitId) {
-        var req = {'HITId':hitId};
+    // Required parameters: none
+    // Optional parameters: SortProperty, SortDirection
+    getAvailableHITs: function(userProfile) {
+      const req = {
+        'MaxResults': 99,
+      };
 
-        var client = getClient(userProfile);
+      const client = getClient(userProfile);
 
-        return client.listAssignmentsForHIT(req).promise().then(function(res) {
-          var assignlist = [];
-          res.Assignments.forEach(function(assignment) {
-            assignlist.push(assignment);
-          });
-          return assignlist;
-        });
-      },
-      
-      //Required parameters: AssignmentId
-      //Optional parameters: RequesterFeedback
-      approveAssignment: function(userProfile, requestParams) {
-        var req = _.extend({
-          'AssignmentId': '',
-          'RequesterFeedback': ''
-        }, requestParams);
+      const hitlist = [];
+      let rejected = 0;
 
-        var client = getClient(userProfile);
+      return client.listHITs(req).promise().then(function(data) {
+        data.HITs.forEach(function(hit) {
+          const max = hit.MaxAssignments;
+          const pend = hit.NumberOfAssignmentsPending;
+          const avail = hit.NumberOfAssignmentsAvailable;
+          const complete = hit.NumberOfAssignmentsCompleted;
 
-        return client.approveAssignment(req).promise().then(function(res){
-          return {'Successful':'true'} // MTurk has stopped sending response details back for this operation, so we'll just put something here
-        }, function(err){
-          throw {
-            'errmsg': 'Assignment Approval failed',
-            'response': err
+          if (max < 0 || pend < 0 || avail < 0 || complete < 0) {
+            serverConsole('Something wrong with this HIT\'s stats - including for safety. hit was', hit);
+            hitlist.push(hit.HITId);
+          } else if (pend > 0 || avail > 0 || complete < max) {
+            hitlist.push(hit.HITId);
+          } else {
+            rejected +=1;
           }
         });
-      },
+        serverConsole('Searched HITs returning', hitlist.length, 'as possible, rejected', rejected);
+        return hitlist;
+      });
+    },
 
-      //Required parameters: AssignmentId
-      //Pretty raw - currently only used for tracking/debugging on profile
-      //page of our admins.
-      getAssignment: function(userProfile, requestParams) {
-        var req = _.extend({}, requestParams);
+    // Required parameters: HITId
+    // Optional parameters: AssignmentStatus
+    getAssignmentsForHIT: function(userProfile, hitId) {
+      const req = {'HITId': hitId};
 
-        var client = getClient(userProfile);
+      const client = getClient(userProfile);
 
-        return client.getAssignment(req).promise();
-      },
-      
-      //Required parameters: Subject, MessageText, WorkerId
-      notifyWorker: function(userProfile, requestParams) {
-        var req = {
-          'Subject': requestParams.Subject,
-          'MessageText': requestParams.MessageText,
-          'WorkerIds': [requestParams.WorkerId]
+      return client.listAssignmentsForHIT(req).promise().then(function(res) {
+        const assignlist = [];
+        res.Assignments.forEach(function(assignment) {
+          assignlist.push(assignment);
+        });
+        return assignlist;
+      });
+    },
+
+    // Required parameters: AssignmentId
+    // Optional parameters: RequesterFeedback
+    approveAssignment: function(userProfile, requestParams) {
+      const req = _.extend({
+        'AssignmentId': '',
+        'RequesterFeedback': '',
+      }, requestParams);
+
+      const client = getClient(userProfile);
+
+      return client.approveAssignment(req).promise().then(function(res) {
+        return {'Successful': 'true'}; // MTurk has stopped sending response details back for this operation, so we'll just put something here
+      }, function(err) {
+        throw {
+          'errmsg': 'Assignment Approval failed',
+          'response': err,
         };
+      });
+    },
 
-        client = getClient(userProfile);
+    // Required parameters: AssignmentId
+    // Pretty raw - currently only used for tracking/debugging on profile
+    // page of our admins.
+    getAssignment: function(userProfile, requestParams) {
+      const req = _.extend({}, requestParams);
 
-        return client.notifyWorkers(req).promise().then(function(res){
-          return {'Successful':'true'} // see approveAssignment
-        }, function(err){
-          throw {
-            'errmsg': 'Worker Notification failed',
-            'response': err
-          }
-        });
-      },
+      const client = getClient(userProfile);
 
-      //Required parameters: WorkerId, AssignmentId, Reason
-      grantBonus: function(userProfile, amount, requestParams) {
-        var req = _.extend({
-          'BonusAmount': amount,
-          'WorkerId': '',
-          'AssignmentId': '',
-          'Reason': ''
-        });
+      return client.getAssignment(req).promise();
+    },
 
-        var client = getClient(userProfile);
+    // Required parameters: Subject, MessageText, WorkerId
+    notifyWorker: function(userProfile, requestParams) {
+      const req = {
+        'Subject': requestParams.Subject,
+        'MessageText': requestParams.MessageText,
+        'WorkerIds': [requestParams.WorkerId],
+      };
 
-        client.sendBonus(req).promise().then(function(res){
-          return {'Successful':'true'}
-        }, function(err){
-          throw{
-            'errmsg': 'Bonus Granting failed',
-            'response': err
-          };
-        });
-      },
+      client = getClient(userProfile);
+
+      return client.notifyWorkers(req).promise().then(function(res) {
+        return {'Successful': 'true'}; // see approveAssignment
+      }, function(err) {
+        throw {
+          'errmsg': 'Worker Notification failed',
+          'response': err,
+        };
+      });
+    },
+
+    // Required parameters: WorkerId, AssignmentId, Reason
+    grantBonus: function(userProfile, amount, requestParams) {
+      const req = _.extend({
+        'BonusAmount': amount,
+        'WorkerId': '',
+        'AssignmentId': '',
+        'Reason': '',
+      });
+
+      const client = getClient(userProfile);
+
+      client.sendBonus(req).promise().then(function(res) {
+        return {'Successful': 'true'};
+      }, function(err) {
+        throw {
+          'errmsg': 'Bonus Granting failed',
+          'response': err,
+        };
+      });
+    },
 
 
-    };
+  };
 })();

@@ -1,4 +1,5 @@
-import { ReactiveVar } from 'meteor/reactive-var'
+import {ReactiveVar} from 'meteor/reactive-var';
+import {meteorCallAsync} from '../..';
 
 Template.dataDownload.onCreated(async function() {
   this.selectedTeacherId = new ReactiveVar(null);
@@ -6,30 +7,30 @@ Template.dataDownload.onCreated(async function() {
 });
 
 Template.dataDownload.onRendered(async function() {
-  const allCourses = await meteorCallAsync("getAllCourses");
-  let classesByInstructorId = {};
-  for(let course of allCourses){
-    if(!classesByInstructorId[course.teacheruserid]){
+  const allCourses = await meteorCallAsync('getAllCourses');
+  const classesByInstructorId = {};
+  for (const course of allCourses) {
+    if (!classesByInstructorId[course.teacheruserid]) {
       classesByInstructorId[course.teacheruserid] = [];
     }
     classesByInstructorId[course.teacheruserid].push(course);
   }
-  Session.set("classesByInstructorId",classesByInstructorId);
-  const allTeachers = await meteorCallAsync("getAllTeachers");
-  Session.set("allUsersWithTeacherRole", allTeachers);
+  Session.set('classesByInstructorId', classesByInstructorId);
+  const allTeachers = await meteorCallAsync('getAllTeachers');
+  Session.set('allUsersWithTeacherRole', allTeachers);
 
   if (isAdmin()) {
-    var clozeEdits = [];
+    const clozeEdits = [];
 
     Meteor.call('getClozeEditAuthors', function(err, res) {
-      if (!!err) {
+      if (err) {
         console.log('error getting cloze edit authors: ' + JSON.stringify(err));
       } else {
-        var authors = res;
+        const authors = res;
 
         _.each(_.keys(authors), function(authorId) {
-          var clozeEdit = {};
-          
+          const clozeEdit = {};
+
           clozeEdit.authorId = authorId;
           clozeEdit.disp = authors[authorId];
 
@@ -37,7 +38,7 @@ Template.dataDownload.onRendered(async function() {
         });
       }
 
-      Session.set("clozeEdits", clozeEdits);
+      Session.set('clozeEdits', clozeEdits);
     });
   }
 });
@@ -47,15 +48,15 @@ Template.dataDownload.helpers({
     return Session.get('allUsersWithTeacherRole');
   },
   'classes': function() {
-    var uid = "";
+    let uid = '';
 
     if (isAdmin() && !_.isEmpty(Template.instance().selectedTeacherId.get())) {
       uid = Template.instance().selectedTeacherId.get();
-    }else if (isTeacher()) {
+    } else if (isTeacher()) {
       uid = Meteor.userId();
     }
-    
-    return Session.get("classesByInstructorId")[uid];
+
+    return Session.get('classesByInstructorId')[uid];
   },
   'selectedTeacherId': function() {
     return Template.instance().selectedTeacherId.get();
@@ -64,25 +65,24 @@ Template.dataDownload.helpers({
     return Template.instance().selectedClassId.get();
   },
   'dataDownloads': function() {
-    var dataDownloads = [];
-    var classTdfNames = [];
+    let dataDownloads = [];
+    const classTdfNames = [];
 
     if (!_.isEmpty(Template.instance().selectedClassId.get())) {
-      var uid = "";
+      let uid = '';
 
       if (isAdmin() && !_.isEmpty(Template.instance().selectedTeacherId.get())) {
         uid = Template.instance().selectedTeacherId.get();
       }
-    
+
       if (isTeacher() && !isAdmin()) {
         uid = Meteor.userId();
       }
 
-      var classes = Session.get("classesByInstructorId")[uid];
+      const classes = Session.get('classesByInstructorId')[uid];
 
       classes.forEach(function(classObject) {
         if (classObject.courseId == Template.instance().selectedClassId.get()) {
-
           if (classObject.tdfs) {
             classObject.tdfs.forEach(function(tdf) {
               classTdfNames.push(tdf.fileName);
@@ -92,12 +92,12 @@ Template.dataDownload.helpers({
       });
     }
 
-    dataDownloads = Session.get("allTdfs").map(function(tdf) {
-      let name = !!tdf.content.tdfs.tutor.setspec[0].lessonname ? tdf.content.tdfs.tutor.setspec[0].lessonname[0] : "NO NAME";
+    dataDownloads = Session.get('allTdfs').map(function(tdf) {
+      const name = tdf.content.tdfs.tutor.setspec[0].lessonname ? tdf.content.tdfs.tutor.setspec[0].lessonname[0] : 'NO NAME';
       tdf.disp = name;
-      
+
       if (tdf.content.fileName != name) {
-        tdf.disp += " (" + tdf.content.fileName + ")";
+        tdf.disp += ' (' + tdf.content.fileName + ')';
       }
 
       return tdf;
@@ -111,14 +111,14 @@ Template.dataDownload.helpers({
       if (isAdmin()) {
         if (_.isEmpty(Template.instance().selectedTeacherId.get())) {
           return true; // If no teacher is selected, view all available TDF data downloads
-        } 
+        }
 
         if (Template.instance().selectedTeacherId.get() == tdf.ownerId) {
           return true; // If a teacher is selected, only return TDF data downloads where selected teacher is owner
         }
 
         return false;
-      } 
+      }
 
       if (Meteor.userId() == tdf.ownerId) {
         return true; // If user is not admin role, return only TDF data downloads where current user is owner
@@ -130,7 +130,7 @@ Template.dataDownload.helpers({
     return dataDownloads;
   },
   'userClozeEdits': function() {
-    return Session.get('clozeEdits');;
+    return Session.get('clozeEdits');
   },
   'isTeacherSelected': function() {
     return !_.isEmpty(Template.instance().selectedTeacherId.get());
@@ -142,7 +142,7 @@ Template.dataDownload.helpers({
     return Meteor.userId();
   },
   'showClasses': function() {
-    var showClasses = false;
+    let showClasses = false;
 
     if (isAdmin() && !_.isEmpty(Template.instance().selectedTeacherId.get())) {
       showClasses = true;
@@ -151,12 +151,12 @@ Template.dataDownload.helpers({
     if (isTeacher() && !isAdmin()) {
       showClasses = true;
     }
-    
+
     return showClasses;
   },
   'user': function() {
     return Meteor.user() ? Meteor.user().username : false;
-  }
+  },
 });
 
 Template.dataDownload.events({
@@ -164,17 +164,17 @@ Template.dataDownload.events({
     if (event.currentTarget.value) {
       instance.selectedTeacherId.set(event.currentTarget.value);
     } else {
-      instance.selectedTeacherId.set("");
-      instance.selectedClassId.set(""); // Reset the class filter so there is no option/value mismatch when returning to previously selected teacher
+      instance.selectedTeacherId.set('');
+      instance.selectedClassId.set(''); // Reset the class filter so there is no option/value mismatch when returning to previously selected teacher
     }
   },
   'change #classSelect': function(event, instance) {
     if (event.currentTarget.value) {
       instance.selectedClassId.set(event.currentTarget.value);
     } else {
-      instance.selectedClassId.set("");
+      instance.selectedClassId.set('');
     }
-  }
+  },
 });
 
 function isTeacher() {

@@ -23,110 +23,115 @@
  * schedule item is written 0-based (e.g. A-0).
  * */
 
-import { getTdfByFileName, getStimuliSetById, getHistoryByTDFfileName, getListOfStimTags } from "./methods";
-import { outputFields } from "../common/Definitions";
-import { getHistory } from "../server/orm";
+import {
+  getTdfByFileName,
+  getStimuliSetById,
+  getHistoryByTDFfileName,
+  getListOfStimTags,
+  serverConsole} from './methods';
+import {outputFields} from '../common/Definitions';
+import {getHistory} from '../server/orm';
 
-(async function () { //Begin IIFE pattern
-    let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
-    
-    //Helper to transform our output record into a delimited record
-    function delimitedRecord(rec) {
-        var vals = new Array(FIELDSDS.length);
-        for (var i = 0; i < FIELDSDS.length; ++i) {
-            vals[i] = _.trim(rec[FIELDSDS[i]])
-                .replace(/\s+/gm, ' ')   //Norm ws and remove non-space ws
-                .slice(0, 255)           //Respect len limits for data shop
-                .replace(/\s+$/gm, '');  //Might have revealed embedded space at end
-        }
+export {createExperimentExport};
 
-        return vals.join('\t');
+let FIELDSDS = JSON.parse(JSON.stringify(outputFields));
+
+// Helper to transform our output record into a delimited record
+function delimitedRecord(rec) {
+  const vals = new Array(FIELDSDS.length);
+  for (let i = 0; i < FIELDSDS.length; ++i) {
+    vals[i] = _.trim(rec[FIELDSDS[i]])
+        .replace(/\s+/gm, ' ') // Norm ws and remove non-space ws
+        .slice(0, 255) // Respect len limits for data shop
+        .replace(/\s+$/gm, ''); // Might have revealed embedded space at end
+  }
+
+  return vals.join('\t');
+}
+
+async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagList) {
+  serverConsole('getValuesOfStimTagList:', tdfFileName, clusterKC, stimulusKC, tagList);
+  const tdf = await getTdfByFileName(tdfFileName);
+  const stimuliSetId = tdf.stimuliSetId;
+  const stimuliSet = await getStimuliSetById(stimuliSetId);
+  const curStimSet = stimuliSet.find((x) => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
+  serverConsole('getValuesOfStimTagList:', typeof(curStimSet), Object.keys(curStimSet || {}));
+  const valueDict = {};
+
+  for (const tag of tagList) {
+    for (const stim of curStimSet) {
+      if (!valueDict[tag] && stim.tags) {
+        valueDict[tag] = stim.tags[tag] || '';
+      } else {
+        valueDict[tag] = '';
+      }
+    }
+  }
+
+  return valueDict;
+}
+
+// Exported main function: call recordAcceptor with each record generated
+// for expName in datashop format. We do NOT terminate our records.
+// We return the number of records written
+async function createExperimentExport(expName, format, recordAcceptor) {
+  const header = {};
+  let expNames = [];
+
+  if (_.isString(expName)) {
+    expNames.push(expName);
+  } else {
+    expNames = expName;
+  }
+
+  const listOfDynamicStimTags = await getListOfStimTags(expName);
+  const listOfDynamicStimTagsWithColumnNames = [];
+  for (const tag of listOfDynamicStimTags) {
+    listOfDynamicStimTagsWithColumnNames.push('CF (' + tag + ')');
+  }
+
+  FIELDSDS = FIELDSDS.concat(listOfDynamicStimTagsWithColumnNames);
+
+  FIELDSDS.forEach(async function(f) {
+    const prefix = f.substr(0, 14);
+
+    let t;
+    if (prefix === 'Condition Name') {
+      t = 'Condition Name';
+    } else if (prefix === 'Condition Type') {
+      t = 'Condition Type';
+    } else {
+      t = f;
     }
 
-    getValuesOfStimTagList = async function(tdfFileName, clusterKC,stimulusKC,tagList){
-        console.log("getValuesOfStimTagList:",tdfFileName,clusterIndex,stimIndex,tagList);
-        const tdf = await getTdfByFileName(tdfFileName);
-        const stimuliSetId = tdf.stimuliSetId;
-        const stimuliSet = await getStimuliSetById(stimuliSetId);
-        let curStimSet = stimuliSet.find(x => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
-        console.log("getValuesOfStimTagList:",typeof(curStimSet),Object.keys(curStimSet || {}));
-        let valueDict = {};
+    header[f] = t;
+  });
 
-        for(var tag of tagList){
-            for(let stim of curStimSet){
-                if(!valueDict[tag] && stim.tags){
-                    valueDict[tag] = stim.tags[tag] || "";
-                }else{
-                    valueDict[tag] = "";
-                }
-            }
+  recordAcceptor(delimitedRecord(header));
+  let recordCount = 1;
+
+  Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
+
+  expNames.forEach(async function(expName) {
+    const histories = await getHistoryByTDFfileName(expName);
+    for (let history of histories) {
+      try {
+        const clusterKC = history.kc_cluster;
+        const stimulusKC = history.cf_stimulus_version;
+        serverConsole('history:', history.kc_cluster, clusterKC, stimulusKC, history);
+        history = getHistory(history);
+        const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
+
+        for (const tag of Object.keys(dynamicStimTagValues)) {
+          history.dynamicTagFields['CF (' + tag + ')'] = dynamicStimTagValues[tag];
         }
-
-        return valueDict;
+        recordCount++;
+        recordAcceptor(delimitedRecord(history));
+      } catch (e) {
+        serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
+      }
     }
+  });
 
-    // Exported main function: call recordAcceptor with each record generated
-    // for expName in datashop format. We do NOT terminate our records.
-    // We return the number of records written
-    createExperimentExport = async function (expName, format, recordAcceptor) {
-        var header = {};
-        var expNames = [];
-        
-        if (_.isString(expName)) {
-            expNames.push(expName);
-        } else {
-            expNames = expName;
-        }
-
-        const listOfDynamicStimTags = await getListOfStimTags(expName);
-        let listOfDynamicStimTagsWithColumnNames = [];
-        for(let tag of listOfDynamicStimTags){
-            listOfDynamicStimTagsWithColumnNames.push("CF (" + tag + ")");
-        }
-
-        FIELDSDS = FIELDSDS.concat(listOfDynamicStimTagsWithColumnNames);
-
-        FIELDSDS.forEach(async function (f) {
-            var prefix = f.substr(0, 14);
-
-            var t;
-            if (prefix === 'Condition Name') {
-                t = 'Condition Name';
-            }else if (prefix === 'Condition Type') {
-                t = 'Condition Type';
-            }else {
-                t = f;
-            }
-
-            header[f] = t;
-        });
-
-        recordAcceptor(delimitedRecord(header));
-        var recordCount = 1;
-
-        Meteor.call("updatePerformanceData","utlQuery","experiment_times.createExperimentExport","SERVER_REPORT");
-
-        expNames.forEach(async function(expName) {
-            const histories = await getHistoryByTDFfileName(expName);
-            for(let history of histories){
-                try {
-                    let clusterKC = history.kc_cluster;
-                    let stimulusKC = history.cf_stimulus_version;
-                    console.log("history:",history.kc_cluster,clusterKC,stimulusKC,history);
-                    history = getHistory(history);
-                    const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
-        
-                    for(let tag of Object.keys(dynamicStimTagValues)){
-                        history.dynamicTagFields["CF (" + tag + ")"] = dynamicStimTagValues[tag];
-                    }
-                    recordCount++;
-                    recordAcceptor(delimitedRecord(history));
-                }catch (e) {
-                    serverConsole("There was an error populating the record - it will be skipped", e, e.stack);
-                }
-            }
-        });
-
-        return recordCount;
-    };
-})(); //end IIFE
+  return recordCount;
+}
