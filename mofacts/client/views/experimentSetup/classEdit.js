@@ -98,10 +98,6 @@ Template.classEdit.events({
         alert('Saved class successfully!');
         curClass.courseId = res;
         console.log('curClass:' + JSON.stringify(curClass));
-        console.log('curClass:', curClass);
-        let test = {1: 'thing', 2: 2};
-        test.blah = test;
-        console.log('curClass:', test);
         Session.set('classes', classes);
         // Need a delay here so the reactive session var can update the template
         setTimeout(function() {

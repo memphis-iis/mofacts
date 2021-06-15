@@ -3,7 +3,6 @@ import {Tracker} from 'meteor/tracker';
 import {DynamicTdfGenerator} from '../../../common/DynamicTdfGenerator';
 import {rangeVal} from '../../lib/currentTestingHelpers';
 import {meteorCallAsync} from '../..';
-import {stringifyIfExists} from '../../../common/globalHelpers';
 
 Session.set('curClozeSentencePairClusterKC', '');
 Session.set('clozeSentencePairs', {});
@@ -233,9 +232,9 @@ function saveEditHistory(originalClozes, newClozes) {
   };
   Meteor.call('insertClozeEditHistory', history, function(err, result) {
     if (err) {
-      console.log('error saving cloze edit history: ' + stringifyIfExists(err));
+      console.log('error saving cloze edit history: ', err);
     } else {
-      console.log('saving cloze edit history results: ' + JSON.stringify(result));
+      console.log('saving cloze edit history results: ', result);
     }
   });
 
@@ -454,7 +453,7 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
     const lastStim = newStimJSON.length - 1; // [{},{}]
     curTdf.tdfs.tutor.unit[1].assessmentsession[0].clusterlist = [lastStim + '-' + lastStim];
 
-    console.log('curTdf.subTdfs: ' + JSON.stringify(curTdf.subTdfs));
+    console.log('curTdf.subTdfs: ', curTdf.subTdfs);
   } else {
     for (const unitIndex in clusterListMappings) {
       const isLearningSession = clusterListMappings[unitIndex].unitType === MODEL_UNIT;
@@ -662,14 +661,14 @@ Template.contentGeneration.events({
     console.log('inputText: ' + inputText);
     Meteor.call('getClozesFromText', inputText, function(err, result) {
       if (typeof(err) !== 'undefined') {
-        console.log('Error getting clozes, mofacts side: ' + JSON.stringify(err));
-        alert('Couldn\'t generate clozes from source material: ' + JSON.stringify(err));
+        console.log('Error getting clozes, mofacts side: ', err);
+        alert('Couldn\'t generate clozes from source material: ', err);
       } else if (result.tag != 0) {
         const error = result.fields[0];
         console.log('Error getting clozes, content gen side: ' + error);
         alert('Couldn\'t generate clozes from source material: ' + error);
       } else {
-        console.log(JSON.stringify(result));
+        console.log(result);
         alert('Successfully generated clozes!');
         origTdfId = '';
         const sentences = result.fields[0].sentences;

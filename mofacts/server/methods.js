@@ -347,8 +347,8 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       delete responseState.responseText;
     }
     for (const componentState of componentStates) {
-      const deleteQuery = 'DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3';
-      await t.none(deleteQuery, [userId, TDFId, componentState.KCId]);
+      const deleteQuery = 'DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3 AND componentType=$4';
+      await t.none(deleteQuery, [userId, TDFId, componentState.KCId, componentState.componentType]);
       await t.none('INSERT INTO componentState(userId,TDFId,KCId,componentType,probabilityEstimate, \
         firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, outcomeStack) \
         VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, ${probabilityEstimate}, ${firstSeen}, ${lastSeen}, \

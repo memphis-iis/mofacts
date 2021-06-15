@@ -138,7 +138,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1), // convert from ms to min
   };
   Session.set('curStudentPerformance', studentPerformance);
-  console.log('setStudentPerformance,output:', JSON.stringify(studentPerformance), JSON.stringify(studentPerformanceData));
+  console.log('setStudentPerformance,output:', studentPerformance, studentPerformanceData);
 }
 
 // Return the total number of stim clusters
@@ -319,7 +319,7 @@ function getCurrentDeliveryParams() {
 
   const isLearningSession = Session.get('unitType') == MODEL_UNIT;
 
-  console.log('getCurrentDeliveryParams:', JSON.stringify(currUnit), isLearningSession);
+  console.log('getCurrentDeliveryParams:', currUnit, isLearningSession);
 
   // Note that we will only extract values that have a specified default
   // value here.

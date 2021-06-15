@@ -87,8 +87,8 @@ function testLogin() {
   });
 }
 
-// eslint-disable-next-line no-unused-vars
-function setTeacher(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
+// eslint-disable-next-line no-undef
+setTeacher = function(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.username}}'}
   console.log(teacher);
   Session.set('curTeacher', teacher);
   $('#initialInstructorSelection').prop('hidden', 'true');
@@ -103,10 +103,10 @@ function setTeacher(teacher) { // Shape: {_id:'{{this._id}}',username:'{{this.us
     Session.set('curTeacherClasses', curClasses);
     $('#classSelection').prop('hidden', '');
   }
-}
+};
 
-// eslint-disable-next-line no-unused-vars
-function setClass(curClassID) {
+// eslint-disable-next-line no-undef
+setClass = function(curClassID) {
   console.log(curClassID);
   $('#classSelection').prop('hidden', 'true');
   const allClasses = Session.get('curTeacherClasses');

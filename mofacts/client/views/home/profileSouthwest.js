@@ -2,7 +2,6 @@ import {meteorCallAsync} from '../..';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {selectTdf} from './profile';
 import {routeToSignin} from '../../lib/router';
-import {stringifyIfExists} from '../../../common/globalHelpers';
 
 Template.profileSouthwest.helpers({
   username: function() {
@@ -59,7 +58,7 @@ Template.profileSouthwest.rendered = async function() {
   Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), function(err, result) {
     console.log('err: ' + err + ', res: ' + result);
     const assignedTdfs = result;
-    console.log('assignedTdfs: ' + stringifyIfExists(assignedTdfs));
+    console.log('assignedTdfs: ', assignedTdfs);
     // Check all the valid TDF's
     assignedTdfs.forEach( function(tdf) {
       const TDFId = tdf.TDFId;

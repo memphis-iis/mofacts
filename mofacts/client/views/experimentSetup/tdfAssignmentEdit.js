@@ -92,7 +92,7 @@ Template.tdfAssignmentEdit.events({
           alert('Error saving class (check server logs)');
         } else {
           alert('Saved class successfully!');
-          console.log('curCourseAssignment:' + JSON.stringify(curCourseAssignment));
+          console.log('curCourseAssignment:', curCourseAssignment);
           const assignments = Session.get('assignments');
           let hadAssignment = false;
           for (let i=0; i<assignments.length; i++) {
