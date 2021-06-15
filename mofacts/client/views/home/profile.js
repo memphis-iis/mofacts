@@ -465,6 +465,9 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       browserLanguage: prefLang,
       selectedHow: how,
       isMultiTdf: isMultiTdf,
+      currentTdfId,
+      currentTdfName: curTdfContent.fileName,
+      currentStimuliSetId: currentStimuliSetId,
     };
     await updateExperimentState(newExperimentState, 'profile.selectTdf');
 

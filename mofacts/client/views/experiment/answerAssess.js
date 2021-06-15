@@ -322,7 +322,7 @@ const Answers = {
       switch (feedbackType) {
         case 'refutational':
           Meteor.call('getSimpleFeedbackForAnswer', userInput, answerToCheck, function(err, res) {
-            console.log('simpleFeedback, err: ' + stringifyIfExists(err) + ', res: ' + JSON.stringify(res));
+            console.log('simpleFeedback, err: ', err, ', res: ', res);
             if (typeof(err) != 'undefined') {
               console.log('error with refutational feedback, meteor call: ', err);
               console.log(res);

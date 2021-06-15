@@ -12,7 +12,7 @@ import {
 import {updateExperimentState} from './card';
 import {KC_MULTIPLE, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
-import {displayify, stringifyIfExists} from '../../../common/globalHelpers';
+import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
@@ -76,7 +76,8 @@ function defaultUnitEngine(curExperimentData) {
     },
 
     getSubClozeAnswerSyllables: function(answer, displaySyllableIndices, cachedSyllables) {
-      console.log('getSubClozeAnswerSyllables, displaySyllableIndices: ' + JSON.stringify(displaySyllableIndices) + ', this.cachedSyllables: ', cachedSyllables);
+      console.log('getSubClozeAnswerSyllables, displaySyllableIndices: ', displaySyllableIndices,
+          ', this.cachedSyllables: ', cachedSyllables);
       if (typeof(displaySyllableIndices) === 'undefined' || !cachedSyllables || displaySyllableIndices.length == 0) {
         console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
         return undefined;
@@ -178,8 +179,8 @@ function defaultUnitEngine(curExperimentData) {
             currentAnswer = clozeMissingSyllables;
             clozeQuestionParts = cQuestionParts;
             console.log('clozeQuestionParts:', cQuestionParts);
-            const {clozeQuestion2, clozeMissingSyllables2} = this.replaceClozeWithSyllables(
-                currentQuestionPart2, currentAnswerSyllables, currentStimAnswer);
+            const {clozeQuestion2, clozeMissingSyllables2} =
+                this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer);
             if (clozeQuestion2) {
               currentQuestionPart2 = clozeQuestion2;
             }
@@ -720,7 +721,7 @@ function modelUnitEngine() {
       } else {
         const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
         // Figure out which cluster numbers that they want
-        console.log('setupclusterlist:', stringifyIfExists(this.curUnit), stringifyIfExists(sessCurUnit));
+        console.log('setupclusterlist:', this.curUnit, sessCurUnit);
         const unitClusterList = _.chain(this.curUnit || sessCurUnit) // TODO: shouldn't need both
             .prop('learningsession').first()
             .prop('clusterlist').first().trim().value();
@@ -894,7 +895,7 @@ function modelUnitEngine() {
         };
         componentStates.push(responseState);
       }
-      console.log('saveComponentStates', JSON.stringify(componentStates));
+      console.log('saveComponentStates', componentStates);
       await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'), componentStates);
     },
@@ -941,14 +942,16 @@ function modelUnitEngine() {
           const clusterKC = componentCard.KCId;
           const cardIndex = clusterKC % curKCBase;
           const modelCard = cards[cardIndex];
-          const componentData = _.pick(componentCard, ['firstSeen', 'lastSeen', 'priorCorrect', 'priorIncorrect', 'priorStudy', 'totalPracticeDuration']);
+          const componentData = _.pick(componentCard,
+              ['firstSeen', 'lastSeen', 'priorCorrect', 'priorIncorrect', 'priorStudy', 'totalPracticeDuration']);
           componentData.clusterKC = clusterKC;
-          console.log('componentCard.outcomeStack:', componentCard.outcomeStack);
-          componentData.outcomeStack = !!componentCard.outcomeStack && typeof(componentCard.outcomeStack)==='string' ? componentCard.outcomeStack.split(',').map((x) => parseInt(x)) : [];
+          componentData.outcomeStack = !!componentCard.outcomeStack && typeof(componentCard.outcomeStack)==='string' ?
+              componentCard.outcomeStack.split(',').map((x) => parseInt(x)) : [];
           componentData.hasBeenIntroduced = true;
           Object.assign(modelCard, componentData);
           const clusterProbs = stimProbabilityEstimates.filter((x) => x.kcid == clusterKC) || {};
-          modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates || modelCard.previousCalculatedProbabilities;
+          modelCard.previousCalculatedProbabilities = clusterProbs.probabilityEstimates ||
+              modelCard.previousCalculatedProbabilities;
         }
         for (let cardIndex=0; cardIndex<cards.length; cardIndex++) {
           const modelCard = cards[cardIndex];
@@ -963,8 +966,11 @@ function modelUnitEngine() {
             const modelStim = modelCard.stims.find((x) => x.stimulusKC == stimulusKC);
             Object.assign(modelStim, componentStim);
             const stimProbs = stimProbabilityEstimates.filter((x) => x.kcid == componentStim.stimulusKC) || {};
-            modelStim.otherPracticeTime = cards.reduce((acc, card) => acc + card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc + stim.totalPracticeDuration, 0), 0);
-            modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || modelStim.previousCalculatedProbabilities;
+            modelStim.otherPracticeTime = cards.reduce((acc, card) => acc +
+                card.stims.filter((x) => x.stimulusKC != stimulusKC).reduce((acc, stim) => acc +
+                    stim.totalPracticeDuration, 0), 0);
+            modelStim.previousCalculatedProbabilities = stimProbs.probabilityEstimates ||
+                modelStim.previousCalculatedProbabilities;
             const stimIndex = modelStim.stimIndex;
             if (!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
             probsMap[cardIndex][stimIndex] = componentStim.probabilityEstimate;
@@ -977,7 +983,8 @@ function modelUnitEngine() {
           const modelResponse = Object.values(cardProbabilities.responses).find((x) => x.KCId == response.KCId);
           Object.assign(modelResponse, response);
         }
-        console.log('loadComponentStates2', cards, stims, probsMap, componentStates, stimulusKCs, stimProbabilityEstimates);
+        console.log('loadComponentStates2', cards, stims, probsMap, componentStates,
+            stimulusKCs, stimProbabilityEstimates);
       }
 
       const initProbs = [];
@@ -1162,8 +1169,13 @@ function modelUnitEngine() {
         }
       });
 
-      await this.saveComponentStates();
-      await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+      try {
+        await this.saveComponentStates();
+        await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
+      } catch (e) {
+        console.log('error in select next card server calls:', e);
+        throw new Error('error in select next card server calls:', e);
+      }
     },
 
     cardAnswered: function(wasCorrect) {
@@ -1171,7 +1183,7 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
       const card = _.prop(cards, cluster.shufIndex);
-      console.log('cardAnswered, card: ' + JSON.stringify(card) + 'cluster.shufIndex: ' + cluster.shufIndex);
+      console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
       if (card.lastSeen > 0) {
         const practice = Date.now() - card.lastSeen;
@@ -1292,7 +1304,7 @@ function scheduleUnitEngine() {
     // First get the setting we'll use
     const settings = loadAssessmentSettings(setspec, unit);
     console.log('ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION');
-    console.log('settings:', JSON.stringify(settings));
+    console.log('settings:', settings);
 
     // Shuffle clusters at start
     if (settings.randomClusters) {

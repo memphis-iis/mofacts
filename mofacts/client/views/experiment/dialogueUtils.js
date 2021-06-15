@@ -100,7 +100,7 @@ function dialogueContinue() {
       // Enter dialogue loop
       Session.set('displayReady', false); // This will get flipped back after we update the display inside dialogueLoop
       Session.set('dialogueLoopStage', 'insideLoop');
-      console.log('getDialogFeedbackForAnswer3', JSON.stringify(dialogueContext));
+      console.log('getDialogFeedbackForAnswer3', dialogueContext);
       Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       break;
     case 'exit':

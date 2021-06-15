@@ -52,8 +52,8 @@ Meteor.startup(function() {
       } else {
         try {
           convertedArgs.push(JSON.stringify(args[index]));
-        } catch {
-          // do nothing
+        } catch (e) {
+          convertedArgs.push(e);
         }
       }
     }
@@ -65,7 +65,7 @@ Meteor.startup(function() {
   sessionCleanUp();
 
   // Include any special jQuery handling we need
-  $(window).resize(function() {
+  $(window).on('resize', function() {
     redoCardImage();
   });
 });

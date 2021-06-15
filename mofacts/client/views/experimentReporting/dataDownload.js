@@ -24,7 +24,7 @@ Template.dataDownload.onRendered(async function() {
 
     Meteor.call('getClozeEditAuthors', function(err, res) {
       if (err) {
-        console.log('error getting cloze edit authors: ' + JSON.stringify(err));
+        console.log('error getting cloze edit authors: ', err);
       } else {
         const authors = res;
 

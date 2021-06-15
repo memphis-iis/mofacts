@@ -17,6 +17,7 @@ import {routeToSignin} from '../../lib/router';
 import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine';
 import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
+import {sessionCleanUp} from '../../lib/sessionUtils';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -334,6 +335,7 @@ function leavePage(dest) {
   if (!(dest == '/card' || dest == '/instructions' || dest == '/voice')) {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
+    sessionCleanUp();
     if (window.AudioContext) {
       console.log('closing audio context');
       stopRecording();
@@ -422,7 +424,7 @@ Template.card.events({
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
-        console.log('getDialogFeedbackForAnswer', stringifyIfExists(dialogueContext));
+        console.log('getDialogFeedbackForAnswer', dialogueContext);
         Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     }
@@ -668,7 +670,7 @@ function pollMediaDevices() {
 }
 
 function clearAudioContextAndRelatedVariables() {
-  window.AudioContext.close();
+  audioContext.close();
   if (streamSource) {
     streamSource.disconnect();
   }
@@ -774,7 +776,7 @@ function preloadAudioFiles() {
 
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
-  console.log('curStimImgSrcs: ' + stringifyIfExists(curStimImgSrcs));
+  console.log('curStimImgSrcs: ', curStimImgSrcs);
   imagesDict = {};
   let img;
   for (const src of curStimImgSrcs) {
@@ -783,7 +785,7 @@ function preloadImages() {
     console.log('img:' + img);
     imagesDict[src] = img;
   }
-  console.log('imagesDict: ' + stringifyIfExists(imagesDict));
+  console.log('imagesDict: ', imagesDict);
 }
 
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
@@ -913,7 +915,7 @@ function setUpButtonTrial() {
 function getCurrentFalseResponses() {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
   const cluster = getStimCluster(curClusterIndex);
-  console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, stringifyIfExists(cluster));
+  console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, cluster);
 
   if (typeof(cluster) == 'undefined' || !cluster.stims || cluster.stims.length == 0 ||
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
@@ -936,7 +938,7 @@ function getCurrentClusterAndStimIndices() {
     const currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
-    console.log('getCurrentClusterAndStimIndices, engine: ' + stringifyIfExists(currentQuest));
+    console.log('getCurrentClusterAndStimIndices, engine: ', currentQuest);
   }
 
   return {curClusterIndex, curStimIndex};
@@ -1358,9 +1360,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
       Session.set('overallOutcomeHistory', overallOutcomeHistory);
     }
-    console.log('writing answerLogRecord to history:', JSON.stringify(answerLogRecord));
-    await meteorCallAsync('insertHistory', answerLogRecord);
-    await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    console.log('writing answerLogRecord to history:', answerLogRecord);
+    try {
+      await meteorCallAsync('insertHistory', answerLogRecord);
+      await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    } catch (e) {
+      console.log('error writing history record:', e);
+      throw new Error('error inserting history/updating state:', e);
+    }
 
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
     // is specified and we have seen that many (or more) timeouts in a row, then
@@ -1465,7 +1472,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const wasButtonTrial = !!Session.get('buttonTrial');
   if (wasButtonTrial) {
     if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect) {
-      buttonEntries = JSON.parse(stringifyIfExists(Session.get('buttonEntriesTemp')));
+      buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
     } else {
       buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
     }
@@ -1711,7 +1718,7 @@ async function unitIsFinished(reason) {
     // nothing for now
   }
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
-  console.log('unitIsFinished,updateExperimentState', JSON.stringify(res));
+  console.log('unitIsFinished,updateExperimentState', res);
   leavePage(leaveTarget);
 }
 
@@ -1825,7 +1832,7 @@ function startQuestionTimeout() {
   if (!deliveryParams) {
     throw new Error('No delivery params');
   }
-  console.log('startQuestionTimeout deliveryParams', JSON.stringify(deliveryParams));
+  console.log('startQuestionTimeout deliveryParams', deliveryParams);
 
   let delayMs = 0;
   if (getTestType() === 's' || getTestType() === 'f') { // Study
@@ -1847,7 +1854,8 @@ function startQuestionTimeout() {
   Session.set('displayReady', false);
   Session.set('clozeQuestionParts', undefined);
   console.log('++++ CURRENT DISPLAY ++++');
-  console.log(JSON.stringify(currentDisplayEngine));
+  console.log(currentDisplayEngine);
+  console.log('-------------------------');
 
   const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
   const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
@@ -1859,11 +1867,11 @@ function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
   console.log('checking for prestimulus display');
   // we'll [0], if it exists
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec[0].prestimulusDisplay;
-  console.log('prestimulusDisplay:', stringifyIfExists(prestimulusDisplay));
+  console.log('prestimulusDisplay:', prestimulusDisplay);
 
   if (prestimulusDisplay) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay[0]};
-    console.log('prestimulusDisplay detected, displaying', stringifyIfExists(prestimulusDisplayWrapper));
+    console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
     Session.set('clozeQuestionParts', undefined);
     Session.set('displayReady', true);
@@ -2055,7 +2063,7 @@ function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, callb
 
   HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
     if (err) {
-      console.log('err: ' + JSON.stringify(err));
+      console.log('err: ', err);
     } else {
       const audioDataEncoded = response.data.audioContent;
       const audioData = decodeBase64AudioContent(audioDataEncoded);
@@ -2162,10 +2170,11 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
-    console.log(JSON.stringify(response));
+    console.log(response);
     let transcript = '';
     const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
-    const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';// Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
+    const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
+    // Session.get("speechOutOfGrammarFeedback");//TODO: change this in tdfs and not hardcoded
     let ignoredOrSilent = false;
 
     // If we get back an error status make sure to inform the user so they at
@@ -2252,7 +2261,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
         } else {
           const answer = DialogueUtils.getDialogueUserAnswerValue();
           const dialogueContext = DialogueUtils.updateDialogueState(answer);
-          console.log('getDialogFeedbackForAnswer2', JSON.stringify(dialogueContext));
+          console.log('getDialogFeedbackForAnswer2', dialogueContext);
           Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
         }
       } else {
@@ -2268,6 +2277,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
 
 let recorder = null;
 let audioContext = null;
+window.audioContext1 = audioContext;
 let selectedInputDevice = null;
 let userMediaStream = null;
 let streamSource = null;
@@ -2390,7 +2400,7 @@ async function getExperimentState() {
   const curExperimentState = await meteorCallAsync('getExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'));
   const sessExpState = Session.get('currentExperimentState');
-  console.log('getExperimentState:', stringifyIfExists(curExperimentState), stringifyIfExists(sessExpState));
+  console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
@@ -2402,8 +2412,8 @@ async function updateExperimentState(newState, codeCallLocation) {
   if (!Session.get('currentExperimentState')) {
     Session.set('currentExperimentState', {});
   }
-  const oldExperimentState = Session.get('currentExperimentState');
-  const newExperimentState = Object.assign(JSON.parse(stringifyIfExists(oldExperimentState)), newState);
+  const oldExperimentState = Session.get('currentExperimentState') || {};
+  const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   const res = await meteorCallAsync('setExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState);
   Session.set('currentExperimentState', newExperimentState);
@@ -2609,13 +2619,13 @@ async function resumeFromComponentState() {
 async function checkSyllableCacheForCurrentStimFile(cb) {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-  console.log('cachedSyllables start: ' + stringifyIfExists(cachedSyllables));
+  console.log('cachedSyllables start: ', cachedSyllables);
   if (!cachedSyllables) {
     console.log('no cached syllables for this stim, calling server method to create them');
     const curAnswers = getAllCurrentStimAnswers();
     Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function() {
       cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-      console.log('new cachedSyllables: ' + stringifyIfExists(cachedSyllables));
+      console.log('new cachedSyllables: ', cachedSyllables);
       cb();
     });
   } else {
@@ -2641,6 +2651,7 @@ async function processUserTimesLog() {
   Session.set('currentQuestionPart2', experimentState.currentQuestionPart2);
   Session.set('currentAnswer', experimentState.currentAnswer);
   Session.set('currentAnswerSyllables', experimentState.currentAnswerSyllables);
+  console.log('!!!processUserTimesLog currentAnswerSyllables');
   Session.set('clozeQuestionParts', experimentState.clozeQuestionParts);
   Session.set('showOverlearningText', experimentState.showOverlearningText);
   Session.set('testType', experimentState.testType);
