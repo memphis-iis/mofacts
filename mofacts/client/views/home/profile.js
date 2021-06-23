@@ -232,8 +232,7 @@ function toggleTdfPresence(instance, mode) {
 Session.set('speechAPIKey', null);
 
 Template.profile.rendered = async function() {
-  Session.set('currentExperimentState', undefined);
-  Session.set('subTdfIndex', undefined);
+  sessionCleanUp();
   Session.set('showSpeechAPISetup', true);
   const allTdfs = await meteorCallAsync('getAllTdfs');
   console.log('allTdfs', allTdfs, typeof(allTdfs));
@@ -271,8 +270,10 @@ Template.profile.rendered = async function() {
     }
 
     const name = setspec.lessonname[0];
-    const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ? setspec.speechIgnoreOutOfGrammarResponses[0].toLowerCase() == 'true' : false;
-    const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ? setspec.speechOutOfGrammarFeedback[0] : 'Response not in answer set';
+    const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
+        setspec.speechIgnoreOutOfGrammarResponses[0].toLowerCase() == 'true' : false;
+    const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
+        setspec.speechOutOfGrammarFeedback[0] : 'Response not in answer set';
 
     // Check to see if we have found a selected experiment target
     if (experimentTarget && !foundExpTarget) {
@@ -313,7 +314,8 @@ Template.profile.rendered = async function() {
     }
 
     const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled[0] == 'true' : false;
-    const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ? setspec.enableAudioPromptAndFeedback[0] == 'true' : false;
+    const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
+        setspec.enableAudioPromptAndFeedback[0] == 'true' : false;
 
     tdfObject.name = name;
     tdfObject.tdfid = TDFId;
@@ -367,8 +369,10 @@ Template.profile.rendered = async function() {
 };
 
 // Actual logic for selecting and starting a TDF
+// eslint-disable-next-line max-len
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest) {
-  console.log('Starting Lesson', lessonName, currentTdfId, 'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
+  console.log('Starting Lesson', lessonName, currentTdfId,
+      'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
   const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
 
@@ -414,16 +418,20 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     console.log('Error getting browser info', err);
   }
 
-  // Check to see if the user has turned on audio prompt.  If so and if the tdf has it enabled then turn on, otherwise we won't do anything
+  // Check to see if the user has turned on audio prompt.
+  // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
   const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all');
   console.log(curTdfContent);
-  const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback && curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == 'true';
-  const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey && !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+  const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback &&
+      curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == 'true';
+  const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey &&
+      !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
   let audioPromptFeedbackEnabled = undefined;
   if (Session.get('experimentTarget')) {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled;
   } else if (fromSouthwest) {
-    audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
+    audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled &&
+        userAudioPromptFeedbackToggled && audioPromptTTSAPIKeyAvailable;
   } else {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled && userAudioPromptFeedbackToggled;
   }
@@ -432,7 +440,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // If we're in experiment mode and the tdf file defines whether audio input is enabled
   // forcibly use that, otherwise go with whatever the user set the audio input toggle to
   const userAudioToggled = audioInputEnabled;
-  const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled ? curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == 'true' : false;
+  const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled ?
+      curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == 'true' : false;
   const audioEnabled = !Session.get('experimentTarget') ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
   Session.set('audioEnabled', audioEnabled);
 
@@ -444,7 +453,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     // and going to the practice set
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
       Session.set('speechAPIKey', key);
-      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey && !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey[0];
+      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey &&
+          !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey[0];
       if (!key && !tdfKeyPresent) {
         console.log('speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');

@@ -57,8 +57,8 @@ Meteor.startup(function() {
         }
       }
     }
-    console.logs.unshift(convertedArgs);
-    console.logs = console.logs.slice(0, 2000);
+    console.logs = console.logs.concat(convertedArgs);
+    console.logs = console.logs.slice(0, 100000);
     console.defaultLog.apply(null, args);
   };
   Session.set('debugging', true);
@@ -144,7 +144,9 @@ Template.body.events({
     const sessionVars = Session.all();
     const userAgent = navigator.userAgent;
     const logs = console.logs;
-    Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars, userAgent, logs);
+    const currentExperimentState = Session.get('currentExperimentState');
+    Meteor.call('sendUserErrorReport', curUser, errorDescription, curPage, sessionVars,
+        userAgent, logs, currentExperimentState);
     $('#errorReportingModal').modal('hide');
     $('#errorDescription').val('');
   },

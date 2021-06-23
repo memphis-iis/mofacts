@@ -560,7 +560,8 @@ async function editCourseAssignments(newCourseAssignment) {
 
       for (const tdfName of tdfsAdded) {
         const TDFId = tdfNameIDMap[tdfName];
-        console.log('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved, curCourseAssignments, existingTdfs, newTdfs);
+        console.log('editCourseAssignments tdf:', TDFId, tdfName, tdfsAdded, tdfsRemoved,
+            curCourseAssignments, existingTdfs, newTdfs);
         await t.none('INSERT INTO assignment(courseId, TDFId) VALUES($1, $2)', [newCourseAssignment.courseid, TDFId]);
       }
       for (const tdfName of tdfsRemoved) {
@@ -578,7 +579,8 @@ async function editCourseAssignments(newCourseAssignment) {
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
   console.log('getTdfAssignmentsByCourseIdMap', instructorId);
-  const query = 'SELECT t.content #> array[\'tdfs\',\'tutor\',\'setspec\',\'0\',\'lessonname\',\'0\'] AS displayname, a.TDFId, a.courseId \
+  const query = 'SELECT t.content #> array[\'tdfs\',\'tutor\',\'setspec\',\'0\',\'lessonname\',\'0\'] \
+                 AS displayname, a.TDFId, a.courseId \
                  FROM assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
@@ -587,15 +589,24 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   console.log('assignmentTdfFileNames', assignmentTdfFileNamesRet);
   const assignmentTdfFileNamesByCourseIdMap = {};
   for (const assignment of assignmentTdfFileNamesRet) {
-    if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseid]) assignmentTdfFileNamesByCourseIdMap[assignment.courseid] = [];
-    assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({tdfid: assignment.tdfid, displayname: assignment.displayname});
+    if (!assignmentTdfFileNamesByCourseIdMap[assignment.courseid]) {
+      assignmentTdfFileNamesByCourseIdMap[assignment.courseid] = [];
+    }
+    assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({
+      tdfid: assignment.tdfid,
+      displayname: assignment.displayname,
+    });
   }
   return assignmentTdfFileNamesByCourseIdMap;
 }
 
 async function getTdfsAssignedToStudent(userId) {
   console.log('getTdfsAssignedToStudent', userId);
-  const tdfs = await db.manyOrNone('SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId INNER JOIN section_user_map AS m ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2', [userId, curSemester]);
+  const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
+                 ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
+                 INNER JOIN section_user_map AS m \
+                 ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2';
+  const tdfs = await db.manyOrNone(query, [userId, curSemester]);
   const formattedTdfs = tdfs.map((x) => getTdf(x));
   return formattedTdfs;
 }
@@ -633,8 +644,8 @@ async function setExperimentState(UserId, TDFId, newExperimentState) { // by cur
 
   if (experimentStateRet != null) {
     const updatedExperimentState = Object.assign(experimentStateRet.experimentstate, newExperimentState);
-    const updateQuery = 'UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3 RETURNING experimentStateId';
-    await db.one(updateQuery, [updatedExperimentState, UserId, TDFId]);
+    const updateQuery = 'UPDATE globalExperimentState SET experimentState=$1 WHERE userId = $2 AND TDFId = $3';
+    await db.none(updateQuery, [updatedExperimentState, UserId, TDFId]);
     return updatedExperimentState;
   }
 
@@ -709,7 +720,10 @@ async function insertHistory(historyRecord) {
                             feedbackType, \
                             dialogueHistory, \
                             recordedServerTime)';
-  query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[],$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb,$59)';
+  query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[], \
+            $15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30, \
+            $31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46, \
+            $47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb,$59)';
 
   const historyVals = [
     historyRecord.itemId,
@@ -776,7 +790,8 @@ async function insertHistory(historyRecord) {
 }
 
 async function getHistoryByTDFfileName(TDFfileName) {
-  const query = 'SELECT h.* FROM history AS h INNER JOIN item AS i ON i.itemId=h.itemId INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE t.content @> $1::jsonb';
+  const query = 'SELECT h.* FROM history AS h INNER JOIN item AS i ON i.itemId=h.itemId \
+                 INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE t.content @> $1::jsonb';
   // let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
   const historyRet = await db.manyOrNone(query, [{'fileName': TDFfileName}]);
 
@@ -796,7 +811,8 @@ function getAllTeachers(southwestOnly=false) {
 async function addCourse(mycourse) {
   console.log('addCourse:' + JSON.stringify(mycourse));
   const res = await db.tx(async (t) => {
-    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) VALUES(${courseName}, ${teacherUserId}, ${semester}, ${beginDate}) RETURNING courseId', mycourse)
+    return t.one('INSERT INTO course(courseName, teacherUserId, semester, beginDate) \
+                  VALUES(${courseName}, ${teacherUserId}, ${semester}, ${beginDate}) RETURNING courseId', mycourse)
         .then(async (row) => {
           const courseId = row.courseid;
           for (const sectionName of mycourse.sections) {
@@ -812,7 +828,8 @@ async function editCourse(mycourse) {
   console.log('editCourse:' + JSON.stringify(mycourse));
   const res = await db.tx(async (t) => {
     console.log('transaction');
-    return t.one('UPDATE course SET courseName=${coursename}, beginDate=${beginDate} WHERE courseid=${courseid} RETURNING courseId', mycourse).then(async (row) => {
+    return t.one('UPDATE course SET courseName=${coursename}, beginDate=${beginDate} \
+                  WHERE courseid=${courseid} RETURNING courseId', mycourse).then(async (row) => {
       const courseId = row.courseid;
       console.log('courseId', courseId, row);
       const newSections = mycourse.sections;
@@ -841,7 +858,8 @@ async function editCourse(mycourse) {
 async function addUserToTeachersClass(userid, teacherID, sectionId) {
   console.log('addUserToTeachersClass', userid, teacherID, sectionId);
 
-  const existingMappingCountRet = await db.oneOrNone('SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2', [sectionId, userid]);
+  const query = 'SELECT COUNT(*) AS existingMappingCount FROM section_user_map WHERE sectionId=$1 AND userId=$2';
+  const existingMappingCountRet = await db.oneOrNone(query, [sectionId, userid]);
   const existingMappingCount = existingMappingCountRet.existingmappingcount;
   console.log('existingMapping', existingMappingCount);
   if (existingMappingCount == 0) {
@@ -946,8 +964,11 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
 }
 
 async function getStudentReportingData(userId, TDFid) {
-  const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
-               unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 GROUP BY ordinality ORDER BY ORDINALITY ASC LIMIT 5;';
+  const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
+                 as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
+                 unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
+                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 GROUP BY ordinality \
+                 ORDER BY ORDINALITY ASC LIMIT 5;';
   const dataRet = await db.manyOrNone(query, [userId, TDFid]);
   const correctnessAcrossRepetitions = [];
   for (const curData of dataRet) {
@@ -960,7 +981,9 @@ async function getStudentReportingData(userId, TDFid) {
     });
   }
 
-  const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, componentState.KCId from componentState JOIN item ON componentState.kcid=item.stimuluskc WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
+  const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, \
+                  componentState.KCId FROM componentState JOIN item ON componentState.kcid=item.stimuluskc \
+                  WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
   const dataRet2 = await db.manyOrNone(query2, [userId, TDFid]);
   const probEstimates = [];
   for (const curData of dataRet2) {
@@ -980,7 +1003,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\'';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   if (!perfRet) return null;
   return {
@@ -1025,15 +1048,27 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
     totalpracticeduration = parseInt(totalpracticeduration);
 
     if (!studentPerformanceForClass[courseid]) studentPerformanceForClass[courseid] = {};
-    if (!studentPerformanceForClass[courseid][tdfid]) studentPerformanceForClass[courseid][tdfid] = {count: 0, totalTime: 0, numCorrect: 0};
+    if (!studentPerformanceForClass[courseid][tdfid]) {
+      studentPerformanceForClass[courseid][tdfid] = {count: 0, totalTime: 0, numCorrect: 0};
+    }
     studentPerformanceForClass[courseid][tdfid].numCorrect += correct;
     studentPerformanceForClass[courseid][tdfid].count += correct + incorrect;
     studentPerformanceForClass[courseid][tdfid].totalTime += totalpracticeduration;
 
     if (!studentPerformanceForClassAndTdfIdMap[courseid]) studentPerformanceForClassAndTdfIdMap[courseid] = {};
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
+    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid]) {
+      studentPerformanceForClassAndTdfIdMap[courseid][tdfid] = {};
+    }
 
-    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {count: 0, totalTime: 0, numCorrect: 0, username: studentUsername, userId: userid};
+    if (!studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid]) {
+      studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid] = {
+        count: 0,
+        totalTime: 0,
+        numCorrect: 0,
+        username: studentUsername,
+        userId: userid,
+      };
+    }
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].numCorrect += correct;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
@@ -1146,7 +1181,9 @@ function sendErrorReportSummaries() {
         const unsentErrorReport = unsentErrorReports[index2];
         const userWhoReportedError = Meteor.users.findOne({_id: unsentErrorReport.user});
         const userWhoReportedErrorUsername = userWhoReportedError ? userWhoReportedError.username : 'UNKNOWN';
-        text = text + 'User: ' + userWhoReportedErrorUsername + ', page: ' + unsentErrorReport.page + ', time: ' + unsentErrorReport.time + ', description: ' + unsentErrorReport.description + ', userAgent: ' + unsentErrorReport.userAgent + ' \n';
+        text = text + 'User: ' + userWhoReportedErrorUsername + ', page: ' + unsentErrorReport.page +
+               ', time: ' + unsentErrorReport.time + ', description: ' + unsentErrorReport.description +
+               ', userAgent: ' + unsentErrorReport.userAgent + ' \n';
         sentErrorReports.add(unsentErrorReport._id);
       }
 
@@ -1215,7 +1252,8 @@ function hasGeneratedTdfs(TDFjson) {
 }
 
 async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
-  const associatedStimSetIdRet = await db.oneOrNone('SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1', stimulusFilename);
+  const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+  const associatedStimSetIdRet = await db.oneOrNone(query, stimulusFilename);
   serverConsole('getAssociatedStimSetIdForStimFile', stimulusFilename, associatedStimSetIdRet);
   return associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
 }
@@ -1246,11 +1284,14 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId, stimuliSetId) {
         matchingStim = getItem(matchingStim);
         const mergedStim = Object.assign(matchingStim, newStim);
         if (mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
-        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, parentStimulusFileName = ${parentStimulusFileName}, \
-                      stimulusKC = ${stimulusKC}, clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, optimalProb = ${optimalProb}, \
-                      correctResponse = ${correctResponse}, incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
-                      speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, textStimulus = ${textStimulus}, \
-                      audioStimulus = ${audioStimulus}, imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
+        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, \
+                      parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
+                      clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
+                      optimalProb = ${optimalProb}, correctResponse = ${correctResponse}, \
+                      incorrectResponses = ${incorrectResponses}, itemResponseType = ${itemResponseType}, \
+                      speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, \
+                      textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
+                      imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
                       alternateDisplays = ${alternateDisplays}, tags = ${tags}', mergedStim);
       }
     } else {
@@ -1258,11 +1299,13 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId, stimuliSetId) {
     }
     for (const stim of newStims) {
       if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
-      await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, optimalProb, correctResponse, \
-        incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
-      VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, ${optimalProb}, ${correctResponse}, \
-        ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, \
-        ${imageStimulus}, ${videoStimulus}, ${alternateDisplays}::jsonb, ${tags})', stim);
+      await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
+        optimalProb, correctResponse, incorrectResponses, itemResponseType, speechHintExclusionList, clozeStimulus, \
+        textStimulus, audioStimulus, imageStimulus, videoStimulus, alternateDisplays, tags) \
+      VALUES(${stimuliSetId}, ${stimulusFilename}, ${stimulusKC}, ${clusterKC}, ${responseKC}, ${params}, \
+        ${optimalProb}, ${correctResponse}, ${incorrectResponses}, ${itemResponseType}, ${speechHintExclusionList}, \
+        ${clozeStimulus}, ${textStimulus}, ${audioStimulus}, ${imageStimulus}, ${videoStimulus}, \
+        ${alternateDisplays}::jsonb, ${tags})', stim);
     }
 
     return {ownerId};
@@ -1292,7 +1335,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, stimuliSetId) {
     } else {
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
-    await db.none('UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4', [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
+    const query = 'UPDATE tdf SET ownerId=$1, stimuliSetId=$2, content=$3::jsonb WHERE TDFId=$4';
+    await db.none(query, [ownerId, prev.stimuliSetId, tdfJSONtoUpsert, prev.TDFId]);
   } else {
     let tdfJSONtoUpsert;
     if (hasGeneratedTdfs(tdfJSON)) {
@@ -1304,7 +1348,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, stimuliSetId) {
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
     try {
-      await db.none('INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)', [ownerId, stimuliSetId, tdfJSONtoUpsert]);
+      const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
+      await db.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
     } catch (e) {
       serverConsole('error updating tdf data3', tdfFilename, e, e.stack);
     }
@@ -1623,7 +1668,7 @@ Meteor.startup(async function() {
       sendEmail(to, from, subject, text);
     },
 
-    sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs) {
+    sendUserErrorReport: function(userID, description, curPage, sessionVars, userAgent, logs, currentExperimentState) {
       const errorReport = {
         user: userID,
         description: description,
@@ -1632,6 +1677,7 @@ Meteor.startup(async function() {
         sessionVars: sessionVars,
         userAgent: userAgent,
         logs: logs,
+        currentExperimentState: currentExperimentState,
         emailed: false,
       };
       return ErrorReports.insert(errorReport);
@@ -1991,9 +2037,12 @@ Meteor.startup(async function() {
       }
 
       utlQueriesWithinFifteenMin = last50UtlQueries.filter((x) => x.timestamp > fifteenMinAgo);
-      const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit || utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
+      const currentServerLoadIsTooHigh = (loginsWithinAHalfHour.size > loginsWithinAHalfHourLimit ||
+            utlQueriesWithinFifteenMin.length > utlQueriesWithinFifteenMinLimit);
 
-      serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' + loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', utlQueriesWithinFifteenMin:' + utlQueriesWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
+      serverConsole('isCurrentServerLoadTooHigh:' + currentServerLoadIsTooHigh + ', loginsWithinAHalfHour:' +
+          loginsWithinAHalfHour.size + '/' + loginsWithinAHalfHourLimit + ', utlQueriesWithinFifteenMin:' +
+          utlQueriesWithinFifteenMin.length + '/' + utlQueriesWithinFifteenMinLimit);
 
       return currentServerLoadIsTooHigh;
     },
