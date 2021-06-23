@@ -191,7 +191,7 @@ Template.signInSouthwest.helpers({
     return Session.get('systemDown') && !Session.get('showTestLogins');
   },
 
-  'systemOverloaded': () => Session.get('systemOverloaded'),
+  'systemOverloaded': () => Session.get('systemOverloaded') && !Session.get('showTestLogins'),
 
   'showTestLogins': () => Session.get('showTestLogins'),
 

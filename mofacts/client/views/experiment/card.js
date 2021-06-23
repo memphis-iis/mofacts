@@ -213,6 +213,8 @@ function resetMainCardTimeout() {
   varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
 
+// TODO: there is a minor bug here related to not being able to truly pause on
+// re-entering a tdf for the first trial
 function restartMainCardTimeoutIfNecessary() {
   console.log('restartMainCardTimeoutIfNecessary');
   const mainCardTimeoutStart = Session.get('mainCardTimeoutStart');
@@ -238,6 +240,7 @@ function restartMainCardTimeoutIfNecessary() {
     }
   }
   timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
+  varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
 
 // Set a special timeout to handle simulation if necessary
@@ -483,7 +486,7 @@ Template.card.helpers({
 
   'subWordClozeCurrentQuestionExists': function() {
     console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
-    return typeof(Session.get('clozeQuestionParts')) != 'undefined';
+    return typeof(Session.get('clozeQuestionParts')) != 'undefined' && Session.get('clozeQuestionParts') !== null;
   },
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
@@ -1431,6 +1434,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
   return reviewTimeout;
 }
 
+// eslint-disable-next-line max-len
 function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, testType, deliveryParams, dialogueHistory) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   const feedbackDuration = !userFeedbackStart ? 0 : Date.now() - userFeedbackStart;
@@ -1464,8 +1468,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     endLatency = -1;
     startLatency = -1;
   }
-
-  updateCurStudentPerformance(isCorrect, endLatency);
 
   // Figure out button trial entries
   let buttonEntries = '';
@@ -1558,7 +1560,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Session_ID': sessionID,
 
     'Condition_Namea': 'tdf file',
-    'Condition_Typea': Session.get('currentTdfName'), // Note: we use this to enrich the history record server side, change both places if at all
+    // Note: we use this to enrich the history record server side, change both places if at all
+    'Condition_Typea': Session.get('currentTdfName'),
     'Condition_Nameb': 'xcondition',
     'Condition_Typeb': Session.get('experimentXCond'),
     'Condition_Namec': 'schedule condition',
@@ -1616,18 +1619,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   };
 
   return answerLogRecord;
-}
-
-function updateCurStudentPerformance(isCorrect, endLatency) {
-  // Update running user metrics total,
-  // note this assumes curStudentPerformance has already been set (at least to 0s) on initial page entry
-  const curUserPerformance = Session.get('curStudentPerformance');
-  curUserPerformance.count = curUserPerformance.count + 1;
-  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
-  curUserPerformance.totalTime = curUserPerformance.totalTime + (endLatency / (1000*60));
-  curUserPerformance.totalTimeDisplay = curUserPerformance.totalTime.toFixed(1);
-  Session.set('curStudentPerformance', curUserPerformance);
 }
 
 // Helper to parse a schedule condition - see note above about 0 and 1 based
@@ -2651,8 +2642,7 @@ async function processUserTimesLog() {
   Session.set('currentQuestionPart2', experimentState.currentQuestionPart2);
   Session.set('currentAnswer', experimentState.currentAnswer);
   Session.set('currentAnswerSyllables', experimentState.currentAnswerSyllables);
-  console.log('!!!processUserTimesLog currentAnswerSyllables');
-  Session.set('clozeQuestionParts', experimentState.clozeQuestionParts);
+  Session.set('clozeQuestionParts', experimentState.clozeQuestionParts || undefined);
   Session.set('showOverlearningText', experimentState.showOverlearningText);
   Session.set('testType', experimentState.testType);
   Session.set('originalDisplay', experimentState.originalDisplay);

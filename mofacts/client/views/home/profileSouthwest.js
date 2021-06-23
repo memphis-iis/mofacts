@@ -37,11 +37,15 @@ const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedba
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   if (audioInputEnabled) {
-    container = $(container).prepend('<p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>');
+    const audioHtml = '<p style="display:inline-block" title="Speech Input available for this module"> \
+                       <i class="fa fa-microphone"></i></p>';
+    container = $(container).prepend(audioHtml);
   }
   container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   if (enableAudioPromptAndFeedback) {
-    container = $(container).prepend('<p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>');
+    const audioHtml = '<p style="display:inline-block" title="Audio Output available for this module"> \
+                       <i class="fas fa-volume-up"></i></p>';
+    container = $(container).prepend(audioHtml);
   }
   container = $(container).prepend(btnObj);
   $('#testButtonContainer').append(container);
@@ -82,7 +86,7 @@ Template.profileSouthwest.rendered = async function() {
 
       const currentStimuliSetId = tdf.stimuliSetId;
 
-      const ignoreOutOfGrammarResponses = (_.chain(setspec).prop('speechIgnoreOutOfGrammarResponses').first().value() || '').toLowerCase() == 'true';
+      const ignoreOutOfGrammarResponses = _.chain(setspec).prop('speechIgnoreOutOfGrammarResponses').first().value() == 'true';
       let speechOutOfGrammarFeedback = _.chain(setspec).prop('speechOutOfGrammarFeedback').first().value();
       if (!speechOutOfGrammarFeedback) {
         speechOutOfGrammarFeedback = 'Response not in answer set';

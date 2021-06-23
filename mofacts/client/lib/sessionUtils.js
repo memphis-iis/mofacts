@@ -63,6 +63,7 @@ function sessionCleanUp() {
   Session.set('currentTdfUnit', undefined);
   Session.set('currentStimuliSet', undefined);
   Session.set('currentDeliveryParams', {});
+  Session.set('currentExperimentState', undefined);
 
   Session.set('curTeacher', undefined);
   Session.set('clusterIndex', undefined);
@@ -103,6 +104,6 @@ function sessionCleanUp() {
   Session.set('VADInitialized', false);
   Session.set('studentReportingTdfs', []);
   Session.set('studentUsername', undefined);
-  Session.set('curStudentPerformance', {});
+  Session.set('curStudentPerformance', undefined);
   Session.set('scoringEnabled', undefined);
 }

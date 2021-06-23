@@ -32,6 +32,8 @@
         "DynamicConfig": "readonly",
         "UserProfileData": "readonly",
         "SyncedCron": "readonly",
-        "getConfigProperty": "readonly"
+        "getConfigProperty": "readonly",
+        "Papa": "readonly",
+        "Chartist": "readonly"
     }
 }

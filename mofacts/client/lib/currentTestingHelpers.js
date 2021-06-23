@@ -12,6 +12,7 @@ export {
   randomChoice,
   search,
   haveMeteorUser,
+  updateCurStudentPerformance,
   setStudentPerformance,
   getStimCount,
   getStimCluster,
@@ -108,7 +109,22 @@ function search(key, prop, searchObj) {
 
 function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
-};
+}
+
+function updateCurStudentPerformance(isCorrect, endLatency) {
+  // Update running user metrics total,
+  // note this assumes curStudentPerformance has already been initialized on initial page entry
+  const curUserPerformance = Session.get('curStudentPerformance');
+  console.log('updateCurStudentPerformance', isCorrect, endLatency,
+      JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
+  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
+
+  Session.set('curStudentPerformance', curUserPerformance);
+}
 
 async function setStudentPerformance(studentID, studentUsername, tdfId) {
   console.log('setStudentPerformance:', studentID, studentUsername, tdfId);
@@ -135,10 +151,11 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'percentCorrect': percentCorrect,
     'numCorrect': studentPerformanceData.numCorrect,
     'totalTime': studentPerformanceData.totalPracticeDuration,
-    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1), // convert from ms to min
+    // convert from ms to min
+    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
   };
   Session.set('curStudentPerformance', studentPerformance);
-  console.log('setStudentPerformance,output:', studentPerformance, studentPerformanceData);
+  console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
 }
 
 // Return the total number of stim clusters
@@ -153,7 +170,7 @@ function getStimCount() {
     }
   }
   return numClusters;
-};
+}
 
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping.
@@ -161,7 +178,8 @@ function getStimCount() {
 function getStimCluster(clusterMappedIndex=0) {
   const isLearningSession = Session.get('unitType') == MODEL_UNIT;
   const clusterMapping = Session.get('clusterMapping');
-  const rawIndex = isLearningSession ? clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
+  const rawIndex = isLearningSession ?
+      clusterMapping[clusterMappedIndex] : clusterMappedIndex; // Only learning sessions use cluster mapping
   const cluster = {
     shufIndex: clusterMappedIndex, // Tack these on for later logging purposes
     clusterIndex: rawIndex,
@@ -174,7 +192,7 @@ function getStimCluster(clusterMappedIndex=0) {
   }
   // let cluster = cachedStimu.stimu.setspec.clusters[mappedIndex];
   return cluster;
-};
+}
 
 function getStimKCBaseForCurrentStimuliSet() {
   if (Session.get('currentStimuliSet')) {
@@ -205,7 +223,7 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
   }
 
   // Shufle the given ranges of cards (like permutefinalresult)
-  if (!!shuffleclusters) {
+  if (shuffleclusters) {
     const shuffleRanges = [];
     extractDelimFields(shuffleclusters, shuffleRanges);
 
@@ -216,7 +234,7 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
       const randPerm = targetIndexes.slice(); // clone
       shuffle(randPerm);
 
-      for (j = 0; j < targetIndexes.length; ++j) {
+      for (let j = 0; j < targetIndexes.length; ++j) {
         shuffled[targetIndexes[j]] = mapping[randPerm[j]];
       }
     });
@@ -225,7 +243,7 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
   }
 
   // Swap out sections of clusters (one step up from our shuffle above)
-  if (!!swapclusters) {
+  if (swapclusters) {
     // Get the chunks that we'll be swapping. Each chunk is in the format
     // of an array of integral indexes (after the map). We actually get
     // TWO lists of chunks - one in order and one that is the actual swap
@@ -271,7 +289,7 @@ function createStimClusterMapping(stimCount, shuffleclusters, swapclusters, star
   }
 
   return mapping;
-};
+}
 
 function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
@@ -279,7 +297,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   let allAnswers = new Set();
 
   console.log(stims);
-  for (stim of stims) {
+  for (const stim of stims) {
     const responseParts = stim.correctResponse.toLowerCase().split(';');
     const answerArray = responseParts.filter(function(entry) {
       return entry.indexOf('incorrect') == -1;
@@ -304,7 +322,7 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
 
 function getTestType() {
   return _.trim(Session.get('testType')).toLowerCase();
-};
+}
 
 // Return the delivery parms for the current unit. Note that we provide default
 // values AND eliminate the single-value array issue from our XML-2-JSON mapping
@@ -357,7 +375,7 @@ function getCurrentDeliveryParams() {
   // We've defined defaults - also define translatations for values
   function xlateBool(v) {
     return v ? _.trim(v).toLowerCase() === 'true' : false;
-  };
+  }
 
   const xlations = {
     'showhistory': xlateBool,
@@ -389,7 +407,7 @@ function getCurrentDeliveryParams() {
   // Use the current unit specified to get the deliveryparams array. If there
   // isn't a unit then we use the top-level deliveryparams (if there are)
   let sourceDelParams = null;
-  if (!!currUnit) {
+  if (currUnit) {
     // We have a unit
     if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
       sourceDelParams = currUnit.deliveryparams;
@@ -445,4 +463,4 @@ function getCurrentDeliveryParams() {
   }
 
   return deliveryParams;
-};
+}

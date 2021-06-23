@@ -37,7 +37,6 @@ following is true:
 ******************************************************************************
 **/
 
-import {Promise} from 'meteor/promise';
 import {serverConsole, decryptUserData, createAwsHmac} from './methods';
 
 

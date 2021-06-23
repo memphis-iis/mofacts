@@ -8,6 +8,7 @@ import {
   shuffle,
   randomChoice,
   createStimClusterMapping,
+  updateCurStudentPerformance,
 } from '../../lib/currentTestingHelpers';
 import {updateExperimentState} from './card';
 import {KC_MULTIPLE, MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
@@ -73,19 +74,6 @@ function defaultUnitEngine(curExperimentData) {
     init: async function() {
       console.log('Engine created for unit:', this.unitType);
       await this.initImpl();
-    },
-
-    getSubClozeAnswerSyllables: function(answer, displaySyllableIndices, cachedSyllables) {
-      console.log('getSubClozeAnswerSyllables, displaySyllableIndices: ', displaySyllableIndices,
-          ', this.cachedSyllables: ', cachedSyllables);
-      if (typeof(displaySyllableIndices) === 'undefined' || !cachedSyllables || displaySyllableIndices.length == 0) {
-        console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
-        return undefined;
-      } else {
-        answer = answer.replace(/\./g, '_');
-        const syllableArray = cachedSyllables.data[answer].syllables;
-        return {syllableArray, displaySyllableIndices};
-      }
     },
 
     replaceClozeWithSyllables: function(question, currentAnswerSyllables, origAnswer) {
@@ -160,17 +148,34 @@ function defaultUnitEngine(curExperimentData) {
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
-        currentStimAnswer, probFunctionsParameters) {
+        currentStimAnswer, probFunctionParameters) {
       console.log('setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
-          currentStimAnswer, probFunctionsParameters);
+          currentStimAnswer, probFunctionParameters);
       let currentAnswer = currentStimAnswer;
       let clozeQuestionParts = undefined;
       let currentAnswerSyllables = undefined;
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
-      if (probFunctionsParameters) {
-        currentAnswerSyllables = this.getSubClozeAnswerSyllables(currentStimAnswer, probFunctionsParameters.hintsylls,
-            this.cachedSyllables);
+      if (probFunctionParameters) {
+        console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
+            ', this.cachedSyllables: ', this.cachedSyllables);
+        if (typeof(probFunctionParameters.hintsylls) === 'undefined' ||
+            !this.cachedSyllables ||
+            probFunctionParameters.hintsylls.length == 0) {
+          console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
+          console.log(typeof(probFunctionParameters.hintsylls),
+              !this.cachedSyllables,
+              (probFunctionParameters.hintsylls || []).length);
+        } else {
+          const answer = currentStimAnswer.replace(/\./g, '_');
+          const displaySyllableIndices = JSON.parse(JSON.stringify(probFunctionParameters.hintsylls));
+          currentAnswerSyllables = {
+            count: this.cachedSyllables.data[answer].count,
+            syllableArray: this.cachedSyllables.data[answer].syllables,
+            displaySyllableIndices: displaySyllableIndices,
+          };
+        }
+
         if (currentAnswerSyllables) {
           const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts} =
               this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer);
@@ -196,11 +201,11 @@ function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables, clozeQuestionParts, currentAnswer};
     },
 
-    setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, probFunctionsParameters) {
+    setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, probFunctionParameters) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
-      console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionsParameters,
+      console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim]);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
@@ -248,14 +253,14 @@ function defaultUnitEngine(curExperimentData) {
       newExperimentState.originalQuestion = currentQuestion;
       newExperimentState.originalQuestion2 = currentQuestionPart2;
 
-      const {
+      let {
         currentQuestionPostSylls,
         currentQuestionPart2PostSylls,
         currentAnswerSyllables,
         clozeQuestionParts,
         currentAnswer,
       } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
-          probFunctionsParameters);
+          probFunctionParameters);
 
       console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
       console.log('setUpCardQuestionAndAnswerGlobals3:', currentAnswerSyllables, clozeQuestionParts, currentAnswer);
@@ -269,7 +274,7 @@ function defaultUnitEngine(curExperimentData) {
       Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
-      newExperimentState.clozeQuestionParts = clozeQuestionParts;
+      newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
       newExperimentState.currentQuestionPart2 = currentQuestionPart2PostSylls;
 
       if (currentDisplay.clozeText) {
@@ -387,7 +392,8 @@ function modelUnitEngine() {
   // in the unit's learningsession/calculateProbability tag
   function defaultProbFunction(p) {
     // Calculated metrics
-    p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785), 0.2514);
+    p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers +
+          ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785), 0.2514);
 
     p.meanSpacing = 0;
 
@@ -396,7 +402,8 @@ function modelUnitEngine() {
     } else {
       if (p.questionStudyTrialCount + p.questionTotalTests > 1) {
         p.meanSpacing = Math.max(
-            1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294),
+            1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) /
+                (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294),
         );
       }
     }
@@ -422,7 +429,7 @@ function modelUnitEngine() {
       .prop('learningsession').first()
       .prop('calculateProbability').first().trim().value();
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
-  console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction), probFunction, Session.get('currentTdfUnit'), 'test');
+  console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
     probFunction = new Function('p', '\'use strict\';\n' + probFunction); // jshint ignore:line
   } else {
@@ -611,7 +618,7 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const parms = this.calculateSingleProb(i, j, count);
-          stim.probFunctionsParameters = parms;
+          stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;
@@ -705,7 +712,8 @@ function modelUnitEngine() {
       if (isMultiTdf) {
         const curUnitNumber = Session.get('currentUnitNumber');
 
-        // NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
+        // NOTE: We are currently assuming that multiTdfs will have only three units:
+        // an instruction unit, an assessment session with exactly one question which is the last
         // item in the stim file, and a unit with all clusters specified in the generated subtdfs array
         if (curUnitNumber == 2) {
           const subTdfIndex = Session.get('subTdfIndex');
@@ -776,7 +784,8 @@ function modelUnitEngine() {
         const cluster = getStimCluster(i);
         const numStims = cluster.stims.length;
         for (j = 0; j < numStims; ++j) {
-          const parameter = getStimParameterArray(i, j); // Note this may be a single element array for older stims or a 3 digit array for newer ones
+          // Note this may be a single element array for older stims or a 3 digit array for newer ones
+          const parameter = getStimParameterArray(i, j);
           // Per-stim counts
           card.stims.push({
             clusterKC: (curKCBase + i),
@@ -907,9 +916,12 @@ function modelUnitEngine() {
       const probsMap = {};
       const cards = cardProbabilities.cards;
 
-      const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum', Meteor.userId(), Session.get('currentTdfId'));
+      const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
+          Meteor.userId(), Session.get('currentTdfId'));
       console.log('loadComponentStates,componentStates:', componentStates);
-      if (componentStates.length == 0) { // No prior history, we assume KCs could have been affected by other units using them
+
+      // No prior history, we assume KCs could have been affected by other units using them
+      if (componentStates.length == 0) {
         const stimulusKCs = [];
         for (const curCard of cards) {
           for (const curStim of curCard.stims) {
@@ -924,7 +936,8 @@ function modelUnitEngine() {
           for (const stim of card.stims) {
             const stimIndex = stim.stimIndex;
             const stimProbs = stimProbabilityEstimates.filter((x) => x.kcid == stim.stimulusKC) || {};
-            stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates || stim.previousCalculatedProbabilities;
+            stim.previousCalculatedProbabilities = stimProbs.probabilityEstimates ||
+                stim.previousCalculatedProbabilities;
             if (!probsMap[cardIndex][stimIndex]) probsMap[cardIndex][stimIndex] = 0;
           }
         }
@@ -1035,7 +1048,7 @@ function modelUnitEngine() {
 
     initImpl: async function() {
       Session.set('unitType', MODEL_UNIT);
-      this.initializeActRModel();
+      await this.initializeActRModel();
     },
 
     selectNextCard: async function() {
@@ -1065,7 +1078,8 @@ function modelUnitEngine() {
           indices = findMinProbDistCard(cards);
           break;
         case 'highest':
-          indices = findMaxProbCard(cards, 1.00001); // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
+          // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
+          indices = findMaxProbCard(cards, 1.00001);
           if (indices.clusterIndex === -1) {
             indices = findMinProbCard(cards);
           }
@@ -1107,8 +1121,8 @@ function modelUnitEngine() {
       console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
-      const stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, stim.probFunctionsParameters);
-      console.log('selectNextCard,', Session.get('clozeQuestionParts'));
+      const stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, stim.probFunctionParameters);
+      console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
       newExperimentState = Object.assign(newExperimentState, stateChanges);// Find objects we'll be touching
 
       let testType = 'd';
@@ -1185,26 +1199,30 @@ function modelUnitEngine() {
       const card = _.prop(cards, cluster.shufIndex);
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
-      if (card.lastSeen > 0) {
-        const practice = Date.now() - card.lastSeen;
-        card.totalPracticeDuration += practice;
-        _.each(cards, function(otherCard, index) {
-          if (otherCard.firstSeen > 0) {
-            if (index != cluster.shufIndex) {
-              otherCard.otherPracticeTime += practice;
-              _.each(otherCard.stims, function(otherStim, index) {
-                otherStim.otherPracticeTime += practice;
-              });
-            } else {
-              _.each(otherCard.stims, function(otherStim, index) {
-                if (index != currentCardInfo.whichStim) {
-                  otherStim.otherPracticeTime += practice;
-                }
-              });
-            }
+      const practiceTime = Date.now() - card.lastSeen;
+      card.totalPracticeDuration += practiceTime;
+      _.each(cards, function(otherCard, index) {
+        if (otherCard.firstSeen > 0) {
+          if (index != cluster.shufIndex) {
+            otherCard.otherPracticeTime += practiceTime;
+            _.each(otherCard.stims, function(otherStim, index) {
+              otherStim.otherPracticeTime += practiceTime;
+            });
+          } else {
+            _.each(otherCard.stims, function(otherStim, index) {
+              if (index != currentCardInfo.whichStim) {
+                otherStim.otherPracticeTime += practiceTime;
+              }
+            });
           }
-        });
-      }
+        }
+      });
+
+      const {whichStim} = this.findCurrentCardInfo();
+      const stim = card.stims[whichStim];
+      stim.totalPracticeDuration += practiceTime;
+
+      updateCurStudentPerformance(wasCorrect, practiceTime);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
@@ -1222,16 +1240,11 @@ function modelUnitEngine() {
         cardProbabilities.numCorrectAnswers += 1;
       }
 
-      // "Card-level" stats (and below - e.g. stim-level stats)
-      const {whichStim} = this.findCurrentCardInfo();
-      const stim = card.stims[whichStim];
-
       const currentStimProbability = stim.probabilityEstimate;
       stim.previousCalculatedProbabilities.push(currentStimProbability);
       card.previousCalculatedProbabilities.push(currentStimProbability);
 
-      console.log('cardAnswered, curTrialInfo:',
-          JSON.stringify(currentStimProbability), JSON.stringify(card), JSON.stringify(stim));
+      console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) card.priorCorrect += 1;
       else card.priorIncorrect += 1;
 
@@ -1260,10 +1273,6 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      // All stats gathered - calculate probabilities
-      // Need a delay so that the outcomeStack arrays can be properly updated
-      // before we use them in calculateCardProbabilities
-      // Meteor.setTimeout(calculateCardProbabilities,20); //TODO: why did we need this?  Make sure we are calculating correct values now
       this.saveComponentStates;
     },
 
@@ -1603,7 +1612,8 @@ function scheduleUnitEngine() {
     if (isMultiTdf) {
       const curUnitNumber = Session.get('currentUnitNumber');
 
-      // NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
+      // NOTE: We are currently assuming that multiTdfs will have only three units:
+      // an instruction unit, an assessment session with exactly one question which is the last
       // item in the stim file, and a unit with all clusters specified in the generated subtdfs array
       if (curUnitNumber == 1) {
         const lastClusterIndex = getStimCount() - 1;
@@ -1689,7 +1699,8 @@ function scheduleUnitEngine() {
       // increment the session's question index number
       Session.set('clusterIndex', curClusterIndex);
 
-      newExperimentState = Object.assign(newExperimentState, this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined));
+      newExperimentState = Object.assign(newExperimentState,
+          this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined));
 
       Session.set('testType', questInfo.testType);
       Session.set('questionIndex', questionIndex + 1);
