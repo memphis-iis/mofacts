@@ -1,6 +1,7 @@
 import { ReactiveDict } from 'meteor/reactive-dict';
 
 const _state = new ReactiveDict('dialogueSelectState');
+window._state = _state;
 const _availableDialogueTypes = ["simple", "refutational", "dialogue"];
 
 const _randomizeSelectedDialogueType = () => {
@@ -9,8 +10,9 @@ const _randomizeSelectedDialogueType = () => {
   _state.set("selectedDialogueType", _state.get("randomSelectedDialogueType"));
 }
 
-Template.profileDialogueToggles.rendered = function() {
-  _randomizeSelectedDialogueType();
+Template.profileDialogueToggles.created = function() {
+  //_randomizeSelectedDialogueType();
+  _state.set("selectedDialogueType", "simple");
 }
 
 Template.profileDialogueToggles.events({
@@ -22,7 +24,7 @@ Template.profileDialogueToggles.events({
 
 Template.profileDialogueToggles.helpers({
   isChecked: type => {
-    return type === _state.get("randomSelectedDialogueType");
+    return type === _state.get("selectedDialogueType");
   }
 });
 

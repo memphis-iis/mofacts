@@ -213,7 +213,7 @@ function defaultUnitEngine(curExperimentData) {
         audioSrc: curStim.audioStimulus,
         imgSrc: curStim.imageStimulus,
         videoSrc: curStim.videoStimulus,
-        clozeText: curStim.clozeStimulus,
+        clozeText: curStim.clozeStimulus || curStim.clozeText,
       }));
       if (curStim.alternateDisplays) {
         const numPotentialDisplays = curStim.alternateDisplays.length + 1;
@@ -227,7 +227,7 @@ function defaultUnitEngine(curExperimentData) {
             audioSrc: curAltDisplay.audioStimulus,
             imgSrc: curAltDisplay.imageStimulus,
             videoSrc: curAltDisplay.videoStimulus,
-            clozeText: curAltDisplay.clozeStimulus,
+            clozeText: curAltDisplay.clozeStimulus || curAltDisplay.clozeText,
           }));
         }
       }
@@ -1059,7 +1059,6 @@ function modelUnitEngine() {
       this.calculateCardProbabilities();
       let newClusterIndex = -1;
       let newStimIndex = -1;
-      let newProbIndex;
       const cards = cardProbabilities.cards;
       let indices;
 
@@ -1117,7 +1116,7 @@ function modelUnitEngine() {
 
       // Save for returning the info later (since we don't have a schedule)
       setCurrentCardInfo(cardIndex, whichStim);
-      console.log('select next card:', newProbIndex, cardIndex, whichStim);
+      console.log('select next card:', cardIndex, whichStim);
       console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
