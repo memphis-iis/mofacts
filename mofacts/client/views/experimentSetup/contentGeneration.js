@@ -242,14 +242,16 @@ function saveEditHistory(originalClozes, newClozes) {
 }
 
 function generateAndSubmitTDFAndStimFiles() {
-  sortClozes('originalOrderIndex'); // It's important to keep items in the same order to preserve cluster index/clusterKC relation
+  // It's important to keep items in the same order to preserve cluster index/clusterKC relation
+  sortClozes('originalOrderIndex');
   const clozes = Session.get('clozeSentencePairs').clozes;
   console.log('Generating TDF with clozes: ', clozes);
   const displayName = $('#tdfDisplayNameTextBox').val();
   const curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g, '_');
   const curDate = new Date();
   const curDateTime = curDate.toISOString().replace(/-/g, '_').replace(/:/g, '_').replace(/[.]/g, '_');
-  const tdfFileName = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' + curSemester + '_TDF.xml';
+  const tdfFileName = displayName.replace(/ /g, '_') + '_' + curUserName + '_' +
+      curDateTime + '_' + curSemester + '_TDF.xml';
 
   let stimulusFilename = undefined;
   let parentStimulusFileName = undefined;
@@ -260,11 +262,13 @@ function generateAndSubmitTDFAndStimFiles() {
     isMultiTdf = originalTDF.isMultiTdf;
 
     stimulusFilename = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
-    stimulusFilename = stimulusFilename.slice(0, stimulusFilename.length-5) + '_' + curUserName + '_' + curDateTime + '_' + curSemester + '.json';
+    stimulusFilename = stimulusFilename.slice(0, stimulusFilename.length-5) + '_' + curUserName + '_' +
+        curDateTime + '_' + curSemester + '.json';
 
     parentStimulusFileName = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
   } else {
-    stimulusFilename = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' + curSemester + '_autoNamed_Stim.json';
+    stimulusFilename = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' +
+        curSemester + '_autoNamed_Stim.json';
     parentStimulusFileName = null;
   }
 
@@ -422,7 +426,10 @@ function generateStimJSON(clozes, isMultiTdf, stimulusFilename, parentStimulusFi
   }
 
   if (finalDidYouReadQuestion) {
-    if (!finalDidYouReadQuestion.parentStimulusFileName) finalDidYouReadQuestion.parentStimulusFileName = parentStimulusFileName || null;
+    if (!finalDidYouReadQuestion.parentStimulusFileName) {
+      finalDidYouReadQuestion.parentStimulusFileName = parentStimulusFileName || null;
+    }
+
     curStim.push(finalDidYouReadQuestion);// [{},{}]
   }
 
@@ -446,7 +453,8 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
   const isMultiTdf = curTdf.isMultiTdf;
 
   if (isMultiTdf) {
-    const tdfGenerator = new DynamicTdfGenerator(curTdf.tdfs, tdfFileName, Meteor.userId(), 'content_generation', newStimJSON);
+    const tdfGenerator = new DynamicTdfGenerator(curTdf.tdfs, tdfFileName, Meteor.userId(),
+        'content_generation', newStimJSON);
     const generatedTdf = tdfGenerator.getGeneratedTdf();
     curTdf = generatedTdf;
 
@@ -458,7 +466,8 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
     for (const unitIndex in clusterListMappings) {
       const isLearningSession = clusterListMappings[unitIndex].unitType === MODEL_UNIT;
       const unit = curTdf.tdfs.tutor.unit[unitIndex];
-      const clusterlist = isLearningSession ? unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
+      const clusterlist = isLearningSession ?
+          unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
       clusterlist[0] = clusterListMappings[unitIndex].new;
     }
     curTdf.createdAt = new Date();
@@ -482,8 +491,12 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
 function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloze) {
   console.log('updateLookupMaps: ', oldCloze, newCloze);
   recordClozeEditHistory(oldCloze, newCloze);
-  stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter((clozeItem) => clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId);
-  clusterKCtoClozesMap[clusterKC] = clusterKCtoClozesMap[clusterKC].filter((clozeItem) => clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId);
+  stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter((clozeItem) =>{
+    clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId;
+  });
+  clusterKCtoClozesMap[clusterKC] = clusterKCtoClozesMap[clusterKC].filter((clozeItem) =>{
+    clozeItem.stimulusKC == stimulusKC && clozeItem.paraphraseId != paraphraseId;
+  });
 
   const prevClozeSentencePairs = Session.get('clozeSentencePairs');
   let newSentences = prevClozeSentencePairs.sentences;
@@ -518,7 +531,8 @@ function updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, newCloz
 
 function deleteCloze(stimulusKC, clusterKC, paraphraseId) {
   console.log('deleteCloze', stimulusKC, clusterKC, paraphraseId);
-  const oldCloze = JSON.parse(JSON.stringify(stimulusKCtoClozesMap[stimulusKC].find((elem) => elem.paraphraseId == paraphraseId)));
+  const oldCloze = JSON.parse(JSON.stringify(stimulusKCtoClozesMap[stimulusKC].find(
+      (elem) => elem.paraphraseId == paraphraseId)));
   updateLookupMaps(stimulusKC, clusterKC, paraphraseId, oldCloze, {});
 }
 
@@ -591,6 +605,7 @@ Template.contentGeneration.onRendered(async function() {
   console.log('contentGeneration rendered');
   setAllTdfs(getTdfOwnersMap);
 
+  // eslint-disable-next-line no-invalid-this
   const template = this;
   template.autorun(() => {
     Session.get('clozeSentencePairs');
@@ -625,7 +640,8 @@ Template.contentGeneration.events({
     const curParaphraseId = parseInt(event.currentTarget.getAttribute('paraphrase-id'));
     const clozeSentencePairs = Session.get('clozeSentencePairs');
 
-    const oldCloze = JSON.parse(JSON.stringify(clozeSentencePairs.clozes.find((cloze) => cloze.paraphraseId == curParaphraseId)));
+    const oldCloze = JSON.parse(JSON.stringify(clozeSentencePairs.clozes.find(
+        (cloze) => cloze.paraphraseId == curParaphraseId)));
     const newCloze = JSON.parse(JSON.stringify(oldCloze));
 
     const originalText = JSON.parse(JSON.stringify(newCloze.clozeStimulus));
@@ -690,7 +706,8 @@ Template.contentGeneration.events({
         clozeEdits = [];
       }
     });
-    alert('Depending on the length of text inputted, this operation may take a while.  Another popup will inform you once it has completed.');
+    alert('Depending on the length of text inputted, this operation may take a while.  \
+        Another popup will inform you once it has completed.');
   },
 
   'click #editClozeSaveButton': function(event) {
@@ -711,14 +728,24 @@ Template.contentGeneration.events({
       const oldCloze = stimulusKCtoClozesMap[stimulusKC].find((elem) => elem.paraphraseId == paraphraseId);
       const originalVersion = oldCloze.originalVersion === 'Same' ? oldCloze.clozeStimulus : oldCloze.originalVersion;
 
-      const newCloze = {...oldCloze, originalVersion, clozeStimulus: newClozeText, correctResponse, clusterKC, stimulusKC, origStimIndex: oldCloze.origStimIndex};
+      const newCloze = {
+        ...oldCloze,
+        originalVersion,
+        clozeStimulus: newClozeText,
+        correctResponse,
+        clusterKC,
+        stimulusKC,
+        origStimIndex: oldCloze.origStimIndex,
+      };
       recordClozeEditHistory(oldCloze, newCloze);
 
-      stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter((clozeItem) => clozeItem.paraphraseId != paraphraseId);
+      stimulusKCtoClozesMap[stimulusKC] = stimulusKCtoClozesMap[stimulusKC].filter(
+          (clozeItem) => clozeItem.paraphraseId != paraphraseId);
       stimulusKCtoClozesMap[stimulusKC].push(newCloze);
 
       const clozeSentencePairs = Session.get('clozeSentencePairs');
-      const editingClozeIndex = clozeSentencePairs.clozes.findIndex( (cloze) => cloze.stimulusKC == stimulusKC && cloze.paraphraseId == paraphraseId);
+      const editingClozeIndex = clozeSentencePairs.clozes.findIndex(
+          (cloze) => cloze.stimulusKC == stimulusKC && cloze.paraphraseId == paraphraseId);
       clozeSentencePairs.clozes.splice(editingClozeIndex, 1, newCloze);
       // clozeSentencePairs.clozes = clozeSentencePairs.clozes.filter((cloze) => cloze.stimulusKC != stimulusKC);
       // clozeSentencePairs.clozes.push(newCloze);
@@ -821,7 +848,8 @@ Template.contentGeneration.events({
     console.log('stimObject: ', stimObject);
     const tdfObject = tdfIdToTdfFileMap[origTdfId];
     const units = tdfObject.tdfs.tutor.unit;
-    // NOTE: We are currently assuming that multiTdfs will have only three units: an instruction unit, an assessment session with exactly one question which is the last
+    // NOTE: We are currently assuming that multiTdfs will have only three units:
+    // an instruction unit, an assessment session with exactly one question which is the last
     // item in the stim file, and a unit with all clusters specified in the generated subtdfs array
     if (tdfObject.isMultiTdf) {
       // Do nothing, multiTdfs will be processed without clusterlistmappings, elsewhere
@@ -847,12 +875,12 @@ Template.contentGeneration.events({
       }
     }
 
-    if (!!tdfObject.tdfs.tutor.setspec[0].speechAPIKey && !!tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0]) {
+    if (tdfObject.tdfs.tutor.setspec[0].speechAPIKey && tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0]) {
       speechAPIKey = tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0];
     } else {
       speechAPIKey = null;
     }
-    if (!!tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey && !!tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0]) {
+    if (tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey && tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0]) {
       textToSpeechAPIKey = tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
     } else {
       textToSpeechAPIKey = null;
@@ -877,7 +905,8 @@ Template.contentGeneration.helpers({
   },
 
   isCoreference: function(paraphraseId) {
-    const cloze = !!Session.get('clozeSentencePairs') && Session.get('clozeSentencePairs').clozes ? Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
+    const cloze = !!Session.get('clozeSentencePairs') && Session.get('clozeSentencePairs').clozes ?
+        Session.get('clozeSentencePairs').clozes.find((cloze) => cloze.paraphraseId == paraphraseId) : undefined;
     if (!cloze) console.log('isCoreference, not found: ' + paraphraseId);
     return cloze ? cloze.isCoreference : false;
   },
@@ -927,7 +956,8 @@ const templateTDFJSON = {
       'unit': [
         {
           'unitinstructions': [
-            '\n          <center><h3>Practice Instructions</h3></center><br>\nPractice the clozes by entering the missing fill-in word.',
+            '\n          <center><h3>Practice Instructions</h3></center><br>\n\
+                Practice the clozes by entering the missing fill-in word.',
           ],
           'unitname': [
             'Content Generated from text extract',

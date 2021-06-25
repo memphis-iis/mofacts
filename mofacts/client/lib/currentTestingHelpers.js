@@ -197,7 +197,8 @@ function getStimCluster(clusterMappedIndex=0) {
 function getStimKCBaseForCurrentStimuliSet() {
   if (Session.get('currentStimuliSet')) {
     const oneOrderOfMagnitudeLess = (KC_MULTIPLE / 10);
-    return Math.round((Session.get('currentStimuliSet')[0].clusterKC) / oneOrderOfMagnitudeLess) * oneOrderOfMagnitudeLess;
+    return Math.round((Session.get('currentStimuliSet')[0].clusterKC) / oneOrderOfMagnitudeLess) *
+       oneOrderOfMagnitudeLess;
   }
 }
 
@@ -311,7 +312,8 @@ function getAllCurrentStimAnswers(removeExcludedPhraseHints) {
   allAnswers = Array.from(allAnswers);
 
   if (removeExcludedPhraseHints) {
-    const curSpeechHintExclusionListText = getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || '';
+    const curSpeechHintExclusionListText =
+        getStimCluster(curClusterIndex).stims[curStimIndex].speechHintExclusionList || '';
     const exclusionList = curSpeechHintExclusionListText.split(',');
     // Remove the optional phrase hint exclusions
     allAnswers = allAnswers.filter((el)=>exclusionList.indexOf(el)==-1);

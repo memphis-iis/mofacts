@@ -2709,7 +2709,6 @@ async function processUserTimesLog() {
     case 'answer':
     case '[timeout]':
       // resumeToQuestion = true;//TODO: may want true here
-      // let simCorrect = experimentState.wasSim > 0 ? simCorrect = wasCorrect : null;
       // writeCurrentToScrollList(entry.answer, action === "[timeout]", simCorrect, 0);//TODO restore all scroll list state
       break;
   }
