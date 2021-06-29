@@ -108,29 +108,34 @@ function doFileUpload(fileElementSelector, fileType, fileDescrip) {
     count += 1;
 
     const name = file.name;
-    const fileReader = new FileReader();
+    if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
+      name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
+      name.indexOf('?') != -1 || name.indexOf('*') != -1) {
+      alert('Please remove the following characters from your filename: < > : " / | ? *');
+    } else {
+      const fileReader = new FileReader();
+      fileReader.onload = function() {
+        console.log('Upload attempted for', name);
 
-    fileReader.onload = function() {
-      console.log('Upload attempted for', name);
+        Meteor.call('saveContentFile', fileType, name, fileReader.result, function(error, result) {
+          if (error) {
+            console.log('Critical failure saving ' + fileDescrip, error);
+            alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
+          } else if (!result.result) {
+            console.log(fileDescrip + ' save failed', result);
+            alert('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+          } else {
+            console.log(fileDescrip + ' Saved:', result);
+            alert('Your ' + fileDescrip + ' file was saved');
+            // Now we can clear the selected file
+            $(fileElementSelector).val('');
+            $(fileElementSelector).parent().find('.file-info').html('');
+          }
+        });
+      };
 
-      Meteor.call('saveContentFile', fileType, name, fileReader.result, function(error, result) {
-        if (error) {
-          console.log('Critical failure saving ' + fileDescrip, error);
-          alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
-        } else if (!result.result) {
-          console.log(fileDescrip + ' save failed', result);
-          alert('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
-        } else {
-          console.log(fileDescrip + ' Saved:', result);
-          alert('Your ' + fileDescrip + ' file was saved');
-          // Now we can clear the selected file
-          $(fileElementSelector).val('');
-          $(fileElementSelector).parent().find('.file-info').html('');
-        }
-      });
-    };
-
-    fileReader.readAsBinaryString(file);
+      fileReader.readAsBinaryString(file);
+    }
   });
 
   console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
