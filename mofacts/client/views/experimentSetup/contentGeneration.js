@@ -250,7 +250,7 @@ function generateAndSubmitTDFAndStimFiles() {
   const curUserName = Meteor.user().username.split('@')[0].replace(/[.]/g, '_');
   const curDate = new Date();
   const curDateTime = curDate.toISOString().replace(/-/g, '_').replace(/:/g, '_').replace(/[.]/g, '_');
-  const tdfFileName = displayName.replace(/ /g, '_') + '_' + curUserName + '_' +
+  const tdfFileName = displayName.replace(/[ <>:"/|?*]/g, '_') + '_' + curUserName + '_' +
       curDateTime + '_' + curSemester + '_TDF.xml';
 
   let stimulusFilename = undefined;
