@@ -128,7 +128,9 @@ function updateTdfsSelectedAndNotSelected() {
   const allTdfDisplays = Session.get('allTdfFilenamesAndDisplayNames');
   const tdfsNotSelected = allTdfDisplays.filter((x) => curCourseAssignment.tdfs.indexOf(x.fileName) == -1);
   console.log('curCourseAssignment', curCourseAssignment);
-  const tdfsSelected = curCourseAssignment.tdfs.map((x) => allTdfDisplays.find((tdfDisplay) => tdfDisplay.fileName == x));
+  const tdfsSelected = curCourseAssignment.tdfs.map((x) =>
+    allTdfDisplays.find((tdfDisplay) =>
+      tdfDisplay.fileName == x));
   console.log('updateTdfsSelectedAndNotSelected', tdfsSelected, tdfsNotSelected, curCourseAssignment);
   Session.set('tdfsSelected', tdfsSelected);
   Session.set('tdfsNotSelected', tdfsNotSelected);

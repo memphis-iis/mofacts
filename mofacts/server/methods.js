@@ -4,7 +4,6 @@ import * as TutorialDialogue from '../server/lib/TutorialDialogue';
 import * as ElaboratedFeedback from './lib/CachedElaboratedFeedback';
 import * as DefinitionalFeedback from '../server/lib/DefinitionalFeedback.js';
 import * as ClozeAPI from '../server/lib/ClozeAPI.js';
-import xml2js from 'xml2js';
 import {displayify, isEmpty, stringifyIfExists} from '../common/globalHelpers';
 import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
@@ -29,7 +28,6 @@ export {
 // brackets instead of dot notation - that's because we prefer square brackets
 // for creating some MongoDB queries
 
-const Future = Npm.require('fibers/future');
 const fs = Npm.require('fs');
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
@@ -389,7 +387,7 @@ function _branchingCorrectText(answer) {
 
 // TODO: move this to function through existing upsert functions
 async function insertStimTDFPair(newStimJSON, wrappedTDF, sourceSentences) {
-  const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
+  const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
   const newStimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
   wrappedTDF.stimuliSetId = newStimuliSetId;
   for (const stim of newStimJSON) {
@@ -1251,25 +1249,31 @@ function hasGeneratedTdfs(TDFjson) {
   return TDFjson.tdfs.tutor.generatedtdfs && TDFjson.tdfs.tutor.generatedtdfs.length;
 }
 
-async function getAssociatedStimSetIdForStimFile(stimulusFilename) {
-  const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
-  const associatedStimSetIdRet = await db.oneOrNone(query, stimulusFilename);
-  serverConsole('getAssociatedStimSetIdForStimFile', stimulusFilename, associatedStimSetIdRet);
-  return associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
-}
-
 // TODO rework for input in a new format as well as the current assumption of the old format
-async function upsertStimFile(stimFilename, stimJSON, ownerId, stimuliSetId) {
-  console.log('upsertStimFile', stimFilename, stimuliSetId);
+async function upsertStimFile(stimFilename, stimJSON, ownerId) {
+  console.log('upsertStimFile', stimFilename);
+  const oldStimFormat = {
+    'fileName': stimFilename,
+    'stimuli': stimJSON,
+    'owner': ownerId,
+    'source': 'repo',
+  };
   await db.tx(async (t) => {
-    const oldStimFormat = {
-      'fileName': stimFilename,
-      'stimuli': stimJSON,
-      'owner': ownerId,
-      'source': 'repo',
-    };
-
     const responseKCMap = await getReponseKCMap();
+    const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+    const associatedStimSetIdRet = await t.oneOrNone(query, stimFilename);
+    serverConsole('getAssociatedStimSetIdForStimFile', stimFilename, associatedStimSetIdRet);
+    let stimuliSetId;
+    if (associatedStimSetIdRet) {
+      stimuliSetId = associatedStimSetIdRet.stimulisetid;
+      console.log('stimuliSetId1:', stimuliSetId, associatedStimSetIdRet);
+    } else {
+      const highestStimuliSetId = await t.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM item');
+      stimuliSetId = highestStimuliSetId && highestStimuliSetId.stimulisetid ?
+          parseInt(highestStimuliSetId.stimulisetid) + 1 : 1;
+      console.log('stimuliSetId2:', stimuliSetId, highestStimuliSetId);
+    }
+
     const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
     let newStims = [];
@@ -1312,7 +1316,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId, stimuliSetId) {
   });
 }
 
-async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, stimuliSetId) {
+async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   console.log('upsertTDFFile', tdfFilename);
   const prev = await getTdfByFileName(tdfFilename);
   let stimFileName;
@@ -1347,90 +1351,59 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId, stimuliSetId) {
       tdfJSON.createdAt = new Date();
       tdfJSONtoUpsert = JSON.stringify(tdfJSON);
     }
-    try {
+    await db.tx(async (t) => {
+      let stimuliSetId;
+      if (tdfJSON.tdfs.tutor.setspec[0].stimulusfile) {
+        const stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+        const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+        const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
+        if (associatedStimSetIdRet) {
+          stimuliSetId = associatedStimSetIdRet.stimulisetid;
+        } else {
+          throw new Error('No matching stimulus file found');
+        }
+      } else {
+        stimuliSetId = null; // Root condition tdfs have no stimulisetid
+      }
       const query = 'INSERT INTO tdf(ownerId, stimuliSetId, content) VALUES($1, $2, $3::jsonb)';
-      await db.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
-    } catch (e) {
-      serverConsole('error updating tdf data3', tdfFilename, e, e.stack);
-    }
+      await t.none(query, [ownerId, stimuliSetId, tdfJSONtoUpsert]);
+    });
   }
 }
 
-function getStimJSONFromFile(fileName) {
-  const future = new Future();
-  Assets.getText(fileName, function(err, data) {
-    if (err) {
-      serverConsole('Error reading Stim JSON', err);
-      throw err;
-    }
-    future.return(JSON.parse(data));
+function parseStringSync(str) {
+  let result;
+  // eslint-disable-next-line new-cap
+  require('xml2js').Parser().parseString(str, (e, r) => {
+    result = r;
   });
-  return future.wait();
-}
-
-function getTdfJSONFromFile(fileName) {
-  const future = new Future();
-  Assets.getText(fileName, function(err, data) {
-    if (err) {
-      serverConsole('Error reading Tdf JSON', err);
-      throw err;
-    }
-    future.return(xml2js.parseStringSync(data));
-  });
-  return future.wait();
+  return result;
 }
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
     console.log('loading stims and tdfs from asset dir');
     serverConsole('start stims');
-    let higheststimsetid = 0;
     const stimFilenames = _.filter(fs.readdirSync('./assets/app/stims/'), (fn) => {
       return fn.indexOf('.json') >= 0;
     });
     for (const filename of stimFilenames) {
-      // try{
-      const json = getStimJSONFromFile('stims/' + filename);
-      let stimuliSetId = await getAssociatedStimSetIdForStimFile(filename);
-      serverConsole('insert stim', filename, stimuliSetId);
-      if (isEmpty(stimuliSetId)) {
-        higheststimsetid += 1;
-        stimuliSetId = JSON.parse(JSON.stringify(higheststimsetid));
-        serverConsole('insert stim', filename, stimuliSetId, higheststimsetid);
-      }
-      await upsertStimFile(filename, json, adminUserId, stimuliSetId);
-      // }catch(e){
-      //  serverConsole('error loading stim file:',filename,e,e.stack);
-      // }
+      const data = Assets.getText('stims/' + filename);
+      const json = JSON.parse(data);
+      await upsertStimFile(filename, json, adminUserId);
     }
 
     setTimeout(async () => {
       serverConsole('start tdfs');
-      let higheststimsetid = 0;
       const tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => {
         return fn.indexOf('.xml') >= 0;
       });
       for (let filename of tdfFilenames) {
-        // try{
-        const json = getTdfJSONFromFile('tdf/' + filename);
-        const stimFileName = json.tutor.setspec[0].stimulusfile ? json.tutor.setspec[0].stimulusfile[0] : 'INVALID';
-        let stimuliSetId;
-        if (stimFileName == 'INVALID') {
-          // Note this means root tdfs will have NULL stimulisetid
-          stimuliSetId = null;
-        } else {
-          stimuliSetId = await getAssociatedStimSetIdForStimFile(stimFileName);
-          if (isEmpty(stimuliSetId)) {
-            higheststimsetid += 1;
-            stimuliSetId = JSON.parse(JSON.stringify(higheststimsetid));
-          }
-        }
+        const data = Assets.getText('tdf/' + filename);
+        const json = parseStringSync(data);
         filename = filename.replace('.xml', curSemester + '.xml');
         const rec = {'fileName': filename, 'tdfs': json, 'ownerId': adminUserId, 'source': 'repo'};
-        await upsertTDFFile(filename, rec, adminUserId, stimuliSetId);
-        // }catch(e){
-        //  serverConsole('error loading tdf file:',filename,e);
-        // }
+        await upsertTDFFile(filename, rec, adminUserId);
       }
     }, 2000);
   }
@@ -1961,14 +1934,16 @@ Meteor.startup(async function() {
 
             return results;
           } else {
-            const stimuliSetId = await getAssociatedStimSetIdForStimFile(stimFileName);
+            const query = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+            const associatedStimSetIdRet = await db.oneOrNone(query, stimFileName);
+            const stimuliSetId = associatedStimSetIdRet ? associatedStimSetIdRet.stimulisetid : null;
             if (isEmpty(stimuliSetId)) {
               results.result = false;
               results.errmsg = 'Please upload stimulus file before uploading a TDF';
             } else {
               try {
                 const rec = {'fileName': filename, 'tdfs': json, 'ownerId': ownerId, 'source': 'upload'};
-                await upsertTDFFile(filename, rec, ownerId, stimuliSetId);
+                await upsertTDFFile(filename, rec, ownerId);
                 results.result = true;
               } catch (err) {
                 results.result=false;
@@ -1979,13 +1954,7 @@ Meteor.startup(async function() {
           }
         } else if (type === 'stim') {
           const jsonContents = JSON.parse(filecontents);
-
-          let stimuliSetId = await getAssociatedStimSetIdForStimFile(filename);
-          if (isEmpty(stimuliSetId)) {
-            const highestStimuliSetIdRet = await db.oneOrNone('SELECT MAX(stimuliSetId) AS stimuliSetId FROM tdf');
-            stimuliSetId = highestStimuliSetIdRet.stimulisetid + 1;
-          }
-          await upsertStimFile(filename, jsonContents, ownerId, stimuliSetId);
+          await upsertStimFile(filename, jsonContents, ownerId);
         }
       } catch (e) {
         serverConsole('ERROR saving content file:', e, e.stack);
