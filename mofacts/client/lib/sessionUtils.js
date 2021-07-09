@@ -70,6 +70,8 @@ function sessionCleanUp() {
   Session.set('currentAnswer', undefined);
   Session.set('originalAnswer', undefined);
 
+  Session.set('dialogueCacheHint', undefined);
+
   Session.set('displayReady', undefined);
   Session.set('currentDisplay', undefined);
   Session.set('currentDisplayEngine', undefined);

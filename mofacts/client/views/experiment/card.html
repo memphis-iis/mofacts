@@ -162,6 +162,14 @@
             </div>
         </div>
 
+        {{#if showDialogueHints}}
+        <div class="row">
+            <div class="col-lg-12 visible-text text-center">
+                <h5>Testing Aid (Dialogue Cache Matching Answer): {{dialogueCacheHint}}</h5>
+            </div>
+        </div>
+        {{/if}}
+
         {{#if isInRole 'teacher'}}
         <div class="row">
             <div class="col-lg-12 visible-text text-center">

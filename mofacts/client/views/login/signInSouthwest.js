@@ -160,6 +160,9 @@ Template.signInSouthwest.onCreated(async function() {
   } else {
     Session.set('showTestLogins', true);
   }
+  if (urlVars['showDialogueHints']) {
+    Session.set('showDialogueHints', true);
+  }
   Session.set('teachers', verifiedTeachers);
 });
 

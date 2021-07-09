@@ -201,7 +201,7 @@ function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables, clozeQuestionParts, currentAnswer};
     },
 
-    setUpCardQuestionAndAnswerGlobals: function(cardIndex, whichStim, probFunctionParameters) {
+    setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, probFunctionParameters) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
@@ -238,6 +238,11 @@ function defaultUnitEngine(curExperimentData) {
       let currentQuestion = currentDisplay.clozeText || currentDisplay.text;
       let currentQuestionPart2 = undefined;
       let currentStimAnswer = getStimAnswer(cardIndex, whichStim);
+
+      const correctAnswer = Answers.getDisplayAnswerText(currentStimAnswer);
+      const cacheWords = await meteorCallAsync('getMatchingDialogueCacheWordsForAnswer', correctAnswer);
+      Session.set('dialogueCacheHint', cacheWords.join(','));
+
       Session.set('originalAnswer', currentStimAnswer);
       newExperimentState.originalAnswer = currentStimAnswer;
       currentStimAnswer = currentStimAnswer.toLowerCase();
@@ -1120,7 +1125,8 @@ function modelUnitEngine() {
       console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
-      const stateChanges = this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, stim.probFunctionParameters);
+      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim,
+          stim.probFunctionParameters);
       console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
       newExperimentState = Object.assign(newExperimentState, stateChanges);// Find objects we'll be touching
 
@@ -1698,8 +1704,8 @@ function scheduleUnitEngine() {
       // increment the session's question index number
       Session.set('clusterIndex', curClusterIndex);
 
-      newExperimentState = Object.assign(newExperimentState,
-          this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined));
+      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined);
+      newExperimentState = Object.assign(newExperimentState, stateChanges);
 
       Session.set('testType', questInfo.testType);
       Session.set('questionIndex', questionIndex + 1);
