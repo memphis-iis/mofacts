@@ -101,10 +101,34 @@ if (Meteor.settings.definitionalFeedbackDataLocation) {
   DefinitionalFeedback.Initialize(feedbackData);
 }
 
+const feedbackCacheMap = {};
 if (Meteor.settings.elaboratedFeedbackDataLocation) {
   console.log('initializing elaborated feedback');
+  const dataBuff = fs.readFileSync(Meteor.settings.elaboratedFeedbackDataLocation);
+  const cacheJSON = JSON.parse(dataBuff.toString());
+  for (const triple of cacheJSON) {
+    const pairWord1 = triple[0];
+    const pairWord2 = triple[1];
+    if (!feedbackCacheMap[pairWord1]) {
+      feedbackCacheMap[pairWord1] = new Set();
+    }
+    if (!feedbackCacheMap[pairWord2]) {
+      feedbackCacheMap[pairWord2] = new Set();
+    }
+    feedbackCacheMap[pairWord1].add(pairWord2);
+    feedbackCacheMap[pairWord2].add(pairWord1);
+  }
   // eslint-disable-next-line new-cap
-  ElaboratedFeedback.Initialize(fs.readFileSync(Meteor.settings.elaboratedFeedbackDataLocation));
+  ElaboratedFeedback.Initialize(dataBuff);
+}
+
+function getMatchingDialogueCacheWordsForAnswer(answer) {
+  const matches = feedbackCacheMap[answer.toLowerCase()];
+  if (matches) {
+    return Array.from(matches);
+  } else {
+    return [];
+  }
 }
 
 const pgp = require('pg-promise')();
@@ -1546,7 +1570,7 @@ Meteor.startup(async function() {
     getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
     getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getStimuliSetsForIdSet,
-    getStimuliSetByFilename, getSourceSentences,
+    getStimuliSetByFilename, getSourceSentences, getMatchingDialogueCacheWordsForAnswer,
 
     getAllCourses, getAllCourseSections, getAllCoursesForInstructor, getAllCourseAssignmentsForInstructor,
     addCourse, editCourse, editCourseAssignments, addUserToTeachersClass,

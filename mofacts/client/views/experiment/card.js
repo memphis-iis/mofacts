@@ -646,6 +646,10 @@ Template.card.helpers({
   'inResume': () => Session.get('inResume'),
 
   'audioEnabled': () => Session.get('audioEnabled'),
+
+  'showDialogueHints': () => Session.get('showDialogueHints'),
+
+  'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 });
 
 function getResponseType() {
@@ -1415,17 +1419,16 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
     if (isCorrect) {
       reviewTimeout = _.intval(deliveryParams.correctprompt);
     } else {
-      reviewTimeout = _.intval(deliveryParams.reviewstudy);
+      // Fast forward through feedback if we already did a dialogue feedback session
+      if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
+        reviewTimeout = 0.001;
+      } else {
+        reviewTimeout = _.intval(deliveryParams.reviewstudy);
+      }
     }
   } else {
     // We don't know what to do since this is an unsupported test type - fail
     throw new Error('Unknown trial type was specified - no way to proceed');
-  }
-
-  // Fast forward through feedback if we already did a dialogue feedback session
-  if (deliveryParams.feedbackType == 'dialogue' && !isCorrect && dialogueHistory.LastStudentAnswer) {
-    // If we failed to do a dialogue, allow for feedback review
-    reviewTimeout = 0.001;
   }
 
   // We need at least a timeout of 1ms
@@ -1473,7 +1476,9 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let buttonEntries = '';
   const wasButtonTrial = !!Session.get('buttonTrial');
   if (wasButtonTrial) {
-    if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect) {
+    const wasDrill = (testType === 'd' || testType === 'm' || testType === 'n');
+    // If we had a dialogue interaction restore this from the session variable as the screen was wiped
+    if (getCurrentDeliveryParams().feedbackType == 'dialogue' && !isCorrect && wasDrill) {
       buttonEntries = JSON.parse(JSON.stringify(Session.get('buttonEntriesTemp')));
     } else {
       buttonEntries = _.map(Session.get('buttonList'), (val) => val.buttonValue).join(',');
