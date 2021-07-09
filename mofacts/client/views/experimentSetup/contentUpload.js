@@ -66,16 +66,16 @@ Template.contentUpload.events({
   // Admin/Teachers - upload a TDF file
   'click #doUploadTDF': async function(event) {
     event.preventDefault();
-    doFileUpload('#upload-tdf', 'tdf', 'TDF');
+    await doFileUpload('#upload-tdf', 'tdf', 'TDF');
 
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   },
 
   // Admin/Teachers - upload a Stimulus file
-  'click #doUploadStim': function(event) {
+  'click #doUploadStim': async function(event) {
     event.preventDefault();
-    doFileUpload('#upload-stim', 'stim', 'Stimlus');
+    await doFileUpload('#upload-stim', 'stim', 'Stimlus');
   },
 
   'change #upload-tdf': function(event) {
@@ -101,10 +101,13 @@ Template.contentUpload.events({
 // //////////////////////////////////////////////////////////////////////////
 // Our main logic for uploading files
 
-function doFileUpload(fileElementSelector, fileType, fileDescrip) {
+async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
   let count = 0;
+  const files = $(fileElementSelector).prop('files');
+  console.log('files:', files);
+  const errorStack = [];
 
-  _.each($(fileElementSelector).prop('files'), function(file) {
+  for (const file of files) {
     count += 1;
 
     const name = file.name;
@@ -113,30 +116,41 @@ function doFileUpload(fileElementSelector, fileType, fileDescrip) {
       name.indexOf('?') != -1 || name.indexOf('*') != -1) {
       alert('Please remove the following characters from your filename: < > : " / | ? *');
     } else {
-      const fileReader = new FileReader();
-      fileReader.onload = function() {
-        console.log('Upload attempted for', name);
+      const fileData = await readFileAsDataURL(file);
+      console.log('Upload attempted for', name);
 
-        Meteor.call('saveContentFile', fileType, name, fileReader.result, function(error, result) {
-          if (error) {
-            console.log('Critical failure saving ' + fileDescrip, error);
-            alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
-          } else if (!result.result) {
-            console.log(fileDescrip + ' save failed', result);
-            alert('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
-          } else {
-            console.log(fileDescrip + ' Saved:', result);
-            alert('Your ' + fileDescrip + ' file was saved');
-            // Now we can clear the selected file
-            $(fileElementSelector).val('');
-            $(fileElementSelector).parent().find('.file-info').html('');
-          }
-        });
-      };
-
-      fileReader.readAsBinaryString(file);
+      try {
+        const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
+        if (!result.result) {
+          console.log(fileDescrip + ' save failed', result);
+          errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
+        } else {
+          console.log(fileDescrip + ' Saved:', result);
+        }
+      } catch (error) {
+        console.log('Critical failure saving ' + fileDescrip, error);
+        errorStack.push('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
+      }
     }
-  });
+  }
+  if (errorStack.length == 0) {
+    alert(count.toString() + ' files saved successfully');
+  } else {
+    alert('There were ' + errorStack.length + ' errors uploading files: ' + errorStack.join('\n'));
+  }
+  // Now we can clear the selected file
+  $(fileElementSelector).val('');
+  $(fileElementSelector).parent().find('.file-info').html('');
 
   console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+}
+
+async function readFileAsDataURL(file) {
+  const result = await new Promise((resolve) => {
+    const fileReader = new FileReader();
+    fileReader.onload = () => resolve(fileReader.result);
+    fileReader.readAsBinaryString(file);
+  });
+
+  return result;
 }

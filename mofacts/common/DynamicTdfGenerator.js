@@ -206,7 +206,7 @@ export class DynamicTdfGenerator {
       clusterMap[clusterIndex][stimIndex] = stim;
     }
     clusters = clusterMap;
-    console.log('getStimFileClusters:', clusterMap);
+    // console.log('getStimFileClusters:', clusterMap);
     // } catch (error) {
     //  throw new Error('Unable to find clusters with stim file: ',stimFileName,',',error);
     // }
