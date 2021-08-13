@@ -1093,13 +1093,13 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
   const studentPerformanceForClass = {};
   const studentPerformanceForClassAndTdfIdMap = {};
   for (const studentPerformance of studentPerformanceRet) {
-    let studentUsername = userIdToUsernames[studentPerformance.userid];
+    let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
+    let studentUsername = userIdToUsernames[userid];
     if (!studentUsername) {
       studentUsername = Meteor.find({_id: userid});
       userIdToUsernames[userid] = studentUsername;
     }
 
-    let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
     correct = parseInt(correct);
     incorrect = parseInt(incorrect);
     totalpracticeduration = parseInt(totalpracticeduration);
