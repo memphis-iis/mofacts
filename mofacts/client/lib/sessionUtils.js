@@ -104,8 +104,5 @@ function sessionCleanUp() {
   Session.set('subTdfIndex', undefined);
   Session.set('testType', undefined);
   Session.set('VADInitialized', false);
-  Session.set('studentReportingTdfs', []);
-  Session.set('studentUsername', undefined);
-  Session.set('curStudentPerformance', undefined);
   Session.set('scoringEnabled', undefined);
 }

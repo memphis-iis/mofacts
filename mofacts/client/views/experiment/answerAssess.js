@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-escape */
 import {getAllCurrentStimAnswers} from '../../lib/currentTestingHelpers';
-import {stringifyIfExists} from '../../../common/globalHelpers';
 
 export {Answers};
 

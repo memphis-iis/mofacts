@@ -37,9 +37,12 @@ function getComponentState(componentState) {
     priorCorrect: componentState.priorcorrect,
     priorIncorrect: componentState.priorincorrect,
     priorStudy: componentState.priorstudy,
-    totalPracticeDuration: componentState.totalPracticeDuration,
+    totalPracticeDuration: componentState.totalpracticeduration,
     outcomeStack: componentState.outcomestack.split(',').filter((x) => x!=='').map((x) => parseInt(x)),
   };
+  if(componentState.firstseen != outputComponentState.firstSeen.toString()){
+    console.log("orm error? ", componentState, outputComponentState);
+  }
   if (componentState.componenttype==='stimulus') {
     outputComponentState.probabilityEstimate = parseFloat(componentState.probabilityestimate);
   } else if (componentState.componenttype==='cluster') {
