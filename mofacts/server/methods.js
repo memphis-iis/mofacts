@@ -132,6 +132,7 @@ function getMatchingDialogueCacheWordsForAnswer(answer) {
 }
 
 const pgp = require('pg-promise')();
+// TODO: don't hardcode this
 const connectionString = 'postgres://mofacts:test101@localhost:5432';
 const db = pgp(connectionString);
 
@@ -307,15 +308,26 @@ async function getStimuliSetsForIdSet(stimuliSetIds) {
   return ret;
 }
 
-async function getProbabilityEstimatesByKCId(relevantKCIds) {
+async function getProbabilityEstimatesByKCId(relevantKCIds) { // {clusterIndex:[stimKCId,stimKCId],...}
+  const clusterQuery = 'SELECT array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates \
+    FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL';
+  const clusterProbs = {};
+  let individualStimKCs = [];
+  // eslint-disable-next-line guard-for-in
+  for (const clusterIndex in relevantKCIds) {
+    const clusterKCs = relevantKCIds[clusterIndex];
+    const ret = await db.oneOrNone(clusterQuery, [clusterKCs]);
+    clusterProbs[clusterIndex] = ret.probabilityestimates;
+    individualStimKCs = individualStimKCs.concat(clusterKCs);
+  }
   const query = 'SELECT KCId, array_agg(probabilityEstimate ORDER BY eventId) AS probabilityEstimates \
     FROM history WHERE KCId = ANY($1) AND probabilityEstimate IS NOT NULL GROUP BY KCId';
-  const ret = await db.manyOrNone(query, [relevantKCIds]);
-  const estimates = [];
+  const ret = await db.manyOrNone(query, [individualStimKCs]);
+  const individualStimProbs = {};
   for (const pair of ret) {
-    estimates.push({KCId: pair.kcid, probabilityEstimates: pair.probabilityestimates});
+    individualStimProbs[pair.kcid] = pair.probabilityestimates;
   }
-  return estimates;
+  return {clusterProbs, individualStimProbs};
 }
 
 // by currentTdfId, not currentRootTDFId
@@ -354,30 +366,56 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
 }
 
 async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
-  const responseComponentStates = componentStates.filter((x) => x.componentType == 'response');
+  serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const res = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
     const newResponseKCRet = await t.one('SELECT MAX(responseKC) AS responseKC from ITEM');
     let newResponseKC = newResponseKCRet.responsekc + 1;
-    for (const responseState of responseComponentStates) {
-      if (!isEmpty(responseKCMap[responseState.responseText])) {
-        responseState.KCId = responseKCMap[responseState.responseText];
-      } else {
-        responseState.KCId = newResponseKC;
-        newResponseKC += 1;
-      }
-      delete responseState.responseText;
-    }
+    const resArr = [];
+
     for (const componentState of componentStates) {
-      const deleteQuery = 'DELETE FROM componentState WHERE userId=$1 AND TDFId=$2 AND KCId=$3 AND componentType=$4';
-      await t.none(deleteQuery, [userId, TDFId, componentState.KCId, componentState.componentType]);
-      await t.none('INSERT INTO componentState(userId,TDFId,KCId,componentType,probabilityEstimate, \
-        firstSeen,lastSeen,priorCorrect,priorIncorrect,priorStudy,totalPracticeDuration, outcomeStack) \
-        VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, ${probabilityEstimate}, ${firstSeen}, ${lastSeen}, \
-        ${priorCorrect},${priorIncorrect},${priorStudy},${totalPracticeDuration},${outcomeStack})', componentState);
+      componentState.userId = userId;
+      componentState.TDFId = TDFId;
+      if (componentState.componentType == 'response') {
+        if (!isEmpty(responseKCMap[componentState.responseText])) {
+          componentState.KCId = responseKCMap[componentState.responseText];
+        } else {
+          componentState.KCId = newResponseKC;
+          newResponseKC += 1;
+        }
+        delete componentState.responseText;
+      }
+      if (!componentState.trialsSinceLastSeen) {
+        componentState.trialsSinceLastSeen = null;
+      }
+
+      const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
+          firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+          priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+          priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+          WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
+          RETURNING componentStateId';
+      try {
+        const componentStateId = await t.one(updateQuery, componentState);
+        resArr.push(componentStateId);
+      } catch (e) {
+        // ComponentState didn't exist before so we'll insert it
+        if (e.name == 'QueryResultError') {
+          const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
+            probabilityEstimate,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+            totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+            ${probabilityEstimate},${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+            ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
+            RETURNING componentStateId',
+          componentState);
+        } else {
+          resArr.push('not caught error:', e);
+        }
+      }
     }
-    return {userId, TDFId};
+    return {userId, TDFId, resArr};
   });
+  serverConsole('res:', res);
   return res;
 }
 
@@ -658,9 +696,7 @@ async function getExperimentState(UserId, TDFId) { // by currentRootTDFId, not c
 
 // UPSERT not INSERT
 async function setExperimentState(UserId, TDFId, newExperimentState) { // by currentRootTDFId, not currentTdfId
-  serverConsole('setExperimentState:', UserId, TDFId, newExperimentState);
-  console.log('setExperimentState:', UserId, TDFId, newExperimentState);
-  console.log('setExperimentState:', UserId, '|', TDFId, '|', newExperimentState);
+  serverConsole('setExperimentState:', UserId, TDFId);
   const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
   const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
 
@@ -826,7 +862,6 @@ function getAllTeachers(southwestOnly=false) {
   console.log('getAllTeachers', query);
   const allTeachers = Meteor.users.find(query).fetch();
 
-  console.log('allTeachers', allTeachers);
   return allTeachers;
 }
 
@@ -1325,6 +1360,7 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     } else {
       newStims = newFormatItems;
     }
+    console.log('!!!newStims:', newStims);
     for (const stim of newStims) {
       if (stim.alternateDisplays) stim.alternateDisplays = JSON.stringify(stim.alternateDisplays);
       await t.none('INSERT INTO item(stimuliSetId, stimulusFilename, stimulusKC, clusterKC, responseKC, params, \
@@ -1979,6 +2015,7 @@ Meteor.startup(async function() {
         } else if (type === 'stim') {
           const jsonContents = JSON.parse(filecontents);
           await upsertStimFile(filename, jsonContents, ownerId);
+          results.data = jsonContents;
         }
       } catch (e) {
         serverConsole('ERROR saving content file:', e, e.stack);

@@ -335,7 +335,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (!(dest == '/card' || dest == '/instructions' || dest == '/voice')) {
+  if (dest != '/card' && dest != '/instructions' && dest != '/voice') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -1224,8 +1224,6 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
-  // Give unit engine a chance to update any necessary stats
-  engine.cardAnswered(isCorrect);
 
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
@@ -1355,6 +1353,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   Meteor.setTimeout(async function() {
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewBegin, testType, deliveryParams, dialogueHistory);
+
+    // Give unit engine a chance to update any necessary stats
+    const endLatency = trialEndTimeStamp - trialStartTimestamp;
+    await engine.cardAnswered(isCorrect, endLatency);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
     const newExperimentState = {
