@@ -67,6 +67,12 @@ Accounts.registerLoginHandler(function(loginRequest) {
                 [localFindStructure]: profileOrEmailValue
             });
 
+            if(!user){
+                user = Meteor.users.findOne({
+                    "username": profileOrEmailValue
+                });
+            }
+
             if (!user) {
                 serverConsole("no existing user found");
                 if (Meteor.settings.saml[0].dynamicProfile) {
@@ -82,9 +88,6 @@ Accounts.registerLoginHandler(function(loginRequest) {
                     // console.log("Create user: " + JSON.stringify(newUser));
 
                     Accounts.createUser(newUser);
-
-                    // console.log("#################");
-                    // console.log("Trying to find user");
 
                     user = Meteor.users.findOne({
                         "username": profileOrEmailValue
