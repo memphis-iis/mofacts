@@ -56,7 +56,7 @@ repository. From your command prompt, clone the repository and then enter the
 new directory:
 
 ````
-$ git clone https://bitbucket.org/ppavlik/mofacts.git
+$ git clone https://github.com/memphis-iis/mofacts-ies.git
 $ cd mofacts
 ````
 
