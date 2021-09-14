@@ -1,20 +1,32 @@
 <template name="profileDialogueToggles">
   <div class="padLeftAndRight row toggleSwitchContainer">
-    <p>These buttons allow you to select an answer feedback type</p>
+    <p  style="text-align: left;font-size: larger;">Feedback Settings</p>
+    <div class="dialogue-select-containers">
+      <div id="switch-input" class="switch-3 switch-candy">
+        <input class="dialogueSelectRadio" id="dialogueSelectSimple" name="dialogueSelectRadios" data-dialogue-type="simple" type="radio" checked="{{isChecked 'simple'}}"/>
+        <label for="dialogueSelectSimple" onclick="" >Simple Feedback</label>
+      </div>
+      <p>When an answer is incorrect, the system gives the correct answer.</p>
+    </div>
     <div class="dialogue-select-containers">
       <div class="flow">
-        
-        <div id="switch-input" class="switch-toggle switch-3 switch-candy">
-          <input class="dialogueSelectRadio" id="dialogueSelectSimple" name="dialogueSelectRadios" data-dialogue-type="simple" type="radio" checked="{{isChecked 'simple'}}" />
-          <label for="dialogueSelectSimple" onclick="">Simple</label>
+        <div id="switch-input" class="switch-3 switch-candy">
           <input class="dialogueSelectRadio" id="dialogueSelectRefutational" name="dialogueSelectRadios" data-dialogue-type="refutational" type="radio" checked="{{isChecked 'refutational'}}"  />
-          <label for="dialogueSelectRefutational" onclick="">Refutational</label>
-          <input class="dialogueSelectRadio" id="dialogueSelectDialogue" name="dialogueSelectRadios" data-dialogue-type="dialogue" type="radio" checked="{{isChecked 'dialogue'}}"  />
-          <label for="dialogueSelectDialogue" onclick="">Dialogue</label>
+          <label for="dialogueSelectRefutational" onclick="">Refutational Feedback *</label>
         </div>
-        <br/>
-        <br/>
+        <p>When an answer is incorrect, the system provides additional explanation about why that answer is wrong.</p>
       </div>
     </div>
+    <div class="dialogue-select-containers">
+      <div class="flow">
+        <div id="switch-input" class="switch-3 switch-candy">
+          <input class="dialogueSelectRadio" id="dialogueSelectDialogue" name="dialogueSelectRadios" data-dialogue-type="dialogue" type="radio" checked="{{isChecked 'dialogue'}}"  />
+          <label for="dialogueSelectDialogue" onclick="">Dialogue Feedback *</label>
+        </div>
+        <p>When an answer is incorrect, the system asks you follow up quesitons to help you remember the differences between your answer and the correct answer.</p>
+      </div>
+    </div>
+    <br/>
+    <p style="font-size: medium;">*Refutational and Dialogue feedback are only activated for some questions.</p>
   </div>
 </template>

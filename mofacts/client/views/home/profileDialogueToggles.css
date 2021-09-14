@@ -1,0 +1,12 @@
+.dialogue-select-containers{
+    text-align: left;
+}
+
+.dialogue-select-containers p{
+    padding-left: 8%;
+}
+
+.dialogue-select-containers input[type="radio"] {
+    margin-top: -4px;
+    vertical-align: middle;
+}
