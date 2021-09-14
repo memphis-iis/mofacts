@@ -1,0 +1,28 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ddp-client"
+    }
+  ],
+  "implies": [
+    {
+      "package": "ddp-client",
+      "constraint": ""
+    },
+    {
+      "package": "ddp-server",
+      "constraint": ""
+    }
+  ],
+  "resources": [],
+  "packageVariables": [
+    {
+      "name": "DDP",
+      "export": true
+    }
+  ]
+}

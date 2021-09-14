@@ -1,0 +1,125 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "srp",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "sha",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ddp",
+      "constraint": "1.4.0"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.12.4"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/password_client.js",
+      "length": 10257,
+      "offset": 0,
+      "path": "password_client.js",
+      "hash": "aaad327474dc3c254dcdd4f3ab453c86de3b345b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/email_templates.js",
+      "length": 1036,
+      "offset": 0,
+      "path": "email_templates.js",
+      "hash": "bb5bca6d1991581af37309e10a1e214fca0e87c6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/email_tests.js",
+      "length": 11152,
+      "offset": 0,
+      "path": "email_tests.js",
+      "hash": "cf831766ee0aafe08dd4b99e6c2617f2a4d29cb8",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/email_tests_setup.js",
+      "length": 1667,
+      "offset": 0,
+      "path": "email_tests_setup.js",
+      "hash": "cab8dee5ffdc333112ec25bf26a7f16d75734397",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/password_server.js",
+      "length": 39260,
+      "offset": 0,
+      "path": "password_server.js",
+      "hash": "2dec9bcee029601169b8549d345bb225866e749e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/password_tests.js",
+      "length": 62015,
+      "offset": 0,
+      "path": "password_tests.js",
+      "hash": "cdb8151b89a7fd65ebab1747d2f9db1464c3ab0e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/password_tests_setup.js",
+      "length": 5155,
+      "offset": 0,
+      "path": "password_tests_setup.js",
+      "hash": "8550562a894d6f7ca42ed00b15a35d72ebe5ebcf",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

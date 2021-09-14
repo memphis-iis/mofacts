@@ -1,0 +1,48 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.6.2"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.3.3",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/alanning_roles.js",
+      "length": 29739,
+      "offset": 0,
+      "servePath": "/packages/alanning_roles.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Roles",
+      "export": true
+    }
+  ]
+}

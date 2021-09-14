@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "accounts-oauth"
+    },
+    {
+      "package": "facebook-oauth"
+    },
+    {
+      "package": "accounts-ui",
+      "weak": true
+    },
+    {
+      "package": "facebook-config-ui",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    },
+    {
+      "package": "facebook-oauth",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/notice.js",
+      "length": 405,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "3b11aabced7be314e201e93d6d2cec2ef9716d76",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/facebook.js",
+      "length": 1154,
+      "offset": 0,
+      "path": "facebook.js",
+      "hash": "d5255addcc6dc1147282185dc6c54b2076ce16e1",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

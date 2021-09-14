@@ -1,0 +1,25 @@
+{
+  "name": "ddp-rate-limiter",
+  "summary": "The DDPRateLimiter allows users to add rate limits to DDP methods and subscriptions.",
+  "version": "1.0.7",
+  "isTest": false,
+  "plugins": [],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

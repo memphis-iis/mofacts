@@ -1,0 +1,119 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "srp"
+    },
+    {
+      "package": "sha"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/password_client.js",
+      "length": 10261,
+      "offset": 0,
+      "path": "password_client.js",
+      "hash": "b36c91d47a0cba81316ff5477d2c1c496c255bc1",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/email_templates.js",
+      "length": 1036,
+      "offset": 0,
+      "path": "email_templates.js",
+      "hash": "bb5bca6d1991581af37309e10a1e214fca0e87c6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/email_tests.js",
+      "length": 11152,
+      "offset": 0,
+      "path": "email_tests.js",
+      "hash": "cf831766ee0aafe08dd4b99e6c2617f2a4d29cb8",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/email_tests_setup.js",
+      "length": 1663,
+      "offset": 0,
+      "path": "email_tests_setup.js",
+      "hash": "92ebac77d42d2bcac8260e72be0a849c9b023465",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/password_server.js",
+      "length": 41904,
+      "offset": 0,
+      "path": "password_server.js",
+      "hash": "53b806be81f82f3e7f148dfb57af8be2bc394c65",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/password_tests.js",
+      "length": 64904,
+      "offset": 0,
+      "path": "password_tests.js",
+      "hash": "6ba83e1fdb5351cda8d13bb7fc569d719731149e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/password_tests_setup.js",
+      "length": 5155,
+      "offset": 0,
+      "path": "password_tests_setup.js",
+      "hash": "8550562a894d6f7ca42ed00b15a35d72ebe5ebcf",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

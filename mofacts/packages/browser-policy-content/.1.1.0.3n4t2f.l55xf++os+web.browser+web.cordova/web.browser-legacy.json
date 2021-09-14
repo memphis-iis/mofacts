@@ -1,0 +1,21 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.7"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/browser-policy-content.js",
+      "length": 10827,
+      "offset": 0,
+      "servePath": "/packages/browser-policy-content.js"
+    }
+  ]
+}

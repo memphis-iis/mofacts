@@ -1,0 +1,80 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Autoupdate",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "webapp"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "inter-process-messaging"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ddp"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/autoupdate_server.js",
+      "length": 6645,
+      "offset": 0,
+      "path": "autoupdate_server.js",
+      "hash": "8e841de4ae22e9488e84b2cea85d486b0769929a",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/autoupdate_client.js",
+      "length": 6913,
+      "offset": 0,
+      "path": "autoupdate_client.js",
+      "hash": "1c3382ae108841864bb567dbfcaf5f816efd4c3e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/autoupdate_cordova.js",
+      "length": 2586,
+      "offset": 0,
+      "path": "autoupdate_cordova.js",
+      "hash": "fa1f79610172398267280a52ff90d43484d70c7f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client_versions.js",
+      "length": 2723,
+      "offset": 0,
+      "path": "client_versions.js",
+      "hash": "15b6bed0ca6c2c6730b1133ab4554f3975967415",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

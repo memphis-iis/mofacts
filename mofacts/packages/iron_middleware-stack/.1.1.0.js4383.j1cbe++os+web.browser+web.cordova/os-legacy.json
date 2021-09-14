@@ -1,0 +1,51 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:url",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/iron_middleware-stack.js",
+      "length": 14138,
+      "offset": 0,
+      "servePath": "/packages/iron_middleware-stack.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Handler",
+      "export": "tests"
+    },
+    {
+      "name": "MiddlewareStack"
+    },
+    {
+      "name": "Iron"
+    }
+  ]
+}

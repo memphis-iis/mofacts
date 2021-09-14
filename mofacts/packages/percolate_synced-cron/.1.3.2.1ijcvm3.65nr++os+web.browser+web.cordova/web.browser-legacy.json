@@ -1,0 +1,33 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "css",
+      "file": "web.browser/example/example.css",
+      "length": 31,
+      "offset": 0,
+      "servePath": "/packages/percolate_synced-cron/example/example.css"
+    },
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/percolate_synced-cron.js",
+      "length": 17417,
+      "offset": 0,
+      "servePath": "/packages/percolate_synced-cron.js"
+    }
+  ],
+  "node_modules": "npm/node_modules",
+  "packageVariables": [
+    {
+      "name": "SyncedCron"
+    },
+    {
+      "name": "Later"
+    }
+  ]
+}

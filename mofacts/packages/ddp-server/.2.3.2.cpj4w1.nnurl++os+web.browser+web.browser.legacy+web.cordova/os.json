@@ -1,0 +1,191 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDPServer",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "random",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.1"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "retry",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "mongo-id",
+      "constraint": "1.0.7"
+    },
+    {
+      "package": "diff-sequence",
+      "constraint": "1.1.1"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.14.3"
+    },
+    {
+      "package": "ddp-common",
+      "constraint": "1.4.0"
+    },
+    {
+      "package": "ddp-rate-limiter",
+      "constraint": "1.0.7",
+      "weak": true
+    },
+    {
+      "package": "ddp-client",
+      "constraint": "2.3.3"
+    },
+    {
+      "package": "webapp",
+      "constraint": "1.9.1"
+    },
+    {
+      "package": "routepolicy",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "audit-argument-checks",
+      "constraint": "1.0.7",
+      "weak": true
+    },
+    {
+      "package": "autopublish",
+      "constraint": "1.0.7",
+      "weak": true
+    },
+    {
+      "package": "facts-base",
+      "constraint": "1.0.1",
+      "weak": true
+    },
+    {
+      "package": "callback-hook",
+      "constraint": "1.3.0"
+    }
+  ],
+  "implies": [
+    {
+      "package": "ddp-client",
+      "constraint": "2.3.3"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/stream_server.js",
+      "length": 7860,
+      "offset": 0,
+      "path": "stream_server.js",
+      "hash": "aa92ffa87e345338ee7482f7be9ddc2214b33587",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/livedata_server.js",
+      "length": 59358,
+      "offset": 0,
+      "path": "livedata_server.js",
+      "hash": "9baeab2eb2394a96c079d93207532cfe246bdd5b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/writefence.js",
+      "length": 4027,
+      "offset": 0,
+      "path": "writefence.js",
+      "hash": "a48a4fcadc903eb2622c00e81f1f85e83462be95",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/crossbar.js",
+      "length": 6657,
+      "offset": 0,
+      "path": "crossbar.js",
+      "hash": "08f759e33168f7d142820f4c9c4e3136987fb02f",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server_convenience.js",
+      "length": 747,
+      "offset": 0,
+      "path": "server_convenience.js",
+      "hash": "8598694406e73ed6165da3aed7b223af6208d2ab",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/crossbar_tests.js",
+      "length": 2096,
+      "offset": 0,
+      "path": "crossbar_tests.js",
+      "hash": "d75e8633dd76bc4c3876e383f8f06ecb652bcc6a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/livedata_server_tests.js",
+      "length": 11280,
+      "offset": 0,
+      "path": "livedata_server_tests.js",
+      "hash": "e4bc58aa4b8c4673b558d6115fc7cea2af075cdc",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/session_view_tests.js",
+      "length": 11432,
+      "offset": 0,
+      "path": "session_view_tests.js",
+      "hash": "c35556197d199d9fa23bf4598fc60e1e6afd2b33",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

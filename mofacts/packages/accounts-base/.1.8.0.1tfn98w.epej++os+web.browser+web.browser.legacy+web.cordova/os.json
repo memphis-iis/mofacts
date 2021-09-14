@@ -1,0 +1,200 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Accounts",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ddp-rate-limiter"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "callback-hook"
+    },
+    {
+      "package": "url"
+    },
+    {
+      "package": "service-configuration",
+      "unordered": true
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "mongo"
+    },
+    {
+      "package": "autopublish",
+      "weak": true
+    },
+    {
+      "package": "oauth-encryption",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server_main.js",
+      "length": 863,
+      "offset": 0,
+      "path": "server_main.js",
+      "hash": "ab40124a585b08a179aa7a2e5b0b114881db40a9",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_client.js",
+      "length": 31520,
+      "offset": 0,
+      "path": "accounts_client.js",
+      "hash": "202a4d21a49fb788a93d4f610169256f881a7bd5",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_client_tests.js",
+      "length": 4111,
+      "offset": 0,
+      "path": "accounts_client_tests.js",
+      "hash": "05b6adce7910bfc1f72ed0254e32a06149198b8b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_common.js",
+      "length": 16611,
+      "offset": 0,
+      "path": "accounts_common.js",
+      "hash": "a0251028117ab1e59a0ce50f5d0900f71fef02aa",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_reconnect_tests.js",
+      "length": 4119,
+      "offset": 0,
+      "path": "accounts_reconnect_tests.js",
+      "hash": "87756cb3a0f4e6901d43db1b508c434344231581",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_server.js",
+      "length": 56714,
+      "offset": 0,
+      "path": "accounts_server.js",
+      "hash": "cc4ed37bcee0f91be2894e9366fa2d6e0dce1547",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_tests.js",
+      "length": 25520,
+      "offset": 0,
+      "path": "accounts_tests.js",
+      "hash": "d6c3365dff6281c657ae9519270368d886ee6a45",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_tests_setup.js",
+      "length": 102,
+      "offset": 0,
+      "path": "accounts_tests_setup.js",
+      "hash": "929c01b0be6a8706b24f3f402d26d61c43f13a75",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/accounts_url_tests.js",
+      "length": 1291,
+      "offset": 0,
+      "path": "accounts_url_tests.js",
+      "hash": "c177b7c35e9d8f876c31ad0b55e5448463ce242d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client_main.js",
+      "length": 669,
+      "offset": 0,
+      "path": "client_main.js",
+      "hash": "69dad2983ae34e6793bd9a80124b04d8fc231d5f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client_tests.js",
+      "length": 111,
+      "offset": 0,
+      "path": "client_tests.js",
+      "hash": "7af526fffaa6da06aa64ff90bef3b4dc48a4eb48",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server_tests.js",
+      "length": 70,
+      "offset": 0,
+      "path": "server_tests.js",
+      "hash": "a75ae458c136ecef2086a4512830189a66842146",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

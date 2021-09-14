@@ -1,0 +1,14 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:linter-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": []
+}

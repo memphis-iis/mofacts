@@ -1,0 +1,89 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "reload"
+    },
+    {
+      "package": "autoupdate"
+    }
+  ],
+  "implies": [
+    {
+      "package": "meteor",
+      "constraint": ""
+    },
+    {
+      "package": "webapp",
+      "constraint": ""
+    },
+    {
+      "package": "logging",
+      "constraint": ""
+    },
+    {
+      "package": "tracker",
+      "constraint": ""
+    },
+    {
+      "package": "deps",
+      "constraint": ""
+    },
+    {
+      "package": "session",
+      "constraint": ""
+    },
+    {
+      "package": "ddp",
+      "constraint": ""
+    },
+    {
+      "package": "livedata",
+      "constraint": ""
+    },
+    {
+      "package": "mongo",
+      "constraint": ""
+    },
+    {
+      "package": "blaze",
+      "constraint": ""
+    },
+    {
+      "package": "ui",
+      "constraint": ""
+    },
+    {
+      "package": "spacebars",
+      "constraint": ""
+    },
+    {
+      "package": "templating",
+      "constraint": ""
+    },
+    {
+      "package": "check",
+      "constraint": ""
+    },
+    {
+      "package": "underscore",
+      "constraint": ""
+    },
+    {
+      "package": "jquery",
+      "constraint": ""
+    },
+    {
+      "package": "random",
+      "constraint": ""
+    },
+    {
+      "package": "ejson",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

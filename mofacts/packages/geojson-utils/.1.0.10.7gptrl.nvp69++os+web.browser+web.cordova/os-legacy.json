@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/geojson-utils.js",
+      "length": 13976,
+      "offset": 0,
+      "servePath": "/packages/geojson-utils.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "GeoJSON",
+      "export": true
+    }
+  ]
+}

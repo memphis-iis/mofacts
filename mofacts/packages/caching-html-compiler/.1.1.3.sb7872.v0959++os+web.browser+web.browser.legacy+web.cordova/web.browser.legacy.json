@@ -1,0 +1,39 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "caching-compiler",
+      "constraint": "1.1.7"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.5.8"
+    },
+    {
+      "package": "templating-tools",
+      "constraint": "1.1.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/caching-html-compiler.js",
+      "length": 4383,
+      "offset": 0,
+      "path": "caching-html-compiler.js",
+      "hash": "76119375887c83efd1b499e29228dc4da029dde2",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:dynamic-import",
+      "constraint": "1.5.0"
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "promise"
+    },
+    {
+      "package": "fetch"
+    },
+    {
+      "package": "modern-browsers"
+    },
+    {
+      "package": "hot-module-replacement",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client.js",
+      "length": 5506,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "5f1789fb0d91abfd968c70a11aa0728981b7fd28",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/cache.js",
+      "length": 5701,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "cache.js",
+      "hash": "0368469afa83c8c92e0643cfaf0d52b1cd733cec",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/common.js",
+      "length": 55,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "common.js",
+      "hash": "3d4472440446fd92e4fcba378afdc250462e7fa2",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/dynamic-versions.js",
+      "length": 3289,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dynamic-versions.js",
+      "hash": "413a6948ce3fbf126a457dd2553ac4d64757422c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/security.js",
+      "length": 1168,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "security.js",
+      "hash": "4343117e931e1f72a9f02749c9135e075a557157",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server.js",
+      "length": 5712,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "73ff3179a2ab3be99a016520e3e59d15d566f3d4",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

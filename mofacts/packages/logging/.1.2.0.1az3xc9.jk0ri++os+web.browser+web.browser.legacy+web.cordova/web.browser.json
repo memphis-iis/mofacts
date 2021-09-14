@@ -1,0 +1,63 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Log",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ecmascript-runtime-client"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/logging.js",
+      "length": 8536,
+      "offset": 0,
+      "path": "logging.js",
+      "hash": "15766e8f46327a0ad446965d96ea85fe7c5c9975",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/logging_cordova.js",
+      "length": 507,
+      "offset": 0,
+      "path": "logging_cordova.js",
+      "hash": "b98cba44916e218d80cba1458dc8adc64723c045",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/logging_test.js",
+      "length": 7796,
+      "offset": 0,
+      "path": "logging_test.js",
+      "hash": "79d6d1b79b2be5add067cd4b8a34ad12a6dcb6cf",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

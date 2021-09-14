@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Howler",
+      "testOnly": false
+    },
+    {
+      "name": "Howl",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/packages/bojicas_howler2.js",
+      "length": 241006,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "/packages/bojicas_howler2.js",
+      "hash": "d89a4d2bd80601f359b6bcc4eb4ec03df00cd77b"
+    }
+  ]
+}

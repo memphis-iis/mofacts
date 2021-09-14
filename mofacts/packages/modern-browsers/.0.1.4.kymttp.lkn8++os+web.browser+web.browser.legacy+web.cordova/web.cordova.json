@@ -1,0 +1,40 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/modern-tests.js",
+      "length": 558,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern-tests.js",
+      "hash": "c5e0c9d6986853902a7a2de2b75be6b885be3d54",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/modern.js",
+      "length": 5931,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern.js",
+      "hash": "ee9836ef05294ca68aa913c4ebd2baf8697d1a45",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

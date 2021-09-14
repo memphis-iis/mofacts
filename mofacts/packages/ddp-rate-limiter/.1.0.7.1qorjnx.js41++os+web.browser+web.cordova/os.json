@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDPRateLimiter",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "rate-limit"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ddp-rate-limiter.js",
+      "length": 3541,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "ddp-rate-limiter.js",
+      "hash": "574e7fb315ab5b5d20a000267c3dc146bb078aaa",
+      "fileOptions": {}
+    }
+  ]
+}

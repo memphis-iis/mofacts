@@ -1,0 +1,36 @@
+{
+  "name": "fourseven:scss",
+  "summary": "Style with attitude. Sass and SCSS support for Meteor.js.",
+  "version": "4.12.0",
+  "isTest": false,
+  "plugins": [
+    {
+      "name": "compileScssBatch",
+      "arch": "os",
+      "path": "plugin.compileScssBatch.os/program.json"
+    }
+  ],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser.legacy",
+      "path": "web.browser.legacy-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

@@ -1,0 +1,99 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "HTTP",
+      "testOnly": false
+    },
+    {
+      "name": "HTTPInternals",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "url",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.15.0"
+    },
+    {
+      "package": "logging",
+      "constraint": "1.1.20"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/httpcall_server.js",
+      "length": 3521,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_server.js",
+      "hash": "d761ed0f93afa2cf32084684bb7eee0e66fd2748",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/httpcall_client.js",
+      "length": 7576,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_client.js",
+      "hash": "79ee324802987c0e5f72f06bb508ba1a4a45be3d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/httpcall_common.js",
+      "length": 4381,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_common.js",
+      "hash": "84f6508a1b64cd45b60c3ced0a9be59fb123e3ed",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/httpcall_tests.js",
+      "length": 18014,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_tests.js",
+      "hash": "41f68508c602049e183b8b32a25c76f9a9b461c3",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/test_responder.js",
+      "length": 2394,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "test_responder.js",
+      "hash": "890eaa47ac8bd8d9891219e23e3fd5a526e6e113",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

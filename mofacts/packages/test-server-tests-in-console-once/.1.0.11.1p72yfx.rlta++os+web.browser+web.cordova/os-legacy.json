@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tinytest"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "ejson"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/test-server-tests-in-console-once.js",
+      "length": 2815,
+      "offset": 0,
+      "servePath": "/packages/test-server-tests-in-console-once.js"
+    }
+  ]
+}

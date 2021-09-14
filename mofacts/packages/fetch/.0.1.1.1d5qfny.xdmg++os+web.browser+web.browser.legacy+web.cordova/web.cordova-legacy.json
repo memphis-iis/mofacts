@@ -1,0 +1,33 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "modern-browsers"
+    },
+    {
+      "package": "promise"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/fetch.js",
+      "length": 3771,
+      "offset": 0,
+      "servePath": "/packages/fetch.js"
+    }
+  ],
+  "node_modules": "npm/node_modules",
+  "packageVariables": [
+    {
+      "name": "fetch",
+      "export": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/packages/mizzao:bootstrap-3.js",
+      "length": 0,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "/packages/mizzao:bootstrap-3.js",
+      "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    }
+  ]
+}

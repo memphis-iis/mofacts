@@ -1,0 +1,134 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "URL",
+      "testOnly": false
+    },
+    {
+      "name": "URLSearchParams",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.15.0"
+    },
+    {
+      "package": "modern-browsers",
+      "constraint": "0.1.5"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/modern.js",
+      "length": 199,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern.js",
+      "hash": "f26f5871c5872fa67bf2e0d2d1274e422b42095f",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/legacy.js",
+      "length": 343,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "legacy.js",
+      "hash": "b9aa11b258b80faab35209989c62bc43dfb8238e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server.js",
+      "length": 707,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "d988f7ff6026c1e6e6ae7c4fecc6efb01c5231b1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/bc/url_client.js",
+      "length": 288,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "bc/url_client.js",
+      "hash": "7375c5857f1fad533fc74bb517fdc3a8d555d7ba",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/bc/url_common.js",
+      "length": 1310,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "bc/url_common.js",
+      "hash": "08d6b41de3e9a004418da39959616ce28d20be8f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/bc/url_server.js",
+      "length": 361,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "bc/url_server.js",
+      "hash": "3a8b5fe56a08023dbea1af368371f60af123b44b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/bc/url_tests.js",
+      "length": 465,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "bc/url_tests.js",
+      "hash": "cba2597b31d6295c1178eadb92ddc6895c1536a2",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/tests/main.js",
+      "length": 240,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "tests/main.js",
+      "hash": "2546b8dddffe661e3887a18ff308111860702b17",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

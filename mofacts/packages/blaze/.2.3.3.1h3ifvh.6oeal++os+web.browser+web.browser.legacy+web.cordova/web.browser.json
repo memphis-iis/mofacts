@@ -1,0 +1,218 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Blaze",
+      "testOnly": false
+    },
+    {
+      "name": "UI",
+      "testOnly": false
+    },
+    {
+      "name": "Handlebars",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.11.9"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "check",
+      "constraint": "1.2.3"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "observe-sequence",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "reactive-var",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "ordered-dict",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/preamble.js",
+      "length": 1531,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "preamble.js",
+      "hash": "39b0232323d372e68ca72cf74b6158dc178341f9",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/dombackend.js",
+      "length": 5421,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dombackend.js",
+      "hash": "3f07b39906e0634bd840e2aea2e54fac1376b651",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/domrange.js",
+      "length": 14930,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "domrange.js",
+      "hash": "eced68bc598b76e8a10ce639b42f6585ac4a64b4",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/events.js",
+      "length": 6738,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "events.js",
+      "hash": "918bba9b4cc233fdebf60c0edf40259a17c12807",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/attrs.js",
+      "length": 12834,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "attrs.js",
+      "hash": "54643a63d550a5c35fbc6c82399f8acc95ab6548",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/materializer.js",
+      "length": 7431,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "materializer.js",
+      "hash": "3b3a716c8c341e74be56ef292749b480af93c579",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/exceptions.js",
+      "length": 1625,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "exceptions.js",
+      "hash": "b10f429ef06fb26519caa86c0fc526db67f395c7",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/view.js",
+      "length": 32056,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "view.js",
+      "hash": "d86ca7a40561247b4abc02227d2760272cfa1d04",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/builtins.js",
+      "length": 12748,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "builtins.js",
+      "hash": "34dca947e19250b111892b2b7580327d69d8c288",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lookup.js",
+      "length": 7465,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lookup.js",
+      "hash": "f19f56309240750f5949fb6108cf9f95467ecf67",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/template.js",
+      "length": 19325,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "template.js",
+      "hash": "9367bb2760d9ca1da66afae0bd0f6ea0548875be",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/backcompat.js",
+      "length": 466,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "backcompat.js",
+      "hash": "9cc3f3b275bf122537482e7fb9c57c6b2173e243",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

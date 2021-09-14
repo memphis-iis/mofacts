@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "rate-limit"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/ddp-rate-limiter.js",
+      "length": 4174,
+      "offset": 0,
+      "servePath": "/packages/ddp-rate-limiter.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "DDPRateLimiter",
+      "export": true
+    }
+  ]
+}

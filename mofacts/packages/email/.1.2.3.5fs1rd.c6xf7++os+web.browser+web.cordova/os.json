@@ -1,0 +1,36 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Email",
+      "testOnly": false
+    },
+    {
+      "name": "EmailInternals",
+      "testOnly": false
+    },
+    {
+      "name": "EmailTest",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/email.js",
+      "length": 5554,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "email.js",
+      "hash": "71c9ee80a62e38f16171e9ee92d7900cfa15cbc7",
+      "fileOptions": {}
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

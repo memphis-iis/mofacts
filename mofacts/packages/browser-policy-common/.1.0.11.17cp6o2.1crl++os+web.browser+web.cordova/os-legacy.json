@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "webapp"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/browser-policy-common.js",
+      "length": 1968,
+      "offset": 0,
+      "servePath": "/packages/browser-policy-common.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "BrowserPolicy",
+      "export": true
+    }
+  ]
+}

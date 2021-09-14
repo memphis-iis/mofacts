@@ -1,0 +1,32 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/logic-solver.js",
+      "length": 307511,
+      "offset": 0,
+      "servePath": "/packages/logic-solver.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Logic",
+      "export": true
+    },
+    {
+      "name": "C_MINISAT"
+    },
+    {
+      "name": "MiniSat"
+    }
+  ]
+}

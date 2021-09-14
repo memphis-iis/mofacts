@@ -1,0 +1,34 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript-runtime"
+    },
+    {
+      "package": "modern-browsers"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/babel-compiler.js",
+      "length": 20761,
+      "offset": 0,
+      "servePath": "/packages/babel-compiler.js"
+    }
+  ],
+  "node_modules": "npm/node_modules",
+  "packageVariables": [
+    {
+      "name": "Babel",
+      "export": true
+    },
+    {
+      "name": "BabelCompiler",
+      "export": true
+    }
+  ]
+}

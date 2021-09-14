@@ -1,0 +1,35 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-ui-unstyled"
+    },
+    {
+      "package": "less"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "less",
+      "file": "web.browser/login_buttons.less",
+      "length": 60,
+      "offset": 0,
+      "path": "login_buttons.less",
+      "hash": "3937cda7246122eb15ead7f1f00f0ddb66110ea0",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

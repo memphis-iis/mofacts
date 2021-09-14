@@ -1,0 +1,69 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.11.9"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "check",
+      "constraint": "1.2.3"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "observe-sequence",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "reactive-var",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "ordered-dict",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/blaze.js",
+      "length": 81447,
+      "offset": 0,
+      "servePath": "/packages/blaze.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Blaze",
+      "export": true
+    },
+    {
+      "name": "UI",
+      "export": true
+    },
+    {
+      "name": "Handlebars",
+      "export": true
+    }
+  ]
+}

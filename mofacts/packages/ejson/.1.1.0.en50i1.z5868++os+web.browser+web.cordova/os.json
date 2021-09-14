@@ -1,0 +1,70 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "EJSON",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "base64"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ejson.js",
+      "length": 16846,
+      "offset": 0,
+      "path": "ejson.js",
+      "hash": "299d048ca00ecdf527d0ea454c2adbf85d2c6833",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/custom_models_for_tests.js",
+      "length": 1110,
+      "offset": 0,
+      "path": "custom_models_for_tests.js",
+      "hash": "e4ba8b1f4ea6422878a29966c18b1ad137d188bf",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ejson_tests.js",
+      "length": 7857,
+      "offset": 0,
+      "path": "ejson_tests.js",
+      "hash": "ee0f4bd70036949ccee8ff2df44f88532faa42c6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/stringify.js",
+      "length": 3407,
+      "offset": 0,
+      "path": "stringify.js",
+      "hash": "9123fe718a0cb9a9007c956c31e09b02fbf8d948",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

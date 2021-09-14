@@ -1,0 +1,58 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "promise"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/inter-process-messaging.js",
+      "length": 7825,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "inter-process-messaging.js",
+      "hash": "7a3b6f6998b3f2b9ca006033731099697a99204a",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/tests.js",
+      "length": 4188,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "tests.js",
+      "hash": "2d7cf9fef01ceaea69b316c564280f0cf32553d6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/types.js",
+      "length": 150,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "types.js",
+      "hash": "851883187c3b5ed9a9ca2057aafadb3cf0b04c45",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

@@ -1,0 +1,33 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Blaze",
+      "testOnly": false
+    },
+    {
+      "name": "UI",
+      "testOnly": false
+    },
+    {
+      "name": "Handlebars",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.3.2"
+    }
+  ],
+  "implies": [
+    {
+      "package": "blaze",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

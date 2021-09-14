@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "BrowserPolicy",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "webapp"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/browser-policy-common.js",
+      "length": 1398,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy-common.js",
+      "hash": "aedf983f1a8085bfe1de6936a231cc1b567e6728",
+      "fileOptions": {}
+    }
+  ]
+}

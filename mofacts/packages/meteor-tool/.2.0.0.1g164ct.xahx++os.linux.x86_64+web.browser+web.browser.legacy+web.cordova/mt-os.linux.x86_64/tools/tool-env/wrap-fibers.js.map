@@ -1,0 +1,1 @@
+{"version":3,"sources":["/tools/tool-env/wrap-fibers.js"],"names":["require","wrapYieldingFiberMethods"],"mappings":"AAAAA,OAAO,CAAC,cAAD,CAAP,CAAwBC,wBAAxB,CAAiDD,OAAO,CAAC,QAAD,CAAxD","sourcesContent":["require(\"@wry/context\").wrapYieldingFiberMethods(require(\"fibers\"));\n"],"file":"tools/tool-env/wrap-fibers.js.map"}

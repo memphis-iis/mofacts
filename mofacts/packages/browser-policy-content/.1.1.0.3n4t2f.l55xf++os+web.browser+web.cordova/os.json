@@ -1,0 +1,46 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.7"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "browser-policy-common",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "webapp",
+      "constraint": "1.3.12"
+    }
+  ],
+  "implies": [
+    {
+      "package": "browser-policy-common",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/browser-policy-content.js",
+      "length": 10208,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy-content.js",
+      "hash": "1ea9527c8164d25ee7de4a4dee3738f0ced4cf83",
+      "fileOptions": {
+        "mainModule": true
+      }
+    }
+  ]
+}

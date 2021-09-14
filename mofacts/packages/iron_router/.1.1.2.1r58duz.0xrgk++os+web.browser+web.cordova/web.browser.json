@@ -1,0 +1,200 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Router",
+      "testOnly": false
+    },
+    {
+      "name": "RouteController",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "deps",
+      "constraint": "1.0.3"
+    },
+    {
+      "package": "ui",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "meteor",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:layout",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "iron:middleware-stack",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "iron:url",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "iron:location",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:controller",
+      "constraint": "1.0.12"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/current_options.js",
+      "length": 196,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/current_options.js",
+      "hash": "a72af38ac7ae799c29a63a23b2f013128ceb7fb7",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/http_methods.js",
+      "length": 80,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/http_methods.js",
+      "hash": "d1a86a419cf6925671fb1d03bd4cad0ee2cca775",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/route_controller.js",
+      "length": 6051,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/route_controller.js",
+      "hash": "0c3cfd80f49878827f7050308cf484aabbedead4",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/route_controller_client.js",
+      "length": 11770,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/route_controller_client.js",
+      "hash": "48a9e92a68519b6b04d339247b710c09504734d0",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/route.js",
+      "length": 6124,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/route.js",
+      "hash": "3552bcaa6d8186fcde3be32f069783efd3d1acd7",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/router.js",
+      "length": 10650,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/router.js",
+      "hash": "ca427212a19111ed5d99b12d1696731845fb5633",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/hooks.js",
+      "length": 1433,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/hooks.js",
+      "hash": "5f5079e3c1c35faa8334bc437a1b1f4046147df0",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/helpers.js",
+      "length": 4276,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/helpers.js",
+      "hash": "6590ea8aa1a715a00e903a1442be6110dc36a704",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/router_client.js",
+      "length": 7354,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/router_client.js",
+      "hash": "8fc9ce240040ba5ef2a2e82e145b9c811a0ebd0c",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/plugins.js",
+      "length": 336,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/plugins.js",
+      "hash": "3929193f6a6712f5927a9e053e55238104436350",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/global_router.js",
+      "length": 26,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/global_router.js",
+      "hash": "1e71f7331b3a5888760e515e46eed4a0507a7bae",
+      "fileOptions": {}
+    },
+    {
+      "type": "js",
+      "file": "web.browser/packages/iron_router/lib/template.templates.js",
+      "length": 2031,
+      "offset": 0,
+      "servePath": "/packages/iron_router/lib/template.templates.js"
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

@@ -1,0 +1,50 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Twitter",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "oauth1"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "service-configuration"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/twitter_common.js",
+      "length": 87,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "twitter_common.js",
+      "hash": "465668039ad7fac5ffe69e1423b8d393befccc5c",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/twitter_server.js",
+      "length": 1419,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "twitter_server.js",
+      "hash": "25b3db64e78b75eb13e89eb5c7f1e863c3c943c3",
+      "fileOptions": {}
+    }
+  ]
+}

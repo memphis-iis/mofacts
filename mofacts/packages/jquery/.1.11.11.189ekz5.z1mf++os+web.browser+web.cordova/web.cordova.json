@@ -1,0 +1,50 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "$",
+      "testOnly": false
+    },
+    {
+      "name": "jQuery",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.7"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/main.js",
+      "length": 490,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "main.js",
+      "hash": "d8c309ad6647a8348bd009d61b7c32f263f37653",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/jquery.js",
+      "length": 294199,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "jquery.js",
+      "hash": "73d15ef036af1980629bcde3f32cc5869654ad4c",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

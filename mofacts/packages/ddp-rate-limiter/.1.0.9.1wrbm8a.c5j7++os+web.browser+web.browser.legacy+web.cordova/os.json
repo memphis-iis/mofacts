@@ -1,0 +1,71 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDPRateLimiter",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "rate-limit"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ddp-rate-limiter.js",
+      "length": 3533,
+      "offset": 0,
+      "path": "ddp-rate-limiter.js",
+      "hash": "325678f6a09357c6bde81f8c6e20cad60530388e",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ddp-rate-limiter-test-service.js",
+      "length": 3159,
+      "offset": 0,
+      "path": "ddp-rate-limiter-test-service.js",
+      "hash": "4767ac5e7152456cda9a91844777141f6833cab6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ddp-rate-limiter-tests-common.js",
+      "length": 133,
+      "offset": 0,
+      "path": "ddp-rate-limiter-tests-common.js",
+      "hash": "7706dda1e50567ef880483af14c9e31ba84becd2",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ddp-rate-limiter-tests.js",
+      "length": 12344,
+      "offset": 0,
+      "path": "ddp-rate-limiter-tests.js",
+      "hash": "8851f905a14f08387439080de7f1ef1635933a21",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

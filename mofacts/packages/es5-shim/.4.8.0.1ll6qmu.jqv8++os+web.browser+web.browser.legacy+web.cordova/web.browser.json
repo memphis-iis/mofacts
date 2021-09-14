@@ -1,0 +1,80 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client.js",
+      "length": 155,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "95eaa608e4e3c6bbcddae7b02c69f8cbbdcc986c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/console.js",
+      "length": 836,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "console.js",
+      "hash": "2362107985a9d751ea0990bc7c2de11029a5ab8d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/cordova.js",
+      "length": 345,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "cordova.js",
+      "hash": "ae67f5cbe8e8c1bc4014b4b6de150d7228d01730",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/export_globals.js",
+      "length": 442,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "export_globals.js",
+      "hash": "26552caa1fcf940ece29179fa56543ad4a6e67d3",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/import_globals.js",
+      "length": 726,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "import_globals.js",
+      "hash": "a75c0d90ab0c6156b96662efba849840a130460c",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

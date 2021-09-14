@@ -1,0 +1,53 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "AllowDeny",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "minimongo"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "ddp"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/allow-deny.js",
+      "length": 19981,
+      "offset": 0,
+      "path": "allow-deny.js",
+      "hash": "c0a0a04bba2a24f99c79144665ecb8261e74b2e1",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/allow-deny-tests.js",
+      "length": 32,
+      "offset": 0,
+      "path": "allow-deny-tests.js",
+      "hash": "71818466e24d901be9c819d8eacef963c4487192",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

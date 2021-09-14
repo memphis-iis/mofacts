@@ -1,0 +1,26 @@
+{
+  "isopack-2": {
+    "name": "iron:layout",
+    "summary": "Dynamic layouts which enable rendering dynamic templates into regions on a page.",
+    "version": "1.0.12",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova.json"
+      }
+    ],
+    "plugins": []
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "cmather:iron-core",
+      "constraint": "0.2.0",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/iron_core.js",
+      "length": 8926,
+      "offset": 0,
+      "servePath": "/packages/iron_core.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Iron",
+      "export": true
+    }
+  ]
+}
