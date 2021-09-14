@@ -92,11 +92,11 @@
         </div>  <!-- close row -->
         {{/if}}
 
-        {{#if testordrill}}
+        {{#if testordrill}} 
             {{#if notButtonTrialOrInDialogueLoop}}
                 <div class="row" id="textEntryRow">
                     <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                        {{> inputF}}
+                        {{> inputF}} 
                     </div>
                 </div>  <!-- close row -->
             {{else}}
@@ -105,10 +105,13 @@
                 {{#if buttonTrial}}
                     {{#if audioEnabled}}
                         <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                        <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
+                        <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
+                        <br>
                     {{/if}}
                 {{/if}}
                 <div class="col-md-12">
-                    <div id="multipleChoiceContainer">
+                    <div id="multipleChoiceContainer"> 
                         <!-- will contain multiple choice buttons which are dynamically added. -->
                         {{#if buttonTrial}}
                         <table id="multipleChoiceTable">

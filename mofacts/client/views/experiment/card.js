@@ -475,6 +475,10 @@ Template.card.helpers({
 
   'isNormal': () => Session.get('loginMode') !== 'experiment',
 
+  'voiceTranscriptionImgSrc': () => Session.get('voiceTranscriptionImgSrc'), 
+
+  'voiceTranscriptionPromptMsg': () => Session.get('voiceTranscriptionPromptMsg'),
+
   'username': function() {
     if (!haveMeteorUser()) {
       console.log('!haveMeteorUser');
@@ -2165,7 +2169,10 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
   return request;
 }
 
+
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
+  Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
+  Session.set('voiceTranscriptionImgSrc','images/mic_off.png');
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
     console.log(response);
@@ -2306,6 +2313,8 @@ function startUserMedia(stream) {
   // Set up options for voice activity detection code (vad.js)
   const energyOffsetExp = 60 - Session.get('audioInputSensitivity');
   const energyOffset = parseFloat('1e+' + energyOffsetExp);
+  Session.set('voiceTranscriptionPromptMsg','I am listening.');
+  Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
   const options = {
     source: input,
     energy_offset: energyOffset,
