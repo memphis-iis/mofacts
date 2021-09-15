@@ -2352,7 +2352,8 @@ function startUserMedia(stream) {
         }
         Router.go('/card');
         return;
-      } else if (!Session.get('recording')) {
+      } else if (!Session.get('recording') || Session.get('pausedLocks') != 0) {
+        console.log('pauseLocks remaining: ' + Session.get('pausedLocks'));
         if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
           leavePage(function() {
             console.log('cleaning up page after nav away from card, voice_stop');
