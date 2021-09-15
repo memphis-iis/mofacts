@@ -475,6 +475,33 @@ Template.card.helpers({
 
   'isNormal': () => Session.get('loginMode') !== 'experiment',
 
+  'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
+
+  'voiceTranscriptionImgSrc': function() {
+    if(Session.get('recording')){
+      //Change graphic path;
+      return 'images/mic_on.png';
+    } else {
+      //Change graphic path;
+      return 'images/mic_off.png';
+    }
+    
+  }, 
+
+  'voiceTranscriptionPromptMsg': function() {
+    if(!Session.get('recording')){
+      if(Session.get('buttonTrial')){
+        return 'Let me select that.';
+      } else {
+        return 'Let me transcribe that.';
+      }
+    } else {
+      return 'I am listening.';
+    }
+  },
+
+  
+
   'username': function() {
     if (!haveMeteorUser()) {
       console.log('!haveMeteorUser');
