@@ -1190,7 +1190,13 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     // Timeout
     userAnswerWithTimeout = '';
     isCorrect = false;
-    historyUserAnswer = 'You didn\'t answer in time.';   //Change graphic and message
+    historyUserAnswer = 'You didn\'t answer in time.';
+  } else if (typeof simCorrect === 'boolean') {
+    // Simulation! We know what they did
+    isCorrect = simCorrect;
+    historyUserAnswer = 'Simulated answer where correct==' + simCorrect;
+    historyCorrectMsg = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
+  } else {
     // "Regular" answers
     userAnswerWithTimeout = userAnswer;
     isCorrect = null;
@@ -1372,11 +1378,9 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
-     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewBegin, testType, deliveryParams, dialogueHistory);
     
-
-
     // Give unit engine a chance to update any necessary stats
     const endLatency = trialEndTimeStamp - trialStartTimestamp;
     await engine.cardAnswered(isCorrect, endLatency);
@@ -1801,6 +1805,7 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
+  
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
@@ -2126,11 +2131,8 @@ async function processLINEAR16(data) {
         phraseHints.push(curChar);
       }
     } else {
-
-      //look at this for transcription prompt! 
       if (DialogueUtils.isUserInDialogueLoop()) {
         DialogueUtils.setDialogueUserAnswerValue('waiting for transcription');
-        
       } else {
         userAnswer.value = 'waiting for transcription';
         phraseHints = getAllCurrentStimAnswers(true);
@@ -2190,7 +2192,6 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
   return request;
 }
 
-
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
@@ -2221,8 +2222,6 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
         }
       }
     } else {
-      //Change graphic and message
-     
       console.log('NO TRANSCRIPT/SILENCE');
       transcript = 'Silence detected';
       ignoredOrSilent = true;
@@ -2379,7 +2378,7 @@ function startUserMedia(stream) {
         if (resetMainCardTimeout && timeoutFunc) {
           if (Session.get('recording')) {
             console.log('voice_start resetMainCardTimeout');
-          
+            resetMainCardTimeout();
           } else {
             console.log('NOT RECORDING');
           }
@@ -2404,7 +2403,6 @@ function startRecording() {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');    
-    resetMainCardTimeout();
   } else {
     console.log('NO RECORDER');
   }
