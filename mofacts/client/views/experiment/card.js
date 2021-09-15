@@ -1180,7 +1180,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
   const trueAnswer = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
 
   let userAnswerWithTimeout = null;
-  
+
   if (getTestType() === 's' || getTestType() === 'f') {
     // Study trial
     isCorrect = true;
