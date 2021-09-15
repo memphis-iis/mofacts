@@ -1,86 +1,126 @@
 <template name="profileAudioToggles">
   <div class="padLeftAndRight row toggleSwitchContainer">
-      <p>These buttons allow you to turn on speech recognition and reading out loud.</p>
-      <div class="audio-button-containers">
-        <div class="flow">
-          <div id="switch-input" class="switch-toggle switch-3 switch-candy">
-            <input class="audioInputRadio" id="audioInputOff" name="state-da" type="radio" checked="checked" />
-            <label for="audioInputOff" onclick="">Off</label>
-            <input class="audioInputRadio" id="audioInputOn" name="state-da" type="radio" />
-            <label for="audioInputOn" onclick="">On</label>
-          </div>
-          <br/>
-          <br/>
-          <p class="text-left">Enable audio input</p>
+    <div class="audio-button-containers">
+      <p style="font-size: larger;">Questions</p>
+        <div id="switch-feedback" class="switch-3 switch-candy">
+          <input class="audioPromptRadio" id="audioPromptQuestionOff" name="state-db" type="radio" checked="checked"/>
+          <label for="audioPromptQuestionOff" onclick="">I read the questions to myself</label>
         </div>
-        <br/>
-        <div class="audioEnabledGroup invisible">
-          <input type="range" style="width:250px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
-          <span>
-            <p class='flow'>Audio input sensitivity:</p>
-            <p class='flow' id="audioInputSensitivityLabel">20</p>
-          </span>
+        <div id="switch-feedback" class="switch-3 switch-candy">
+          <input class="audioPromptRadio" id="audioPromptQuestionOn" name="state-db" type="radio" />
+          <label for="audioPromptQuestionOn" onclick="">The computer reads the questions for me</label>
         </div>
-        {{#if showSpeechAPISetup}}
-          <div class="audioEnabledGroup invisible">
-            {{#if speechAPIKeyIsSetup}}
-              <p style="color:green">Speech api key is setup</p>
-            {{else}}
-              <p style="color:red">Speech api key is not setup</p>
-            {{/if}}
-            <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
+        <div class="audioPromptQuestionGroup invisible">
+          <div style="display: inline-block;">
+            <label for="audioPromptVolume" class="audioPromptVolume">Volume: </label>
+            <input type="range" id="audioPromptVolume" min="0.1" max="1" step=".1">
           </div>
-        {{/if}}
-      </div>
-      <div>
-        <div class="flow">
-          <div id="switch-feedback" class="switch-toggle switch-3 switch-candy">
-            <input class="audioPromptRadio" id="audioPromptOff" name="state-d" type="radio" checked="checked" />
-            <label for="audioPromptOff" onclick="">Off</label>
-            <input class="audioPromptRadio" id="audioPromptFeedbackOnly" name="state-d" type="radio" />
-            <label for="audioPromptFeedbackOnly" onclick="">Feedback only</label>
-            <input class="audioPromptRadio" id="audioPromptAll" name="state-d" type="radio" />
-            <label for="audioPromptAll" onclick="">All</label>
-          </div>
-          <p class="text-left">Enable audio prompt/feedback</p>
-        </div>
-        <br/>
-        <div class="audioPromptFeedbackGroup invisible">
-          <input type="range" style="width:260px" id="audioPromptSpeakingRate" value="1" step="0.1" min="0.1" max="2">
-          <div>
-            <p id="audioPromptSpeakingRateLabel">Audio prompt speaking rate: 1</p>
+          <div style="display: inline-block;">
+            <label for="audioPromptSpeakingRate">Speed: </label>
+            <select type="select" id="audioPromptSpeakingRate">
+              <option value=".25">0.25</option>
+              <option value=".5">0.50</option>
+              <option value=".75">0.75</option>
+              <option value="1" selected>Normal</option>
+              <option value="1.25">1.25</option>
+              <option value="1.5">1.50</option>
+              <option value="1.75">1.75</option>
+              <option value="2">2</option>
+            </select>
           </div>
         </div>
-        <p>The icons (<i class="fa fa-microphone"></i> <i class="fas fa-volume-up"></i>) 
-          indicate that system is capable of speech recognition (<i class="fa fa-microphone"></i>) and text to speech reading (<i class="fas fa-volume-up"></i>).</p>
-      </div>
-      <div id="headphonesSuggestedDiv" class="invisible">
-        <h3>Headphones are suggested with both speech input and output enabled.</h3>
-      </div>
-      <div id='speechAPIModal' class="modal fade">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                <span class="sr-only">Close</span>
-              </button>
-              <h4 class="modal-title">Google Speech API Key Setup</h4>
-            </div>
-            <div class="modal-body">
-              <p>If you haven't already please enable the Google Speech API
-                and generate a Google Speech API key by following the instructions
-                <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
-              <label>Google Speech API Key:</label>
-              <input type="text" id='speechAPIKey'>
-            </div>
-            <div class="modal-footer">
-              <button id='speechAPISubmit' type="button" class="btn-primary flow">Save changes</button>
-              <button id='speechAPIDelete' type="button" class="btn-danger flow">Delete API Key</button>
-            </div>
-          </div>
+    </div>
+    <div class="audio-button-containers">
+      <div class="flow">
+        <p style="font-size: larger;">Answers</p>
+        <div id="switch-input" class="switch-3 switch-candy">
+          <input class="audioInputRadio" id="audioInputOff" name="state-da" type="radio" checked="checked" />
+          <label for="audioInputOff" onclick="">I type the answers</label>
+        </div>
+        <div id="switch-input" class="switch-3 switch-candy">
+          <input class="audioInputRadio" id="audioInputOn" name="state-da" type="radio" />
+          <label for="audioInputOn" onclick="">I say the answers out loud</label>
         </div>
       </div>
+      <br/>
+      <div class="audioEnabledGroup invisible" style="width: 100%;">
+        <label for="audioInputSensitivity" style="padding-left: 8%;">
+          <span>Audio sensitivity: Quiet Room</span>
+        </label>
+        <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
+          <span style="font-weight: bold;">Noisy Room</span>
+      </div>
+      {{#if showSpeechAPISetup}}
+        <div class="audioEnabledGroup invisible" style="padding-left: 10%;">
+          {{#if speechAPIKeyIsSetup}}
+            <p style="color:green">Speech api key is setup</p>
+          {{else}}
+            <p style="color:red">Speech api key is not setup</p>
+          {{/if}}
+          <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
+        </div>
+      {{/if}}
+    </div>
+    <div class="audio-button-containers">
+      <div class="flow">
+        <p style="font-size: larger;">Feedback</p>
+        <div id="switch-feedback" class="switch-3 switch-candy">
+          <input class="audioPromptRadio" id="audioPromptFeedbackOff" name="state-d" type="radio" checked="checked" />
+          <label for="audioPromptFeedbackOff" onclick="">I read the feedback to myself</label>
+        </div>
+        <div id="switch-feedback" class="switch-3 switch-candy">
+          <input class="audioPromptRadio" id="audioPromptFeedbackOn" name="state-d" type="radio" />
+          <label for="audioPromptFeedbackOn" onclick="">The computer reads the feedback out loud</label>
+        </div>
+      </div>
+      <br/>
+      <div class="audioPromptFeedbackGroup invisible">
+        <div style="display: inline-block;">
+          <label for="audioPromptVolume" class="audioPromptVolume">Volume: </label>
+          <input type="range" id="audioPromptVolume" min="0.1" max="1" step=".1">
+        </div>
+        <div style="display: inline-block;">
+          <label for="audioPromptSpeakingRate">Speed: </label>
+          <select type="select" id="audioPromptSpeakingRate">
+            <option value=".25">0.25</option>
+            <option value=".5">0.50</option>
+            <option value=".75">0.75</option>
+            <option value="1" selected>Normal</option>
+            <option value="1.25">1.25</option>
+            <option value="1.5">1.50</option>
+            <option value="1.75">1.75</option>
+            <option value="2">2</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div id="headphonesSuggestedDiv" class="invisible">
+      <h3>Headphones are suggested with both speech input and output enabled.</h3>
+    </div>
+    <div id='speechAPIModal' class="modal fade">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+            <h4 class="modal-title">Google Speech API Key Setup</h4>
+          </div>
+          <div class="modal-body">
+            <p>If you haven't already please enable the Google Speech API
+              and generate a Google Speech API key by following the instructions
+              <a href="https://support.google.com/cloud/answer/6158862?hl=en" target="_blank">here</a>.</p>
+            <label>Google Speech API Key:</label>
+            <input type="text" id='speechAPIKey'>
+          </div>
+          <div class="modal-footer">
+            <button id='speechAPISubmit' type="button" class="btn-primary flow">Save changes</button>
+            <button id='speechAPIDelete' type="button" class="btn-danger flow">Delete API Key</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <br/>
 </template>

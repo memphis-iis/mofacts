@@ -1,5 +1,6 @@
 export {getAudioPromptModeFromPage, getAudioInputFromPage};
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
+
 const showHideAudioEnabledGroup = function(show) {
   if (show) {
     $('.audioEnabledGroup').removeClass('invisible');
@@ -11,12 +12,12 @@ const showHideAudioEnabledGroup = function(show) {
 };
 
 function getAudioPromptModeFromPage() {
-  if ($('#audioPromptOff')[0].checked) {
-    return 'silent';
-  } else if ($('#audioPromptFeedbackOnly')[0].checked) {
-    return 'feedback';
-  } else if ($('#audioPromptAll')[0].checked) {
+  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
     return 'all';
+  } else if ($('#audioPromptFeedbackOn')[0].checked){
+    return 'feedback';
+  } else if ($('#audioPromptQuestionOn')[0].checked) {
+    return 'question';
   } else {
     return 'silent';
   }
@@ -24,14 +25,21 @@ function getAudioPromptModeFromPage() {
 
 function setAudioPromptModeOnPage(audioPromptMode) {
   switch (audioPromptMode) {
-    case 'silent':
-      $('#audioPromptOff')[0].checked = true;
+    case 'all':
+      $('#audioPromptFeedbackOn')[0].checked = true;
+      $('#audioPromptQuestionOn')[0].checked = true;
       break;
     case 'feedback':
-      $('#audioPromptFeedbackOnly')[0].checked = true;
+      $('#audioPromptFeedbackOn')[0].checked = true;
+      $('#audioPromptQuestionOff')[0].checked = true;
       break;
-    case 'all':
-      $('#audioPromptAll')[0].checked = true;
+    case 'question':
+      $('#audioPromptFeedbackOff')[0].checked = true;
+      $('#audioPromptQuestionOn')[0].checked = true;
+      break;
+    default:
+      $('#audioPromptFeedbackOff')[0].checked = true;
+      $('#audioPromptQuestionOff')[0].checked = true;
       break;
   }
 }
@@ -56,17 +64,32 @@ function showHideheadphonesSuggestedDiv(show) {
   }
 }
 
-function showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode) {
+function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   switch (audioPromptMode) {
     case 'feedback':
+      $('.audioPromptFeedbackGroup').addClass('flow');
+      $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').removeClass('flow');
+      break;
+    case 'question':
+      $('.audioPromptQuestionGroup').addClass('flow');
+      $('.audioPromptQuestionGroup').removeClass('invisible');
+      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').removeClass('flow');
+      break;
     case 'all':
       $('.audioPromptFeedbackGroup').addClass('flow');
       $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').addClass('flow');
+      $('.audioPromptQuestionGroup').removeClass('invisible');
       break;
     case 'silent':
     default:
       $('.audioPromptFeedbackGroup').addClass('invisible');
       $('.audioPromptFeedbackGroup').removeClass('flow');
+      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').removeClass('flow');
       break;
   }
 }
@@ -78,23 +101,15 @@ Template.profileAudioToggles.rendered = function() {
 
   checkAndSetSpeechAPIKeyIsSetup();
 
-  $('#audioPromptSpeakingRate').change(function() {
-    $('#audioPromptSpeakingRateLabel').text('Audio prompt speaking rate: ' + document.getElementById('audioPromptSpeakingRate').value);
-  });
-
   $('#audioInputSensitivity').change(function() {
     $('#audioInputSensitivityLabel').text(document.getElementById('audioInputSensitivity').value);
-  });
-
-  $('#audioPromptSpeakingRate').change(function() {
-    $('#audioPromptSpeakingRateLabel').text(document.getElementById('audioPromptSpeakingRate').value);
   });
 
   // Restore toggle values from prior page loads
   setAudioInputOnPage(Session.get('audioEnabledView'));
   const audioPromptMode = Session.get('audioPromptFeedbackView');
   setAudioPromptModeOnPage(audioPromptMode);
-  showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
+  showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
   showHideAudioEnabledGroup();
 
   // Restore range/label values from prior page loads
@@ -120,8 +135,9 @@ Template.profileAudioToggles.events({
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
 
     Session.set('audioPromptFeedbackView', audioPromptMode);
+    Session.set('audioPromptQuestionView', audioPromptMode);
 
-    showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
+    showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
   },
 
   'click .audioInputRadio': function(event) {
