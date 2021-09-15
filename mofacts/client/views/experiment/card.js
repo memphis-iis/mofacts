@@ -475,9 +475,12 @@ Template.card.helpers({
 
   'isNormal': () => Session.get('loginMode') !== 'experiment',
 
+  'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
+
   'voiceTranscriptionImgSrc': () => Session.get('voiceTranscriptionImgSrc'), 
 
   'voiceTranscriptionPromptMsg': () => Session.get('voiceTranscriptionPromptMsg'),
+
 
   'username': function() {
     if (!haveMeteorUser()) {
