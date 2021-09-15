@@ -2378,7 +2378,7 @@ function startUserMedia(stream) {
         if (resetMainCardTimeout && timeoutFunc) {
           if (Session.get('recording')) {
             console.log('voice_start resetMainCardTimeout');
-            
+            resetMainCardTimeout();
           } else {
             console.log('NOT RECORDING');
           }
@@ -2403,7 +2403,7 @@ function startRecording() {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');    
-    resetMainCardTimeout();
+  
   } else {
     console.log('NO RECORDER');
   }
