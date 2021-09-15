@@ -1355,8 +1355,13 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
+    //Change graphic and message
+    Session.set('voiceTranscriptionPromptMsg','');
+    Session.set('voiceTranscriptionImgSrc','');
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewBegin, testType, deliveryParams, dialogueHistory);
+    
+
 
     // Give unit engine a chance to update any necessary stats
     const endLatency = trialEndTimeStamp - trialStartTimestamp;
@@ -1782,7 +1787,9 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
-
+  //Change graphic and message
+  Session.set('voiceTranscriptionPromptMsg','I am listening.');
+  Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
@@ -2108,6 +2115,8 @@ async function processLINEAR16(data) {
         phraseHints.push(curChar);
       }
     } else {
+
+      //look at this for transcription prompt! 
       if (DialogueUtils.isUserInDialogueLoop()) {
         DialogueUtils.setDialogueUserAnswerValue('waiting for transcription');
       } else {
@@ -2171,8 +2180,13 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
 
 
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
-  Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
-  Session.set('voiceTranscriptionImgSrc','images/mic_off.png');
+    //Change graphic and message
+     if(Session.get('buttonTrial')){
+      Session.set('voiceTranscriptionPromptMsg','Let me select that.');
+    } else {
+      Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
+    }
+    Session.set('voiceTranscriptionImgSrc','images/mic_off.png');
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
     console.log(response);
@@ -2202,9 +2216,18 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
         }
       }
     } else {
+      //Change graphic and message
+      if(Session.get('buttonTrial')){
+      Session.set('voiceTranscriptionPromptMsg','Let me select that.');
+    } else {
+      Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
+    }
       console.log('NO TRANSCRIPT/SILENCE');
       transcript = 'Silence detected';
       ignoredOrSilent = true;
+      //Change graphic and message
+      Session.set('voiceTranscriptionPromptMsg','I am listening.');
+      Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
     }
 
     const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
