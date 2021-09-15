@@ -477,10 +477,30 @@ Template.card.helpers({
 
   'isNotInDialogueLoopStageIntroOrExit': () => Session.get('dialogueLoopStage') != 'intro' && Session.get('dialogueLoopStage') != 'exit',
 
-  'voiceTranscriptionImgSrc': () => Session.get('voiceTranscriptionImgSrc'), 
+  'voiceTranscriptionImgSrc': function() {
+    if(Session.get('recording')){
+      //Change graphic path;
+      return 'images/mic_on.png';
+    } else {
+      //Change graphic path;
+      return 'images/mic_off.png';
+    }
+    
+  }, 
 
-  'voiceTranscriptionPromptMsg': () => Session.get('voiceTranscriptionPromptMsg'),
+  'voiceTranscriptionPromptMsg': function() {
+    if(!Session.get('recording')){
+      if(Session.get('buttonTrial')){
+        return 'Let me select that.';
+      } else {
+        return 'Let me transcribe that.';
+      }
+    } else {
+      return 'I am listening.';
+    }
+  },
 
+  
 
   'username': function() {
     if (!haveMeteorUser()) {
@@ -1170,13 +1190,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     // Timeout
     userAnswerWithTimeout = '';
     isCorrect = false;
-    historyUserAnswer = 'You didn\'t answer in time.';
-  } else if (typeof simCorrect === 'boolean') {
-    // Simulation! We know what they did
-    isCorrect = simCorrect;
-    historyUserAnswer = 'Simulated answer where correct==' + simCorrect;
-    historyCorrectMsg = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
-  } else {
+    historyUserAnswer = 'You didn\'t answer in time.';   //Change graphic and message
     // "Regular" answers
     userAnswerWithTimeout = userAnswer;
     isCorrect = null;
@@ -1358,10 +1372,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
-    //Change graphic and message
-    Session.set('voiceTranscriptionPromptMsg','');
-    Session.set('voiceTranscriptionImgSrc','');
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewBegin, testType, deliveryParams, dialogueHistory);
     
 
@@ -1790,9 +1801,6 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
-  //Change graphic and message
-  Session.set('voiceTranscriptionPromptMsg','I am listening.');
-  Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
@@ -2122,6 +2130,7 @@ async function processLINEAR16(data) {
       //look at this for transcription prompt! 
       if (DialogueUtils.isUserInDialogueLoop()) {
         DialogueUtils.setDialogueUserAnswerValue('waiting for transcription');
+        
       } else {
         userAnswer.value = 'waiting for transcription';
         phraseHints = getAllCurrentStimAnswers(true);
@@ -2183,13 +2192,6 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
 
 
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
-    //Change graphic and message
-     if(Session.get('buttonTrial')){
-      Session.set('voiceTranscriptionPromptMsg','Let me select that.');
-    } else {
-      Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
-    }
-    Session.set('voiceTranscriptionImgSrc','images/mic_off.png');
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
     console.log(response);
@@ -2220,17 +2222,10 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
       }
     } else {
       //Change graphic and message
-      if(Session.get('buttonTrial')){
-      Session.set('voiceTranscriptionPromptMsg','Let me select that.');
-    } else {
-      Session.set('voiceTranscriptionPromptMsg','Let me transcribe that.');
-    }
+     
       console.log('NO TRANSCRIPT/SILENCE');
       transcript = 'Silence detected';
       ignoredOrSilent = true;
-      //Change graphic and message
-      Session.set('voiceTranscriptionPromptMsg','I am listening.');
-      Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
     }
 
     const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
@@ -2339,8 +2334,6 @@ function startUserMedia(stream) {
   // Set up options for voice activity detection code (vad.js)
   const energyOffsetExp = 60 - Session.get('audioInputSensitivity');
   const energyOffset = parseFloat('1e+' + energyOffsetExp);
-  Session.set('voiceTranscriptionPromptMsg','I am listening.');
-  Session.set('voiceTranscriptionImgSrc','images/mic_on.png');
   const options = {
     source: input,
     energy_offset: energyOffset,
@@ -2386,7 +2379,7 @@ function startUserMedia(stream) {
         if (resetMainCardTimeout && timeoutFunc) {
           if (Session.get('recording')) {
             console.log('voice_start resetMainCardTimeout');
-            resetMainCardTimeout();
+          
           } else {
             console.log('NOT RECORDING');
           }
@@ -2410,7 +2403,8 @@ function startRecording() {
   if (recorder) {
     Session.set('recording', true);
     recorder.record();
-    console.log('RECORDING START');
+    console.log('RECORDING START');    
+    resetMainCardTimeout();
   } else {
     console.log('NO RECORDER');
   }
