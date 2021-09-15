@@ -1180,10 +1180,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
   const trueAnswer = Answers.getDisplayAnswerText(Session.get('currentAnswer'));
 
   let userAnswerWithTimeout = null;
-
-  if (getTestType() === 's' || getTestType() === 'f') {
-    // Study trial
-    isCorrect = true;
+  didn
     historyUserAnswer = 'You answered ' + _.trim(userAnswer) + '.';
     historyCorrectMsg = trueAnswer;
   } else if (isTimeout) {
@@ -1380,7 +1377,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   Meteor.setTimeout(async function() {
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
         reviewBegin, testType, deliveryParams, dialogueHistory);
-    
+
     // Give unit engine a chance to update any necessary stats
     const endLatency = trialEndTimeStamp - trialStartTimestamp;
     await engine.cardAnswered(isCorrect, endLatency);
@@ -1805,7 +1802,7 @@ async function prepareCard() {
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
-  
+
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
@@ -2402,8 +2399,7 @@ function startRecording() {
   if (recorder) {
     Session.set('recording', true);
     recorder.record();
-    console.log('RECORDING START');    
-  
+    console.log('RECORDING START');
   } else {
     console.log('NO RECORDER');
   }
