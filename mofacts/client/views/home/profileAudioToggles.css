@@ -24,6 +24,29 @@
 }
 
 #switch-feedback {
-  margin-left: 10px;
+  margin-left: 26px;
 }
 
+.audio-button-containers {
+  text-align: left;
+}
+
+.audio-button-containers input[type="radio"] {
+    margin-top: -4px;
+    vertical-align: middle;
+}
+
+.audio-button-containers input[type="select"]{
+  padding: 10px 0;
+}
+
+.audio-button-containers input[type="range"]{
+  margin-top: -4px;
+  vertical-align: middle;
+  display: inline; 
+  width: 50%;
+}
+
+.audioPromptVolume {
+  margin-left: 20%;
+}

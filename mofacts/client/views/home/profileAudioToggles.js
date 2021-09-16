@@ -1,5 +1,6 @@
 export {getAudioPromptModeFromPage, getAudioInputFromPage};
 // Set up input sensitivity range to display/hide when audio input is enabled/disabled
+
 const showHideAudioEnabledGroup = function(show) {
   if (show) {
     $('.audioEnabledGroup').removeClass('invisible');
@@ -11,27 +12,44 @@ const showHideAudioEnabledGroup = function(show) {
 };
 
 function getAudioPromptModeFromPage() {
-  if ($('#audioPromptOff')[0].checked) {
-    return 'silent';
-  } else if ($('#audioPromptFeedbackOnly')[0].checked) {
-    return 'feedback';
-  } else if ($('#audioPromptAll')[0].checked) {
+  if ($('#audioPromptFeedbackOn')[0].checked && $('#audioPromptQuestionOn')[0].checked) {
     return 'all';
+  } else if ($('#audioPromptFeedbackOn')[0].checked){
+    return 'feedback';
+  } else if ($('#audioPromptQuestionOn')[0].checked) {
+    return 'question';
   } else {
     return 'silent';
   }
 }
 
+function setAudioPromptQuestionVolumeOnPage(audioVolume) {
+  //Google's TTS API uses decibles to alter audio, the range is -96 to 16. 0 is 
+  document.getElementById('audioPromptQuestionVolume').value = audioVolume;
+}
+
+function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
+  document.getElementById('audioPromptFeedbackVolume').value = audioVolume;
+
+}
+
 function setAudioPromptModeOnPage(audioPromptMode) {
   switch (audioPromptMode) {
-    case 'silent':
-      $('#audioPromptOff')[0].checked = true;
+    case 'all':
+      $('#audioPromptFeedbackOn')[0].checked = true;
+      $('#audioPromptQuestionOn')[0].checked = true;
       break;
     case 'feedback':
-      $('#audioPromptFeedbackOnly')[0].checked = true;
+      $('#audioPromptFeedbackOn')[0].checked = true;
+      $('#audioPromptQuestionOff')[0].checked = true;
       break;
-    case 'all':
-      $('#audioPromptAll')[0].checked = true;
+    case 'question':
+      $('#audioPromptFeedbackOff')[0].checked = true;
+      $('#audioPromptQuestionOn')[0].checked = true;
+      break;
+    default:
+      $('#audioPromptFeedbackOff')[0].checked = true;
+      $('#audioPromptQuestionOff')[0].checked = true;
       break;
   }
 }
@@ -56,17 +74,32 @@ function showHideheadphonesSuggestedDiv(show) {
   }
 }
 
-function showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode) {
+function showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode) {
   switch (audioPromptMode) {
     case 'feedback':
+      $('.audioPromptFeedbackGroup').addClass('flow');
+      $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').removeClass('flow');
+      break;
+    case 'question':
+      $('.audioPromptQuestionGroup').addClass('flow');
+      $('.audioPromptQuestionGroup').removeClass('invisible');
+      $('.audioPromptFeedbackGroup').addClass('invisible');
+      $('.audioPromptFeedbackGroup').removeClass('flow');
+      break;
     case 'all':
       $('.audioPromptFeedbackGroup').addClass('flow');
       $('.audioPromptFeedbackGroup').removeClass('invisible');
+      $('.audioPromptQuestionGroup').addClass('flow');
+      $('.audioPromptQuestionGroup').removeClass('invisible');
       break;
     case 'silent':
     default:
       $('.audioPromptFeedbackGroup').addClass('invisible');
       $('.audioPromptFeedbackGroup').removeClass('flow');
+      $('.audioPromptQuestionGroup').addClass('invisible');
+      $('.audioPromptQuestionGroup').removeClass('flow');
       break;
   }
 }
@@ -78,23 +111,17 @@ Template.profileAudioToggles.rendered = function() {
 
   checkAndSetSpeechAPIKeyIsSetup();
 
-  $('#audioPromptSpeakingRate').change(function() {
-    $('#audioPromptSpeakingRateLabel').text('Audio prompt speaking rate: ' + document.getElementById('audioPromptSpeakingRate').value);
-  });
-
   $('#audioInputSensitivity').change(function() {
     $('#audioInputSensitivityLabel').text(document.getElementById('audioInputSensitivity').value);
-  });
-
-  $('#audioPromptSpeakingRate').change(function() {
-    $('#audioPromptSpeakingRateLabel').text(document.getElementById('audioPromptSpeakingRate').value);
   });
 
   // Restore toggle values from prior page loads
   setAudioInputOnPage(Session.get('audioEnabledView'));
   const audioPromptMode = Session.get('audioPromptFeedbackView');
   setAudioPromptModeOnPage(audioPromptMode);
-  showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
+  showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
+  setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
+  setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
   showHideAudioEnabledGroup();
 
   // Restore range/label values from prior page loads
@@ -103,10 +130,14 @@ Template.profileAudioToggles.rendered = function() {
     document.getElementById('audioInputSensitivity').value = audioInputSensitivityView;
   }
 
-  const audioPromptSpeakingRateView = Session.get('audioPromptSpeakingRateView');
-  if (audioPromptSpeakingRateView) {
-    document.getElementById('audioPromptSpeakingRate').value = audioPromptSpeakingRateView;
-    document.getElementById('audioPromptSpeakingRateLabel').innerHTML = audioPromptSpeakingRateView;
+  const audioPromptFeedbackSpeakingRateView = Session.get('audioPromptFeedbackSpeakingRateView');
+  if (audioPromptFeedbackSpeakingRateView) {
+    document.getElementById('audioPromptFeedbackSpeakingRate').value = audioPromptFeedbackSpeakingRateView;
+  }
+
+  const audioPromptQuestionSpeakingRateView = Session.get('audioPromptQuestionSpeakingRateView');
+  if (audioPromptQuestionSpeakingRateView) {
+    document.getElementById('audioPromptQuestionSpeakingRate').value = audioPromptQuestionSpeakingRateView;
   }
 };
 
@@ -121,7 +152,7 @@ Template.profileAudioToggles.events({
 
     Session.set('audioPromptFeedbackView', audioPromptMode);
 
-    showHideAudioPromptFeedbackGroupDependingOnAudioPromptMode(audioPromptMode);
+    showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
   },
 
   'click .audioInputRadio': function(event) {
@@ -178,6 +209,14 @@ Template.profileAudioToggles.events({
         alert('Your profile changes have been saved');
       }
     });
+  },
+
+  'change #audioPromptQuestionVolume': function(event) {
+    Session.set('audioPromptQuestionVolume', event.currentTarget.value);
+  },
+
+  'change #audioPromptFeedbackVolume': function(event) {
+    Session.set('audioPromptFeedbackVolume', event.currentTarget.value)
   },
 });
 
