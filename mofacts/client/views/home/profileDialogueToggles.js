@@ -19,6 +19,14 @@ Template.profileDialogueToggles.events({
     _state.set('selectedDialogueType',
         event.currentTarget.getAttribute('data-dialogue-type'));
   },
+
+  'click #confirmFeedbackSelection': function() {
+    Session.set('feedbackParamsSet',true);
+    Session.set('pausedLocks', 0);
+    Router.go('/card');
+    
+  },
+
 });
 
 Template.profileDialogueToggles.helpers({
