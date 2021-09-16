@@ -399,13 +399,20 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('audioPromptFeedbackView', audioPromptMode);
   const audioInputEnabled = getAudioInputFromPage();
   Session.set('audioEnabledView', audioInputEnabled);
-  const audioPromptSpeakingRate = document.getElementById('audioPromptSpeakingRate').value;
-  Session.set('audioPromptSpeakingRateView', audioPromptSpeakingRate);
+  const audioPromptFeedbackSpeakingRate = document.getElementById('audioPromptFeedbackSpeakingRate').value;
+  Session.set('audioPromptFeedbackSpeakingRateView', audioPromptFeedbackSpeakingRate);
+  const audioPromptQuestionSpeakingRate = document.getElementById('audioPromptQuestionSpeakingRate').value;
+  Session.set('audioPromptQuestionSpeakingRateView', audioPromptQuestionSpeakingRate);
   const audioInputSensitivity = document.getElementById('audioInputSensitivity').value;
   Session.set('audioInputSensitivityView', audioInputSensitivity);
+  const audioPromptQuestionVolume = document.getElementById('audioPromptQuestionVolume').value;
+  Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
+  const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
+  Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
 
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
-  Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
+  Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
+  Session.set('audioPromptQuestionSpeakingRate', audioPromptQuestionSpeakingRate);
   Session.set('audioInputSensitivity', audioInputSensitivity);
 
   // Get some basic info about the current user's environment

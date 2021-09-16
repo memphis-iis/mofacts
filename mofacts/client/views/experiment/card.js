@@ -1942,7 +1942,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
       console.log('text to speak playing prompt: ', new Date());
-      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'all');
+      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'question');
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
@@ -2027,8 +2027,19 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       let ttsAPIKey = '';
       if (Session.get('currentTdfFile').tdfs.tutor.setspec[0].textToSpeechAPIKey) {
         ttsAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
-        const audioPromptSpeakingRate = Session.get('audioPromptSpeakingRate');
-        makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, function(audioObj) {
+        rate = Session.get('audioPromptFeedbackSpeakingRate');
+        volume = Session.get('audioPromptFeedbackVolume')
+
+        if (audioPromptSource == 'question'){
+          rate = Session.get('audioPromptQuestionSpeakingRate');
+          volume = Session.get('audioPromptQuestionVolume')
+        } else if (audioPromptSource == 'dialogue') {
+          volume = 0;
+          rate = 1;
+        }
+        const audioPromptSpeakingRate = rate;
+        const audioPromptVolume = volume;
+        makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
@@ -2050,11 +2061,11 @@ function decodeBase64AudioContent(audioDataEncoded) {
   return new Audio('data:audio/ogg;base64,' + audioDataEncoded);
 }
 
-function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, callback) {
+function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, audioVolume, callback) {
   const request = {
     input: {text: message},
     voice: {languageCode: 'en-US', ssmlGender: 'FEMALE'},
-    audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate},
+    audioConfig: {audioEncoding: 'MP3', speakingRate: audioPromptSpeakingRate, volumeGainDb: audioVolume},
   };
 
   const ttsURL = 'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + ttsAPIKey;

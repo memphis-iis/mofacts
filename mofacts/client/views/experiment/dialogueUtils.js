@@ -77,7 +77,7 @@ function dialogueLoop(err, res) {
       Session.set('dialogueLoopStage', 'exit');
     }
     updateDialogueDisplay(newDisplay);
-    speakMessageIfAudioPromptFeedbackEnabled(newDisplay, false, 'dialogue');
+    speakMessageIfAudioPromptFeedbackEnabled(newDisplay, 'dialogue');
 
     if (Session.get('audioEnabled')) {
       startRecording();
@@ -168,7 +168,7 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
             transitionStatement = transitionStatement + dialogueTransitionInstructions;
           }
           updateDialogueDisplay(transitionStatement);
-          speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, false, 'dialogue');
+          speakMessageIfAudioPromptFeedbackEnabled(transitionStatement, 'dialogue');
           // wait for user to hit enter to make sure they read the transition statement
           // execution thread continues at keypress #dialogueUserAnswer in card.js
         }

@@ -23,6 +23,16 @@ function getAudioPromptModeFromPage() {
   }
 }
 
+function setAudioPromptQuestionVolumeOnPage(audioVolume) {
+  //Google's TTS API uses decibles to alter audio, the range is -96 to 16. 0 is 
+  document.getElementById('audioPromptQuestionVolume').value = audioVolume;
+}
+
+function setAudioPromptFeedbackVolumeOnPage(audioVolume) {
+  document.getElementById('audioPromptFeedbackVolume').value = audioVolume;
+
+}
+
 function setAudioPromptModeOnPage(audioPromptMode) {
   switch (audioPromptMode) {
     case 'all':
@@ -110,6 +120,8 @@ Template.profileAudioToggles.rendered = function() {
   const audioPromptMode = Session.get('audioPromptFeedbackView');
   setAudioPromptModeOnPage(audioPromptMode);
   showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
+  setAudioPromptQuestionVolumeOnPage(Session.get('audioPromptQuestionVolume'));
+  setAudioPromptFeedbackVolumeOnPage(Session.get('audioPromptFeedbackVolume'));
   showHideAudioEnabledGroup();
 
   // Restore range/label values from prior page loads
@@ -118,10 +130,14 @@ Template.profileAudioToggles.rendered = function() {
     document.getElementById('audioInputSensitivity').value = audioInputSensitivityView;
   }
 
-  const audioPromptSpeakingRateView = Session.get('audioPromptSpeakingRateView');
-  if (audioPromptSpeakingRateView) {
-    document.getElementById('audioPromptSpeakingRate').value = audioPromptSpeakingRateView;
-    document.getElementById('audioPromptSpeakingRateLabel').innerHTML = audioPromptSpeakingRateView;
+  const audioPromptFeedbackSpeakingRateView = Session.get('audioPromptFeedbackSpeakingRateView');
+  if (audioPromptFeedbackSpeakingRateView) {
+    document.getElementById('audioPromptFeedbackSpeakingRate').value = audioPromptFeedbackSpeakingRateView;
+  }
+
+  const audioPromptQuestionSpeakingRateView = Session.get('audioPromptQuestionSpeakingRateView');
+  if (audioPromptQuestionSpeakingRateView) {
+    document.getElementById('audioPromptQuestionSpeakingRate').value = audioPromptQuestionSpeakingRateView;
   }
 };
 
@@ -193,6 +209,14 @@ Template.profileAudioToggles.events({
         alert('Your profile changes have been saved');
       }
     });
+  },
+
+  'change #audioPromptQuestionVolume': function(event) {
+    Session.set('audioPromptQuestionVolume', event.currentTarget.value);
+  },
+
+  'change #audioPromptFeedbackVolume': function(event) {
+    Session.set('audioPromptFeedbackVolume', event.currentTarget.value)
   },
 });
 
