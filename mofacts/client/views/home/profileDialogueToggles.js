@@ -22,7 +22,6 @@ Template.profileDialogueToggles.events({
 
   'click #confirmFeedbackSelection': function() {
     Session.set('feedbackParamsSet',true);
-    Session.set('pausedLocks', 0);
     Router.go('/card');
     
   },
