@@ -135,7 +135,6 @@ Template.profileAudioToggles.events({
     showHideheadphonesSuggestedDiv(showHeadphonesSuggestedDiv);
 
     Session.set('audioPromptFeedbackView', audioPromptMode);
-    Session.set('audioPromptQuestionView', audioPromptMode);
 
     showHideAudioPromptGroupDependingOnAudioPromptMode(audioPromptMode);
   },
