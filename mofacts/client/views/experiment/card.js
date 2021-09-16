@@ -2027,18 +2027,12 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       let ttsAPIKey = '';
       if (Session.get('currentTdfFile').tdfs.tutor.setspec[0].textToSpeechAPIKey) {
         ttsAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
-        rate = Session.get('audioPromptFeedbackSpeakingRate');
-        volume = Session.get('audioPromptFeedbackVolume')
-
+        let audioPromptSpeakingRate = Session.get('audioPromptFeedbackSpeakingRate');
+        let audioPromptVolume = Session.get('audioPromptFeedbackVolume')
         if (audioPromptSource == 'question'){
-          rate = Session.get('audioPromptQuestionSpeakingRate');
-          volume = Session.get('audioPromptQuestionVolume')
-        } else if (audioPromptSource == 'dialogue') {
-          volume = 0;
-          rate = 1;
+          audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
+          audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
-        const audioPromptSpeakingRate = rate;
-        const audioPromptVolume = volume;
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
