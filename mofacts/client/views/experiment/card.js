@@ -371,6 +371,12 @@ Template.card.rendered = async function() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
+  // Check if TDF allows for dialogue feedback preferences, if so, route to dialogue feedback widget
+  if(Session.get('allowFeedbackTypeSelect') && !Session.get('feedbackParamsSet')) {
+    Router.go('/feedback'); 
+  } 
+
+
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
@@ -860,6 +866,8 @@ function curStimHasImageDisplayType() {
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
   return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
 }
+
+
 
 // Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:
 //

@@ -108,4 +108,7 @@ function sessionCleanUp() {
   Session.set('testType', undefined);
   Session.set('VADInitialized', false);
   Session.set('scoringEnabled', undefined);
+  Session.set('feedbackParamsSet', undefined);
+  
 }
+

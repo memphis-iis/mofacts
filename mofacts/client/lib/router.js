@@ -161,6 +161,7 @@ const defaultBehaviorRoutes = [
   'instructorReporting',
   'studentReporting',
   'voice',
+  'feedback',
 ];
 
 const getDefaultRouteAction = function(routeName) {
