@@ -372,15 +372,10 @@ Template.card.rendered = async function() {
   }
 
   // Check if TDF allows for dialogue feedback preferences, if so, route to dialogue feedback widget
-  const allowFeedbackTypeSelect = Session.get('allowFeedbackTypeSelect');
-  const feedbackParamsSet = Session.get('feedbackParamsSet');
-  //Paused Lock to prevent audio from playing during preference selection
-  Session.set('pausedLocks', Session.get('pausedLocks')+1);
-  if(allowFeedbackTypeSelect && !feedbackParamsSet){
-    Router.go('/feedback');
-  } else {
-    Session.set('pausedLocks', Session.get('pausedLocks')-1);
-  }
+  if(Session.get('allowFeedbackTypeSelect') && !Session.get('feedbackParamsSet')) {
+    Router.go('/feedback'); 
+  } 
+
 
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
