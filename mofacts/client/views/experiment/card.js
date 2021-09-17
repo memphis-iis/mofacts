@@ -524,7 +524,7 @@ Template.card.helpers({
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
   'subWordParts': () => Session.get('clozeQuestionParts'),
- 
+
   'clozeText': function() {
     const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
     return clozeText;
