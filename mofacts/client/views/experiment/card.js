@@ -1934,7 +1934,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
     console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
     const initialviewTimeDelay = deliveryParams.initialview;
-    console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
+    console.log('Rusty: two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
     setTimeout(function() {
       console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
