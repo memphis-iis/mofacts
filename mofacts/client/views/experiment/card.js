@@ -524,7 +524,7 @@ Template.card.helpers({
 
   // For now we're going to assume syllable hints are contiguous. TODO: make this more generalizable
   'subWordParts': () => Session.get('clozeQuestionParts'),
-
+ 
   'clozeText': function() {
     const clozeText = Session.get('currentDisplay') ? Session.get('currentDisplay').clozeText : undefined;
     return clozeText;
@@ -1934,7 +1934,7 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
     console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
     const initialviewTimeDelay = deliveryParams.initialview;
-    console.log('Rusty: two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
+    console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
     setTimeout(function() {
       console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
