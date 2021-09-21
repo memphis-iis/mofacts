@@ -16,6 +16,10 @@ Template.inputF.helpers({
   'dialogueIntroExit': function() {
     return DialogueUtils.isUserInDialogueIntroExit();
   },
+
+  'questionIsRemovable': function() {
+    return Session.get('numRemainingCards') > 2;
+  }
 });
 
 Template.inputForceCorrect.rendered = function() {

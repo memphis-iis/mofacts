@@ -54,6 +54,9 @@ function defaultUnitEngine(curExperimentData) {
   const engine = {
     // Things actual engines must supply
     unitType: 'DEFAULT',
+    updateCardList: function() {
+      throw new Error('Missing Implementation');
+    },
     selectNextCard: function() {
       throw new Error('Missing Implementation');
     },
@@ -309,6 +312,8 @@ function emptyUnitEngine() {
     unitFinished: function() {
       return true;
     },
+    updateCardList: function() { },
+    getCardCount: function() { },
     selectNextCard: function() { },
     findCurrentCardInfo: function() { },
     cardAnswered: async function() { },
@@ -920,6 +925,9 @@ function modelUnitEngine() {
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
+      let hiddenItems = Session.get('hiddenItems');
+      if (hiddenItems === undefined) hiddenItems = []
+      Session.set('numRemainingCards', cards.length - hiddenItems.length);
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
@@ -1063,6 +1071,27 @@ function modelUnitEngine() {
       await this.initializeActRModel();
     },
 
+    updateCardList: async function() {
+      //This is called whenever a user marks a card as incorrect. 
+      //updateCurStudentPerformance(true, 0, true);
+      const cards = cardProbabilities.cards;
+      let hiddenItems = Session.get('hiddenItems');
+  
+      for(let i = 0; i < cards.length; i++){
+        let card = cards[i].clusterKC;
+        if(hiddenItems.includes(card)){
+          cards[i].canUse = false;
+        }
+      }
+    },
+
+    getCardCount: async function() {
+      const cards = cardProbabilities.cards;
+      let hiddenItems = Session.get('hiddenItems');
+      if (hiddenItems === undefined) hiddenItems = [];
+      return (cards.length - hiddenItems.length);
+    },
+
     selectNextCard: async function() {
       // The cluster (card) index, the cluster version (stim index), and
       // whether or not we should show the overlearning text is determined
@@ -1204,7 +1233,7 @@ function modelUnitEngine() {
       }
     },
 
-    cardAnswered: async function(wasCorrect, practiceTime) {
+    cardAnswered: async function(wasCorrect, practiceTime, wasReport) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
@@ -1233,7 +1262,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, wasReport);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and

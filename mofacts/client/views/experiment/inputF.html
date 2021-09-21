@@ -4,6 +4,11 @@
             <button type="button" id="dialogueIntroExit" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
                 Press to continue when ready
             </button>
+            {{#if questionIsRemovable}}
+                <button type="button" id="removeQuestion" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
+                    Report question as incorrect
+                </button>
+            {{/if}}
         {{else}}
             <div class="{{fontSizeClass}}">
                 <input id="dialogueUserAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
@@ -14,6 +19,25 @@
             <input id="userAnswer" class="alert alert-warning" style="display:table-cell;width:100%;">
         </div>
     {{/if}}
+
+    <div class="modal fade" id="removalConfirmation" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header visible-text">
+                    <button type="button" class="close removalModalDismiss" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Question removed</h4>
+                </div>
+                <div class="modal-body visible-text">
+                    <div id="finalInstructionsText">Thanks, we’ll take it out of your stack.</div>
+                </div>
+                <div class="modal-footer visible-text">
+                    <button type="button" class="btn btn-default btn-responsive removalModalDismissCancel" id="removalModalDismissCancel" data-dismiss="modal" style="float: left; background: red;">Cancel</button>
+                    <button type="button" class="btn btn-default btn-responsive removalModalDismissContinue" id="removalModalDismissContinue" data-dismiss="modal">Continue</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </template>
 
 <template name="inputForceCorrect">
