@@ -427,7 +427,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
   // Check to see if the user has turned on audio prompt.
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
-  const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all');
+  const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
   console.log(curTdfContent);
   const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback &&
       curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == 'true';
@@ -487,6 +487,18 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       currentStimuliSetId: currentStimuliSetId,
     };
     await updateExperimentState(newExperimentState, 'profile.selectTdf');
+
+    const curTdf = await meteorCallAsync('getTdfById', currentTdfId);
+    const stimuliSet = await meteorCallAsync('getStimuliSetById', curTdf.stimuliSetId);
+
+    // Cancels the loading of a TDF if question TTS enabled and TDF contains image buttons.
+    for(stim in stimuliSet){
+      if (stimuliSet[stim].itemResponseType == 'image' && (audioPromptMode == 'all' || audioPromptMode == 'question')) {
+        console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+        alert('Question reading not supported on this TDF. Please disable and try again.');
+        return;
+      }
+    }
 
     Session.set('inResume', true);
     if (isMultiTdf) {

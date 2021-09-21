@@ -1973,11 +1973,18 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       });
     }, timeuntilaudio);
   } else { // Not a sound - can unlock now for data entry now
-    const questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
+    const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
       console.log('text to speak playing prompt: ', new Date());
-      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'question');
+      let buttons = Session.get('buttonList');
+      let buttonsToSpeak = '';
+      if(buttons){
+        for(button in buttons){
+          buttonsToSpeak = buttonsToSpeak + ' ' + buttons[button].buttonName;
+        }
+      }
+      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
