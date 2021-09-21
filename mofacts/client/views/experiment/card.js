@@ -414,6 +414,20 @@ Template.card.events({
     handleUserInput(e, 'keypress');
   },
 
+  'click #removeQuestion': function() {
+    // Dialog modal to inform user that the question will not be counted
+    $('#removalConfirmation').modal('show');
+  },
+
+  'click #removalModalDismissContinue': function() {
+    // Dialog modal to inform user that the question will not be counted
+    $('#removalConfirmation').modal('hide');
+  },
+
+  'click #removalModalDismissContinue': function() {
+    removeCardByUser();
+  },
+
   'click #dialogueIntroExit': function() {
     dialogueContinue();
   },
@@ -1378,12 +1392,13 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
+    let isReport = Session.get('isReport');
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, testType, deliveryParams, dialogueHistory);
+        reviewBegin, testType, deliveryParams, dialogueHistory, isReport);
 
     // Give unit engine a chance to update any necessary stats
     const endLatency = trialEndTimeStamp - trialStartTimestamp;
-    await engine.cardAnswered(isCorrect, endLatency);
+    await engine.cardAnswered(isCorrect, endLatency, isReport);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
     const newExperimentState = {
@@ -1424,6 +1439,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         return; // We are totally done
       }
     }
+    Session.set('isReport', false);
 
     hideUserFeedback();
     $('#userAnswer').val('');
@@ -1467,7 +1483,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, testType, deliveryParams, dialogueHistory) {
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, testType, deliveryParams, dialogueHistory, isReport) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   const feedbackDuration = !userFeedbackStart ? 0 : Date.now() - userFeedbackStart;
   let responseDuration = 0;
@@ -1577,14 +1593,19 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   // hack
   const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
-
+  let outcome = 'incorrect';
+  if(isReport) {
+    outcome = 'removal';
+  } else if (isCorrect) {
+    outcome = 'correct';
+  }
   const answerLogRecord = {
     'itemId': itemId,
     'KCId': stimulusKC,
     'userId': Meteor.userId(),
     'TDFId': Session.get('currentTdfId'),
     'eventStartTime': trialStartTimestamp,
-    'outcome': isCorrect ? 'correct' : 'incorrect',
+    'outcome': outcome,
     'probabilityEstimate': probabilityEstimate,
     'typeOfResponse': getResponseType(),
     'responseValue': _.trim(userAnswer),
@@ -1997,7 +2018,7 @@ function allowUserInput() {
       $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
     // Force scrolling to bottom of screen for the input
-    scrollElementIntoView(null, false);
+    // scrollElementIntoView(null, false);
 
     const textFocus = !getButtonTrial();
     if (textFocus) {
@@ -2661,6 +2682,21 @@ async function checkSyllableCacheForCurrentStimFile(cb) {
   } else {
     cb();
   }
+}
+
+async function removeCardByUser() {
+  let clusterIndex = Session.get('clusterIndex');
+  const stimulusKC = getStimCluster(clusterIndex).stims[0].stimulusKC;
+  const userId = Meteor.userId();
+  const tdfId = Session.get('currentTdfId');
+
+  await meteorCallAsync('insertHiddenItem', userId, stimulusKC);
+  Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', userId, tdfId));
+  engine.updateCardList();
+  Session.set('dialogueLoopStage', 'exit');
+  Session.set('numRemainingCards', await engine.getCardCount());
+  Session.set('isReport', true);
+  await dialogueContinue();
 }
 
 async function processUserTimesLog() {

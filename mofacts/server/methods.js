@@ -713,6 +713,21 @@ async function setExperimentState(UserId, TDFId, newExperimentState) { // by cur
   return TDFId;
 }
 
+async function insertHiddenItem(userId, stimulusKC) {
+  let query = 'UPDATE componentstate SET showitem = FALSE WHERE userid = $1 AND kcid = $2';
+  await db.manyOrNone(query, [userId, stimulusKC]);
+}
+
+async function getHiddenItems(userId, tdfId) {
+  let query = 'SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false';
+  const hiddenItems = await db.manyOrNone(query, [userId, tdfId]);
+  let ret = [];
+  for(let i = 0; i < hiddenItems.length; i++){
+    ret.push(hiddenItems[i].kcid);
+  }
+  return [...new Set(ret)];
+}
+
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
@@ -1624,6 +1639,8 @@ Meteor.startup(async function() {
     insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap,
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
+
+    insertHiddenItem, getHiddenItems,
 
     getAltServerUrl: function() {
       return altServerUrl;

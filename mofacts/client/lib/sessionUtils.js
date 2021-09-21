@@ -59,6 +59,8 @@ function sessionCleanUp() {
 
   Session.set('schedule', undefined);
 
+  Session.set('isReport', false);
+
   Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
   Session.set('currentTdfId', undefined);
