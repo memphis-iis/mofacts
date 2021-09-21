@@ -18,7 +18,7 @@ Template.inputF.helpers({
   },
 
   'questionIsRemovable': function() {
-    return Session.get('numRemainingCards') > 2;
+    return Session.get('numRemainingCards') > 3;
   }
 });
 
