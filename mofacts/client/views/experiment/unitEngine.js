@@ -15,7 +15,6 @@ import {MODEL_UNIT, SCHEDULE_UNIT} from '../../../common/Definitions';
 import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
-import { BigNatModule$002EFFT$002EFp$$$m2PowNthRoot } from '../../../server/lib/BigInt/n';
 
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
@@ -127,10 +126,10 @@ function defaultUnitEngine(curExperimentData) {
 
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-      
       clozeQuestionParts.splice(1, 1);
       clozeQuestionParts.splice(1, 0, clozeAnswerNoUnderscores.trim());
-      clozeQuestionRemainingParts = clozeQuestionParts.splice(0,2);
+      clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionParts[2];
+      clozeQuestionRemainingParts = clozeQuestionParts.splice(2).join('');
       clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionRemainingParts;
 
       // If our third cloze part begins with an underscore,
@@ -146,8 +145,7 @@ function defaultUnitEngine(curExperimentData) {
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
-      clozeQuestionPart[2] = clozeQuestionParts
-      console.log('Rusty:', clozeQuestionParts);  
+
       return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts};
     },
 
