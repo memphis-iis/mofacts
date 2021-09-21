@@ -488,18 +488,6 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     };
     await updateExperimentState(newExperimentState, 'profile.selectTdf');
 
-    const curTdf = await meteorCallAsync('getTdfById', currentTdfId);
-    const stimuliSet = await meteorCallAsync('getStimuliSetById', curTdf.stimuliSetId);
-
-    // Cancels the loading of a TDF if question TTS enabled and TDF contains image buttons.
-    for(stim in stimuliSet){
-      if (stimuliSet[stim].itemResponseType == 'image' && (audioPromptMode == 'all' || audioPromptMode == 'question')) {
-        console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
-        alert('Question reading not supported on this TDF. Please disable and try again.');
-        return;
-      }
-    }
-
     Session.set('inResume', true);
     if (isMultiTdf) {
       navigateForMultiTdf();

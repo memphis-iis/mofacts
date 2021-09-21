@@ -855,6 +855,15 @@ function preloadStimuliFiles() {
   }
 }
 
+function checkUserAudioConfigCompatability(){
+  const audioPromptMode = Session.get('audioPromptMode');
+  if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
+    console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+    alert('Question reading not supported on this TDF. Please disable and try again.');
+    leavePage('/profile');
+  }
+}
+
 function curStimHasSoundDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
@@ -2566,6 +2575,7 @@ async function resumeFromComponentState() {
   Session.set('currentStimuliSet', stimuliSet);
 
   preloadStimuliFiles();
+  checkUserAudioConfigCompatability();
 
   // In addition to experimental condition, we allow a root TDF to specify
   // that the xcond parameter used for selecting from multiple deliveryParms's
