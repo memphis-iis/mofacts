@@ -120,6 +120,8 @@ function updateCurStudentPerformance(isCorrect, endLatency) {
   curUserPerformance.count = curUserPerformance.count + 1;
   if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
   curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+  curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
+  curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
   curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
   curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
 
@@ -134,12 +136,16 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     studentPerformanceData = {
       numCorrect: 0,
       numIncorrect: 0,
+      stimsSeen: 0,
+      totalStimCount: 0,
       totalPracticeDuration: 0,
     };
   } else {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
+      stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen) || 0,
+      totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
       totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,
     };
   }
@@ -150,6 +156,8 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'count': count,
     'percentCorrect': percentCorrect,
     'numCorrect': studentPerformanceData.numCorrect,
+    'stimsSeen' : studentPerformanceData.stimsSeen,
+    'totalStimCount': studentPerformanceDataRet.totalStimCount,
     'totalTime': studentPerformanceData.totalPracticeDuration,
     // convert from ms to min
     'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
