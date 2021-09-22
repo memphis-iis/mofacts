@@ -1222,7 +1222,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
     }
 
     const currCount = _.intval(Session.get('scrollListCount'));
-    const currentQuestion = Session.get('currentDisplay').clozeText || Session.get('currentDisplay').text;
+    const currentQuestion = Session.get('currentDisplay').text || Session.get('currentDisplay').clozeText
 
     scrollList.insert({
       'temp': 1, // Deleted when clearing
