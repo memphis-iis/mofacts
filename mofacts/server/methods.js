@@ -1020,6 +1020,15 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
   return ret.count;
 }
 
+async function getStimCountByTdfId(tdfId) {
+  const query = 'SELECT COUNT(*) FROM item \
+               WHERE stimuliSetId=$1 \
+               ORDER BY itemId';
+  const ret = await db.one(query, stimuliSetId);
+  return ret.count;
+}
+
+
 async function getStudentReportingData(userId, TDFid) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
@@ -1056,17 +1065,25 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
+               COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration \
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\'';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
-  if (!perfRet) return null;
+  const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
+                  FROM history AS s \
+                  WHERE s.userId=$1 AND s.tdfid=$2';                  
+  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid]);
+  if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: perfRet.numcorrect,
     numIncorrect: perfRet.numincorrect,
-    totalPracticeDuration: perfRet.totalpracticeduration,
+    totalStimCount: perfRet.totalstimcount,
+    stimsSeen: perfRet2.stimsSeen,
+    totalPracticeDuration: perfRet.totalpracticeduration
+ 
   };
 }
 

@@ -1,9 +1,34 @@
 import {setStudentPerformance} from '../../lib/currentTestingHelpers';
 import {INVALID} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
+import gauge, {
+  Gauge,
+  Donut,
+  BaseDonut,
+  TextRenderer
+
+} from '../../lib/gauge.js';
+import { Session } from 'meteor/session';
 
 Session.set('studentReportingTdfs', []);
 Session.set('curStudentPerformance', {});
+
+let defaultGaugeOptions = {
+  lines: 12, // The number of lines to draw
+  angle: 0.22, // The length of each line
+  lineWidth: 0.15, // The line thickness
+  pointer: {
+    length: 0.9, // The radius of the inner circle
+    strokeWidth: 0.035, // The rotation offset
+    color: '#111111' // Fill color
+  },
+  limitMax: 'true', // If true, the pointer will not go past the end of the gauge
+  colorStart: '#008351', // Colors
+  colorStop: '#008351', // just experiment with them
+  strokeColor: '#EEEEEE', // to see which ones work best for you
+  generateGradient: true
+};
+
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
@@ -63,6 +88,7 @@ Template.studentReporting.events({
 
       setStudentPerformance(studentID, studentUsername, selectedTdfId);
       drawCharts(studentData);
+      drawDashboard(studentID, selectedTdfId);
     }
   },
 });
@@ -196,6 +222,45 @@ function drawProbBars(targetSelector, labels, series, dataDescrip, chartConfig) 
       });
     });
   }
+}
+
+function lookUpLabelByDataValue(labels, series, value) {
+  return labels[series.findIndex(function(element) {
+    return element == value;
+  })];
+}
+
+
+async function drawDashboard(studentID,selectedTDF){
+  
+  //Get Data from session variableS
+  const {username, count, percentCorrect, numCorrect, stimsSeen,  totalTime, totalTimeDisplay} = ession.get('curStudentPerformance');
+  //Draw Dashboard
+  let dashCluster = [];
+  dashClusterCanvases = document.getElementsByClassName('gaugeCanvas');
+    Array.prototype.forEach.call(dashClusterCanvases, function(element){
+      let gaugeMeter = new progressGauge(element,0,100);
+      dashCluster.push(gaugeMeter);
+    });
+    //Populate Dashboard values
+    console.log('Testing dashCluster:',dashCluster);
+    dashCluster[1].set(curStudentPerformance.percentCorrect);
+    console.log('Testing curStudentPerformance:',Session.get('curStudentPerformance'));
+
+  }
+function progressGauge(target, currentValue,maxValue,options = defaultGaugeOptions){
+    if(target != undefined){
+      console.log('gauge canvas found and loaded.')
+      gauge = new Donut(target).setOptions(options); // create sexy gauge!
+      gauge.maxValue = maxValue; // set max gauge value
+      gauge.animationSpeed = 32; // set animation speed (32 is default value)
+      gauge.set(currentValue); // set actual value
+      gauge.setTextField(document.getElementById("preview-textfield"));
+      return gauge;
+  } else {
+      console.log('canvas not found in DOM call.')
+  }
+ 
 }
 
 function lookUpLabelByDataValue(labels, series, value) {
