@@ -126,12 +126,24 @@ function defaultUnitEngine(curExperimentData) {
 
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-      clozeQuestionParts.splice(1, 1);
-      clozeQuestionParts.splice(1, 0, clozeAnswerNoUnderscores.trim());
-      clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionParts[2];
-      clozeQuestionRemainingParts = clozeQuestionParts.splice(2).join('');
-      clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionRemainingParts;
-
+      // clozeQuestionParts.splice(1, 1);
+      // clozeQuestionParts.splice(1, 0, clozeAnswerNoUnderscores.trim());
+      // clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionParts[2];
+      // clozeQuestionRemainingParts = clozeQuestionParts.splice(2).join('');
+      // clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionRemainingParts;
+      
+      //Testing
+      for (var i = 0; i < clozeQuestionParts.length; i++)  {
+        console.log('clozeQuestionParts',i,clozeQuestionParts[i]);
+        let clozeAnswerAddedSpaces = "";
+        if(clozeQuestionParts[i].charAt(0) == "_"){
+          clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
+        }
+      }
+      console.log('clozeQuestionParts',clozeQuestionParts);
+      clozeQuestionParts = clozeQuestionParts.join(' ');
+      
+      
       // If our third cloze part begins with an underscore,
       // our second cloze part should be our syllables, so
       // if the answer sans underscores doesn't end in whitespace,
@@ -145,7 +157,6 @@ function defaultUnitEngine(curExperimentData) {
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
-
       return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts};
     },
 
