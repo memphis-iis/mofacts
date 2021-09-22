@@ -137,7 +137,7 @@ function defaultUnitEngine(curExperimentData) {
         console.log('clozeQuestionParts',i,clozeQuestionParts[i]);
         let clozeAnswerAddedSpaces = "";
         if(clozeQuestionParts[i].charAt(0) == "_"){
-          clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
+          clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
         }
       }
       console.log('clozeQuestionParts',clozeQuestionParts);
