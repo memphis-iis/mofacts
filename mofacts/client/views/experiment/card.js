@@ -2662,7 +2662,7 @@ async function resumeFromComponentState() {
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
   
   //check if user feedback settins are enabled, if so redirect to settings menu
-  await getFeebackParameters(curTdfUnit);
+  await getFeedbackParameters(curTdfUnit);
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
@@ -2670,7 +2670,7 @@ async function resumeFromComponentState() {
   checkSyllableCacheForCurrentStimFile(processUserTimesLog);
 }
 
-async function getFeebackParameters(curTdfUnit){
+async function getFeedbackParameters(curTdfUnit){
   allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
   if(allowFeedbackTypeSelect){
     Router.go('/feedback'); 
