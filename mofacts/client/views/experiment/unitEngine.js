@@ -126,17 +126,17 @@ function defaultUnitEngine(curExperimentData) {
 
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-      
-      //Ieterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
-      for (var i = 0; i < clozeQuestionParts.length; i++)  {
-        console.log('clozeQuestionParts',i,clozeQuestionParts[i]);
-        let clozeAnswerAddedSpaces = "";
-        if(clozeQuestionParts[i].charAt(0) == "_"){
+
+      // Iterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
+      for (let i = 0; i < clozeQuestionParts.length; i++) {
+        console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
+        if (clozeQuestionParts[i].charAt(0) == '_') {
           clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
         }
+      }
       clozeQuestionParts = clozeQuestionParts.join(' ');
-      
-      
+
+
       // If our third cloze part begins with an underscore,
       // our second cloze part should be our syllables, so
       // if the answer sans underscores doesn't end in whitespace,
@@ -1297,11 +1297,11 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
-      let maxTrials = _.chain(session).prop("maxTrials").first().intval(0).value();
-      let numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
+      const maxTrials = _.chain(session).prop('maxTrials').first().intval(0).value();
+      const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
 
-      if(maxTrials > 0 && numTrialsSoFar >= maxTrials){
-          return true;
+      if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
+        return true;
       }
 
       // TODO: why are we using side effects to handle the unit being finished? Fix this
