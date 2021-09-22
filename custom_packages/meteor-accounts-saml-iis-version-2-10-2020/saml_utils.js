@@ -414,7 +414,6 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
     const xml = new Buffer(samlResponse, 'base64').toString('utf8');
     // We currently use RelayState to save SAML provider
     console.log("SAML.validateResponse",`Validating response with relay state: ${ xml }`);
-    const parser = new xml2js.Parser({ explicitRoot: true });
     const doc = new xmldom.DOMParser().parseFromString(xml, 'text/xml');
 
     if (doc) {
@@ -511,7 +510,7 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
                             //console.log("value: " + JSON.stringify(value));
                             profile[attributes[i].getAttribute('Name').replace(/\./g,'_')] = value;
                         }
-                        console.log("SAML.validateResponse,","profile after attributes: " + JSON.stringify(profile));
+                        console.log("SAML.validateResponse,","profile after attributes: ", profile);
                     } else {
                         console.log("SAML.validateResponse,","No Attributes found in SAML attribute statement.");
                     }
@@ -519,8 +518,26 @@ SAML.prototype.validateResponse = function(samlResponse, relayState, callback) {
                     console.log("SAML.validateResponse,","No Attribute Statement found in SAML response.");
                 }
 
-                console.log("SAML.validateResponse, profile: " + JSON.stringify(profile));
-                callback(null, profile, false);
+                let localProfileAttribute = this.options.localProfileMatchAttribute.replace(/\./g,'_');
+
+                if(!profile[localProfileAttribute]){
+                    console.log("no attributes from old format, attempting to parse new format");
+                    const subject = assertion.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion', 'Subject')[0];
+                    if(subject){
+                        const nameID = subject.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:assertion', 'NameID')[0];
+                        if(nameID){
+                            profile[localProfileAttribute] = nameID.textContent;
+                        }
+                    }
+                }
+
+                //If we still don't have an identifier we should error out
+                if(!profile[localProfileAttribute]){
+                    callback(new Error('No identifier in SAML response'),null,false);
+                }else{
+                    console.log("SAML.validateResponse, profile: ",profile);
+                    callback(null, profile, false);
+                }
             } else {
                 const logoutResponse = doc.getElementsByTagNameNS('urn:oasis:names:tc:SAML:2.0:protocol', 'LogoutResponse');
 
