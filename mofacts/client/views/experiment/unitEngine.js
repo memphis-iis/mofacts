@@ -1297,6 +1297,12 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
+      let maxTrials = _.chain(session).prop("maxTrials").first().intval(0).value();
+      let numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
+
+      if(maxTrials > 0 && numTrialsSoFar >= maxTrials){
+          return true;
+      }
 
       // TODO: why are we using side effects to handle the unit being finished? Fix this
       if (minSecs > 0.0 || maxSecs > 0.0) {
