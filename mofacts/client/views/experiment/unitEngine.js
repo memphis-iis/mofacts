@@ -517,7 +517,7 @@ function modelUnitEngine() {
 
   function findMinProbDistCard(cards) {
     console.log('findMinProbDistCard');
-    let currentMin = 1.00001;
+    let currentMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -529,12 +529,12 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const parameters = stim.parameter;
-          let optimalProb = parameters[1];
+          let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
             // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
           }
-          const dist = Math.abs(stim.probabilityprobabilityEstimate - optimalProb);
+          const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist <= currentMin) {
             currentMin = dist;
             clusterIndex=i;
