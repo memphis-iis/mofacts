@@ -371,12 +371,7 @@ Template.card.rendered = async function() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  // Check if TDF allows for dialogue feedback preferences, if so, route to dialogue feedback widget
-  if(Session.get('allowFeedbackTypeSelect') && !Session.get('feedbackParamsSet')) {
-    Router.go('/feedback'); 
-  } 
-
-
+ 
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
@@ -2665,11 +2660,22 @@ async function resumeFromComponentState() {
   }
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
+  
+  //check if user feedback settins are enabled, if so redirect to settings menu
+  await getFeebackParameters(curTdfUnit);
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
   checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+}
+
+async function getFeebackParameters(curTdfUnit){
+  allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
+  if(allowFeedbackTypeSelect){
+    Router.go('/feedback'); 
+    return true;
+  } 
 }
 
 async function checkSyllableCacheForCurrentStimFile(cb) {
