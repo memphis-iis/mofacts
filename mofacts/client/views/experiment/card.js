@@ -1395,11 +1395,12 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
+    const reviewEnd = Date.now();
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, testType, deliveryParams, dialogueHistory);
+        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory);
 
     // Give unit engine a chance to update any necessary stats
-    const endLatency = trialEndTimeStamp - trialStartTimestamp;
+    const endLatency = reviewEnd - trialStartTimestamp;
     await engine.cardAnswered(isCorrect, endLatency);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
@@ -1484,9 +1485,9 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, testType, deliveryParams, dialogueHistory) {
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
-  const feedbackDuration = !userFeedbackStart ? 0 : Date.now() - userFeedbackStart;
+  const feedbackDuration = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
   let responseDuration = 0;
   if (firstKeypressTimestamp != 0) {
     responseDuration = trialEndTimeStamp - firstKeypressTimestamp;
@@ -1497,7 +1498,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
 
-  let reviewLatency = Date.now() - reviewBegin;
+  let reviewLatency = userFeedbackStart ? reviewEnd - userFeedbackStart : reviewEnd - reviewBegin;
 
   if (!reviewLatency) {
     let assumedReviewLatency = 0;
