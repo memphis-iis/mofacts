@@ -126,21 +126,14 @@ function defaultUnitEngine(curExperimentData) {
 
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-      // clozeQuestionParts.splice(1, 1);
-      // clozeQuestionParts.splice(1, 0, clozeAnswerNoUnderscores.trim());
-      // clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionParts[2];
-      // clozeQuestionRemainingParts = clozeQuestionParts.splice(2).join('');
-      // clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionRemainingParts;
       
-      //Testing
+      //Ieterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
       for (var i = 0; i < clozeQuestionParts.length; i++)  {
         console.log('clozeQuestionParts',i,clozeQuestionParts[i]);
         let clozeAnswerAddedSpaces = "";
         if(clozeQuestionParts[i].charAt(0) == "_"){
           clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
         }
-      }
-      console.log('clozeQuestionParts',clozeQuestionParts);
       clozeQuestionParts = clozeQuestionParts.join(' ');
       
       
