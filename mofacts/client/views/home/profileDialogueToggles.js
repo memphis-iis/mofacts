@@ -21,7 +21,7 @@ Template.profileDialogueToggles.events({
   },
 
   'click #confirmFeedbackSelection': function() {
-    Session.set('feedbackParamsSet',true);
+    Session.set('feedbackParamsSelected', true);
     Router.go('/card');
     
   },
