@@ -756,13 +756,10 @@ function modelUnitEngine() {
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
-      let hiddenItems = Session.get('hiddenItems');
       for (let i = 0; i < clusterList.length; ++i) {
         const nums = rangeVal(clusterList[i]);
         for (let j = 0; j < nums.length; ++j) {
-          if(!hiddenItems.includes(cards[_.intval(nums[j])].clusterKC)) {
-            cards[_.intval(nums[j])].canUse = true;
-          }
+          cards[_.intval(nums[j])].canUse = true;
         }
       }
       console.log('setupClusterList,cards:', cards);
