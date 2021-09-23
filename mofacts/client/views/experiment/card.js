@@ -335,7 +335,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (dest != '/card' && dest != '/instructions' && dest != '/voice') {
+  if (dest != '/card' && dest != '/instructions' && dest != '/voice' && dest != '/feedback') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -401,7 +401,7 @@ Template.card.rendered = async function() {
   // interstitial and get back here again)
   if (audioInputEnabled && !audioInputDetectionInitialized) {
     initializeAudio();
-  } else {
+  } else if (Session.get('feedbackParamsSelected') != true) {
     cardStart();
   }
 };
@@ -1727,6 +1727,7 @@ async function unitIsFinished(reason) {
   Session.set('currentTdfUnit', curTdfUnit);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
+  Session.set('feedbackParamsSelected',false);
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
@@ -2377,7 +2378,7 @@ function startUserMedia(stream) {
         }
         Router.go('/card');
         return;
-      } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
+      } else if (!Session.get('recording') || Session.get('pausedLocks')>0){
         if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
           leavePage(function() {
             console.log('cleaning up page after nav away from card, voice_stop');
@@ -2661,20 +2662,21 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
   
-  //check if user feedback settins are enabled, if so redirect to settings menu
-  await getFeedbackParameters(curTdfUnit);
+
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
   checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+
+  //check if user feedback settins are enabled, if so redirect to settings menu
+  getFeedbackParameters(curTdfUnit);
 }
 
-async function getFeedbackParameters(curTdfUnit){
+function getFeedbackParameters(curTdfUnit){
   allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
   if(allowFeedbackTypeSelect){
-    Router.go('/feedback'); 
-    return true;
+    leavePage('/feedback'); 
   } 
 }
 
