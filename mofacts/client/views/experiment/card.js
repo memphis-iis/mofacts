@@ -2663,7 +2663,7 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
-  getFeebackParameters();
+  getFeedbackParameters();
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
@@ -2674,7 +2674,7 @@ async function resumeFromComponentState() {
 }
 
 
-async function getFeebackParameters(){
+async function getFeedbackParameters(){
   if(typeof getCurrentDeliveryParams().allowFeedbackTypeSelect !== 'undefined'){
     allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
   } else {
