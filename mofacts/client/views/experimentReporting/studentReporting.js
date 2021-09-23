@@ -16,7 +16,7 @@ Session.set('curStudentPerformance', {});
 
 let defaultGaugeOptions = {
   lines: 12, // The number of lines to draw
-  angle: 0.22, // The length of each line
+  angle: -.20, // The length of each line
   lineWidth: 0.15, // The line thickness
   pointer: {
     length: 0.9, // The radius of the inner circle
@@ -29,7 +29,21 @@ let defaultGaugeOptions = {
   strokeColor: '#EEEEEE', // to see which ones work best for you
   generateGradient: true
 };
-
+let defaultDonutOptions = {
+  lines: 12, // The number of lines to draw
+  angle: .15, // The length of each line
+  lineWidth: 0.2, // The line thickness
+  pointer: {
+    length: 0.9, // The radius of the inner circle
+    strokeWidth: 0.035, // The rotation offset
+    color: '#111111' // Fill color
+  },
+  limitMax: 'true', // If true, the pointer will not go past the end of the gauge
+  colorStart: '#008351', // Colors
+  colorStop: '#008351', // just experiment with them
+  strokeColor: '#EEEEEE', // to see which ones work best for you
+  generateGradient: true
+};
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
@@ -37,6 +51,8 @@ Template.studentReporting.helpers({
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   studentUsername: () => Session.get('studentUsername'),
+  stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
+  stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   INVALID: INVALID,
 });
 
@@ -73,11 +89,18 @@ Template.studentReporting.rendered = async function() {
       setStudentPerformance(studentID, studentUsername, tdfToSelect);
     });
   }
+  updateDashboard(Session.get('currentTdfId'));
 };
 
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
     const selectedTdfId = $(event.currentTarget).val();
+    updateDashboard(selectedTdfId);
+  },
+});
+
+async function updateDashboard(value){
+  const selectedTdfId = value;
     console.log('change tdf select', selectedTdfId);
     if (selectedTdfId!==INVALID) {
       $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
@@ -91,9 +114,7 @@ Template.studentReporting.events({
       setStudentPerformance(studentID, studentUsername, selectedTdfId);
       drawCharts(studentData);
       drawDashboard(curStudentGraphData, studentData);
-    }
-  },
-});
+}}
 
 function drawCharts(studentData) {
   $('#correctnessChart').attr('data-x-axis-label', 'Repetition Number');
@@ -249,18 +270,27 @@ async function drawDashboard(curStudentGraphData, studentData){
       }
     }
   stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
-  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;
-        
-  console.log('Rusty',stimsSeenPredictedProbability,stimsNotSeenPredictedProbability);
+  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
+  Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
+  console.log('Rusty',stimsSeenPredictedProbability,stimsNotSeenPredictedProbability, Session.get('stimsSeenPredictedProbability'), Session.get('stimsNotSeenPredictedProbability'));
       
   
 
   //Draw Dashboard
   let dashCluster = [];
-  dashClusterCanvases = document.getElementsByClassName('gaugeCanvas');
+  dashClusterCanvases = document.getElementsByClassName('dashCanvas');
     Array.prototype.forEach.call(dashClusterCanvases, function(element){
-      let gaugeMeter = new progressGauge(element,0,100);
-      dashCluster.push(gaugeMeter);
+      if(element.classList.contains('gauge')){
+        console.log(element);
+        let gaugeMeter = new progressGauge(element,"gauge",0,100);
+        dashCluster.push(gaugeMeter);
+      } else {
+        console.log(element);
+        let gaugeMeter = new progressGauge(element,"donut",0,100);
+        dashCluster.push(gaugeMeter);
+      }
+
     });
     //Populate Dashboard values
     console.log('Testing dashCluster:',dashCluster);
@@ -270,10 +300,12 @@ async function drawDashboard(curStudentGraphData, studentData){
     dashCluster[3].set(stimsNotSeenPredictedProbability);
 
   }
-function progressGauge(target, currentValue,maxValue,options = defaultGaugeOptions){
+function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
     if(target != undefined){
       console.log('gauge canvas found and loaded.')
-      gauge = new Donut(target).setOptions(options); // create sexy gauge!
+      console.log('gaugeType',gaugeType);
+      if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);} 
+      if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(defaultDonutOptions);}
       gauge.maxValue = maxValue; // set max gauge value
       gauge.animationSpeed = 32; // set animation speed (32 is default value)
       gauge.set(currentValue); // set actual value
