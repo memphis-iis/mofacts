@@ -1,4 +1,4 @@
-export const curSemester = 'SU_2021';
+export const curSemester = 'FA_2021';
 export const ALL_TDFS = 'xml';
 export const INVALID = 'invalid';
 export const ENTER_KEY = 13;

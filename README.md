@@ -23,7 +23,7 @@ the above, setting up and running the application is as simple as opening a
 terminal and running:
 
 ````
-$ git clone https://bitbucket.org/ppavlik/mofacts.git
+$ git clone https://github.com/memphis-iis/mofacts-ies.git
 $ cd mofacts/mofacts
 $ ./run_meteor
 ````
