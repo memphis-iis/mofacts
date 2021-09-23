@@ -1081,7 +1081,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
     numCorrect: perfRet.numcorrect,
     numIncorrect: perfRet.numincorrect,
     totalStimCount: perfRet.totalstimcount,
-    stimsSeen: perfRet2.stimsSeen,
+    stimsSeen: perfRet2.stimsseen,
     totalPracticeDuration: perfRet.totalpracticeduration
  
   };
