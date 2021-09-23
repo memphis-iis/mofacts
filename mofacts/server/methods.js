@@ -1048,14 +1048,15 @@ async function getStudentReportingData(userId, TDFid) {
   }
 
   const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, \
-                  componentState.KCId FROM componentState JOIN item ON componentState.kcid=item.stimuluskc \
-                  WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
+                  componentState.lastSeen, componentState.KCId FROM componentState JOIN item \
+                  ON componentState.kcid=item.stimuluskc WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
   const dataRet2 = await db.manyOrNone(query2, [userId, TDFid]);
   const probEstimates = [];
   for (const curData of dataRet2) {
     probEstimates.push({
       stimulus: curData.clozestimulus || curData.textstimulus,
       probabilityEstimate: Math.round(100 * parseFloat(curData.probabilityestimate)),
+      lastSeen: curData.lastseen,
     });
   }
   return {correctnessAcrossRepetitions, probEstimates};
