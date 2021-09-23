@@ -1,6 +1,13 @@
 <template name="card">
     <div class="container" id="cardContainer">
-
+    
+    {{#if displayFeedback}}
+        {{>profileDialogueToggles}}
+        <div>
+            <br />
+            <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
+        </div>
+    {{/if}}
     {{#if displayReady}}
         <div class="scrollHistoryContainer">
             {{#if haveScrollList}}
@@ -16,7 +23,7 @@
             {{/each}}
             {{/if}}
         </div>
-
+       
         <!-- Progress bar while resuming -->
         {{#if inResume}}
         <div class="row">

@@ -335,7 +335,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (dest != '/card' && dest != '/instructions' && dest != '/voice' && dest != '/feedback') {
+  if (dest != '/card' && dest != '/instructions' && dest != '/voice') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
@@ -371,7 +371,6 @@ Template.card.rendered = async function() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
- 
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
@@ -401,7 +400,7 @@ Template.card.rendered = async function() {
   // interstitial and get back here again)
   if (audioInputEnabled && !audioInputDetectionInitialized) {
     initializeAudio();
-  } else if (Session.get('feedbackParamsSelected') != true) {
+  } else {
     cardStart();
   }
 };
@@ -437,7 +436,11 @@ Template.card.events({
   'keypress #userForceCorrect': function(e) {
     handleUserForceCorrectInput(e, 'keypress');
   },
-
+  'click #confirmFeedbackSelection': function() {
+    Session.set('displayFeedback', false);
+    checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
+    
+  },
   'click #overlearningButton': function(event) {
     event.preventDefault();
     leavePage('/profile');
@@ -501,7 +504,7 @@ Template.card.helpers({
     }
   },
 
-  
+  'displayFeedback': () => Session.get('displayFeedback'),
 
   'username': function() {
     if (!haveMeteorUser()) {
@@ -1727,7 +1730,6 @@ async function unitIsFinished(reason) {
   Session.set('currentTdfUnit', curTdfUnit);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
-  Session.set('feedbackParamsSelected',false);
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
@@ -2378,7 +2380,7 @@ function startUserMedia(stream) {
         }
         Router.go('/card');
         return;
-      } else if (!Session.get('recording') || Session.get('pausedLocks')>0){
+      } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
         if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
           leavePage(function() {
             console.log('cleaning up page after nav away from card, voice_stop');
@@ -2661,24 +2663,30 @@ async function resumeFromComponentState() {
   }
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
-  
 
+  getFeebackParameters(curTdfUnit);
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
-  checkSyllableCacheForCurrentStimFile(processUserTimesLog);
-
-  //check if user feedback settins are enabled, if so redirect to settings menu
-  getFeedbackParameters(curTdfUnit);
+  if(!Session.get('displayFeedback')){
+    checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+  }
 }
 
-function getFeedbackParameters(curTdfUnit){
-  allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
+
+async function getFeebackParameters(curTdfUnit){
+  if(typeof curTdfUnit.deliveryparams[0].allowFeedbackTypeSelect !== 'undefined'){
+    allowFeedbackTypeSelect = curTdfUnit.deliveryparams[0].allowFeedbackTypeSelect[0];
+  } else {
+    allowFeedbackTypeSelect = false;
+  }
   if(allowFeedbackTypeSelect){
-    leavePage('/feedback'); 
+    Session.set('displayFeedback',true);
   } 
 }
+
+
 
 async function checkSyllableCacheForCurrentStimFile(cb) {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
