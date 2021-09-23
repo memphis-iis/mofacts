@@ -1,3 +1,4 @@
+
 import {setStudentPerformance} from '../../lib/currentTestingHelpers';
 import {INVALID} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
@@ -84,11 +85,12 @@ Template.studentReporting.events({
       const studentUsername = Session.get('studentUsername') || Meteor.user().username;
 
       const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
+      const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
       console.log('studentData', studentData);
 
       setStudentPerformance(studentID, studentUsername, selectedTdfId);
       drawCharts(studentData);
-      drawDashboard(studentID, selectedTdfId);
+      drawDashboard(curStudentGraphData);
     }
   },
 });
@@ -231,10 +233,11 @@ function lookUpLabelByDataValue(labels, series, value) {
 }
 
 
-async function drawDashboard(studentID,selectedTDF){
-  
+async function drawDashboard(curStudentGraphData){
   //Get Data from session variableS
-  const {username, count, percentCorrect, numCorrect, stimsSeen,  totalTime, totalTimeDisplay} = ession.get('curStudentPerformance');
+  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
+  percentCorrect = numCorrect / stimsSeen * 100;
+  percentStimsSeen = stimsSeen / totalStimCount * 100;
   //Draw Dashboard
   let dashCluster = [];
   dashClusterCanvases = document.getElementsByClassName('gaugeCanvas');
@@ -244,8 +247,8 @@ async function drawDashboard(studentID,selectedTDF){
     });
     //Populate Dashboard values
     console.log('Testing dashCluster:',dashCluster);
-    dashCluster[1].set(curStudentPerformance.percentCorrect);
-    console.log('Testing curStudentPerformance:',Session.get('curStudentPerformance'));
+    dashCluster[0].set(percentStimsSeen);
+    dashCluster[1].set(percentCorrect);
 
   }
 function progressGauge(target, currentValue,maxValue,options = defaultGaugeOptions){
