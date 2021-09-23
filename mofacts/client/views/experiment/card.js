@@ -439,7 +439,6 @@ Template.card.events({
   'click #confirmFeedbackSelection': function() {
     Session.set('displayFeedback', false);
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
-    
   },
   'click #overlearningButton': function(event) {
     event.preventDefault();
@@ -2664,7 +2663,7 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
-  getFeebackParameters(curTdfUnit);
+  getFeebackParameters();
 
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
@@ -2675,9 +2674,9 @@ async function resumeFromComponentState() {
 }
 
 
-async function getFeebackParameters(curTdfUnit){
-  if(typeof curTdfUnit.deliveryparams[0].allowFeedbackTypeSelect !== 'undefined'){
-    allowFeedbackTypeSelect = curTdfUnit.deliveryparams[0].allowFeedbackTypeSelect[0];
+async function getFeebackParameters(){
+  if(typeof getCurrentDeliveryParams().allowFeedbackTypeSelect !== 'undefined'){
+    allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
   } else {
     allowFeedbackTypeSelect = false;
   }

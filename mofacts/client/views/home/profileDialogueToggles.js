@@ -20,12 +20,6 @@ Template.profileDialogueToggles.events({
         event.currentTarget.getAttribute('data-dialogue-type'));
   },
 
-  'click #confirmFeedbackSelection': function() {
-    Session.set('displayFeedback', false);
-   
-    
-  },
-
 });
 
 Template.profileDialogueToggles.helpers({
