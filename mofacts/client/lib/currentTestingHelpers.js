@@ -111,19 +111,17 @@ function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 }
 
-function updateCurStudentPerformance(isCorrect, endLatency, isReport = false) {
+function updateCurStudentPerformance(isCorrect, endLatency) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
   console.log('updateCurStudentPerformance', isCorrect, endLatency,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
-  if (!isReport){
-    curUserPerformance.count = curUserPerformance.count + 1;
-    if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
-    curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
-    curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
-  }
+  curUserPerformance.count = curUserPerformance.count + 1;
+  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
+  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   Session.set('curStudentPerformance', curUserPerformance);
 }
 
@@ -172,6 +170,10 @@ function getStimCount() {
   }
   return numClusters;
 }
+
+// function getStimById(){
+
+// }
 
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping.

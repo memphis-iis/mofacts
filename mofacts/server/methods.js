@@ -713,9 +713,9 @@ async function setExperimentState(UserId, TDFId, newExperimentState) { // by cur
   return TDFId;
 }
 
-async function insertHiddenItem(userId, stimulusKC) {
+async function insertHiddenItem(userId, clusterKC) {
   let query = 'UPDATE componentstate SET showitem = FALSE WHERE userid = $1 AND kcid = $2';
-  await db.manyOrNone(query, [userId, stimulusKC]);
+  await db.manyOrNone(query, [userId, clusterKC]);
 }
 
 async function getHiddenItems(userId, tdfId) {

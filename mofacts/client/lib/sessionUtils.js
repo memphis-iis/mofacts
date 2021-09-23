@@ -60,6 +60,7 @@ function sessionCleanUp() {
   Session.set('schedule', undefined);
 
   Session.set('isReport', false);
+  Session.set('hiddenItems', []);
 
   Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);

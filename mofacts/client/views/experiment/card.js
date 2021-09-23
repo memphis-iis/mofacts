@@ -390,6 +390,8 @@ Template.card.rendered = async function() {
       Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
     }
   }
+  //If the hidden items variable is undefined, this will query the db for items with showitems = false parameter
+  Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
   const audioInputDetectionInitialized = Session.get('VADInitialized');
 
   window.AudioContext = window.webkitAudioContext || window.AudioContext;
@@ -414,17 +416,10 @@ Template.card.events({
     handleUserInput(e, 'keypress');
   },
 
-  'click #removeQuestion': function() {
-    // Dialog modal to inform user that the question will not be counted
-    $('#removalConfirmation').modal('show');
-  },
-
-  'click #removalModalDismissContinue': function() {
-    // Dialog modal to inform user that the question will not be counted
-    $('#removalConfirmation').modal('hide');
-  },
-
-  'click #removalModalDismissContinue': function() {
+  'click #removeQuestion': function(e) {
+    //Add dialogue to inform user that the question will not be counted
+    e.preventDefault();
+    $('#removalFeedback').addClass('text-align alert-success').show();
     removeCardByUser();
   },
 
@@ -691,6 +686,8 @@ Template.card.helpers({
   'showDialogueHints': () => Session.get('showDialogueHints'),
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
+
+  'questionIsRemovable': () => Session.get('numRemainingCards') > 3,
 });
 
 function getResponseType() {
@@ -1091,7 +1088,7 @@ function handleUserInput(e, source, simAnswerCorrect) {
     resetMainCardTimeout();
     return;
   }
-
+  
   // Stop current timeout and stop user input
   stopUserInput();
   // We've entered input before the timeout, meaning we need to decrement the pausedLocks before we lose
@@ -1265,7 +1262,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
-
+  if(!isCorrect) showRemovalButton();
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = getCurrentDeliveryParams();
@@ -1398,7 +1395,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
     // Give unit engine a chance to update any necessary stats
     const endLatency = trialEndTimeStamp - trialStartTimestamp;
-    await engine.cardAnswered(isCorrect, endLatency, isReport);
+    await engine.cardAnswered(isCorrect, endLatency);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
     const newExperimentState = {
@@ -2018,7 +2015,7 @@ function allowUserInput() {
       $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', false);
     }
     // Force scrolling to bottom of screen for the input
-    // scrollElementIntoView(null, false);
+    scrollElementIntoView(null, false);
 
     const textFocus = !getButtonTrial();
     if (textFocus) {
@@ -2684,19 +2681,26 @@ async function checkSyllableCacheForCurrentStimFile(cb) {
   }
 }
 
+async function showRemovalButton() {
+  $('#removeQuestion').removeClass('invisible');
+}
+
 async function removeCardByUser() {
+
   let clusterIndex = Session.get('clusterIndex');
-  const stimulusKC = getStimCluster(clusterIndex).stims[0].stimulusKC;
+  let stims = getStimCluster(clusterIndex).stims; 
+  let whichStim = engine.findCurrentCardInfo().whichStim;
   const userId = Meteor.userId();
   const tdfId = Session.get('currentTdfId');
 
-  await meteorCallAsync('insertHiddenItem', userId, stimulusKC);
+  await meteorCallAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC);
   Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', userId, tdfId));
-  engine.updateCardList();
-  Session.set('dialogueLoopStage', 'exit');
   Session.set('numRemainingCards', await engine.getCardCount());
   Session.set('isReport', true);
-  await dialogueContinue();
+  if(Session.get('dialogueLoopStage')){
+    Session.set('dialogueLoopStage', 'exit');
+    dialogueContinue();
+  }
 }
 
 async function processUserTimesLog() {

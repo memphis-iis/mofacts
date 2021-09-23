@@ -54,9 +54,6 @@ function defaultUnitEngine(curExperimentData) {
   const engine = {
     // Things actual engines must supply
     unitType: 'DEFAULT',
-    updateCardList: function() {
-      throw new Error('Missing Implementation');
-    },
     selectNextCard: function() {
       throw new Error('Missing Implementation');
     },
@@ -312,7 +309,6 @@ function emptyUnitEngine() {
     unitFinished: function() {
       return true;
     },
-    updateCardList: function() { },
     getCardCount: function() { },
     selectNextCard: function() { },
     findCurrentCardInfo: function() { },
@@ -451,6 +447,7 @@ function modelUnitEngine() {
     let currentMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
+    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -459,6 +456,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate <= currentMin) {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
@@ -494,6 +492,7 @@ function modelUnitEngine() {
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
+    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -502,6 +501,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < ceiling) {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
@@ -519,6 +519,7 @@ function modelUnitEngine() {
     let currentMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
+    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -527,6 +528,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let optimalProb = parameters[1];
           if (!optimalProb) {
@@ -551,6 +553,7 @@ function modelUnitEngine() {
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
+    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -559,6 +562,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
@@ -746,11 +750,13 @@ function modelUnitEngine() {
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
-
+      let hiddenItems = Session.get('hiddenItems');
       for (let i = 0; i < clusterList.length; ++i) {
         const nums = rangeVal(clusterList[i]);
         for (let j = 0; j < nums.length; ++j) {
-          cards[_.intval(nums[j])].canUse = true;
+          if(!hiddenItems.includes(cards[_.intval(nums[j])].clusterKC)) {
+            cards[_.intval(nums[j])].canUse = true;
+          }
         }
       }
       console.log('setupClusterList,cards:', cards);
@@ -1071,20 +1077,6 @@ function modelUnitEngine() {
       await this.initializeActRModel();
     },
 
-    updateCardList: async function() {
-      //This is called whenever a user marks a card as incorrect. 
-      //updateCurStudentPerformance(true, 0, true);
-      const cards = cardProbabilities.cards;
-      let hiddenItems = Session.get('hiddenItems');
-  
-      for(let i = 0; i < cards.length; i++){
-        let card = cards[i].clusterKC;
-        if(hiddenItems.includes(card)){
-          cards[i].canUse = false;
-        }
-      }
-    },
-
     getCardCount: async function() {
       const cards = cardProbabilities.cards;
       let hiddenItems = Session.get('hiddenItems');
@@ -1233,7 +1225,7 @@ function modelUnitEngine() {
       }
     },
 
-    cardAnswered: async function(wasCorrect, practiceTime, wasReport) {
+    cardAnswered: async function(wasCorrect, practiceTime) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
@@ -1262,7 +1254,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime, wasReport);
+      updateCurStudentPerformance(wasCorrect, practiceTime);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
