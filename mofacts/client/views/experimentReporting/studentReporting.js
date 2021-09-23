@@ -83,14 +83,14 @@ Template.studentReporting.events({
       $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
       const studentID = Session.get('curStudentID') || Meteor.userId();
       const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-
       const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
       const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
+    
       console.log('studentData', studentData);
 
       setStudentPerformance(studentID, studentUsername, selectedTdfId);
       drawCharts(studentData);
-      drawDashboard(curStudentGraphData);
+      drawDashboard(curStudentGraphData, studentData);
     }
   },
 });
@@ -233,11 +233,28 @@ function lookUpLabelByDataValue(labels, series, value) {
 }
 
 
-async function drawDashboard(curStudentGraphData){
+async function drawDashboard(curStudentGraphData, studentData){
   //Get Data from session variableS
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
   percentCorrect = numCorrect / stimsSeen * 100;
   percentStimsSeen = stimsSeen / totalStimCount * 100;
+  // Perform calculated data
+  const stimsSeenProbabilties = [];
+  const stimsNotSeenProbabilites = [];
+  for(let i = 0; i < studentData.probEstimates.length; i++ ){
+      if(studentData.probEstimates[i].lastSeen != 0){
+        stimsSeenProbabilties.push(studentData.probEstimates[i].probabilityEstimate);
+      } else {
+        stimsNotSeenProbabilites.push(studentData.probEstimates[i].probabilityEstimate);
+      }
+    }
+  stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
+  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;
+        
+  console.log('Rusty',stimsSeenPredictedProbability,stimsNotSeenPredictedProbability);
+      
+  
+
   //Draw Dashboard
   let dashCluster = [];
   dashClusterCanvases = document.getElementsByClassName('gaugeCanvas');
@@ -249,6 +266,8 @@ async function drawDashboard(curStudentGraphData){
     console.log('Testing dashCluster:',dashCluster);
     dashCluster[0].set(percentStimsSeen);
     dashCluster[1].set(percentCorrect);
+    dashCluster[2].set(stimsSeenPredictedProbability);
+    dashCluster[3].set(stimsNotSeenPredictedProbability);
 
   }
 function progressGauge(target, currentValue,maxValue,options = defaultGaugeOptions){
