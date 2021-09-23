@@ -16,31 +16,31 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curStudentPerformance.totalTimeDisplay}}.
+        for {{curStudentPerformance.totalTimeDisplay}} seconds.
     </div>
     <div class="row">
       <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="gaugeCanvas" width="70" height="70" id="canvas-unit-item-progress"></canvas>
-          <div id="preview-textfield" style="display:none">0%</div>
+          <canvas class="dashCanvas donut" width="150" height="70" id="canvas-unit-item-progress"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
           <p>You have seen {{curStudentPerformance.stimsSeen}} items out of the {{curStudentPerformance.totalStimCount}} items for this unit.</p>      
       </div>
       <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="gaugeCanvas" width="70" height="70" id="canvas-unit-percent-correct"></canvas>
-          <div id="preview-textfield" style="display:none">0%</div>
+          <canvas class="dashCanvas donut" width="150" height="70" id="canvas-unit-percent-correct"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
           <p>{{curStudentPerformance.percentCorrect}} percent correct so far.</p>      
       </div>
   </div>
   <div class="row">
       <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="gaugeCanvas" width="70" height="70" id="canvas-ai-test-prediction"></canvas>
-          <div id="preview-textfield" style="display:none">0%</div>
-          <p>How the AI thinks you will do if you were tested on all of the previously seen flashcards now. You can't get into the gold zone unitl all the cards are introduced.</p>      
+          <canvas class="dashCanvas gauge" width="150" height="70" id="canvas-ai-test-prediction"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
+          <p>The AI thinks you will score {{stimsSeenPredictedProbability}}&#37; if you were tested on all of the previously seen flashcards now. You can't get into the gold zone unitl all the cards are introduced.</p>      
           
       </div>
       <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="gaugeCanvas" width="70" height="70" id="canvas-ai-new-card-prediction"></canvas>
-          <div id="preview-textfield" style="display:none">0%</div>
-          <p>How the AI thinks you will do when you see a new flashcard.</p>      
+          <canvas class="dashCanvas gauge" width="150" height="70" id="canvas-ai-new-card-prediction"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
+          <p>How the AI thinks you score {{stimsNotSeenPredictedProbability}}&#37; when you see a new flashcard.</p>      
       </div>
 
   </div>
