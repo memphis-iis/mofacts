@@ -371,6 +371,12 @@ Template.card.rendered = async function() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
+  // Check if TDF allows for dialogue feedback preferences, if so, route to dialogue feedback widget
+  if(Session.get('allowFeedbackTypeSelect') && !Session.get('feedbackParamsSet')) {
+    Router.go('/feedback'); 
+  } 
+
+
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
@@ -860,6 +866,15 @@ function preloadStimuliFiles() {
   }
 }
 
+function checkUserAudioConfigCompatability(){
+  const audioPromptMode = Session.get('audioPromptMode');
+  if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
+    console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+    alert('Question reading not supported on this TDF. Please disable and try again.');
+    leavePage('/profile');
+  }
+}
+
 function curStimHasSoundDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
@@ -871,6 +886,8 @@ function curStimHasImageDisplayType() {
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
   return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
 }
+
+
 
 // Buttons are determined by 3 options: buttonorder, buttonOptions, wrongButtonLimit:
 //
@@ -1390,11 +1407,12 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   clearCardTimeout();
   Meteor.setTimeout(async function() {
     let isReport = Session.get('isReport');
+    const reviewEnd = Date.now();
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, testType, deliveryParams, dialogueHistory, isReport);
+        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, isReport);
 
     // Give unit engine a chance to update any necessary stats
-    const endLatency = trialEndTimeStamp - trialStartTimestamp;
+    const endLatency = reviewEnd - trialStartTimestamp;
     await engine.cardAnswered(isCorrect, endLatency);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
@@ -1480,9 +1498,9 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, testType, deliveryParams, dialogueHistory, isReport) {
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, isReport) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
-  const feedbackDuration = !userFeedbackStart ? 0 : Date.now() - userFeedbackStart;
+  const feedbackDuration = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
   let responseDuration = 0;
   if (firstKeypressTimestamp != 0) {
     responseDuration = trialEndTimeStamp - firstKeypressTimestamp;
@@ -1493,7 +1511,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
 
-  let reviewLatency = Date.now() - reviewBegin;
+  let reviewLatency = userFeedbackStart ? reviewEnd - userFeedbackStart : reviewEnd - reviewBegin;
 
   if (!reviewLatency) {
     let assumedReviewLatency = 0;
@@ -1983,11 +2001,18 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
       });
     }, timeuntilaudio);
   } else { // Not a sound - can unlock now for data entry now
-    const questionToSpeak = currentDisplay.text || currentDisplay.clozeText;
+    const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
       console.log('text to speak playing prompt: ', new Date());
-      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak, 'question');
+      let buttons = Session.get('buttonList');
+      let buttonsToSpeak = '';
+      if(buttons){
+        for(button in buttons){
+          buttonsToSpeak = buttonsToSpeak + ' ' + buttons[button].buttonName;
+        }
+      }
+      speakMessageIfAudioPromptFeedbackEnabled(questionToSpeak + buttonsToSpeak, 'question');
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
@@ -2569,6 +2594,7 @@ async function resumeFromComponentState() {
   Session.set('currentStimuliSet', stimuliSet);
 
   preloadStimuliFiles();
+  checkUserAudioConfigCompatability();
 
   // In addition to experimental condition, we allow a root TDF to specify
   // that the xcond parameter used for selecting from multiple deliveryParms's

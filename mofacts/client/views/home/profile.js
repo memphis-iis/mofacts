@@ -427,7 +427,7 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
 
   // Check to see if the user has turned on audio prompt.
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
-  const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all');
+  const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
   console.log(curTdfContent);
   const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback &&
       curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == 'true';

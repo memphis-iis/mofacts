@@ -126,9 +126,16 @@ function defaultUnitEngine(curExperimentData) {
 
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
-      clozeQuestionParts.splice(1, 1);
-      clozeQuestionParts.splice(1, 0, clozeAnswerNoUnderscores.trim());
-      clozeQuestionParts[2] = clozeAnswerOnlyUnderscores + ' ' + clozeQuestionParts[2];
+
+      // Iterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
+      for (let i = 0; i < clozeQuestionParts.length; i++) {
+        console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
+        if (clozeQuestionParts[i].charAt(0) == '_') {
+          clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
+        }
+      }
+      clozeQuestionParts = clozeQuestionParts.join(' ');
+
 
       // If our third cloze part begins with an underscore,
       // our second cloze part should be our syllables, so
@@ -143,7 +150,6 @@ function defaultUnitEngine(curExperimentData) {
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
-
       return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts};
     },
 
@@ -516,7 +522,7 @@ function modelUnitEngine() {
 
   function findMinProbDistCard(cards) {
     console.log('findMinProbDistCard');
-    let currentMin = 1.00001;
+    let currentMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
     const hiddenItems = Session.get('hiddenItems');
@@ -530,12 +536,12 @@ function modelUnitEngine() {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
-          let optimalProb = parameters[1];
+          let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
             // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
           }
-          const dist = Math.abs(stim.probabilityprobabilityEstimate - optimalProb);
+          const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
           if (dist <= currentMin) {
             currentMin = dist;
             clusterIndex=i;
@@ -1312,6 +1318,12 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
+      const maxTrials = _.chain(session).prop('maxTrials').first().intval(0).value();
+      const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
+
+      if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
+        return true;
+      }
 
       // TODO: why are we using side effects to handle the unit being finished? Fix this
       if (minSecs > 0.0 || maxSecs > 0.0) {
