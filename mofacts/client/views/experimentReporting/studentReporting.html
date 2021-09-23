@@ -16,9 +16,9 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curStudentPerformance.totalTimeDisplay}} seconds.
+        for {{curStudentPerformance.totalTimeDisplay}} minutes.
     </div>
-    <div class="row">
+    <div class="row" style="padding-top:20px;">
       <div class="gauge col-sm-6 col-xs-12">
           <canvas class="dashCanvas donut" width="150" height="70" id="canvas-unit-item-progress"></canvas>
           <div id="preview-textfield" style="display:none;">0%</div>
@@ -40,7 +40,7 @@
       <div class="gauge col-sm-6 col-xs-12">
           <canvas class="dashCanvas gauge" width="150" height="70" id="canvas-ai-new-card-prediction"></canvas>
           <div id="preview-textfield" style="display:none;">0%</div>
-          <p>How the AI thinks you score {{stimsNotSeenPredictedProbability}}&#37; when you see a new flashcard.</p>      
+          <p>The AI thinks you will be correct {{stimsNotSeenPredictedProbability}}&#37; of the time when you see a new flashcard.</p>      
       </div>
 
   </div>

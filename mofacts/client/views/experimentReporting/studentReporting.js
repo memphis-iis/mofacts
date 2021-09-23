@@ -15,24 +15,27 @@ Session.set('studentReportingTdfs', []);
 Session.set('curStudentPerformance', {});
 
 let defaultGaugeOptions = {
-  lines: 12, // The number of lines to draw
-  angle: -.20, // The length of each line
-  lineWidth: 0.15, // The line thickness
+  angle: -.2,
+  lineWidth: 0.2,
   pointer: {
-    length: 0.9, // The radius of the inner circle
-    strokeWidth: 0.035, // The rotation offset
-    color: '#111111' // Fill color
+    length: 0.5,
+    strokeWidth: 0.05,
+    color: '#000000'
   },
-  limitMax: 'true', // If true, the pointer will not go past the end of the gauge
-  colorStart: '#008351', // Colors
-  colorStop: '#008351', // just experiment with them
-  strokeColor: '#EEEEEE', // to see which ones work best for you
-  generateGradient: true
+  staticZones: [
+     {strokeStyle: "#F03E3E", min: 0, max: 50, height: 1},
+     {strokeStyle: "#30B32D", min: 51, max: 79, height: 1},
+     {strokeStyle: "#FFDD00", min: 80, max: 100, height: 1},
+
+  ],
+  limitMax: false,
+  limitMin: false,
+  highDpiSupport: true
 };
 let defaultDonutOptions = {
   lines: 12, // The number of lines to draw
   angle: .15, // The length of each line
-  lineWidth: 0.2, // The line thickness
+  lineWidth: 0.15, // The line thickness
   pointer: {
     length: 0.9, // The radius of the inner circle
     strokeWidth: 0.035, // The rotation offset
@@ -78,12 +81,7 @@ Template.studentReporting.rendered = async function() {
   // let dataAlreadyInCache = false;
   if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
     console.log('admin/teacher');
-  } else {
-    Session.set('curStudentID', studentID);
-    Session.set('studentUsername', studentUsername);
-  }
-  if (Session.get('instructorSelectedTdf')) {
-    Tracker.afterFlush(async function() {
+  } else {scorer.afterFlush(async function() {
       const tdfToSelect = Session.get('instructorSelectedTdf');
       $('#tdf-select').val(tdfToSelect);
       setStudentPerformance(studentID, studentUsername, tdfToSelect);
@@ -99,22 +97,23 @@ Template.studentReporting.events({
   },
 });
 
-async function updateDashboard(value){
-  const selectedTdfId = value;
-    console.log('change tdf select', selectedTdfId);
-    if (selectedTdfId!==INVALID) {
-      $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
-      const studentID = Session.get('curStudentID') || Meteor.userId();
-      const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-      const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
-      const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
-    
-      console.log('studentData', studentData);
+async function updateDashboard(selectedTdfId){
+  console.log('change tdf select', selectedTdfId);
+  if (selectedTdfId!==INVALID) {
+    $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
+    const studentID = Session.get('curStudentID') || Meteor.userId();
+    const studentUsername = Session.get('studentUsername') || Meteor.user().username;
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
 
-      setStudentPerformance(studentID, studentUsername, selectedTdfId);
-      drawCharts(studentData);
-      drawDashboard(curStudentGraphData, studentData);
-}}
+    console.log('studentData', studentData);
+
+    setStudentPerformance(studentID, studentUsername, selectedTdfId);
+    drawCharts(studentData);
+    drawDashboard(curStudentGraphData, studentData);
+    $('#tdf-select').val(selectedTdfId);
+  }
+}
 
 function drawCharts(studentData) {
   $('#correctnessChart').attr('data-x-axis-label', 'Repetition Number');
@@ -273,7 +272,7 @@ async function drawDashboard(curStudentGraphData, studentData){
   stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
-  console.log('Rusty',stimsSeenPredictedProbability,stimsNotSeenPredictedProbability, Session.get('stimsSeenPredictedProbability'), Session.get('stimsNotSeenPredictedProbability'));
+  
       
   
 
