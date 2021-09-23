@@ -693,7 +693,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numRemainingCards') > 3,
+  'questionIsRemovable': () => Session.get('numRemainingCards') > 2,
 });
 
 function getResponseType() {
