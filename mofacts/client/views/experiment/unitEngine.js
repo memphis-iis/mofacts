@@ -315,7 +315,7 @@ function emptyUnitEngine() {
     unitFinished: function() {
       return true;
     },
-    getCardCount: function() { },
+    getVisableCardCount: function() { },
     selectNextCard: function() { },
     findCurrentCardInfo: function() { },
     cardAnswered: async function() { },
@@ -448,12 +448,11 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCard(cards) {
+  function findMinProbCard(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
-    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -493,12 +492,11 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCard(cards, ceiling) {
+  function findMaxProbCard(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCard');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
-    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -520,12 +518,11 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMinProbDistCard(cards) {
+  function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
-    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -554,12 +551,11 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
     console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
-    const hiddenItems = Session.get('hiddenItems');
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -936,7 +932,6 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       let hiddenItems = Session.get('hiddenItems');
       if (hiddenItems === undefined) hiddenItems = []
-      Session.set('numRemainingCards', cards.length - hiddenItems.length);
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
@@ -1031,9 +1026,11 @@ function modelUnitEngine() {
 
       const initProbs = [];
       const numQuestions = getStimCount();
+      let numVisableCards = 0;
       for (let i = 0; i < numQuestions; ++i) {
         const cluster = getStimCluster(i);
         const numStims = cluster.stims.length;
+        numVisableCards += numStims;
         for (let j = 0; j < numStims; ++j) {
           initProbs.push({
             cardIndex: i, // clusterKC
@@ -1042,6 +1039,7 @@ function modelUnitEngine() {
           });
         }
       }
+      Session.set('numVisableCards', numVisableCards - hiddenItems.length);
 
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
@@ -1080,11 +1078,16 @@ function modelUnitEngine() {
       await this.initializeActRModel();
     },
 
-    getCardCount: async function() {
-      const cards = cardProbabilities.cards;
+    getVisableCardCount: async function() {
+      const numQuestions = getStimCount();
+      let numVisableCards = 0;
+      for (let i = 0; i < numQuestions; ++i) {
+        const cluster = getStimCluster(i);
+        const numStims = cluster.stims.length;
+        numVisableCards += numStims;
+      }
       let hiddenItems = Session.get('hiddenItems');
-      if (hiddenItems === undefined) hiddenItems = [];
-      return (cards.length - hiddenItems.length);
+      return (numVisableCards - hiddenItems.length);
     },
 
     selectNextCard: async function() {
@@ -1093,6 +1096,7 @@ function modelUnitEngine() {
       // here. See calculateCardProbabilities for how prob.probability is
       // calculated
       this.calculateCardProbabilities();
+      const hiddenItems = Session.get('hiddenItems');
       let newClusterIndex = -1;
       let newStimIndex = -1;
       const cards = cardProbabilities.cards;
@@ -1102,11 +1106,11 @@ function modelUnitEngine() {
 
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         case 'distance':
@@ -1114,15 +1118,15 @@ function modelUnitEngine() {
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCard(cards, 1.00001);
+          indices = findMaxProbCard(cards, 1.00001, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCard(cards, 0.90);
+          indices = findMaxProbCard(cards, 0.90, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
       }
