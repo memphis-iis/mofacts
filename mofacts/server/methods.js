@@ -1039,14 +1039,15 @@ async function getStudentReportingData(userId, TDFid) {
   }
 
   const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, \
-                  componentState.KCId FROM componentState JOIN item ON componentState.kcid=item.stimuluskc \
-                  WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
+                  componentState.lastSeen, componentState.KCId FROM componentState JOIN item \
+                  ON componentState.kcid=item.stimuluskc WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
   const dataRet2 = await db.manyOrNone(query2, [userId, TDFid]);
   const probEstimates = [];
   for (const curData of dataRet2) {
     probEstimates.push({
       stimulus: curData.clozestimulus || curData.textstimulus,
       probabilityEstimate: Math.round(100 * parseFloat(curData.probabilityestimate)),
+      lastSeen: curData.lastseen,
     });
   }
   return {correctnessAcrossRepetitions, probEstimates};
@@ -1056,17 +1057,25 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
+               COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration \
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\'';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
-  if (!perfRet) return null;
+  const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
+                  FROM history AS s \
+                  WHERE s.userId=$1 AND s.tdfid=$2';                  
+  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid]);
+  if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: perfRet.numcorrect,
     numIncorrect: perfRet.numincorrect,
-    totalPracticeDuration: perfRet.totalpracticeduration,
+    totalStimCount: perfRet.totalstimcount,
+    stimsSeen: perfRet2.stimsseen,
+    totalPracticeDuration: perfRet.totalpracticeduration
+ 
   };
 }
 
