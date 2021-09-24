@@ -1,0 +1,38 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Optimized Practice for Psyc 7302: Module  8, part 2",
+            "userselect": "true",
+            "stimulusfile": "Psyc7302Module8stims2.json",
+            "isModeled": "false",
+            "lfparameter": ".85",
+            "simTimeout": "3500",
+            "simCorrectProb": "0.85"
+        },
+        "unit": [
+            {
+                "unitinstructions": "Here comes the optimized practice for the most important facts.",
+                "unitname": "Model Unit",
+                "learningsession": {
+                    "clusterlist": "0-27",
+                    "calculateProbability": "\n                // An example of a custom probability routine. Note that we don't\n                // declare a function, but we MUST set p.probability and return p.\n                // We are also allowed to parameters to p for output to the console\n                // (if we are logged in a teacher)\n                // A demonstration of a variable that will be shown in the console\n                p.CUSTOM_MSG = \"In our custom function\";\n                // Calculated metrics\n                p.baseLevel = 1 / Math.pow(1 + p.questionSecsPracticingOthers + ((p.questionSecsSinceFirstShown - p.questionSecsPracticingOthers) * 0.00785),  0.2514);\n                p.meanSpacing = 0;\n                if (p.questionStudyTrialCount + p.questionTotalTests == 1) {\n                    p.meanspacing = 1;\n                } else {\n                    if (p.questionStudyTrialCount + p.questionTotalTests > 1) {\n                        p.meanSpacing = Math.max(\n                                1, Math.pow((p.questionSecsSinceFirstShown - p.questionSecsSinceLastShown) / (p.questionStudyTrialCount + p.questionTotalTests - 1), 0.0294)\n                                );\n                    }\n                }\n                p.intbs = p.meanSpacing * p.baseLevel;\n                p.recency = p.questionSecsSinceLastShown === 0 ? 0 : 1 / Math.pow(1 + p.questionSecsSinceLastShown, 0.2514);\n                // Helpful to be able to see our y parameter for debugging\n                p.y = p.stimParameters[0] - 1.5 +\n                0.55033* Math.log((2+ p.stimSuccessCount)/(2+ p.stimFailureCount))+\n                0.88648* Math.log((2 + p.responseSuccessCount)/(2 + p.responseFailureCount))+\n                1.00719* Math.log((10 + p.userCorrectResponses)/(10 + p.userTotalResponses-p.userCorrectResponses))+\n                3.20689* (p.recency)+\n                4.57174* p.intbs * Math.log(1 + p.stimSuccessCount + p.stimFailureCount) +\n                0.74734* p.intbs * Math.log(1 + p.responseSuccessCount + p.responseFailureCount);\n                // At a minimum we need to set p.probability and return p\n                p.probability = 1.0 / (1.0 + Math.exp(-p.y));  // Actual probability\n                return p;\n            "
+                },
+                "deliveryparams": {
+                    "practiceseconds": "1000000",
+                    "drill": "12000",
+                    "purestudy": "12000",
+                    "skipstudy": "false",
+                    "reviewstudy": "8000",
+                    "correctprompt": "750",
+                    "fontsize": "2",
+                    "correctscore": "1",
+                    "incorrectscore": "0"
+                }
+            },
+            {
+                "unitname": "last",
+                "unitinstructions": "You are all done."
+            }
+        ]
+    }
+}

@@ -1,0 +1,74 @@
+{
+    "tutor": {
+        "setspec": {
+            "name": "Statistics Practice",
+            "lessonname": "Statistics Cloze Sentence Experiment test",
+            "userselect": "false",
+            "randomizedDelivery": "3",
+            "experimentTarget": "svoturktesting",
+            "stimulusfile": "SVO4stims.json",
+            "isModeled": "false",
+            "lfparameter": ".85",
+            "shuffleclusters": "20-35",
+            "swapclusters": [
+                "0-19 20-35",
+                "0-4 5-9 10-14 15-19"
+            ]
+        },
+        "unit": [
+            {
+                "unitname": "Show the questions",
+                "unitinstructions": "Demographic Survey<br><br>\nPlease answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.",
+                "buttonorder": "fixed",
+                "deliveryparams": {
+                    "drill": "12000000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "500",
+                    "fontsize": "3",
+                    "correctscore": "0",
+                    "incorrectscore": "0"
+                },
+                "buttontrial": "false",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "5",
+                        "group": "0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                "
+                    },
+                    "initialpositions": "                A_1 A_2 A_3 A_4 A_5            ",
+                    "randomizegroups": "false",
+                    "clusterlist": "36-40",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-0"
+                }
+            },
+            {
+                "turkpay": "true",
+                "turkminscore": "4",
+                "turkemailsubject": "MOFACTS: Lockout End for TEST",
+                "turkemail": "\nThank you for your patience. The lockout time has expired, so it's time to\nreturn to Mofacts! A bonus of $3.00 will be paid if you do.\nHere's the link in case you forgot: http://mofacts.optimallearning.org/experiment/svo\nThanks!\nThe Mofacts System\n        ",
+                "unitinstructions": "You have completed Session 1 of the experiment. Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response. We will check your completion and approve your assignment for the $2 payment.\n\t\t\tIf the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest now.\n\t\t\tIf the countdown below is 1 day or 3 days, you will receive a private message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.",
+                "unitname": "Lockout unit",
+                "deliveryparams": [
+                    {
+                        "lockoutminutes": "2"
+                    },
+                    {
+                        "lockoutminutes": "2"
+                    },
+                    {
+                        "lockoutminutes": "2"
+                    }
+                ]
+            },
+            {
+                "turkbonus": "3.00",
+                "unitname": "last",
+                "unitinstructions": "You have now completed the posttest. We will check your completion and confirm the $3 bonus."
+            }
+        ]
+    }
+}
