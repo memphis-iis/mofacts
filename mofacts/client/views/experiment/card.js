@@ -396,7 +396,7 @@ Template.card.rendered = async function() {
       Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
     }
   }
-  //If the hidden items variable is undefined, this will query the db for items with showitems = false parameter
+  //Gets the list of hidden items from the db on load of card. 
   Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', Meteor.userId(), Session.get('currentTdfId')));
   const audioInputDetectionInitialized = Session.get('VADInitialized');
 
@@ -425,7 +425,7 @@ Template.card.events({
   'click #removeQuestion': function(e) {
     //Add dialogue to inform user that the question will not be counted
     e.preventDefault();
-    $('#removalFeedback').addClass('text-align alert-success').show();
+    $('#removalFeedback').show();
     removeCardByUser();
   },
 
@@ -693,7 +693,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numRemainingCards') > 2,
+  'questionIsRemovable': () => Session.get('numVisableCards') > 2,
 });
 
 function getResponseType() {
@@ -1406,10 +1406,10 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
   Meteor.setTimeout(async function() {
-    let isReport = Session.get('isReport');
+    let wasReportedForRemoval = Session.get('wasReportedForRemoval');
     const reviewEnd = Date.now();
     const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, isReport);
+        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
 
     // Give unit engine a chance to update any necessary stats
     const endLatency = reviewEnd - trialStartTimestamp;
@@ -1454,7 +1454,6 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         return; // We are totally done
       }
     }
-    Session.set('isReport', false);
 
     hideUserFeedback();
     $('#userAnswer').val('');
@@ -1498,7 +1497,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, isReport) {
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   const feedbackDuration = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
   let responseDuration = 0;
@@ -1609,7 +1608,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   // hack
   const sessionID = (new Date(trialStartTimestamp)).toUTCString().substr(0, 16) + ' ' + Session.get('currentTdfName');
   let outcome = 'incorrect';
-  if(isReport) {
+  if(wasReportedForRemoval) {
     outcome = 'removal';
   } else if (isCorrect) {
     outcome = 'correct';
@@ -1731,6 +1730,7 @@ function hideUserFeedback() {
   $('#UserInteraction').removeClass('text-align alert alert-success alert-danger').html('').hide();
   $('#userForceCorrect').val(''); // text box - see inputF.html
   $('#forceCorrectionEntry').hide(); // Container
+  $('#removeQuestion').hide();
 }
 
 // Called when the current unit is done. This should be either unit-defined (see
@@ -1826,6 +1826,7 @@ async function cardStart() {
 }
 
 async function prepareCard() {
+  Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
   Session.set('currentDisplay', {});
   Session.set('clozeQuestionParts', undefined);
@@ -2708,21 +2709,23 @@ async function checkSyllableCacheForCurrentStimFile(cb) {
 }
 
 async function showRemovalButton() {
-  $('#removeQuestion').removeClass('invisible');
+  $('#removeQuestion').show();
 }
 
 async function removeCardByUser() {
-
   let clusterIndex = Session.get('clusterIndex');
   let stims = getStimCluster(clusterIndex).stims; 
   let whichStim = engine.findCurrentCardInfo().whichStim;
   const userId = Meteor.userId();
   const tdfId = Session.get('currentTdfId');
+  await meteorCallAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC, tdfId);
+  let hiddenItems = Session.get('hiddenItems');
+  hiddenItems.push(stims[whichStim].stimulusKC);
+  
+  Session.set('numVisableCards', Session.get('numVisableCards') - 1);
+  Session.set('hiddenItems', hiddenItems);
+  Session.set('wasReportedForRemoval', true);
 
-  await meteorCallAsync('insertHiddenItem', userId, stims[whichStim].stimulusKC);
-  Session.set('hiddenItems', await meteorCallAsync('getHiddenItems', userId, tdfId));
-  Session.set('numRemainingCards', await engine.getCardCount());
-  Session.set('isReport', true);
   if(Session.get('dialogueLoopStage')){
     Session.set('dialogueLoopStage', 'exit');
     dialogueContinue();

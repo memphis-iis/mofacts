@@ -171,10 +171,6 @@ function getStimCount() {
   return numClusters;
 }
 
-// function getStimById(){
-
-// }
-
 // Return the stim file cluster matching the index AFTER mapping it per the
 // current sessions cluster mapping.
 // Note that the cluster mapping goes from current session index to raw index in order of the stim file

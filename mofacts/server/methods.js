@@ -713,19 +713,15 @@ async function setExperimentState(UserId, TDFId, newExperimentState) { // by cur
   return TDFId;
 }
 
-async function insertHiddenItem(userId, clusterKC) {
-  let query = 'UPDATE componentstate SET showitem = FALSE WHERE userid = $1 AND kcid = $2';
-  await db.manyOrNone(query, [userId, clusterKC]);
+async function insertHiddenItem(userId, stimulusKC, tdfId) {
+  let query = 'UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = \'stimulus\'';
+  await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
 }
 
 async function getHiddenItems(userId, tdfId) {
-  let query = 'SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false';
+  let query = 'SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = \'stimulus\'';
   const hiddenItems = await db.manyOrNone(query, [userId, tdfId]);
-  let ret = [];
-  for(let i = 0; i < hiddenItems.length; i++){
-    ret.push(hiddenItems[i].kcid);
-  }
-  return [...new Set(ret)];
+  return hiddenItems;
 }
 
 async function insertHistory(historyRecord) {
