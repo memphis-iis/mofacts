@@ -9,7 +9,7 @@ import gauge, {
   TextRenderer
 
 } from '../../lib/gauge.js';
-import { Session } from 'meteor/session';
+
 
 Session.set('studentReportingTdfs', []);
 Session.set('curStudentPerformance', {});
@@ -81,7 +81,12 @@ Template.studentReporting.rendered = async function() {
   // let dataAlreadyInCache = false;
   if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
     console.log('admin/teacher');
-  } else {scorer.afterFlush(async function() {
+  } else {
+    Session.set('curStudentID', studentID);
+    Session.set('studentUsername', studentUsername);
+  }
+  if (Session.get('instructorSelectedTdf')) {
+    Tracker.afterFlush(async function() {
       const tdfToSelect = Session.get('instructorSelectedTdf');
       $('#tdf-select').val(tdfToSelect);
       setStudentPerformance(studentID, studentUsername, tdfToSelect);
@@ -100,7 +105,7 @@ Template.studentReporting.events({
 async function updateDashboard(selectedTdfId){
   console.log('change tdf select', selectedTdfId);
   if (selectedTdfId!==INVALID) {
-    $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
+    $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);

@@ -1020,15 +1020,6 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
   return ret.count;
 }
 
-async function getStimCountByTdfId(tdfId) {
-  const query = 'SELECT COUNT(*) FROM item \
-               WHERE stimuliSetId=$1 \
-               ORDER BY itemId';
-  const ret = await db.one(query, stimuliSetId);
-  return ret.count;
-}
-
-
 async function getStudentReportingData(userId, TDFid) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
