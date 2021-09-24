@@ -1,0 +1,74 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Swahili Vocabulary test",
+            "userselect": "false",
+            "stimulusfile": "Swahilistims.json",
+            "shuffleclusters": "0-16",
+            "lfparameter": "0.80",
+            "isModeled": "false",
+            "experimentTarget": "swa",
+            "experimentPasswordRequired": "true"
+        },
+        "unit": [
+            {
+                "unitname": "Instructions",
+                "unitinstructions": "\n\t\t\tWelcome to a basic lesson on Swahili!\n\t\t"
+            },
+            {
+                "unitname": "Swahili Training",
+                "unitinstructions": "\n            Enter answer in the prompt box below each question.  Please\n            attempt to answer all questions presented.\n        ",
+                "deliveryparams": {
+                    "drill": "10000",
+                    "purestudy": "10000",
+                    "skipstudy": "false",
+                    "reviewstudy": "2000",
+                    "correctprompt": "500"
+                },
+                "buttontrial": "true",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "17",
+                        "group": "0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,s,0 0,s,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,s,0 0,s,d,0"
+                    },
+                    "initialpositions": "\n\t\t\t\tA_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14\n\t\t\t\tA_15 A_16 A_17\n\t\t\t",
+                    "randomizegroups": "false",
+                    "clusterlist": "0-16",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-16"
+                }
+            },
+            {
+                "unitname": "Swahili Post-test",
+                "unitinstructions": "\n\t\t\tLet's see if you can remember the answers!\n\t\t",
+                "deliveryparams": {
+                    "drill": "10000",
+                    "purestudy": "10000",
+                    "skipstudy": "false",
+                    "reviewstudy": "2000",
+                    "correctprompt": "500"
+                },
+                "buttontrial": "false",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "17",
+                        "group": "0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0 0,f,d,0\n\t\t\t\t\t0,f,d,0 0,f,d,0"
+                    },
+                    "initialpositions": "\n\t\t\t\tA_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14\n\t\t\t\tA_15 A_16 A_17\n\t\t\t",
+                    "randomizegroups": "false",
+                    "clusterlist": "0-16",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-16"
+                }
+            },
+            {
+                "unitname": "Final",
+                "unitinstructions": "\n\t\t\tYou have completed all the units that are available\n\t\t"
+            }
+        ]
+    }
+}
