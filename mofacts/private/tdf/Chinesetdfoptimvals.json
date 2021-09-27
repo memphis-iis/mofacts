@@ -1,0 +1,105 @@
+{
+    "tutor": {
+        "setspec": {
+            "name": "Cat Optim Test",
+            "lessonname": "Optimized Drill Practice of Chinese Tones",
+            "userselect": "false",
+            "stimulusfile": "Chinesestimsoptimvals.json"
+        },
+        "unit": [
+            {
+                "unitinstructions": "Here comes the optim test.",
+                "unitname": "Tone pre-test",
+                "buttonorder": "fixed",
+                "buttonOptions": "tone 1, tone 2, tone 3, tone 4",
+                "deliveryparams": {
+                    "practiceseconds": "1000000",
+                    "drill": "7000",
+                    "skipstudy": "false",
+                    "reviewstudy": "6000",
+                    "correctprompt": "1000",
+                    "fontsize": "2",
+                    "correctscore": "1",
+                    "incorrectscore": "0",
+                    "timeuntilaudio": "500"
+                },
+                "buttontrial": "true",
+                "learningsession": {
+                    "clusterlist": "0-3",
+                    "unitMode": "distance",
+                    "calculateProbability": "\n          function mul(m1, m2) {\n            var result = 0;\n            var len = m1.length;\n            for (var i = 0; i < len; i++) {\n                result += m1[i] * m2[i]\n            }\n            return result\n          }\n          function logitdec(outcomes, decay) {\n            if (outcomes) {\n                var outcomessuc = JSON.parse(JSON.stringify(outcomes));\n                var outcomesfail = outcomes.map(function(value) {\n                    return Math.abs(value - 1)\n                });\n                var w = outcomessuc.unshift(1);\n                var v = outcomesfail.unshift(1);\n                return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                })))\n            }\n            return 0\n          }\n          function propdec(outcomes, decay) {\n            if (outcomes) {\n                var outcomesLocal = JSON.parse(JSON.stringify(outcomes));\n                var w = outcomesLocal.unshift(1);\n                return mul(outcomesLocal, [...Array(w).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                })) / [...Array(w + 1).keys()].reverse().map(function(value, index) {\n                    return Math.pow(decay, value)\n                }).reduce((a, b) => a + b, 0)\n            }\n            return .5\n          }\n          function baselevel(age, interference, d, f) {\n            return 1 / Math.pow(1 + interference + ((age - interference) * f), d)\n          }\n          function recency(age, d) {\n            return 1 / Math.pow(1 + age, d)\n          }\n          function compdiffcor(seq, probs) {\n            return mul(seq, probs) - mul(seq, probs.map(function(value) {\n                return value * value\n            }))\n          }\n          function quaddiffcor(seq, probs) {\n            return mul(seq, probs.map(function(value) {\n                return value * value\n            }))\n          }\n          function linediffcor(seq, probs) {\n            return mul(seq, probs)\n          }\n          function linediffincor(seq, probs) {\n            return mul(seq.map(function(value) {\n                return Math.abs(value - 1)\n            }), probs)\n          }\n          p.y = p.stimParameters[0] + .75151021 * logitdec(p.overallOutcomeHistory, .975) +\n                p.stimParameters[2] * compdiffcor(p.clusterOutcomeHistory, p.clusterPreviousCalculatedProbabilities) +\n                p.stimParameters[3] * linediffincor(p.clusterOutcomeHistory, p.clusterPreviousCalculatedProbabilities);\n          p.probability = 1.0 / (1.0 + Math.exp(-p.y));\n          console.log(p.stimParameters[0]);\n          console.log(.75151021 * logitdec(p.overallOutcomeHistory, .975) );\n          console.log(p.stimParameters[2] * compdiffcor(p.clusterOutcomeHistory, p.clusterPreviousCalculatedProbabilities));\n          console.log(p.stimParameters[3] * linediffincor(p.clusterOutcomeHistory, p.clusterPreviousCalculatedProbabilities));\nconsole.log(p.probability )\n          return p\n             ",
+                    "XcalculateProbability": "\n                 p.CUSTOM_MSG = \"Random p model\";\n                 p.probability = Math.random();  // random p means model picks randomly\n                 return p;\n             "
+                }
+            },
+            {
+                "unitinstructions": "Here comes the post-test.",
+                "unitname": "Tone post-test",
+                "buttonorder": "fixed",
+                "buttonOptions": "tone 1, tone 2, tone 3, tone 4",
+                "deliveryparams": {
+                    "practiceseconds": "1000000",
+                    "drill": "7000",
+                    "skipstudy": "false",
+                    "reviewstudy": "6000",
+                    "correctprompt": "1000",
+                    "fontsize": "2",
+                    "correctscore": "1",
+                    "incorrectscore": "0",
+                    "timeuntilaudio": "500"
+                },
+                "buttontrial": "true",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A B C D",
+                        "clustersrepeated": "18 18 18 18",
+                        "templatesrepeated": "1 1 1 1",
+                        "group": [
+                            "0,f,t,0 1,f,t,1 6,f,t,2 7,f,t,3 12,f,t,4 13,f,t,5\n\t\t\t\t\t18,f,t,6 19,f,t,7 24,f,t,8 25,f,t,9 30,f,t,10 31,f,t,11\n\t\t\t\t\t36,f,t,12 37,f,t,13 42,f,t,14 43,f,t,15 48,f,t,16 49,f,t,17\n\t\t\t\t",
+                            "0,f,t,0 1,f,t,1 6,f,t,2 7,f,t,3 12,f,t,4 13,f,t,5\n\t\t\t\t\t18,f,t,6 19,f,t,7 24,f,t,8 25,f,t,9 30,f,t,10 31,f,t,11\n\t\t\t\t\t36,f,t,12 37,f,t,13 42,f,t,14 43,f,t,15 48,f,t,16 49,f,t,17\n\t\t\t\t",
+                            "0,f,t,0 1,f,t,1 6,f,t,2 7,f,t,3 12,f,t,4 13,f,t,5\n\t\t\t\t\t18,f,t,6 19,f,t,7 24,f,t,8 25,f,t,9 30,f,t,10 31,f,t,11\n\t\t\t\t\t36,f,t,12 37,f,t,13 42,f,t,14 43,f,t,15 48,f,t,16 49,f,t,17\n\t\t\t\t",
+                            "0,f,t,0 1,f,t,1 6,f,t,2 7,f,t,3 12,f,t,4 13,f,t,5\n\t\t\t\t\t18,f,t,6 19,f,t,7 24,f,t,8 25,f,t,9 30,f,t,10 31,f,t,11\n\t\t\t\t\t36,f,t,12 37,f,t,13 42,f,t,14 43,f,t,15 48,f,t,16 49,f,t,17\n\t\t\t\t"
+                        ]
+                    },
+                    "initialpositions": "\n\t\t\t\tA_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1 A_1\n\t\t\t\tB_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1 B_1\n\t\t\t\tC_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1 C_1\n\t\t\t\tD_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1 D_1\n\t\t\t",
+                    "randomizegroups": "false",
+                    "clusterlist": "0-3",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-71"
+                }
+            },
+            {
+                "unitname": "Show the questions",
+                "unitinstructions": "Demographic Survey<br><br>\nPlease answer the following 9 quick demographic questions, which may be useful for us to understand the data we collect.",
+                "buttonorder": "fixed",
+                "deliveryparams": {
+                    "drill": "12000000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "500",
+                    "fontsize": "3",
+                    "correctscore": "0",
+                    "incorrectscore": "0"
+                },
+                "buttontrial": "false",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "E",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "9",
+                        "group": "0,b,t,0 0,f,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,f,t,0 0,b,t,0 0,b,t,0 "
+                    },
+                    "initialpositions": "                E_1 E_2 E_3 E_4 E_5 E_6 E_7 E_8 E_9          ",
+                    "randomizegroups": "false",
+                    "clusterlist": "4-12",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-0"
+                }
+            },
+            {
+                "unitname": "last",
+                "unitinstructions": "You have completed the experiment.\n<br><br>\n<strong>Please enter the code- Tones -into the Amazon Mechanical Turk website for this HIT and submit your response now.\n<br><br>\nWe will check your completion and approve your assignment for the $6 payment."
+            }
+        ]
+    }
+}
