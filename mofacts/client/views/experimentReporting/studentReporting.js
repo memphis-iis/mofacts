@@ -16,7 +16,8 @@ Session.set('curStudentPerformance', {});
 
 let defaultGaugeOptions = {
   angle: -.2,
-  lineWidth: 0.2,
+  lineWidth: 0.22,
+  radiusScale:0.9,
   pointer: {
     length: 0.5,
     strokeWidth: 0.05,
@@ -24,22 +25,39 @@ let defaultGaugeOptions = {
   },
   staticZones: [
      {strokeStyle: "#F03E3E", min: 0, max: 50, height: 1},
-     {strokeStyle: "#30B32D", min: 51, max: 79, height: 1},
+     {strokeStyle: "#30B32D", min: 50, max: 80, height: 1},
      {strokeStyle: "#FFDD00", min: 80, max: 100, height: 1},
 
   ],
+  renderTicks: {
+    divisions: 5,
+    divWidth: 1.1,
+    divLength: 0.7,
+    divColor: '#333333',
+    subDivisions: 3,
+    subLength: 0.5,
+    subWidth: 0.6,
+    subColor: '#666666'
+  },
+
+  staticLabels: {
+    font: "8px sans-serif",  // Specifies font
+    labels: [50, 60, 70, 80, 100],  // Print labels at these values
+    color: "#000000",  // Optional: Label text color
+    fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+  },
   limitMax: false,
   limitMin: false,
   highDpiSupport: true
 };
 let defaultDonutOptions = {
   lines: 12, // The number of lines to draw
-  angle: .15, // The length of each line
-  lineWidth: 0.15, // The line thickness
+  angle: .4, // The length of each line
+  lineWidth: 0.13, // The line thickness
   pointer: {
     length: 0.9, // The radius of the inner circle
     strokeWidth: 0.035, // The rotation offset
-    color: '#111111' // Fill color
+    color: '#333' // Fill color
   },
   limitMax: 'true', // If true, the pointer will not go past the end of the gauge
   colorStart: '#008351', // Colors
@@ -53,6 +71,10 @@ Template.studentReporting.helpers({
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
+  curStudentPerformaceCorrectInInteger: function() {
+    var percentCorrectInteger = parseFloat(Session.get('curStudentPerformance').percentCorrect).toFixed(0);
+    return percentCorrectInteger;
+  },
   studentUsername: () => Session.get('studentUsername'),
   stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
