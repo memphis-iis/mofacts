@@ -1196,7 +1196,7 @@ function modelUnitEngine() {
       // have been seen - and we need to do this whether or NOT we are in
       // resume mode
       _.each(cardProbabilities.cards, function(card, index) {
-        if (index != cardIndex) {
+        if (index != cardIndex && card.hasBeenIntroduced) {
           card.trialsSinceLastSeen += 1;
         }
       });
@@ -1247,7 +1247,7 @@ function modelUnitEngine() {
       // the only place we call it after init *and* something might have
       // changed during question selection
       if (getTestType() === 's') {
-        await this.saveComponentStates;
+        await this.saveComponentStates();
         return;
       }
 
@@ -1290,7 +1290,7 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      await this.saveComponentStates;
+      await this.saveComponentStates();
     },
 
     unitFinished: function() {
