@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Meetup",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.2"
+    },
+    {
+      "package": "oauth2",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "oauth",
+      "constraint": "2.0.0"
+    },
+    {
+      "package": "http",
+      "constraint": "1.4.4 || 2.0.0"
+    },
+    {
+      "package": "service-configuration",
+      "constraint": "1.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/meetup_server.js",
+      "length": 2112,
+      "offset": 0,
+      "path": "meetup_server.js",
+      "hash": "2e1228943a7ad45ba5bdcc7373cc624fa09dcf06",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/meetup_client.js",
+      "length": 1970,
+      "offset": 0,
+      "path": "meetup_client.js",
+      "hash": "dbc009ef30c23167d6f8780b0fc583ad3d10fab7",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

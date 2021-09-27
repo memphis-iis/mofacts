@@ -1,0 +1,37 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "IdMap",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.1"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/id-map.js",
+      "length": 1907,
+      "offset": 0,
+      "path": "id-map.js",
+      "hash": "95f0edffc1b4d35217f8640f72e718be72934f8b",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    }
+  ]
+}

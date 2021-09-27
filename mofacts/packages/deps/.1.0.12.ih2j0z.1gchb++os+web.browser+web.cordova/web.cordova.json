@@ -1,0 +1,28 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Tracker",
+      "testOnly": false
+    },
+    {
+      "name": "Deps",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tracker"
+    }
+  ],
+  "implies": [
+    {
+      "package": "tracker",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

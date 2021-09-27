@@ -1,0 +1,9 @@
+{
+  "format": "javascript-image-pre1",
+  "arch": "os",
+  "load": [
+    {
+      "path": "packages/basicFileTypes_plugin.js"
+    }
+  ]
+}

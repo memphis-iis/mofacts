@@ -1,0 +1,64 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.14.3"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/generator.js",
+      "length": 4882,
+      "offset": 0,
+      "path": "generator.js",
+      "hash": "c2725642be03a2d8cd5f828018c09dded80c1cb1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/template-web.browser.js",
+      "length": 2299,
+      "offset": 0,
+      "path": "template-web.browser.js",
+      "hash": "70f881ccee1f23228930a8b4662b808c9a6b302b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/template-web.cordova.js",
+      "length": 2929,
+      "offset": 0,
+      "path": "template-web.cordova.js",
+      "hash": "d05a83efada8445eb2a8edeb09c615f9e35e4f1c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/template.js",
+      "length": 584,
+      "offset": 0,
+      "path": "template.js",
+      "hash": "db734c0459acd42c8982f899e694b03634f2993a",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

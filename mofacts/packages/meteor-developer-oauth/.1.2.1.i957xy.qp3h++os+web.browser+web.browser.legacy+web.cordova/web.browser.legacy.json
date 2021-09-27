@@ -1,0 +1,67 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "MeteorDeveloperAccounts",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "oauth2"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "service-configuration"
+    },
+    {
+      "package": "random"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/meteor_developer_common.js",
+      "length": 342,
+      "offset": 0,
+      "path": "meteor_developer_common.js",
+      "hash": "eda6e97c3504ae63d9290cccf424cdc05905374d",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/meteor_developer_client.js",
+      "length": 1785,
+      "offset": 0,
+      "path": "meteor_developer_client.js",
+      "hash": "146ea6d5bbd61728769c2ea7ec4062a346cc7b56",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/meteor_developer_server.js",
+      "length": 2835,
+      "offset": 0,
+      "path": "meteor_developer_server.js",
+      "hash": "8afd4179beee4cc876bf4f6c3433004176490865",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

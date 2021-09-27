@@ -1,0 +1,36 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:compiler-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "implies": [
+    {
+      "package": "modules",
+      "constraint": ""
+    },
+    {
+      "package": "ecmascript-runtime",
+      "constraint": ""
+    },
+    {
+      "package": "babel-runtime",
+      "constraint": ""
+    },
+    {
+      "package": "promise",
+      "constraint": ""
+    },
+    {
+      "package": "dynamic-import",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

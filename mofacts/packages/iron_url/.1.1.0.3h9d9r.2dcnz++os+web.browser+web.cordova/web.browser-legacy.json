@@ -1,0 +1,39 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/iron_url.js",
+      "length": 18093,
+      "offset": 0,
+      "servePath": "/packages/iron_url.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "compilePath"
+    },
+    {
+      "name": "Url"
+    }
+  ]
+}

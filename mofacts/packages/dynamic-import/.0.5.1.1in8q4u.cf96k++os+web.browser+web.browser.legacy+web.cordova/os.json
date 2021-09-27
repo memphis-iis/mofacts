@@ -1,0 +1,114 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:dynamic-import",
+      "constraint": "1.5.0"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.13.0"
+    },
+    {
+      "package": "promise",
+      "constraint": "0.11.1"
+    },
+    {
+      "package": "fetch",
+      "constraint": "0.1.0"
+    },
+    {
+      "package": "modern-browsers",
+      "constraint": "0.1.2"
+    },
+    {
+      "package": "inter-process-messaging",
+      "constraint": "0.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server.js",
+      "length": 5956,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "456622bf17ec60586b9192c4f990caebb4884059",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/cache.js",
+      "length": 5701,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "cache.js",
+      "hash": "0368469afa83c8c92e0643cfaf0d52b1cd733cec",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client.js",
+      "length": 4907,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "8c52ebfb2dfa041083f55da120545cb8d96b42bc",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/common.js",
+      "length": 55,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "common.js",
+      "hash": "3d4472440446fd92e4fcba378afdc250462e7fa2",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/dynamic-versions.js",
+      "length": 2489,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dynamic-versions.js",
+      "hash": "155f4938b8dded8949bd7e0dcc6081079c057846",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/security.js",
+      "length": 1168,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "security.js",
+      "hash": "4343117e931e1f72a9f02749c9135e075a557157",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

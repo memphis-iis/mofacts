@@ -1,0 +1,74 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Logic",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minisat.js",
+      "length": 236978,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "minisat.js",
+      "hash": "6b4c3b8368015bfc5fc52436c7f494017d8f77c1",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minisat_wrapper.js",
+      "length": 4173,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "minisat_wrapper.js",
+      "hash": "f9133e1e590a8fb34f196cec992ec1c9e9b1b9be",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/types.js",
+      "length": 4311,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "types.js",
+      "hash": "d40026efa5d2ed0c1e5da864ae8dddcf4aabd855",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/logic.js",
+      "length": 52306,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "logic.js",
+      "hash": "99f163240c821c24943e863558b238b496b8f52f",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/optimize.js",
+      "length": 5399,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "optimize.js",
+      "hash": "01cdf30a98b90af26008f0572c85997a595cab0f",
+      "fileOptions": {}
+    }
+  ]
+}

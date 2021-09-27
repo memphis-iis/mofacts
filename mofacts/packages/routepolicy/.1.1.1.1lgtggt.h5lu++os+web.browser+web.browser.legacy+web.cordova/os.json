@@ -1,0 +1,62 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "RoutePolicy",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.2"
+    },
+    {
+      "package": "webapp",
+      "constraint": "1.11.0",
+      "unordered": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/main.js",
+      "length": 124,
+      "offset": 0,
+      "path": "main.js",
+      "hash": "e8ec53f04bc2d59774ac0c47eedc5e74de99a84f",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/routepolicy.js",
+      "length": 3667,
+      "offset": 0,
+      "path": "routepolicy.js",
+      "hash": "b66159a1a2337067071adac4680a167eb32d1674",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/routepolicy_tests.js",
+      "length": 2132,
+      "offset": 0,
+      "path": "routepolicy_tests.js",
+      "hash": "86dc2726ab1433f036884c1e755e440b2f0781f9",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

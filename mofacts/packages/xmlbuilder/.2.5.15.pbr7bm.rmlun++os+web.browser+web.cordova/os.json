@@ -1,0 +1,28 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "XmlBuilder",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/xmlbuilder.js",
+      "length": 41,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "xmlbuilder.js",
+      "hash": "eeeaa985004ef5fff16ef1be30ac0b31ed95d65c",
+      "fileOptions": {}
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

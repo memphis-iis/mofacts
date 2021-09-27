@@ -1,0 +1,56 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "CssTools",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minifier-tests.js",
+      "length": 3162,
+      "offset": 0,
+      "path": "minifier-tests.js",
+      "hash": "c7fbe9dedfc625e02dc89cbae1bff3a9f621ff94",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minifier.js",
+      "length": 10346,
+      "offset": 0,
+      "path": "minifier.js",
+      "hash": "c9897ffe761999225102dbd6f11314440e71bb2b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/urlrewriting-tests.js",
+      "length": 8628,
+      "offset": 0,
+      "path": "urlrewriting-tests.js",
+      "hash": "e90ebed97bb915caf79a79715fd23bbca2618c2b",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

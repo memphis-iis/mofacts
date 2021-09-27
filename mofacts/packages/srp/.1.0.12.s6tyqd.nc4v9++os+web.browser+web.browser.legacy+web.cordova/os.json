@@ -1,0 +1,68 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "SRP",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.11.0"
+    },
+    {
+      "package": "random",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "sha",
+      "constraint": "1.0.9"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/biginteger.js",
+      "length": 35831,
+      "offset": 0,
+      "path": "biginteger.js",
+      "hash": "bec6a5b2c481b1fbff381837e2fe6c2b4bb1f07e",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/srp.js",
+      "length": 3112,
+      "offset": 0,
+      "path": "srp.js",
+      "hash": "afd32e1fa7e5278f67e0d5e8607b6ea7208fdd70",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/srp_tests.js",
+      "length": 1144,
+      "offset": 0,
+      "path": "srp_tests.js",
+      "hash": "c162426782638cac015f1274ff01e0b14f0fe4f7",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

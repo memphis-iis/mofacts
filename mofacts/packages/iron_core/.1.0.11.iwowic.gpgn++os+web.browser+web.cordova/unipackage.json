@@ -1,0 +1,25 @@
+{
+  "name": "iron:core",
+  "summary": "Iron namespace and utilities.",
+  "version": "1.0.11",
+  "isTest": false,
+  "plugins": [],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

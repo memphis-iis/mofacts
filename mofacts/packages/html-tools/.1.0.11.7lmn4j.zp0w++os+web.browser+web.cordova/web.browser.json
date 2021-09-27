@@ -1,0 +1,92 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "HTMLTools",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/utils.js",
+      "length": 2587,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "utils.js",
+      "hash": "f2c7ba3317d75bce68d09efa608576c60aa766e6",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/scanner.js",
+      "length": 2834,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "scanner.js",
+      "hash": "ff69363501859303ae2c7bbc5f9746cccc0911c4",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/charref.js",
+      "length": 152547,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "charref.js",
+      "hash": "9fd357ef411887ccc13321eb30c9d619fb3c2283",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/tokenize.js",
+      "length": 15914,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "tokenize.js",
+      "hash": "db4988ba0042dbb25dbc700d0b06a8d498dfdbe8",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/templatetag.js",
+      "length": 758,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "templatetag.js",
+      "hash": "62065554bf385fbaeffa9a32df10d33d99c2ce95",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/parse.js",
+      "length": 11688,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "parse.js",
+      "hash": "1175bddab92a05a2a69210b67be254ab38d6ec09",
+      "fileOptions": {}
+    }
+  ]
+}

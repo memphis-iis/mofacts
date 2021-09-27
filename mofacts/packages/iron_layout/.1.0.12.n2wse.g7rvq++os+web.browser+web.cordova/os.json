@@ -1,0 +1,77 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.0.0"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:dynamic-template",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "cmather:blaze-layout",
+      "constraint": "0.2.5",
+      "weak": true
+    },
+    {
+      "package": "cmather:iron-layout",
+      "constraint": "0.2.0",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    },
+    {
+      "package": "iron:dynamic-template",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/version_conflict_errors.js",
+      "length": 1238,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "version_conflict_errors.js",
+      "hash": "826bde2478ba8a102b4aa221ae1f2fe0901fec62",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/layout.js",
+      "length": 11953,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "layout.js",
+      "hash": "c690130b9272f7870bba943785b2602d6d463396",
+      "fileOptions": {}
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "css",
+      "file": "web.browser/reset.css",
+      "length": 1089,
+      "offset": 0,
+      "servePath": "/packages/meyerweb-reset/reset.css"
+    }
+  ]
+}

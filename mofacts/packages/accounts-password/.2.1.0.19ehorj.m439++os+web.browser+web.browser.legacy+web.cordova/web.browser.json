@@ -1,0 +1,117 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "sha"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/password_client.js",
+      "length": 7525,
+      "offset": 0,
+      "path": "password_client.js",
+      "hash": "5533533fc7c39795d3cebc1d636ded082514dd2e",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/email_templates.js",
+      "length": 1036,
+      "offset": 0,
+      "path": "email_templates.js",
+      "hash": "bb5bca6d1991581af37309e10a1e214fca0e87c6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/email_tests.js",
+      "length": 11152,
+      "offset": 0,
+      "path": "email_tests.js",
+      "hash": "cf831766ee0aafe08dd4b99e6c2617f2a4d29cb8",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/email_tests_setup.js",
+      "length": 1663,
+      "offset": 0,
+      "path": "email_tests_setup.js",
+      "hash": "92ebac77d42d2bcac8260e72be0a849c9b023465",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/password_server.js",
+      "length": 40437,
+      "offset": 0,
+      "path": "password_server.js",
+      "hash": "958d17e715683fdd3b306e5a8abf307f9d3b1992",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/password_tests.js",
+      "length": 59639,
+      "offset": 0,
+      "path": "password_tests.js",
+      "hash": "fbb5cfa687aeae3962a55bc4c535ad90b62ed0da",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/password_tests_setup.js",
+      "length": 3653,
+      "offset": 0,
+      "path": "password_tests_setup.js",
+      "hash": "ee41bec3563768c943a00ddf5fa8ec1999abb3cb",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

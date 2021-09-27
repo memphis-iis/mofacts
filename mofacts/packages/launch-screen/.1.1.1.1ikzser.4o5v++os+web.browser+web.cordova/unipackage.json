@@ -1,0 +1,28 @@
+{
+  "name": "launch-screen",
+  "summary": "Default and customizable launch screen on mobile.",
+  "version": "1.1.1",
+  "isTest": false,
+  "plugins": [],
+  "cordovaDependencies": {
+    "cordova-plugin-splashscreen": "4.0.1"
+  },
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

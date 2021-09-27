@@ -1,0 +1,173 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "WebApp",
+      "testOnly": false
+    },
+    {
+      "name": "WebAppInternals",
+      "testOnly": false
+    },
+    {
+      "name": "main",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "logging"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "routepolicy"
+    },
+    {
+      "package": "modern-browsers"
+    },
+    {
+      "package": "boilerplate-generator"
+    },
+    {
+      "package": "webapp-hashing"
+    },
+    {
+      "package": "inter-process-messaging"
+    },
+    {
+      "package": "callback-hook"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/webapp_server.js",
+      "length": 49568,
+      "offset": 0,
+      "path": "webapp_server.js",
+      "hash": "09ecc750ac67b4cf91fbc5537ba0fcd9e9d84bc4",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/connect.js",
+      "length": 1409,
+      "offset": 0,
+      "path": "connect.js",
+      "hash": "6e6b576ea02ddf86916bcef15bdec3222d8a0f9e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/legacy_test_asset.js",
+      "length": 23,
+      "offset": 0,
+      "path": "legacy_test_asset.js",
+      "hash": "6aad238ef60f4badf827003bd5763cfd0a862bec",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/modern_test_asset.js",
+      "length": 23,
+      "offset": 0,
+      "path": "modern_test_asset.js",
+      "hash": "56d2f6d830a14ea7b5d3527850c1079b761b0e3e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/socket_file.js",
+      "length": 2555,
+      "offset": 0,
+      "path": "socket_file.js",
+      "hash": "75317a9a6d3fb87be8894eefe9d2a64796df3be5",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/socket_file_tests.js",
+      "length": 1809,
+      "offset": 0,
+      "path": "socket_file_tests.js",
+      "hash": "2aa47a6be039c24a837d97425604aee41a71f695",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/webapp_client.js",
+      "length": 473,
+      "offset": 0,
+      "path": "webapp_client.js",
+      "hash": "f5700f4cb17ff1047285bb132012503f59a096d7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/webapp_client_tests.js",
+      "length": 228,
+      "offset": 0,
+      "path": "webapp_client_tests.js",
+      "hash": "6892b88b516556e454658cf0810f72aeaaf4d30e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/webapp_cordova.js",
+      "length": 100,
+      "offset": 0,
+      "path": "webapp_cordova.js",
+      "hash": "c77f809ed12f618bbce0cd3b940d95470dcd2264",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/webapp_tests.js",
+      "length": 10616,
+      "offset": 0,
+      "path": "webapp_tests.js",
+      "hash": "dfd7fba77fc65083a6946e48274588c68d3576cb",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

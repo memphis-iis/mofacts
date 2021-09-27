@@ -1,0 +1,193 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDP",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "retry"
+    },
+    {
+      "package": "id-map"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "callback-hook"
+    },
+    {
+      "package": "ddp-common"
+    },
+    {
+      "package": "reload"
+    },
+    {
+      "package": "socket-stream-client"
+    },
+    {
+      "package": "diff-sequence"
+    },
+    {
+      "package": "mongo-id"
+    },
+    {
+      "package": "reload",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/client/client.js",
+      "length": 195,
+      "offset": 0,
+      "path": "client/client.js",
+      "hash": "9edc3cd6f4b6122ce38c0abfba8d433b4f322a1c",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/client/client_convenience.js",
+      "length": 2181,
+      "offset": 0,
+      "path": "client/client_convenience.js",
+      "hash": "5ee93d9cf332d573ec215aed73d7b66a37756f84",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/common/MethodInvoker.js",
+      "length": 3470,
+      "offset": 0,
+      "path": "common/MethodInvoker.js",
+      "hash": "cb6e60ed802081b060bfebeee150b95e68073b90",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/common/livedata_connection.js",
+      "length": 63635,
+      "offset": 0,
+      "path": "common/livedata_connection.js",
+      "hash": "4917255c9754fe8c73ae46282f15f6d811d4c7e4",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/common/namespace.js",
+      "length": 2980,
+      "offset": 0,
+      "path": "common/namespace.js",
+      "hash": "c788d0b5c03746d6de5fbab835734f92e227147d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/server/server.js",
+      "length": 46,
+      "offset": 0,
+      "path": "server/server.js",
+      "hash": "afc17bedb6da1fc64f15cc2c20b1446f1f0531f9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/test/livedata_connection_tests.js",
+      "length": 76194,
+      "offset": 0,
+      "path": "test/livedata_connection_tests.js",
+      "hash": "5aa987a46c171cc0ef7d9c0edcd8a89e7077b871",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/test/livedata_test_service.js",
+      "length": 10337,
+      "offset": 0,
+      "path": "test/livedata_test_service.js",
+      "hash": "223c3a19e0eed0751edd96dc10e66b66dcede23d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/test/livedata_tests.js",
+      "length": 31570,
+      "offset": 0,
+      "path": "test/livedata_tests.js",
+      "hash": "45b23152a5711412612c00e423fccb8f0b43e9df",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/test/random_stream_tests.js",
+      "length": 1369,
+      "offset": 0,
+      "path": "test/random_stream_tests.js",
+      "hash": "6b02f2865d183fc2d6bb929a94c5e3ecba2f3cb1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/test/stub_stream.js",
+      "length": 1085,
+      "offset": 0,
+      "path": "test/stub_stream.js",
+      "hash": "cb527086a59a35379e5e845ec04e494343e85c9f",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

@@ -1,0 +1,55 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Facebook",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "oauth2"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "http"
+    },
+    {
+      "package": "service-configuration"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/facebook_server.js",
+      "length": 3309,
+      "offset": 0,
+      "path": "facebook_server.js",
+      "hash": "475349b897806c0447403149159108475a564396",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/facebook_client.js",
+      "length": 1835,
+      "offset": 0,
+      "path": "facebook_client.js",
+      "hash": "11bcb11d7a8b29b6c7e23a2206a88869932a2bc8",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

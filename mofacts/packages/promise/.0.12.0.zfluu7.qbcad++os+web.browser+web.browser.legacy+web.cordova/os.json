@@ -1,0 +1,106 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Promise",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "modern-browsers"
+    },
+    {
+      "package": "context",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/modern.js",
+      "length": 146,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern.js",
+      "hash": "ae15b2311a67d2cab0e78ac9df88f38a72bb2106",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server.js",
+      "length": 663,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "2ccfb781621f77f3dce5aabcd50cfe9a896bf319",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client.js",
+      "length": 79,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "8f81a7f5f2c22f20f5742a5bad386c8ccf66bbf5",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/extensions.js",
+      "length": 1233,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "extensions.js",
+      "hash": "8b892725eddde797c1234eb48d9d26983d9af7d6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/legacy.js",
+      "length": 249,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "legacy.js",
+      "hash": "22c9978055f32cec6e276a31412abb3a01923f71",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/promise-tests.js",
+      "length": 1192,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "promise-tests.js",
+      "hash": "939d3285688ad8e937b6b1e27dfc34c372e4c664",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

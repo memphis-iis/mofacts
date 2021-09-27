@@ -1,0 +1,51 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "webapp"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "force-ssl-common"
+    },
+    {
+      "package": "isobuild:prod-only",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/force_ssl_both.js",
+      "length": 68,
+      "offset": 0,
+      "path": "force_ssl_both.js",
+      "hash": "d077aa9acf17a829aab8217687466699a75424a6",
+      "fileOptions": {
+        "mainModule": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/force_ssl_server.js",
+      "length": 2153,
+      "offset": 0,
+      "path": "force_ssl_server.js",
+      "hash": "d5210e05ebbf48838b62613c2689ef26f03a9f92",
+      "fileOptions": {
+        "mainModule": true
+      }
+    }
+  ]
+}

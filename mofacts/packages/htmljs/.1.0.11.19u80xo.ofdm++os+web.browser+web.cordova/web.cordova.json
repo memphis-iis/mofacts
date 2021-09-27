@@ -1,0 +1,53 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "HTML",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "deps",
+      "constraint": "1.0.12"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/preamble.js",
+      "length": 82,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "preamble.js",
+      "hash": "519ade20daf0757fea3701fec420e47f7efd232d",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/visitors.js",
+      "length": 9994,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "visitors.js",
+      "hash": "a64df84cf5f74a47ec93078821502392d930d6e8",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/html.js",
+      "length": 9614,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "html.js",
+      "hash": "91a571dfbfa6447640e79d9f777cef436cd4c677",
+      "fileOptions": {}
+    }
+  ]
+}

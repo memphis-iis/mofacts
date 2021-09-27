@@ -1,0 +1,31 @@
+{
+  "isopack-2": {
+    "name": "boilerplate-generator",
+    "summary": "Generates the boilerplate html from program's manifest",
+    "version": "1.7.1",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser.legacy",
+        "path": "web.browser.legacy.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova.json"
+      }
+    ],
+    "plugins": []
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.12.0"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "accounts-oauth",
+      "constraint": "1.1.16"
+    },
+    {
+      "package": "google-oauth",
+      "constraint": "1.2.6"
+    },
+    {
+      "package": "accounts-ui",
+      "constraint": "1.3.1",
+      "weak": true
+    },
+    {
+      "package": "google-config-ui",
+      "constraint": "1.0.1",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "google-oauth",
+      "constraint": "1.2.6"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/notice.js",
+      "length": 397,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "b8cc2711d06f80c4d73b941f2bbee7beeadb3823",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/google.js",
+      "length": 2357,
+      "offset": 0,
+      "path": "google.js",
+      "hash": "88e19f058c5fd8f19fc3c44026aa43753afbe5b1",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

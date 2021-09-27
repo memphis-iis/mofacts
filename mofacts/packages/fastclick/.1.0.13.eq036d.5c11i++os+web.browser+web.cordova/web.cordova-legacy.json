@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/fastclick.js",
+      "length": 29074,
+      "offset": 0,
+      "servePath": "/packages/fastclick.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "FastClick",
+      "export": true
+    },
+    {
+      "name": "module"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.16.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/dev-error-overlay.js",
+      "length": 2544,
+      "offset": 0,
+      "servePath": "/packages/dev-error-overlay.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "DevErrorOverlay",
+      "export": true
+    }
+  ]
+}

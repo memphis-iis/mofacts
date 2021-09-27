@@ -1,0 +1,52 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "OAuthEncryption",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.5"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.12"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/encrypt.js",
+      "length": 4269,
+      "offset": 0,
+      "path": "encrypt.js",
+      "hash": "692a9b0e96d77ef37c1b6870d38601b2992d461c",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/encrypt_tests.js",
+      "length": 4212,
+      "offset": 0,
+      "path": "encrypt_tests.js",
+      "hash": "2263613cd0e0000a4b86758ff318c6ee925f489b",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

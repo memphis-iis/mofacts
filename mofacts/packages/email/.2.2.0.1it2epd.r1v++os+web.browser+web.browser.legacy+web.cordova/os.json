@@ -1,0 +1,59 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Email",
+      "testOnly": false
+    },
+    {
+      "name": "EmailInternals",
+      "testOnly": false
+    },
+    {
+      "name": "EmailTest",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "logging"
+    },
+    {
+      "package": "callback-hook"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/email.js",
+      "length": 8651,
+      "offset": 0,
+      "path": "email.js",
+      "hash": "852bff80454e723eb90f1edb533e4f0cffdea7ed",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/email_tests.js",
+      "length": 12101,
+      "offset": 0,
+      "path": "email_tests.js",
+      "hash": "045bec3228796902f3ffefa8eba0a835f838664b",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

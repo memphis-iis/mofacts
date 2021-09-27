@@ -1,0 +1,54 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.2.13"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.browser/meetup_login_button.css",
+      "length": 2387,
+      "offset": 0,
+      "path": "meetup_login_button.css",
+      "hash": "ea299301e151180110c73c0dad415573cdcc7d67",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.browser/meetup_configure.html",
+      "length": 732,
+      "offset": 0,
+      "path": "meetup_configure.html",
+      "hash": "7be258de1a4e27709260f2be07813e8cc66a863f",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/meetup_configure.js",
+      "length": 245,
+      "offset": 0,
+      "path": "meetup_configure.js",
+      "hash": "da6942fb01ea05fe23f73ea78cab9cda40aa2028",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

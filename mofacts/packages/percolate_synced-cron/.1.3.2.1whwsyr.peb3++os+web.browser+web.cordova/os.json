@@ -1,0 +1,70 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "SyncedCron",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "check",
+      "constraint": "1.1.2"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.1.5"
+    },
+    {
+      "package": "logging",
+      "constraint": "1.0.10"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/synced-cron-server.js",
+      "length": 8477,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "synced-cron-server.js",
+      "hash": "2577f9eead4316687faf66bb4e63ab282c50f0aa",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/synced-cron-tests.js",
+      "length": 5699,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "synced-cron-tests.js",
+      "hash": "81a64874111f2dc838e6fc7a931af8c4abfda96e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/example/example.js",
+      "length": 1078,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "example/example.js",
+      "hash": "8e9b5938dd25e115a73c4f7d94d619d73188e7ab",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

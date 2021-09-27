@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "ECMAScript",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:compiler-plugin",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "babel-compiler"
+    },
+    {
+      "package": "react-fast-refresh"
+    }
+  ],
+  "implies": [
+    {
+      "package": "modules",
+      "constraint": ""
+    },
+    {
+      "package": "ecmascript-runtime",
+      "constraint": ""
+    },
+    {
+      "package": "babel-runtime",
+      "constraint": ""
+    },
+    {
+      "package": "promise",
+      "constraint": ""
+    },
+    {
+      "package": "dynamic-import",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/ecmascript.js",
+      "length": 382,
+      "offset": 0,
+      "path": "ecmascript.js",
+      "hash": "f0ee82302ecf5f797f1ab2d5f2407262b9507202",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modern-browsers"
+    }
+  ],
+  "resources": [],
+  "node_modules": "npm/node_modules"
+}

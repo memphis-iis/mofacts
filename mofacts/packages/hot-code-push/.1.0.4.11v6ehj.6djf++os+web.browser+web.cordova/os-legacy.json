@@ -1,0 +1,19 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "implies": [
+    {
+      "package": "autoupdate",
+      "constraint": ""
+    },
+    {
+      "package": "reload",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

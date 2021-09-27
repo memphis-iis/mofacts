@@ -1,0 +1,15 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [],
+  "packageVariables": [
+    {
+      "name": "LaunchScreen",
+      "export": true
+    }
+  ]
+}

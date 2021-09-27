@@ -1,0 +1,37 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:dynamic-import",
+      "constraint": "1.5.0"
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "promise"
+    },
+    {
+      "package": "fetch"
+    },
+    {
+      "package": "modern-browsers"
+    },
+    {
+      "package": "hot-module-replacement",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/dynamic-import.js",
+      "length": 26515,
+      "offset": 0,
+      "servePath": "/packages/dynamic-import.js"
+    }
+  ]
+}

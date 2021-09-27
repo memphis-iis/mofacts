@@ -1,0 +1,67 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "modules"
+    },
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "hot-code-push",
+      "unordered": true
+    },
+    {
+      "package": "dev-error-overlay",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "modules-runtime-hot",
+      "constraint": "0.13.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server.js",
+      "length": 188,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "a867931ece1f8a5c4ff271bf093fae198044a1c0",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/client.js",
+      "length": 14055,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "55121d930ba841c5e024d53385d76bc18fb7b48d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/hot-api.js",
+      "length": 2622,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "hot-api.js",
+      "hash": "df2505222126c5598855bdc81fc65f91540dd6e3",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

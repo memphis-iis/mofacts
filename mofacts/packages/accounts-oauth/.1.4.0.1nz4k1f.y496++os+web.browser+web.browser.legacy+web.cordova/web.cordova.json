@@ -1,0 +1,74 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "oauth"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_common.js",
+      "length": 1217,
+      "offset": 0,
+      "path": "oauth_common.js",
+      "hash": "5ef07900c2f28bc8950e58582c80d8b1ee27a8fd",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_client.js",
+      "length": 4952,
+      "offset": 0,
+      "path": "oauth_client.js",
+      "hash": "ba8c445283523bf27c3e8e9ce9084acc3eba53e3",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_server.js",
+      "length": 2449,
+      "offset": 0,
+      "path": "oauth_server.js",
+      "hash": "d87cec25475dadc5612e98de73c76429b7bd03ed",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_tests.js",
+      "length": 189,
+      "offset": 0,
+      "path": "oauth_tests.js",
+      "hash": "a2363b45e47bb64523eac8ac6be1b0a1d78eda98",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

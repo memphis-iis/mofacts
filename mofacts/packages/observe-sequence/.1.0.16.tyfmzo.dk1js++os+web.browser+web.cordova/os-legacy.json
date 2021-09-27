@@ -1,0 +1,52 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "mongo-id",
+      "constraint": "1.0.5"
+    },
+    {
+      "package": "diff-sequence",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "random",
+      "constraint": "1.0.10"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/observe-sequence.js",
+      "length": 12949,
+      "offset": 0,
+      "servePath": "/packages/observe-sequence.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "ObserveSequence",
+      "export": true
+    },
+    {
+      "name": "seqChangedToEmpty"
+    },
+    {
+      "name": "seqChangedToArray"
+    },
+    {
+      "name": "seqChangedToCursor"
+    }
+  ]
+}

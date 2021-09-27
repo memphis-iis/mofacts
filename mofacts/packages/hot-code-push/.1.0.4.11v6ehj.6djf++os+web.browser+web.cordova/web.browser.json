@@ -1,0 +1,20 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "implies": [
+    {
+      "package": "autoupdate",
+      "constraint": ""
+    },
+    {
+      "package": "reload",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

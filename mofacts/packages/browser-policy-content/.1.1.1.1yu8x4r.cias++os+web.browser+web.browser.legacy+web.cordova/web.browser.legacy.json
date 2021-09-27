@@ -1,0 +1,27 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/browser-policy-content.js",
+      "length": 10214,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy-content.js",
+      "hash": "0146813795446ddab2aae7b08457d7dd4eb71649",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

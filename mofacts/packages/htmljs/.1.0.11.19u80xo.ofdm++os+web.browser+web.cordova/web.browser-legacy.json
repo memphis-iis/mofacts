@@ -1,0 +1,33 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "deps",
+      "constraint": "1.0.12"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/htmljs.js",
+      "length": 21664,
+      "offset": 0,
+      "servePath": "/packages/htmljs.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "HTML",
+      "export": true
+    },
+    {
+      "name": "IDENTITY"
+    },
+    {
+      "name": "SLICE"
+    }
+  ]
+}

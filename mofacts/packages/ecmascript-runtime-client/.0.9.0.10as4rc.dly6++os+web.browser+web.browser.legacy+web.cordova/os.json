@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "es5-shim",
+      "weak": true
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "promise"
+    },
+    {
+      "package": "modern-browsers"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/versions.js",
+      "length": 498,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "versions.js",
+      "hash": "37752a2ce12accd0c3bfd0afc465b31bd04239f1",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/legacy.js",
+      "length": 1638,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "legacy.js",
+      "hash": "fe5b37c4311f20398ef3438d7b41e20f25e61d30",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/modern.js",
+      "length": 830,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern.js",
+      "hash": "2e79dbd54f54b32bf72b74765fd0a7e473bb5276",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

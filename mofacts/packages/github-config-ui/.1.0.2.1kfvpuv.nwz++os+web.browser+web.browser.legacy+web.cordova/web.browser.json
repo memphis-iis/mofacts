@@ -1,0 +1,54 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.4.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.browser/github_login_button.css",
+      "length": 907,
+      "offset": 0,
+      "path": "github_login_button.css",
+      "hash": "4b6d8c2193c93dddce919620b231b5a94e6a9faf",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.browser/github_configure.html",
+      "length": 508,
+      "offset": 0,
+      "path": "github_configure.html",
+      "hash": "4fe3d6e52882f58727a66bda17dba35107b83c45",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/github_configure.js",
+      "length": 259,
+      "offset": 0,
+      "path": "github_configure.js",
+      "hash": "5d1c11784a21dbb3b03c2c3a8029498c94ab381f",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

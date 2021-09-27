@@ -1,0 +1,50 @@
+{
+  "isopack-2": {
+    "name": "bojicas:howler2",
+    "summary": "Meteor package for Howler audio library",
+    "version": "2.0.0_9",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova.json"
+      }
+    ],
+    "plugins": []
+  },
+  "isopack-1": {
+    "name": "bojicas:howler2",
+    "summary": "Meteor package for Howler audio library",
+    "version": "2.0.0_9",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os-legacy.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser-legacy.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova-legacy.json"
+      }
+    ],
+    "plugins": []
+  }
+}

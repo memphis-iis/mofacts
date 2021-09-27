@@ -1,0 +1,85 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Tinytest",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "mongo"
+    },
+    {
+      "package": "check"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/tinytest_client.js",
+      "length": 2827,
+      "offset": 0,
+      "path": "tinytest_client.js",
+      "hash": "64dad4632ac8a3bc28fa2f804ce9dfdc9bcf6900",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/model.js",
+      "length": 157,
+      "offset": 0,
+      "path": "model.js",
+      "hash": "367cf234727485dad2a1b6206249939b51c4a8c8",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/tinytest.js",
+      "length": 19465,
+      "offset": 0,
+      "path": "tinytest.js",
+      "hash": "251c3983545b9d1f55a2fa6b19bf831695af4d44",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/tinytest_server.js",
+      "length": 2293,
+      "offset": 0,
+      "path": "tinytest_server.js",
+      "hash": "e95fdda9fd7c2bbbfbb62a3ffe9ad54af5f45e6b",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "accounts-oauth",
+      "constraint": "1.1.15",
+      "weak": true
+    },
+    {
+      "package": "accounts-password",
+      "constraint": "1.5.1",
+      "weak": true
+    },
+    {
+      "package": "less",
+      "constraint": "2.7.12"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.2"
+    }
+  ],
+  "resources": []
+}

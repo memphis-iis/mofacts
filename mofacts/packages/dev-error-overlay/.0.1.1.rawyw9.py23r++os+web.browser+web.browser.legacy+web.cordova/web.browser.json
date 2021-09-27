@@ -1,0 +1,33 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DevErrorOverlay",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.16.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client.js",
+      "length": 1974,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "0eebf5f6123148c5045a7931657c4a364f91c635",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

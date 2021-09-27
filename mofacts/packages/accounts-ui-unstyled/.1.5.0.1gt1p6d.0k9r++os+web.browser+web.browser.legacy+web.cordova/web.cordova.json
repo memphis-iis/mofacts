@@ -1,0 +1,191 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "service-configuration"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.4.0"
+    },
+    {
+      "package": "session"
+    },
+    {
+      "package": "accounts-oauth",
+      "weak": true
+    },
+    {
+      "package": "accounts-password",
+      "weak": true
+    },
+    {
+      "package": "less"
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_ui.js",
+      "length": 4928,
+      "offset": 0,
+      "path": "accounts_ui.js",
+      "hash": "0f86217189dff8c382c61a7e46605934f0cfcca0",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/login_buttons.html",
+      "length": 2883,
+      "offset": 0,
+      "path": "login_buttons.html",
+      "hash": "fc3a1dcc8da199d7d4008ed658d5e68fbe0ca879",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/login_buttons_single.html",
+      "length": 1171,
+      "offset": 0,
+      "path": "login_buttons_single.html",
+      "hash": "c18ff74d5cb8dc5ef4eca5b0921784238842a856",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/login_buttons_dropdown.html",
+      "length": 5514,
+      "offset": 0,
+      "path": "login_buttons_dropdown.html",
+      "hash": "ffd3855c61e79ae5379a9fb440ba55ca41a43e3b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/login_buttons_dialogs.html",
+      "length": 6080,
+      "offset": 0,
+      "path": "login_buttons_dialogs.html",
+      "hash": "bae7b9e3ce2893c85f1fb8e4fc7f03a9ede9cdaf",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/login_buttons_session.js",
+      "length": 3078,
+      "offset": 0,
+      "path": "login_buttons_session.js",
+      "hash": "23ca41aeaa6e2a6d1923757a34325fefcbe63ba4",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/login_buttons.js",
+      "length": 3896,
+      "offset": 0,
+      "path": "login_buttons.js",
+      "hash": "8af3ac6e94624def5f77068f2093e37f162bbd23",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/login_buttons_single.js",
+      "length": 3503,
+      "offset": 0,
+      "path": "login_buttons_single.js",
+      "hash": "6d151e04668b32942e6b133ddd1146caabff7359",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/login_buttons_dropdown.js",
+      "length": 16963,
+      "offset": 0,
+      "path": "login_buttons_dropdown.js",
+      "hash": "32b1455cb39da167819ffdcb98cb3f72a3add058",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/login_buttons_dialogs.js",
+      "length": 8637,
+      "offset": 0,
+      "path": "login_buttons_dialogs.js",
+      "hash": "d1fd6e7c1c9338f700b14acdaa600c5e8bf0c259",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "less",
+      "file": "web.cordova/login_buttons.import.less",
+      "length": 12233,
+      "offset": 0,
+      "path": "login_buttons.import.less",
+      "hash": "2214f6db30058d79beee711a17ce5e02c977a76c",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_ui_tests.js",
+      "length": 839,
+      "offset": 0,
+      "path": "accounts_ui_tests.js",
+      "hash": "437aa5f010681323b50f2135203b58445be5d44d",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

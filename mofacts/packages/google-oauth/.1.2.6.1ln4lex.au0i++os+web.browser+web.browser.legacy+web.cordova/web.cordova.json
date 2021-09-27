@@ -1,0 +1,80 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Google",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "oauth2"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "service-configuration"
+    },
+    {
+      "package": "random"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/google_client.js",
+      "length": 3054,
+      "offset": 0,
+      "path": "google_client.js",
+      "hash": "bfe51cd1a2c54cb48498feccc252a11a45c936bf",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/google_sign-in.js",
+      "length": 2173,
+      "offset": 0,
+      "path": "google_sign-in.js",
+      "hash": "a9ae6cbeea9916361338ddb01c83e544f0d6c8c0",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/namespace.js",
+      "length": 212,
+      "offset": 0,
+      "path": "namespace.js",
+      "hash": "e7062dbeee43d66bbb4978718599a915b213b653",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/google_server.js",
+      "length": 4212,
+      "offset": 0,
+      "path": "google_server.js",
+      "hash": "72dc46b5740aea2b8310b0fb7e142ac4eaec1326",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "PackageVersion",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/package-version-parser.js",
+      "length": 17896,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "package-version-parser.js",
+      "hash": "796ae29d9844bb584e26da36a1d33c32c64ae0d5",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/package-version-parser-tests.js",
+      "length": 18101,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "package-version-parser-tests.js",
+      "hash": "4b6349f6a2cc28ade09f51a44acec86c4f069790",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

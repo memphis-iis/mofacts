@@ -1,0 +1,68 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.12.4"
+    },
+    {
+      "package": "reload",
+      "constraint": "1.3.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/appcache-client.js",
+      "length": 1888,
+      "offset": 0,
+      "path": "appcache-client.js",
+      "hash": "c6bf4fcafa8541d7726a0853777d8f7af80e3a30",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/appcache-server.js",
+      "length": 9323,
+      "offset": 0,
+      "path": "appcache-server.js",
+      "hash": "bfd04d6e13ed060d1f7ba9cbcafcf0e22d908819",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/appcache_tests-client.js",
+      "length": 4870,
+      "offset": 0,
+      "path": "appcache_tests-client.js",
+      "hash": "fc2e3c4e3227b55d70b894aff0e47bee0e0f8aba",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/appcache_tests-server.js",
+      "length": 931,
+      "offset": 0,
+      "path": "appcache_tests-server.js",
+      "hash": "9ddaa96cfaf3756796df50a21d116e751842c5ec",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

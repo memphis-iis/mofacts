@@ -1,0 +1,63 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/generator.js",
+      "length": 4882,
+      "offset": 0,
+      "path": "generator.js",
+      "hash": "c2725642be03a2d8cd5f828018c09dded80c1cb1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/template-web.browser.js",
+      "length": 2230,
+      "offset": 0,
+      "path": "template-web.browser.js",
+      "hash": "f74422c2d1158ed20ad3b5e59735bed941460382",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/template-web.cordova.js",
+      "length": 2899,
+      "offset": 0,
+      "path": "template-web.cordova.js",
+      "hash": "85af8ccc43b0d1f2c113b545d15819ef1d5c68ed",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/template.js",
+      "length": 584,
+      "offset": 0,
+      "path": "template.js",
+      "hash": "db734c0459acd42c8982f899e694b03634f2993a",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

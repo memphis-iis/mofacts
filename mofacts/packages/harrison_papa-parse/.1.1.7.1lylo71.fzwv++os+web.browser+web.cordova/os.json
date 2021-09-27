@@ -1,0 +1,31 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Papa",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/baby-parse.js",
+      "length": 25810,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "baby-parse.js",
+      "hash": "b797a1ea967218a12cd2eb32d8b2acff6b7b4314",
+      "fileOptions": {}
+    }
+  ]
+}

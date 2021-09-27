@@ -1,0 +1,196 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Accounts",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ddp-rate-limiter"
+    },
+    {
+      "package": "localstorage"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "callback-hook"
+    },
+    {
+      "package": "reactive-var"
+    },
+    {
+      "package": "service-configuration",
+      "unordered": true
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "mongo"
+    },
+    {
+      "package": "blaze",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client_main.js",
+      "length": 669,
+      "offset": 0,
+      "path": "client_main.js",
+      "hash": "69dad2983ae34e6793bd9a80124b04d8fc231d5f",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_client.js",
+      "length": 31520,
+      "offset": 0,
+      "path": "accounts_client.js",
+      "hash": "202a4d21a49fb788a93d4f610169256f881a7bd5",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_client_tests.js",
+      "length": 2742,
+      "offset": 0,
+      "path": "accounts_client_tests.js",
+      "hash": "7e825cdb0209a60c5949c5d71265317eb1848d8c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_common.js",
+      "length": 14756,
+      "offset": 0,
+      "path": "accounts_common.js",
+      "hash": "d2d45192e9be363337c0818498e6292d7cda6940",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_reconnect_tests.js",
+      "length": 4119,
+      "offset": 0,
+      "path": "accounts_reconnect_tests.js",
+      "hash": "87756cb3a0f4e6901d43db1b508c434344231581",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_server.js",
+      "length": 54435,
+      "offset": 0,
+      "path": "accounts_server.js",
+      "hash": "c3a182317747e6f4b71c031de907120b7fcb391d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_tests.js",
+      "length": 18055,
+      "offset": 0,
+      "path": "accounts_tests.js",
+      "hash": "166bdacb54a5aef7acf963cdfa233be38a0731c9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_tests_setup.js",
+      "length": 102,
+      "offset": 0,
+      "path": "accounts_tests_setup.js",
+      "hash": "929c01b0be6a8706b24f3f402d26d61c43f13a75",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/accounts_url_tests.js",
+      "length": 1291,
+      "offset": 0,
+      "path": "accounts_url_tests.js",
+      "hash": "c177b7c35e9d8f876c31ad0b55e5448463ce242d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client_tests.js",
+      "length": 111,
+      "offset": 0,
+      "path": "client_tests.js",
+      "hash": "7af526fffaa6da06aa64ff90bef3b4dc48a4eb48",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/server_main.js",
+      "length": 863,
+      "offset": 0,
+      "path": "server_main.js",
+      "hash": "ab40124a585b08a179aa7a2e5b0b114881db40a9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/server_tests.js",
+      "length": 70,
+      "offset": 0,
+      "path": "server_tests.js",
+      "hash": "a75ae458c136ecef2086a4512830189a66842146",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

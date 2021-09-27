@@ -1,0 +1,43 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.4"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.2.1"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.1.2"
+    },
+    {
+      "package": "check",
+      "constraint": "1.0.6"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/alanning_roles.js",
+      "length": 25208,
+      "offset": 0,
+      "servePath": "/packages/alanning_roles.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Roles",
+      "export": true
+    }
+  ]
+}

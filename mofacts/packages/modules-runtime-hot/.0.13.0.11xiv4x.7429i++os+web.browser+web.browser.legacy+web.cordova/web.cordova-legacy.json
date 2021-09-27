@@ -1,0 +1,26 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/modules-runtime-hot.js",
+      "length": 21653,
+      "offset": 0,
+      "servePath": "/packages/modules-runtime-hot.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "meteorInstall",
+      "export": true
+    },
+    {
+      "name": "makeInstaller"
+    }
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.0.0"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "ui",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "reactive-var",
+      "constraint": "1.0.1"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "random",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/version_conflict_error.js",
+      "length": 759,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "version_conflict_error.js",
+      "hash": "a3bc302b6e3a7a8abd1e9b3e480f55f2354353a6",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/dynamic_template.html",
+      "length": 120,
+      "offset": 0,
+      "path": "dynamic_template.html",
+      "hash": "a4f6c21503c6b836d9acaaa560ed3e8852226248",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/dynamic_template.js",
+      "length": 17603,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dynamic_template.js",
+      "hash": "4b7dcb342cc74d2ccd17f17b45d6d0c0afc897e9",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/blaze_overrides.js",
+      "length": 1312,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "blaze_overrides.js",
+      "hash": "52877b9f37ff4d288e5f65739e41785ace2bd244",
+      "fileOptions": {}
+    }
+  ]
+}

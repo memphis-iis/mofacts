@@ -1,0 +1,11 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [],
+  "node_modules": "npm/node_modules"
+}

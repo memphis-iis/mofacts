@@ -1,0 +1,20 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "random"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/localstorage.js",
+      "length": 2431,
+      "offset": 0,
+      "servePath": "/packages/localstorage.js"
+    }
+  ]
+}

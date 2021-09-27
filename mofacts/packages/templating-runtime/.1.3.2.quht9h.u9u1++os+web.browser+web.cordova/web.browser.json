@@ -1,0 +1,78 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Template",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.3.2"
+    },
+    {
+      "package": "spacebars",
+      "constraint": "1.0.15"
+    },
+    {
+      "package": "templating-compiler",
+      "constraint": "1.3.2"
+    }
+  ],
+  "implies": [
+    {
+      "package": "meteor",
+      "constraint": "1.2.17"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.3.2"
+    },
+    {
+      "package": "spacebars",
+      "constraint": "1.0.15"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/templating.js",
+      "length": 2736,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "templating.js",
+      "hash": "3f28983d524eb400523851709786f7040553f09b",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.browser/dynamic.html",
+      "length": 1065,
+      "offset": 0,
+      "path": "dynamic.html",
+      "hash": "a34e3070868ad5edc6e8e931ec2b992f7ec57252",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/dynamic.js",
+      "length": 1030,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dynamic.js",
+      "hash": "742d3bc2f38a0080c440b3c4f17c0d66925784af",
+      "fileOptions": {}
+    }
+  ]
+}

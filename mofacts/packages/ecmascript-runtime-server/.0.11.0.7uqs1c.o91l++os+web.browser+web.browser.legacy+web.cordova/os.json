@@ -1,0 +1,29 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/runtime.js",
+      "length": 670,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "runtime.js",
+      "hash": "49908bea780b1f52bb72ff4a121272a87d0c5687",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

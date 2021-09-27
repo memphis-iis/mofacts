@@ -1,0 +1,49 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "FastClick",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/pre.js",
+      "length": 194,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "pre.js",
+      "hash": "56688cdcd6d59695cd72425a87d8dafcd9bad204",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/fastclick.js",
+      "length": 25945,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "fastclick.js",
+      "hash": "b722bbc4eb90ad8ab8dfa915eab1e92e48b93f52",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/post.js",
+      "length": 268,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "post.js",
+      "hash": "7d37731d380cc59fc6d8d6ba32705d514734bf6c",
+      "fileOptions": {}
+    }
+  ]
+}

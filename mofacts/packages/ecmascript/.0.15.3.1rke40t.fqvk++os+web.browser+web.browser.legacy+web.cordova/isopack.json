@@ -1,0 +1,37 @@
+{
+  "isopack-2": {
+    "name": "ecmascript",
+    "summary": "Compiler plugin that supports ES2015+ in all .js files",
+    "version": "0.15.3",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser.legacy",
+        "path": "web.browser.legacy.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova.json"
+      }
+    ],
+    "plugins": [
+      {
+        "name": "compile-ecmascript",
+        "arch": "os",
+        "path": "plugin.compile-ecmascript.os/program.json"
+      }
+    ]
+  }
+}

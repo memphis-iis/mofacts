@@ -1,0 +1,10 @@
+{
+  "format": "javascript-image-pre1",
+  "arch": "os",
+  "load": [
+    {
+      "node_modules": "npm/node_modules/meteor/lintJshint/node_modules",
+      "path": "packages/lintJshint_plugin.js"
+    }
+  ]
+}

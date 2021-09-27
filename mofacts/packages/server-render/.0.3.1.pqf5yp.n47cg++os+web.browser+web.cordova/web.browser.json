@@ -1,0 +1,93 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.10.0"
+    },
+    {
+      "package": "webapp",
+      "constraint": "1.5.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client.js",
+      "length": 250,
+      "offset": 0,
+      "path": "client.js",
+      "hash": "4a04986326a8b7ea4255fce30a0e6140b5ca0a56",
+      "fileOptions": {
+        "lazy": true,
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client-sink.js",
+      "length": 1734,
+      "offset": 0,
+      "path": "client-sink.js",
+      "hash": "9174ead844c522d14c8645bfe03f2d09b468634f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server-register.js",
+      "length": 2973,
+      "offset": 0,
+      "path": "server-register.js",
+      "hash": "b9ea8e35ac92f3db94491ff411ed7d2d49ceea83",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server-render-tests.js",
+      "length": 3357,
+      "offset": 0,
+      "path": "server-render-tests.js",
+      "hash": "253a8dbc91c348ed1f67db63cdc5bb8a5e593bb7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server-sink.js",
+      "length": 2017,
+      "offset": 0,
+      "path": "server-sink.js",
+      "hash": "a6109dc86426aa1924f50d12123039c2e3d57b3d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server.js",
+      "length": 773,
+      "offset": 0,
+      "path": "server.js",
+      "hash": "a79b2d3f16ef3bac4b3ac8e6bb5c9cc0a14daa9e",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

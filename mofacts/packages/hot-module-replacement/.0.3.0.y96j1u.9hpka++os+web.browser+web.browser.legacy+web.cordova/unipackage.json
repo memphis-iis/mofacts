@@ -1,0 +1,31 @@
+{
+  "name": "hot-module-replacement",
+  "summary": "Update code in development without reloading the page",
+  "version": "0.3.0",
+  "isTest": false,
+  "plugins": [],
+  "debugOnly": true,
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser.legacy",
+      "path": "web.browser.legacy-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

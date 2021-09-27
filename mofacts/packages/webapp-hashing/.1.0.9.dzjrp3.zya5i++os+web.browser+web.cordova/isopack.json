@@ -1,0 +1,26 @@
+{
+  "isopack-2": {
+    "name": "webapp-hashing",
+    "summary": "Used internally by WebApp. Knows how to hash programs from manifests.",
+    "version": "1.0.9",
+    "isTest": false,
+    "builds": [
+      {
+        "kind": "main",
+        "arch": "os",
+        "path": "os.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.browser",
+        "path": "web.browser.json"
+      },
+      {
+        "kind": "main",
+        "arch": "web.cordova",
+        "path": "web.cordova.json"
+      }
+    ],
+    "plugins": []
+  }
+}

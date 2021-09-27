@@ -1,0 +1,64 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "check",
+      "testOnly": false
+    },
+    {
+      "name": "Match",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.10.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/match.js",
+      "length": 15238,
+      "offset": 0,
+      "path": "match.js",
+      "hash": "cbf0cceda84b5f4b390434f9b8cd5e5468c81fa1",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/isPlainObject.js",
+      "length": 945,
+      "offset": 0,
+      "path": "isPlainObject.js",
+      "hash": "a6321ea3e1390e3e7d3085153605c2f48dc95399",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/match_test.js",
+      "length": 15188,
+      "offset": 0,
+      "path": "match_test.js",
+      "hash": "d0d55757a4b0b98a5b5856912daca5b610d38cf2",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

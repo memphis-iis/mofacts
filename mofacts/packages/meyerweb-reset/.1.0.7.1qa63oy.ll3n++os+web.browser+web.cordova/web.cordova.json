@@ -1,0 +1,21 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.cordova/reset.css",
+      "length": 1089,
+      "offset": 0,
+      "path": "reset.css",
+      "hash": "ebd23ad8432d1f1422d80f4d62f4396800e6b953",
+      "fileOptions": {}
+    }
+  ]
+}

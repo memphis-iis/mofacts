@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Github",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.2"
+    },
+    {
+      "package": "oauth2",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "oauth",
+      "constraint": "2.0.0"
+    },
+    {
+      "package": "random",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "service-configuration",
+      "constraint": "1.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/github_client.js",
+      "length": 1513,
+      "offset": 0,
+      "path": "github_client.js",
+      "hash": "ff2bc30104d1c4bb2158578323ceee1727e38efd",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/github_server.js",
+      "length": 2608,
+      "offset": 0,
+      "path": "github_server.js",
+      "hash": "9b08360c502f32e23b3c27c13f43f09514df4b7f",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

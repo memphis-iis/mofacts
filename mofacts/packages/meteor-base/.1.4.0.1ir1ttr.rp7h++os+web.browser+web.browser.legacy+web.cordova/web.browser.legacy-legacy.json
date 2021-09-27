@@ -1,0 +1,35 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "implies": [
+    {
+      "package": "meteor",
+      "constraint": ""
+    },
+    {
+      "package": "webapp",
+      "constraint": ""
+    },
+    {
+      "package": "ddp",
+      "constraint": ""
+    },
+    {
+      "package": "livedata",
+      "constraint": ""
+    },
+    {
+      "package": "es5-shim",
+      "constraint": ""
+    },
+    {
+      "package": "hot-code-push",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

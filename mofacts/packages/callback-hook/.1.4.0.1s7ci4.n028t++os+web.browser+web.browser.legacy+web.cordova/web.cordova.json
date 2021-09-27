@@ -1,0 +1,44 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Hook",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/hook.js",
+      "length": 4961,
+      "offset": 0,
+      "path": "hook.js",
+      "hash": "3223cca6ef4270f51cdf22abfc98e400ab104346",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/hook_tests.js",
+      "length": 1659,
+      "offset": 0,
+      "path": "hook_tests.js",
+      "hash": "e7821d46f464f7c9a72e712d2c960685a3a2010e",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "JSLexer",
+      "testOnly": false
+    },
+    {
+      "name": "JSParser",
+      "testOnly": false
+    },
+    {
+      "name": "ParseNode",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/lexer.js",
+      "length": 24366,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lexer.js",
+      "hash": "b11d1868751aafe93d724ad38d477bfdc3360dcf",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/parserlib.js",
+      "length": 6441,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "parserlib.js",
+      "hash": "2e518f58539965bd619f7864851ba0dd8a6af04a",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/stringify.js",
+      "length": 3523,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "stringify.js",
+      "hash": "e0eb97138cef0d9beec6a2a85704e64254b2d35e",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/parser.js",
+      "length": 29952,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "parser.js",
+      "hash": "2ebebb312ad076638b6122193e91b81b3cc047b1",
+      "fileOptions": {}
+    }
+  ]
+}

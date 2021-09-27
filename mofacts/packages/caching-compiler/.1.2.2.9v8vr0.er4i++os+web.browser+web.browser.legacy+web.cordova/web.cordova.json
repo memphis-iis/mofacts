@@ -1,0 +1,43 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.14.0"
+    },
+    {
+      "package": "random",
+      "constraint": "1.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/caching-compiler.js",
+      "length": 13245,
+      "offset": 0,
+      "path": "caching-compiler.js",
+      "hash": "6c61093869bf0eaac9a6043b81a100f44cbd1832",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/multi-file-caching-compiler.js",
+      "length": 9252,
+      "offset": 0,
+      "path": "multi-file-caching-compiler.js",
+      "hash": "023d6abb528cdc1ae7ef45fa6db26224d503e1d7",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

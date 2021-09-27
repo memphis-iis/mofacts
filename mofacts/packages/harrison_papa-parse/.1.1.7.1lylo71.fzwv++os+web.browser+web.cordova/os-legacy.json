@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/harrison_papa-parse.js",
+      "length": 26583,
+      "offset": 0,
+      "servePath": "/packages/harrison_papa-parse.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Papa",
+      "export": true
+    }
+  ]
+}

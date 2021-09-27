@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "accounts-oauth"
+    },
+    {
+      "package": "github-oauth"
+    },
+    {
+      "package": "accounts-ui",
+      "weak": true
+    },
+    {
+      "package": "github-config-ui",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    },
+    {
+      "package": "github-oauth",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/notice.js",
+      "length": 397,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "d7f15e4dc6c6c361581d12f7f2cd4a1b2511211b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/github.js",
+      "length": 958,
+      "offset": 0,
+      "path": "github.js",
+      "hash": "bce4a15941cbbf0a3c48fbe876d50c80fced93ea",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

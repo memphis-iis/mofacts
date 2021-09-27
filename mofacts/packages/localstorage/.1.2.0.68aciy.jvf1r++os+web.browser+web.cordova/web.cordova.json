@@ -1,0 +1,25 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "random"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/localstorage.js",
+      "length": 1791,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "localstorage.js",
+      "hash": "3c71c218acd3f94370b8cb556e76abd7541174ac",
+      "fileOptions": {}
+    }
+  ]
+}

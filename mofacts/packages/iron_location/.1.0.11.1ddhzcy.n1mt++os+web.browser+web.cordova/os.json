@@ -1,0 +1,41 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:url",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "appcache",
+      "constraint": "1.0.0-cordova1",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}
