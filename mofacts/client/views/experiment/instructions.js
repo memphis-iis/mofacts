@@ -295,10 +295,22 @@ Template.instructions.helpers({
 
     return img;
   },
-
-  instructions: function() {
-    return _.chain(Session.get('currentTdfUnit')).prop('unitinstructions').trim().value();
+  instructionText: function(){
+    text = Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructions;
+    return text;
   },
+  instructionQuestion: function(){
+    question = Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion;
+    return question;
+  },
+  displayContinueButton: function(){
+    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
+      return false;
+    } else {
+      return true;
+    }
+  },
+
 
   islockout: function() {
     return currLockOutMinutes() > 0;
@@ -340,4 +352,14 @@ Template.instructions.events({
     event.preventDefault();
     instructContinue();
   },
+  'click #instructionQuestionAffrimative': function() {
+    Session.set('instructionQuestionResults','true');
+    $('#instructionQuestion').hide();
+
+  },
+  'click #instructionQuestionNegative': function() {
+    Session.set('instructionQuestionResults','false');
+    $('#instructionQuestion').hide();
+
+  }
 });

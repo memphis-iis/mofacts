@@ -21,6 +21,7 @@
 	</setspec>
 	<unit>
 		<unitinstructions>Here comes the test assessment session</unitinstructions>
+		<unitinstructionsquestion>Did you read the chapter?</unitinstructionsquestion>
 		<unitname>Schedule Unit</unitname>
 		<buttontrial>true</buttontrial>
 		<deliveryparams>
