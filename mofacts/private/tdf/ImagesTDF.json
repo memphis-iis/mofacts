@@ -1,0 +1,48 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Images",
+            "stimulusfile": "Imagestims.json",
+            "lfparameter": "0.80",
+            "isModeled": "false",
+            "experimentTarget": "imgtest",
+            "userselect": "false",
+            "experimentPasswordRequired": "true"
+        },
+        "unit": [
+            {
+                "unitname": "Introduction",
+                "unitinstructions": "This is a testing TDF"
+            },
+            {
+                "unitname": "Random Optimal",
+                "learningsession": {
+                    "clusterlist": "0-14",
+                    "displayminseconds": "30",
+                    "displaymaxseconds": "50"
+                },
+                "deliveryparams": {
+                    "drill": "15000",
+                    "purestudy": "10000",
+                    "skipstudy": "false",
+                    "reviewstudy": "5000",
+                    "correctprompt": "1000",
+                    "fontsize": "2",
+                    "correctscore": "1",
+                    "incorrectscore": "0"
+                }
+            },
+            {
+                "deliveryparams": {
+                    "purestudy": "10000",
+                    "skipstudy": "false",
+                    "reviewstudy": "10000",
+                    "correctprompt": "500",
+                    "drill": "10000",
+                    "practiceseconds": "15",
+                    "finalInstructions": "All done!"
+                }
+            }
+        ]
+    }
+}

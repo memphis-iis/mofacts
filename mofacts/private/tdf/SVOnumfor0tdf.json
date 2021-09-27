@@ -1,0 +1,136 @@
+{
+    "tutor": {
+        "setspec": {
+            "name": "Statistics Practice",
+            "lessonname": "SVOnumfor0tdf.json",
+            "userselect": "false",
+            "stimulusfile": "SVO4stims.json",
+            "isModeled": "false",
+            "lfparameter": ".85",
+            "shuffleclusters": "0-17 18-35",
+            "swapclusters": "0-17 18-35"
+        },
+        "unit": [
+            {
+                "unitname": "Show the questions",
+                "unitinstructions": "<font size=\"2\">Consent to Use Data<br><br>The Mechanical Turk task you have selected is part of a research project that is described below.  You will use you computer for this experiment, first to load the program, then to practice for 68 sentences, then you will either complete the posttest after a 2 minute wait, or be chosen for 1 day or 3 day later posttest completion, at which time you will see 54 concluding sentence presentations. This study should take no longer than 60 minutes total to complete. <br><br>\nIf you should have any questions about this research study please feel free to contact  Philip Pavlik at 901-678-2326. For questions regarding the research subjects' rights, the Chair of the Institutional Review Board for the Protection of Human Subjects should be contacted at 901-678-2533.<br><br>\nAll efforts, within the limits allowed by law, will be made to keep the personal information (your Amazon Turk Worker ID) in your research record private but total privacy cannot be promised. We will deidentify your data (remove your ID) after the experiment before storing it on our computers long-term. By participating, you understand and agree that the deidentified data gathered during this study may be used by University of Memphis and published and/or disclosed by Unviersity of Memphis to others outside of University of Memphis. However, no personally identifying information will ever be mentioned in any such publication or dissemination of the research data and/or results to other researchers.<br><br>\nBy clicking this button, I consent to the above terms. \n"
+            },
+            {
+                "unitname": "Show the questions",
+                "unitinstructions": "Demographic Survey<br><br>\nPlease answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.",
+                "buttonorder": "fixed",
+                "deliveryparams": {
+                    "drill": "12000000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "500",
+                    "fontsize": "3",
+                    "correctscore": "0",
+                    "incorrectscore": "0"
+                },
+                "buttontrial": "false",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "5",
+                        "group": "0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                "
+                    },
+                    "initialpositions": "                A_1 A_2 A_3 A_4 A_5            ",
+                    "randomizegroups": "false",
+                    "clusterlist": "36-40",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-0"
+                }
+            },
+            {
+                "unitname": "Statistics Practice",
+                "unitinstructions": "Memory for Statistics Experiment<br><br>\n             Task: You will see a sequence of 68 sentences on statistics. Some of the sentences will be just to read and some will require you to fill in the blank '__________' (if there are two blanks, it is the same word used twice, but only type it once). You must press ENTER to submit your answer. Try to guess or remember the answers for the blanks, and if you cannot guess, just press ENTER to read the correct answer. If you get a fill in the blank answer wrong, you will be given a review with the correct answer. You have 16 seconds when reading for study or review, and 12 seconds to begin typing the answers for fill-in-the-blank sentences. Please make sure this window is maximized before you begin.\n            Hit ENTER after typing to submit your response.  ",
+                "deliveryparams": {
+                    "drill": "12000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "1000",
+                    "fontsize": "3",
+                    "correctscore": "1",
+                    "incorrectscore": "0"
+                },
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A B C D E F G H",
+                        "clustersrepeated": "8 4 2 8 4 2 4 2",
+                        "templatesrepeated": "2 2 2 2 2 2 2 2",
+                        "group": [
+                            " 0,f,z,0 0,f,z,1 0,f,z,11 0,f,z,12 0,f,z,20 0,f,z,21 0,f,z,26 0,f,z,27\n\t\t\t\t\tr,f,z,0 r,f,z,1 r,f,z,9 r,f,z,10 r,f,z,19 r,f,z,20 r,f,z,27 r,f,z,28 ",
+                            " 0,f,z,0 0,f,z,1 0,f,z,11 0,f,z,12\n\t\t\t\t\tr,f,z,0 r,f,z,1 r,f,z,9 r,f,z,10 ",
+                            " 0,f,z,0 0,f,z,1\n\t\t\t\t\tr,f,z,0 r,f,z,1 ",
+                            " 0,f,z,0 0,f,z,11 0,f,z,20 0,f,z,26 0,f,z,33 0,f,z,42 0,f,z,52 0,f,z,60\n\t\t\t\t\tr,f,z,0 r,f,z,11 r,f,z,20 r,f,z,26 r,f,z,33 r,f,z,42 r,f,z,52 r,f,z,60 ",
+                            " 0,f,z,0 0,f,z,11 0,f,z,20 0,f,z,26\n\t\t\t\t\tr,f,z,0 r,f,z,9 r,f,z,19 r,f,z,27 ",
+                            " 0,f,z,0 0,f,z,11\n\t\t\t\t\tr,f,z,0 r,f,z,10 ",
+                            " 0,f,z,0 0,f,z,21 0,f,z,34 0,f,z,52\n\t\t\t\t\tr,f,z,0 r,f,z,16 r,f,z,31 r,f,z,50 ",
+                            " 0,f,z,0 0,f,z,21\n\t\t\t\t\tr,f,z,0 r,f,z,18 "
+                        ]
+                    },
+                    "initialpositions": "H_1  G_1 F_1 E_1 D_1 D_2 A_1 A_1 B_1 B_1 C_1 C_1\n\t\t\t\tG_2 F_1 E_1 D_1 D_2 A_1 A_1 B_1 B_1\n\t\t\t\tH_1 G_1 E_1 D_1 D_2 A_1 A_1\n\t\t\t\tG_2 E_1 D_1 D_2 A_1 A_1\n\t\t\t\tH_2 G_1 E_2 D_1 D_2 A_2 A_2 B_2 B_2\n\t\t\t\tG_2 F_2 E_2 D_1 D_2 A_2 A_2 B_2 B_2\n\t\t\t\tH_2 G_1 F_2 E_2 D_1 D_2 A_2 A_2 C_2 C_2\n\t\t\t\tG_2 E_2 D_1 D_2 A_2 A_2\n\t\t\t",
+                    "randomizegroups": "false",
+                    "clusterlist": "0-15",
+                    "permutefinalresult": "0-11 12-20 21-27 28-33 34-42 43-51 52-61 62-67 ",
+                    "assignrandomclusters": "false",
+                    "randomchoices": "4"
+                }
+            },
+            {
+                "turkemailsubject": "Link for 3$ Bonus for Turk HIT",
+                "turkemail": "\nDear Amazon Turk Worker,\nRecently you completed part 1 of a 2 part experiment called 'Memory for Statistics Experiment 3', which paid $2.00. Now we would appreciate it if you would please return do part 2. It is a bit less work than part 1, but we pay a $3.00 bonus for completion, since it is so important for us to get the part 2 data. This must be completed in the next 48 hours from when you get this email.\nPlease avoid typos in your Turk ID, since then we cannot identify you as a part 2 person and cannot pay your bonus. You know you have continued correctly if it says 'Thanks for continuing. You have 54 sentences remaining.'\nHere is the link to finish: http://mofacts.optimallearning.org/experiment/svo\nThanks for your help,\nPhil\n        ",
+                "unitinstructions": "You have completed Session 1 of the experiment. \n<br><br>\n<strong>Please enter the code- Ferrets -into the Amazon Mechanical Turk website for this HIT and submit your response now. \n<br><br>\nWe will check your completion and approve your assignment for the $2 payment. If the countdown below is 2 minutes: Please wait for the countdown to finish and take the posttest for the $3 bonus now.\n<br><br>\nIf the countdown below is 1 day or 3 days, you will receive a private Turk message (delivered to your email inbox) for instructions on Session 2. Session 2 earns a $3 bonus.",
+                "unitname": "Lockout unit",
+                "deliveryparams": [
+                    {
+                        "lockoutminutes": "2"
+                    },
+                    {
+                        "lockoutminutes": "1440"
+                    },
+                    {
+                        "lockoutminutes": "4320"
+                    }
+                ]
+            },
+            {
+                "unitname": "Posttest",
+                "unitinstructions": "Memory for Statistics Experiment\n\t\t\tThanks for continuing. You have 54 sentences remaining. ",
+                "deliveryparams": {
+                    "drill": "12000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "1000",
+                    "fontsize": "3",
+                    "correctscore": "1",
+                    "incorrectscore": "0"
+                },
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "3",
+                        "templatesrepeated": "18",
+                        "group": "\n\t\t\t\t\tr,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36\n\t\t\t\t\tr,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36\n\t\t\t\t\tr,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36 r,f,d,0 r,f,d,18 r,f,d,36\n\t\t\t\t\t0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36\n\t\t\t\t\t0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36\n\t\t\t\t\t0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36 0,f,d,0 0,f,d,18 0,f,d,36\n\t\t\t\t"
+                    },
+                    "initialpositions": "\n\t\t\t\tA_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18\n\t\t\t\tA_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18\n\t\t\t\tA_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8 A_9 A_10 A_11 A_12 A_13 A_14 A_15 A_16 A_17 A_18\n\t\t\t",
+                    "randomizegroups": "false",
+                    "clusterlist": "0-17",
+                    "permutefinalresult": "0-17 18-35 36-53",
+                    "assignrandomclusters": "true",
+                    "randomchoices": "1-1 2-2 3-3"
+                }
+            },
+            {
+                "turkbonus": "3.00",
+                "unitname": "last",
+                "unitinstructions": "You have now completed the posttest. We will check your completion and confirm the $3 bonus."
+            }
+        ]
+    }
+}
