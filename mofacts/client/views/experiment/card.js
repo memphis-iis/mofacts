@@ -371,12 +371,6 @@ Template.card.rendered = async function() {
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
   }
 
-  // Check if TDF allows for dialogue feedback preferences, if so, route to dialogue feedback widget
-  if(Session.get('allowFeedbackTypeSelect') && !Session.get('feedbackParamsSet')) {
-    Router.go('/feedback'); 
-  } 
-
-
   const audioInputEnabled = Session.get('audioEnabled');
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
@@ -442,7 +436,10 @@ Template.card.events({
   'keypress #userForceCorrect': function(e) {
     handleUserForceCorrectInput(e, 'keypress');
   },
-
+  'click #confirmFeedbackSelection': function() {
+    Session.set('displayFeedback', false);
+    checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
+  },
   'click #overlearningButton': function(event) {
     event.preventDefault();
     leavePage('/profile');
@@ -506,7 +503,7 @@ Template.card.helpers({
     }
   },
 
-  
+  'displayFeedback': () => Session.get('displayFeedback'),
 
   'username': function() {
     if (!haveMeteorUser()) {
@@ -2666,11 +2663,29 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
+  getFeedbackParameters();
+
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
-  checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+  if(!Session.get('displayFeedback')){
+    checkSyllableCacheForCurrentStimFile(processUserTimesLog);
+  }
 }
+
+
+async function getFeedbackParameters(){
+  if(typeof getCurrentDeliveryParams().allowFeedbackTypeSelect !== 'undefined'){
+    allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
+  } else {
+    allowFeedbackTypeSelect = false;
+  }
+  if(allowFeedbackTypeSelect){
+    Session.set('displayFeedback',true);
+  } 
+}
+
+
 
 async function checkSyllableCacheForCurrentStimFile(cb) {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
