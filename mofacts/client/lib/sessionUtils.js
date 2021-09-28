@@ -61,7 +61,7 @@ function sessionCleanUp() {
 
   Session.set('isReport', false);
   Session.set('hiddenItems', []);
-  Session.set('numVisableCards', 0);
+  Session.set('numVisibleCards', 0);
 
   Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
