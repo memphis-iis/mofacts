@@ -693,7 +693,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numVisableCards') > 2,
+  'questionIsRemovable': () => Session.get('numVisibleCards') > 3,
 });
 
 function getResponseType() {
@@ -2722,7 +2722,7 @@ async function removeCardByUser() {
   let hiddenItems = Session.get('hiddenItems');
   hiddenItems.push(stims[whichStim].stimulusKC);
   
-  Session.set('numVisableCards', Session.get('numVisableCards') - 1);
+  Session.set('numVisibleCards', Session.get('numVisibleCards') - 1);
   Session.set('hiddenItems', hiddenItems);
   Session.set('wasReportedForRemoval', true);
 

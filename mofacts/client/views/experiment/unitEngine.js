@@ -315,7 +315,6 @@ function emptyUnitEngine() {
     unitFinished: function() {
       return true;
     },
-    getVisableCardCount: function() { },
     selectNextCard: function() { },
     findCurrentCardInfo: function() { },
     cardAnswered: async function() { },
@@ -479,6 +478,7 @@ function modelUnitEngine() {
         } else {
           for (let j=0; j<card.stims.length; j++) {
             const stim = card.stims[j];
+            if (hiddenItems.includes(stim.stimulusKC)) continue;
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
               clusterIndex=i;
@@ -1026,11 +1026,9 @@ function modelUnitEngine() {
 
       const initProbs = [];
       const numQuestions = getStimCount();
-      let numVisableCards = 0;
       for (let i = 0; i < numQuestions; ++i) {
         const cluster = getStimCluster(i);
         const numStims = cluster.stims.length;
-        numVisableCards += numStims;
         for (let j = 0; j < numStims; ++j) {
           initProbs.push({
             cardIndex: i, // clusterKC
@@ -1039,7 +1037,14 @@ function modelUnitEngine() {
           });
         }
       }
-      Session.set('numVisableCards', numVisableCards - hiddenItems.length);
+
+      let numVisibleCards = 0;
+      for (let i = 0; i < cardProbabilities.cards.length; i++){
+        if(cardProbabilities.cards[i].canUse){
+          numVisibleCards += cardProbabilities.cards[i].stims.length;
+        }
+      }
+      Session.set('numVisibleCards', numVisibleCards - hiddenItems.length);
 
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
@@ -1076,18 +1081,6 @@ function modelUnitEngine() {
     initImpl: async function() {
       Session.set('unitType', MODEL_UNIT);
       await this.initializeActRModel();
-    },
-
-    getVisableCardCount: async function() {
-      const numQuestions = getStimCount();
-      let numVisableCards = 0;
-      for (let i = 0; i < numQuestions; ++i) {
-        const cluster = getStimCluster(i);
-        const numStims = cluster.stims.length;
-        numVisableCards += numStims;
-      }
-      let hiddenItems = Session.get('hiddenItems');
-      return (numVisableCards - hiddenItems.length);
     },
 
     selectNextCard: async function() {
