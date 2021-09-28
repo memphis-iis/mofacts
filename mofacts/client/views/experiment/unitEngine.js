@@ -583,6 +583,9 @@ function modelUnitEngine() {
     const stim = card.stims[whichStim];
     const responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(getStimAnswer(cardIndex, whichStim)));
 
+    // Record instructions answer to card
+    cardProbabilities.instructionQuestionResult = Session.get('instructionQuestionResults');
+    
     // About to show a card - record any times necessary
     card.lastSeen = Date.now();
     if (card.firstSeen < 1) {
@@ -604,6 +607,7 @@ function modelUnitEngine() {
         resp.priorStudy += 1;
       }
     }
+    
     // If this is NOT a resume (and is just normal display mode for
     // a learner) then we need to update stats for the card
     card.trialsSinceLastSeen = 0;
@@ -657,6 +661,9 @@ function modelUnitEngine() {
       // Top-level metrics
       p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
       p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
+      
+      // Unit metrics
+      p.instructionQuestionResult = cardProbabilities.instructionQuestionResult;
 
       // Card/cluster metrics
       p.questionSuccessCount = card.priorCorrect;
