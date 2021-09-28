@@ -1,0 +1,15 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Psychological Disorders B",
+            "stimulusfile": "Disorders2stimsfake.json",
+            "experimentTarget": "disordersb",
+            "randomizedDelivery": "1",
+            "userselect": "false",
+            "condition": [
+                "Disorders2fake-massed.xml",
+                "Disorders2fake-spaced.xml"
+            ]
+        }
+    }
+}
