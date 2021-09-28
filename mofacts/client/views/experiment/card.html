@@ -1,173 +1,180 @@
 <template name="card">
     <div class="container" id="cardContainer">
-
-    {{#if displayReady}}
-        <div class="scrollHistoryContainer">
-            {{#if haveScrollList}}
-            {{#each scrollList}}
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
-                    <div class="panel">
-                        <div class="panel-heading bg-primary">{{question}}</div>
-                        <div class="panel-body {{#if userCorrect}}bg-success{{/if}} {{#unless userCorrect}}bg-danger{{/unless}}">{{answer}}</div>
+    {{#if displayFeedback}}
+        {{>profileDialogueToggles}}
+        <div>
+            <br />
+            <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
+        </div>
+    {{else}}
+        {{#if displayReady}}
+            <div class="scrollHistoryContainer">
+                {{#if haveScrollList}}
+                {{#each scrollList}}
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-offset-2 col-md-8 col-lg-offset-2 col-lg-8">
+                        <div class="panel">
+                            <div class="panel-heading bg-primary">{{question}}</div>
+                            <div class="panel-body {{#if userCorrect}}bg-success{{/if}} {{#unless userCorrect}}bg-danger{{/unless}}">{{answer}}</div>
+                        </div>
                     </div>
                 </div>
+                {{/each}}
+                {{/if}}
             </div>
-            {{/each}}
-            {{/if}}
-        </div>
-
-        <!-- Progress bar while resuming -->
-        {{#if inResume}}
-        <div class="row">
-            <div class="col-md-offset-2 col-md-8">
-                <br /><br />
-                <h2>Loading...</h2>
-                <!-- <div class="progress">
-                    <div class="progress-bar progress-bar-striped active" role="progressbar"
-                        aria-valuemin="0" aria-valuemax="100"
-                        aria-valuenow="50" style="width: 50%; min-width: 2em;">
-                        <span id="resumeMsg">Working...</span>
-                    </div>
-                </div> -->
-            </div>
-        </div>
-        {{/if}}
-
-        {{#if trial}}
+            <!-- Progress bar while resuming -->
+            {{#if inResume}}
             <div class="row">
-                <div class="container-fluid" id="displayContainer">
-                    <div id="leftPanel" class="col-md-11">
-                        {{#if anythingButAudioCard}}
-                            <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
-                                {{#if textOrClozeCard}}
-                                    {{#if subWordClozeCurrentQuestionExists}}
-                                        {{{subWordParts}}}
-                                    {{else}}
-                                        {{{clozeText}}}
-                                        {{{text}}}
+                <div class="col-md-offset-2 col-md-8">
+                    <br /><br />
+                    <h2>Loading...</h2>
+                    <!-- <div class="progress">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar"
+                            aria-valuemin="0" aria-valuemax="100"
+                            aria-valuenow="50" style="width: 50%; min-width: 2em;">
+                            <span id="resumeMsg">Working...</span>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+            {{/if}}
+
+            {{#if trial}}
+                <div class="row">
+                    <div class="container-fluid" id="displayContainer">
+                        <div id="leftPanel" class="col-md-11">
+                            {{#if anythingButAudioCard}}
+                                <div class="marginLeftAndRight alert alert-info {{fontSizeClass}}" id="textQuestion">
+                                    {{#if textOrClozeCard}}
+                                        {{#if subWordClozeCurrentQuestionExists}}
+                                            {{{subWordParts}}}
+                                        {{else}}
+                                            {{{clozeText}}}
+                                            {{{text}}}
+                                        {{/if}}
                                     {{/if}}
-                                {{/if}}
-                            </div>
-                            <div class="marginLeftAndRight h2" id="imageDisplay">
-                                {{#if imageCard}}
-                                    <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
-                                {{/if}}
-                            </div>
-                            <div class="marginLeftAndRight h2" id="videoDisplay">
-                                {{#if videoCard}}
-                                    <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
-                                        <source src="{{curVideoSrc}}">
-                                        Your browser does not support the video tag.
-                                    </video>
-                                {{/if}}
-                            </div>
-                        {{/if}}
-                    </div>
-                    <div id="rightmostPanel" class="col-md-1">
-                        {{#if audioCard}}
-                            <img src="images/speaker.png" class="marginLeftAndRight h2 sound-img">
-                        {{/if}}
+                                </div>
+                                <div class="marginLeftAndRight h2" id="imageDisplay">
+                                    {{#if imageCard}}
+                                        <img id="cardQuestionImg" src="{{curImgSrc}}" style="max-width: 100%; width: auto; height: max-content;"> 
+                                    {{/if}}
+                                </div>
+                                <div class="marginLeftAndRight h2" id="videoDisplay">
+                                    {{#if videoCard}}
+                                        <video autoplay="" style="display: block; margin-left: auto; margin-right: auto; width: 50%;">
+                                            <source src="{{curVideoSrc}}">
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    {{/if}}
+                                </div>
+                            {{/if}}
+                        </div>
+                        <div id="rightmostPanel" class="col-md-1">
+                            {{#if audioCard}}
+                                <img src="images/speaker.png" class="marginLeftAndRight h2 sound-img">
+                            {{/if}}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {{/if}}
-
-        {{#if study}}
-        <div class="row">
-            <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
-                {{#unless clozeCard}}
-                    {{#unless hideResponse}}
-                        <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
-                    {{/unless}}
-                {{/unless}}
-                <div>
-                    {{#if skipstudy}}
-                    <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
-                        Continue
-                    </button>
-                    {{/if}}
-                </div>
-            </div>  <!-- close column -->
-        </div>  <!-- close row -->
-        {{/if}}
-
-        {{#if testordrill}}
-            {{#if audioEnabled}}
-                {{#if isNotInDialogueLoopStageIntroOrExit}}
-                    <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
-                    <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
-                    <br>
-                {{/if}}
             {{/if}}
-            {{#if notButtonTrialOrInDialogueLoop}}
-                <div class="row" id="textEntryRow">
-                    <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
-                        {{> inputF}}
-                    </div>
-                </div>  <!-- close row -->
-            {{else}}
-                
+
+            {{#if study}}
             <div class="row">
-            
-                {{#if buttonTrial}}
-                    {{#if audioEnabled}}
-                        <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                <div class="col-xs-offset-2 col-xs-8 col-sm-offset-4 col-sm-4 col-md-offset-4 col-md-4 col-lg-offset-4 col-lg-4 {{fontSizeClass}}">
+                    {{#unless clozeCard}}
+                        {{#unless hideResponse}}
+                            <p id="answerLabel" class="alert alert-info">{{displayAnswer}}</p>
+                        {{/unless}}
+                    {{/unless}}
+                    <div>
+                        {{#if skipstudy}}
+                        <button type='button' id='continueStudy' name='continueStudy' class='btn btn-block btn-responsive' disabled>
+                            Continue
+                        </button>
+                        {{/if}}
+                    </div>
+                </div>  <!-- close column -->
+            </div>  <!-- close row -->
+            {{/if}}
+
+            {{#if testordrill}}
+                {{#if audioEnabled}}
+                    {{#if isNotInDialogueLoopStageIntroOrExit}}
+                        <p class="marginLeftAndRight text-center">{{voiceTranscriptionPromptMsg}}</p>
+                        <img class="center-block" style="height:50px; width:auto; " src="{{voiceTranscriptionImgSrc}}">
+                        <br>
                     {{/if}}
                 {{/if}}
-                <div class="col-md-12">
-                    <div id="multipleChoiceContainer">
-                        <!-- will contain multiple choice buttons which are dynamically added. -->
-                        {{#if buttonTrial}}
-                        <table id="multipleChoiceTable">
-                            {{#if imageResponse}}
-                                {{#each buttonListImageRows}}
-                                <tr>
-                                    {{#each this}}
-                                    {{#if audioEnabled}}
+                {{#if notButtonTrialOrInDialogueLoop}}
+                    <div class="row" id="textEntryRow">
+                        <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8">
+                            {{> inputF}}
+                        </div>
+                    </div>  <!-- close row -->
+                {{else}}
+                    
+                <div class="row">
+                
+                    {{#if buttonTrial}}
+                        {{#if audioEnabled}}
+                            <p class="marginLeftAndRight text-center">Please speak the letter next to the correct option for audio input</p>
+                        {{/if}}
+                    {{/if}}
+                    <div class="col-md-12">
+                        <div id="multipleChoiceContainer">
+                            <!-- will contain multiple choice buttons which are dynamically added. -->
+                            {{#if buttonTrial}}
+                            <table id="multipleChoiceTable">
+                                {{#if imageResponse}}
+                                    {{#each buttonListImageRows}}
+                                    <tr>
+                                        {{#each this}}
+                                        {{#if audioEnabled}}
+                                            <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
+                                            <td>&nbsp;</td>
+                                        {{/if}}
+                                        <td class="td-img">
+                                            <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
+                                            </button>
+                                        </td>
+                                        {{/each}}
+                                    </tr>
+                                    {{/each}}
+                                {{else}}
+                                    {{#each buttonList}}
+                                    <tr display={{displayReadyConverter (displayReady) }}>
+                                        {{#if audioEnabled}}
                                         <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
                                         <td>&nbsp;</td>
-                                    {{/if}}
-                                    <td class="td-img">
-                                        <button style="background: url({{buttonValue}});background-size: 300px 150px;;background-repeat: no-repeat;" verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn-alt btn-block multipleChoiceButton btn-image btn-responsive'>
-                                        </button>
-                                    </td>
+                                        {{/if}}
+                                        <td>
+                                            <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
+                                            {{buttonValue}}
+                                            </button>
+                                        </td>
+                                    </tr>
                                     {{/each}}
-                                </tr>
-                                {{/each}}
-                            {{else}}
-                                {{#each buttonList}}
-                                <tr display={{displayReadyConverter (displayReady) }}>
-                                    {{#if audioEnabled}}
-                                    <td><label style="margin-bottom:0px">{{verbalChoice}}.</label></td>
-                                    <td>&nbsp;</td>
-                                    {{/if}}
-                                    <td>
-                                        <button verbalChoice='{{verbalChoice}}' type='button' name='{{buttonName}}' class='btnPaddedAndMinWidth btn btn-block multipleChoiceButton btn-responsive'>
-                                        {{buttonValue}}
-                                        </button>
-                                    </td>
-                                </tr>
-                                {{/each}}
+                                {{/if}}
+                            </table>
                             {{/if}}
-                        </table>
-                        {{/if}}
+                        </div>
+                    </div>
+                </div> <!-- close row -->
+                {{/if}}
+            {{/if}}
+
+            <div class="userInteractionContainer">
+                <div class="row">
+                    <div class="marginLeftAndRight {{fontSizeClass}}" id="UserInteraction" hidden>
                     </div>
                 </div>
-            </div> <!-- close row -->
-            {{/if}}
-        {{/if}}
-
-        <div class="userInteractionContainer">
-            <div class="row">
-                <div class="marginLeftAndRight {{fontSizeClass}}" id="UserInteraction" hidden>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="forceCorrectionEntry" hidden>
+                        {{> inputForceCorrect}}
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-offset-1 col-md-10 col-lg-offset-2 col-lg-8 {{fontSizeClass}}" id="forceCorrectionEntry" hidden>
-                    {{> inputForceCorrect}}
-                </div>
-            </div>
+<<<<<<< HEAD
             {{#if questionIsRemovable}}
                 <div class="removalContainer">
                     <div class="row">
@@ -181,38 +188,41 @@
                 </div>
             {{/if}}
         </div>
+=======
+>>>>>>> postgresMigration
 
-        {{#if showDialogueHints}}
-        <div class="row">
-            <div class="col-lg-12 visible-text text-center">
-                <h5>Testing Aid (Dialogue Cache Matching Answer): {{dialogueCacheHint}}</h5>
+            {{#if showDialogueHints}}
+            <div class="row">
+                <div class="col-lg-12 visible-text text-center">
+                    <h5>Testing Aid (Dialogue Cache Matching Answer): {{dialogueCacheHint}}</h5>
+                </div>
             </div>
-        </div>
+            {{/if}}
+
+            {{#if isInRole 'teacher'}}
+            <div class="row">
+                <div class="col-lg-12 visible-text text-center">
+                    {{#if displayAnswer}}<h5>Teacher Aid (Answer): {{displayAnswer}}</h5>{{/if}}
+                    {{#if currentProgress}}<h5>Current Progress: {{currentProgress}}</h5>{{/if}}
+                    {{#if rawAnswer}}<h5>Teacher Aid (Raw Answer Text): {{rawAnswer}}</h5>{{/if}}
+                </div>
+            </div>
+            {{/if}}
+
+            <div class="row">
+                <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
+                    <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
+                    <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
+                </div>
+            </div>
+        {{else}}
+            <div class="row">
+                <div class="col-md-offset-2 col-md-8">
+                    <br /><br />
+                    <h2>Content loading...</h2>
+                </div>
+            </div>
         {{/if}}
-
-        {{#if isInRole 'teacher'}}
-        <div class="row">
-            <div class="col-lg-12 visible-text text-center">
-                {{#if displayAnswer}}<h5>Teacher Aid (Answer): {{displayAnswer}}</h5>{{/if}}
-                {{#if currentProgress}}<h5>Current Progress: {{currentProgress}}</h5>{{/if}}
-                {{#if rawAnswer}}<h5>Teacher Aid (Raw Answer Text): {{rawAnswer}}</h5>{{/if}}
-            </div>
-        </div>
-        {{/if}}
-
-        <div class="row">
-            <div hidden  class="col-lg-offset-2 col-lg-5" style="text-align: center;" id="overlearningRow">
-                <h4 style=" color: #585858;">You are currently overlearning!  Please consider taking a break and coming back later.</h4>
-                <button id="overlearningButton" type="button" class="btn btn-responsive" style="width: auto;">Practice</button>
-            </div>
-        </div>
-    {{else}}
-        <div class="row">
-            <div class="col-md-offset-2 col-md-8">
-                <br /><br />
-                <h2>Content loading...</h2>
-            </div>
-        </div>
     {{/if}}
 
         <!-- Modal -->

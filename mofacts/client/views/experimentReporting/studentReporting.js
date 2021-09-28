@@ -1,16 +1,83 @@
+
 import {setStudentPerformance} from '../../lib/currentTestingHelpers';
 import {INVALID} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
+import gauge, {
+  Gauge,
+  Donut,
+  BaseDonut,
+  TextRenderer
+
+} from '../../lib/gauge.js';
+
 
 Session.set('studentReportingTdfs', []);
 Session.set('curStudentPerformance', {});
+
+let defaultGaugeOptions = {
+  angle: -.2,
+  lineWidth: 0.22,
+  radiusScale:0.9,
+  pointer: {
+    length: 0.5,
+    strokeWidth: 0.05,
+    color: '#000000'
+  },
+  staticZones: [
+     {strokeStyle: "#F03E3E", min: 0, max: 50, height: 1},
+     {strokeStyle: "#30B32D", min: 50, max: 80, height: 1},
+     {strokeStyle: "#FFDD00", min: 80, max: 100, height: 1},
+
+  ],
+  renderTicks: {
+    divisions: 5,
+    divWidth: 1.1,
+    divLength: 0.7,
+    divColor: '#333333',
+    subDivisions: 3,
+    subLength: 0.5,
+    subWidth: 0.6,
+    subColor: '#666666'
+  },
+
+  staticLabels: {
+    font: "8px sans-serif",  // Specifies font
+    labels: [50, 60, 70, 80, 100],  // Print labels at these values
+    color: "#000000",  // Optional: Label text color
+    fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+  },
+  limitMax: false,
+  limitMin: false,
+  highDpiSupport: true
+};
+let defaultDonutOptions = {
+  lines: 12, // The number of lines to draw
+  angle: .4, // The length of each line
+  lineWidth: 0.13, // The line thickness
+  pointer: {
+    length: 0.9, // The radius of the inner circle
+    strokeWidth: 0.035, // The rotation offset
+    color: '#333' // Fill color
+  },
+  limitMax: 'true', // If true, the pointer will not go past the end of the gauge
+  colorStart: '#008351', // Colors
+  colorStop: '#008351', // just experiment with them
+  strokeColor: '#EEEEEE', // to see which ones work best for you
+  generateGradient: true
+};
 
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
+  curStudentPerformaceCorrectInInteger: function() {
+    var percentCorrectInteger = parseFloat(Session.get('curStudentPerformance').percentCorrect).toFixed(0);
+    return percentCorrectInteger;
+  },
   studentUsername: () => Session.get('studentUsername'),
+  stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
+  stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   INVALID: INVALID,
 });
 
@@ -47,25 +114,33 @@ Template.studentReporting.rendered = async function() {
       setStudentPerformance(studentID, studentUsername, tdfToSelect);
     });
   }
+  updateDashboard(Session.get('currentTdfId'));
 };
 
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
     const selectedTdfId = $(event.currentTarget).val();
-    console.log('change tdf select', selectedTdfId);
-    if (selectedTdfId!==INVALID) {
-      $(`#tdf-select option[value="${INVALID}"]`).prop('disabled', true);
-      const studentID = Session.get('curStudentID') || Meteor.userId();
-      const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-
-      const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
-      console.log('studentData', studentData);
-
-      setStudentPerformance(studentID, studentUsername, selectedTdfId);
-      drawCharts(studentData);
-    }
+    updateDashboard(selectedTdfId);
   },
 });
+
+async function updateDashboard(selectedTdfId){
+  console.log('change tdf select', selectedTdfId);
+  if (selectedTdfId!==INVALID) {
+    $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
+    const studentID = Session.get('curStudentID') || Meteor.userId();
+    const studentUsername = Session.get('studentUsername') || Meteor.user().username;
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
+
+    console.log('studentData', studentData);
+
+    setStudentPerformance(studentID, studentUsername, selectedTdfId);
+    drawCharts(studentData);
+    drawDashboard(curStudentGraphData, studentData);
+    $('#tdf-select').val(selectedTdfId);
+  }
+}
 
 function drawCharts(studentData) {
   $('#correctnessChart').attr('data-x-axis-label', 'Repetition Number');
@@ -196,6 +271,76 @@ function drawProbBars(targetSelector, labels, series, dataDescrip, chartConfig) 
       });
     });
   }
+}
+
+function lookUpLabelByDataValue(labels, series, value) {
+  return labels[series.findIndex(function(element) {
+    return element == value;
+  })];
+}
+
+
+async function drawDashboard(curStudentGraphData, studentData){
+  //Get Data from session variableS
+  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
+  percentCorrect = numCorrect / stimsSeen * 100;
+  percentStimsSeen = stimsSeen / totalStimCount * 100;
+  // Perform calculated data
+  const stimsSeenProbabilties = [];
+  const stimsNotSeenProbabilites = [];
+  for(let i = 0; i < studentData.probEstimates.length; i++ ){
+      if(studentData.probEstimates[i].lastSeen != 0){
+        stimsSeenProbabilties.push(studentData.probEstimates[i].probabilityEstimate);
+      } else {
+        stimsNotSeenProbabilites.push(studentData.probEstimates[i].probabilityEstimate);
+      }
+    }
+  stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
+  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
+  Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
+  
+      
+  
+
+  //Draw Dashboard
+  let dashCluster = [];
+  dashClusterCanvases = document.getElementsByClassName('dashCanvas');
+    Array.prototype.forEach.call(dashClusterCanvases, function(element){
+      if(element.classList.contains('gauge')){
+        console.log(element);
+        let gaugeMeter = new progressGauge(element,"gauge",0,100);
+        dashCluster.push(gaugeMeter);
+      } else {
+        console.log(element);
+        let gaugeMeter = new progressGauge(element,"donut",0,100);
+        dashCluster.push(gaugeMeter);
+      }
+
+    });
+    //Populate Dashboard values
+    console.log('Testing dashCluster:',dashCluster);
+    dashCluster[0].set(percentStimsSeen);
+    dashCluster[1].set(percentCorrect);
+    dashCluster[2].set(stimsSeenPredictedProbability);
+    dashCluster[3].set(stimsNotSeenPredictedProbability);
+
+  }
+function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
+    if(target != undefined){
+      console.log('gauge canvas found and loaded.')
+      console.log('gaugeType',gaugeType);
+      if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);} 
+      if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(defaultDonutOptions);}
+      gauge.maxValue = maxValue; // set max gauge value
+      gauge.animationSpeed = 32; // set animation speed (32 is default value)
+      gauge.set(currentValue); // set actual value
+      gauge.setTextField(document.getElementById("preview-textfield"));
+      return gauge;
+  } else {
+      console.log('canvas not found in DOM call.')
+  }
+ 
 }
 
 function lookUpLabelByDataValue(labels, series, value) {
