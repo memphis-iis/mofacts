@@ -100,7 +100,7 @@ Template.turkWorkflow.rendered = async function() {
   allTdfs.forEach( function(tdf) {
     const tdfObject = tdf.content;
     // Make sure we have a valid TDF (with a setspec)
-    const setspec = tdfObject.tdfs.tutor.setspec[0];
+    const setspec = tdfObject.tdfs.tutor.setspec;
 
     if (!setspec) {
       return;

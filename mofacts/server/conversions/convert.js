@@ -26,8 +26,8 @@ function generateTdfs(tdfsJson) {
   const jsonTdfs = [];
   const rootTdfNames = [];
   tdfsJson.forEach((tdfFile) => {
-    if (tdfFile.tdfs.tutor.setspec[0].stimulusfile) {
-      const stimuliSetId = stimIdMap[tdfFile.tdfs.tutor.setspec[0].stimulusfile[0]];
+    if (tdfFile.tdfs.tutor.setspec.stimulusfile) {
+      const stimuliSetId = stimIdMap[tdfFile.tdfs.tutor.setspec.stimulusfile];
       const tdfs = getNewTdfFormat(tdfFile, tdfId, stimuliSetId);
       jsonTdfs.push(tdfs);
 
