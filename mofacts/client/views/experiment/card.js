@@ -119,6 +119,10 @@ const scrollList = new Mongo.Collection(null); // local-only - no database
 Session.set('scrollListCount', 0);
 Session.set('currentDeliveryParams', {});
 Session.set('inResume', false);
+Session.set('wasReportedForRemoval', false);
+Session.set('hiddenItems', []);
+Session.set('numVisibleCards', 0);
+Session.set('')
 let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
