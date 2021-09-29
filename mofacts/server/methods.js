@@ -695,8 +695,8 @@ async function getExperimentState(UserId, TDFId) { // by currentRootTDFId, not c
 }
 
 // UPSERT not INSERT
-async function setExperimentState(UserId, TDFId, newExperimentState) { // by currentRootTDFId, not currentTdfId
-  serverConsole('setExperimentState:', UserId, TDFId);
+async function setExperimentState(UserId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
+  serverConsole('setExperimentState:', where, UserId, TDFId, newExperimentState);
   const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
   const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
 
@@ -1178,13 +1178,13 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
     if (onlyWithLearningSessions) {
       for (const unit of tdfObject.tdfs.tutor.unit) {
         if (unit.learningsession) {
-          const displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+          const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
           tdfsAttempted.push({tdfid, displayName});
           break;
         }
       }
     } else {
-      const displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+      const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
       tdfsAttempted.push({tdfid, displayName});
     }
   }
@@ -1217,7 +1217,7 @@ function setLearningSessionItems(learningSessionItem, tdf) {
 }
 
 function getClusterListsFromUnit(unit) {
-  const clustersToParse = unit.learningsession[0].clusterlist[0];
+  const clustersToParse = unit.learningsession.clusterlist;
   return clustersToParse.split(' ').map((x) => x.split('-').map((y) => parseInt(y)));
 }
 
@@ -1391,8 +1391,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   let stimFileName;
   let skipStimSet = false;
   let stimSet;
-  if (tdfJSON.tdfs.tutor.setspec[0].stimulusfile) {
-    stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+  if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
+    stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
     stimSet = await getStimuliSetByFilename(stimFileName);
   } else {
     skipStimSet = true;
@@ -1422,8 +1422,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     }
     await db.tx(async (t) => {
       let stimuliSetId;
-      if (tdfJSON.tdfs.tutor.setspec[0].stimulusfile) {
-        const stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+      if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
+        const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
         const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
         const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
         if (associatedStimSetIdRet) {
@@ -1461,16 +1461,15 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
       const json = JSON.parse(data);
       await upsertStimFile(filename, json, adminUserId);
     }
-
     setTimeout(async () => {
       serverConsole('start tdfs');
       const tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => {
-        return fn.indexOf('.xml') >= 0;
+        return fn.indexOf('.json') >= 0;
       });
       for (let filename of tdfFilenames) {
         const data = Assets.getText('tdf/' + filename);
-        const json = parseStringSync(data);
-        filename = filename.replace('.xml', curSemester + '.xml');
+        const json = JSON.parse(data);
+        filename = filename.replace('.json', curSemester + '.json');
         const rec = {'fileName': filename, 'tdfs': json, 'ownerId': adminUserId, 'source': 'repo'};
         await upsertTDFFile(filename, rec, adminUserId);
       }
@@ -1987,15 +1986,14 @@ Meteor.startup(async function() {
         if (type == 'tdf') {
           const jsonContents = JSON.parse(filecontents);
           const json = {tutor: jsonContents.tutor};
-          const lessonName = _.trim(jsonContents.tutor.setspec[0].lessonname[0]);
+          const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
           if (lessonName.length < 1) {
             results.result = false;
             results.errmsg = 'TDF has no lessonname - it cannot be valid';
 
             return results;
           }
-
-          const stimFileName = json.tutor.setspec[0].stimulusfile ? json.tutor.setspec[0].stimulusfile[0] : 'INVALID';
+          const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
           if (stimFileName == 'INVALID') {
             // Note this means root tdfs will have NULL stimulisetid
             results.result = false;

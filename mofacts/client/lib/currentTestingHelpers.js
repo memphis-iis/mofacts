@@ -419,7 +419,7 @@ function getCurrentDeliveryParams() {
   let sourceDelParams = null;
   if (currUnit) {
     // We have a unit
-    if (currUnit.deliveryparams && currUnit.deliveryparams.length) {
+    if (currUnit.deliveryparams !== undefined) {
       sourceDelParams = currUnit.deliveryparams;
     }
   } else {
@@ -430,7 +430,7 @@ function getCurrentDeliveryParams() {
     }
   }
 
-  if (sourceDelParams && sourceDelParams.length) {
+  if (sourceDelParams !== undefined) {
     // Note that if there is no XCond or if they specify something
     // wacky we'll just go with index 0
     let xcondIndex = _.intval(Session.get('experimentXCond'));
@@ -440,9 +440,9 @@ function getCurrentDeliveryParams() {
     const found = sourceDelParams[xcondIndex];
 
     // If found del params, then use any values we find
-    if (found) {
+    if (sourceDelParams) {
       for (fieldName in deliveryParams) {
-        const fieldVal = _.first(found[fieldName]);
+        const fieldVal = sourceDelParams[fieldName];
         if (fieldVal) {
           deliveryParams[fieldName] = fieldVal;
           modified = true;

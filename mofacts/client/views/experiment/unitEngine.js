@@ -437,8 +437,8 @@ function modelUnitEngine() {
 
   // See if they specified a probability function
   let probFunction = _.chain(Session.get('currentTdfUnit'))
-      .prop('learningsession').first()
-      .prop('calculateProbability').first().trim().value();
+      .prop('learningsession')
+      .prop('calculateProbability').trim().value();
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -742,8 +742,8 @@ function modelUnitEngine() {
         // Figure out which cluster numbers that they want
         console.log('setupclusterlist:', this.curUnit, sessCurUnit);
         const unitClusterList = _.chain(this.curUnit || sessCurUnit) // TODO: shouldn't need both
-            .prop('learningsession').first()
-            .prop('clusterlist').first().trim().value();
+            .prop('learningsession')
+            .prop('clusterlist').trim().value();
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
@@ -1058,7 +1058,7 @@ function modelUnitEngine() {
 
     unitMode: (function() {
       const unitMode = _.chain(Session.get('currentTdfUnit'))
-          .prop('learningsession').first()
+          .prop('learningsession')
           .prop('unitMode').trim().value() || 'default';
       console.log('UNIT MODE: ' + unitMode);
       return unitMode;
@@ -1297,7 +1297,7 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
-      const maxTrials = _.chain(session).prop('maxTrials').first().intval(0).value();
+      const maxTrials = _.chain(session).prop('maxTrials').intval(0).value();
       const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
@@ -1408,8 +1408,8 @@ function scheduleUnitEngine() {
           // 1 - legacy was f/b, now "b" forces a button trial
           // 2 - trial type (t, d, s, m, n, i, f)
           // 3 - location (added to qidx)
-          const groupEntry = group[index * templateSize + k];
-          const parts = groupEntry.split(',');
+          // const groupEntry = group[index * templateSize + k];
+          const parts = group.split(',');
 
           let forceButtonTrial = false;
           if (parts[1].toLowerCase()[0] === 'b') {
@@ -1481,8 +1481,8 @@ function scheduleUnitEngine() {
     // Shuffle and swap final question mapping based on permutefinalresult
     // and swapfinalresults
     if (finalQuests.length > 0) {
-      const shuffles = settings.finalPermute || [''];
-      const swaps = settings.finalSwap || [''];
+      const shuffles = settings.finalPermute.split(' ');
+      const swaps = settings.finalSwap.split(' ');
       let mapping = _.range(finalQuests.length);
 
       while (shuffles.length > 0 || swaps.length > 0) {
@@ -1546,17 +1546,10 @@ function scheduleUnitEngine() {
       return settings;
     }
 
-    const rawAssess = _.safefirst(unit.assessmentsession);
-    if (!rawAssess) {
-      return settings;
-    }
+    const assess = unit.assessmentsession;
 
     // Everything comes from the asessment session as a single-value array,
     // so just parse all that right now
-    const assess = {};
-    _.each(rawAssess, function(val, name) {
-      assess[name] = _.safefirst(val);
-    });
 
     // Interpret TDF string booleans
     const boolVal = function(src) {
@@ -1567,8 +1560,8 @@ function scheduleUnitEngine() {
     settings.specType = _.display(setspec.clustermodel);
 
     // We have a few parameters that we need in their "raw" states (as arrays)
-    settings.finalSwap = _.prop(rawAssess, 'swapfinalresult') || [''];
-    settings.finalPermute = _.prop(rawAssess, 'permutefinalresult') || [''];
+    settings.finalSwap = _.prop(assess, 'swapfinalresult') || '';
+    settings.finalPermute = _.prop(assess, 'permutefinalresult') || '';
 
     // The "easy" "top-level" settings
     extractDelimFields(assess.initialpositions, settings.initialPositions);
@@ -1610,14 +1603,7 @@ function scheduleUnitEngine() {
       extractDelimFields(byGroup.clustersrepeated, settings.templateSizes);
       extractDelimFields(byGroup.templatesrepeated, settings.numTemplatesList);
       extractDelimFields(byGroup.initialpositions, settings.initialPositions);
-
-      _.each(byGroup.group, function(tdfGroup) {
-        const newGroup = [];
-        extractDelimFields(tdfGroup, newGroup);
-        if (newGroup.length > 0) {
-          settings.groups.push(newGroup);
-        }
-      });
+      extractDelimFields(byGroup.group, settings.groups);
 
       if (settings.groups.length != settings.groupNames.length) {
         console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
@@ -1671,7 +1657,7 @@ function scheduleUnitEngine() {
 
       const curUnitNum = Session.get('currentUnitNumber');
       const file = Session.get('currentTdfFile');
-      const setSpec = file.tdfs.tutor.setspec[0];
+      const setSpec = file.tdfs.tutor.setspec;
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
       console.log('creating schedule with params:', setSpec, curUnitNum, currUnit);

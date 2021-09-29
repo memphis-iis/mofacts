@@ -79,8 +79,8 @@ function lockoutKick() {
 function getDisplayTimeouts() {
   const unit = Session.get('currentTdfUnit');
   return {
-    'minSecs': _.chain(unit).prop('instructionminseconds').first().intval(0).value(),
-    'maxSecs': _.chain(unit).prop('instructionmaxseconds').first().intval(0).value(),
+    'minSecs': _.chain(unit).prop('instructionminseconds').intval(0).value(),
+    'maxSecs': _.chain(unit).prop('instructionmaxseconds').intval(0).value(),
   };
 }
 
@@ -243,7 +243,7 @@ function instructContinue() {
   const curUnit = Session.get('currentTdfUnit');
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
-    curUnit.unitinstructions[0].trim() : '';
+    curUnit.unitinstructions.trim() : '';
   if (feedbackText.length < 1) feedbackText = curUnit.picture ? curUnit.picture.trim() : '';
 
   // Record the fact that we just showed instruction. Also - we use a call
