@@ -111,19 +111,21 @@ function haveMeteorUser() {
   return (!!Meteor.userId() && !!Meteor.user() && !!Meteor.user().username);
 }
 
-function updateCurStudentPerformance(isCorrect, endLatency) {
+function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemoval) {
   // Update running user metrics total,
   // note this assumes curStudentPerformance has already been initialized on initial page entry
   const curUserPerformance = Session.get('curStudentPerformance');
   console.log('updateCurStudentPerformance', isCorrect, endLatency,
       JSON.parse(JSON.stringify((Session.get('curStudentPerformance')))));
-  curUserPerformance.count = curUserPerformance.count + 1;
-  if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
-  curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
-  curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
-  curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
-  curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
-  curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
+  if(!wasReportedForRemoval){
+    curUserPerformance.count = curUserPerformance.count + 1;
+    if (isCorrect) curUserPerformance.numCorrect = curUserPerformance.numCorrect + 1;
+    curUserPerformance.percentCorrect = ((curUserPerformance.numCorrect / curUserPerformance.count)*100).toFixed(2) + '%';
+    curUserPerformance.stimsSeen = parseInt(curUserPerformance.stimsSeen);
+    curUserPerformance.totalStimCount = parseInt(curUserPerformance.totalStimCount);
+    curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
+    curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
+  }
   Session.set('curStudentPerformance', curUserPerformance);
 }
 
