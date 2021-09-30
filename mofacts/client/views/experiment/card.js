@@ -1414,7 +1414,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
     // Give unit engine a chance to update any necessary stats
     const endLatency = reviewEnd - trialStartTimestamp;
-    await engine.cardAnswered(isCorrect, endLatency);
+    await engine.cardAnswered(isCorrect, endLatency, wasReportedForRemoval);
     const answerLogAction = isTimeout ? '[timeout]' : 'answer';
     Session.set('dialogueHistory', undefined);
     const newExperimentState = {

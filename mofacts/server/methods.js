@@ -1077,7 +1077,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\'';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' AND s.showitem = true';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
@@ -1959,9 +1959,11 @@ Meteor.startup(async function() {
       serverConsole('saveUsersFile: ' + filename);
       const allErrors = [];
       let rows = Papa.parse(filecontents).data;
+      serverConsole(rows);
       rows = rows.slice(1);
       for (const index in rows) {
         const row = rows[index];
+        serverConsole(row);
         const username = row[0];
         const password = row[1];
         serverConsole('username: ' + username + ', password: ' + password);

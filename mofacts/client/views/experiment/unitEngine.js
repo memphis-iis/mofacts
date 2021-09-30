@@ -1225,7 +1225,7 @@ function modelUnitEngine() {
       }
     },
 
-    cardAnswered: async function(wasCorrect, practiceTime) {
+    cardAnswered: async function(wasCorrect, practiceTime, wasReportedForRemoval) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
@@ -1254,7 +1254,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, wasReportedForRemoval);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
