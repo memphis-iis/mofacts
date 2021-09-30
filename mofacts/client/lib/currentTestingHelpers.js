@@ -430,7 +430,7 @@ function getCurrentDeliveryParams() {
     }
   }
 
-  if (sourceDelParams !== undefined) {
+  if (sourceDelParams !== null) {
     // Note that if there is no XCond or if they specify something
     // wacky we'll just go with index 0
     let xcondIndex = _.intval(Session.get('experimentXCond'));
