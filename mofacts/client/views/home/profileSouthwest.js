@@ -78,7 +78,7 @@ Template.profileSouthwest.rendered = async function() {
         return;
       }
 
-      const name = _.chain(setspec).prop('lessonname').value();
+      const name = setspec.lessonname;
       if (!name) {
         console.log('Skipping TDF with no name', setspec);
         return;
@@ -86,20 +86,20 @@ Template.profileSouthwest.rendered = async function() {
 
       const currentStimuliSetId = tdf.stimuliSetId;
 
-      const ignoreOutOfGrammarResponses = _.chain(setspec).prop('speechIgnoreOutOfGrammarResponses').value() == 'true';
-      let speechOutOfGrammarFeedback = _.chain(setspec).prop('speechOutOfGrammarFeedback').value();
+      const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses == 'true';
+      let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback;
       if (!speechOutOfGrammarFeedback) {
         speechOutOfGrammarFeedback = 'Response not in answer set';
       }
 
-      let audioInputEnabled = _.chain(setspec).prop('audioInputEnabled').value() == 'true';
-      const enableAudioPromptAndFeedback = _.chain(setspec).prop('enableAudioPromptAndFeedback').value() == 'true';
+      let audioInputEnabled = setspec.audioInputEnabled == 'true';
+      const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback == 'true';
 
-      const audioInputSpeechAPIKeyAvailable = !!_.chain(setspec).prop('speechAPIKey').value();
+      const audioInputSpeechAPIKeyAvailable = !!setspec.speechAPIKey;
 
       // Only display the audio input available if enabled in tdf and tdf has key for it
       audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
-      const audioPromptTTSAPIKeyAvailable = !!_.chain(setspec).prop('textToSpeechAPIKey').value();
+      const audioPromptTTSAPIKeyAvailable = !!setspec.textToSpeechAPIKey;
 
       // Only display the audio output available if enabled in tdf and tdf has key for it
       const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;

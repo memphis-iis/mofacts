@@ -57,7 +57,7 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  const lockoutminutes = _.chain(Session.get('currentDeliveryParams')).prop('lockoutminutes').intval().value();
+  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
   logLockout(lockoutminutes);
   return lockoutminutes;
 }
@@ -79,8 +79,8 @@ function lockoutKick() {
 function getDisplayTimeouts() {
   const unit = Session.get('currentTdfUnit');
   return {
-    'minSecs': _.chain(unit).prop('instructionminseconds').intval(0).value(),
-    'maxSecs': _.chain(unit).prop('instructionmaxseconds').intval(0).value(),
+    'minSecs': parseInt(unit?.instructionminseconds || 0),
+    'maxSecs': parseInt(unit?.instructionmaxseconds || 0),
   };
 }
 
@@ -297,7 +297,7 @@ Template.instructions.helpers({
   },
 
   instructions: function() {
-    return _.chain(Session.get('currentTdfUnit')).prop('unitinstructions').trim().value();
+    return Session.get('currentTdfUnit').unitinstructions;
   },
 
   islockout: function() {

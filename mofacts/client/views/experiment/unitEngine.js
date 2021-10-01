@@ -436,9 +436,7 @@ function modelUnitEngine() {
   }
 
   // See if they specified a probability function
-  let probFunction = _.chain(Session.get('currentTdfUnit'))
-      .prop('learningsession')
-      .prop('calculateProbability').trim().value();
+  let probFunction = Session.get('currentTdfUnit')?.learningsession?.calculateProbability?.trim();
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -741,9 +739,7 @@ function modelUnitEngine() {
         const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
         // Figure out which cluster numbers that they want
         console.log('setupclusterlist:', this.curUnit, sessCurUnit);
-        const unitClusterList = _.chain(this.curUnit || sessCurUnit) // TODO: shouldn't need both
-            .prop('learningsession')
-            .prop('clusterlist').trim().value();
+        const unitClusterList = this.curUnit?.learningsession?.clusterlist?.trim() || sessCurUnit?.learningsession?.clusterlist?.trim(); // TODO: shouldn't need both
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
@@ -1057,9 +1053,7 @@ function modelUnitEngine() {
     curUnit: (() => JSON.parse(JSON.stringify(Session.get('currentTdfUnit'))))(),
 
     unitMode: (function() {
-      const unitMode = _.chain(Session.get('currentTdfUnit'))
-          .prop('learningsession')
-          .prop('unitMode').trim().value() || 'default';
+      const unitMode = Session.get('currentTdfUnit').learningsession?.unitMode?.trim() || 'default';
       console.log('UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1297,7 +1291,7 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
-      const maxTrials = _.chain(session).prop('maxTrials').intval(0).value();
+      const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
@@ -1408,7 +1402,6 @@ function scheduleUnitEngine() {
           // 1 - legacy was f/b, now "b" forces a button trial
           // 2 - trial type (t, d, s, m, n, i, f)
           // 3 - location (added to qidx)
-          // const groupEntry = group[index * templateSize + k];
           const parts = group.split(',');
 
           let forceButtonTrial = false;
@@ -1548,9 +1541,6 @@ function scheduleUnitEngine() {
 
     const assess = unit.assessmentsession;
 
-    // Everything comes from the asessment session as a single-value array,
-    // so just parse all that right now
-
     // Interpret TDF string booleans
     const boolVal = function(src) {
       return _.display(src).toLowerCase() === 'true';
@@ -1558,10 +1548,8 @@ function scheduleUnitEngine() {
 
     // Get the setspec settings first
     settings.specType = _.display(setspec.clustermodel);
-
-    // We have a few parameters that we need in their "raw" states (as arrays)
-    settings.finalSwap = _.prop(assess, 'swapfinalresult') || '';
-    settings.finalPermute = _.prop(assess, 'permutefinalresult') || '';
+    settings.finalSwap = assess.swapfinalresult || '';
+    settings.finalPermute = assess.permutefinalresult || '';
 
     // The "easy" "top-level" settings
     extractDelimFields(assess.initialpositions, settings.initialPositions);
