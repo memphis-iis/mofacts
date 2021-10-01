@@ -252,8 +252,8 @@ function checkSimulation() {
 
   const setspec = Session.get('currentTdfFile').tdfs.tutor.setspec;
 
-  const simTimeout = parseInt(setspec.simTimeout);
-  const simCorrectProb = parseFloat(setspec.simCorrectProb);
+  const simTimeout = parseInt(setspec.simTimeout || 0);
+  const simCorrectProb = parseFloat(setspec.simCorrectProb || 0);
 
   if (simTimeout <= 0 || simCorrectProb <= 0.0) {
     return;
@@ -277,8 +277,8 @@ function getDisplayTimeouts() {
   const curUnit = Session.get('currentTdfUnit');
   const session = curUnit.learningsession || null;
   return {
-    'minSecs': parseInt(session?.displayminseconds || 0),
-    'maxSecs': parseInt(session?.displaymaxseconds || 0),
+    'minSecs': parseInt((session ? session.displayminseconds : 0) || 0),
+    'maxSecs': parseInt((session ? session.displaymaxseconds : 0) || 0),
   };
 }
 
@@ -889,8 +889,8 @@ function setUpButtonTrial() {
   const currUnit = Session.get('currentTdfUnit');
   const deliveryParams = Session.get('currentDeliveryParams');
   let buttonChoices = [];
-  const buttonOrder = currUnit.buttonorder?.trim().toLowerCase() || "";
-  const buttonOptions = currUnit.buttonOptions?.trim() || "";
+  const buttonOrder = currUnit.buttonorder ? currUnit.buttonorder.trim().toLowerCase() : "";
+  const buttonOptions = currUnit.buttonOptions ? currUnit.buttonOptions.trim() : "";
   let correctButtonPopulated = null;
 
   if (buttonOptions) {
@@ -1766,7 +1766,7 @@ async function unitIsFinished(reason) {
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
   // Default to value given in the unit
-  let isButtonTrial = true === eval(curUnit.buttontrial);
+  let isButtonTrial = 'true' === (curUnit.buttontrial ? curUnit.buttontrial.toLowerCase() : "");
 
   const curCardInfo = engine.findCurrentCardInfo();
   if (curCardInfo.forceButtonTrial) {

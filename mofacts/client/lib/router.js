@@ -249,8 +249,8 @@ Router.route('/instructions', {
       console.log('No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
-      const txt = unit.unitinstructions?.trim();
-      const pic = unit.picture?.trim();
+      const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
+      const pic = unit.picture ? unit.picture.trim() : undefined;
       if (!txt && !pic) {
         console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();
