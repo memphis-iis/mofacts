@@ -79,8 +79,8 @@ function lockoutKick() {
 function getDisplayTimeouts() {
   const unit = Session.get('currentTdfUnit');
   return {
-    'minSecs': parseInt(unit?.instructionminseconds || 0),
-    'maxSecs': parseInt(unit?.instructionmaxseconds || 0),
+    'minSecs': parseInt((unit ? unit.instructionminseconds : 0) || 0),
+    'maxSecs': parseInt((unit ? unit.instructionmaxseconds : 0) || 0),
   };
 }
 

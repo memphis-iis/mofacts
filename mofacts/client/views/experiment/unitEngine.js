@@ -436,7 +436,10 @@ function modelUnitEngine() {
   }
 
   // See if they specified a probability function
-  let probFunction = Session.get('currentTdfUnit')?.learningsession?.calculateProbability?.trim();
+  const unit = Session.get('currentTdfUnit');
+  let probFunction = undefined;
+  if (unit.learningsession) 
+    probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -739,7 +742,14 @@ function modelUnitEngine() {
         const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
         // Figure out which cluster numbers that they want
         console.log('setupclusterlist:', this.curUnit, sessCurUnit);
-        const unitClusterList = this.curUnit?.learningsession?.clusterlist?.trim() || sessCurUnit?.learningsession?.clusterlist?.trim(); // TODO: shouldn't need both
+        let unitClusterList = "";
+        // TODO: shouldn't need both
+        if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
+          unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+        }
+        else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
+          unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
+        }
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
@@ -1053,7 +1063,11 @@ function modelUnitEngine() {
     curUnit: (() => JSON.parse(JSON.stringify(Session.get('currentTdfUnit'))))(),
 
     unitMode: (function() {
-      const unitMode = Session.get('currentTdfUnit').learningsession?.unitMode?.trim() || 'default';
+      const unit = Session.get('currentTdfUnit');
+      let unitMode = 'default';
+      if(unit.learningsession && unit.learningsession.unitMode){
+        unitMode = unit.learningsession.unitMode.trim();
+      }
       console.log('UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1402,6 +1416,7 @@ function scheduleUnitEngine() {
           // 1 - legacy was f/b, now "b" forces a button trial
           // 2 - trial type (t, d, s, m, n, i, f)
           // 3 - location (added to qidx)
+          const groupEntry = group[index * templateSize + k];
           const parts = group.split(',');
 
           let forceButtonTrial = false;
