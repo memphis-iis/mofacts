@@ -252,8 +252,8 @@ function checkSimulation() {
 
   const setspec = Session.get('currentTdfFile').tdfs.tutor.setspec;
 
-  const simTimeout = _.chain(setspec).prop('simTimeout').value();
-  const simCorrectProb = _.chain(setspec).prop('simCorrectProb').value();
+  const simTimeout = parseInt(setspec.simTimeout);
+  const simCorrectProb = parseFloat(setspec.simCorrectProb);
 
   if (simTimeout <= 0 || simCorrectProb <= 0.0) {
     return;
@@ -275,10 +275,10 @@ function checkSimulation() {
 // name in instructions.js (where we use two similar parameters)
 function getDisplayTimeouts() {
   const curUnit = Session.get('currentTdfUnit');
-  const session = _.chain(curUnit).prop('learningsession').value();
+  const session = curUnit.learningsession || null;
   return {
-    'minSecs': _.chain(session).prop('displayminseconds').intval(0).value(),
-    'maxSecs': _.chain(session).prop('displaymaxseconds').intval(0).value(),
+    'minSecs': parseInt(session?.displayminseconds || 0),
+    'maxSecs': parseInt(session?.displaymaxseconds || 0),
   };
 }
 
@@ -381,8 +381,7 @@ Template.card.rendered = async function() {
   if (audioInputEnabled) {
     if (!Session.get('audioInputSensitivity')) {
       // Default to 20 in case tdf doesn't specify and we're in an experiment
-      const audioInputSensitivity = Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity ?
-      _.intval(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) : 20;
+      const audioInputSensitivity = parseInt(Session.get('currentTdfFile').tdfs.tutor.setspec.audioInputSensitivity) || 20;
       Session.set('audioInputSensitivity', audioInputSensitivity);
     }
   }
@@ -391,8 +390,7 @@ Template.card.rendered = async function() {
   if (audioOutputEnabled) {
     if (!Session.get('audioPromptSpeakingRate')) {
       // Default to 1 in case tdf doesn't specify and we're in an experiment
-      const audioPromptSpeakingRate = Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptSpeakingRate ?
-      _.floatval(Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptSpeakingRate) : 1;
+      const audioPromptSpeakingRate = parseFloat(Session.get('currentTdfFile').tdfs.tutor.setspec.audioPromptSpeakingRate) || 1;
       Session.set('audioPromptSpeakingRate', audioPromptSpeakingRate);
     }
   }
@@ -891,8 +889,8 @@ function setUpButtonTrial() {
   const currUnit = Session.get('currentTdfUnit');
   const deliveryParams = Session.get('currentDeliveryParams');
   let buttonChoices = [];
-  const buttonOrder = _.chain(currUnit).prop('buttonorder').trim().value().toLowerCase();
-  const buttonOptions = _.chain(currUnit).prop('buttonOptions').trim().value();
+  const buttonOrder = currUnit.buttonorder?.trim().toLowerCase() || "";
+  const buttonOptions = currUnit.buttonOptions?.trim() || "";
   let correctButtonPopulated = null;
 
   if (buttonOptions) {
@@ -1768,7 +1766,7 @@ async function unitIsFinished(reason) {
 function getButtonTrial() {
   const curUnit = Session.get('currentTdfUnit');
   // Default to value given in the unit
-  let isButtonTrial = 'true' === _.chain(curUnit).prop('buttontrial').trim().value().toLowerCase();
+  let isButtonTrial = true === eval(curUnit.buttontrial);
 
   const curCardInfo = engine.findCurrentCardInfo();
   if (curCardInfo.forceButtonTrial) {
@@ -2469,7 +2467,7 @@ async function updateExperimentState(newState, codeCallLocation) {
   const oldExperimentState = Session.get('currentExperimentState') || {};
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   const res = await meteorCallAsync('setExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, codeCallLocation);
+      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState);
   Session.set('currentExperimentState', newExperimentState);
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, 'new:', newExperimentState, res);
   return res;
