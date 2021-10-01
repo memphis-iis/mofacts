@@ -1417,7 +1417,7 @@ function scheduleUnitEngine() {
           // 2 - trial type (t, d, s, m, n, i, f)
           // 3 - location (added to qidx)
           const groupEntry = group[index * templateSize + k];
-          const parts = group.split(',');
+          const parts = groupEntry.split(',');
 
           let forceButtonTrial = false;
           if (parts[1].toLowerCase()[0] === 'b') {
@@ -1606,7 +1606,26 @@ function scheduleUnitEngine() {
       extractDelimFields(byGroup.clustersrepeated, settings.templateSizes);
       extractDelimFields(byGroup.templatesrepeated, settings.numTemplatesList);
       extractDelimFields(byGroup.initialpositions, settings.initialPositions);
-      extractDelimFields(byGroup.group, settings.groups);
+
+      // Group can be either string or array. If its just a string then we need to pass it into settings as an array. 
+      if(settings.groupNames.length > 1){
+        _.each(byGroup.group, function(tdfGroup) {
+          const newGroup = [];
+          extractDelimFields(tdfGroup, newGroup);
+          if (newGroup.length > 0) {
+            settings.groups.push(newGroup);
+          }
+        });
+      }
+      else{
+        const newGroup = []
+        extractDelimFields(byGroup.group, newGroup);
+        if (newGroup.length > 0) {
+          settings.groups.push(newGroup);
+        }
+      }
+
+//      extractDelimFields(byGroup.group, settings.groups);
 
       if (settings.groups.length != settings.groupNames.length) {
         console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
