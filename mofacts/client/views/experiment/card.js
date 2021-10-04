@@ -2467,7 +2467,7 @@ async function updateExperimentState(newState, codeCallLocation) {
   const oldExperimentState = Session.get('currentExperimentState') || {};
   const newExperimentState = Object.assign(JSON.parse(JSON.stringify(oldExperimentState)), newState);
   const res = await meteorCallAsync('setExperimentState',
-      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState);
+      Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
   Session.set('currentExperimentState', newExperimentState);
   console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, 'new:', newExperimentState, res);
   return res;
