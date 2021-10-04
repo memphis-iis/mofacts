@@ -1,0 +1,49 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DiffSequence",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.11.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/diff.js",
+      "length": 9492,
+      "offset": 0,
+      "path": "diff.js",
+      "hash": "30fd4da03da7bb61d0aba483a6e12b8a2350d5b9",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/tests.js",
+      "length": 4878,
+      "offset": 0,
+      "path": "tests.js",
+      "hash": "0baa6c628441cfc347ec55b162e86c2b2a2131fd",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

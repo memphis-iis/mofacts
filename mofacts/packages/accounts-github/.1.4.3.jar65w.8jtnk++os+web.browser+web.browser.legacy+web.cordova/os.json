@@ -1,0 +1,71 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.12.0"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "accounts-oauth",
+      "constraint": "1.1.16"
+    },
+    {
+      "package": "github-oauth",
+      "constraint": "1.2.3"
+    },
+    {
+      "package": "accounts-ui",
+      "constraint": "1.3.1",
+      "weak": true
+    },
+    {
+      "package": "github-config-ui",
+      "constraint": "1.0.1",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": "1.4.3"
+    },
+    {
+      "package": "github-oauth",
+      "constraint": "1.2.3"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/notice.js",
+      "length": 397,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "d7f15e4dc6c6c361581d12f7f2cd4a1b2511211b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/github.js",
+      "length": 958,
+      "offset": 0,
+      "path": "github.js",
+      "hash": "bce4a15941cbbf0a3c48fbe876d50c80fced93ea",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

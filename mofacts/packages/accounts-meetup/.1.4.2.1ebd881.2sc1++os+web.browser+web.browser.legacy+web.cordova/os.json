@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "accounts-oauth"
+    },
+    {
+      "package": "meetup-oauth"
+    },
+    {
+      "package": "accounts-ui",
+      "weak": true
+    },
+    {
+      "package": "meetup-config-ui",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    },
+    {
+      "package": "meetup-oauth",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/notice.js",
+      "length": 397,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "e617eac8cdc55985d4ea9bafc01cb9611e4c7f21",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/meetup.js",
+      "length": 953,
+      "offset": 0,
+      "path": "meetup.js",
+      "hash": "6deba593ec0791aed86b1d55efe0584626d6f509",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

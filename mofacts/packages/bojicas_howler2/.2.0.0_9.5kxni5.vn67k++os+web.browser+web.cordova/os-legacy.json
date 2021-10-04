@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/bojicas_howler2/packages/bojicas_howler2.js",
+      "length": 0,
+      "offset": 0,
+      "servePath": "/packages/bojicas_howler2/packages/bojicas_howler2.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Howler",
+      "export": true
+    },
+    {
+      "name": "Howl",
+      "export": true
+    }
+  ]
+}

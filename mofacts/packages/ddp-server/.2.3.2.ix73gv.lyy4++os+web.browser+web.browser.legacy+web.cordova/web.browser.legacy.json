@@ -1,0 +1,17 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "implies": [
+    {
+      "package": "ddp-client",
+      "constraint": "2.3.3"
+    }
+  ],
+  "resources": [],
+  "node_modules": "npm/node_modules"
+}

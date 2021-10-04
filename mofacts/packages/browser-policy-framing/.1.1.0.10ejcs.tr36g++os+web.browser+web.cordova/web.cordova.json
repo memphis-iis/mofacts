@@ -1,0 +1,28 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.7"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/browser-policy-framing.js",
+      "length": 1399,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy-framing.js",
+      "hash": "ae5f0da23e80864201d8b93e0fad8e19d3877013",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

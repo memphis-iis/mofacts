@@ -1,0 +1,26 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/papa-parse.js",
+      "length": 14580,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "papa-parse.js",
+      "hash": "e6b0948363fd17844799813262f091768128a9a1",
+      "fileOptions": {}
+    }
+  ]
+}

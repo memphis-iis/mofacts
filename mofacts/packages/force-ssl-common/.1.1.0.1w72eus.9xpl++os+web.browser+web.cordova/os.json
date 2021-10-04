@@ -1,0 +1,39 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/force_ssl_common.js",
+      "length": 1112,
+      "offset": 0,
+      "path": "force_ssl_common.js",
+      "hash": "8d9e70fce1c464c6f4e56055bfa1e29877833a64",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/force_ssl_tests.js",
+      "length": 3284,
+      "offset": 0,
+      "path": "force_ssl_tests.js",
+      "hash": "3f541dc80318ac8a2fce1d777d94faa9cfd11ea7",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

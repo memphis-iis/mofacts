@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Handler",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:url",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/handler.js",
+      "length": 3610,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/handler.js",
+      "hash": "815b8959bfc8a28ab07e654f155956287b740987",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/middleware_stack.js",
+      "length": 8976,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/middleware_stack.js",
+      "hash": "0d35d42637068fcf04c7ed1cb3cadbbb25105db2",
+      "fileOptions": {}
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "accounts-oauth"
+    },
+    {
+      "package": "weibo-oauth"
+    },
+    {
+      "package": "accounts-ui",
+      "weak": true
+    },
+    {
+      "package": "weibo-config-ui",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    },
+    {
+      "package": "weibo-oauth",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/notice.js",
+      "length": 393,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "9334a4ab53ad38280ac8a96001c56de265c600dd",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/weibo.js",
+      "length": 890,
+      "offset": 0,
+      "path": "weibo.js",
+      "hash": "8de02783460508a9570d4e97f942072d0160c06c",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

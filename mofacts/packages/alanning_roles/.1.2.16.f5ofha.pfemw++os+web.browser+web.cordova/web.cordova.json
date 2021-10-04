@@ -1,0 +1,85 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Roles",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.4"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.2.1"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.1.2"
+    },
+    {
+      "package": "check",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "blaze",
+      "constraint": "2.1.3",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/roles_common.js",
+      "length": 22892,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "roles_common.js",
+      "hash": "087fc37323788095c295ee7ce493a3ba31fc76ee",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client/debug.js",
+      "length": 537,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client/debug.js",
+      "hash": "039857c19b6d741c1322663249b98bbebab551be",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client/uiHelpers.js",
+      "length": 2311,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client/uiHelpers.js",
+      "hash": "6a305cb80345cfa8297c9b46762334f595100694",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client/subscriptions.js",
+      "length": 499,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client/subscriptions.js",
+      "hash": "669e4bc257bfde1676b90bf8b03b21366da504e4",
+      "fileOptions": {}
+    }
+  ]
+}

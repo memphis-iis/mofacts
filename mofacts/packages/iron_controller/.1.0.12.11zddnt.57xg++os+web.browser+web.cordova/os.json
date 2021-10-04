@@ -1,0 +1,67 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "reactive-dict",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:layout",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "iron:dynamic-template",
+      "constraint": "1.0.12"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/lib/controller.js",
+      "length": 4852,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/controller.js",
+      "hash": "734a10242cec5395cd793c3877f51b18b2e1ff14",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/lib/controller_server.js",
+      "length": 300,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/controller_server.js",
+      "hash": "2552368f5dd1f59ce9c2dd4c94e7529b0dacf3b6",
+      "fileOptions": {}
+    }
+  ]
+}

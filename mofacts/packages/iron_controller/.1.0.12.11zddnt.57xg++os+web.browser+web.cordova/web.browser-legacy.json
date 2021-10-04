@@ -1,0 +1,59 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "reactive-dict",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.0.6"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:layout",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "iron:dynamic-template",
+      "constraint": "1.0.12"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/iron_controller.js",
+      "length": 13529,
+      "offset": 0,
+      "servePath": "/packages/iron_controller.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "WaitList"
+    },
+    {
+      "name": "Controller"
+    }
+  ]
+}

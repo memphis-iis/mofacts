@@ -1,0 +1,54 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.2.13"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.browser.legacy/google_login_button.css",
+      "length": 1227,
+      "offset": 0,
+      "path": "google_login_button.css",
+      "hash": "6636e1d8ac79bff54828e78df6e3d407e6b6c38e",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.browser.legacy/google_configure.html",
+      "length": 1064,
+      "offset": 0,
+      "path": "google_configure.html",
+      "hash": "0cecb07a569d371d52e5471016ca11ecd8795bdf",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/google_configure.js",
+      "length": 362,
+      "offset": 0,
+      "path": "google_configure.js",
+      "hash": "738adccd671083175f471ef32aeae97b47d18940",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Base64",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.12.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/base64.js",
+      "length": 3289,
+      "offset": 0,
+      "path": "base64.js",
+      "hash": "acfdef19da77d16995afc81be89f779ee9e213f5",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/base64_test.js",
+      "length": 1627,
+      "offset": 0,
+      "path": "base64_test.js",
+      "hash": "d8ff31dce9c8ea5e073030297c9d73205a057229",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

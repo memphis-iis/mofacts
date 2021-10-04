@@ -1,0 +1,47 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/lib/compiler.js",
+      "length": 6308,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/compiler.js",
+      "hash": "2f2eb4e629bb307a39cab241fc685a9c55691f05",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/lib/url.js",
+      "length": 10163,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/url.js",
+      "hash": "db14ffcc25002c105889dfc5f9cfc4d13a95660e",
+      "fileOptions": {}
+    }
+  ]
+}

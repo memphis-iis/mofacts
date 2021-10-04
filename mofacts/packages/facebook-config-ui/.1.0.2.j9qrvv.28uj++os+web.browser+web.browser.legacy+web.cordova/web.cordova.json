@@ -1,0 +1,54 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.2.13"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.cordova/facebook_login_button.css",
+      "length": 417,
+      "offset": 0,
+      "path": "facebook_login_button.css",
+      "hash": "7b6e74d628e59311774e7b3409bdc3686e70e788",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.cordova/facebook_configure.html",
+      "length": 1634,
+      "offset": 0,
+      "path": "facebook_configure.html",
+      "hash": "3443a4770db535616b695a409465cdd99ad2a9c6",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/facebook_configure.js",
+      "length": 254,
+      "offset": 0,
+      "path": "facebook_configure.js",
+      "hash": "19d5c977d5a048de87b5297ba02275c229a84228",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

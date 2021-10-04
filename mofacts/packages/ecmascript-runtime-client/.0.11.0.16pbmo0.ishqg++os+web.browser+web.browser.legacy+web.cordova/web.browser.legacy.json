@@ -1,0 +1,79 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Symbol",
+      "testOnly": false
+    },
+    {
+      "name": "Map",
+      "testOnly": false
+    },
+    {
+      "name": "Set",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "es5-shim",
+      "weak": true
+    },
+    {
+      "package": "modules"
+    },
+    {
+      "package": "promise"
+    },
+    {
+      "package": "modern-browsers"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/modern.js",
+      "length": 886,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "modern.js",
+      "hash": "4a267ceca3382709911d323e03fdd74a29dc04f8",
+      "fileOptions": {
+        "mainModule": false,
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/legacy.js",
+      "length": 1638,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "legacy.js",
+      "hash": "fe5b37c4311f20398ef3438d7b41e20f25e61d30",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/versions.js",
+      "length": 498,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "versions.js",
+      "hash": "37752a2ce12accd0c3bfd0afc465b31bd04239f1",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

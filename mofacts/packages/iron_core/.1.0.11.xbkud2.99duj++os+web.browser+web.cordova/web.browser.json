@@ -1,0 +1,51 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Iron",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "cmather:iron-core",
+      "constraint": "0.2.0",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/version_conflict_error.js",
+      "length": 746,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/version_conflict_error.js",
+      "hash": "e0d85e07d771cc23c9311296de35cc19d166a711",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/lib/iron_core.js",
+      "length": 6726,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/iron_core.js",
+      "hash": "4024f2f63652686e93e57be57c8df4ba3f82e7bf",
+      "fileOptions": {}
+    }
+  ]
+}

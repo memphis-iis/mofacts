@@ -1,0 +1,84 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "urlToHashStyle",
+      "testOnly": true
+    },
+    {
+      "name": "urlFromHashStyle",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.2"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "iron:core",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "iron:url",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "appcache",
+      "constraint": "1.0.0-cordova1",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "iron:core",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/lib/utils.js",
+      "length": 2281,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/utils.js",
+      "hash": "6b465636bff559e33bf2d3e3755ed6e087dac1ca",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/lib/state.js",
+      "length": 673,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/state.js",
+      "hash": "946327088f26af5a17942726d0064b2425490daa",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/lib/location.js",
+      "length": 7585,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "lib/location.js",
+      "hash": "dfaa8f9a467a91dd5c115c3b857c95a9682b6cc7",
+      "fileOptions": {}
+    }
+  ]
+}

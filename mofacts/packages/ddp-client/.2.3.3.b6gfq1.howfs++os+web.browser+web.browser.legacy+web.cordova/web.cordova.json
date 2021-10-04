@@ -1,0 +1,195 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDP",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "random",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "retry",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "id-map",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.11.0"
+    },
+    {
+      "package": "callback-hook",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ddp-common",
+      "constraint": "1.4.0"
+    },
+    {
+      "package": "reload",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "socket-stream-client",
+      "constraint": "0.2.0"
+    },
+    {
+      "package": "diff-sequence",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "mongo-id",
+      "constraint": "1.0.7"
+    },
+    {
+      "package": "reload",
+      "constraint": "1.2.0",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client/client.js",
+      "length": 195,
+      "offset": 0,
+      "path": "client/client.js",
+      "hash": "9edc3cd6f4b6122ce38c0abfba8d433b4f322a1c",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/client/client_convenience.js",
+      "length": 2531,
+      "offset": 0,
+      "path": "client/client_convenience.js",
+      "hash": "24722f653d02cf3b54c1474e1633fd195398ec96",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/common/MethodInvoker.js",
+      "length": 3470,
+      "offset": 0,
+      "path": "common/MethodInvoker.js",
+      "hash": "cb6e60ed802081b060bfebeee150b95e68073b90",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/common/livedata_connection.js",
+      "length": 63879,
+      "offset": 0,
+      "path": "common/livedata_connection.js",
+      "hash": "1f204c83317cdcfa971b0fc9f35abd80e0b71c74",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/common/namespace.js",
+      "length": 3101,
+      "offset": 0,
+      "path": "common/namespace.js",
+      "hash": "dbe27d38c8d4808d1dcb981cf63db08e23722ae7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test/livedata_connection_tests.js",
+      "length": 75821,
+      "offset": 0,
+      "path": "test/livedata_connection_tests.js",
+      "hash": "3e72bbdbcae7c7b55ce949af51e0239468ae5ab0",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test/livedata_test_service.js",
+      "length": 10299,
+      "offset": 0,
+      "path": "test/livedata_test_service.js",
+      "hash": "806cd43410b1cb0d9c3fa1e3ae8de0ed037bbc9d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test/livedata_tests.js",
+      "length": 31354,
+      "offset": 0,
+      "path": "test/livedata_tests.js",
+      "hash": "e4be21889d3fad620f29afaa327bc48757128160",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test/random_stream_tests.js",
+      "length": 1355,
+      "offset": 0,
+      "path": "test/random_stream_tests.js",
+      "hash": "048c58b4f0c33041d592f09ff5fd6a814c69bd09",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test/stub_stream.js",
+      "length": 1075,
+      "offset": 0,
+      "path": "test/stub_stream.js",
+      "hash": "62c2edf48333c3fb51a9e980724488da9a3bd41b",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

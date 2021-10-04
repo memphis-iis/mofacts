@@ -1,0 +1,35 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDP",
+      "testOnly": false
+    },
+    {
+      "name": "DDPServer",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ddp-client"
+    },
+    {
+      "package": "ddp-server"
+    }
+  ],
+  "implies": [
+    {
+      "package": "ddp-client",
+      "constraint": ""
+    },
+    {
+      "package": "ddp-server",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

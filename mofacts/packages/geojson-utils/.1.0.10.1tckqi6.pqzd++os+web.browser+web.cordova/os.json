@@ -1,0 +1,45 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "GeoJSON",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/main.js",
+      "length": 49,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "main.js",
+      "hash": "89eb428adbc68b47920f86cedd1af0a3c6a80d46",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/geojson-utils.js",
+      "length": 12319,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "geojson-utils.js",
+      "hash": "065d2fb3a40534adc8c7606868ba5101e2fc4284",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

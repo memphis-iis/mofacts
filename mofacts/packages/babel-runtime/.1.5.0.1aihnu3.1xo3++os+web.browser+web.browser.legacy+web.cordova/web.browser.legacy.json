@@ -1,0 +1,28 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/babel-runtime.js",
+      "length": 838,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "babel-runtime.js",
+      "hash": "cb23d057c22b7b4826675696daa2b5f409ef5f9f",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    }
+  ]
+}

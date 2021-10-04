@@ -1,0 +1,57 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "BlazeTools",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/preamble.js",
+      "length": 17,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "preamble.js",
+      "hash": "e33582c17fa8fe9885775b02ef7bde6eb67faa76",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/tokens.js",
+      "length": 15669,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "tokens.js",
+      "hash": "4d9225ef5915d9b080ff2c82ab5658588caffb1d",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/tojs.js",
+      "length": 4869,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "tojs.js",
+      "hash": "dbaecc1b6d2d63704c9d037d6b4efd1a344cefef",
+      "fileOptions": {}
+    }
+  ]
+}

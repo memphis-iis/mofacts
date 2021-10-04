@@ -1,0 +1,41 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.7.7"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/browser-policy-test.js",
+      "length": 8374,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy-test.js",
+      "hash": "6df7ad0a9e594230d37a4ac0dcb702af50690f8a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/browser-policy.js",
+      "length": 79,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "browser-policy.js",
+      "hash": "4c3068ab537bca6e74364607a0da26195deccec8",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

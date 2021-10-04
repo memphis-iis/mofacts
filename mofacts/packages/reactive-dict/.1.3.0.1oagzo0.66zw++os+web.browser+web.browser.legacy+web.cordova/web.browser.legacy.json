@@ -1,0 +1,70 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "ReactiveDict",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "mongo",
+      "weak": true
+    },
+    {
+      "package": "reload",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/migration.js",
+      "length": 1512,
+      "offset": 0,
+      "path": "migration.js",
+      "hash": "f0907877e26ad1409491c9c835ac65e0b18fd69c",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/reactive-dict-tests.js",
+      "length": 4818,
+      "offset": 0,
+      "path": "reactive-dict-tests.js",
+      "hash": "e1d16f358aa31f4d1411e0cc148cb6a1b4cec6f3",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/reactive-dict.js",
+      "length": 10991,
+      "offset": 0,
+      "path": "reactive-dict.js",
+      "hash": "5eadaa85d26e8183412b56783260fbd43a7952ac",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

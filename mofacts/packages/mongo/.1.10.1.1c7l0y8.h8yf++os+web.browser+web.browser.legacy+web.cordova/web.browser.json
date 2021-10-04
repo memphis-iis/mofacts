@@ -1,0 +1,262 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Mongo",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "allow-deny"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "minimongo"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "diff-sequence"
+    },
+    {
+      "package": "mongo-id"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "mongo-dev-server"
+    },
+    {
+      "package": "mongo-decimal",
+      "weak": true
+    },
+    {
+      "package": "insecure",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/local_collection_driver.js",
+      "length": 798,
+      "offset": 0,
+      "path": "local_collection_driver.js",
+      "hash": "d4e6e73b41b20e726f8a7806dae7dfe3dc172eb7",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/collection.js",
+      "length": 30692,
+      "offset": 0,
+      "path": "collection.js",
+      "hash": "b44e6cfef7c55d5f9ae9efc3f7bcb9de238f593c",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/allow_tests.js",
+      "length": 32987,
+      "offset": 0,
+      "path": "allow_tests.js",
+      "hash": "aa8cce8072371d47a3a68e5d8576907d1dd00f2d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/collection_tests.js",
+      "length": 4646,
+      "offset": 0,
+      "path": "collection_tests.js",
+      "hash": "887747bb3a4d7fe6c4dc39bb997cd75db8ca640a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/connection_options.js",
+      "length": 389,
+      "offset": 0,
+      "path": "connection_options.js",
+      "hash": "e0a93f71a44b47be662a381fcf33755b470882d4",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/doc_fetcher.js",
+      "length": 1994,
+      "offset": 0,
+      "path": "doc_fetcher.js",
+      "hash": "c776332669e9e748b0e365a5401a5689a82e4994",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/doc_fetcher_tests.js",
+      "length": 1354,
+      "offset": 0,
+      "path": "doc_fetcher_tests.js",
+      "hash": "64821d9fcee817d2e7c5b2c4cecbcf2e965a9604",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/mongo_driver.js",
+      "length": 51232,
+      "offset": 0,
+      "path": "mongo_driver.js",
+      "hash": "b6018982342d25a69816f872deb5c1385fa5f51e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/mongo_livedata_tests.js",
+      "length": 118833,
+      "offset": 0,
+      "path": "mongo_livedata_tests.js",
+      "hash": "3caf3bd86de6248db7ed49cf9d21769f0a999d32",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/observe_changes_tests.js",
+      "length": 14502,
+      "offset": 0,
+      "path": "observe_changes_tests.js",
+      "hash": "5ec361e579cf5b196746f9e6cf6e48f299e3675c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/observe_multiplex.js",
+      "length": 9233,
+      "offset": 0,
+      "path": "observe_multiplex.js",
+      "hash": "4cfbcf416643bb3faf5cc647f4ac29edefdec6bd",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/oplog_observe_driver.js",
+      "length": 39384,
+      "offset": 0,
+      "path": "oplog_observe_driver.js",
+      "hash": "b2b1d56166e85fc985e60d0dddae0e95c995e133",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/oplog_tailing.js",
+      "length": 13254,
+      "offset": 0,
+      "path": "oplog_tailing.js",
+      "hash": "f1c79cb254f7bc792170194576ed8ff12decf33f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/oplog_tests.js",
+      "length": 5435,
+      "offset": 0,
+      "path": "oplog_tests.js",
+      "hash": "7330608a44161412e455896a7b7a15063230e4d0",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/polling_observe_driver.js",
+      "length": 8860,
+      "offset": 0,
+      "path": "polling_observe_driver.js",
+      "hash": "847d7d6d4a7cd15c6d51713559e5caa3b2f2488a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/remote_collection_driver.js",
+      "length": 1192,
+      "offset": 0,
+      "path": "remote_collection_driver.js",
+      "hash": "9eb81526be2d2db08d253d2478dfb09455013d64",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/upsert_compatibility_test.js",
+      "length": 5198,
+      "offset": 0,
+      "path": "upsert_compatibility_test.js",
+      "hash": "0eaa9b5e82cbdb27f326a5ad441e7da6eeb0deb1",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

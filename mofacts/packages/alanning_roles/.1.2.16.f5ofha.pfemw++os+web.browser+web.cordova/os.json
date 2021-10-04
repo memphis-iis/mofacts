@@ -1,0 +1,58 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Roles",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.4"
+    },
+    {
+      "package": "accounts-base",
+      "constraint": "1.2.1"
+    },
+    {
+      "package": "tracker",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.1.2"
+    },
+    {
+      "package": "check",
+      "constraint": "1.0.6"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/roles_server.js",
+      "length": 708,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "roles_server.js",
+      "hash": "3faf15704d4bdeda90f3d741581d443630ebe5e1",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/roles_common.js",
+      "length": 22892,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "roles_common.js",
+      "hash": "087fc37323788095c295ee7ce493a3ba31fc76ee",
+      "fileOptions": {}
+    }
+  ]
+}

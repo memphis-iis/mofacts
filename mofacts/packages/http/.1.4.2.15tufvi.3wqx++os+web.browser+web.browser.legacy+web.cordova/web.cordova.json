@@ -1,0 +1,91 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "HTTP",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "url",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "modules",
+      "constraint": "0.12.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/httpcall_client.js",
+      "length": 7561,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_client.js",
+      "hash": "0364f310eefb0db324fb225c579967db264ae2b4",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/httpcall_common.js",
+      "length": 4031,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_common.js",
+      "hash": "bb3276a675ca6eddb316bd17ca6aee6f7c74d90b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/httpcall_server.js",
+      "length": 3521,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_server.js",
+      "hash": "d761ed0f93afa2cf32084684bb7eee0e66fd2748",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/httpcall_tests.js",
+      "length": 18385,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "httpcall_tests.js",
+      "hash": "b59d74f9619bb6f01dfb688ee5c968eea7dd682b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/test_responder.js",
+      "length": 2394,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "test_responder.js",
+      "hash": "890eaa47ac8bd8d9891219e23e3fd5a526e6e113",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

@@ -1,0 +1,125 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "meteorInstall",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "modules-runtime"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client.js",
+      "length": 154,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client.js",
+      "hash": "1d77022dbb1b4b1627b8381e1c5ae444ddd8ab3d",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/css.js",
+      "length": 557,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "css.js",
+      "hash": "8f75bdb812965b89c93ac283ee0a21726cb5b1f7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/install-packages.js",
+      "length": 1006,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "install-packages.js",
+      "hash": "1cba8f3703d0ceab95eec1da36d87d2a0d36d33e",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/legacy.js",
+      "length": 260,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "legacy.js",
+      "hash": "50b486bf5a93845206c61b19c78e3a6a6914aff5",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/process.js",
+      "length": 838,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "process.js",
+      "hash": "987a9859cda893eb3125615b22885e393a5092b9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/reify.js",
+      "length": 71,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "reify.js",
+      "hash": "ff120c490d7ca7e493c25406b55232ba8784384a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/server.js",
+      "length": 82,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "11d99298182f74afb5bb188ea219b95ef9b366a1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/stubs.js",
+      "length": 367,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "stubs.js",
+      "hash": "946940234562d79a75ebb8f10757605e7996f386",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

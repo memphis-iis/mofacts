@@ -1,0 +1,64 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Facts",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.10.0"
+    },
+    {
+      "package": "facts-base",
+      "constraint": "1.0.0"
+    },
+    {
+      "package": "mongo",
+      "constraint": "1.4.2"
+    },
+    {
+      "package": "templating",
+      "constraint": "1.2.13"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.10"
+    }
+  ],
+  "implies": [
+    {
+      "package": "facts-base",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "html",
+      "file": "web.browser/facts_ui.html",
+      "length": 270,
+      "offset": 0,
+      "path": "facts_ui.html",
+      "hash": "0b90378b5309d3a8bce6262a37abcce277abc9a4",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/facts_ui_client.js",
+      "length": 857,
+      "offset": 0,
+      "path": "facts_ui_client.js",
+      "hash": "e97f469841cefc43f1a5408b8d7a16bb27783f3b",
+      "fileOptions": {
+        "mainModule": true
+      }
+    }
+  ]
+}

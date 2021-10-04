@@ -1,0 +1,19 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    }
+  ],
+  "implies": [
+    {
+      "package": "mobile-status-bar",
+      "constraint": ""
+    },
+    {
+      "package": "launch-screen",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "accounts-base"
+    },
+    {
+      "package": "accounts-oauth"
+    },
+    {
+      "package": "meteor-developer-oauth"
+    },
+    {
+      "package": "accounts-ui",
+      "weak": true
+    },
+    {
+      "package": "meteor-developer-config-ui",
+      "weak": true
+    }
+  ],
+  "implies": [
+    {
+      "package": "accounts-base",
+      "constraint": ""
+    },
+    {
+      "package": "meteor-developer-oauth",
+      "constraint": ""
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/notice.js",
+      "length": 446,
+      "offset": 0,
+      "path": "notice.js",
+      "hash": "61a42195bf62c184fdaa921490f53a6d6848b725",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/meteor-developer.js",
+      "length": 1115,
+      "offset": 0,
+      "path": "meteor-developer.js",
+      "hash": "7b1833079d500041b787de68a5a9ef0e5f091153",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

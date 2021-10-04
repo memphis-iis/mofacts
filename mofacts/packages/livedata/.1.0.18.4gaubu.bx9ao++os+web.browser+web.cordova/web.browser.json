@@ -1,0 +1,28 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "DDP",
+      "testOnly": false
+    },
+    {
+      "name": "LivedataTest",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ddp"
+    }
+  ],
+  "implies": [
+    {
+      "package": "ddp",
+      "constraint": ""
+    }
+  ],
+  "resources": []
+}

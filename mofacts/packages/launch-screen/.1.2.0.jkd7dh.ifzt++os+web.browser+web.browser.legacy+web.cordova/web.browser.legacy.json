@@ -1,0 +1,50 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "LaunchScreen",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "blaze",
+      "weak": true
+    },
+    {
+      "package": "templating",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/mobile-launch-screen.js",
+      "length": 920,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "mobile-launch-screen.js",
+      "hash": "e94beeff43f4088fd654738701e35b9ad1e9a094",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/default-behavior.js",
+      "length": 1219,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "default-behavior.js",
+      "hash": "64830c49b16f4a46c1a42ee22df1b6ca1eea6bca",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

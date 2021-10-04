@@ -1,0 +1,119 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "ConstraintSolver",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "package-version-parser"
+    },
+    {
+      "package": "logic-solver"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/datatypes.js",
+      "length": 2065,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "datatypes.js",
+      "hash": "e6f0b355237d843d0da114d462c654b4f86f171a",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/catalog-cache.js",
+      "length": 4381,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "catalog-cache.js",
+      "hash": "ed2faee81c6d51a9769a2c4d869c139b76a65b9c",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/catalog-loader.js",
+      "length": 4218,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "catalog-loader.js",
+      "hash": "30eb7edbeaa6e3fe0d08bc9afac390f54bb365ee",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/constraint-solver-input.js",
+      "length": 8167,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "constraint-solver-input.js",
+      "hash": "f461391d89beb1e328fc76a3e18863116fb5cc67",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/version-pricer.js",
+      "length": 10293,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "version-pricer.js",
+      "hash": "82b0af4018fa97c019e00b6ad83cf38d286dbb6f",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/solver.js",
+      "length": 43202,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "solver.js",
+      "hash": "022255f135bdd1b49d9932007b41cb43d61cfba7",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/constraint-solver.js",
+      "length": 9278,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "constraint-solver.js",
+      "hash": "d29ca54a6fc9f7362d952c724ab931d870e50288",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}
