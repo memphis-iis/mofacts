@@ -1,0 +1,300 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "MongoInternals",
+      "testOnly": false
+    },
+    {
+      "name": "Mongo",
+      "testOnly": false
+    },
+    {
+      "name": "ObserveMultiplexer",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "npm-mongo"
+    },
+    {
+      "package": "allow-deny"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "minimongo"
+    },
+    {
+      "package": "ddp"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "diff-sequence"
+    },
+    {
+      "package": "mongo-id"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "mongo-dev-server"
+    },
+    {
+      "package": "logging"
+    },
+    {
+      "package": "mongo-decimal"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "binary-heap"
+    },
+    {
+      "package": "insecure",
+      "weak": true
+    },
+    {
+      "package": "autopublish",
+      "weak": true
+    },
+    {
+      "package": "disable-oplog",
+      "weak": true
+    },
+    {
+      "package": "webapp",
+      "weak": true
+    },
+    {
+      "package": "facts-base",
+      "weak": true
+    },
+    {
+      "package": "callback-hook"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/mongo_driver.js",
+      "length": 51241,
+      "offset": 0,
+      "path": "mongo_driver.js",
+      "hash": "65af7cb0970be1286581a3aadc1ccd430a48baee",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/oplog_tailing.js",
+      "length": 13249,
+      "offset": 0,
+      "path": "oplog_tailing.js",
+      "hash": "1f6763164e166101635cfac62431f2689b6ed087",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/observe_multiplex.js",
+      "length": 9233,
+      "offset": 0,
+      "path": "observe_multiplex.js",
+      "hash": "4cfbcf416643bb3faf5cc647f4ac29edefdec6bd",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/doc_fetcher.js",
+      "length": 1994,
+      "offset": 0,
+      "path": "doc_fetcher.js",
+      "hash": "c776332669e9e748b0e365a5401a5689a82e4994",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/polling_observe_driver.js",
+      "length": 8860,
+      "offset": 0,
+      "path": "polling_observe_driver.js",
+      "hash": "847d7d6d4a7cd15c6d51713559e5caa3b2f2488a",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/oplog_observe_driver.js",
+      "length": 39384,
+      "offset": 0,
+      "path": "oplog_observe_driver.js",
+      "hash": "b2b1d56166e85fc985e60d0dddae0e95c995e133",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/local_collection_driver.js",
+      "length": 798,
+      "offset": 0,
+      "path": "local_collection_driver.js",
+      "hash": "d4e6e73b41b20e726f8a7806dae7dfe3dc172eb7",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/remote_collection_driver.js",
+      "length": 1204,
+      "offset": 0,
+      "path": "remote_collection_driver.js",
+      "hash": "63e78bae2da9926ebbb870160168bd1d49546372",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/collection.js",
+      "length": 34238,
+      "offset": 0,
+      "path": "collection.js",
+      "hash": "0240cf331f55a57d7be6b942aa81bfdd5d111df5",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/connection_options.js",
+      "length": 389,
+      "offset": 0,
+      "path": "connection_options.js",
+      "hash": "e0a93f71a44b47be662a381fcf33755b470882d4",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/allow_tests.js",
+      "length": 32987,
+      "offset": 0,
+      "path": "allow_tests.js",
+      "hash": "aa8cce8072371d47a3a68e5d8576907d1dd00f2d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/collection_tests.js",
+      "length": 6044,
+      "offset": 0,
+      "path": "collection_tests.js",
+      "hash": "33626688528fd64961ad0fde3d0d5f693ee90c8b",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/doc_fetcher_tests.js",
+      "length": 1354,
+      "offset": 0,
+      "path": "doc_fetcher_tests.js",
+      "hash": "64821d9fcee817d2e7c5b2c4cecbcf2e965a9604",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/mongo_livedata_tests.js",
+      "length": 118833,
+      "offset": 0,
+      "path": "mongo_livedata_tests.js",
+      "hash": "3caf3bd86de6248db7ed49cf9d21769f0a999d32",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/observe_changes_tests.js",
+      "length": 14502,
+      "offset": 0,
+      "path": "observe_changes_tests.js",
+      "hash": "5ec361e579cf5b196746f9e6cf6e48f299e3675c",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/oplog_tests.js",
+      "length": 5434,
+      "offset": 0,
+      "path": "oplog_tests.js",
+      "hash": "37c23360591ddb96f6a87d359c68bb68714d4be9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/upsert_compatibility_test.js",
+      "length": 5198,
+      "offset": 0,
+      "path": "upsert_compatibility_test.js",
+      "hash": "0eaa9b5e82cbdb27f326a5ad441e7da6eeb0deb1",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

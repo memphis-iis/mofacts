@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "ReactiveVar",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tracker"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/reactive-var.js",
+      "length": 3609,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "reactive-var.js",
+      "hash": "74bd1a6ba6770dd28ec9028bc0f3e8166f619816",
+      "fileOptions": {}
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "jquery",
+      "constraint": "1.0.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "css",
+      "file": "web.cordova/packages/mizzao:bootstrap-3/bootstrap-3/css/bootstrap.css",
+      "length": 137067,
+      "offset": 0,
+      "servePath": "/packages/mizzao:bootstrap-3/bootstrap-3/css/bootstrap.css"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.eot",
+      "length": 20335,
+      "offset": 0,
+      "servePath": "/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.eot",
+      "path": "bootstrap-3/fonts/glyphicons-halflings-regular.eot"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.ttf",
+      "length": 41280,
+      "offset": 0,
+      "servePath": "/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.ttf",
+      "path": "bootstrap-3/fonts/glyphicons-halflings-regular.ttf"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.svg",
+      "length": 62926,
+      "offset": 0,
+      "servePath": "/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.svg",
+      "path": "bootstrap-3/fonts/glyphicons-halflings-regular.svg"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.woff",
+      "length": 23320,
+      "offset": 0,
+      "servePath": "/packages/mizzao:bootstrap-3/bootstrap-3/fonts/glyphicons-halflings-regular.woff",
+      "path": "bootstrap-3/fonts/glyphicons-halflings-regular.woff"
+    },
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/mizzao_bootstrap-3/packages/mizzao_bootstrap-3.js",
+      "length": 294545,
+      "offset": 0,
+      "servePath": "/packages/mizzao_bootstrap-3/packages/mizzao_bootstrap-3.js"
+    }
+  ]
+}

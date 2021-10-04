@@ -1,0 +1,19 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "meteorJsMinify",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "babel-compiler"
+    }
+  ],
+  "resources": [],
+  "node_modules": "npm/node_modules"
+}

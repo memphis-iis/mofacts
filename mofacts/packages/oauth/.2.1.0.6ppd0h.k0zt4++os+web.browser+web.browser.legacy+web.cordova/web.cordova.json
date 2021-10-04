@@ -1,0 +1,159 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "OAuth",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "localstorage"
+    },
+    {
+      "package": "url"
+    },
+    {
+      "package": "reload"
+    },
+    {
+      "package": "base64"
+    }
+  ],
+  "resources": [
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/oauth/end_of_popup_response.js",
+      "length": 1236,
+      "offset": 0,
+      "servePath": "/packages/oauth/end_of_popup_response.js",
+      "path": "end_of_popup_response.js"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/oauth/end_of_redirect_response.js",
+      "length": 455,
+      "offset": 0,
+      "servePath": "/packages/oauth/end_of_redirect_response.js",
+      "path": "end_of_redirect_response.js"
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_client.js",
+      "length": 5334,
+      "offset": 0,
+      "path": "oauth_client.js",
+      "hash": "4d62a330c8a113f306b33d6b5bb10b4edb22c172",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_cordova.js",
+      "length": 2401,
+      "offset": 0,
+      "path": "oauth_cordova.js",
+      "hash": "4af1fc3833269600a86fd576dfad2be54bdcc06b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_common.js",
+      "length": 1698,
+      "offset": 0,
+      "path": "oauth_common.js",
+      "hash": "c57b01b25ebe060f1056742eb15e39bab322227b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/end_of_popup_response.js",
+      "length": 1236,
+      "offset": 0,
+      "path": "end_of_popup_response.js",
+      "hash": "dee4b010736fc3eddae9114b35f394cc2c6abe05",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/end_of_redirect_response.js",
+      "length": 455,
+      "offset": 0,
+      "path": "end_of_redirect_response.js",
+      "hash": "089ad49c79ff5a030af18e9c53886063f5554d51",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_browser.js",
+      "length": 2579,
+      "offset": 0,
+      "path": "oauth_browser.js",
+      "hash": "cdde6bb7e15c079a07583cb15fb68580668732ff",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_server.js",
+      "length": 16245,
+      "offset": 0,
+      "path": "oauth_server.js",
+      "hash": "84f1039f874f057f2042db2a10b847c677bb1d74",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_tests.js",
+      "length": 4724,
+      "offset": 0,
+      "path": "oauth_tests.js",
+      "hash": "616a768764caf1f1dd46a90d4aff9eae6236c827",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/pending_credentials.js",
+      "length": 3659,
+      "offset": 0,
+      "path": "pending_credentials.js",
+      "hash": "60d1c5f419d988d7f06aad9991357775d9899d24",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

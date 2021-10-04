@@ -1,0 +1,72 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "runTests",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "tinytest"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "session"
+    },
+    {
+      "package": "reload"
+    },
+    {
+      "package": "random"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server.js",
+      "length": 392,
+      "offset": 0,
+      "path": "server.js",
+      "hash": "997f5b558cbdfb767db3c00e8916c6335fbd0c07",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/diff_match_patch_uncompressed.js",
+      "length": 76493,
+      "offset": 0,
+      "path": "diff_match_patch_uncompressed.js",
+      "hash": "146686739070ef66dde1cc021de6b78d0d34e6d3",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/driver.js",
+      "length": 14818,
+      "offset": 0,
+      "path": "driver.js",
+      "hash": "8c23094c255e4da3a973f2d6994f5c43afc65dab",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

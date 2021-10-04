@@ -1,0 +1,59 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "runTests",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tinytest",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.10"
+    },
+    {
+      "package": "random",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.0"
+    },
+    {
+      "package": "http",
+      "constraint": "1.4.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "asset",
+      "file": "os/packages/test-in-console/runner.js",
+      "length": 1381,
+      "offset": 0,
+      "servePath": "/packages/test-in-console/runner.js",
+      "path": "runner.js"
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/reporter.js",
+      "length": 965,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "reporter.js",
+      "hash": "0ad8ba2d9b4e7e52521f6632631adab37fe55e0e",
+      "fileOptions": {}
+    }
+  ]
+}

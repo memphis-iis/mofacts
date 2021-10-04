@@ -1,0 +1,181 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "OAuth",
+      "testOnly": false
+    },
+    {
+      "name": "Oauth",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "check",
+      "constraint": "1.3.1"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.14.3"
+    },
+    {
+      "package": "reload",
+      "constraint": "1.3.0"
+    },
+    {
+      "package": "base64",
+      "constraint": "1.0.12"
+    },
+    {
+      "package": "localstorage",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "url",
+      "constraint": "1.3.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/oauth/end_of_popup_response.js",
+      "length": 1236,
+      "offset": 0,
+      "servePath": "/packages/oauth/end_of_popup_response.js",
+      "path": "end_of_popup_response.js"
+    },
+    {
+      "type": "asset",
+      "file": "web.cordova/packages/oauth/end_of_redirect_response.js",
+      "length": 455,
+      "offset": 0,
+      "servePath": "/packages/oauth/end_of_redirect_response.js",
+      "path": "end_of_redirect_response.js"
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_client.js",
+      "length": 5603,
+      "offset": 0,
+      "path": "oauth_client.js",
+      "hash": "1fcadd37a821fff9cc2197ecea54606ba614d772",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_cordova.js",
+      "length": 2401,
+      "offset": 0,
+      "path": "oauth_cordova.js",
+      "hash": "4af1fc3833269600a86fd576dfad2be54bdcc06b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_common.js",
+      "length": 2149,
+      "offset": 0,
+      "path": "oauth_common.js",
+      "hash": "293e710d83498ec66e71a508c0928acb2deff171",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/deprecated.js",
+      "length": 41,
+      "offset": 0,
+      "path": "deprecated.js",
+      "hash": "150de4a41a91e4308bba0720c0034de3049474a0",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/end_of_popup_response.js",
+      "length": 1236,
+      "offset": 0,
+      "path": "end_of_popup_response.js",
+      "hash": "dee4b010736fc3eddae9114b35f394cc2c6abe05",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/end_of_redirect_response.js",
+      "length": 455,
+      "offset": 0,
+      "path": "end_of_redirect_response.js",
+      "hash": "089ad49c79ff5a030af18e9c53886063f5554d51",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_browser.js",
+      "length": 2579,
+      "offset": 0,
+      "path": "oauth_browser.js",
+      "hash": "cdde6bb7e15c079a07583cb15fb68580668732ff",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_server.js",
+      "length": 16245,
+      "offset": 0,
+      "path": "oauth_server.js",
+      "hash": "84f1039f874f057f2042db2a10b847c677bb1d74",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/oauth_tests.js",
+      "length": 4724,
+      "offset": 0,
+      "path": "oauth_tests.js",
+      "hash": "616a768764caf1f1dd46a90d4aff9eae6236c827",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/pending_credentials.js",
+      "length": 3662,
+      "offset": 0,
+      "path": "pending_credentials.js",
+      "hash": "c6674ccebda2d89811bfccbdb6122590c5cabfe1",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

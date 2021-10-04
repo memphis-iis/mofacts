@@ -1,0 +1,74 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "service-configuration"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "mongo"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/oauth1_binding.js",
+      "length": 5745,
+      "offset": 0,
+      "path": "oauth1_binding.js",
+      "hash": "798d93d2398d0cfc9f6706cedb9ac5696a0de330",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/oauth1_pending_request_tokens.js",
+      "length": 3015,
+      "offset": 0,
+      "path": "oauth1_pending_request_tokens.js",
+      "hash": "8c7d2d0f7ece2950b4ed37817223c9e88411c1d0",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/oauth1_server.js",
+      "length": 3968,
+      "offset": 0,
+      "path": "oauth1_server.js",
+      "hash": "52efb919a836c18998fe165e1293698757f2b8c9",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/oauth1_tests.js",
+      "length": 5826,
+      "offset": 0,
+      "path": "oauth1_tests.js",
+      "hash": "4ac307b8c6573b45e9f91f49e0cc898c375f7f5e",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

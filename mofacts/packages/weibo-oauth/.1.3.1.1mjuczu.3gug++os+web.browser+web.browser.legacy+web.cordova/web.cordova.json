@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Weibo",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "oauth1",
+      "constraint": "1.4.0"
+    },
+    {
+      "package": "oauth",
+      "constraint": "2.0.0"
+    },
+    {
+      "package": "random",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "service-configuration",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/weibo_client.js",
+      "length": 1435,
+      "offset": 0,
+      "path": "weibo_client.js",
+      "hash": "3f221afb2d456d91623f7ca5bd9a1eed76e8f496",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/weibo_server.js",
+      "length": 2677,
+      "offset": 0,
+      "path": "weibo_server.js",
+      "hash": "3ddd777c60e5d8c8dd21db18aee15d4566839fce",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

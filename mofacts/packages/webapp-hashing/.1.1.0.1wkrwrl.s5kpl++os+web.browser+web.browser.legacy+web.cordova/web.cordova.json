@@ -1,0 +1,31 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "WebAppHashing",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/webapp-hashing.js",
+      "length": 1717,
+      "offset": 0,
+      "path": "webapp-hashing.js",
+      "hash": "35db696d47ae167afc190ba7fad9fe3c381de220",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

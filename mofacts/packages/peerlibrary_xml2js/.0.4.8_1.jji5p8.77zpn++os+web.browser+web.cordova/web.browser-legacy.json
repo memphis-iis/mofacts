@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "peerlibrary:blocking",
+      "constraint": "0.5.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/peerlibrary_xml2js/packages/peerlibrary_xml2js.js",
+      "length": 0,
+      "offset": 0,
+      "servePath": "/packages/peerlibrary_xml2js/packages/peerlibrary_xml2js.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "xml2js",
+      "export": true
+    }
+  ]
+}

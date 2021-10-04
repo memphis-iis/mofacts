@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor",
+      "unordered": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/underscore.js",
+      "length": 47397,
+      "offset": 0,
+      "servePath": "/packages/underscore.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "_",
+      "export": true
+    },
+    {
+      "name": "exports"
+    }
+  ]
+}

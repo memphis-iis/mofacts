@@ -1,0 +1,208 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Meteor",
+      "testOnly": false
+    },
+    {
+      "name": "global",
+      "testOnly": false
+    },
+    {
+      "name": "meteorEnv",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "isobuild:compiler-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/global.js",
+      "length": 71,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "global.js",
+      "hash": "3dd95fbd9353c99881ca34e04acd370f6cfc5586",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/client_environment.js",
+      "length": 2548,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "client_environment.js",
+      "hash": "71c4a439c5de0cd1003ee161dbe260f3d7565899",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/define-package.js",
+      "length": 1771,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "define-package.js",
+      "hash": "1c1507146102088a5a9a0d8487f8e22101db1fe0",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/helpers.js",
+      "length": 5409,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "helpers.js",
+      "hash": "b230376605b27b8e8cb51704679ae74ccdfdca3f",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/setimmediate.js",
+      "length": 4223,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "setimmediate.js",
+      "hash": "8e17c7d4ae3622c215d875e970ad5d8eb67217d2",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/timers.js",
+      "length": 2703,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "timers.js",
+      "hash": "4bec78fea553dd47fe3055ed3e0833df0b81f21b",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/errors.js",
+      "length": 4364,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "errors.js",
+      "hash": "a57cf3c90aec7021c44f8960d73a8dbb25c4b4d7",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/fiber_stubs_client.js",
+      "length": 2185,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "fiber_stubs_client.js",
+      "hash": "896cbd9b42d3d2a4960f08bb7970a5d4913929ea",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/startup_client.js",
+      "length": 2343,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "startup_client.js",
+      "hash": "d4e0de5cdbd349113bb94822659ddc4794207be2",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/debug.js",
+      "length": 2350,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "debug.js",
+      "hash": "d6fd88555bad97946b57195b244d47b25aba2061",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/string_utils.js",
+      "length": 276,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "string_utils.js",
+      "hash": "a7490b2a8276e63e4b0b0c4b91910a2a630e93bc",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/test_environment.js",
+      "length": 1312,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "test_environment.js",
+      "hash": "042e601d0b34f0e52ffd5c46144c4f580519ff8e",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/dynamics_browser.js",
+      "length": 1594,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "dynamics_browser.js",
+      "hash": "921f6257c1077e2d0d4e67d6ed7ac1deb66fde88",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/url_common.js",
+      "length": 3044,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "url_common.js",
+      "hash": "407fd4d710c5187dcf64633844f9995acb849def",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

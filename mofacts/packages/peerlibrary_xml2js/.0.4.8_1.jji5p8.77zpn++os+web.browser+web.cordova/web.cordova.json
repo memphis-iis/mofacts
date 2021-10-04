@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "xml2js",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "peerlibrary:blocking",
+      "constraint": "0.5.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/packages/peerlibrary_xml2js.js",
+      "length": 0,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "/packages/peerlibrary_xml2js.js",
+      "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    }
+  ]
+}

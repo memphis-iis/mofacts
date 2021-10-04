@@ -1,0 +1,128 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Random",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/main_client.js",
+      "length": 1081,
+      "offset": 0,
+      "path": "main_client.js",
+      "hash": "423d443e5a11aa718711542cbf233dda8277c6d1",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/AbstractRandomGenerator.js",
+      "length": 3313,
+      "offset": 0,
+      "path": "AbstractRandomGenerator.js",
+      "hash": "82ff2c6522e9444ffe4f826ab400e8de393e33e6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/AleaRandomGenerator.js",
+      "length": 2107,
+      "offset": 0,
+      "path": "AleaRandomGenerator.js",
+      "hash": "b7c1938b74013869ae206c40e83adb4d79776e45",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/BrowserRandomGenerator.js",
+      "length": 475,
+      "offset": 0,
+      "path": "BrowserRandomGenerator.js",
+      "hash": "4d58c8990f2c1b557950507d650b279e175c2ac0",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/NodeRandomGenerator.js",
+      "length": 1209,
+      "offset": 0,
+      "path": "NodeRandomGenerator.js",
+      "hash": "e887b68f2ee6191d89cba0a5c88721d98020d54a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/createAleaGenerator.js",
+      "length": 1046,
+      "offset": 0,
+      "path": "createAleaGenerator.js",
+      "hash": "363b8f0e831984f31dd261b8557e3aa67cef0daa",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/createRandom.js",
+      "length": 628,
+      "offset": 0,
+      "path": "createRandom.js",
+      "hash": "31ca3490ea68350d11700e95f9bd573277d8eef7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/main_server.js",
+      "length": 341,
+      "offset": 0,
+      "path": "main_server.js",
+      "hash": "98257a99df087cbe5d92ce04ccf45f6614f5e364",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/random_tests.js",
+      "length": 1905,
+      "offset": 0,
+      "path": "random_tests.js",
+      "hash": "92c8f1d72d6676e9e937afaf524dcf628a6fe5d3",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

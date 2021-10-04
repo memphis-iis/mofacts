@@ -1,0 +1,28 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "webapp"
+    }
+  ],
+  "resources": [
+    {
+      "type": "asset",
+      "file": "os/packages/reload-safetybelt/safetybelt.js",
+      "length": 169,
+      "offset": 0,
+      "servePath": "/packages/reload-safetybelt/safetybelt.js",
+      "path": "safetybelt.js"
+    },
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/reload-safetybelt.js",
+      "length": 1051,
+      "offset": 0,
+      "servePath": "/packages/reload-safetybelt.js"
+    }
+  ]
+}

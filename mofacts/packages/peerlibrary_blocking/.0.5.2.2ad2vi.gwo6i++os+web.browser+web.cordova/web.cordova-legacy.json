@@ -1,0 +1,27 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/peerlibrary_blocking/packages/peerlibrary_blocking.js",
+      "length": 0,
+      "offset": 0,
+      "servePath": "/packages/peerlibrary_blocking/packages/peerlibrary_blocking.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "blocking",
+      "export": true
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "RateLimiter",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "random",
+      "constraint": "1.1.0"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.10.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/rate-limit.js",
+      "length": 9863,
+      "offset": 0,
+      "path": "rate-limit.js",
+      "hash": "5b5739f3383b74a9166b3f7bd4fc4644fe7257e0",
+      "fileOptions": {
+        "mainModule": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/rate-limit-tests.js",
+      "length": 11030,
+      "offset": 0,
+      "path": "rate-limit-tests.js",
+      "hash": "c704b876953bd21693779331450c048bb085bbaf",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

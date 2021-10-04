@@ -1,0 +1,13 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:compiler-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": []
+}

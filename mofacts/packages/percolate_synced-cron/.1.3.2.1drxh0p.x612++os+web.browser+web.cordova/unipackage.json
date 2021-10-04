@@ -1,0 +1,25 @@
+{
+  "name": "percolate:synced-cron",
+  "summary": "Allows you to define and run scheduled jobs across multiple servers.",
+  "version": "1.3.2",
+  "isTest": false,
+  "plugins": [],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

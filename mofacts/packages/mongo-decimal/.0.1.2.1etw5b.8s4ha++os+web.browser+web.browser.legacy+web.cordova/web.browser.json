@@ -1,0 +1,50 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Decimal",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.14.3"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/decimal.js",
+      "length": 386,
+      "offset": 0,
+      "path": "decimal.js",
+      "hash": "2d78d379822d39d1845717fd09403a399b9888b6",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/decimal_tests.js",
+      "length": 260,
+      "offset": 0,
+      "path": "decimal_tests.js",
+      "hash": "dc1feb141172e553d2aa0a29aa03dc6cdb2a776a",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

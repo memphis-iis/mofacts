@@ -1,0 +1,31 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tinytest"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "ejson"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/server.js",
+      "length": 2224,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "server.js",
+      "hash": "fe85c64107a5451305295bdd3bc1b8eebd068863",
+      "fileOptions": {}
+    }
+  ]
+}

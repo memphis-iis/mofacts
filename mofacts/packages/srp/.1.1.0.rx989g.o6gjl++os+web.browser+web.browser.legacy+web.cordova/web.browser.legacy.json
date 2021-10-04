@@ -1,0 +1,65 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "SRP",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "sha"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/srp.js",
+      "length": 3156,
+      "offset": 0,
+      "path": "srp.js",
+      "hash": "286917302edffe28b13db85c0872a113c1f1d1ce",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/biginteger.js",
+      "length": 35846,
+      "offset": 0,
+      "path": "biginteger.js",
+      "hash": "0a48c15c8626100772e9b6f2397cf31c02a83be1",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser.legacy/srp_tests.js",
+      "length": 1031,
+      "offset": 0,
+      "path": "srp_tests.js",
+      "hash": "da0aad94598e5c03a6200ea62788259953061030",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

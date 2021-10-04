@@ -1,0 +1,25 @@
+{
+  "name": "natestrauser:select2",
+  "summary": "Select2 is a jQuery based replacement for select boxes.",
+  "version": "4.0.3",
+  "isTest": false,
+  "plugins": [],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

@@ -1,0 +1,18 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "minifier-css",
+      "constraint": "1.5.4"
+    },
+    {
+      "package": "isobuild:minifier-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "resources": []
+}
