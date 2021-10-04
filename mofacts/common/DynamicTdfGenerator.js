@@ -9,7 +9,7 @@ export class DynamicTdfGenerator {
     this.parentTutor_ = this.parentTdfJson_.tutor;
 
     /** @private @const {array} */
-    this.parentSetSpec_ = this.parentTutor_.setspec[0];
+    this.parentSetSpec_ = this.parentTutor_.setspec;
 
     /** @private @const {array} */
     this.parentUnits_ = this.parentTutor_.unit;
@@ -18,7 +18,7 @@ export class DynamicTdfGenerator {
     this.parentGeneratedTdfs_ = this.parentTutor_.generatedtdfs[0].generatedtdf;
 
     /** @private @const {string} */
-    this.parentStimFileName_ = this.parentSetSpec_.stimulusfile[0];
+    this.parentStimFileName_ = this.parentSetSpec_.stimulusfile;
 
     /** @private @const {string} */
     this.fileName_ = fileName;
