@@ -1,5 +1,5 @@
 .DS_Store
-.meteor
+mofacts/.meteor
 .vscode
 *.txt
 .project
