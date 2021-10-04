@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "Setting enviornment variable to ignore certificate verification."
+export NODE_TLS_REJECT_UNAUTHORIZED=0
+
 echo "Removing use of symlinks from shared folder"
 sudo umount .meteor/local -f
 rm .meteor/local -rf
