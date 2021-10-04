@@ -1,9 +1,0 @@
-{
-  "format": "unipackage-unibuild-pre1",
-  "uses": [
-    {
-      "package": "meteor"
-    }
-  ],
-  "resources": []
-}
