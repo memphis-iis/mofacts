@@ -1,0 +1,47 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "meteorJsMinify",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "babel-compiler"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/minifier-tests.js",
+      "length": 1050,
+      "offset": 0,
+      "path": "minifier-tests.js",
+      "hash": "2c529000e8834807f58b04e3b4206a6c4db01b59",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/minifier.js",
+      "length": 1148,
+      "offset": 0,
+      "path": "minifier.js",
+      "hash": "8905bcc3db4cd6b23254a266171546c4eb0f3386",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ],
+  "node_modules": "npm/node_modules"
+}

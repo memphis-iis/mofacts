@@ -1,0 +1,28 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "babel-compiler",
+      "constraint": "7.4.0"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/minifier-js.js",
+      "length": 1914,
+      "offset": 0,
+      "servePath": "/packages/minifier-js.js"
+    }
+  ],
+  "node_modules": "npm/node_modules",
+  "packageVariables": [
+    {
+      "name": "meteorJsMinify",
+      "export": true
+    }
+  ]
+}

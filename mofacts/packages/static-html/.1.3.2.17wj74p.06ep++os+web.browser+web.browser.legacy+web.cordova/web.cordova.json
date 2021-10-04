@@ -1,0 +1,20 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "isobuild:compiler-plugin",
+      "constraint": "1.0.0"
+    }
+  ],
+  "implies": [
+    {
+      "package": "meteor",
+      "constraint": "1.2.17"
+    }
+  ],
+  "resources": []
+}

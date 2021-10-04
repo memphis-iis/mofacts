@@ -1,0 +1,46 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.9"
+    },
+    {
+      "package": "htmljs",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "html-tools",
+      "constraint": "1.0.11"
+    },
+    {
+      "package": "blaze-tools",
+      "constraint": "1.0.10"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.browser-legacy/packages/spacebars-compiler.js",
+      "length": 47653,
+      "offset": 0,
+      "servePath": "/packages/spacebars-compiler.js"
+    }
+  ],
+  "node_modules": "npm/node_modules",
+  "packageVariables": [
+    {
+      "name": "SpacebarsCompiler",
+      "export": true
+    },
+    {
+      "name": "TemplateTag"
+    },
+    {
+      "name": "ReactComponentSiblingForbidder"
+    }
+  ]
+}

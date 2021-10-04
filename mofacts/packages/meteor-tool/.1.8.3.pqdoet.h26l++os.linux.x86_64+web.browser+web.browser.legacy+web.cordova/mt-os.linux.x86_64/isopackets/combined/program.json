@@ -1,0 +1,153 @@
+{
+  "format": "javascript-image-pre1",
+  "arch": "os",
+  "load": [
+    {
+      "node_modules": "npm/node_modules/meteor/meteor/node_modules",
+      "path": "packages/meteor.js"
+    },
+    {
+      "path": "packages/ecmascript-runtime.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/modules-runtime/node_modules",
+      "path": "packages/modules-runtime.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/modules/node_modules",
+      "path": "packages/modules.js"
+    },
+    {
+      "path": "packages/modern-browsers.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/promise/node_modules",
+      "path": "packages/promise.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/ecmascript-runtime-client/node_modules",
+      "path": "packages/ecmascript-runtime-client.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/ecmascript-runtime-server/node_modules",
+      "path": "packages/ecmascript-runtime-server.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/babel-compiler/node_modules",
+      "path": "packages/babel-compiler.js"
+    },
+    {
+      "sourceMap": "packages/ecmascript.js.map",
+      "path": "packages/ecmascript.js"
+    },
+    {
+      "path": "packages/babel-runtime.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/fetch/node_modules",
+      "path": "packages/fetch.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/inter-process-messaging/node_modules",
+      "path": "packages/inter-process-messaging.js"
+    },
+    {
+      "path": "packages/dynamic-import.js"
+    },
+    {
+      "sourceMap": "packages/base64.js.map",
+      "path": "packages/base64.js"
+    },
+    {
+      "sourceMap": "packages/ejson.js.map",
+      "path": "packages/ejson.js"
+    },
+    {
+      "sourceMap": "packages/check.js.map",
+      "path": "packages/check.js"
+    },
+    {
+      "sourceMap": "packages/random.js.map",
+      "path": "packages/random.js"
+    },
+    {
+      "sourceMap": "packages/tracker.js.map",
+      "path": "packages/tracker.js"
+    },
+    {
+      "sourceMap": "packages/retry.js.map",
+      "path": "packages/retry.js"
+    },
+    {
+      "sourceMap": "packages/id-map.js.map",
+      "path": "packages/id-map.js"
+    },
+    {
+      "sourceMap": "packages/callback-hook.js.map",
+      "path": "packages/callback-hook.js"
+    },
+    {
+      "sourceMap": "packages/ddp-common.js.map",
+      "path": "packages/ddp-common.js"
+    },
+    {
+      "path": "packages/reload.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/socket-stream-client/node_modules",
+      "sourceMap": "packages/socket-stream-client.js.map",
+      "path": "packages/socket-stream-client.js"
+    },
+    {
+      "sourceMap": "packages/diff-sequence.js.map",
+      "path": "packages/diff-sequence.js"
+    },
+    {
+      "sourceMap": "packages/mongo-id.js.map",
+      "path": "packages/mongo-id.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/ddp-client/node_modules",
+      "sourceMap": "packages/ddp-client.js.map",
+      "path": "packages/ddp-client.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/npm-mongo/node_modules",
+      "path": "packages/npm-mongo.js"
+    },
+    {
+      "path": "packages/underscore.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/package-version-parser/node_modules",
+      "path": "packages/package-version-parser.js"
+    },
+    {
+      "path": "packages/logic-solver.js"
+    },
+    {
+      "path": "packages/constraint-solver.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/boilerplate-generator/node_modules",
+      "sourceMap": "packages/boilerplate-generator.js.map",
+      "path": "packages/boilerplate-generator.js"
+    },
+    {
+      "sourceMap": "packages/webapp-hashing.js.map",
+      "path": "packages/webapp-hashing.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/xmlbuilder/node_modules",
+      "path": "packages/xmlbuilder.js"
+    },
+    {
+      "node_modules": "npm/node_modules/meteor/logging/node_modules",
+      "sourceMap": "packages/logging.js.map",
+      "path": "packages/logging.js"
+    },
+    {
+      "path": "packages/isopacket-combined_plugin.js"
+    }
+  ]
+}

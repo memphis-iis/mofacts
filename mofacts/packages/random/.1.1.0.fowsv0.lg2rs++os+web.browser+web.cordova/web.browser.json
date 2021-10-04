@@ -1,0 +1,41 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "Random",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/random.js",
+      "length": 9368,
+      "offset": 0,
+      "path": "random.js",
+      "hash": "a65d48cb951f9e70d3d5df4285871456b18a62fb",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/random_tests.js",
+      "length": 1805,
+      "offset": 0,
+      "path": "random_tests.js",
+      "hash": "7240b50b5f0828a08f6d873ff2f64c76498fd6de",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

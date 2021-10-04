@@ -1,0 +1,50 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "_",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor",
+      "unordered": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/pre.js",
+      "length": 166,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "pre.js",
+      "hash": "050e3237ba33a082abe000d8acf633562e55169e",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/underscore.js",
+      "length": 44699,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "underscore.js",
+      "hash": "6224bcc7efe353d1fa15fdb5446be30cf1003e84",
+      "fileOptions": {}
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/post.js",
+      "length": 159,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "post.js",
+      "hash": "84756e71110b448c0cc19f4fa5ab84298323585d",
+      "fileOptions": {}
+    }
+  ]
+}

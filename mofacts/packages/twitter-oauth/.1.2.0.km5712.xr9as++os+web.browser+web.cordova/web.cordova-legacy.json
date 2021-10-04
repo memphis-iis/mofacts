@@ -1,0 +1,35 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "oauth1"
+    },
+    {
+      "package": "oauth"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "service-configuration"
+    }
+  ],
+  "resources": [
+    {
+      "type": "prelink",
+      "file": "web.cordova-legacy/packages/twitter-oauth.js",
+      "length": 3776,
+      "offset": 0,
+      "servePath": "/packages/twitter-oauth.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "Twitter",
+      "export": true
+    }
+  ]
+}

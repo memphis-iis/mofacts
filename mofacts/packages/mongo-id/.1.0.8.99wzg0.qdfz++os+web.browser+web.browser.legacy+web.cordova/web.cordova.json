@@ -1,0 +1,41 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "MongoID",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ejson",
+      "constraint": "1.1.1"
+    },
+    {
+      "package": "random",
+      "constraint": "1.2.0"
+    },
+    {
+      "package": "ecmascript",
+      "constraint": "0.15.1"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/id.js",
+      "length": 2538,
+      "offset": 0,
+      "path": "id.js",
+      "hash": "a5147a59a6e60eb5ee01908acfe4ae5481c2cd88",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "blocking",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "underscore",
+      "constraint": "1.0.2"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/packages/peerlibrary:blocking.js",
+      "length": 0,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "/packages/peerlibrary:blocking.js",
+      "hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
+    }
+  ]
+}

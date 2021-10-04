@@ -1,0 +1,57 @@
+{
+  "format": "unipackage-unibuild-pre1",
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tinytest"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "check"
+    },
+    {
+      "package": "http"
+    }
+  ],
+  "resources": [
+    {
+      "type": "asset",
+      "file": "os/packages/test-in-console/phantomRunner.js",
+      "length": 1376,
+      "offset": 0,
+      "servePath": "/packages/test-in-console/phantomRunner.js",
+      "path": "phantomRunner.js"
+    },
+    {
+      "type": "asset",
+      "file": "os/packages/test-in-console/puppeteerRunner.js",
+      "length": 1554,
+      "offset": 0,
+      "servePath": "/packages/test-in-console/puppeteerRunner.js",
+      "path": "puppeteerRunner.js"
+    },
+    {
+      "type": "prelink",
+      "file": "os-legacy/packages/test-in-console.js",
+      "length": 1563,
+      "offset": 0,
+      "servePath": "/packages/test-in-console.js"
+    }
+  ],
+  "packageVariables": [
+    {
+      "name": "runTests",
+      "export": true
+    }
+  ]
+}

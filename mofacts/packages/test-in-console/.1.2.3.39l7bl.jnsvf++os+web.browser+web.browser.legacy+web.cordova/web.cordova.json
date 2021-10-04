@@ -1,0 +1,60 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "TEST_STATUS",
+      "testOnly": false
+    },
+    {
+      "name": "runTests",
+      "testOnly": false
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "tinytest"
+    },
+    {
+      "package": "underscore"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "check"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.cordova/driver.js",
+      "length": 7028,
+      "offset": 0,
+      "usesDefaultSourceProcessor": true,
+      "path": "driver.js",
+      "hash": "b717d2fad91ad1902342e07b8e2d6709019a9dde",
+      "fileOptions": {
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "css",
+      "file": "web.cordova/test.css",
+      "length": 332,
+      "offset": 0,
+      "path": "test.css",
+      "hash": "29fd533f36bb21bd757b8e2c064a65309db960ff",
+      "fileOptions": {
+        "lazy": false
+      }
+    }
+  ]
+}

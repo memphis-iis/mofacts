@@ -1,0 +1,38 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "ecmascript"
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/reload.js",
+      "length": 8280,
+      "offset": 0,
+      "path": "reload.js",
+      "hash": "68152fb8844b5c697020f07a50b3b37ddaed27b6",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "os/reload_tests.js",
+      "length": 1262,
+      "offset": 0,
+      "path": "reload_tests.js",
+      "hash": "87ab98cf67cc407b817de695c3a67add6121a76d",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

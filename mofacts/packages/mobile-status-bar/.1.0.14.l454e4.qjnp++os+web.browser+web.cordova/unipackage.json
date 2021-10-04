@@ -1,0 +1,28 @@
+{
+  "name": "mobile-status-bar",
+  "summary": "Good defaults for the mobile status bar",
+  "version": "1.0.14",
+  "isTest": false,
+  "plugins": [],
+  "cordovaDependencies": {
+    "cordova-plugin-statusbar": "2.2.1"
+  },
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}

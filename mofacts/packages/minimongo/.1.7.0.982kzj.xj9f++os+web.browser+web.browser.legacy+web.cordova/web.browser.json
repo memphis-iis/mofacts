@@ -1,0 +1,204 @@
+{
+  "format": "isopack-2-unibuild",
+  "declaredExports": [
+    {
+      "name": "LocalCollection",
+      "testOnly": false
+    },
+    {
+      "name": "Minimongo",
+      "testOnly": false
+    },
+    {
+      "name": "MinimongoTest",
+      "testOnly": true
+    },
+    {
+      "name": "MinimongoError",
+      "testOnly": true
+    }
+  ],
+  "uses": [
+    {
+      "package": "meteor"
+    },
+    {
+      "package": "diff-sequence"
+    },
+    {
+      "package": "ecmascript"
+    },
+    {
+      "package": "ejson"
+    },
+    {
+      "package": "geojson-utils"
+    },
+    {
+      "package": "id-map"
+    },
+    {
+      "package": "mongo-id"
+    },
+    {
+      "package": "ordered-dict"
+    },
+    {
+      "package": "random"
+    },
+    {
+      "package": "tracker"
+    },
+    {
+      "package": "mongo-decimal",
+      "weak": true
+    }
+  ],
+  "resources": [
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_client.js",
+      "length": 32,
+      "offset": 0,
+      "path": "minimongo_client.js",
+      "hash": "d78205dd8cd228cb31e8b79b29eb73939cc0cee3",
+      "fileOptions": {
+        "mainModule": true,
+        "lazy": false
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/common.js",
+      "length": 48736,
+      "offset": 0,
+      "path": "common.js",
+      "hash": "8d47cd7d510c0f06460edde390e9cc107081d99a",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/cursor.js",
+      "length": 15273,
+      "offset": 0,
+      "path": "cursor.js",
+      "hash": "cb332f58f7bf6de9d89ea2cc4346aa58d005291d",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/local_collection.js",
+      "length": 57779,
+      "offset": 0,
+      "path": "local_collection.js",
+      "hash": "95d19cef6f04fe099a8aaa8ffa319040b0216626",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/matcher.js",
+      "length": 9272,
+      "offset": 0,
+      "path": "matcher.js",
+      "hash": "5323902661e6a6a967af9c420d4ec4b859acd3e7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_common.js",
+      "length": 241,
+      "offset": 0,
+      "path": "minimongo_common.js",
+      "hash": "b0244b83cc87597dcec7794fa6c612c37c8ea9df",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_server.js",
+      "length": 10841,
+      "offset": 0,
+      "path": "minimongo_server.js",
+      "hash": "4ccd2439a85657ea86c60425b8e8d535a0af6297",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_tests.js",
+      "length": 1788,
+      "offset": 0,
+      "path": "minimongo_tests.js",
+      "hash": "e868b7413c7bbce52068df50b88c18dfb39234b3",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_tests_client.js",
+      "length": 145711,
+      "offset": 0,
+      "path": "minimongo_tests_client.js",
+      "hash": "bcf22b2270a17549728bd21793a24069dfacc9a4",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/minimongo_tests_server.js",
+      "length": 22666,
+      "offset": 0,
+      "path": "minimongo_tests_server.js",
+      "hash": "9a4d04eaf49dbfcb814315f5ef79aca13c18b2b7",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/observe_handle.js",
+      "length": 90,
+      "offset": 0,
+      "path": "observe_handle.js",
+      "hash": "65ade5c036389f59f474a900d4190e7bb19da20f",
+      "fileOptions": {
+        "lazy": true
+      }
+    },
+    {
+      "type": "source",
+      "extension": "js",
+      "file": "web.browser/sorter.js",
+      "length": 9630,
+      "offset": 0,
+      "path": "sorter.js",
+      "hash": "137eafd66c776d80f7e37dc763c49ab408a93cbb",
+      "fileOptions": {
+        "lazy": true
+      }
+    }
+  ]
+}

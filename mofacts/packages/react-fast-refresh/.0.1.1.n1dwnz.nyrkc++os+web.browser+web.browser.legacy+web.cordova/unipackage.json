@@ -1,0 +1,30 @@
+{
+  "name": "react-fast-refresh",
+  "summary": "Automatically update React components with HMR",
+  "version": "0.1.1",
+  "isTest": false,
+  "plugins": [],
+  "unibuilds": [
+    {
+      "kind": "main",
+      "arch": "os",
+      "path": "os-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser",
+      "path": "web.browser-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.browser.legacy",
+      "path": "web.browser.legacy-legacy.json"
+    },
+    {
+      "kind": "main",
+      "arch": "web.cordova",
+      "path": "web.cordova-legacy.json"
+    }
+  ],
+  "format": "unipackage-pre2"
+}
