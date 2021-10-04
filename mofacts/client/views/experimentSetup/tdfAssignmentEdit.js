@@ -35,7 +35,7 @@ Template.tdfAssignmentEdit.onRendered(async function() {
   for (const i in allTdfObjects) {
     const tdf = allTdfObjects[i];
     if (tdf.fileName.indexOf(curSemester) != -1) { // tdf.ownerId == Meteor.userId() &&
-      allTdfDisplays.push({fileName: tdf.fileName, displayName: tdf.tdfs.tutor.setspec[0].lessonname[0]});
+      allTdfDisplays.push({fileName: tdf.fileName, displayName: tdf.tdfs.tutor.setspec.lessonname});
     }
   }
   console.log('allTdfDisplays', allTdfDisplays);

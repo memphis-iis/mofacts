@@ -436,9 +436,10 @@ function modelUnitEngine() {
   }
 
   // See if they specified a probability function
-  let probFunction = _.chain(Session.get('currentTdfUnit'))
-      .prop('learningsession').first()
-      .prop('calculateProbability').first().trim().value();
+  const unit = Session.get('currentTdfUnit');
+  let probFunction = undefined;
+  if (unit.learningsession) 
+    probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -741,9 +742,14 @@ function modelUnitEngine() {
         const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
         // Figure out which cluster numbers that they want
         console.log('setupclusterlist:', this.curUnit, sessCurUnit);
-        const unitClusterList = _.chain(this.curUnit || sessCurUnit) // TODO: shouldn't need both
-            .prop('learningsession').first()
-            .prop('clusterlist').first().trim().value();
+        let unitClusterList = "";
+        // TODO: shouldn't need both
+        if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
+          unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+        }
+        else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
+          unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
+        }
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
@@ -1057,9 +1063,11 @@ function modelUnitEngine() {
     curUnit: (() => JSON.parse(JSON.stringify(Session.get('currentTdfUnit'))))(),
 
     unitMode: (function() {
-      const unitMode = _.chain(Session.get('currentTdfUnit'))
-          .prop('learningsession').first()
-          .prop('unitMode').trim().value() || 'default';
+      const unit = Session.get('currentTdfUnit');
+      let unitMode = 'default';
+      if(unit.learningsession && unit.learningsession.unitMode){
+        unitMode = unit.learningsession.unitMode.trim();
+      }
       console.log('UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1297,7 +1305,7 @@ function modelUnitEngine() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
-      const maxTrials = _.chain(session).prop('maxTrials').first().intval(0).value();
+      const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
@@ -1481,8 +1489,8 @@ function scheduleUnitEngine() {
     // Shuffle and swap final question mapping based on permutefinalresult
     // and swapfinalresults
     if (finalQuests.length > 0) {
-      const shuffles = settings.finalPermute || [''];
-      const swaps = settings.finalSwap || [''];
+      const shuffles = settings.finalPermute.split(' ');
+      const swaps = settings.finalSwap.split(' ');
       let mapping = _.range(finalQuests.length);
 
       while (shuffles.length > 0 || swaps.length > 0) {
@@ -1546,17 +1554,7 @@ function scheduleUnitEngine() {
       return settings;
     }
 
-    const rawAssess = _.safefirst(unit.assessmentsession);
-    if (!rawAssess) {
-      return settings;
-    }
-
-    // Everything comes from the asessment session as a single-value array,
-    // so just parse all that right now
-    const assess = {};
-    _.each(rawAssess, function(val, name) {
-      assess[name] = _.safefirst(val);
-    });
+    const assess = unit.assessmentsession;
 
     // Interpret TDF string booleans
     const boolVal = function(src) {
@@ -1565,10 +1563,8 @@ function scheduleUnitEngine() {
 
     // Get the setspec settings first
     settings.specType = _.display(setspec.clustermodel);
-
-    // We have a few parameters that we need in their "raw" states (as arrays)
-    settings.finalSwap = _.prop(rawAssess, 'swapfinalresult') || [''];
-    settings.finalPermute = _.prop(rawAssess, 'permutefinalresult') || [''];
+    settings.finalSwap = assess.swapfinalresult || '';
+    settings.finalPermute = assess.permutefinalresult || '';
 
     // The "easy" "top-level" settings
     extractDelimFields(assess.initialpositions, settings.initialPositions);
@@ -1611,13 +1607,25 @@ function scheduleUnitEngine() {
       extractDelimFields(byGroup.templatesrepeated, settings.numTemplatesList);
       extractDelimFields(byGroup.initialpositions, settings.initialPositions);
 
-      _.each(byGroup.group, function(tdfGroup) {
-        const newGroup = [];
-        extractDelimFields(tdfGroup, newGroup);
+      // Group can be either string or array. If its just a string then we need to pass it into settings as an array. 
+      if(settings.groupNames.length > 1){
+        _.each(byGroup.group, function(tdfGroup) {
+          const newGroup = [];
+          extractDelimFields(tdfGroup, newGroup);
+          if (newGroup.length > 0) {
+            settings.groups.push(newGroup);
+          }
+        });
+      }
+      else{
+        const newGroup = []
+        extractDelimFields(byGroup.group, newGroup);
         if (newGroup.length > 0) {
           settings.groups.push(newGroup);
         }
-      });
+      }
+
+//      extractDelimFields(byGroup.group, settings.groups);
 
       if (settings.groups.length != settings.groupNames.length) {
         console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
@@ -1671,7 +1679,7 @@ function scheduleUnitEngine() {
 
       const curUnitNum = Session.get('currentUnitNumber');
       const file = Session.get('currentTdfFile');
-      const setSpec = file.tdfs.tutor.setspec[0];
+      const setSpec = file.tdfs.tutor.setspec;
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
       console.log('creating schedule with params:', setSpec, curUnitNum, currUnit);
