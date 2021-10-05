@@ -1,4 +1,4 @@
-Meteor 1.12 upgrade
+Meteor 1.12 upgrade path notes
 
 A. Must destroy vagrant enviornment and re-provision
 
@@ -35,7 +35,6 @@ C. Upgrade from a current branch that doesn't include 1.12
     -Must upgrade project
         meteor update --release 1.12
 
-    -Reinstall removed package
         
 
 
