@@ -185,6 +185,35 @@ $ vagrant destroy
 This is a low risk activity, since you can always run `vagrant up` to recreate
 the virtual machine for you.
 
+## Notes on Upgrading from Meteor 1.8.3 releases to Meteor 1.12 releases
+
+There are two options to upgrade meteor to fix the issue of expired certificates, depending individual cases.
+
+### Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
+    
+    -vagrant destroy, pull 1.12 branch, vagrant up
+
+### Update your environment to run node 12 and meteor 1.12:
+    
+    -Must install nodejs 12.x
+        curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
+        sudo apt install -y nodejs        
+    
+    -Must install meteor 1.12
+        curl https://install.meteor.com/?release=1.12 | sh
+
+    -update npm packages and upgrade incompatible package
+        sudo rm -rf package-lock.json node_modules
+        sudo npm cache clean --force
+        sudo npm i --unsafe-perm node-sass
+        NODE_TLS_REJECT_UNAUTHORIZED=0 meteor remove fourseven:scss
+        NODE_TLS_REJECT_UNAUTHORIZED=0 meteor add fourseven:scss@4.12.0
+        
+    -**if using an old branch** manually upgrade mofacts to 1.12 
+        meteor update --release 1.12
+        
+      
+
 ## FAQs
 
 ### Question
