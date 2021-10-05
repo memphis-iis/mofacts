@@ -202,7 +202,7 @@ B. Use the latest 1.12 branch of mofacts and DO the following to update your env
     -Must cleanup old permissions
         sudo chown -R $(whoami) ~/.npm
 
-    -Must update npm packages and upgrade incompatible package
+    -(SHOULD BE OPTIONAL) update npm packages and upgrade incompatible package
         sudo rm -rf package-lock.json node_modules
         sudo npm cache clean --force
         sudo npm i --unsafe-perm node-sass
