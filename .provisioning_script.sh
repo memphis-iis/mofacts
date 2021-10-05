@@ -63,7 +63,7 @@ sudo systemctl enable syllable.service
 sudo systemctl start syllable.service
 
 # Install meteor
-curl https://install.meteor.com/?release=1.8.3 | sh
+curl https://install.meteor.com/?release=1.12 | sh
 
 # In case we're running on a Windows host, we force the use of mounting instead
 # of symlinks for meteor packages
