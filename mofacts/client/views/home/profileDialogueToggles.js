@@ -11,7 +11,9 @@ const _randomizeSelectedDialogueType = () => {
 
 Template.profileDialogueToggles.created = function() {
   // _randomizeSelectedDialogueType();
-  _state.set('selectedDialogueType', 'simple');
+  if(_state.get('selectedDialogueType') === undefined){
+    _state.set('selectedDialogueType', 'simple')
+  }
 };
 
 Template.profileDialogueToggles.events({
