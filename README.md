@@ -189,31 +189,31 @@ the virtual machine for you.
 
 There are two options to upgrade meteor to fix the issue of expired certificates, depending individual cases.
 
-A. Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
+### Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
     
     -Manually upgrade mofacts to 1.12
         meteor update --release 1.12
 
-B. Use the latest 1.12 branch of mofacts and DO the following to update your environment:
+### Use the latest 1.12 branch of mofacts and DO the following to update your environment:
     
     -Must install nodejs 12.x
         curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
+        sudo apt install -y nodejs        
     
     -Must install meteor 1.12
         curl https://install.meteor.com/?release=1.12 | sh
-    
-    -Must cleanup old permissions
-        sudo chown -R $(whoami) ~/.npm
 
-    -pdate npm packages and upgrade incompatible package
+    -update npm packages and upgrade incompatible package
         sudo rm -rf package-lock.json node_modules
         sudo npm cache clean --force
         sudo npm i --unsafe-perm node-sass
         NODE_TLS_REJECT_UNAUTHORIZED=0 meteor remove fourseven:scss
-        meteor add fourseven:scss@4.12.0
+        NODE_TLS_REJECT_UNAUTHORIZED=0 meteor add fourseven:scss@4.12.0
         
     -anually upgrade mofacts to 1.12
         meteor update --release 1.12
+        
+###Troubleshooting the Meteor Upgrade
       
 
 ## FAQs
