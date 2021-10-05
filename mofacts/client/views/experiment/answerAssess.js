@@ -332,7 +332,7 @@ const Answers = {
               callback(fullTextIsCorrect);
             } else if (res.tag == 0) {
               console.log('refutationalFeedback,return:', res);
-              const refutationalFeedback = res.fields[0].Feedback;
+              const refutationalFeedback = res.fields[0].feedback;
 
               if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
                 fullTextIsCorrect.matchText = refutationalFeedback;
