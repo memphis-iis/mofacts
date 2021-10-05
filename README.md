@@ -187,7 +187,7 @@ the virtual machine for you.
 
 ## Notes on Upgrading from Meteor 1.8.3 releases to Meteor 1.12 releases
 
-There are three options to upgrade meteor to fix the issue of expired certificates, depending individual cases.
+There are two options to upgrade meteor to fix the issue of expired certificates, depending individual cases.
 
 A. Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
 
