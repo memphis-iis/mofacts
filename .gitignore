@@ -14,6 +14,7 @@ mofacts/build/mof*
 .meteor
 build/*.tar.gz
 mofacts/settings.json
+mofacts/.meteor/
 .tags*
 docker-out/
 \#*\#
