@@ -191,10 +191,9 @@ There are two options to upgrade meteor to fix the issue of expired certificates
 
 ### Destroy vagrant environment and re-provision and use the latest branch that is compatible with 1.12
     
-    -Manually upgrade mofacts to 1.12
-        meteor update --release 1.12
+    -vagrant destroy, pull 1.12 branch, vagrant up
 
-### Use the latest 1.12 branch of mofacts and DO the following to update your environment:
+### Update your environment to run node 12 and meteor 1.12:
     
     -Must install nodejs 12.x
         curl -sL https://deb.nodesource.com/setup_12.x | sudo bash -
@@ -210,10 +209,9 @@ There are two options to upgrade meteor to fix the issue of expired certificates
         NODE_TLS_REJECT_UNAUTHORIZED=0 meteor remove fourseven:scss
         NODE_TLS_REJECT_UNAUTHORIZED=0 meteor add fourseven:scss@4.12.0
         
-    -anually upgrade mofacts to 1.12
+    -**if using an old branch** manually upgrade mofacts to 1.12 
         meteor update --release 1.12
         
-###Troubleshooting the Meteor Upgrade
       
 
 ## FAQs
