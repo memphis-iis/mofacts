@@ -59,7 +59,7 @@ function sessionCleanUp() {
 
   Session.set('schedule', undefined);
 
-  Session.set('isReport', false);
+  Session.set('wasReportedForRemoval', false);
   Session.set('hiddenItems', []);
   Session.set('numVisibleCards', 0);
 
