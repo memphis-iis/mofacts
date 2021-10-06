@@ -71,14 +71,14 @@ Template.profileSouthwest.rendered = async function() {
       const isMultiTdf = tdfObject.isMultiTdf;
 
       // Make sure we have a valid TDF (with a setspec)
-      const setspec = tdfObject.tdfs.tutor.setspec[0];
+      const setspec = tdfObject.tdfs.tutor.setspec;
 
       if (!setspec) {
         console.log('Invalid TDF - it will never work', tdfObject);
         return;
       }
 
-      const name = _.chain(setspec).prop('lessonname').first().value();
+      const name = setspec.lessonname;
       if (!name) {
         console.log('Skipping TDF with no name', setspec);
         return;
@@ -86,20 +86,20 @@ Template.profileSouthwest.rendered = async function() {
 
       const currentStimuliSetId = tdf.stimuliSetId;
 
-      const ignoreOutOfGrammarResponses = _.chain(setspec).prop('speechIgnoreOutOfGrammarResponses').first().value() == 'true';
-      let speechOutOfGrammarFeedback = _.chain(setspec).prop('speechOutOfGrammarFeedback').first().value();
+      const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses == 'true';
+      let speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback;
       if (!speechOutOfGrammarFeedback) {
         speechOutOfGrammarFeedback = 'Response not in answer set';
       }
 
-      let audioInputEnabled = _.chain(setspec).prop('audioInputEnabled').first().value() == 'true';
-      const enableAudioPromptAndFeedback = _.chain(setspec).prop('enableAudioPromptAndFeedback').first().value() == 'true';
+      let audioInputEnabled = setspec.audioInputEnabled == 'true';
+      const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback == 'true';
 
-      const audioInputSpeechAPIKeyAvailable = !!_.chain(setspec).prop('speechAPIKey').first().value();
+      const audioInputSpeechAPIKeyAvailable = !!setspec.speechAPIKey;
 
       // Only display the audio input available if enabled in tdf and tdf has key for it
       audioInputEnabled = audioInputEnabled && audioInputSpeechAPIKeyAvailable;
-      const audioPromptTTSAPIKeyAvailable = !!_.chain(setspec).prop('textToSpeechAPIKey').first().value();
+      const audioPromptTTSAPIKeyAvailable = !!setspec.textToSpeechAPIKey;
 
       // Only display the audio output available if enabled in tdf and tdf has key for it
       const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
