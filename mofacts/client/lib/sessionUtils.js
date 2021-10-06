@@ -59,6 +59,10 @@ function sessionCleanUp() {
 
   Session.set('schedule', undefined);
 
+  Session.set('wasReportedForRemoval', false);
+  Session.set('hiddenItems', []);
+  Session.set('numVisibleCards', 0);
+
   Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
   Session.set('currentTdfId', undefined);
