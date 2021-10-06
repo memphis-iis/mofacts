@@ -448,7 +448,7 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCard(cards) {
+  function findMinProbCard(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
@@ -461,6 +461,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate <= currentMin) {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
@@ -478,6 +479,7 @@ function modelUnitEngine() {
         } else {
           for (let j=0; j<card.stims.length; j++) {
             const stim = card.stims[j];
+            if (hiddenItems.includes(stim.stimulusKC)) continue;
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
               clusterIndex=i;
@@ -491,7 +493,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCard(cards, ceiling) {
+  function findMaxProbCard(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -504,6 +506,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < ceiling) {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
@@ -516,7 +519,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMinProbDistCard(cards) {
+  function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
@@ -529,6 +532,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
@@ -548,7 +552,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
     console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -561,6 +565,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
@@ -753,7 +758,6 @@ function modelUnitEngine() {
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
-
       for (let i = 0; i < clusterList.length; ++i) {
         const nums = rangeVal(clusterList[i]);
         for (let j = 0; j < nums.length; ++j) {
@@ -932,6 +936,8 @@ function modelUnitEngine() {
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
+      let hiddenItems = Session.get('hiddenItems');
+      if (hiddenItems === undefined) hiddenItems = []
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
@@ -1038,6 +1044,14 @@ function modelUnitEngine() {
         }
       }
 
+      let numVisibleCards = 0;
+      for (let i = 0; i < cardProbabilities.cards.length; i++){
+        if(cardProbabilities.cards[i].canUse){
+          numVisibleCards += cardProbabilities.cards[i].stims.length;
+        }
+      }
+      Session.set('numVisibleCards', numVisibleCards - hiddenItems.length);
+
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
         numCorrectAnswers,
@@ -1083,6 +1097,7 @@ function modelUnitEngine() {
       // here. See calculateCardProbabilities for how prob.probability is
       // calculated
       this.calculateCardProbabilities();
+      const hiddenItems = Session.get('hiddenItems');
       let newClusterIndex = -1;
       let newStimIndex = -1;
       const cards = cardProbabilities.cards;
@@ -1092,11 +1107,11 @@ function modelUnitEngine() {
 
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         case 'distance':
@@ -1104,15 +1119,15 @@ function modelUnitEngine() {
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCard(cards, 1.00001);
+          indices = findMaxProbCard(cards, 1.00001, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCard(cards, 0.90);
+          indices = findMaxProbCard(cards, 0.90, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
       }
@@ -1218,7 +1233,7 @@ function modelUnitEngine() {
       }
     },
 
-    cardAnswered: async function(wasCorrect, practiceTime) {
+    cardAnswered: async function(wasCorrect, practiceTime, wasReportedForRemoval) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
@@ -1247,7 +1262,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, wasReportedForRemoval);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
