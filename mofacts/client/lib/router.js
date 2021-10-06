@@ -131,8 +131,8 @@ Router.route('/experiment/:target?/:xcond?', {
     const tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
     if (tdf) {
       console.log('tdf found');
-      const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired ?
-          eval(tdf.content.tdfs.tutor.setspec[0].experimentPasswordRequired[0]) : false;
+      const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
+          eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
       console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
@@ -249,8 +249,8 @@ Router.route('/instructions', {
       console.log('No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
-      const txt = _.chain(unit).prop('unitinstructions').first().trim().value();
-      const pic = _.chain(unit).prop('picture').first().trim().value();
+      const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
+      const pic = unit.picture ? unit.picture.trim() : undefined;
       if (!txt && !pic) {
         console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();

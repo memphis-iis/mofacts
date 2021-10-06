@@ -93,7 +93,7 @@ Template.dataDownload.helpers({
     }
 
     dataDownloads = Session.get('allTdfs').map(function(tdf) {
-      const name = tdf.content.tdfs.tutor.setspec[0].lessonname ? tdf.content.tdfs.tutor.setspec[0].lessonname[0] : 'NO NAME';
+      const name = tdf.content.tdfs.tutor.setspec.lessonname ? tdf.content.tdfs.tutor.setspec.lessonname : 'NO NAME';
       tdf.disp = name;
 
       if (tdf.content.fileName != name) {

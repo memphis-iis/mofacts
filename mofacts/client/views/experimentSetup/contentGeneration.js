@@ -48,7 +48,7 @@ async function setAllTdfs(ownerMapCallback) {
     tdfIdToTdfFileMap[tdfid] = tdfFile;
     tdfIdToStimuliSetMap[tdfid] = allStims.filter((x) => x.stimuliSetId == tdfStimSetId);
 
-    const displayName = tdfFile.tdfs.tutor.setspec[0].lessonname[0];
+    const displayName = tdfFile.tdfs.tutor.setspec.lessonname;
     let displayDate = '';
     if (tdfFile.createdAt) {
       const date = new Date(tdfFile.createdAt);
@@ -261,11 +261,11 @@ function generateAndSubmitTDFAndStimFiles() {
     const originalTDF = tdfIdToTdfFileMap[tdfTemplateId];
     isMultiTdf = originalTDF.isMultiTdf;
 
-    stimulusFilename = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
+    stimulusFilename = originalTDF.tdfs.tutor.setspec.stimulusfile;
     stimulusFilename = stimulusFilename.slice(0, stimulusFilename.length-5) + '_' + curUserName + '_' +
         curDateTime + '_' + curSemester + '.json';
 
-    parentStimulusFileName = originalTDF.tdfs.tutor.setspec[0].stimulusfile[0];
+    parentStimulusFileName = originalTDF.tdfs.tutor.setspec.stimulusfile;
   } else {
     stimulusFilename = displayName.replace(/ /g, '_') + '_' + curUserName + '_' + curDateTime + '_' +
         curSemester + '_autoNamed_Stim.json';
@@ -467,22 +467,22 @@ function generateTDFJSON(tdfFileName, displayName, stimulusFilename, newStimJSON
       const isLearningSession = clusterListMappings[unitIndex].unitType === MODEL_UNIT;
       const unit = curTdf.tdfs.tutor.unit[unitIndex];
       const clusterlist = isLearningSession ?
-          unit.learningsession[0].clusterlist : unit.assessmentsession[0].clusterlist;
-      clusterlist[0] = clusterListMappings[unitIndex].new;
+          unit.learningsession.clusterlist : unit.assessmentsession.clusterlist;
+      clusterlist = clusterListMappings[unitIndex].new;
     }
     curTdf.createdAt = new Date();
     curTdf.ownerId = Meteor.userId();
     curTdf.fileName = tdfFileName;
   }
 
-  curTdf.tdfs.tutor.setspec[0].lessonname = [displayName];
-  curTdf.tdfs.tutor.setspec[0].stimulusfile = [stimulusFilename];
+  curTdf.tdfs.tutor.setspec.lessonname = [displayName];
+  curTdf.tdfs.tutor.setspec.stimulusfile = [stimulusFilename];
 
   if (typeof(speechAPIKey) !== 'undefined') {
-    curTdf.tdfs.tutor.setspec[0].speechAPIKey = [speechAPIKey];
+    curTdf.tdfs.tutor.setspec.speechAPIKey = [speechAPIKey];
   }
   if (typeof(speechAPIKey) !== 'undefined') {
-    curTdf.tdfs.tutor.setspec[0].textToSpeechAPIKey = [textToSpeechAPIKey];
+    curTdf.tdfs.tutor.setspec.textToSpeechAPIKey = [textToSpeechAPIKey];
   }
 
   return curTdf;
@@ -859,7 +859,7 @@ Template.contentGeneration.events({
         if (!!unit.learningsession || !!unit.assessmentsession) {
           const session = unit.learningsession || unit.assessmentsession;
           const unitType = unit.learningsession ? MODEL_UNIT : SCHEDULE_UNIT;
-          const stimIndices = rangeVal(session[0].clusterlist[0]);
+          const stimIndices = rangeVal(session.clusterlist);
           clusterListMappings[unitIndex] = {
             orig: unitIndex,
             new: undefined,
@@ -875,13 +875,13 @@ Template.contentGeneration.events({
       }
     }
 
-    if (tdfObject.tdfs.tutor.setspec[0].speechAPIKey && tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0]) {
-      speechAPIKey = tdfObject.tdfs.tutor.setspec[0].speechAPIKey[0];
+    if (tdfObject.tdfs.tutor.setspec.speechAPIKey) {
+      speechAPIKey = tdfObject.tdfs.tutor.setspec.speechAPIKey;
     } else {
       speechAPIKey = null;
     }
-    if (tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey && tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0]) {
-      textToSpeechAPIKey = tdfObject.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+    if (tdfObject.tdfs.tutor.setspec.textToSpeechAPIKey) {
+      textToSpeechAPIKey = tdfObject.tdfs.tutor.setspec.textToSpeechAPIKey;
     } else {
       textToSpeechAPIKey = null;
     }

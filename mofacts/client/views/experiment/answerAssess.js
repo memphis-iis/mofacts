@@ -306,7 +306,7 @@ const Answers = {
   // taking into account both branching answers and edit distance
   answerIsCorrect: async function(userInput, answer, originalAnswer, setspec, callback) {
     // Note that a missing or invalid lfparameter will result in a null value
-    const lfparameter = _.chain(setspec).prop('lfparameter').first().floatval().value();
+    const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
     const feedbackType = Session.get('currentDeliveryParams').feedbackType;
 
     let fullTextIsCorrect = checkAnswer(userInput, answer, originalAnswer, lfparameter);
@@ -332,7 +332,7 @@ const Answers = {
               callback(fullTextIsCorrect);
             } else if (res.tag == 0) {
               console.log('refutationalFeedback,return:', res);
-              const refutationalFeedback = res.fields[0].Feedback;
+              const refutationalFeedback = res.fields[0].feedback;
 
               if (typeof(refutationalFeedback) != 'undefined' && refutationalFeedback != null) {
                 fullTextIsCorrect.matchText = refutationalFeedback;
