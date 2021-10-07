@@ -137,6 +137,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
       numCorrect: 0,
       numIncorrect: 0,
       stimsSeen: 0,
+      lastSeen: 0,
       totalStimCount: 0,
       totalPracticeDuration: 0,
     };
@@ -144,6 +145,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     studentPerformanceData = {
       numCorrect: parseInt(studentPerformanceDataRet.numCorrect) || 0,
       numIncorrect: parseInt(studentPerformanceDataRet.numIncorrect) || 0,
+      lastSeen: parseInt(studentPerformanceDataRet.lastSeen) || 0,
       stimsSeen:  parseInt(studentPerformanceDataRet.stimsSeen) || 0,
       totalStimCount: parseInt(studentPerformanceDataRet.totalStimCount) || 0,
       totalPracticeDuration: parseInt(studentPerformanceDataRet.totalPracticeDuration) || 0,

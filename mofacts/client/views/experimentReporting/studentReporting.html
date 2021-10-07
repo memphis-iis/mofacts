@@ -18,10 +18,10 @@
       </select>
         for {{curStudentPerformance.totalTimeDisplay}} minutes. This is your progress report for
       <select id="hintlevel-select">
-        <option value="0">hint level 0</option>
-        <option value="1">hint level 1</option>
-        <option value="2">hint level 2</option>
-        <option value="3">hint level 3</option>
+          <option>select a hint level</option>
+        {{#each hintLevelsActive}}
+          <option value="{{hintLevelsActive}}">hint level {{hintLevelsActive}}</option>
+        {{/each}}
       </select>.
   
     <div class="row" style="padding-top:20px;">

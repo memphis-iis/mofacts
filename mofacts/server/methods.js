@@ -1024,7 +1024,8 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
                  unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
-                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 AND hintLevel=$3 GROUP BY ordinality \
+                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2'
+                 + 'AND hintLevel=$3' + ' GROUP BY ordinality \
                  ORDER BY ORDINALITY ASC LIMIT 5;';
   const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
   const correctnessAcrossRepetitions = [];
