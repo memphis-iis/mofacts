@@ -71,7 +71,7 @@ Template.studentReporting.helpers({
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
-  curStudentPerformaceCorrectInInteger: function() {
+  curStudentPerformanceCorrectInInteger: function() {
     var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
   },
@@ -160,7 +160,6 @@ async function updateDashboard(selectedTdfId, hintlevel=null){
     drawCharts(studentData);
     drawDashboard(curStudentGraphData, studentData);
     $('#tdf-select').val(selectedTdfId);
-    
   }
 }
 
@@ -340,10 +339,6 @@ async function drawDashboard(curStudentGraphData, studentData){
   Session.set('stimCount',parseFloat(totalStimCount));
   Session.set('stimsSeen',stimsSeen);
   
-  
-      
-  
-
   //Draw Dashboard
   let dashCluster = [];
   dashClusterCanvases = document.getElementsByClassName('dashCanvas');

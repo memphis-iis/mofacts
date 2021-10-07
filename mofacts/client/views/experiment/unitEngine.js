@@ -688,27 +688,7 @@ function modelUnitEngine() {
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
-      
-      //Hint Level metrics
-      p.hintLevelProbabilities = Array(4);
-      for(i = 0; i<_.keys(stim).length; i++){
-        let hintLevelProbabilityEstimates = [];
-        try{
-          if(stim[i].hintLevel !== 'undefined'){
-            console.log('Rusty stim[i]', stim[i]);
-            hintLevelProbabilityEstimates.push(stim[i].probabilityEstimate);
-            console.log('Rusty hintLevelProbabilityEstimates ', hintLevelProbabilityEstimates);
-            hintLevelProbability = hintLevelProbabilityEstimates.reduce((a,b) => a + b) / hintLevelProbabilityEstimates.length;
-            p.hintLevelProbabilities[stim[i].hintLevel] = hintLevelProbability;
-          } 
-        } catch(e){
-          console.log('componentState is undefined. Skipping');
-        }
-      }
-      console.log('Rusty p.hintLeveProbabilities ', p.hintLevelProbabilities);
-      // p.hintLevelProbabilities[stim[i].hintLevel] = stim[i].probabilityEstimate;
-      
-      
+            
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
