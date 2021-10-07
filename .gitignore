@@ -26,3 +26,4 @@ ubuntu-bionic-18.04-cloudimg-console.log
 profileTmp
 certs
 node_modules/
+!mofacts/private/tdf/*

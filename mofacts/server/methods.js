@@ -365,7 +365,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   return componentStates;
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const res = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
@@ -390,24 +390,24 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       }
 
       const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
-          firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-          priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-          priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-          WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-          RETURNING componentStateId';
+        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
+        RETURNING componentStateId';
       try {
         const componentStateId = await t.one(updateQuery, componentState);
         resArr.push(componentStateId);
       } catch (e) {
-        // ComponentState didn't exist before so we'll insert it
+      // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
           const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
-            probabilityEstimate,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+            ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
             ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
             RETURNING componentStateId',
-          componentState);
+            componentState);
         } else {
           resArr.push('not caught error:', e);
         }
@@ -695,8 +695,8 @@ async function getExperimentState(UserId, TDFId) { // by currentRootTDFId, not c
 }
 
 // UPSERT not INSERT
-async function setExperimentState(UserId, TDFId, newExperimentState) { // by currentRootTDFId, not currentTdfId
-  serverConsole('setExperimentState:', UserId, TDFId);
+async function setExperimentState(UserId, TDFId, newExperimentState, where) { // by currentRootTDFId, not currentTdfId
+  serverConsole('setExperimentState:', where, UserId, TDFId, newExperimentState);
   const query = 'SELECT experimentState FROM globalExperimentState WHERE userId = $1 AND TDFId = $2';
   const experimentStateRet = await db.oneOrNone(query, [UserId, TDFId]);
 
@@ -713,6 +713,25 @@ async function setExperimentState(UserId, TDFId, newExperimentState) { // by cur
   return TDFId;
 }
 
+async function insertHiddenItem(userId, stimulusKC, tdfId) {
+  let query = "UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = 'stimulus'";
+  await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
+}
+
+async function getHiddenItems(userId, tdfId) {
+  let query = "SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = 'stimulus'";
+  const res = await db.manyOrNone(query, [userId, tdfId]);
+  let hiddenItems = [];
+  for(let item in res){
+    hiddenItems.push(res[item].kcid);
+  }
+  return hiddenItems;
+}
+async function getUserLastFeedbackTypeFromHistory(tdfID) {
+  const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
+  const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
+  return feedbackType;
+}
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
@@ -1020,13 +1039,14 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
   return ret.count;
 }
 
-async function getStudentReportingData(userId, TDFid) {
+async function getStudentReportingData(userId, TDFid, hintLevel) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
                  unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
-                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 GROUP BY ordinality \
+                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2'
+                 + 'AND hintLevel=$3' + ' GROUP BY ordinality \
                  ORDER BY ORDINALITY ASC LIMIT 5;';
-  const dataRet = await db.manyOrNone(query, [userId, TDFid]);
+  const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
   const correctnessAcrossRepetitions = [];
   for (const curData of dataRet) {
     const numCorrect = parseInt(curData.numcorrect);
@@ -1039,34 +1059,44 @@ async function getStudentReportingData(userId, TDFid) {
   }
 
   const query2 = 'SELECT item.clozeStimulus, item.textStimulus, componentState.probabilityEstimate, \
-                  componentState.KCId FROM componentState JOIN item ON componentState.kcid=item.stimuluskc \
-                  WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
+                  componentState.lastSeen, componentState.KCId FROM componentState JOIN item \
+                  ON componentState.kcid=item.stimuluskc WHERE componentType=\'stimulus\' AND userId=$1 AND TDFId=$2;';
   const dataRet2 = await db.manyOrNone(query2, [userId, TDFid]);
   const probEstimates = [];
   for (const curData of dataRet2) {
     probEstimates.push({
       stimulus: curData.clozestimulus || curData.textstimulus,
       probabilityEstimate: Math.round(100 * parseFloat(curData.probabilityestimate)),
+      lastSeen: curData.lastseen,
     });
   }
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
+               COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration \
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\'';
-  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
-  if (!perfRet) return null;
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
+               AND s.hintLevel=$3;';
+  const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
+  const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
+                  FROM history AS s \
+                  WHERE s.userId=$1 AND s.tdfid=$2';                  
+  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid]);
+  if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: perfRet.numcorrect,
     numIncorrect: perfRet.numincorrect,
-    totalPracticeDuration: perfRet.totalpracticeduration,
+    totalStimCount: perfRet.totalstimcount,
+    stimsSeen: perfRet2.stimsseen,
+    totalPracticeDuration: perfRet.totalpracticeduration
+ 
   };
 }
 
@@ -1169,13 +1199,13 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
     if (onlyWithLearningSessions) {
       for (const unit of tdfObject.tdfs.tutor.unit) {
         if (unit.learningsession) {
-          const displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+          const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
           tdfsAttempted.push({tdfid, displayName});
           break;
         }
       }
     } else {
-      const displayName = tdfObject.tdfs.tutor.setspec[0].lessonname[0];
+      const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
       tdfsAttempted.push({tdfid, displayName});
     }
   }
@@ -1208,7 +1238,7 @@ function setLearningSessionItems(learningSessionItem, tdf) {
 }
 
 function getClusterListsFromUnit(unit) {
-  const clustersToParse = unit.learningsession[0].clusterlist[0];
+  const clustersToParse = unit.learningsession.clusterlist;
   return clustersToParse.split(' ').map((x) => x.split('-').map((y) => parseInt(y)));
 }
 
@@ -1382,8 +1412,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   let stimFileName;
   let skipStimSet = false;
   let stimSet;
-  if (tdfJSON.tdfs.tutor.setspec[0].stimulusfile) {
-    stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+  if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
+    stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
     stimSet = await getStimuliSetByFilename(stimFileName);
   } else {
     skipStimSet = true;
@@ -1413,8 +1443,8 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
     }
     await db.tx(async (t) => {
       let stimuliSetId;
-      if (tdfJSON.tdfs.tutor.setspec[0].stimulusfile) {
-        const stimFileName = tdfJSON.tdfs.tutor.setspec[0].stimulusfile[0];
+      if (tdfJSON.tdfs.tutor.setspec.stimulusfile) {
+        const stimFileName = tdfJSON.tdfs.tutor.setspec.stimulusfile;
         const stimuliSetIdQuery = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
         const associatedStimSetIdRet = await t.oneOrNone(stimuliSetIdQuery, stimFileName);
         if (associatedStimSetIdRet) {
@@ -1452,16 +1482,15 @@ async function loadStimsAndTdfsFromPrivate(adminUserId) {
       const json = JSON.parse(data);
       await upsertStimFile(filename, json, adminUserId);
     }
-
     setTimeout(async () => {
       serverConsole('start tdfs');
       const tdfFilenames = _.filter(fs.readdirSync('./assets/app/tdf/'), (fn) => {
-        return fn.indexOf('.xml') >= 0;
+        return fn.indexOf('.json') >= 0;
       });
       for (let filename of tdfFilenames) {
         const data = Assets.getText('tdf/' + filename);
-        const json = parseStringSync(data);
-        filename = filename.replace('.xml', curSemester + '.xml');
+        const json = JSON.parse(data);
+        filename = filename.replace('.json', curSemester + '.json');
         const rec = {'fileName': filename, 'tdfs': json, 'ownerId': adminUserId, 'source': 'repo'};
         await upsertTDFFile(filename, rec, adminUserId);
       }
@@ -1624,6 +1653,8 @@ Meteor.startup(async function() {
     insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap,
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
+
+    insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
     getAltServerUrl: function() {
       return altServerUrl;
@@ -1933,9 +1964,11 @@ Meteor.startup(async function() {
       serverConsole('saveUsersFile: ' + filename);
       const allErrors = [];
       let rows = Papa.parse(filecontents).data;
+      serverConsole(rows);
       rows = rows.slice(1);
       for (const index in rows) {
         const row = rows[index];
+        serverConsole(row);
         const username = row[0];
         const password = row[1];
         serverConsole('username: ' + username + ', password: ' + password);
@@ -1978,15 +2011,14 @@ Meteor.startup(async function() {
         if (type == 'tdf') {
           const jsonContents = JSON.parse(filecontents);
           const json = {tutor: jsonContents.tutor};
-          const lessonName = _.trim(jsonContents.tutor.setspec[0].lessonname[0]);
+          const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
           if (lessonName.length < 1) {
             results.result = false;
             results.errmsg = 'TDF has no lessonname - it cannot be valid';
 
             return results;
           }
-
-          const stimFileName = json.tutor.setspec[0].stimulusfile ? json.tutor.setspec[0].stimulusfile[0] : 'INVALID';
+          const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
           if (stimFileName == 'INVALID') {
             // Note this means root tdfs will have NULL stimulisetid
             results.result = false;

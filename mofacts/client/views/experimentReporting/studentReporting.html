@@ -5,11 +5,10 @@
     <h1 class="text-center">Progress for {{currentUser.username}}</h1>
   {{/if}}
   <div class="allContent">
-    <div>
-      <p>Instructions for using and interpreting this page are located at the bottom of the page</p>
-    </div>
-    <div>
-      <h2>Select Chapter</h2>
+
+    <div class="halfWidth centerForDesktop">
+      You have been learning
+         
       <select id="tdf-select">
           <option value="{{INVALID}}">Select a tdf</option>
           <!-- <option value="xml">All</option> -->
@@ -17,13 +16,47 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
+        for {{curStudentPerformance.totalTimeDisplay}} minutes. This is your progress report for
+      <select id="hintlevel-select">
+          <option>select a hint level</option>
+        {{#each hintLevelsActive}}
+          <option value="{{hintLevelsActive}}">hint level {{hintLevelsActive}}</option>
+        {{/each}}
+      </select>.
+  
+    <div class="row" style="padding-top:20px;">
+      <div class="gauge col-sm-6 col-xs-12">
+        <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}}</b></div>  
+        <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-item-progress"></canvas>
+          <p style="font-size: x-small;">Items out of the {{stimCount}} total items for this unit.</p>      
+      </div>
+      <div class="gauge col-sm-6 col-xs-12">
+          <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{curStudentPerformanceCorrectInInteger}}%</b></div>  
+          <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-percent-correct"></canvas>
+          <p style="font-size: x-small;">Percent correct so far.</p>      
+      </div>
+  </div>
+  <div class="row">
+      <div class="gauge col-sm-6 col-xs-12">
+          <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-test-prediction"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
+          <p style="font-size: x-small;">How the AI thinks you will will do if you were tested on all of the previously seen flashcards now. You can't get into the gold zone unitl all the cards are introduced.</p>      
+          
+      </div>
+      <div class="gauge col-sm-6 col-xs-12">
+          <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-new-card-prediction"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>
+          <p style="font-size: x-small;">How the AI thinks you will do when you see a new flashcard.</p>      
+      </div>
     </div>
+
+  </div>
     <div>
       <h2>Progress Data</h2>
       <table border="0" class="halfWidth centerForDesktop">
         <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (min)</th></tr>
         <tr>
-          <td>{{curStudentPerformance.percentCorrect}}</td>
+          <td>{{curStudentPerformanceCorrectInInteger}}%</td>
           <td>{{curStudentPerformance.count}}</td>
           <td>{{curStudentPerformance.totalTimeDisplay}}</td>
         </tr>

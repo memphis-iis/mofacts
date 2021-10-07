@@ -72,7 +72,7 @@ Template.profile.events({
     selectTdf(
         target.data('tdfid'),
         target.data('lessonname'),
-        target.data('currentStimuliSetId'),
+        target.data('currentstimulisetid'),
         target.data('ignoreoutofgrammarresponses'),
         target.data('speechoutofgrammarfeedback'),
         'User button click',
@@ -262,22 +262,22 @@ Template.profile.rendered = async function() {
     const currentStimuliSetId = tdf.stimuliSetId;
 
     // Make sure we have a valid TDF (with a setspec)
-    const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec[0] : null;
+    const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec : null;
 
     if (!setspec) {
       console.log('Invalid TDF - it will never work', tdfObject);
       continue;
     }
 
-    const name = setspec.lessonname[0];
+    const name = setspec.lessonname;
     const ignoreOutOfGrammarResponses = setspec.speechIgnoreOutOfGrammarResponses ?
-        setspec.speechIgnoreOutOfGrammarResponses[0].toLowerCase() == 'true' : false;
+        setspec.speechIgnoreOutOfGrammarResponses.toLowerCase() == 'true' : false;
     const speechOutOfGrammarFeedback = setspec.speechOutOfGrammarFeedback ?
-        setspec.speechOutOfGrammarFeedback[0] : 'Response not in answer set';
+        setspec.speechOutOfGrammarFeedback : 'Response not in answer set';
 
     // Check to see if we have found a selected experiment target
     if (experimentTarget && !foundExpTarget) {
-      const tdfExperimentTarget = _.trim(setspec.experimentTarget[0]).toLowerCase();
+      const tdfExperimentTarget = _.trim(setspec.experimentTarget).toLowerCase();
       if (tdfExperimentTarget && experimentTarget == tdfExperimentTarget) {
         foundExpTarget = {
           tdfid: TDFId,
@@ -310,12 +310,12 @@ Template.profile.rendered = async function() {
     // Note that we defer checking for userselect in case something above
     // (e.g. experimentTarget) auto-selects the TDF
     if (setspec.userselect) {
-      if (setspec.userselect[0] == 'false') continue;
+      if (setspec.userselect == 'false') continue;
     }
 
-    const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled[0] == 'true' : false;
+    const audioInputEnabled = setspec.audioInputEnabled ? setspec.audioInputEnabled == 'true' : false;
     const enableAudioPromptAndFeedback = setspec.enableAudioPromptAndFeedback ?
-        setspec.enableAudioPromptAndFeedback[0] == 'true' : false;
+        setspec.enableAudioPromptAndFeedback == 'true' : false;
 
     tdfObject.name = name;
     tdfObject.tdfid = TDFId;
@@ -409,6 +409,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
   const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
+  const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
+  Session.set('feedbackTypeFromHistory', feedbackType)
 
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
   Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
@@ -429,10 +431,10 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
   const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
   console.log(curTdfContent);
-  const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback &&
-      curTdfContent.tdfs.tutor.setspec[0].enableAudioPromptAndFeedback[0] == 'true';
-  const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey &&
-      !!curTdfContent.tdfs.tutor.setspec[0].textToSpeechAPIKey[0];
+  const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback &&
+      curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback == 'true';
+  const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
+      !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey;
   let audioPromptFeedbackEnabled = undefined;
   if (Session.get('experimentTarget')) {
     audioPromptFeedbackEnabled = tdfAudioPromptFeedbackEnabled;
@@ -447,8 +449,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   // If we're in experiment mode and the tdf file defines whether audio input is enabled
   // forcibly use that, otherwise go with whatever the user set the audio input toggle to
   const userAudioToggled = audioInputEnabled;
-  const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled ?
-      curTdfContent.tdfs.tutor.setspec[0].audioInputEnabled[0] == 'true' : false;
+  const tdfAudioEnabled = curTdfContent.tdfs.tutor.setspec.audioInputEnabled ?
+      curTdfContent.tdfs.tutor.setspec.audioInputEnabled == 'true' : false;
   const audioEnabled = !Session.get('experimentTarget') ? (tdfAudioEnabled && userAudioToggled) : tdfAudioEnabled;
   Session.set('audioEnabled', audioEnabled);
 
@@ -460,8 +462,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     // and going to the practice set
     Meteor.call('getUserSpeechAPIKey', function(error, key) {
       Session.set('speechAPIKey', key);
-      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey &&
-          !!curTdfContent.tdfs.tutor.setspec[0].speechAPIKey[0];
+      const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
+          !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
         console.log('speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');

@@ -1,0 +1,29 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Statistics Cloze Sentence Experiment (demo)",
+            "stimulusfile": "SVO4stims.json",
+            "experimentTarget": "svo",
+            "randomizedDelivery": "3",
+            "userselect": "true",
+            "condition": [
+                "SVOnumbak0tdf.xml",
+                "SVOnumbak1tdf.xml",
+                "SVOnumbak2tdf.xml",
+                "SVOnumbak3tdf.xml",
+                "SVOnumfor0tdf.xml",
+                "SVOnumfor1tdf.xml",
+                "SVOnumfor2tdf.xml",
+                "SVOnumfor3tdf.xml",
+                "SVOranbak0tdf.xml",
+                "SVOranbak1tdf.xml",
+                "SVOranbak2tdf.xml",
+                "SVOranbak3tdf.xml",
+                "SVOranfor0tdf.xml",
+                "SVOranfor1tdf.xml",
+                "SVOranfor2tdf.xml",
+                "SVOranfor3tdf.xml"
+            ]
+        }
+    }
+}

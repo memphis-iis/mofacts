@@ -1,0 +1,67 @@
+{
+    "tutor": {
+        "setspec": {
+            "lessonname": "Optimized Cloze Practice of Basic Statistics",
+            "userselect": "true",
+            "stimulusfile": "SVO5stims.json",
+            "isModeled": "false",
+            "lfparameter": ".85",
+            "shuffleclusters": "0-17",
+            "simTimeout": "3500",
+            "simCorrectProb": "0.75"
+        },
+        "unit": [
+            {
+                "unitinstructions": "Here comes the optimized learning.",
+                "unitname": "Model Unit",
+                "learningsession": {
+                    "clusterlist": "0-17"
+                },
+                "deliveryparams": {
+                    "practiceseconds": "1000000",
+                    "drill": "12000000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "12000",
+                    "correctprompt": "750",
+                    "fontsize": "2",
+                    "correctscore": "1",
+                    "incorrectscore": "0"
+                }
+            },
+            {
+                "unitname": "Show the questions",
+                "unitinstructions": "Demographic Survey<br><br>\nPlease answer the following 5 quick demographic questions, which may be useful for us to understand the data we collect.",
+                "buttonorder": "fixed",
+                "deliveryparams": {
+                    "drill": "12000000",
+                    "purestudy": "16000",
+                    "skipstudy": "false",
+                    "reviewstudy": "16000",
+                    "correctprompt": "500",
+                    "fontsize": "3",
+                    "correctscore": "0",
+                    "incorrectscore": "0"
+                },
+                "buttontrial": "false",
+                "assessmentsession": {
+                    "conditiontemplatesbygroup": {
+                        "groupnames": "A",
+                        "clustersrepeated": "1",
+                        "templatesrepeated": "5",
+                        "group": "0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0 0,b,t,0                "
+                    },
+                    "initialpositions": "                A_1 A_2 A_3 A_4 A_5            ",
+                    "randomizegroups": "false",
+                    "clusterlist": "18-22",
+                    "assignrandomclusters": "false",
+                    "permutefinalresult": "0-0"
+                }
+            },
+            {
+                "unitname": "last",
+                "unitinstructions": "You are all done."
+            }
+        ]
+    }
+}
