@@ -57,7 +57,7 @@ const logLockout = _.throttle(
 
 // Return current TDF unit's lockout minutes (or 0 if none-specified)
 function currLockOutMinutes() {
-  const lockoutminutes = _.chain(Session.get('currentDeliveryParams')).prop('lockoutminutes').intval().value();
+  const lockoutminutes = parseInt(Session.get('currentDeliveryParams').lockoutminutes || 0);
   logLockout(lockoutminutes);
   return lockoutminutes;
 }
@@ -79,8 +79,8 @@ function lockoutKick() {
 function getDisplayTimeouts() {
   const unit = Session.get('currentTdfUnit');
   return {
-    'minSecs': _.chain(unit).prop('instructionminseconds').first().intval(0).value(),
-    'maxSecs': _.chain(unit).prop('instructionmaxseconds').first().intval(0).value(),
+    'minSecs': parseInt((unit ? unit.instructionminseconds : 0) || 0),
+    'maxSecs': parseInt((unit ? unit.instructionmaxseconds : 0) || 0),
   };
 }
 
@@ -243,7 +243,7 @@ function instructContinue() {
   const curUnit = Session.get('currentTdfUnit');
 
   let feedbackText = curUnit.unitinstructions && curUnit.unitinstructions.length > 0 ?
-    curUnit.unitinstructions[0].trim() : '';
+    curUnit.unitinstructions.trim() : '';
   if (feedbackText.length < 1) feedbackText = curUnit.picture ? curUnit.picture.trim() : '';
 
   // Record the fact that we just showed instruction. Also - we use a call
@@ -295,19 +295,9 @@ Template.instructions.helpers({
 
     return img;
   },
-  instructionText: function(){
-    return _.chain(Session.get('currentTdfUnit')).prop('unitinstructions').trim().value();
-   
-  },
-  instructionQuestion: function(){
-    return _.chain(Session.get('currentTdfUnit')).prop('unitinstructionsquestion').trim().value();
-  },
-  displayContinueButton: function(){
-    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
-      return false;
-    } else {
-      return true;
-    }
+
+  instructions: function() {
+    return Session.get('currentTdfUnit').unitinstructions;
   },
 
 

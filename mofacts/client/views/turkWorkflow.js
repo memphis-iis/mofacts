@@ -100,19 +100,19 @@ Template.turkWorkflow.rendered = async function() {
   allTdfs.forEach( function(tdf) {
     const tdfObject = tdf.content;
     // Make sure we have a valid TDF (with a setspec)
-    const setspec = tdfObject.tdfs.tutor.setspec[0];
+    const setspec = tdfObject.tdfs.tutor.setspec;
 
     if (!setspec) {
       return;
     }
 
     // No lesson name? that's wrong
-    const name = _.chain(setspec).prop('lessonname').first().value();
+    const name = setspec.lessonname;
     if (!name) {
       return;
     }
 
-    const expTarget = _.chain(setspec).prop('experimentTarget').first().trim().value();
+    const expTarget = setspec.experimentTarget.trim();
 
     if (expTarget.length > 0 && (isAdmin || Meteor.userId() === tdfObject.owner)) {
       $('#turkLogSelectContainer').append(

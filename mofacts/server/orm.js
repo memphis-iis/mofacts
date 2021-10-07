@@ -31,6 +31,7 @@ function getComponentState(componentState) {
     userId: componentState.userid,
     TDFId: componentState.tdfid,
     KCId: componentState.kcid,
+    hintLevel: componentState.hintlevel,
     componentType: componentState.componenttype,
     firstSeen: parseInt(componentState.firstseen),
     lastSeen: parseInt(componentState.lastseen),

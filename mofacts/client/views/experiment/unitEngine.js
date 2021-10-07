@@ -76,7 +76,7 @@ function defaultUnitEngine(curExperimentData) {
       await this.initImpl();
     },
 
-    replaceClozeWithSyllables: function(question, currentAnswerSyllables, origAnswer) {
+    replaceClozeWithSyllables: function(question, currentAnswerSyllables, origAnswer, hintLevel) {
       console.log('replaceClozeWithSyllables1: ', question, currentAnswerSyllables, origAnswer);
       if (!question || question.indexOf('_') == -1) {
         return {
@@ -89,13 +89,15 @@ function defaultUnitEngine(curExperimentData) {
       let clozeMissingSyllables = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
       const syllableIndices = currentAnswerSyllables.displaySyllableIndices;
+      const curHintLevel = hintLevel;
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
 
+
       // eslint-disable-next-line guard-for-in
-      for (let index in syllablesArray) {
-        index = parseInt(index);
+      for (index = 0; index < curHintLevel + 1; index++) {
+        index = parseInt(index); 
         if (syllableIndices.indexOf(index) != -1) {
           clozeAnswer += syllablesArray[index];
           clozeAnswerNoUnderscores += syllablesArray[index];
@@ -150,7 +152,7 @@ function defaultUnitEngine(curExperimentData) {
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
-      return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts};
+      return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts, hintLevel};
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
@@ -160,11 +162,13 @@ function defaultUnitEngine(curExperimentData) {
       let currentAnswer = currentStimAnswer;
       let clozeQuestionParts = undefined;
       let currentAnswerSyllables = undefined;
+      let cHintLevel = 0;
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
       if (probFunctionParameters) {
         console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
+        let currentHintLevel = parseInt(probFunctionParameters.hintLevel);
         if (typeof(probFunctionParameters.hintsylls) === 'undefined' ||
             !this.cachedSyllables ||
             probFunctionParameters.hintsylls.length == 0) {
@@ -183,14 +187,15 @@ function defaultUnitEngine(curExperimentData) {
         }
 
         if (currentAnswerSyllables) {
-          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts} =
-              this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer);
+          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts, hintLevel} =
+              this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer,currentHintLevel);
           if (clozeQuestion) {
             currentQuestion = clozeQuestion;
             currentAnswer = clozeMissingSyllables;
             clozeQuestionParts = cQuestionParts;
+            cHintLevel = hintLevel;
             console.log('clozeQuestionParts:', cQuestionParts);
-            const {clozeQuestion2, clozeMissingSyllables2} =
+            const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
                 this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer);
             if (clozeQuestion2) {
               currentQuestionPart2 = clozeQuestion2;
@@ -204,7 +209,7 @@ function defaultUnitEngine(curExperimentData) {
       console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
           currentAnswerSyllables, clozeQuestionParts, currentAnswer);
       return {currentQuestionPostSylls: currentQuestion, currentQuestionPart2PostSylls: currentQuestionPart2,
-        currentAnswerSyllables, clozeQuestionParts, currentAnswer};
+        currentAnswerSyllables, clozeQuestionParts, currentAnswer, cHintLevel};
     },
 
     setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, probFunctionParameters) {
@@ -270,23 +275,29 @@ function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables,
         clozeQuestionParts,
         currentAnswer,
+        cHintLevel,
       } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
           probFunctionParameters);
-
+      
+      console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',cHintLevel);  
       console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
       console.log('setUpCardQuestionAndAnswerGlobals3:', currentAnswerSyllables, clozeQuestionParts, currentAnswer);
 
       if (currentAnswerSyllables) {
         curStim.answerSyllables = currentAnswerSyllables;
+        curStim.hintLevel = cHintLevel;
       }
+
       Session.set('currentAnswerSyllables', currentAnswerSyllables);
       Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
+      Session.set('hintLevel',cHintLevel);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
       newExperimentState.currentQuestionPart2 = currentQuestionPart2PostSylls;
+      newExperimentState.hintLevel = cHintLevel;
 
       if (currentDisplay.clozeText) {
         currentDisplay.clozeText = currentQuestionPostSylls;
@@ -436,9 +447,10 @@ function modelUnitEngine() {
   }
 
   // See if they specified a probability function
-  let probFunction = _.chain(Session.get('currentTdfUnit'))
-      .prop('learningsession').first()
-      .prop('calculateProbability').first().trim().value();
+  const unit = Session.get('currentTdfUnit');
+  let probFunction = undefined;
+  if (unit.learningsession) 
+    probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
   console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
@@ -447,7 +459,7 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCard(cards) {
+  function findMinProbCard(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
     let clusterIndex=-1;
@@ -460,6 +472,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate <= currentMin) {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
@@ -477,6 +490,7 @@ function modelUnitEngine() {
         } else {
           for (let j=0; j<card.stims.length; j++) {
             const stim = card.stims[j];
+            if (hiddenItems.includes(stim.stimulusKC)) continue;
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
               clusterIndex=i;
@@ -490,7 +504,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCard(cards, ceiling) {
+  function findMaxProbCard(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -503,6 +517,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < ceiling) {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
@@ -515,7 +530,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMinProbDistCard(cards) {
+  function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let clusterIndex=-1;
@@ -528,6 +543,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
@@ -547,7 +563,7 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCardThresholdCeilingPerCard(cards) {
+  function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
     console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
@@ -560,6 +576,7 @@ function modelUnitEngine() {
       } else {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
@@ -636,7 +653,7 @@ function modelUnitEngine() {
           stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
           ptemp[count]=Math.round(100*parms.probability)/100;
-          count++;
+          count++;           
         }
       }
       console.log('calculateCardProbabilities', JSON.stringify(ptemp));
@@ -674,6 +691,7 @@ function modelUnitEngine() {
       p.questionSecsSinceFirstShown = elapsed(card.firstSeen);
       p.questionSecsPracticingOthers = secs(card.otherPracticeTime);
 
+      
       // Stimulus/cluster-version metrics
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
@@ -682,6 +700,7 @@ function modelUnitEngine() {
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
+      p.hintLevel = stim.hintLevel;
       let answerText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, stimIndex)).toLowerCase();
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
       const currentStimuliSetId = Session.get('currentStimuliSetId');
@@ -745,16 +764,20 @@ function modelUnitEngine() {
           throw new Error('We shouldn\'t ever get here, dynamic tdf cluster list error');
         }
       } else {
-        const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
-        // Figure out which cluster numbers that they want
-        console.log('setupclusterlist:', this.curUnit, sessCurUnit);
-        const unitClusterList = _.chain(this.curUnit || sessCurUnit) // TODO: shouldn't need both
-            .prop('learningsession').first()
-            .prop('clusterlist').first().trim().value();
+          const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
+          // Figure out which cluster numbers that they want
+          console.log('setupclusterlist:', this.curUnit, sessCurUnit);
+          let unitClusterList = "";
+          // TODO: shouldn't need both
+          if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
+            unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          }
+          else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
+            unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
+        }
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
-
       for (let i = 0; i < clusterList.length; ++i) {
         const nums = rangeVal(clusterList[i]);
         for (let j = 0; j < nums.length; ++j) {
@@ -783,6 +806,7 @@ function modelUnitEngine() {
       for (i = 0; i < numQuestions; ++i) {
         const card = {
           clusterKC: (curKCBase + i),
+          hintLevel: null,
           priorCorrect: 0,
           priorIncorrect: 0,
           hasBeenIntroduced: false,
@@ -809,6 +833,7 @@ function modelUnitEngine() {
             clusterKC: (curKCBase + i),
             stimIndex: j,
             stimulusKC,
+            hintLevel: 0,
             priorCorrect: 0,
             priorIncorrect: 0,
             hasBeenIntroduced: false,
@@ -835,6 +860,7 @@ function modelUnitEngine() {
           if (!(response in initResponses)) {
             initResponses[response] = {
               KCId: reponseKCMap[response],
+              hintLevel: null,
               priorCorrect: 0,
               priorIncorrect: 0,
               firstSeen: 0,
@@ -877,6 +903,7 @@ function modelUnitEngine() {
           probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
           firstSeen: card.firstSeen,
           lastSeen: card.lastSeen,
+          hintLevel: null,
           trialsSinceLastSeen: card.trialsSinceLastSeen,
           priorCorrect: card.priorCorrect,
           priorIncorrect: card.priorIncorrect,
@@ -895,6 +922,7 @@ function modelUnitEngine() {
             probabilityEstimate: stim.probabilityEstimate, // : stimProb ? stimProb.probability : null,
             firstSeen: stim.firstSeen,
             lastSeen: stim.lastSeen,
+            hintLevel: Session.get('hintLevel'),
             priorCorrect: stim.priorCorrect,
             priorIncorrect: stim.priorIncorrect,
             priorStudy: stim.priorStudy,
@@ -909,6 +937,7 @@ function modelUnitEngine() {
         const responseState = {
           userId,
           TDFId,
+          hintLevel: null,
           componentType: 'response',
           probabilityEstimate: null, // probabilityEstimates only exist for stimuli, not clusters or responses
           firstSeen: response.firstSeen,
@@ -923,8 +952,13 @@ function modelUnitEngine() {
         componentStates.push(responseState);
       }
       console.log('saveComponentStates', componentStates);
-      await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
-          Meteor.userId(), Session.get('currentTdfId'), componentStates);
+      try{
+        await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
+            Meteor.userId(), Session.get('currentTdfId'), componentStates);
+      }
+      catch (error){
+        console.error("Error saving componentstate.", error);
+      }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
       console.log('loadComponentStates start');
@@ -933,6 +967,8 @@ function modelUnitEngine() {
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
+      let hiddenItems = Session.get('hiddenItems');
+      if (hiddenItems === undefined) hiddenItems = []
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
@@ -974,7 +1010,7 @@ function modelUnitEngine() {
           const clusterKC = componentCard.KCId;
           const cardIndex = clusterKC % curKCBase;
           const componentData = _.pick(componentCard,
-              ['firstSeen', 'lastSeen', 'outcomeStack', 'priorCorrect', 'priorIncorrect', 'priorStudy',
+              ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
                 'totalPracticeDuration', 'trialsSinceLastSeen']);
           componentData.clusterKC = clusterKC;
           Object.assign(cards[cardIndex], componentData);
@@ -991,7 +1027,7 @@ function modelUnitEngine() {
             const stimulusKC = componentStim.KCId;
             const stimIndex = cards[cardIndex].stims.findIndex((x) => x.stimulusKC == stimulusKC);
             const componentStimData = _.pick(componentStim,
-                ['firstSeen', 'lastSeen', 'outcomeStack', 'priorCorrect', 'priorIncorrect', 'priorStudy',
+                ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
                   'totalPracticeDuration']);
             Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
@@ -1039,6 +1075,14 @@ function modelUnitEngine() {
         }
       }
 
+      let numVisibleCards = 0;
+      for (let i = 0; i < cardProbabilities.cards.length; i++){
+        if(cardProbabilities.cards[i].canUse){
+          numVisibleCards += cardProbabilities.cards[i].stims.length;
+        }
+      }
+      Session.set('numVisibleCards', numVisibleCards - hiddenItems.length);
+
       Object.assign(cardProbabilities, {
         numQuestionsAnswered,
         numCorrectAnswers,
@@ -1064,9 +1108,11 @@ function modelUnitEngine() {
     curUnit: (() => JSON.parse(JSON.stringify(Session.get('currentTdfUnit'))))(),
 
     unitMode: (function() {
-      const unitMode = _.chain(Session.get('currentTdfUnit'))
-          .prop('learningsession').first()
-          .prop('unitMode').trim().value() || 'default';
+      const unit = Session.get('currentTdfUnit');
+      let unitMode = 'default';
+      if(unit.learningsession && unit.learningsession.unitMode){
+        unitMode = unit.learningsession.unitMode.trim();
+      }
       console.log('UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
@@ -1082,6 +1128,7 @@ function modelUnitEngine() {
       // here. See calculateCardProbabilities for how prob.probability is
       // calculated
       this.calculateCardProbabilities();
+      const hiddenItems = Session.get('hiddenItems');
       let newClusterIndex = -1;
       let newStimIndex = -1;
       const cards = cardProbabilities.cards;
@@ -1091,11 +1138,11 @@ function modelUnitEngine() {
 
       switch (this.unitMode) {
         case 'thresholdCeiling':
-          indices = findMaxProbCardThresholdCeilingPerCard(cards);
+          indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         case 'distance':
@@ -1103,15 +1150,15 @@ function modelUnitEngine() {
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCard(cards, 1.00001);
+          indices = findMaxProbCard(cards, 1.00001, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCard(cards, 0.90);
+          indices = findMaxProbCard(cards, 0.90, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards);
+            indices = findMinProbCard(cards, hiddenItems);
           }
           break;
       }
@@ -1203,7 +1250,7 @@ function modelUnitEngine() {
       // have been seen - and we need to do this whether or NOT we are in
       // resume mode
       _.each(cardProbabilities.cards, function(card, index) {
-        if (index != cardIndex) {
+        if (index != cardIndex && card.hasBeenIntroduced) {
           card.trialsSinceLastSeen += 1;
         }
       });
@@ -1217,7 +1264,7 @@ function modelUnitEngine() {
       }
     },
 
-    cardAnswered: async function(wasCorrect, practiceTime) {
+    cardAnswered: async function(wasCorrect, practiceTime, wasReportedForRemoval) {
       // Get info we need for updates and logic below
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
@@ -1246,7 +1293,7 @@ function modelUnitEngine() {
       const stim = card.stims[whichStim];
       stim.totalPracticeDuration += practiceTime;
 
-      updateCurStudentPerformance(wasCorrect, practiceTime);
+      updateCurStudentPerformance(wasCorrect, practiceTime, wasReportedForRemoval);
 
       // Study trials are a special case: we don't update any of the
       // metrics below. As a result, we just calculate probabilities and
@@ -1254,7 +1301,7 @@ function modelUnitEngine() {
       // the only place we call it after init *and* something might have
       // changed during question selection
       if (getTestType() === 's') {
-        await this.saveComponentStates;
+        await this.saveComponentStates();
         return;
       }
 
@@ -1297,14 +1344,14 @@ function modelUnitEngine() {
             displayify(cardProbabilities.responses));
       }
 
-      await this.saveComponentStates;
+      await this.saveComponentStates();
     },
 
     unitFinished: function() {
       const session = this.curUnit.learningsession;
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
-      const maxTrials = _.chain(session).prop('maxTrials').first().intval(0).value();
+      const maxTrials = parseInt(session.maxTrials || 0);
       const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
@@ -1488,8 +1535,8 @@ function scheduleUnitEngine() {
     // Shuffle and swap final question mapping based on permutefinalresult
     // and swapfinalresults
     if (finalQuests.length > 0) {
-      const shuffles = settings.finalPermute || [''];
-      const swaps = settings.finalSwap || [''];
+      const shuffles = settings.finalPermute.split(' ');
+      const swaps = settings.finalSwap.split(' ');
       let mapping = _.range(finalQuests.length);
 
       while (shuffles.length > 0 || swaps.length > 0) {
@@ -1553,17 +1600,7 @@ function scheduleUnitEngine() {
       return settings;
     }
 
-    const rawAssess = _.safefirst(unit.assessmentsession);
-    if (!rawAssess) {
-      return settings;
-    }
-
-    // Everything comes from the asessment session as a single-value array,
-    // so just parse all that right now
-    const assess = {};
-    _.each(rawAssess, function(val, name) {
-      assess[name] = _.safefirst(val);
-    });
+    const assess = unit.assessmentsession;
 
     // Interpret TDF string booleans
     const boolVal = function(src) {
@@ -1572,10 +1609,8 @@ function scheduleUnitEngine() {
 
     // Get the setspec settings first
     settings.specType = _.display(setspec.clustermodel);
-
-    // We have a few parameters that we need in their "raw" states (as arrays)
-    settings.finalSwap = _.prop(rawAssess, 'swapfinalresult') || [''];
-    settings.finalPermute = _.prop(rawAssess, 'permutefinalresult') || [''];
+    settings.finalSwap = assess.swapfinalresult || '';
+    settings.finalPermute = assess.permutefinalresult || '';
 
     // The "easy" "top-level" settings
     extractDelimFields(assess.initialpositions, settings.initialPositions);
@@ -1618,6 +1653,8 @@ function scheduleUnitEngine() {
       extractDelimFields(byGroup.templatesrepeated, settings.numTemplatesList);
       extractDelimFields(byGroup.initialpositions, settings.initialPositions);
 
+      // Group can be either string or array. If its just a string then we need to pass it into settings as an array. 
+      if(settings.groupNames.length > 1){
       _.each(byGroup.group, function(tdfGroup) {
         const newGroup = [];
         extractDelimFields(tdfGroup, newGroup);
@@ -1625,6 +1662,16 @@ function scheduleUnitEngine() {
           settings.groups.push(newGroup);
         }
       });
+    }
+    else{
+      const newGroup = []
+      extractDelimFields(byGroup.group, newGroup);
+      if (newGroup.length > 0) {
+        settings.groups.push(newGroup);
+      }
+    }
+
+//      extractDelimFields(byGroup.group, settings.groups);
 
       if (settings.groups.length != settings.groupNames.length) {
         console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
@@ -1678,7 +1725,7 @@ function scheduleUnitEngine() {
 
       const curUnitNum = Session.get('currentUnitNumber');
       const file = Session.get('currentTdfFile');
-      const setSpec = file.tdfs.tutor.setspec[0];
+      const setSpec = file.tdfs.tutor.setspec;
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
       console.log('creating schedule with params:', setSpec, curUnitNum, currUnit);

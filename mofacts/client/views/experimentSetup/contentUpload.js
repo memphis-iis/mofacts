@@ -26,7 +26,7 @@ function userFilesRefresh() {
         }
       }
       const stimuliSetId = tdf.stimuliSetId;
-      let stimFileName = tdf.content.tdfs.tutor.setspec[0].stimulusfile;
+      let stimFileName = tdf.content.tdfs.tutor.setspec.stimulusfile;
       if (stimFileName) stimFileName = stimFileName[0];
       if (stimuliSetId && stimFileName) {
         try {
