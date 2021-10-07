@@ -365,7 +365,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   return componentStates;
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const res = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
@@ -390,24 +390,24 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       }
 
       const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
-          firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-          priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-          priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-          WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
-          RETURNING componentStateId';
+        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
+        RETURNING componentStateId';
       try {
         const componentStateId = await t.one(updateQuery, componentState);
         resArr.push(componentStateId);
       } catch (e) {
-        // ComponentState didn't exist before so we'll insert it
+      // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
           const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
-            probabilityEstimate,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-            ${probabilityEstimate},${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+            ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
             ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
             RETURNING componentStateId',
-          componentState);
+            componentState);
         } else {
           resArr.push('not caught error:', e);
         }
@@ -1039,13 +1039,14 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
   return ret.count;
 }
 
-async function getStudentReportingData(userId, TDFid) {
+async function getStudentReportingData(userId, TDFid, hintLevel) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
                  unnest(string_to_array(outcomestack,\',\')) WITH ORDINALITY as outcome \
-                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2 GROUP BY ordinality \
+                 WHERE componentType=\'stimulus\' AND USERId=$1 AND TDFId=$2'
+                 + 'AND hintLevel=$3' + ' GROUP BY ordinality \
                  ORDER BY ORDINALITY ASC LIMIT 5;';
-  const dataRet = await db.manyOrNone(query, [userId, TDFid]);
+  const dataRet = await db.manyOrNone(query, [userId, TDFid, hintLevel]);
   const correctnessAcrossRepetitions = [];
   for (const curData of dataRet) {
     const numCorrect = parseInt(curData.numcorrect);
@@ -1072,7 +1073,7 @@ async function getStudentReportingData(userId, TDFid) {
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
@@ -1081,8 +1082,9 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' AND s.showitem = true';
-  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
+               AND s.hintLevel=$3;';
+  const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
                   WHERE s.userId=$1 AND s.tdfid=$2';                  

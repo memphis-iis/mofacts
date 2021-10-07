@@ -71,13 +71,16 @@ Template.studentReporting.helpers({
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
-  curStudentPerformaceCorrectInInteger: function() {
-    var percentCorrectInteger = parseFloat(Session.get('curStudentPerformance').percentCorrect).toFixed(0);
+  curStudentPerformanceCorrectInInteger: function() {
+    var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
   },
+  hintLevelsActive: () => Session.get('hintLevelsActive'),
   studentUsername: () => Session.get('studentUsername'),
   stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
+  stimCount: () => Session.get('stimCount'),
+  stimsSeen: () => Session.get('stimsSeen'),
   INVALID: INVALID,
 });
 
@@ -120,26 +123,56 @@ Template.studentReporting.rendered = async function() {
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
     const selectedTdfId = $(event.currentTarget).val();
-    updateDashboard(selectedTdfId);
+    let hintLevel = $('#hintlevel-select').val();
+    if(hintLevel == 0){
+      hintLevel = null;
+    }
+    updateDashboard(selectedTdfId, hintLevel)
+    
+  },
+  'change #hintlevel-select': async function(event) {
+    let hintLevel = $(event.currentTarget).val();
+    const selectedTdfId = $('#tdf-select').val();
+    if(hintLevel == "0"){
+      hintLevel = null;
+    }
+    updateDashboard(selectedTdfId, hintLevel)
   },
 });
 
-async function updateDashboard(selectedTdfId){
+async function updateDashboard(selectedTdfId, hintlevel=null){
   console.log('change tdf select', selectedTdfId);
   if (selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
+    $(`#select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, hintlevel);
+    console.log("studentData loaded...",studentData);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,hintlevel);
 
     console.log('studentData', studentData);
-
+    console.log('curStudentGraphData',curStudentGraphData);
+    
+    setUpHintLevelSelection(studentID, selectedTdfId);
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawCharts(studentData);
     drawDashboard(curStudentGraphData, studentData);
     $('#tdf-select').val(selectedTdfId);
   }
+}
+
+async function setUpHintLevelSelection(studentID, selectedTdfId) {
+  let hintLevels = [];
+    for(i=0;i<4;i++){
+      const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, selectedTdfId, i.toString());
+      console.log('i totalStimCount',i,totalStimCount)
+      if(totalStimCount > 0){
+        hintLevels.push(i);
+      }
+    }
+    console.log('hintLevels',hintLevels);
+  Session.set('hintLevelsActive',hintLevels);
 }
 
 function drawCharts(studentData) {
@@ -283,8 +316,10 @@ function lookUpLabelByDataValue(labels, series, value) {
 async function drawDashboard(curStudentGraphData, studentData){
   //Get Data from session variableS
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
-  percentCorrect = numCorrect / stimsSeen * 100;
-  percentStimsSeen = stimsSeen / totalStimCount * 100;
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
+  percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
+  console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
+  percentStimsSeen = totalAttempts / parseFloat(totalStimCount) * 100;
   // Perform calculated data
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
@@ -297,12 +332,12 @@ async function drawDashboard(curStudentGraphData, studentData){
     }
   stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
   stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
+  Session.set('stimCount',parseFloat(totalStimCount));
+  Session.set('stimsSeen',stimsSeen);
   
-      
-  
-
   //Draw Dashboard
   let dashCluster = [];
   dashClusterCanvases = document.getElementsByClassName('dashCanvas');
