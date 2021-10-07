@@ -390,26 +390,26 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       }
 
       const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
-      firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
-      priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
-      priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-      WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
-      RETURNING componentStateId';
-  try {
-    const componentStateId = await t.one(updateQuery, componentState);
-    resArr.push(componentStateId);
-  } catch (e) {
-    // ComponentState didn't exist before so we'll insert it
-    if (e.name == 'QueryResultError') {
-      const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
-        probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
-        totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
-        ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
-        ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
-        RETURNING componentStateId',
-      componentState);
-    } else {
-      resArr.push('not caught error:', e);
+        firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+        priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
+        priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
+        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
+        RETURNING componentStateId';
+      try {
+        const componentStateId = await t.one(updateQuery, componentState);
+        resArr.push(componentStateId);
+      } catch (e) {
+      // ComponentState didn't exist before so we'll insert it
+        if (e.name == 'QueryResultError') {
+          const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
+            probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
+            totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
+            ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
+            ${priorStudy},${totalPracticeDuration},${outcomeStack}) \
+            RETURNING componentStateId',
+            componentState);
+        } else {
+          esArr.push('not caught error:', e);
         }
       }
     }
@@ -1085,7 +1085,6 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
                WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
                AND s.hintLevel=$3;';
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
-
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
                   WHERE s.userId=$1 AND s.tdfid=$2';                  
