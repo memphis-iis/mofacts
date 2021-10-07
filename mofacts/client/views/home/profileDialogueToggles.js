@@ -11,8 +11,13 @@ const _randomizeSelectedDialogueType = () => {
 
 Template.profileDialogueToggles.created = function() {
   // _randomizeSelectedDialogueType();
-  if(_state.get('selectedDialogueType') === undefined){
-    _state.set('selectedDialogueType', 'simple')
+  let feedbackTypeDefault = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.feedbackType || "simple";
+  //If the user is allowed to choose a feedback type then default to the last type chosen by this user for this tdf. 
+  if(Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect){
+    _state.set('selectedDialogueType', Session.get('feedbackTypeFromHistory') || feedbackTypeDefault);
+  }
+  else{
+    _state.set('selectedDialogueType', feedbackTypeDefault);
   }
 };
 

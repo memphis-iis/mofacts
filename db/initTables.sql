@@ -74,7 +74,7 @@ CREATE TABLE item (
     tags JSONB
 );
 
-CREATE TYPE outcomeType AS ENUM ('correct','incorrect');
+CREATE TYPE outcomeType AS ENUM ('correct','incorrect', 'removal');
 CREATE TYPE feedbackTypeOptions AS ENUM ('simple','refutational','dialogue');
 
 CREATE TABLE history ( 
@@ -150,6 +150,7 @@ CREATE TABLE componentState (
     userId CHAR(17) NOT NULL,
     TDFId INTEGER REFERENCES tdf (TDFId),
     KCId INTEGER NOT NULL,
+    showItem BOOLEAN DEFAULT TRUE,
     componentType componentStateType NOT NULL,
     hintLevel INTEGER,
     probabilityEstimate NUMERIC(4,3),
