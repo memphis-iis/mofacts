@@ -72,12 +72,14 @@ Template.studentReporting.helpers({
   curClass: () => Session.get('curClass'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   curStudentPerformaceCorrectInInteger: function() {
-    var percentCorrectInteger = parseFloat(Session.get('curStudentPerformance').percentCorrect).toFixed(0);
+    var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
   },
   studentUsername: () => Session.get('studentUsername'),
   stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
+  stimCount: () => Session.get('stimCount'),
+  stimsSeen: () => Session.get('stimsSeen'),
   INVALID: INVALID,
 });
 
@@ -120,21 +122,33 @@ Template.studentReporting.rendered = async function() {
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
     const selectedTdfId = $(event.currentTarget).val();
-    updateDashboard(selectedTdfId);
+    let hintLevel = $('#hintlevel-select').val();
+    if(hintLevel == 0){
+      hintLevel = null;
+    }
+    updateDashboard(selectedTdfId, hintLevel)
+  },
+  'change #hintlevel-select': async function(event) {
+    let hintLevel = $(event.currentTarget).val();
+    const selectedTdfId = $('#tdf-select').val();
+    if(hintLevel == "0"){
+      hintLevel = null;
+    }
+    updateDashboard(selectedTdfId, hintLevel)
   },
 });
 
-async function updateDashboard(selectedTdfId){
+async function updateDashboard(selectedTdfId, hintlevel=null){
   console.log('change tdf select', selectedTdfId);
   if (selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId);
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, hintlevel);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,hintlevel);
 
     console.log('studentData', studentData);
-
+    
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawCharts(studentData);
     drawDashboard(curStudentGraphData, studentData);
@@ -283,8 +297,9 @@ function lookUpLabelByDataValue(labels, series, value) {
 async function drawDashboard(curStudentGraphData, studentData){
   //Get Data from session variableS
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
-  percentCorrect = numCorrect / stimsSeen * 100;
-  percentStimsSeen = stimsSeen / totalStimCount * 100;
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
+  percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
+  percentStimsSeen = totalAttempts / parseFloat(totalStimCount) * 100;
   // Perform calculated data
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
@@ -297,8 +312,11 @@ async function drawDashboard(curStudentGraphData, studentData){
     }
   stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
   stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
+  Session.set('stimCount',parseFloat(totalStimCount));
+  Session.set('stimsSeen',stimsSeen);
   
       
   
