@@ -99,7 +99,6 @@ Template.studentReporting.rendered = async function() {
   const studentID = Session.get('curStudentID') || Meteor.userId();
   console.log('student,', studentUsername, studentID);
 
-
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
   Session.set('studentReportingTdfs', tdfsAttempted);
   console.log('studentReportingTdfs', tdfsAttempted);

@@ -16,7 +16,6 @@ import {meteorCallAsync} from '../../index';
 import {displayify} from '../../../common/globalHelpers';
 import {Answers} from './answerAssess';
 
-
 export {createScheduleUnit, createModelUnit, createEmptyUnit};
 
 async function create(func, curExperimentData) {
@@ -108,12 +107,10 @@ function defaultUnitEngine(curExperimentData) {
             clozeAnswer += '__ __';
             clozeAnswerOnlyUnderscores += '__ __';
             clozeMissingSyllables += syllablesArray[index];
-
           } else {
             clozeAnswer += '____';
             clozeAnswerOnlyUnderscores += '____';
             clozeMissingSyllables += syllablesArray[index];
-
           }
         }
 
@@ -128,7 +125,7 @@ function defaultUnitEngine(curExperimentData) {
           nextChar = reconstructedAnswer.length;
         }
       }
-      
+
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
 
@@ -206,8 +203,8 @@ function defaultUnitEngine(curExperimentData) {
             // TODO we should use clozeMissingSyllables2 probably,
             // doubtful that syllables will work with two part questions for now
           }
-        } 
-      } 
+        }
+      }
 
       console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
           currentAnswerSyllables, clozeQuestionParts, currentAnswer);
@@ -649,7 +646,6 @@ function modelUnitEngine() {
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const parms = this.calculateSingleProb(i, j, count);
-
           stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
           ptemp[count]=Math.round(100*parms.probability)/100;
@@ -665,7 +661,7 @@ function modelUnitEngine() {
     calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, i) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
-      
+
       // Store parameters in an object for easy logging/debugging
       const p = {};
 
@@ -693,7 +689,7 @@ function modelUnitEngine() {
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
-            
+
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
@@ -761,17 +757,17 @@ function modelUnitEngine() {
           throw new Error('We shouldn\'t ever get here, dynamic tdf cluster list error');
         }
       } else {
-        const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
-        // Figure out which cluster numbers that they want
-        console.log('setupclusterlist:', this.curUnit, sessCurUnit);
-    let unitClusterList = "";
-    // TODO: shouldn't need both
-    if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
-      unitClusterList = this.curUnit.learningsession.clusterlist.trim()
-    }
-    else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
-      unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
-    }
+          const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
+          // Figure out which cluster numbers that they want
+          console.log('setupclusterlist:', this.curUnit, sessCurUnit);
+          let unitClusterList = "";
+          // TODO: shouldn't need both
+          if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
+            unitClusterList = this.curUnit.learningsession.clusterlist.trim()
+          }
+          else if (sessCurUnit && sessCurUnit.learningsession && sessCurUnit.learningsession.clusterlist){
+            unitClusterList = sessCurUnit.learningsession.clusterlist.trim();
+        }
         extractDelimFields(unitClusterList, clusterList);
       }
       console.log('clusterList', clusterList);
@@ -964,10 +960,9 @@ function modelUnitEngine() {
       let numCorrectAnswers = 0;
       const probsMap = {};
       const cards = cardProbabilities.cards;
-
       let hiddenItems = Session.get('hiddenItems');
       if (hiddenItems === undefined) hiddenItems = []
-      
+
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
       console.log('loadComponentStates,componentStates:', componentStates);
@@ -1027,7 +1022,7 @@ function modelUnitEngine() {
             const componentStimData = _.pick(componentStim,
                 ['firstSeen', 'lastSeen', 'outcomeStack','hintLevel', 'priorCorrect', 'priorIncorrect', 'priorStudy',
                   'totalPracticeDuration']);
-                  Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
+            Object.assign(cards[cardIndex].stims[stimIndex], componentStimData);
             cards[cardIndex].stims[stimIndex].hasBeenIntroduced = componentStim.firstSeen > 0;
             const stimProbs = stimProbabilityEstimates[stimulusKC] || [];
             if (stimProbs && stimProbs.length > 0) {
