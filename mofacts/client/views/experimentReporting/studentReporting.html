@@ -16,13 +16,19 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curStudentPerformance.totalTimeDisplay}} minutes.
+        for {{curStudentPerformance.totalTimeDisplay}} minutes. This is your progress report for
+      <select id="hintlevel-select">
+        <option value="0">hint level 0</option>
+        <option value="1">hint level 1</option>
+        <option value="2">hint level 2</option>
+        <option value="3">hint level 3</option>
+      </select>.
   
     <div class="row" style="padding-top:20px;">
       <div class="gauge col-sm-6 col-xs-12">
-        <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{curStudentPerformance.stimsSeen}}</b></div>  
+        <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}}</b></div>  
         <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-          <p style="font-size: x-small;">Items out of the {{curStudentPerformance.totalStimCount}} total items for this unit.</p>      
+          <p style="font-size: x-small;">Items out of the {{stimCount}} total items for this unit.</p>      
       </div>
       <div class="gauge col-sm-6 col-xs-12">
           <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{curStudentPerformaceCorrectInInteger}}%</b></div>  
@@ -50,7 +56,7 @@
       <table border="0" class="halfWidth centerForDesktop">
         <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (min)</th></tr>
         <tr>
-          <td>{{curStudentPerformance.percentCorrect}}</td>
+          <td>{{curStudentPerformaceCorrectInInteger}}%</td>
           <td>{{curStudentPerformance.count}}</td>
           <td>{{curStudentPerformance.totalTimeDisplay}}</td>
         </tr>

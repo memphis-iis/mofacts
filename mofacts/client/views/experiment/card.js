@@ -1594,6 +1594,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const answerLogRecord = {
     'itemId': itemId,
     'KCId': stimulusKC,
+    'hintLevel': Session.get('hintLevel'),
     'userId': Meteor.userId(),
     'TDFId': Session.get('currentTdfId'),
     'eventStartTime': trialStartTimestamp,
