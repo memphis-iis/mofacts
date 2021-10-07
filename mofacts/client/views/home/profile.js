@@ -409,6 +409,8 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   Session.set('audioPromptQuestionVolume', audioPromptQuestionVolume);
   const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
+  const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
+  Session.set('feedbackTypeFromHistory', feedbackType)
 
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
   Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);

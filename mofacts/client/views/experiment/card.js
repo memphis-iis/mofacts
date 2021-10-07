@@ -2704,8 +2704,6 @@ async function getFeedbackParameters(){
   } 
 }
 
-
-
 async function checkSyllableCacheForCurrentStimFile(cb) {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});

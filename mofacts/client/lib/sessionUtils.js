@@ -72,6 +72,7 @@ function sessionCleanUp() {
   Session.set('currentDeliveryParams', {});
   Session.set('currentExperimentState', undefined);
   Session.set('displayFeedback',undefined);
+  Session.set('feedbackTypeFromHistory', undefined);
 
   Session.set('curTeacher', undefined);
   Session.set('clusterIndex', undefined);
