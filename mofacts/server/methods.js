@@ -713,6 +713,25 @@ async function setExperimentState(UserId, TDFId, newExperimentState, where) { //
   return TDFId;
 }
 
+async function insertHiddenItem(userId, stimulusKC, tdfId) {
+  let query = "UPDATE componentstate SET showitem = FALSE WHERE userid = $1  AND tdfid = $2 AND kcid = $3 AND componenttype = 'stimulus'";
+  await db.manyOrNone(query, [userId, tdfId, stimulusKC]);
+}
+
+async function getHiddenItems(userId, tdfId) {
+  let query = "SELECT kcid FROM componentstate WHERE userid = $1 AND tdfid = $2 AND showitem = false AND componenttype = 'stimulus'";
+  const res = await db.manyOrNone(query, [userId, tdfId]);
+  let hiddenItems = [];
+  for(let item in res){
+    hiddenItems.push(res[item].kcid);
+  }
+  return hiddenItems;
+}
+async function getUserLastFeedbackTypeFromHistory(tdfID) {
+  const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
+  const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
+  return feedbackType;
+}
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
@@ -1063,9 +1082,10 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
                AND s.hintLevel=$3;';
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
+
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
                   WHERE s.userId=$1 AND s.tdfid=$2';                  
@@ -1635,6 +1655,8 @@ Meteor.startup(async function() {
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
+    insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
+
     getAltServerUrl: function() {
       return altServerUrl;
     },
@@ -1943,9 +1965,11 @@ Meteor.startup(async function() {
       serverConsole('saveUsersFile: ' + filename);
       const allErrors = [];
       let rows = Papa.parse(filecontents).data;
+      serverConsole(rows);
       rows = rows.slice(1);
       for (const index in rows) {
         const row = rows[index];
+        serverConsole(row);
         const username = row[0];
         const password = row[1];
         serverConsole('username: ' + username + ', password: ' + password);

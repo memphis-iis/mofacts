@@ -59,6 +59,10 @@ function sessionCleanUp() {
 
   Session.set('schedule', undefined);
 
+  Session.set('wasReportedForRemoval', false);
+  Session.set('hiddenItems', []);
+  Session.set('numVisibleCards', 0);
+
   Session.set('currentRootTdfId', undefined);
   Session.set('currentTdfName', undefined);
   Session.set('currentTdfId', undefined);
@@ -68,6 +72,7 @@ function sessionCleanUp() {
   Session.set('currentDeliveryParams', {});
   Session.set('currentExperimentState', undefined);
   Session.set('displayFeedback',undefined);
+  Session.set('feedbackTypeFromHistory', undefined);
 
   Session.set('curTeacher', undefined);
   Session.set('clusterIndex', undefined);
