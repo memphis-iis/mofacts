@@ -727,7 +727,11 @@ async function getHiddenItems(userId, tdfId) {
   }
   return hiddenItems;
 }
-
+async function getUserLastFeedbackTypeFromHistory(tdfID) {
+  const query = "SELECT feedbackType FROM HISTORY WHERE TDFId = $1 AND userId = $2 ORDER BY eventid DESC LIMIT 1";
+  const feedbackType = await db.oneOrNone(query, [tdfID, Meteor.userId]);
+  return feedbackType;
+}
 async function insertHistory(historyRecord) {
   const tdfFileName = historyRecord['Condition_Typea'];
   const dynamicTagFields = await getListOfStimTags(tdfFileName);
@@ -1648,7 +1652,7 @@ Meteor.startup(async function() {
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
-    insertHiddenItem, getHiddenItems,
+    insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
     getAltServerUrl: function() {
       return altServerUrl;
