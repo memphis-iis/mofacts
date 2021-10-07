@@ -152,6 +152,7 @@ CREATE TABLE componentState (
     KCId INTEGER NOT NULL,
     showItem BOOLEAN DEFAULT TRUE,
     componentType componentStateType NOT NULL,
+    hintLevel INTEGER,
     probabilityEstimate NUMERIC(4,3),
     firstSeen BIGINT NOT NULL,
     lastSeen BIGINT NOT NULL,
