@@ -365,7 +365,7 @@ async function getComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId) {
   return componentStates;
 }
 
-async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates) {
+async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componentStates, hintLevel) {
   serverConsole('setComponentStatesByUserIdTDFIdAndUnitNum, ', userId, TDFId);
   const res = await db.tx(async (t) => {
     const responseKCMap = await getReponseKCMap();
@@ -390,10 +390,10 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       }
 
       const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
-      hintLevel=${hintLevel}, firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
+      firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
       priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
       priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-      WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
+      WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
       RETURNING componentStateId';
   try {
     const componentStateId = await t.one(updateQuery, componentState);
