@@ -11,8 +11,19 @@
         <div class="row">
             <div class="col-lg-offset-2 col-lg-8">
                 <div class="body">
-                    {{{instructions}}}
+                    <div>
+                        <h3>Instructions:</h3>
+                        {{{instructionText}}}
+                    </div>
+                    {{#if instructionQuestion}}
+                        <div id="instructionQuestion"> 
+                            <h3>{{instructionQuestion}}</h3>
+                            <button id="instructionQuestionAffrimative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">Yes</button>
+                            <button id="instructionQuestionNegative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">No</button>
+                        </div>
+                    {{/if}}
                 </div>
+                
 
                 <br>
                 <div class="form-group">
@@ -32,21 +43,23 @@
 
     <!-- Use a fixed footer if we have something to show -->
     {{#if allowcontinue}}
-    <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
-        <div class="container">
-            <div class="navbar-header" style="width:100%">
-                <ul class="nav nav-justified">
-                    <li>&nbsp;</li>
-                    <li class="text-center">
-                        <button type="button" id="continueButton" class="marginLeftAndRight button btn navbar-btn text-center" style="text-align:center; white-space: nowrap;">
-                            Continue
-                            <span id="displayTimeoutMsg"></span>
-                        </button>
-                    </li>
-                    <li>&nbsp;</li>
-                </ul>
-            </div>  <!-- close header -->
-        </div>  <!-- close container -->
-    </nav>  <!-- close nav -->
+        {{#if displayContinueButton}}
+        <nav class="navbar navbar-inverse navbar-fixed-bottom" role="navigation">
+            <div class="container">
+                <div class="navbar-header" style="width:100%">
+                    <ul class="nav nav-justified">
+                        <li>&nbsp;</li>
+                        <li class="text-center">
+                            <button type="button" id="continueButton" class="marginLeftAndRight button btn navbar-btn text-center" style="text-align:center; white-space: nowrap;">
+                                Continue
+                                <span id="displayTimeoutMsg"></span>
+                            </button>
+                        </li>
+                        <li>&nbsp;</li>
+                    </ul>
+                </div>  <!-- close header -->
+            </div>  <!-- close container -->
+        </nav>  <!-- close nav -->
+        {{/if}}
     {{/if}}
 </template>
