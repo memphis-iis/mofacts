@@ -300,7 +300,6 @@ Template.instructions.helpers({
     return Session.get('currentTdfUnit').unitinstructions;
   },
 
-
   islockout: function() {
     return currLockOutMinutes() > 0;
   },
