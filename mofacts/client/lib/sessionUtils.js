@@ -91,7 +91,7 @@ function sessionCleanUp() {
   Session.set('clozeQuestionParts', undefined);
 
   Session.set('currentUnitStartTime', Date.now());
-  Session.set('currentScore', 0);sessionCleanUp
+  Session.set('currentScore', 0);
   Session.set('overallOutcomeHistory', []);
   Session.set('dialogueLoopStage', undefined);
   Session.set('dialogueHistory', undefined);
