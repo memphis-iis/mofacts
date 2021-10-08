@@ -91,7 +91,7 @@ function sessionCleanUp() {
   Session.set('clozeQuestionParts', undefined);
 
   Session.set('currentUnitStartTime', Date.now());
-  Session.set('currentScore', 0);
+  Session.set('currentScore', 0);sessionCleanUp
   Session.set('overallOutcomeHistory', []);
   Session.set('dialogueLoopStage', undefined);
   Session.set('dialogueHistory', undefined);
@@ -116,5 +116,8 @@ function sessionCleanUp() {
   Session.set('scoringEnabled', undefined);
   Session.set('feedbackParamsSet', undefined);
   
+  //Clear Impersonations
+  const user = Meteor.users.findOne(this.userId);
+  if (user && user.profile && user.profile.impersonating) Meteor.users.update(user._id,{ $unset: 'profile.impersonating' });       
 }
 
