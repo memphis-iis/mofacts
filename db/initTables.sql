@@ -138,7 +138,8 @@ CREATE TABLE history (
     feedbackType feedbackTypeOptions,
     dialogueHistory JSONB,
     recordedServerTime BIGINT NOT NULL,
-    hintLevel INTEGER,
+    instructionQuestionResult BOOLEAN,
+    hintLevel INTEGER
 );
 
 CREATE INDEX idx_history_userId_TDFId on history (userId,TDFId);
@@ -154,6 +155,7 @@ CREATE TABLE componentState (
     showItem BOOLEAN DEFAULT TRUE,
     componentType componentStateType NOT NULL,
     hintLevel INTEGER,
+    instructionQuestionResult BOOLEAN,
     probabilityEstimate NUMERIC(4,3),
     firstSeen BIGINT NOT NULL,
     lastSeen BIGINT NOT NULL,
