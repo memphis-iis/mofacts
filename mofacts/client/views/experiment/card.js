@@ -1685,7 +1685,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
   };
-  console.log('Rusty 1', answerLogRecord);
   return answerLogRecord;
 }
 
