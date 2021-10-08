@@ -1632,6 +1632,9 @@ Meteor.startup(async function() {
     return user;
   });
 
+
+
+
   // Set up our server-side methods
   Meteor.methods({
     getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
@@ -1823,6 +1826,17 @@ Meteor.startup(async function() {
       return createdId;
     },
 
+    //Impersonate User
+    impersonate: function(userId) {
+      check(userId, String);
+  
+      if (!Meteor.users.findOne(userId))
+        throw new Meteor.Error(404, 'User not found');
+      Meteor.users.update()
+      Meteor.users.update(this.userId);
+      this.setUserId(userId);
+      console.log(Meteor.user().profile.impersonating, ' is impersonating ', userId);
+    },
     // We provide a separate server method for user profile info - this is
     // mainly since we don't want some of this data just flowing around
     // between client and server
