@@ -1634,9 +1634,6 @@ Meteor.startup(async function() {
     return user;
   });
 
-
-
-
   // Set up our server-side methods
   Meteor.methods({
     getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
