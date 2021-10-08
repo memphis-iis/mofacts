@@ -1684,6 +1684,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Feedback_Text': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
+    'instructionQuestionResult': Session.get('instructionQuestionResult'),
   };
   return answerLogRecord;
 }

@@ -115,6 +115,8 @@ function sessionCleanUp() {
   Session.set('VADInitialized', false);
   Session.set('scoringEnabled', undefined);
   Session.set('feedbackParamsSet', undefined);
+  Session.set('instructionQuestionResult', undefined);
+  Session.set('hintLevel', undefined);
   
 }
 
