@@ -137,7 +137,8 @@ CREATE TABLE history (
     Feedback_Text TEXT,
     feedbackType feedbackTypeOptions,
     dialogueHistory JSONB,
-    recordedServerTime BIGINT NOT NULL
+    recordedServerTime BIGINT NOT NULL,
+    hintLevel INTEGER,
 );
 
 CREATE INDEX idx_history_userId_TDFId on history (userId,TDFId);
