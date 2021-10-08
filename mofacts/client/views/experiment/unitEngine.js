@@ -912,7 +912,7 @@ function modelUnitEngine() {
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
           outcomeStack: card.outcomeStack.join(','),
-          instructionQuestionResult: session.get('instructionQuestionResult'),
+          instructionQuestionResult: Session.get('instructionQuestionResult'),
         };
         componentStates.push(cardState);
         for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {

@@ -343,11 +343,9 @@ Template.instructions.events({
   'click #instructionQuestionAffrimative': function() {
     Session.set('instructionQuestionResults',true);
     $('#instructionQuestion').hide();
-
   },
   'click #instructionQuestionNegative': function() {
     Session.set('instructionQuestionResults',false);
     $('#instructionQuestion').hide();
-
   }
 });
