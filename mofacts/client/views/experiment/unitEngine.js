@@ -624,7 +624,6 @@ function modelUnitEngine() {
         resp.priorStudy += 1;
       }
     }
-    
     // If this is NOT a resume (and is just normal display mode for
     // a learner) then we need to update stats for the card
     card.trialsSinceLastSeen = 0;
@@ -679,7 +678,7 @@ function modelUnitEngine() {
       p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
       p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
       
-      // Unit metrics
+      // Intstruction metrics
       p.instructionQuestionResult = card.instructionQuestionResult;
 
       // Card/cluster metrics
