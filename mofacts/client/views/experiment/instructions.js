@@ -342,12 +342,12 @@ Template.instructions.events({
     instructContinue();
   },
   'click #instructionQuestionAffrimative': function() {
-    Session.set('instructionQuestionResults','true');
+    Session.set('instructionQuestionResults',true);
     $('#instructionQuestion').hide();
 
   },
   'click #instructionQuestionNegative': function() {
-    Session.set('instructionQuestionResults','false');
+    Session.set('instructionQuestionResults',false);
     $('#instructionQuestion').hide();
 
   }
