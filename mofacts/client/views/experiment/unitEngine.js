@@ -93,7 +93,7 @@ function defaultUnitEngine(curExperimentData) {
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
-
+      let originalAnswerWordCount = origAnswer.split(' ').length;
 
       // eslint-disable-next-line guard-for-in
       for (index = 0; index < curHintLevel + 1; index++) {
@@ -133,7 +133,16 @@ function defaultUnitEngine(curExperimentData) {
       for (let i = 0; i < clozeQuestionParts.length; i++) {
         console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
         if (clozeQuestionParts[i].charAt(0) == '_') {
-          clozeQuestionParts[i] = '<u>' + clozeAnswerNoUnderscores + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + '</u>';
+          let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
+          let clozeAnswerUnderscores = ""
+          for(j=0;j<originalAnswerWordCount+1;j++){
+            if(clozeAnswerSplit[j] !== undefined) { 
+              clozeAnswerUnderscores += '&nbsp<u>' + clozeAnswerSplit[j] + '</u>';
+            }else{
+              clozeAnswerUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</u>';
+            }           
+          }
+          clozeQuestionParts[i] = clozeAnswerUnderscores;
         }
       }
       clozeQuestionParts = clozeQuestionParts.join(' ');
@@ -163,6 +172,7 @@ function defaultUnitEngine(curExperimentData) {
       let clozeQuestionParts = undefined;
       let currentAnswerSyllables = undefined;
       let cHintLevel = 0;
+      let currentStimAnswerWordCount = currentStimAnswer.split(' ').length;
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
       if (probFunctionParameters) {
@@ -203,6 +213,16 @@ function defaultUnitEngine(curExperimentData) {
             // TODO we should use clozeMissingSyllables2 probably,
             // doubtful that syllables will work with two part questions for now
           }
+        } 
+      }else{
+        let answerLocation = currentQuestion.indexOf(' _');
+        if(answerLocation != -1){
+          let answerBlanks = ""
+          currentQuestion = currentQuestion.replaceAll("_","");
+          for(i=0;i<currentStimAnswerWordCount;i++){
+            answerBlanks += "&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>";
+          }
+          currentQuestion = currentQuestion.slice(0,answerLocation) + answerBlanks + currentQuestion.slice(answerLocation);
         }
       }
 
