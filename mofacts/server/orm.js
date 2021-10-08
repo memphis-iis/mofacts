@@ -127,6 +127,7 @@ function getHistory(history) {
     'feedbackType': history.feedbackType,
     'dynamicTagFields': history.dynamicTagFields,
     'recordedServerTime': history.recordedServerTime,
+    'hintLevel':history.hintLevel,
   };
   return historyOutput;
 }
