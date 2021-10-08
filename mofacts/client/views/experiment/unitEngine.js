@@ -680,7 +680,7 @@ function modelUnitEngine() {
       p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
       
       // Unit metrics
-      p.instructionQuestionResult = cardProbabilities.instructionQuestionResult;
+      p.instructionQuestionResult = card.instructionQuestionResult;
 
       // Card/cluster metrics
       p.questionSuccessCount = card.priorCorrect;
@@ -820,6 +820,7 @@ function modelUnitEngine() {
           trialsSinceLastSeen: 3, // We start at >2 for initial logic (see findMin/Max functions below)
           canUse: false,
           stims: [],
+          instructionQuestionResult: null,
         };
 
         // We keep per-stim and re-response-text results as well
@@ -845,6 +846,7 @@ function modelUnitEngine() {
             previousCalculatedProbabilities: [],
             priorStudy: 0,
             parameter: parameter,
+            instructionQuestionResult: null,
           });
           stimulusKC += 1;
 
@@ -868,6 +870,7 @@ function modelUnitEngine() {
               totalPracticeDuration: 0,
               priorStudy: 0,
               outcomeStack: [],
+              instructionQuestionResult: null,
             };
           }
         }
@@ -910,6 +913,7 @@ function modelUnitEngine() {
           priorStudy: card.priorStudy,
           totalPracticeDuration: card.totalPracticeDuration,
           outcomeStack: card.outcomeStack.join(','),
+          instructionQuestionResult: session.get('instructionQuestionResult'),
         };
         componentStates.push(cardState);
         for (let stimIndex=0; stimIndex<card.stims.length; stimIndex++) {
@@ -928,6 +932,7 @@ function modelUnitEngine() {
             priorStudy: stim.priorStudy,
             totalPracticeDuration: stim.totalPracticeDuration,
             outcomeStack: stim.outcomeStack.join(','),
+            instructionQuestionResult: null,
           };
           componentStates.push(stimState);
         }
@@ -948,6 +953,7 @@ function modelUnitEngine() {
           totalPracticeDuration: response.totalPracticeDuration,
           outcomeStack: response.outcomeStack.join(','),
           responseText, // not actually in db, need to lookup/assign kcid when loading
+          instructionQuestionResult: null,
         };
         componentStates.push(responseState);
       }
