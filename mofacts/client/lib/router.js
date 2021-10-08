@@ -184,7 +184,6 @@ Router.route('/', {
   name: 'client.index',
   action: function() {
     if(Meteor.user()){
-      console.log('User already logged in. Redirecting.', Meteor.user());
       this.redirect('/profile');
     } else {
       // If they are navigating to "/" then we clear the (possible) cookie
