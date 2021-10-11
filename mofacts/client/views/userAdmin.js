@@ -85,6 +85,15 @@ Template.userAdmin.events({
       alert(disp);
     });
   },
+
+  //Impersonation 
+  'click .btn-impersonate' : function(event){
+    const btnTarget = $(event.currentTarget);
+    const newUserId = _.trim(btnTarget.data('userid'));
+    Meteor.call('impersonate', newUserId);
+    Router.go('/');
+  }
+
 });
 
 function doFileUpload(fileElementSelector, fileDescrip) {
