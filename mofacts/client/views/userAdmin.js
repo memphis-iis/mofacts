@@ -89,9 +89,9 @@ Template.userAdmin.events({
   //Impersonation 
   'click .btn-impersonate' : function(event){
     const btnTarget = $(event.currentTarget);
-    const userId = _.trim(btnTarget.data('userid'));
-    Meteor.call('impersonate', userId);
-    Router.go('/profile');
+    const newUserId = _.trim(btnTarget.data('userid'));
+    Meteor.call('impersonate', newUserId);
+    Router.go('/');
   }
 
 });

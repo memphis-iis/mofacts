@@ -1828,13 +1828,15 @@ Meteor.startup(async function() {
     //Impersonate User
     impersonate: function(userId) {
       check(userId, String);
-  
       if (!Meteor.users.findOne(userId))
         throw new Meteor.Error(404, 'User not found');
-      Meteor.users.update()
-      Meteor.users.update(this.userId);
-      this.setUserId(userId);
-      console.log(Meteor.user().profile.impersonating, ' is impersonating ', userId);
+        Meteor.users.update(this.userId, { $set: { 'profile.impersonating': userId }});
+         this.setUserId(userId);
+    },
+
+    clearImpersonation: function(){
+      Meteor.users.update(this.userId, { $set: { 'profile.impersonating': false }});
+      return;
     },
     // We provide a separate server method for user profile info - this is
     // mainly since we don't want some of this data just flowing around
