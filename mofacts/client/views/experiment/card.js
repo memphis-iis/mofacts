@@ -876,13 +876,15 @@ function checkUserAudioConfigCompatability(){
 function curStimHasSoundDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
-  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
+  const audioEnabled = stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId] ? stimDisplayTypeMap[currentStimuliSetId].hasAudio : false;
+  return currentStimuliSetId && audioEnabled;
 }
 
 function curStimHasImageDisplayType() {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   const stimDisplayTypeMap = Session.get('stimDisplayTypeMap');
-  return currentStimuliSetId && stimDisplayTypeMap ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
+  const imageEnabled = stimDisplayTypeMap && stimDisplayTypeMap[currentStimuliSetId] ? stimDisplayTypeMap[currentStimuliSetId].hasImage : false;
+  return currentStimuliSetId && imageEnabled;
 }
 
 
