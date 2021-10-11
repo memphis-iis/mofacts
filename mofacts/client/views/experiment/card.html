@@ -1,6 +1,11 @@
 <template name="card">
     <div class="container" id="cardContainer">
-    {{#if displayFeedback}}
+        {{#if isImpersonating}}
+        <div class='text-center alert alert-warning'>
+                Impersonation Mode. Nothing will be logged. Log out to reset.
+        </div>
+        {{/if}}
+        {{#if displayFeedback}}
         {{>profileDialogueToggles}}
         <div>
             <br />

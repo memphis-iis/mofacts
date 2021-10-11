@@ -117,9 +117,5 @@ function sessionCleanUp() {
   Session.set('feedbackParamsSet', undefined);
   Session.set('instructionQuestionResult', undefined);
   Session.set('hintLevel', undefined);
-  
-  //Clear Impersonations
-  const user = Meteor.users.findOne(this.userId);
-  if (user && user.profile && user.profile.impersonating) Meteor.users.update(user._id,{ $unset: 'profile.impersonating' });       
 }
 
