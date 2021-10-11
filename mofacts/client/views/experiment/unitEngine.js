@@ -978,8 +978,10 @@ function modelUnitEngine() {
       }
       console.log('saveComponentStates', componentStates);
       try{
-        await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
-            Meteor.userId(), Session.get('currentTdfId'), componentStates);
+        if(!Meteor.user().profile.impersonating){
+          await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
+              Meteor.userId(), Session.get('currentTdfId'), componentStates);
+        }
       }
       catch (error){
         console.error("Error saving componentstate.", error);

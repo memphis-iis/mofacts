@@ -57,6 +57,9 @@ Template.profile.helpers({
   tdfOwnersMap: (ownerId) => {
     return Template.instance().tdfOwnersMap.get()[ownerId];
   },
+  isImpersonating: function(){
+    return Meteor.user().profile.impersonating;
+  },
 });
 
 // //////////////////////////////////////////////////////////////////////////
