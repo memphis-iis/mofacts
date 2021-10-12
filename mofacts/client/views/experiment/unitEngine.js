@@ -719,7 +719,7 @@ function modelUnitEngine() {
       p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
       p.userCorrectResponses = cardProbabilities.numCorrectAnswers;
       
-      // Intstruction metrics
+      // Instruction metrics
       p.instructionQuestionResult = card.instructionQuestionResult;
 
       // Card/cluster metrics
@@ -731,7 +731,6 @@ function modelUnitEngine() {
       p.questionSecsSinceFirstShown = elapsed(card.firstSeen);
       p.questionSecsPracticingOthers = secs(card.otherPracticeTime);
 
-      
       // Stimulus/cluster-version metrics
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
@@ -744,6 +743,17 @@ function modelUnitEngine() {
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
       const currentStimuliSetId = Session.get('currentStimuliSetId');
       answerText = answerText.replace(/\./g, '_');
+
+      if (probFunctionHasHintSylls) {
+        if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
+          console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText);
+          throw new Error('can\'t find syllable data in database');
+        } else {
+          const stimSyllableData = this.cachedSyllables.data[answerText];
+          p.syllables = stimSyllableData.count;
+          p.syllablesArray = stimSyllableData.syllables;
+        }
+      }
 
       //Hint Level Inner Loop
       p.hintLevel = hintLevel;
