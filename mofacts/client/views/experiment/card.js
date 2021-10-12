@@ -500,6 +500,9 @@ Template.card.helpers({
     }
     
   }, 
+  'isImpersonating': function(){
+    return Meteor.user().profile.impersonating;
+  },
 
   'voiceTranscriptionPromptMsg': function() {
     if(!Session.get('recording')){
@@ -1425,12 +1428,14 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       Session.set('overallOutcomeHistory', overallOutcomeHistory);
     }
     console.log('writing answerLogRecord to history:', answerLogRecord);
-    try {
-      await meteorCallAsync('insertHistory', answerLogRecord);
-      await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-    } catch (e) {
-      console.log('error writing history record:', e);
-      throw new Error('error inserting history/updating state:', e);
+    if(!Meteor.user().profile.impersonating){
+      try {
+        await meteorCallAsync('insertHistory', answerLogRecord);
+        await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+      } catch (e) {
+        console.log('error writing history record:', e);
+        throw new Error('error inserting history/updating state:', e);
+      }
     }
 
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold

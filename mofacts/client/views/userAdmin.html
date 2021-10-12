@@ -29,9 +29,11 @@
                     <th>User</th>
                     <th>Admin?</th>
                     <th>Teacher?</th>
+                    <th>Impersonate:</th>
                 </tr>
                 <tr>
                     <th>Filter: <input type="text" name="filter" id="filter" value="@gmail.com" placeholder="Filter"></th>
+                    <th></th>
                     <th></th>
                     <th></th>
                 </tr>
@@ -87,6 +89,13 @@
                             ><span class="glyphicon glyphicon-plus"></span> Add to Teachers
                             </button>
                         {{/if}}
+                    </td>
+                    <td>
+                            <button type="button"
+                            class="btn btn-fix btn-danger btn-xs btn-impersonate"
+                            data-userid="{{_id}}"
+                        ><span class="glyphicon glyphicon-blackboard"></span> Impersonate
+                        </button>
                     </td>
                 </tr>
                 {{/each}}
