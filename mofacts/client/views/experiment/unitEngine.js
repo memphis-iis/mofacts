@@ -663,25 +663,46 @@ function modelUnitEngine() {
     // the actual card/stim (cluster/version) selection
     calculateCardProbabilities: function calculateCardProbabilities() {
       let count=0;
+      let hintLevelIndex = 1;
       const ptemp=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
-          const parms = this.calculateSingleProb(i, j, count);
+          const currentStimuliSetId = Session.get('currentStimuliSetId');
+          let answerText = Answers.getDisplayAnswerText(getStimAnswer(i, j)).toLowerCase();
+          let hintLevelProbabilities = [];
+          //Detect Hint Levels
+          if (probFunctionHasHintSylls) {
+            if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
+              console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is 1.');
+            } else {
+              const stimSyllableData = this.cachedSyllables.data[answerText];
+              hintLevelIndex = stimSyllableData.count;
+              console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
+            }
+          }
+          for(let k=0; k<hintLevelIndex; k++){
+            let hintLevelParms = this.calculateSingleProb(i, j, k, count);
+            hintLevelProbabilities.push(hintLevelParms.probability);
+          }  
+          const parms = this.calculateSingleProb(i, j, 0, count);
+          stim.hintLevelProbabilites = hintLevelProbabilities;
+          console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;           
         }
       }
+
       console.log('calculateCardProbabilities', JSON.stringify(ptemp));
     },
 
     // Given a single item from the cardProbabilities, calculate the
     // current probability. IMPORTANT: this function only returns ALL parameters
     // used which include probability. The caller is responsible for storing it.
-    calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, i) {
+    calculateSingleProb: function calculateSingleProb(cardIndex, stimIndex, hintLevel, i) {
       const card = cardProbabilities.cards[cardIndex];
       const stim = card.stims[stimIndex];
 
@@ -715,27 +736,18 @@ function modelUnitEngine() {
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
-
+      
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
-      p.hintLevel = stim.hintLevel;
       let answerText = Answers.getDisplayAnswerText(getStimAnswer(cardIndex, stimIndex)).toLowerCase();
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
       const currentStimuliSetId = Session.get('currentStimuliSetId');
       answerText = answerText.replace(/\./g, '_');
 
-      if (probFunctionHasHintSylls) {
-        if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
-          console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText);
-          throw new Error('can\'t find syllable data in database');
-        } else {
-          const stimSyllableData = this.cachedSyllables.data[answerText];
-          p.syllables = stimSyllableData.count;
-          p.syllablesArray = stimSyllableData.syllables;
-        }
-      }
-
+      //Hint Level Inner Loop
+      p.hintLevel = hintLevel;
+      
       p.resp = cardProbabilities.responses[p.stimResponseText];
       p.responseSuccessCount = p.resp.priorCorrect;
       p.responseFailureCount = p.resp.priorIncorrect;
