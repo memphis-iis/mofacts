@@ -78,6 +78,9 @@ function userPasswordCheck() {
   // Hide previous errors
   $('.errcheck').hide();
 
+  //Clear Impersonations
+  Meteor.call('clearImpersonation');
+  
   const experiment = Session.get('loginMode') === 'experiment';
   const experimentPasswordRequired = Session.get('experimentPasswordRequired');
   let newUsername = _.trim($('#signInUsername').val());

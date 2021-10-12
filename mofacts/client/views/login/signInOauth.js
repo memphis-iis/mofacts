@@ -44,6 +44,7 @@ function testLogin() {
       return;
     }
 
+    Meteor.call('clearImpersonation');
     sessionCleanUp();
 
     // Note that we force Meteor to think we have a user name so that
