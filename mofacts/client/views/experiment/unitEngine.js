@@ -714,7 +714,6 @@ function modelUnitEngine() {
           count++;           
         }
       }
-
       console.log('calculateCardProbabilities', JSON.stringify(ptemp));
     },
 
@@ -754,7 +753,7 @@ function modelUnitEngine() {
       p.stimSecsSinceLastShown = elapsed(stim.lastSeen);
       p.stimSecsSinceFirstShown = elapsed(stim.firstSeen);
       p.stimSecsPracticingOthers = secs(stim.otherPracticeTime);
-      
+
       p.stimSuccessCount = stim.priorCorrect;
       p.stimFailureCount = stim.priorIncorrect;
       p.stimStudyTrialCount = stim.priorStudy;
@@ -774,7 +773,6 @@ function modelUnitEngine() {
         }
       }
 
-      //Hint Level Inner Loop
       p.hintLevel = hintLevel;
       
       p.resp = cardProbabilities.responses[p.stimResponseText];
