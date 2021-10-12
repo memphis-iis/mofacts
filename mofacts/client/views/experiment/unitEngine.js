@@ -96,7 +96,7 @@ function defaultUnitEngine(curExperimentData) {
       let originalAnswerWordCount = origAnswer.split(' ').length;
 
       // eslint-disable-next-line guard-for-in
-      for (index = 0; index < curHintLevel + 1; index++) {
+      for (index = 0; index < curHintLevel; index++) {
         index = parseInt(index); 
         if (syllableIndices.indexOf(index) != -1) {
           clozeAnswer += syllablesArray[index];
@@ -165,13 +165,12 @@ function defaultUnitEngine(curExperimentData) {
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
-        currentStimAnswer, probFunctionParameters) {
+        currentStimAnswer, probFunctionParameters, hintLevel) {
       console.log('setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
           currentStimAnswer, probFunctionParameters);
       let currentAnswer = currentStimAnswer;
       let clozeQuestionParts = undefined;
       let currentAnswerSyllables = undefined;
-      let cHintLevel = 0;
       let currentStimAnswerWordCount = currentStimAnswer.split(' ').length;
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
@@ -197,13 +196,12 @@ function defaultUnitEngine(curExperimentData) {
         }
 
         if (currentAnswerSyllables) {
-          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts, hintLevel} =
-              this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer,currentHintLevel);
+          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts, cHintLevel} =
+              this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer,hintLevel);
           if (clozeQuestion) {
             currentQuestion = clozeQuestion;
             currentAnswer = clozeMissingSyllables;
             clozeQuestionParts = cQuestionParts;
-            cHintLevel = hintLevel;
             console.log('clozeQuestionParts:', cQuestionParts);
             const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
                 this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer);
@@ -229,10 +227,10 @@ function defaultUnitEngine(curExperimentData) {
       console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
           currentAnswerSyllables, clozeQuestionParts, currentAnswer);
       return {currentQuestionPostSylls: currentQuestion, currentQuestionPart2PostSylls: currentQuestionPart2,
-        currentAnswerSyllables, clozeQuestionParts, currentAnswer, cHintLevel};
+        currentAnswerSyllables, clozeQuestionParts, currentAnswer, hintLevel};
     },
 
-    setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, probFunctionParameters) {
+    setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, whichHintLevel = 0, probFunctionParameters,) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
@@ -295,29 +293,28 @@ function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables,
         clozeQuestionParts,
         currentAnswer,
-        cHintLevel,
       } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
-          probFunctionParameters);
+          probFunctionParameters, whichHintLevel);
       
-      console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',cHintLevel);  
+      console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);  
       console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
       console.log('setUpCardQuestionAndAnswerGlobals3:', currentAnswerSyllables, clozeQuestionParts, currentAnswer);
 
       if (currentAnswerSyllables) {
         curStim.answerSyllables = currentAnswerSyllables;
-        curStim.hintLevel = cHintLevel;
+        curStim.hintLevel = whichHintLevel;
       }
 
       Session.set('currentAnswerSyllables', currentAnswerSyllables);
       Session.set('currentAnswer', currentAnswer);
       Session.set('clozeQuestionParts', clozeQuestionParts);
       Session.set('currentQuestionPart2', currentQuestionPart2PostSylls);
-      Session.set('hintLevel',cHintLevel);
+      Session.set('hintLevel',whichHintLevel);
       newExperimentState.currentAnswerSyllables = currentAnswerSyllables;
       newExperimentState.currentAnswer = currentAnswer;
       newExperimentState.clozeQuestionParts = clozeQuestionParts || null;
       newExperimentState.currentQuestionPart2 = currentQuestionPart2PostSylls;
-      newExperimentState.hintLevel = cHintLevel;
+      newExperimentState.hintLevel = whichHintLevel;
 
       if (currentDisplay.clozeText) {
         currentDisplay.clozeText = currentQuestionPostSylls;
@@ -479,9 +476,10 @@ function modelUnitEngine() {
     probFunction = defaultProbFunction;
   }
 
-  function findMinProbCard(cards, hiddenItems) {
+  function findMinProbCardAndHintLevel(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
+    let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -497,6 +495,12 @@ function modelUnitEngine() {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
+                currentHintLevelMin = stim.hintLevelProbabilites[k];
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
@@ -524,9 +528,10 @@ function modelUnitEngine() {
     return {clusterIndex, stimIndex};
   }
 
-  function findMaxProbCard(cards, ceiling, hiddenItems) {
-    console.log('findMaxProbCard');
+  function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
+    console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
+    let currentHintLevelMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -542,6 +547,12 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < ceiling ){
+                currentHintLevelMax = stim.hintLevelProbabilites[k];
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
@@ -553,6 +564,7 @@ function modelUnitEngine() {
   function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
+    let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -575,6 +587,13 @@ function modelUnitEngine() {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
+          }
+          for(let k=0; k<stims.hintLevelProbabilites.length; k++){
+            const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.stim.hintLevelProbabilites[k])) - optimalProb);
+            if(hintDist <= currentHintLevelMin){
+              currentHintLevelMin = dist;
+              hintLevelIndex = k;
+            }
           }
         }
       }
@@ -1191,7 +1210,7 @@ function modelUnitEngine() {
           console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
             console.log('thresholdCeiling failed, reverting to min prob');
-            indices = findMinProbCard(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
         case 'distance':
@@ -1199,27 +1218,29 @@ function modelUnitEngine() {
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
-          indices = findMaxProbCard(cards, 1.00001, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 1.00001, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
         default:
-          indices = findMaxProbCard(cards, 0.90, hiddenItems);
+          indices = findMaxProbCardAndHintLevel(cards, 0.90, hiddenItems);
           if (indices.clusterIndex === -1) {
-            indices = findMinProbCard(cards, hiddenItems);
+            indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
       }
 
       newClusterIndex = indices.clusterIndex;
       newStimIndex = indices.stimIndex;
+      newHintLevel = indices.hintLevel;
 
-      console.log('selectNextCard indices:', newClusterIndex, newStimIndex, indices);
+      console.log('selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
       // Found! Update everything and grab a reference to the card and stim
       const cardIndex = newClusterIndex;
       const card = cardProbabilities.cards[cardIndex];
       const whichStim = newStimIndex;
+      const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
 
       // Save the card selection
@@ -1241,7 +1262,7 @@ function modelUnitEngine() {
       console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
-      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim,
+      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, whichHintLevel,
           stim.probFunctionParameters);
       console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
       newExperimentState = Object.assign(newExperimentState, stateChanges);// Find objects we'll be touching
@@ -1825,7 +1846,7 @@ function scheduleUnitEngine() {
       // increment the session's question index number
       Session.set('clusterIndex', curClusterIndex);
 
-      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, undefined);
+      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, whichHintLevel ,undefined);
       newExperimentState = Object.assign(newExperimentState, stateChanges);
 
       Session.set('testType', questInfo.testType);
