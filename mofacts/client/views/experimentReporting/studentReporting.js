@@ -304,8 +304,8 @@ async function drawDashboard(curStudentGraphData, studentData){
         stimsNotSeenProbabilites.push(studentData.probEstimates[i].probabilityEstimate);
       }
     }
-  stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
-  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  stimsSeenPredictedProbability = stimsSeenProbabilties[stimsSeenProbabilties.length -1 ];
+  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites[stimsNotSeenProbabilites.length -1 ];
   Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
