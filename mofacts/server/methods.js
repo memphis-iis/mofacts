@@ -240,6 +240,17 @@ async function getLearningSessionItems(tdfFileName) {
   return learningSessionItems;
 }
 
+async function getTdfIdByStimSetIdAndFileName(stimuliSetId, fileName){
+  const ret = await db.many('SELECT * FROM tdf WHERE stimulisetid =$1', stimuliSetId);
+  const shortFileName = fileName.replace('.json', '').replace('.xml', '');
+  for(let tdf in ret){
+    serverConsole("fileName param : " + fileName + " | fileName querey: " + ret[tdf].content.fileName);
+    if (ret[tdf].content.fileName.includes(shortFileName)){
+      return ret[tdf].tdfid;
+    }
+  }
+}
+
 async function getTdfById(TDFId) {
   const tdfs = await db.one('SELECT * from tdf WHERE TDFId=$1', TDFId);
   const tdf = getTdf(tdfs);
@@ -1659,6 +1670,8 @@ Meteor.startup(async function() {
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
     insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
+
+    getTdfIdByStimSetIdAndFileName,
 
     getAltServerUrl: function() {
       return altServerUrl;

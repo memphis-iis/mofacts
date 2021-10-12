@@ -1643,7 +1643,7 @@ function scheduleUnitEngine() {
     extractDelimFields(assess.initialpositions, settings.initialPositions);
     settings.randomClusters = boolVal(assess.assignrandomclusters);
     settings.randomConditions = boolVal(assess.randomizegroups);
-    settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
+    settings.isButtonTrial = boolVal(unit.buttontrial);
 
     // Unlike finalPermute, which is always a series of space-delimited
     // strings that represent rangeVals, ranChoices can be a single number N
@@ -1671,7 +1671,7 @@ function scheduleUnitEngine() {
     // Note: since there could be 0-N group entries, we leave that as an array
     const byGroup = {};
     _.each(assess.conditiontemplatesbygroup, function(val, name) {
-      byGroup[name] = name === 'group' ? val : _.safefirst(val);
+      byGroup[name] = val;
     });
 
     if (byGroup) {

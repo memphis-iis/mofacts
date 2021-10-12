@@ -2558,7 +2558,7 @@ async function resumeFromComponentState() {
     } else {
       // Select condition and save it
       console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      conditionTdfId = _.sample(setspec.condition);// Transform from tdffilename to tdfid
+      conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", Session.get('currentStimuliSetId'), _.sample(setspec.condition));// Transform from tdffilename to tdfid
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
       console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
@@ -2638,8 +2638,8 @@ async function resumeFromComponentState() {
 
     // Note our default of a single no-op to insure we at least build a
     // default cluster mapping
-    const shuffles = setSpec.shuffleclusters || [''];
-    const swaps = setSpec.swapclusters || [''];
+    const shuffles = setSpec.shuffleclusters ? setSpec.shuffleclusters.trim().split(" ") : [''];
+    const swaps = setSpec.swapclusters ? setSpec.swapclusters.trim().split(" ") : [''];
     clusterMapping = [];
     console.log('shuffles.length', shuffles.length);
     console.log('swaps.length', swaps.length);
