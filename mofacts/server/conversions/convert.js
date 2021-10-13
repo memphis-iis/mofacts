@@ -96,7 +96,7 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
         itemResponseType: cluster.responseType || 'text',
         speechHintExclusionList: stim.speechHintExclusionList,
         clozeStimulus: stim.display.clozeText || stim.display.clozeStimulus,
-        textStimulus: stim.display.text || stim.display.textStimulus,
+        textStimulus: stim.display.text || stim.display.textStimulus || "",
         audioStimulus: stim.display.audioSrc || stim.display.audioStimulus,
         imageStimulus: stim.display.imgSrc || stim.display.imageStimulus,
         videoStimulus: stim.display.videoSrc || stim.display.videoStimulus,
