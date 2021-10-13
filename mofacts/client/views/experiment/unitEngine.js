@@ -701,11 +701,12 @@ function modelUnitEngine() {
               console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
             }
           }
-          for(let k=0; k<hintLevelIndex; k++){
+          const parms = this.calculateSingleProb(i, j, 0, count);
+          hintLevelProbabilities.push(parms.probability)
+          for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
             hintLevelProbabilities.push(hintLevelParms.probability);
           }  
-          const parms = this.calculateSingleProb(i, j, 0, count);
           stim.hintLevelProbabilites = hintLevelProbabilities;
           console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
