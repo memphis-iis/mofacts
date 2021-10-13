@@ -140,7 +140,6 @@ async function updateDashboard(selectedTdfId){
     console.log('studentData', studentData);
     console.log('curStudentGraphData',curStudentGraphData);
     
-
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawCharts(studentData);
     drawDashboard(curStudentGraphData, studentData);
