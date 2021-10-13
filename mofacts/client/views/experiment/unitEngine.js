@@ -204,7 +204,7 @@ function defaultUnitEngine(curExperimentData) {
             clozeQuestionParts = cQuestionParts;
             console.log('clozeQuestionParts:', cQuestionParts);
             const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
-                this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer);
+                this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer,0);
             if (clozeQuestion2) {
               currentQuestionPart2 = clozeQuestion2;
             }
@@ -230,7 +230,7 @@ function defaultUnitEngine(curExperimentData) {
         currentAnswerSyllables, clozeQuestionParts, currentAnswer, hintLevel};
     },
 
-    setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, whichHintLevel = 0, probFunctionParameters,) {
+    setUpCardQuestionAndAnswerGlobals: async function(cardIndex, whichStim, whichHintLevel = 0, probFunctionParameters) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
