@@ -196,7 +196,7 @@ function defaultUnitEngine(curExperimentData) {
         }
 
         if (currentAnswerSyllables) {
-          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts, cHintLevel} =
+          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts} =
               this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer,hintLevel);
           if (clozeQuestion) {
             currentQuestion = clozeQuestion;
