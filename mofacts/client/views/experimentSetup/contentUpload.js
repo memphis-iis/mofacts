@@ -2,12 +2,15 @@ import {meteorCallAsync} from '../..';
 
 const userFiles = new Mongo.Collection(null); // local-only - no database;
 
-function userFilesRefresh() {
+async function userFilesRefresh() {
   console.log('userFilesRefresh');
   userFiles.remove({'temp': 1});
 
   let count = 0;
   const userId = Meteor.userId();
+  let allTdfs = await meteorCallAsync('getAllTdfs');
+  console.log('allTdfs', allTdfs, typeof(allTdfs));
+  Session.set('allTdfs', allTdfs);
 
   for (const tdf of Session.get('allTdfs')) {
     if (userId === tdf.ownerId) {
@@ -70,6 +73,7 @@ Template.contentUpload.events({
 
     const stimDisplayTypeMap = await meteorCallAsync('getStimDisplayTypeMap');
     Session.set('stimDisplayTypeMap', stimDisplayTypeMap);
+    userFilesRefresh();
   },
 
   // Admin/Teachers - upload a Stimulus file
