@@ -75,7 +75,6 @@ Template.studentReporting.helpers({
     var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
   },
-  hintLevelsActive: () => Session.get('hintLevelsActive'),
   studentUsername: () => Session.get('studentUsername'),
   stimsSeenPredictedProbability: () => Session.get('stimsSeenPredictedProbability'),
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
@@ -123,38 +122,24 @@ Template.studentReporting.rendered = async function() {
 Template.studentReporting.events({
   'change #tdf-select': async function(event) {
     const selectedTdfId = $(event.currentTarget).val();
-    let hintLevel = $('#hintlevel-select').val();
-    if(hintLevel == 0){
-      hintLevel = null;
-    }
-    updateDashboard(selectedTdfId, hintLevel)
-    
-  },
-  'change #hintlevel-select': async function(event) {
-    let hintLevel = $(event.currentTarget).val();
-    const selectedTdfId = $('#tdf-select').val();
-    if(hintLevel == "0"){
-      hintLevel = null;
-    }
-    updateDashboard(selectedTdfId, hintLevel)
+    updateDashboard(selectedTdfId)
   },
 });
 
-async function updateDashboard(selectedTdfId, hintlevel=null){
+async function updateDashboard(selectedTdfId){
   console.log('change tdf select', selectedTdfId);
   if (selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     $(`#select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
-    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, hintlevel);
+    const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
     console.log("studentData loaded...",studentData);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,hintlevel);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0");
 
     console.log('studentData', studentData);
     console.log('curStudentGraphData',curStudentGraphData);
     
-    setUpHintLevelSelection(studentID, selectedTdfId);
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawCharts(studentData);
     drawDashboard(curStudentGraphData, studentData);
@@ -162,18 +147,6 @@ async function updateDashboard(selectedTdfId, hintlevel=null){
   }
 }
 
-async function setUpHintLevelSelection(studentID, selectedTdfId) {
-  let hintLevels = [];
-    for(i=0;i<4;i++){
-      const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = await meteorCallAsync('getStudentPerformanceByIdAndTDFId', studentID, selectedTdfId, i.toString());
-      console.log('i totalStimCount',i,totalStimCount)
-      if(totalStimCount > 0){
-        hintLevels.push(i);
-      }
-    }
-    console.log('hintLevels',hintLevels);
-  Session.set('hintLevelsActive',hintLevels);
-}
 
 function drawCharts(studentData) {
   $('#correctnessChart').attr('data-x-axis-label', 'Repetition Number');
@@ -330,8 +303,8 @@ async function drawDashboard(curStudentGraphData, studentData){
         stimsNotSeenProbabilites.push(studentData.probEstimates[i].probabilityEstimate);
       }
     }
-  stimsSeenPredictedProbability = stimsSeenProbabilties.reduce((a, b) => { return a + b;}) / stimsSeenProbabilties.length;
-  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites.reduce((a, b) => { return a + b;}) / stimsNotSeenProbabilites.length;    
+  stimsSeenPredictedProbability = stimsSeenProbabilties[stimsSeenProbabilties.length -1 ];
+  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites[stimsNotSeenProbabilites.length -1 ];
   Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
