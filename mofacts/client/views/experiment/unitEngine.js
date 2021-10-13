@@ -1213,7 +1213,7 @@ function modelUnitEngine() {
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards);
+          indices = findMinProbDistCard(cards, hiddenItems);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
@@ -1421,7 +1421,7 @@ function modelUnitEngine() {
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
-      const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
+      const numTrialsSoFar = cardProbabilities.numQuestionsAnswered;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
         return true;
@@ -1685,7 +1685,7 @@ function scheduleUnitEngine() {
     extractDelimFields(assess.initialpositions, settings.initialPositions);
     settings.randomClusters = boolVal(assess.assignrandomclusters);
     settings.randomConditions = boolVal(assess.randomizegroups);
-    settings.isButtonTrial = boolVal(_.safefirst(unit.buttontrial));
+    settings.isButtonTrial = boolVal(unit.buttontrial);
 
     // Unlike finalPermute, which is always a series of space-delimited
     // strings that represent rangeVals, ranChoices can be a single number N
@@ -1713,7 +1713,7 @@ function scheduleUnitEngine() {
     // Note: since there could be 0-N group entries, we leave that as an array
     const byGroup = {};
     _.each(assess.conditiontemplatesbygroup, function(val, name) {
-      byGroup[name] = name === 'group' ? val : _.safefirst(val);
+      byGroup[name] = val;
     });
 
     if (byGroup) {
