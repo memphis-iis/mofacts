@@ -204,7 +204,7 @@ function defaultUnitEngine(curExperimentData) {
             clozeQuestionParts = cQuestionParts;
             console.log('clozeQuestionParts:', cQuestionParts);
             const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
-                this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer,0);
+                this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer, hintLevel);
             if (clozeQuestion2) {
               currentQuestionPart2 = clozeQuestion2;
             }
