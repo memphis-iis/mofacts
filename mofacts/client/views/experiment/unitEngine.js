@@ -1173,7 +1173,7 @@ function modelUnitEngine() {
           }
           break;
         case 'distance':
-          indices = findMinProbDistCard(cards);
+          indices = findMinProbDistCard(cards, hiddenItems);
           break;
         case 'highest':
           // Magic number to indicate there is no real ceiling (probs should max out at 1.0)
@@ -1379,7 +1379,7 @@ function modelUnitEngine() {
       const minSecs = session.displayminseconds || 0;
       const maxSecs = session.displaymaxseconds || 0;
       const maxTrials = parseInt(session.maxTrials || 0);
-      const numTrialsSoFar = cardProbabilities.numQuestionsIntroduced;
+      const numTrialsSoFar = cardProbabilities.numQuestionsAnswered;
 
       if (maxTrials > 0 && numTrialsSoFar >= maxTrials) {
         return true;

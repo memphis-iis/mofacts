@@ -296,8 +296,20 @@ Template.instructions.helpers({
     return img;
   },
 
-  instructions: function() {
+  instructionText: function() {
     return Session.get('currentTdfUnit').unitinstructions;
+  },
+
+  instructionQuestion: function(){
+    return Session.get('currentTdfUnit').unitinstructionsquestion;
+  },
+
+  displayContinueButton: function(){
+    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
+      return false;
+    } else {
+      return true;
+    }
   },
 
   islockout: function() {
