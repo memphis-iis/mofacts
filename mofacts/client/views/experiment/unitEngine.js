@@ -1845,7 +1845,7 @@ function scheduleUnitEngine() {
       // increment the session's question index number
       Session.set('clusterIndex', curClusterIndex);
 
-      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, whichHintLevel ,undefined);
+      const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(curClusterIndex, curStimIndex, 0 ,undefined);
       newExperimentState = Object.assign(newExperimentState, stateChanges);
 
       Session.set('testType', questInfo.testType);
