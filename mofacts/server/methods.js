@@ -753,10 +753,6 @@ async function insertHistory(historyRecord) {
                             userId, \
                             TDFId, \
                             KCId, \
-                            eventStartTime, \
-                            feedbackDuration, \
-                            stimulusDuration, \
-                            responseDuration, \
                             outcome, \
                             probabilityEstimate, \
                             typeOfResponse, \
@@ -773,7 +769,6 @@ async function insertHistory(historyRecord) {
                             Condition_Typec, \
                             Condition_Named, \
                             Condition_Typed, \
-                            Condition_Namee, \
                             Condition_Typee, \
                             Level_Unit, \
                             Level_Unitname, \
@@ -800,6 +795,7 @@ async function insertHistory(historyRecord) {
                             CF_Response_Time, \
                             CF_Start_Latency, \
                             CF_End_Latency, \
+                            CF_Feedback_Latency, \
                             CF_Review_Latency, \
                             CF_Review_Entry, \
                             CF_Button_Order, \
@@ -819,10 +815,6 @@ async function insertHistory(historyRecord) {
     historyRecord.userId,
     historyRecord.TDFId,
     historyRecord.KCId,
-    historyRecord.eventStartTime,
-    historyRecord.feedbackDuration,
-    historyRecord.stimulusDuration,
-    historyRecord.responseDuration,
     historyRecord.outcome,
     historyRecord.probabilityEstimate,
     historyRecord.typeOfResponse,
@@ -839,8 +831,6 @@ async function insertHistory(historyRecord) {
     historyRecord.Condition_Typec,
     historyRecord.Condition_Named,
     historyRecord.Condition_Typed,
-    historyRecord.Condition_Namee,
-    historyRecord.Condition_Typee,
     historyRecord.Level_Unit,
     historyRecord.Level_Unitname,
     historyRecord.Problem_Name,
@@ -866,6 +856,7 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Response_Time,
     historyRecord.CF_Start_Latency,
     historyRecord.CF_End_Latency,
+    historyRecord.CF_Feedback_Latency,
     historyRecord.CF_Review_Latency,
     historyRecord.CF_Review_Entry,
     historyRecord.CF_Button_Order,

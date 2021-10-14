@@ -22,8 +22,6 @@ export const outputFields = [
   'Condition Typec', // schedCondition
   'Condition Named', // new field? always == 'how answered'*******
   'Condition Typed', // howAnswered
-  // "Condition Namee", //new field? always == 'button trial'***********
-  // "Condition Typee", //wasButtonTrial
   'Level (Unit)', // unit
   'Level (Unitname)', // unitname
   'Problem Name', // questionValue
