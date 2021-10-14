@@ -83,9 +83,6 @@ doInsert('INSERT INTO item(stimuliSetId, stimulusKC, clusterKC, responseKC, para
 // CREATE TABLE history (
 //     eventId SERIAL PRIMARY KEY,
 //     itemId INTEGER REFERENCES item (itemId),
-//     eventStartTime BIGINT NOT NULL,
-//     feedbackDuration INTEGER NOT NULL,
-//     stimulusDuration INTEGER NOT NULL,
 //     responseDuration INTEGER NOT NULL,
 //     outcome outcomeType NOT NULL,
 //     probabilityEstimate NUMERIC(4,3) NOT NULL,
