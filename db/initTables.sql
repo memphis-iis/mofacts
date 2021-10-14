@@ -116,7 +116,6 @@ CREATE TABLE history (
     Tutor_Response_Type  VARCHAR(1024) NOT NULL,
     KC_Default INTEGER,
     KC_Cluster INTEGER,
-    CF_GUI_Source VARCHAR(1024) NOT NULL,
     CF_Audio_Input_Enabled BOOLEAN NOT NULL,
     CF_Audio_Output_Enabled BOOLEAN NOT NULL,
     CF_Display_Order INTEGER NOT NULL,
