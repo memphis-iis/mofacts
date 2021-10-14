@@ -1641,8 +1641,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
 
-
-
     'responseDuration': responseDuration,
 
     'Level_Unit': Session.get('currentUnitNumber'),
