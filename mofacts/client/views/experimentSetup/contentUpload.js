@@ -30,7 +30,7 @@ async function userFilesRefresh() {
       }
       const stimuliSetId = tdf.stimuliSetId;
       let stimFileName = tdf.content.tdfs.tutor.setspec.stimulusfile;
-      if (stimFileName) stimFileName = stimFileName[0];
+      if (typeof stimFileName == 'object') stimFileName = stimFileName[0];
       if (stimuliSetId && stimFileName) {
         try {
           userFiles.insert({
