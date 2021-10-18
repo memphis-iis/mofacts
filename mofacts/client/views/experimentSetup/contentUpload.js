@@ -9,6 +9,7 @@ async function userFilesRefresh() {
   let count = 0;
   const userId = Meteor.userId();
   let allTdfs = await meteorCallAsync('getAllTdfs');
+  let allStims = await meteorCallAsync('getAllStims');
   console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
@@ -17,7 +18,7 @@ async function userFilesRefresh() {
       try {
         userFiles.insert({
           'temp': 1,
-          '_id': '' + tdf.TDFId,
+          '_id': '' + count,
           'idx': count,
           'type': 'tdf',
           'fileName': tdf.content.fileName.trim(),
@@ -28,14 +29,13 @@ async function userFilesRefresh() {
           throw err;
         }
       }
-      const stimuliSetId = tdf.stimuliSetId;
       let stimFileName = tdf.content.tdfs.tutor.setspec.stimulusfile;
       if (typeof stimFileName == 'object') stimFileName = stimFileName[0];
-      if (stimuliSetId && stimFileName) {
+      if (stimFileName && !userFiles.findOne({'fileName': stimFileName})) {
         try {
           userFiles.insert({
             'temp': 1,
-            '_id': '' + stimuliSetId,
+            '_id': '' + count,
             'idx': count,
             'type': 'stim',
             'fileName': stimFileName,
@@ -45,6 +45,24 @@ async function userFilesRefresh() {
           if (err.name !== 'MinimongoError') {
             throw err;
           }
+        }
+      }
+    }
+  }
+  for(const stim of allStims){
+    if (!userFiles.findOne({'fileName': stim.stimulusfilename})){
+      try{
+        userFiles.insert({
+          'temp': 1,
+          '_id': '' + count,
+          'idx': count,
+          'type': 'stim',
+          'fileName': stim.stimulusfilename,
+        });
+        count += 1;
+      } catch (err) {
+        if (err.name !== 'MinimongoError') {
+          throw err;
         }
       }
     }
@@ -80,6 +98,7 @@ Template.contentUpload.events({
   'click #doUploadStim': async function(event) {
     event.preventDefault();
     await doFileUpload('#upload-stim', 'stim', 'Stimlus');
+    userFilesRefresh();
   },
 
   'change #upload-tdf': function(event) {
