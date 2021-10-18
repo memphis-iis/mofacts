@@ -308,6 +308,16 @@ async function getAllTdfs() {
   return tdfs;
 }
 
+async function getAllStims() {
+  console.log('getAllStims');
+  const stimRet = await db.any('SELECT DISTINCT(stimulusfilename), stimulisetid FROM item;')
+  const stims = [];
+  for (const stim of stimRet){
+    stims.push(stim);
+  }
+  return stims;
+}
+
 async function getStimuliSetsForIdSet(stimuliSetIds) {
   const stimSetsStr = stimuliSetIds.join(',');
   const query = 'SELECT * FROM ITEM WHERE stimuliSetId IN (' + stimSetsStr + ') ORDER BY itemId';
@@ -1647,7 +1657,7 @@ Meteor.startup(async function() {
 
   // Set up our server-side methods
   Meteor.methods({
-    getAllTdfs, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
+    getAllTdfs, getAllStims, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
 
     getLearningSessionItems, getStimDisplayTypeMap, getStimuliSetById, getStimuliSetsForIdSet,
     getStimuliSetByFilename, getSourceSentences, getMatchingDialogueCacheWordsForAnswer,
