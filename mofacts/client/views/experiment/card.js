@@ -1502,7 +1502,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 // eslint-disable-next-line max-len
 function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
-  const feedbackDuration = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
+  const cf_feedback_latency = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
   let responseDuration = 0;
   if (firstKeypressTimestamp != 0) {
     responseDuration = trialEndTimeStamp - firstKeypressTimestamp;
@@ -1622,7 +1622,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'hintLevel': parseInt(Session.get('hintLevel')) || 0,
     'userId': Meteor.userId(),
     'TDFId': Session.get('currentTdfId'),
-    'eventStartTime': trialStartTimestamp,
     'outcome': outcome,
     'probabilityEstimate': probabilityEstimate,
     'typeOfResponse': getResponseType(),
@@ -1641,11 +1640,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Condition_Typec': schedCondition,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
-    'Condition_Namee': 'how answered',
-    'Condition_Typee': wasButtonTrial,
 
-    'feedbackDuration': feedbackDuration,
-    'stimulusDuration': endLatency,
     'responseDuration': responseDuration,
 
     'Level_Unit': Session.get('currentUnitNumber'),
@@ -1665,7 +1660,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'KC_Category_Default': '',
     'KC_Cluster': clusterKC,
     'KC_Category_Cluster': '',
-    'CF_GUI_Source': _.trim(source),
     'CF_Audio_Input_Enabled': Session.get('audioEnabled'),
     'CF_Audio_Output_Enabled': Session.get('enableAudioPromptAndFeedback'),
     'CF_Display_Order': Session.get('questionIndex'),

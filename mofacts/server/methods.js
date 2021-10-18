@@ -763,9 +763,6 @@ async function insertHistory(historyRecord) {
                             userId, \
                             TDFId, \
                             KCId, \
-                            eventStartTime, \
-                            feedbackDuration, \
-                            stimulusDuration, \
                             responseDuration, \
                             outcome, \
                             probabilityEstimate, \
@@ -783,8 +780,6 @@ async function insertHistory(historyRecord) {
                             Condition_Typec, \
                             Condition_Named, \
                             Condition_Typed, \
-                            Condition_Namee, \
-                            Condition_Typee, \
                             Level_Unit, \
                             Level_Unitname, \
                             Problem_Name, \
@@ -796,7 +791,6 @@ async function insertHistory(historyRecord) {
                             Tutor_Response_Type, \
                             KC_Default, \
                             KC_Cluster, \
-                            CF_GUI_Source, \
                             CF_Audio_Input_Enabled, \
                             CF_Audio_Output_Enabled, \
                             CF_Display_Order, \
@@ -811,6 +805,7 @@ async function insertHistory(historyRecord) {
                             CF_Response_Time, \
                             CF_Start_Latency, \
                             CF_End_Latency, \
+                            CF_Feedback_Latency, \
                             CF_Review_Latency, \
                             CF_Review_Entry, \
                             CF_Button_Order, \
@@ -820,19 +815,16 @@ async function insertHistory(historyRecord) {
                             recordedServerTime, \
                             instructionquestionresult, \
                             hintlevel)';
-  query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::text[], \
-            $15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30, \
-            $31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46, \
-            $47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58::jsonb,$59,$60,$61)';
+  query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::text[], \
+            $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25, \
+            $26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41, \
+            $42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53::jsonb,$54,$55,$56)';
 
   const historyVals = [
     historyRecord.itemId,
     historyRecord.userId,
     historyRecord.TDFId,
     historyRecord.KCId,
-    historyRecord.eventStartTime,
-    historyRecord.feedbackDuration,
-    historyRecord.stimulusDuration,
     historyRecord.responseDuration,
     historyRecord.outcome,
     historyRecord.probabilityEstimate,
@@ -850,8 +842,6 @@ async function insertHistory(historyRecord) {
     historyRecord.Condition_Typec,
     historyRecord.Condition_Named,
     historyRecord.Condition_Typed,
-    historyRecord.Condition_Namee,
-    historyRecord.Condition_Typee,
     historyRecord.Level_Unit,
     historyRecord.Level_Unitname,
     historyRecord.Problem_Name,
@@ -863,7 +853,6 @@ async function insertHistory(historyRecord) {
     historyRecord.Tutor_Response_Type,
     historyRecord.KC_Default,
     historyRecord.KC_Cluster,
-    historyRecord.CF_GUI_Source,
     historyRecord.CF_Audio_Input_Enabled,
     historyRecord.CF_Audio_Output_Enabled,
     historyRecord.CF_Display_Order,
@@ -878,6 +867,7 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Response_Time,
     historyRecord.CF_Start_Latency,
     historyRecord.CF_End_Latency,
+    historyRecord.CF_Feedback_Latency,
     historyRecord.CF_Review_Latency,
     historyRecord.CF_Review_Entry,
     historyRecord.CF_Button_Order,
