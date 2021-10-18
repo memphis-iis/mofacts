@@ -1576,7 +1576,9 @@ function scheduleUnitEngine() {
             }
 
             let condition = groupName + '-' + index;
-
+            if (showHint) {
+              condition += '-' + 'H';
+            }
             const pairNum = clusterNum;
             setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
           } // offset is Model or something else?
