@@ -1577,16 +1577,6 @@ function scheduleUnitEngine() {
 
             let condition = groupName + '-' + index;
 
-            const st = settings.specType.toLowerCase();
-            if ( (st === 'structuralpairs' || st === 'structuralgroups') ) {
-              condition += '-' + offset + '-0';
-              offset = 0;
-            }
-
-            if (showHint) {
-              condition += '-' + 'H';
-            }
-
             const pairNum = clusterNum;
             setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
           } // offset is Model or something else?
@@ -1649,7 +1639,6 @@ function scheduleUnitEngine() {
   // object with the parameters as specified by the Assessment Session
   function loadAssessmentSettings(setspec, unit) {
     const settings = {
-      specType: 'unspecified',
       groupNames: [],
       templateSizes: [],
       numTemplatesList: [],
@@ -1677,7 +1666,6 @@ function scheduleUnitEngine() {
     };
 
     // Get the setspec settings first
-    settings.specType = _.display(setspec.clustermodel);
     settings.finalSwap = assess.swapfinalresult || '';
     settings.finalPermute = assess.permutefinalresult || '';
 
