@@ -41,7 +41,6 @@ export const outputFields = [
   'KC Category(Default)',
   'KC (Cluster)',
   'KC Category(Cluster)',
-  'CF (GUI Source)',
   'CF (Audio Input Enabled)',
   'CF (Audio Output Enabled)',
   'CF (Display Order)', // questionIndex
