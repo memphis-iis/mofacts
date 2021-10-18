@@ -126,6 +126,7 @@ function updateCurStudentPerformance(isCorrect, endLatency, wasReportedForRemova
     curUserPerformance.totalTime = parseInt(curUserPerformance.totalTime) + endLatency;
     curUserPerformance.totalTimeDisplay = (curUserPerformance.totalTime / (1000*60)).toFixed(1);
   }
+  Session.set('constantTotalTime',curUserPerformance.totalTimeDisplay);
   Session.set('curStudentPerformance', curUserPerformance);
 }
 

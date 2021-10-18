@@ -1,8 +1,8 @@
 <template name="studentReporting">
   {{#if isInRole 'admin, teacher'}}
-    <h1 class="text-center">Progress for {{studentUsername}}</h1>
+    <h2 class="text-center">Progress for {{studentUsername}}</h2>
   {{else}}
-    <h1 class="text-center">Progress for {{currentUser.username}}</h1>
+    <h2 class="text-center">Progress for {{currentUser.username}}</h2>
   {{/if}}
   <div class="allContent">
 
@@ -16,72 +16,36 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curStudentPerformance.totalTimeDisplay}} minutes. 
+        for {{curTotalTime}} minutes. 
   
     <div class="row" style="padding-top:20px;">
       <div class="gauge col-sm-6 col-xs-12">
-        <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}}</b></div>  
+        <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}} of {{stimCount}}</b></div>  
         <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-          <p style="font-size: x-small;">Items out of the {{stimCount}} total items for this unit.</p>      
+          <p>Items out of the {{stimCount}} total items for this unit.</p>      
       </div>
       <div class="gauge col-sm-6 col-xs-12">
           <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{curStudentPerformanceCorrectInInteger}}%</b></div>  
           <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-percent-correct"></canvas>
-          <p style="font-size: x-small;">Percent correct so far.</p>      
+          <p>Percent correct so far.</p>      
       </div>
   </div>
   <div class="row">
       <div class="gauge col-sm-6 col-xs-12">
           <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-test-prediction"></canvas>
           <div id="preview-textfield" style="display:none;">0%</div>
-          <p style="font-size: x-small;">How the AI thinks you will will do if you were tested on all of the previously seen flashcards now. You can't get into the gold zone unitl all the cards are introduced.</p>      
+          <p>How the AI thinks you will will do if you were tested on all of the previously seen flashcards now. </p>      
           
       </div>
       <div class="gauge col-sm-6 col-xs-12">
           <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-new-card-prediction"></canvas>
           <div id="preview-textfield" style="display:none;">0%</div>
-          <p style="font-size: x-small;">How the AI thinks you will do when you see a new flashcard.</p>      
+          <p>How the AI thinks you will do when you see a new flashcard.</p>      
       </div>
     </div>
 
-  </div>
-    <div>
-      <h2>Progress Data</h2>
-      <table border="0" class="halfWidth centerForDesktop">
-        <tr><th class="thWide">% Correct</th><th class="thWide">Count</th><th class="thWide">Total Time (min)</th></tr>
-        <tr>
-          <td>{{curStudentPerformanceCorrectInInteger}}%</td>
-          <td>{{curStudentPerformance.count}}</td>
-          <td>{{curStudentPerformance.totalTimeDisplay}}</td>
-        </tr>
-      </table>
 
-      {{#if curClassPerformance}}
-        <table border="0" class="halfWidth centerForDesktop">
-          <tr><th class="thWide">{{curClass.courseName}} - Avg % Correct</th><th class="thWide">{{curClass.courseName}} - Avg Count</th><th class="thWide">{{curClass.courseName}} - Avg Total Time (min)</th></tr>
-          <tr>
-            <td>{{curClassPerformance.percentCorrect}}</td>
-            <td>{{curClassPerformance.count}}</td>
-            <td>{{curClassPerformance.totalTimeDisplay}}</td>
-          </tr>
-        </table>
-      {{/if}}
-    </div>
-    <div>
-      <h2>Progress Charts</h2>
-      <div>
-        <h3>Corrrectness Across Repetitions of the Same Fill-in</h3>
-        <div class="graphs halfWidth centerForDesktop">
-         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="correctnessChart"></div>
-        </div>
-        <h3>Current Estimate of Recall</h3>
-        <div class="graphs halfWidth centerForDesktop">
-         <div style="left: unset;" class="ct-chart .ct-major-twelfth show-axis-labels toggled displayed" id="cardProbsChart"></div>
-        </div>
-      </div>
-    </div>
-    <div>
-      <p>To see progress on a given chapter, you may select it from the "Select Chapter" dropdown.  If you don't see a chapter in the dropdown, that means you haven't practiced it.</p>
+     
       <!-- <p>On a desktop machine you can see the item names and values for the bottom chart by hovering over the individual bars on the chart with your mouse.</p>
       <p>On mobile, to see item names and values for the bottom chart tap the individual bars on the chart.</p> -->
     </div> 
