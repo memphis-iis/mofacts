@@ -2540,7 +2540,6 @@ async function resumeFromComponentState() {
   }
   const setspec = rootTDF.tdfs.tutor.setspec;
 
-
   const experimentState = await getExperimentState();
   const newExperimentState = JSON.parse(JSON.stringify(experimentState));
 
