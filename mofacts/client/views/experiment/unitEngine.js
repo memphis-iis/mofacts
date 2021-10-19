@@ -1540,7 +1540,6 @@ function scheduleUnitEngine() {
           }
 
           let type = parts[2].toUpperCase()[0];
-
           if (type === 'Z') {
             const stud = Math.floor(Math.random() * 10);
             if (stud === 0) {
