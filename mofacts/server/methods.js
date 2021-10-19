@@ -288,7 +288,7 @@ async function getTdfByFileName(filename) {
 async function getTdfByExperimentTarget(experimentTarget) {
   try {
     console.log('getTdfByExperimentTarget:'+experimentTarget);
-    const queryJSON = {'tdfs': {'tutor': {'setspec': [{'experimentTarget': [experimentTarget]}]}}};
+    const queryJSON = {'tdfs': {'tutor': {'setspec': {'experimentTarget': experimentTarget}}}};
     const tdfs = await db.one('SELECT * from tdf WHERE content @> $1' + '::jsonb', [queryJSON]);
     const tdf = getTdf(tdfs);
     return tdf;
