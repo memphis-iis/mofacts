@@ -1574,10 +1574,6 @@ function scheduleUnitEngine() {
               offset = _.intval(offStr);
             }
 
-            let condition = groupName + '-' + index;
-            if (showHint) {
-              condition += '-' + 'H';
-            }
             const pairNum = clusterNum;
             setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
           } // offset is Model or something else?
@@ -1640,6 +1636,7 @@ function scheduleUnitEngine() {
   // object with the parameters as specified by the Assessment Session
   function loadAssessmentSettings(setspec, unit) {
     const settings = {
+      specType: 'unspecified',
       groupNames: [],
       templateSizes: [],
       numTemplatesList: [],

@@ -2539,58 +2539,18 @@ async function resumeFromComponentState() {
     return;
   }
   const setspec = rootTDF.tdfs.tutor.setspec;
-  const needExpCondition = (setspec.condition && setspec.condition.length);
 
   const experimentState = await getExperimentState();
   const newExperimentState = JSON.parse(JSON.stringify(experimentState));
 
-  // We must always check for experiment condition
-  if (needExpCondition) {
-    console.log('Experimental condition is required: searching');
-    const prevCondition = experimentState.conditionTdfId;
+  // We must always check for experiment condition - aparently not
+  
+  Session.set('currentTdfFile', rootTDF);
+  Session.set('currentTdfName', rootTDF.fileName);
+  Session.set('currentTdfId', Session.get('currentRootTdfId'));
+  Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
 
-    let conditionTdfId = null;
-
-    if (prevCondition) {
-      // Use previous condition and log a notification that we did so
-      console.log('Found previous experimental condition: using that');
-      conditionTdfId = prevCondition;
-    } else {
-      // Select condition and save it
-      console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
-      conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", Session.get('currentStimuliSetId'), _.sample(setspec.condition));// Transform from tdffilename to tdfid
-      newExperimentState.conditionTdfId = conditionTdfId;
-      newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
-      console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
-    }
-
-    if (!conditionTdfId) {
-      console.log('No experimental condition could be selected!');
-      alert('Unfortunately, something is broken and this lesson cannot continue');
-      leavePage('/profile');
-      return;
-    }
-
-    // Now we have a different current TDF (but root stays the same)
-    Session.set('currentTdfId', conditionTdfId);
-
-    const curTdf = await meteorCallAsync('getTdfById', conditionTdfId);
-    Session.set('currentTdfFile', curTdf.content);
-    Session.set('currentTdfName', curTdf.content.fileName);
-
-    // Also need to read new stimulus file (and note that we allow an exception
-    // to kill us if the current tdf is broken and has no stimulus file)
-    Session.set('currentStimuliSetId', curTdf.stimuliSetId);
-    console.log('condition stimuliSetId', curTdf);
-  } else {
-    Session.set('currentTdfFile', rootTDF);
-    Session.set('currentTdfName', rootTDF.fileName);
-    Session.set('currentTdfId', Session.get('currentRootTdfId'));
-    Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
-
-    // Just notify that we're skipping
-    console.log('No Experimental condition is required: continuing', rootTDFBoxed);
-  }
+  
 
   const stimuliSetId = Session.get('currentStimuliSetId');
   const stimuliSet = await meteorCallAsync('getStimuliSetById', stimuliSetId);
