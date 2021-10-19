@@ -1540,7 +1540,6 @@ function scheduleUnitEngine() {
           }
 
           let type = parts[2].toUpperCase()[0];
-
           if (type === 'Z') {
             const stud = Math.floor(Math.random() * 10);
             if (stud === 0) {
@@ -1573,18 +1572,6 @@ function scheduleUnitEngine() {
               offset = randomChoice(settings.ranChoices);
             } else {
               offset = _.intval(offStr);
-            }
-
-            let condition = groupName + '-' + index;
-
-            const st = settings.specType.toLowerCase();
-            if ( (st === 'structuralpairs' || st === 'structuralgroups') ) {
-              condition += '-' + offset + '-0';
-              offset = 0;
-            }
-
-            if (showHint) {
-              condition += '-' + 'H';
             }
 
             const pairNum = clusterNum;
@@ -1677,7 +1664,6 @@ function scheduleUnitEngine() {
     };
 
     // Get the setspec settings first
-    settings.specType = _.display(setspec.clustermodel);
     settings.finalSwap = assess.swapfinalresult || '';
     settings.finalPermute = assess.permutefinalresult || '';
 
