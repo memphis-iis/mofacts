@@ -1,6 +1,9 @@
 import {ReactiveVar} from 'meteor/reactive-var';
 import {meteorCallAsync} from '../..';
 
+const date = new Date();
+const today = String(date.getDate() + '_' + String(date.getMonth() + 1) + '_' + date.getFullYear());
+
 Template.dataDownload.onCreated(async function() {
   this.selectedTeacherId = new ReactiveVar(null);
   this.selectedClassId = new ReactiveVar(null);
@@ -174,6 +177,60 @@ Template.dataDownload.events({
     } else {
       instance.selectedClassId.set('');
     }
+  },
+  'click #dataDownloadLink': function(event) {
+    //kinda hacky. Generates file from data on server then creates link and fakes a click for the user to download it.
+    event.preventDefault();
+    let fileName = event.currentTarget.getAttribute('data-fileName');
+    Meteor.call('createExperimentReport', fileName, 'datashop', function(error, result){
+      if (error){
+        console.log(error);
+        return;
+      }
+      const blob = new Blob([result], {type : 'text/tab-separated-values'});
+      let  a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = window.URL.createObjectURL(blob);
+      a.download = fileName.replace(".json", '_') + today;
+      a.click();
+      document.body.removeChild(a);
+    });
+  },
+
+  'click #teacherDataDownloadLink': function() {
+    Meteor.call('createTeacherReport', 'datashop', function(error, result){
+      if (error){
+        console.log(error);
+        return;
+      }
+      const blob = new Blob([result], {type : 'text/tab-separated-values'});
+      let  a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = window.URL.createObjectURL(blob);
+      a.download = Meteor.user().username.split('@')[0] + "_all_tdfs_" + today;
+      a.click();
+      document.body.removeChild(a);
+    });
+  }, 
+
+  'click #downloadDataByClass': function(event){
+    let classId = event.currentTarget.getAttribute('data-classId');
+    Meteor.call('createClassData', classId, 'datashop', function(error, result){
+      if (error){
+        console.log(error);
+        return;
+      }
+      const blob = new Blob([result], {type : 'text/tab-separated-values'});
+      let  a = document.createElement("a");
+      document.body.appendChild(a);
+      a.style = "display: none";
+      a.href = window.URL.createObjectURL(blob);
+      a.download = classId + "_" + today;
+      a.click();
+      document.body.removeChild(a);
+    });
   },
 });
 

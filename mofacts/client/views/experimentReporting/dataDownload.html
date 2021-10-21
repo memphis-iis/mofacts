@@ -28,7 +28,7 @@
                 {{/each}}
             </select>
             {{#if isClassSelected}}
-                <a class="downloadAllDataLink" href="/data-by-class/{{selectedClassId}}/datashop" target="_blank">
+                <a class="downloadAllDataLink" id="downloadDataByClass" data-classId="{{selectedClassId}}" href target="_blank">
                     Download all TDF data for selected class
                 </a>
             {{/if}}
@@ -38,9 +38,9 @@
     <div class="col-md-12" id="downloadContainer">
         <legend class="downloadLegend">Data Downloads</legend>
         <ul class="downloadContainerList" id="expDataDownloadContainer">
-            <li><a class="exp-data-link" target="_blank" href="/data-by-teacher/{{currentUser}}/datashop">Download all TDF data for current user: {{user}}</a></li>
+            <li><a class="exp-data-link" id="teacherDataDownloadLink" target="_blank" href>Download all TDF data for current user: {{user}}</a></li>
             {{#each dataDownloads}}
-                <li><a class="exp-data-link" target="_blank" href="/experiment-data/{{this.content.fileName}}/datashop">Download: {{this.disp}}</a></li>
+                <li><a class="exp-data-link" id="dataDownloadLink" target="_blank" data-fileName="{{this.content.fileName}}" href>Download: {{this.disp}}</a></li>
             {{/each}}
         </ul>
     </div>
