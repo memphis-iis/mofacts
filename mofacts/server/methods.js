@@ -1673,89 +1673,80 @@ Meteor.startup(async function() {
 
     getTdfIdByStimSetIdAndFileName,
 
-    createExperimentReport: async function(exp, fmt) {
-      let response = '';
+    createExperimentDataFile: async function(exp) {
       if(!Meteor.userId()){
-        response += 'Unauthorized: No user login';
-        return response;
+        throw new Meteor.Error('Unauthorized: No user login');
       }
-      if (!exp) {
-        response += 'No experiment specified';
-        return response;
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+      else if (!exp) {
+        throw new Meteor.Error('No experiment specified');
       }
 
-      if (fmt !== 'datashop') {
-        response += 'Unknown format specified: only datashop currently supported';
-        return response;
-      }
-      const filename = fmt + exp + '-data.txt';
-
-      let record = await createExperimentExport(exp, fmt);
-      response += record;
-      //serverConsole('Sent all  data for', exp, 'as file', filename, 'with record-count:', recCount);
-      return response
+      return await createExperimentExport(exp);
     },
 
-    createTeacherReport: async function(fmt) {
-      const uid = Meteor.userId();
-      let response = '';
+    createTeacherDataFile: async function(teacherID) {
+      const uid = teacherID || Meteor.userId();
 
       if(!Meteor.userId()){
-        response += 'Unauthorized: No user login';
-        return response;
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
       }
   
       const tdfNames = getTdfNamesAssignedByInstructor(uid);
   
       if (!tdfNames.length > 0) {
-        response += 'No tdfs found for any classes';
-        return response;
+        throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
       }
-
-      let userName = Meteor.username();
-      // eslint-disable-next-line no-useless-escape
-      userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
   
-      const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
-  
-      response = createExperimentExport(tdfNames, fmt);
-
-      return response;
+      return await createExperimentExport(tdfNames);
     },
 
-    createClassData: async function(classId, fmt) {
-      let response = '';
-            
+    createClassDataFile: async function(classId) {
       if(!Meteor.userId()){
-        response += 'Unauthorized: No user login';
-        return response;
+        throw new Meteor.Error('Unauthorized: No user login');
       }
-
-      if (!classId) {
-        response += 'No class ID specified';
-        return response;
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
       }
-
-      if (fmt !== 'datashop') {
-        response += 'Unknown format specified: only datashop currently supported';
-        return response;
+      else if (!classId) {
+        throw new Meteor.Error('No class ID specified');
       }
 
       const foundClass = await getCourseById(classId);
 
       if (!foundClass) {
-        response += 'No classes found for the specified class ID';
-        return response;
+        throw new Meteor.Error('No classes found for the specified class ID: ' + classId);
       }
 
       const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
 
       if (!tdfFileNames || tdfFileNames.length == 0) {
-        response += 'No tdfs found for any classes';
-        return response;
+        throw new Meteor.Error('No tdfs found for any classes');
       }
-      response = await createExperimentExport(tdfFileNames, fmt);
+      return await createExperimentExport(tdfFileNames);
+    },
 
+    createClozeEditHistoryDataFile: async function(authorID) {
+      let response = '';
+      if(!Meteor.userId()){
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+      else if (!authorID) {
+        throw new Meteor.Error('No user id specified');
+      }
+
+      for(let record of ClozeEditHistory.find({'user': authorID})){
+        response += JSON.stringify(record);
+        response += '\r\n';
+      }
       return response;
     },
 
@@ -2285,37 +2276,4 @@ Meteor.startup(async function() {
       return sendErrorReportSummaries();
     },
   });
-});
-
-Router.route('clozeEditHistory', {
-  name: 'server.clozeData',
-  where: 'server',
-  path: '/clozeEditHistory/:userID',
-  action: function() {
-    const userID = this.params.userID;
-    const response = this.response;
-
-    if (!userID) {
-      response.writeHead(404);
-      response.end('No user id specified');
-      return;
-    }
-
-    const filename = userID + '-clozeEditHistory.json';
-
-    response.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename=' + filename,
-    });
-
-    let recCount = 0;
-    ClozeEditHistory.find({'user': userID}).forEach(function(record) {
-      recCount += 1;
-      response.write(JSON.stringify(record));
-      response.write('\r\n');
-    });
-    response.end('');
-
-    serverConsole('Sent all  data for', userID, 'as file', filename, 'with record-count:', recCount);
-  },
 });
