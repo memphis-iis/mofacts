@@ -74,7 +74,7 @@ async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagLis
 // Exported main function: call recordAcceptor with each record generated
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
-async function createExperimentExport(expName, format) {
+async function createExperimentExport(expName) {
   let record = '';
   const header = {};
   let expNames = [];
