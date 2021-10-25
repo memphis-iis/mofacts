@@ -1673,6 +1673,83 @@ Meteor.startup(async function() {
 
     getTdfIdByStimSetIdAndFileName,
 
+    createExperimentDataFile: async function(exp) {
+      if(!Meteor.userId()){
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+      else if (!exp) {
+        throw new Meteor.Error('No experiment specified');
+      }
+
+      return await createExperimentExport(exp);
+    },
+
+    createTeacherDataFile: async function(teacherID) {
+      const uid = teacherID || Meteor.userId();
+
+      if(!Meteor.userId()){
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+  
+      const tdfNames = getTdfNamesAssignedByInstructor(uid);
+  
+      if (!tdfNames.length > 0) {
+        throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
+      }
+  
+      return await createExperimentExport(tdfNames);
+    },
+
+    createClassDataFile: async function(classId) {
+      if(!Meteor.userId()){
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+      else if (!classId) {
+        throw new Meteor.Error('No class ID specified');
+      }
+
+      const foundClass = await getCourseById(classId);
+
+      if (!foundClass) {
+        throw new Meteor.Error('No classes found for the specified class ID: ' + classId);
+      }
+
+      const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
+
+      if (!tdfFileNames || tdfFileNames.length == 0) {
+        throw new Meteor.Error('No tdfs found for any classes');
+      }
+      return await createExperimentExport(tdfFileNames);
+    },
+
+    createClozeEditHistoryDataFile: async function(authorID) {
+      let response = '';
+      if(!Meteor.userId()){
+        throw new Meteor.Error('Unauthorized: No user login');
+      }
+      else if(!Roles.userIsInRole(Meteor.userId(), ['teacher', 'admin'])){
+        throw new Meteor.Error('Unauthorized: You do not have permission to this data');
+      }
+      else if (!authorID) {
+        throw new Meteor.Error('No user id specified');
+      }
+
+      for(let record of ClozeEditHistory.find({'user': authorID})){
+        response += JSON.stringify(record);
+        response += '\r\n';
+      }
+      return response;
+    },
+
     getAltServerUrl: function() {
       return altServerUrl;
     },
@@ -2199,191 +2276,4 @@ Meteor.startup(async function() {
       return sendErrorReportSummaries();
     },
   });
-});
-
-Router.route('clozeEditHistory', {
-  name: 'server.clozeData',
-  where: 'server',
-  path: '/clozeEditHistory/:userID',
-  action: function() {
-    const userID = this.params.userID;
-    const response = this.response;
-
-    if (!userID) {
-      response.writeHead(404);
-      response.end('No user id specified');
-      return;
-    }
-
-    const filename = userID + '-clozeEditHistory.json';
-
-    response.writeHead(200, {
-      'Content-Type': 'application/json',
-      'Content-Disposition': 'attachment; filename=' + filename,
-    });
-
-    let recCount = 0;
-    ClozeEditHistory.find({'user': userID}).forEach(function(record) {
-      recCount += 1;
-      response.write(JSON.stringify(record));
-      response.write('\r\n');
-    });
-    response.end('');
-
-    serverConsole('Sent all  data for', userID, 'as file', filename, 'with record-count:', recCount);
-  },
-});
-
-// Serves data file containing all TDF data for single teacher
-Router.route('data-by-teacher', {
-  name: 'server.teacherData',
-  where: 'server',
-  path: '/data-by-teacher/:uid/:format',
-  action: async function() {
-    const uid = this.params.uid;
-    const fmt = this.params.format;
-    const response = this.response;
-
-    if (!uid) {
-      response.writeHead(404);
-      response.end('No user ID specified');
-      return;
-    }
-
-    if (fmt !== 'datashop') {
-      response.writeHead(404);
-      response.end('Unknown format specified: only datashop currently supported');
-      return;
-    }
-
-    const tdfNames = getTdfNamesAssignedByInstructor(uid);
-
-    if (!tdfNames.length > 0) {
-      response.writeHead(404);
-      response.end('No tdfs found for any classes');
-      return;
-    }
-
-    const user = Meteor.users.findOne({'_id': uid});
-    let userName = user.username;
-    // eslint-disable-next-line no-useless-escape
-    userName = userName.replace('/[/\\?%*:|"<>\s]/g', '_');
-
-    const fileName = 'mofacts_' + userName + '_all_tdf_data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'Content-Disposition': 'attachment; filename=' + fileName,
-    });
-
-    const recCount = await createExperimentExport(tdfNames, fmt, function(record) {
-      response.write(record);
-      response.write('\r\n');
-    });
-
-    tdfNames.forEach(function(tdf) {
-      serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
-    });
-
-    response.end('');
-  },
-});
-
-// Serves data file containing all TDF data for all classes for a teacher
-Router.route('data-by-class', {
-  name: 'server.classData',
-  where: 'server',
-  path: '/data-by-class/:classid/:format',
-  action: async function() {
-    const classId = this.params.classid;
-    const fmt = this.params.format;
-    const response = this.response;
-
-    if (!classId) {
-      response.writeHead(404);
-      response.end('No class ID specified');
-      return;
-    }
-
-    if (fmt !== 'datashop') {
-      response.writeHead(404);
-      response.end('Unknown format specified: only datashop currently supported');
-      return;
-    }
-
-    const foundClass = await getCourseById(classId);
-
-    if (!foundClass) {
-      response.writeHead(404);
-      response.end('No classes found for the specified class ID');
-      return;
-    }
-
-    const tdfFileNames = await getTdfAssignmentsByCourseIdMap(classId);
-
-    if (!tdfFileNames || tdfFileNames.length == 0) {
-      response.writeHead(404);
-      response.end('No tdfs found for any classes');
-      return;
-    }
-
-    // eslint-disable-next-line no-useless-escape
-    const className = foundClass.coursename.replace('/[/\\?%*:|"<>\s]/g', '_');
-    const fileName = 'mofacts_' + className + '_all_class_data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'Content-Disposition': 'attachment; filename=' + fileName,
-    });
-
-    const recCount = await createExperimentExport(tdfFileNames, fmt, function(record) {
-      response.write(record);
-      response.write('\r\n');
-    });
-
-    tdfFileNames.forEach(function(tdf) {
-      serverConsole('Sent all  data for', tdf, 'as file', fileName, 'with record-count:', recCount);
-    });
-
-    response.end('');
-  },
-});
-
-// We use a special server-side route for our experimental data download
-Router.route('experiment-data', {
-  name: 'server.data',
-  where: 'server',
-  path: '/experiment-data/:expKey/:format',
-  action: async function() {
-    const exp = this.params.expKey;
-    const fmt = this.params.format;
-    const response = this.response;
-
-    if (!exp) {
-      response.writeHead(404);
-      response.end('No experiment specified');
-      return;
-    }
-
-    if (fmt !== 'datashop') {
-      response.writeHead(404);
-      response.end('Unknown format specified: only datashop currently supported');
-      return;
-    }
-
-    const filename = fmt + exp + '-data.txt';
-
-    response.writeHead(200, {
-      'Content-Type': 'text/tab-separated-values',
-      'Content-Disposition': 'attachment; filename=' + filename,
-    });
-
-    const recCount = await createExperimentExport(exp, fmt, function(record) {
-      response.write(record);
-      response.write('\r\n');
-    });
-    response.end('');
-
-    serverConsole('Sent all  data for', exp, 'as file', filename, 'with record-count:', recCount);
-  },
 });

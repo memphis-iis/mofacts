@@ -1,6 +1,9 @@
 import {ReactiveVar} from 'meteor/reactive-var';
 import {meteorCallAsync} from '../..';
 
+const date = new Date();
+const today = String(date.getDate() + '_' + String(date.getMonth() + 1) + '_' + date.getFullYear());
+
 Template.dataDownload.onCreated(async function() {
   this.selectedTeacherId = new ReactiveVar(null);
   this.selectedClassId = new ReactiveVar(null);
@@ -175,7 +178,65 @@ Template.dataDownload.events({
       instance.selectedClassId.set('');
     }
   },
+  'click #dataDownloadLink': function(event) {
+    //kinda hacky. Generates file from data on server then creates link and fakes a click for the user to download it.
+    event.preventDefault();
+    let fileName = event.currentTarget.getAttribute('data-fileName');
+    Meteor.call('createExperimentDataFile', fileName, function(error, result){
+      createData(error, result, fileName.replace(".json", ''));
+    });
+  },
+
+  'click #teacherDataDownloadLink': function(event) {
+    event.preventDefault();
+    let teacherID = event.currentTarget.getAttribute('data-teacherID');
+    const fileName = 'mofacts_' + Meteor.user({_id : teacherID}).username.replace('/[/\\?%*:|"<>\s]/g', '_') + '_all_tdf_data.txt';
+    Meteor.call('createTeacherDataFile', teacherID, function(error, result){
+      createData(error, result, fileName);
+    });
+  },
+  
+  'click #userDataDownloadLink': function(event) {
+    event.preventDefault();
+    const fileName = 'mofacts_' + Meteor.user().username.replace('/[/\\?%*:|"<>\s]/g', '_') + '_all_tdf_data.txt';
+    Meteor.call('createTeacherDataFile', null, function(error, result){
+      createData(error, result, fileName);
+    });
+  },
+
+  'click #downloadDataByClass': function(event){
+    event.preventDefault();
+    let classId = event.currentTarget.getAttribute('data-classId');
+    const fileName = 'mofacts_' + classId + '_all_tdf_data.txt';
+    Meteor.call('createClassDataFile', classId, function(error, result){
+      createData(error, result, fileName);
+    });
+  },
+
+  'click #downloadClozeEditHistory': function(event){
+    event.preventDefault();
+    const filename = event.currentTarget.getAttribute('data-authorID') + '-clozeEditHistory.json';
+    Meteor.call('createClozeEditHistoryDataFile', event.currentTarget.getAttribute('data-authorID'), function(error, result){
+      createData(error, result, fileName);
+    });
+  }
 });
+
+function createData(error, result, fileName){
+  if (error){
+    console.log(error);
+    alert(error.message.replace('[', '').replace(']', ''));
+    return;
+  }
+  const blob = new Blob([result], {type : 'text/tab-separated-values'});
+  let  a = document.createElement("a");
+  document.body.appendChild(a);
+  a.style = "display: none";
+  a.href = window.URL.createObjectURL(blob);
+  a.download = fileName + "_" + today;
+  a.click();
+  document.body.removeChild(a);
+}
 
 function isTeacher() {
   return Roles.userIsInRole(Meteor.user(), 'teacher');

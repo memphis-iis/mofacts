@@ -74,7 +74,8 @@ async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagLis
 // Exported main function: call recordAcceptor with each record generated
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
-async function createExperimentExport(expName, format, recordAcceptor) {
+async function createExperimentExport(expName) {
+  let record = '';
   const header = {};
   let expNames = [];
 
@@ -107,31 +108,27 @@ async function createExperimentExport(expName, format, recordAcceptor) {
     header[f] = t;
   });
 
-  recordAcceptor(delimitedRecord(header));
-  let recordCount = 1;
+  record += delimitedRecord(header) + "\n\r";
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
-
-  expNames.forEach(async function(expName) {
+  for(expName of expNames){
     const histories = await getHistoryByTDFfileName(expName);
     for (let history of histories) {
       try {
         const clusterKC = history.kc_cluster;
         const stimulusKC = history.cf_stimulus_version;
-        serverConsole('history:', history.kc_cluster, clusterKC, stimulusKC, history);
+        //serverConsole('history:', clusterKC, stimulusKC, history);
         history = getHistory(history);
         const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
 
         for (const tag of Object.keys(dynamicStimTagValues)) {
           history.dynamicTagFields['CF (' + tag + ')'] = dynamicStimTagValues[tag];
         }
-        recordCount++;
-        recordAcceptor(delimitedRecord(history));
+        record += await delimitedRecord(history) + "\n\r";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
       }
     }
-  });
-
-  return recordCount;
+  }
+  return record;
 }
