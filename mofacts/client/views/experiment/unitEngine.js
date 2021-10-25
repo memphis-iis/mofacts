@@ -1573,6 +1573,7 @@ function scheduleUnitEngine() {
             } else {
               offset = _.intval(offStr);
             }
+            let condition = groupName + '-' + index;
 
             const pairNum = clusterNum;
             setQuest(firstPos + location, type, pairNum, condition, offset, forceButtonTrial);
