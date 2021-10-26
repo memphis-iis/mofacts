@@ -1,0 +1,1873 @@
+{
+    "setspec": {
+        "clusters": [
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neuroglia"
+                        },
+                        "display": {
+                            "clozeStimulus": "__________ are found throughout the nervous system, and in the brain Neurons greatly outnumber neurons."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 1,
+                            "sentenceWeight": 96,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "__________ are found throughout the nervous system and significantly outnumber neurons in the brain.",
+                            "clozeCorefTransformation": "__________ are found throughout the nervous system, and in the brain Neurons greatly outnumber neurons.",
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 96,
+                            "corefClusterBackwardWeight": 11,
+                            "corefClusterForwardWeight": 82,
+                            "rootDistance": 1,
+                            "startDistance": 0,
+                            "itemId": -1663641813,
+                            "clozeId": -650016024,
+                            "originalItem": "__________ are found throughout the nervous system, and in the brain they greatly outnumber neurons."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "nervous system"
+                        },
+                        "display": {
+                            "clozeStimulus": "An important part of the __________ __________ at the cellular level is not a cell at all, but the functional connection between a neuron and the cell with which it communicates, called a synapse."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 1,
+                            "sentenceWeight": 21,
+                            "clozeProbability": 0.00000608192839360935,
+                            "clozeParaphraseTransformation": "An important part of the __________ __________ at the cellular level is not the cell at all, but the functional connection between the neuron and the cell with which it binds, is called the synapse.",
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 21,
+                            "corefClusterBackwardWeight": 10,
+                            "corefClusterForwardWeight": 8,
+                            "rootDistance": 4,
+                            "startDistance": 4,
+                            "itemId": 2014420790,
+                            "clozeId": -1901829053
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "An important part of the __________ __________ at the cellular level is not the cell at all, but the functional connection between the neuron and the cell with which it binds, is called the synapse."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nervous system"
+                        },
+                        "display": {
+                            "clozeStimulus": "Structures called sensory receptors at the ends of neurons in the __________ __________ __________ provide the sensory function of the nervous system."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 2,
+                            "sentenceWeight": 96,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeParaphraseTransformation": "Structures called sensory receptors at the ends of neurons in the __________ __________ __________ provide sensory function in the nervous system.",
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 96,
+                            "corefClusterBackwardWeight": 21,
+                            "corefClusterForwardWeight": 72,
+                            "rootDistance": 7,
+                            "startDistance": 10,
+                            "itemId": 1896056682,
+                            "clozeId": -35361001
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Structures called sensory receptors at the ends of neurons in the __________ __________ __________ provide sensory function in the nervous system."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "sensory receptors"
+                        },
+                        "display": {
+                            "clozeStimulus": "Structures called __________ __________ at the ends of neurons in the peripheral nervous system provide the sensory function of the nervous system."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 2,
+                            "sentenceWeight": 96,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "Structures called __________ __________ at the ends of neurons in the peripheral nervous system provide sensory function in the nervous system.",
+                            "semanticRole": "ARG2",
+                            "rootDistance": 2,
+                            "startDistance": 2,
+                            "itemId": 1896056682,
+                            "clozeId": 904781004
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Structures called __________ __________ at the ends of neurons in the peripheral nervous system provide sensory function in the nervous system."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "peripheral nerves"
+                        },
+                        "display": {
+                            "clozeStimulus": "Sensory receptors convert their information into impulses, which are then conducted along __________ __________ to the CNS."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Sensory receptors convert their information into impulses, which are then transmitted along __________ __________ to the central nervous system.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000392415387705948,
+                            "semanticRole": "ARGM-DIR",
+                            "rootDistance": 6,
+                            "startDistance": 12,
+                            "itemId": -1734585465,
+                            "clozeId": -721811952
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Sensory receptors convert their information into impulses, which are then transmitted along __________ __________ to the central nervous system."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "Sensory receptors"
+                        },
+                        "display": {
+                            "clozeStimulus": "__________ __________ convert their information into impulses, which are then conducted along peripheral nerves to the CNS."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "__________ __________ convert their information into impulses, which are then transmitted along peripheral nerves to the central nervous system.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000433606687724915,
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 79,
+                            "corefClusterBackwardWeight": 8,
+                            "corefClusterForwardWeight": 67,
+                            "rootDistance": 2,
+                            "startDistance": 0,
+                            "itemId": -1734585465,
+                            "clozeId": -1875398831
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "__________ __________ convert their information into impulses, which are then transmitted along peripheral nerves to the central nervous system."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impulses"
+                        },
+                        "display": {
+                            "clozeStimulus": "Sensory receptors convert their information into __________, which are then conducted along peripheral nerves to the CNS."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Sensory receptors convert their information into __________, which are then transmitted along peripheral nerves to the central nervous system.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000517368184211515,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 2,
+                            "startDistance": 6,
+                            "itemId": -1734585465,
+                            "clozeId": -1528817139
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Sensory receptors convert their information into __________, which are then transmitted along peripheral nerves to the central nervous system."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "responsive structures"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurons that conduct impulses from the CNS to __________ __________ called effectors carry out the motor functions of the nervous system."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 2,
+                            "sentenceWeight": 98,
+                            "clozeProbability": 0.00000392415387705948,
+                            "corefClusters": 3,
+                            "corefClusterTotalWeight": 98,
+                            "corefClusterBackwardWeight": 26,
+                            "corefClusterForwardWeight": 68,
+                            "rootDistance": 6,
+                            "startDistance": 8,
+                            "itemId": -1084183046,
+                            "clozeId": -105697595
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "effectors"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurons that conduct impulses from the CNS to responsive structures called __________ carry out the motor functions of the nervous system."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The neurons that conduct impulses from the central nervous system to sensitive structures called __________ perform motor functions in the nervous system.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 98,
+                            "clozeProbability": 0.00000433606687724915,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 6,
+                            "startDistance": 11,
+                            "itemId": -1084183046,
+                            "clozeId": 1863578694
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The neurons that conduct impulses from the central nervous system to sensitive structures called __________ perform motor functions in the nervous system."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "impulses"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurons that conduct __________ from the CNS to responsive structures called effectors carry out the motor functions of the nervous system."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The neurons that conduct __________ from the central nervous system to sensitive structures called effectors perform motor functions in the nervous system.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 98,
+                            "clozeProbability": 0.00000517368184211515,
+                            "syntacticRole": "dobj",
+                            "rootDistance": 3,
+                            "startDistance": 3,
+                            "itemId": -1084183046,
+                            "clozeId": 635999959
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The neurons that conduct __________ from the central nervous system to sensitive structures called effectors perform motor functions in the nervous system."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "autonomic nervous systems"
+                        },
+                        "display": {
+                            "clozeStimulus": "The motor portion of the PNS can be subdivided into the somatic and the __________ __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The motor part of the PNS can be divided into the somatic and __________ __________ __________.",
+                            "orderGroup": 2,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000433606687724915,
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 79,
+                            "corefClusterBackwardWeight": 11,
+                            "corefClusterForwardWeight": 65,
+                            "rootDistance": 4,
+                            "startDistance": 13,
+                            "itemId": -1085466095,
+                            "clozeId": 1301250484
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The motor part of the PNS can be divided into the somatic and __________ __________ __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurofilaments"
+                        },
+                        "display": {
+                            "clozeStimulus": "A network of fine threads called __________ extends into the axon and supports it."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "A network of fine filaments called __________ extends and supports the axon.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000201737241657513,
+                            "syntacticRole": "nsubj",
+                            "rootDistance": 2,
+                            "startDistance": 6,
+                            "itemId": 2053871376,
+                            "clozeId": 1684382533
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "A network of fine filaments called __________ extends and supports the axon."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "many fine extensions"
+                        },
+                        "display": {
+                            "clozeStimulus": "Near The axon end, an axon may have __________ __________ __________, each with a specialized ending called an axon terminal."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 3,
+                            "sentenceWeight": 80,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeCorefTransformation": "Near The axon end, an axon may have __________ __________ __________, each with a specialized ending called an axon terminal.",
+                            "semanticRole": "ARG1",
+                            "rootDistance": 7,
+                            "startDistance": 8,
+                            "itemId": -582088659,
+                            "clozeId": 460173322,
+                            "originalItem": "Near its end, an axon may have __________ __________ __________, each with a specialized ending called an axon terminal."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "dendrites"
+                        },
+                        "display": {
+                            "clozeStimulus": "The general pattern is that neurons receive input through the __________ and the cell body, and send output in the form of an impulse conducted away from the cell body, down the axon."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The general formula is that neurons receive input through the __________ and the cell body and send the output in the form of an impulse sent from the cell body down the axon.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 84,
+                            "clozeProbability": 0.00000433606687724915,
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 84,
+                            "corefClusterBackwardWeight": 28,
+                            "corefClusterForwardWeight": 52,
+                            "rootDistance": 4,
+                            "startDistance": 9,
+                            "itemId": -453367329,
+                            "clozeId": 1513536998
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The general formula is that neurons receive input through the __________ and the cell body and send the output in the form of an impulse sent from the cell body down the axon."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "proportion"
+                        },
+                        "display": {
+                            "clozeStimulus": "Myelin gives the cell membranes of Schwann cells a higher __________ of lipid than other cell membranes."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Myelin provides Schwann's cell membranes with a higher __________ of lipids than other cell membranes.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 80,
+                            "clozeProbability": 0.00000392415387705948,
+                            "syntacticRole": "dobj",
+                            "rootDistance": 2,
+                            "startDistance": 10,
+                            "itemId": -1785115459,
+                            "clozeId": -311905494
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Myelin provides Schwann's cell membranes with a higher __________ of lipids than other cell membranes."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cell membranes"
+                        },
+                        "display": {
+                            "clozeStimulus": "Myelin gives the __________ __________ of Schwann cells a higher proportion of lipid than other __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Myelin provides Schwann's __________ __________ with a higher proportion of lipids than other __________ __________.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 80,
+                            "clozeProbability": 0.00000433606687724915,
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 80,
+                            "corefClusterBackwardWeight": 31,
+                            "corefClusterForwardWeight": 46,
+                            "rootDistance": 3,
+                            "startDistance": 2,
+                            "itemId": -1785115459,
+                            "clozeId": -1134659786
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Myelin provides Schwann's __________ __________ with a higher proportion of lipids than other __________ __________."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membranes"
+                        },
+                        "display": {
+                            "clozeStimulus": "Myelin gives the cell __________ of Schwann cells a higher proportion of lipid than other cell __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Myelin provides Schwann's cell __________ with a higher proportion of lipids than other cell __________.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 80,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 4,
+                            "startDistance": 16,
+                            "itemId": -1785115459,
+                            "clozeId": 1768869622
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Myelin provides Schwann's cell __________ with a higher proportion of lipids than other cell __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurilemma"
+                        },
+                        "display": {
+                            "clozeStimulus": "The parts of the Schwann cells that contain most of the cytoplasm and the nuclei remain outside the myelin sheath and comprise a __________, or neurilemmal sheath, which surrounds the myelin sheath."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 3,
+                            "sentenceWeight": 84,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeParaphraseTransformation": "Parts of Schwann cells, which contain most of the cytoplasm and nuclei, remain outside the myelin sheath and contain __________, or neurilemmal sheath, which surrounds the myelin sheath.",
+                            "syntacticRole": "dobj",
+                            "rootDistance": 2,
+                            "startDistance": 23,
+                            "itemId": -741266418,
+                            "clozeId": 1186969889
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Parts of Schwann cells, which contain most of the cytoplasm and nuclei, remain outside the myelin sheath and contain __________, or neurilemmal sheath, which surrounds the myelin sheath."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "longitudinal groove"
+                        },
+                        "display": {
+                            "clozeStimulus": "Instead, the axon or a group of axons may lie partially or completely in a __________ __________ of a Schwann cell."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "Instead, an axon or group of axons may be partially or completely in the __________ __________ of the Schwann cell.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000301500014386427,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 5,
+                            "startDistance": 14,
+                            "itemId": -499310054,
+                            "clozeId": 1676713267
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Instead, an axon or group of axons may be partially or completely in the __________ __________ of the Schwann cell."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "oligodendrocyte"
+                        },
+                        "display": {
+                            "clozeStimulus": "In the CNS, myelin is produced by a type of neuroglia called an __________ rather than by a Schwann cell."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "In the CNS, myelin is produced by a type of neuroglia called an __________, not a Schwann cell.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000116226485206672,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 5,
+                            "startDistance": 13,
+                            "itemId": -1337391967,
+                            "clozeId": 78128775
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "In the CNS, myelin is produced by a type of neuroglia called an __________, not a Schwann cell."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "neuroglia"
+                        },
+                        "display": {
+                            "clozeStimulus": "In the CNS, myelin is produced by a type of __________ called an oligodendrocyte rather than by a Schwann cell."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "In the CNS, myelin is produced by a type of __________ called an oligodendrocyte, not a Schwann cell.",
+                            "orderGroup": 3,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 4,
+                            "startDistance": 11,
+                            "itemId": -1337391967,
+                            "clozeId": 2144435608
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "In the CNS, myelin is produced by a type of __________ called an oligodendrocyte, not a Schwann cell."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neurons"
+                        },
+                        "display": {
+                            "clozeStimulus": "__________ can also be classified by functional differences into the following groups, depending on whether __________ carry information into the CNS, completely within the CNS, or out of the CNS."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 4,
+                            "sentenceWeight": 77,
+                            "clozeProbability": 0.00000608192839360935,
+                            "clozeParaphraseTransformation": "__________ can also be classified according to functional differences into the following groups depending on whether they transmit information to the CNS, entirely to the CNS, or outside the CNS.",
+                            "clozeCorefTransformation": "__________ can also be classified by functional differences into the following groups, depending on whether __________ carry information into the CNS, completely within the CNS, or out of the CNS.",
+                            "corefClusters": 1,
+                            "corefClusterTotalWeight": 77,
+                            "corefClusterBackwardWeight": 47,
+                            "corefClusterForwardWeight": 24,
+                            "rootDistance": 1,
+                            "startDistance": 0,
+                            "itemId": 210014795,
+                            "clozeId": -1134020611,
+                            "originalItem": "__________ can also be classified by functional differences into the following groups, depending on whether they carry information into the CNS, completely within the CNS, or out of the CNS."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Schwann cells"
+                        },
+                        "display": {
+                            "clozeStimulus": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and neuroglia myelin sheath deteriorate within a few weeks, although the __________ __________ and neurilemma remain."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 4,
+                            "sentenceWeight": 77,
+                            "clozeProbability": 0.00000608192839360935,
+                            "clozeParaphraseTransformation": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal axon and its myelin sheath breaks down over several weeks, even if __________ __________ and neurilemma remain.",
+                            "clozeCorefTransformation": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and neuroglia myelin sheath deteriorate within a few weeks, although the __________ __________ and neurilemma remain.",
+                            "semanticRole": "ARG1",
+                            "rootDistance": 3,
+                            "startDistance": 36,
+                            "itemId": -1739511971,
+                            "clozeId": -112222509,
+                            "originalItem": "For example, if injury or disease separates an axon in a peripheral nerve from its cell body, the distal portion of the axon and its myelin sheath deteriorate within a few weeks, although the __________ __________ and neurilemma remain."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distal portion"
+                        },
+                        "display": {
+                            "clozeStimulus": "If an axon of a neuron within the CNS is separated from Schwann cell body, the __________ __________ of the axon will degenerate, but more slowly than a separated axon in the PNS."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 4,
+                            "sentenceWeight": 79,
+                            "clozeProbability": 0.000006742179232986,
+                            "clozeParaphraseTransformation": "If the axon of a neuron in the CNS is detached from the cell body, the __________ __________ of the axon will degenerate, but more slowly than the detached axon in the PNS.",
+                            "clozeCorefTransformation": "If an axon of a neuron within the CNS is separated from Schwann cell body, the __________ __________ of the axon will degenerate, but more slowly than a separated axon in the PNS.",
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 79,
+                            "corefClusterBackwardWeight": 72,
+                            "corefClusterForwardWeight": 2,
+                            "rootDistance": 4,
+                            "startDistance": 16,
+                            "itemId": 1187436490,
+                            "clozeId": -1581357000,
+                            "originalItem": "If an axon of a neuron within the CNS is separated from its cell body, the __________ __________ of the axon will degenerate, but more slowly than a separated axon in the PNS."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter"
+                        },
+                        "display": {
+                            "clozeStimulus": "The increased calcium concentration inside the cell initiates a series of events that fuses the synaptic vesicles with the cell membrane, where they release their __________ by exocytosis."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the cell membrane, where they release their __________ through exocytosis.",
+                            "orderGroup": 5,
+                            "sentenceWeight": 15,
+                            "clozeProbability": 9.30988328446582e-7,
+                            "syntacticRole": "dobj",
+                            "rootDistance": 8,
+                            "startDistance": 26,
+                            "itemId": -950407579,
+                            "clozeId": 1931896820
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the cell membrane, where they release their __________ through exocytosis."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "exocytosis"
+                        },
+                        "display": {
+                            "clozeStimulus": "The increased calcium concentration inside the cell initiates a series of events that fuses the synaptic vesicles with the cell membrane, where they release their neurotransmitter by __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the cell membrane, where they release their neurotransmitter through __________.",
+                            "orderGroup": 5,
+                            "sentenceWeight": 15,
+                            "clozeProbability": 0.00000392415387705948,
+                            "corefClusters": 4,
+                            "corefClusterTotalWeight": 15,
+                            "corefClusterBackwardWeight": 2,
+                            "corefClusterForwardWeight": 7,
+                            "rootDistance": 9,
+                            "startDistance": 28,
+                            "itemId": -950407579,
+                            "clozeId": 436691716
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the cell membrane, where they release their neurotransmitter through __________."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synaptic vesicles"
+                        },
+                        "display": {
+                            "clozeStimulus": "The increased calcium concentration inside the cell initiates a series of events that fuses the __________ __________ with the cell membrane, where they release their neurotransmitter by exocytosis."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "Elevated intracellular calcium initiates a series of events that fuse __________ __________ to the cell membrane, where they release their neurotransmitter through exocytosis.",
+                            "orderGroup": 5,
+                            "sentenceWeight": 15,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 4,
+                            "corefClusterTotalWeight": 15,
+                            "corefClusterBackwardWeight": 2,
+                            "corefClusterForwardWeight": 7,
+                            "rootDistance": 6,
+                            "startDistance": 14,
+                            "itemId": -950407579,
+                            "clozeId": -1589461083
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Elevated intracellular calcium initiates a series of events that fuse __________ __________ to the cell membrane, where they release their neurotransmitter through exocytosis."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cell membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "The increased calcium concentration inside the cell initiates a series of events that fuses the synaptic vesicles with the __________ __________, where they release their neurotransmitter by exocytosis."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the __________ __________, where they release their neurotransmitter through exocytosis.",
+                            "orderGroup": 5,
+                            "sentenceWeight": 15,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 4,
+                            "corefClusterTotalWeight": 15,
+                            "corefClusterBackwardWeight": 2,
+                            "corefClusterForwardWeight": 7,
+                            "rootDistance": 7,
+                            "startDistance": 18,
+                            "itemId": -950407579,
+                            "clozeId": 819953575
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Elevated intracellular calcium initiates a series of events that fuse synaptic vesicles to the __________ __________, where they release their neurotransmitter through exocytosis."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "gradients"
+                        },
+                        "display": {
+                            "clozeStimulus": "Because of the __________ and permeabilities for Na+Na+ and K+,K+, we would expect potassium to diffuse out of the cell more rapidly than sodium could diffuse in."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "Because of the __________ and permeability of Na + Na + and K +, K +, we expect potassium to diffuse out of the cell faster than sodium can diffuse.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 2,
+                            "startDistance": 3,
+                            "itemId": -1311029785,
+                            "clozeId": 582081631
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Because of the __________ and permeability of Na + Na + and K +, K +, we expect potassium to diffuse out of the cell faster than sodium can diffuse."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "potassium"
+                        },
+                        "display": {
+                            "clozeStimulus": "Because of the gradients and permeabilities for Na+Na+ and K+,K+, we would expect __________ to diffuse out of the cell more rapidly than sodium could diffuse in."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "Because of the gradients and permeability of Na + Na + and K +, K +, we expect __________ to diffuse out of the cell faster than sodium can diffuse.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "nsubj",
+                            "rootDistance": 2,
+                            "startDistance": 14,
+                            "itemId": -1311029785,
+                            "clozeId": 1044019057
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Because of the gradients and permeability of Na + Na + and K +, K +, we expect __________ to diffuse out of the cell faster than sodium can diffuse."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "opposite directions"
+                        },
+                        "display": {
+                            "clozeStimulus": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in __________ __________, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ diffusion in the first place."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeParaphraseTransformation": "Thus, the cell continues to consume metabolic energy in the form of ATP for active transport of sodium and potassium ions in __________ __________, thereby maintaining concentration gradients, primarily for those ions that are responsible for their diffusion.",
+                            "clozeCorefTransformation": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in __________ __________, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ diffusion in the first place.",
+                            "semanticRole": "ARGM-DIR",
+                            "rootDistance": 5,
+                            "startDistance": 21,
+                            "itemId": -1657261876,
+                            "clozeId": -1071506236,
+                            "originalItem": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in __________ __________, thereby maintaining the concentration gradients for those ions responsible for their diffusion in the first place."
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "diffusion"
+                        },
+                        "display": {
+                            "clozeStimulus": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ __________ in the first place."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "Thus, the cell continues to consume metabolic energy in the form of ATP for active transport of sodium and potassium ions in opposite directions, thereby maintaining concentration gradients, primarily for those ions that are responsible for their __________.",
+                            "clozeCorefTransformation": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ __________ in the first place.",
+                            "syntacticRole": "pobj",
+                            "rootDistance": 6,
+                            "startDistance": 36,
+                            "itemId": -1657261876,
+                            "clozeId": -1562925446,
+                            "originalItem": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for those ions responsible for their __________ in the first place."
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "metabolic energy"
+                        },
+                        "display": {
+                            "clozeStimulus": "Thus, the cell continues to expend __________ __________ in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ diffusion in the first place."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "Thus, the cell continues to consume __________ __________ in the form of ATP for active transport of sodium and potassium ions in opposite directions, thereby maintaining concentration gradients, primarily for those ions that are responsible for their diffusion.",
+                            "clozeCorefTransformation": "Thus, the cell continues to expend __________ __________ in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for Na+Na+ responsible for Na+Na+ diffusion in the first place.",
+                            "semanticRole": "ARG1",
+                            "rootDistance": 7,
+                            "startDistance": 5,
+                            "itemId": -1657261876,
+                            "clozeId": -1120891379,
+                            "originalItem": "Thus, the cell continues to expend __________ __________ in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the concentration gradients for those ions responsible for their diffusion in the first place."
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "concentration gradients"
+                        },
+                        "display": {
+                            "clozeStimulus": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the __________ __________ for Na+Na+ responsible for Na+Na+ diffusion in the first place."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "Thus, the cell continues to consume metabolic energy in the form of ATP for active transport of sodium and potassium ions in opposite directions, thereby maintaining __________ __________, primarily for those ions that are responsible for their diffusion.",
+                            "clozeCorefTransformation": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the __________ __________ for Na+Na+ responsible for Na+Na+ diffusion in the first place.",
+                            "semanticRole": "ARGM-ADV",
+                            "rootDistance": 7,
+                            "startDistance": 25,
+                            "itemId": -1657261876,
+                            "clozeId": -738244995,
+                            "originalItem": "Thus, the cell continues to expend metabolic energy in the form of ATP to actively transport sodium and potassium ions in opposite directions, thereby maintaining the __________ __________ for those ions responsible for their diffusion in the first place."
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "cell membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "The negative sign is relative to the inside of the cell and is due to the excess negative charges on the inside of the __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "The negative sign refers to the inside of the cell and is caused by an excessive negative charge on the inside of the __________ __________.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 17,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 3,
+                            "corefClusterTotalWeight": 17,
+                            "corefClusterBackwardWeight": 9,
+                            "corefClusterForwardWeight": 5,
+                            "rootDistance": 8,
+                            "startDistance": 24,
+                            "itemId": 814314162,
+                            "clozeId": 295760006
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The negative sign refers to the inside of the cell and is caused by an excessive negative charge on the inside of the __________ __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Na+/K+Na+/K+ pump"
+                        },
+                        "display": {
+                            "clozeStimulus": "The Na+/K+Na+/K+ pump balances these leaks by pumping three sodium ions out for every two potassium ions it pumps in."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000301500014386427,
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 19,
+                            "corefClusterBackwardWeight": 10,
+                            "corefClusterForwardWeight": 6,
+                            "rootDistance": 2,
+                            "startDistance": 1,
+                            "itemId": 2035765985,
+                            "clozeId": 778811754
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "potassium ions"
+                        },
+                        "display": {
+                            "clozeStimulus": "The Na+/K+Na+/K+ pump balances these leaks by pumping three sodium ions out for every two __________ __________ it pumps in."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 19,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "The Na + / K + Na + / K + pump compensates for these leaks by pumping three sodium ions for every two __________ __________ it pumps into.",
+                            "semanticRole": "ARGM-ADV",
+                            "rootDistance": 6,
+                            "startDistance": 12,
+                            "itemId": 2035765985,
+                            "clozeId": -1734830934
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The Na + / K + Na + / K + pump compensates for these leaks by pumping three sodium ions for every two __________ __________ it pumps into."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "surroundings"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurons are excitable; that is, they can respond to changes in their __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 16,
+                            "clozeProbability": 0.00000301500014386427,
+                            "corefClusters": 1,
+                            "corefClusterTotalWeight": 16,
+                            "corefClusterBackwardWeight": 13,
+                            "corefClusterForwardWeight": 0,
+                            "rootDistance": 5,
+                            "startDistance": 14,
+                            "itemId": 696381401,
+                            "clozeId": -1047222344
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "excitable"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurons are __________; that is, they can respond to changes in their surroundings."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 16,
+                            "clozeProbability": 0.00000433606687724915,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 0,
+                            "startDistance": 2,
+                            "itemId": 696381401,
+                            "clozeId": -772511052
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane potential"
+                        },
+                        "display": {
+                            "clozeStimulus": "If, as a result, the __________ __________ becomes more negative than the resting potential, the membrane is hyperpolarized."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "If the resulting __________ __________ becomes more negative than the resting potential, the membrane is hyperpolarized.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 16,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 1,
+                            "corefClusterTotalWeight": 16,
+                            "corefClusterBackwardWeight": 2,
+                            "corefClusterForwardWeight": 11,
+                            "rootDistance": 3,
+                            "startDistance": 7,
+                            "itemId": -450406917,
+                            "clozeId": -1146476705
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "If the resulting __________ __________ becomes more negative than the resting potential, the membrane is hyperpolarized."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "If, as a result, the __________ potential becomes more negative than the resting potential, the __________ is hyperpolarized."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "If the resulting __________ potential becomes more negative than the resting potential, the __________ is hyperpolarized.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 16,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 1,
+                            "corefClusterTotalWeight": 16,
+                            "corefClusterBackwardWeight": 2,
+                            "corefClusterForwardWeight": 11,
+                            "rootDistance": 1,
+                            "startDistance": 18,
+                            "itemId": -450406917,
+                            "clozeId": 1285816016
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "If the resulting __________ potential becomes more negative than the resting potential, the __________ is hyperpolarized."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "If the __________ becomes less negative than the resting potential, the __________ is depolarized."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 2,
+                            "clozeParaphraseTransformation": "If the __________ is less negative than the resting potential, it depolarizes.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 16,
+                            "clozeProbability": 0.00000517368184211515,
+                            "corefClusters": 1,
+                            "corefClusterTotalWeight": 16,
+                            "corefClusterBackwardWeight": 5,
+                            "corefClusterForwardWeight": 8,
+                            "rootDistance": 2,
+                            "startDistance": 2,
+                            "itemId": 1998829085,
+                            "clozeId": -1853124303
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "If the __________ is less negative than the resting potential, it depolarizes."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "attraction"
+                        },
+                        "display": {
+                            "clozeStimulus": "Sodium ions diffuse inward through the open sodium channels, down their concentration gradient, aided by the __________ of the sodium ions to the negative charges on the inside of the membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 6,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000392415387705948,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 3,
+                            "startDistance": 18,
+                            "itemId": 1135550131,
+                            "clozeId": 1992806038
+                        }
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "gradient"
+                        },
+                        "display": {
+                            "clozeStimulus": "Sodium ions diffuse inward through the open sodium channels, down their concentration __________, aided by the attraction of the sodium ions to the negative charges on the inside of the membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 6,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "Sodium ions diffuse through open sodium channels down the __________ of their concentration, which helps attract sodium ions to negative charges on the inner side of the membrane.",
+                            "corefClusters": 4,
+                            "corefClusterTotalWeight": 24,
+                            "corefClusterBackwardWeight": 14,
+                            "corefClusterForwardWeight": 6,
+                            "rootDistance": 4,
+                            "startDistance": 13,
+                            "itemId": 1135550131,
+                            "clozeId": -243048483
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Sodium ions diffuse through open sodium channels down the __________ of their concentration, which helps attract sodium ions to negative charges on the inner side of the membrane."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "Sodium ions diffuse inward through the open sodium channels, down their concentration gradient, aided by the attraction of the sodium ions to the negative charges on the inside of the __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "Sodium ions diffuse through open sodium channels down the gradient of their concentration, which helps attract sodium ions to negative charges on the inner side of the __________.",
+                            "syntacticRole": "pobj",
+                            "rootDistance": 9,
+                            "startDistance": 32,
+                            "itemId": 1135550131,
+                            "clozeId": 2017290180
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Sodium ions diffuse through open sodium channels down the gradient of their concentration, which helps attract sodium ions to negative charges on the inner side of the __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "refractory period"
+                        },
+                        "display": {
+                            "clozeStimulus": "The __________ __________ also ensures that an action potential is conducted in only one direction, down the axon, because the area upstream from where the action potential has just occurred is still in the __________ __________ from the previous action potential."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "Refractory time also ensures that the action potential is only directed in one direction down the axon, because the area upstream of where the action potential just emerged is still in a __________ __________ from the previous action potential.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 22,
+                            "clozeProbability": 0.00000392415387705948,
+                            "semanticRole": "ARG0",
+                            "rootDistance": 2,
+                            "startDistance": 0,
+                            "itemId": -266248666,
+                            "clozeId": 650747746
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Refractory time also ensures that the action potential is only directed in one direction down the axon, because the area upstream of where the action potential just emerged is still in a __________ __________ from the previous action potential."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "conduction"
+                        },
+                        "display": {
+                            "clozeStimulus": "It might seem that the myelin sheath would prevent __________ of an impulse, and this would be true if the sheath were continuous along the length of the axon."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "orderGroup": 6,
+                            "sentenceWeight": 32,
+                            "clozeProbability": 0.00000392415387705948,
+                            "syntacticRole": "dobj",
+                            "rootDistance": 2,
+                            "startDistance": 9,
+                            "itemId": -1861716368,
+                            "clozeId": -1340605946
+                        }
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Ranvier"
+                        },
+                        "display": {
+                            "clozeStimulus": "However, nodes of __________ between Schwann cells or oligodendrocytes interrupt the sheath."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 17,
+                            "clozeProbability": 0.00000608192839360935,
+                            "clozeParaphraseTransformation": "However, __________ nodes between Schwann cells or oligodendrocytes destroy the capsule.",
+                            "corefClusters": 2,
+                            "corefClusterTotalWeight": 17,
+                            "corefClusterBackwardWeight": 7,
+                            "corefClusterForwardWeight": 6,
+                            "rootDistance": 4,
+                            "startDistance": 4,
+                            "itemId": -340656247,
+                            "clozeId": 2036283636
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "However, __________ nodes between Schwann cells or oligodendrocytes destroy the capsule."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bioelectric current"
+                        },
+                        "display": {
+                            "clozeStimulus": "This causes a __________ __________ to flow away from the trigger zone through the cytoplasm of the axon."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "This causes the __________ __________ to flow from the trigger zone through the axon cytoplasm.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 21,
+                            "clozeProbability": 0.00000314628279863165,
+                            "semanticRole": "ARG1",
+                            "rootDistance": 7,
+                            "startDistance": 2,
+                            "itemId": -790344698,
+                            "clozeId": -2102494248
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "This causes the __________ __________ to flow from the trigger zone through the axon cytoplasm."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "cytoplasm"
+                        },
+                        "display": {
+                            "clozeStimulus": "This causes a bioelectric current to flow away from the trigger zone through the __________ of the axon."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "This causes the bioelectric current to flow from the trigger zone through the axon __________.",
+                            "orderGroup": 6,
+                            "sentenceWeight": 21,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 4,
+                            "startDistance": 14,
+                            "itemId": -790344698,
+                            "clozeId": -284004396
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "This causes the bioelectric current to flow from the trigger zone through the axon __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "bioelectric current"
+                        },
+                        "display": {
+                            "clozeStimulus": "As this local current reaches the first node, it stimulates the membrane to its threshold level, and an action potential occurs there, sending a __________ __________ to the next node downstream."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000314628279863165,
+                            "clozeParaphraseTransformation": "As soon as this local current reaches the first node, it stimulates the membrane to its threshold level and an action potential arises that sends a __________ __________ to the next node downstream.",
+                            "semanticRole": "ARGM-ADV",
+                            "rootDistance": 5,
+                            "startDistance": 25,
+                            "itemId": 1888599740,
+                            "clozeId": 1015322592
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "As soon as this local current reaches the first node, it stimulates the membrane to its threshold level and an action potential arises that sends a __________ __________ to the next node downstream."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "next node downstream"
+                        },
+                        "display": {
+                            "clozeStimulus": "As this local current reaches the first node, it stimulates the membrane to its threshold level, and an action potential occurs there, sending a bioelectric current to the __________ __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeParaphraseTransformation": "As soon as this local current reaches the first node, it stimulates the membrane to its threshold level and an action potential arises that sends a bioelectric current to the __________ __________ __________.",
+                            "semanticRole": "ARG2",
+                            "rootDistance": 5,
+                            "startDistance": 29,
+                            "itemId": 1888599740,
+                            "clozeId": 810468519
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "As soon as this local current reaches the first node, it stimulates the membrane to its threshold level and an action potential arises that sends a bioelectric current to the __________ __________ __________."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "threshold level"
+                        },
+                        "display": {
+                            "clozeStimulus": "As this local current reaches the first node, it stimulates the membrane to its __________ __________, and an action potential occurs there, sending a bioelectric current to the next node downstream."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000433606687724915,
+                            "clozeParaphraseTransformation": "As soon as this local current reaches the first node, it stimulates the membrane to its __________ __________ and an action potential arises that sends a bioelectric current to the next node downstream.",
+                            "semanticRole": "ARGM-EXT",
+                            "rootDistance": 3,
+                            "startDistance": 13,
+                            "itemId": 1888599740,
+                            "clozeId": 1777835183
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "As soon as this local current reaches the first node, it stimulates the membrane to its __________ __________ and an action potential arises that sends a bioelectric current to the next node downstream."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "As this local current reaches the first node, it stimulates the __________ to its threshold level, and an action potential occurs there, sending a bioelectric current to the next node downstream."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 6,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "As soon as this local current reaches the first node, it stimulates the __________ to its threshold level and an action potential arises that sends a bioelectric current to the next node downstream.",
+                            "syntacticRole": "dobj",
+                            "rootDistance": 1,
+                            "startDistance": 12,
+                            "itemId": 1888599740,
+                            "clozeId": -966091119
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "As soon as this local current reaches the first node, it stimulates the __________ to its threshold level and an action potential arises that sends a bioelectric current to the next node downstream."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "neurotransmitter molecules"
+                        },
+                        "display": {
+                            "clozeStimulus": "Released __________ __________ diffuse across the synaptic cleft and bind to receptors on the postsynaptic cell membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The released __________ __________ diffuse through the synaptic cleft and bind to receptors on the postsynaptic cell membrane.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 32,
+                            "clozeProbability": 9.30988328446582e-7,
+                            "semanticRole": "ARG1",
+                            "rootDistance": 2,
+                            "startDistance": 1,
+                            "itemId": -77645491,
+                            "clozeId": 262733541
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The released __________ __________ diffuse through the synaptic cleft and bind to receptors on the postsynaptic cell membrane."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeStimulus": "Released neurotransmitter molecules diffuse across the synaptic cleft and bind to __________ on the postsynaptic cell membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The released neurotransmitter molecules diffuse through the synaptic cleft and bind to __________ on the postsynaptic cell membrane.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 32,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 3,
+                            "startDistance": 11,
+                            "itemId": -77645491,
+                            "clozeId": 1815125427
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The released neurotransmitter molecules diffuse through the synaptic cleft and bind to __________ on the postsynaptic cell membrane."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "Released neurotransmitter molecules diffuse across the synaptic cleft and bind to receptors on the postsynaptic cell __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The released neurotransmitter molecules diffuse through the synaptic cleft and bind to receptors on the postsynaptic cell __________.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 32,
+                            "clozeProbability": 0.00000517368184211515,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 5,
+                            "startDistance": 16,
+                            "itemId": -77645491,
+                            "clozeId": 944132215
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The released neurotransmitter molecules diffuse through the synaptic cleft and bind to receptors on the postsynaptic cell __________."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synaptic cleft"
+                        },
+                        "display": {
+                            "clozeStimulus": "Released neurotransmitter molecules diffuse across the __________ __________ and bind to receptors on the postsynaptic cell membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 0,
+                            "clozeParaphraseTransformation": "The released neurotransmitter molecules diffuse through the __________ __________ and bind to receptors on the postsynaptic cell membrane.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 32,
+                            "clozeProbability": 0.00000517368184211515,
+                            "semanticRole": "ARGM-DIR",
+                            "rootDistance": 3,
+                            "startDistance": 4,
+                            "itemId": -77645491,
+                            "clozeId": 1224179483
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "The released neurotransmitter molecules diffuse through the __________ __________ and bind to receptors on the postsynaptic cell membrane."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "distal peripheral process"
+                        },
+                        "display": {
+                            "clozeStimulus": "This is usually in a proximal region of the axon, but in some sensory neurons it may be in the __________ __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "It is usually located in the proximal region of the axon, but in some sensory neurons it may be located in the __________ __________ __________.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000392415387705948,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 4,
+                            "startDistance": 19,
+                            "itemId": -332364147,
+                            "clozeId": -263155286
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "It is usually located in the proximal region of the axon, but in some sensory neurons it may be located in the __________ __________ __________."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "proximal region"
+                        },
+                        "display": {
+                            "clozeStimulus": "This is usually in a __________ __________ of the axon, but in some sensory neurons it may be in the distal peripheral process."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "It is usually located in the __________ __________ of the axon, but in some sensory neurons it may be located in the distal peripheral process.",
+                            "orderGroup": 7,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000517368184211515,
+                            "semanticRole": "ARG2",
+                            "rootDistance": 5,
+                            "startDistance": 3,
+                            "itemId": -332364147,
+                            "clozeId": -1242067602
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "It is usually located in the __________ __________ of the axon, but in some sensory neurons it may be located in the distal peripheral process."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "exocytosis"
+                        },
+                        "display": {
+                            "clozeStimulus": "Calcium ions diffuse inward, and in response, some of the synaptic vesicles fuse with the presynaptic membrane and release their contents by __________ into the synaptic cleft."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 7,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000392415387705948,
+                            "clozeParaphraseTransformation": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their contents by __________ into the synaptic cleft.",
+                            "syntacticRole": "pobj",
+                            "rootDistance": 3,
+                            "startDistance": 24,
+                            "itemId": -898962239,
+                            "clozeId": -1627141777
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their contents by __________ into the synaptic cleft."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "membrane"
+                        },
+                        "display": {
+                            "clozeStimulus": "Calcium ions diffuse inward, and in response, some of the synaptic vesicles fuse with the presynaptic __________ and release their contents by exocytosis into the synaptic cleft."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 7,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic __________ and release their contents by exocytosis into the synaptic cleft.",
+                            "corefClusters": 3,
+                            "corefClusterTotalWeight": 24,
+                            "corefClusterBackwardWeight": 16,
+                            "corefClusterForwardWeight": 4,
+                            "rootDistance": 5,
+                            "startDistance": 18,
+                            "itemId": -898962239,
+                            "clozeId": -815532214
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic __________ and release their contents by exocytosis into the synaptic cleft."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "contents"
+                        },
+                        "display": {
+                            "clozeStimulus": "Calcium ions diffuse inward, and in response, some of the synaptic vesicles fuse with the presynaptic membrane and release their __________ by exocytosis into the synaptic cleft."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 7,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their __________ by exocytosis into the synaptic cleft.",
+                            "syntacticRole": "dobj",
+                            "rootDistance": 2,
+                            "startDistance": 22,
+                            "itemId": -898962239,
+                            "clozeId": 1349536911
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their __________ by exocytosis into the synaptic cleft."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "synaptic cleft"
+                        },
+                        "display": {
+                            "clozeStimulus": "Calcium ions diffuse inward, and in response, some of the synaptic vesicles fuse with the presynaptic membrane and release their contents by exocytosis into the __________ __________."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "orderGroup": 7,
+                            "sentenceWeight": 24,
+                            "clozeProbability": 0.00000517368184211515,
+                            "clozeParaphraseTransformation": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their contents by exocytosis into the __________ __________.",
+                            "semanticRole": "ARGM-DIR",
+                            "rootDistance": 6,
+                            "startDistance": 25,
+                            "itemId": -898962239,
+                            "clozeId": -2000614298
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Calcium ions diffuse inward, and in response, some synaptic vesicles fuse with the presynaptic membrane and release their contents by exocytosis into the __________ __________."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Neurotransmitter molecules"
+                        },
+                        "display": {
+                            "clozeStimulus": "__________ __________ diffuse across the synaptic cleft and react with receptors in the postsynaptic neuron membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "__________ __________ diffuse across the synaptic cleft and react with receptors in the postsynaptic neuronal membrane.",
+                            "orderGroup": 9,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 9.30988328446582e-7,
+                            "semanticRole": "ARG1",
+                            "rootDistance": 2,
+                            "startDistance": 0,
+                            "itemId": 1935848788,
+                            "clozeId": -1634541924
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "__________ __________ diffuse across the synaptic cleft and react with receptors in the postsynaptic neuronal membrane."
+                            }
+                        ]
+                    },
+                    {
+                        "response": {
+                            "correctResponse": "receptors"
+                        },
+                        "display": {
+                            "clozeStimulus": "Neurotransmitter molecules diffuse across the synaptic cleft and react with __________ in the postsynaptic neuron membrane."
+                        },
+                        "parameter": "0,.72",
+                        "tags": {
+                            "weightGroup": 1,
+                            "clozeParaphraseTransformation": "Neurotransmitter molecules diffuse across the synaptic cleft and react with __________ in the postsynaptic neuronal membrane.",
+                            "orderGroup": 9,
+                            "sentenceWeight": 18,
+                            "clozeProbability": 0.00000433606687724915,
+                            "syntacticRole": "pobj",
+                            "rootDistance": 3,
+                            "startDistance": 10,
+                            "itemId": 1935848788,
+                            "clozeId": 672090474
+                        },
+                        "alternateDisplays": [
+                            {
+                                "clozeStimulus": "Neurotransmitter molecules diffuse across the synaptic cleft and react with __________ in the postsynaptic neuronal membrane."
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "stims": [
+                    {
+                        "response": {
+                            "correctResponse": "Yes~Excellent this should make the practice more effective.;.*~That may not be the best choice. We suggest going back and reading the chapter. "
+                        },
+                        "display": {
+                            "clozeStimulus": "Did you read the chapter (yes/no)?"
+                        },
+                        "parameter": "0,.72"
+                    }
+                ]
+            }
+        ]
+    }
+}
