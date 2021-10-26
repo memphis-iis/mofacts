@@ -2782,7 +2782,7 @@ async function processUserTimesLog() {
 
   // prepareCard will handle whether or not new units see instructions, but
   // it will miss instructions for the very first unit.
-  let needFirstUnitInstructions = false;
+  let needFirstUnitInstructions = true;
 
   // It's possible that they clicked Continue on a final unit, so we need to
   // know to act as if we're done
