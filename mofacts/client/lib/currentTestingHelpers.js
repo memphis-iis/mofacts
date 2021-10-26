@@ -384,6 +384,7 @@ function getCurrentDeliveryParams() {
     'feedbackType': '',
     'allowFeedbackTypeSelect': false,
     'falseAnswerLimit': undefined,
+    'allowstimulusdropping': false,
   };
 
   // We've defined defaults - also define translatations for values
@@ -413,6 +414,7 @@ function getCurrentDeliveryParams() {
     'checkOtherAnswers': xlateBool,
     'allowFeedbackTypeSelect': xlateBool,
     'falseAnswerLimit': _.intval,
+    'allowstimulusdropping': xlateBool,
   };
 
   let modified = false;

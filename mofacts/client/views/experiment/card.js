@@ -694,7 +694,7 @@ Template.card.helpers({
 
   'dialogueCacheHint': () => Session.get('dialogueCacheHint'),
 
-  'questionIsRemovable': () => Session.get('numVisibleCards') > 3,
+  'questionIsRemovable': () => Session.get('numVisibleCards') > 3 && getCurrentDeliveryParams().allowstimulusdropping,
 });
 
 function getResponseType() {
