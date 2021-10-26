@@ -1428,7 +1428,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
       Session.set('overallOutcomeHistory', overallOutcomeHistory);
     }
     console.log('writing answerLogRecord to history:', answerLogRecord);
-    if(!Meteor.user().profile.impersonating){
+    if(!Meteor.user().profile.impersonating || Meteor.user().profile === undefined){
       try {
         await meteorCallAsync('insertHistory', answerLogRecord);
         await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
@@ -1436,6 +1436,8 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
         console.log('error writing history record:', e);
         throw new Error('error inserting history/updating state:', e);
       }
+    } else {
+      console.log('no history saved. impersonation mode.');
     }
 
     // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
