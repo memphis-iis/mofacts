@@ -2490,7 +2490,7 @@ async function updateExperimentState(newState, codeCallLocation) {
   const res = await meteorCallAsync('setExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
   Session.set('currentExperimentState', newExperimentState);
-  console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, 'new:', newExperimentState, res);
+  console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
   return res;
 }
 
@@ -2782,7 +2782,7 @@ async function processUserTimesLog() {
 
   // prepareCard will handle whether or not new units see instructions, but
   // it will miss instructions for the very first unit.
-  let needFirstUnitInstructions = true;
+  let needFirstUnitInstructions = true; 
 
   // It's possible that they clicked Continue on a final unit, so we need to
   // know to act as if we're done
@@ -2812,6 +2812,7 @@ async function processUserTimesLog() {
 
   switch (experimentState.lastAction) {
     case 'instructions':
+      needFirstUnitInstructions = false;
       break;
     case 'unit-end':
       // Logged completion of unit - if this is the final unit we also
@@ -2821,7 +2822,7 @@ async function processUserTimesLog() {
           moduleCompleted = true; // TODO: what do we do for multiTdfs? Depends on structure of template parentTdf
         }
       } else {
-        needFirstUnitInstructions = tdfFile.tdfs.tutor.unit && tdfFile.tdfs.tutor.unit.length;
+        needFirstUnitInstructions = tdfFile.tdfs.tutor.unit && tdfFile.tdfs.tutor.unit.unitinstructions;
       }
       break;
       // case "schedule":
