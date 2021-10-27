@@ -11,7 +11,7 @@ import { init } from "meteor/simonsimcity:client-session-timeout";
 
 //Set checks if user is inactive
 const options = {
-  expiryTime: 30 * 60 * 1000 // 30 mins
+  expiryTime: 30 * 60 * 60 * 1000 // 30 mins
 };
 if(init(options)){
   alert('You have been logged out due to inactivity.');
