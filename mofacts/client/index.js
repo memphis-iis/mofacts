@@ -6,6 +6,18 @@ import {sessionCleanUp} from './lib/sessionUtils.js';
 import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
 import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
+import { init } from "meteor/simonsimcity:client-session-timeout";
+
+
+//Set checks if user is inactive
+const options = {
+  expiryTime: 30 * 60 * 1000 // 30 mins
+};
+if(init(options)){
+  alert('You have been logged out due to inactivity.');
+  Router.go('/');
+}
+
 export {redoCardImage, meteorCallAsync};
 
 const meteorCallAsync = Promise.promisify(Meteor.call);
