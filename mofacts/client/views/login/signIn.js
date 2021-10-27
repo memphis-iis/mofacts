@@ -101,6 +101,9 @@ function userPasswordCheck() {
           alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
         } else {
+          Accounts.config({
+            loginExpirationInDays: 0.02
+          });
           signinNotify();
         }
       });
@@ -141,6 +144,9 @@ function userPasswordCheck() {
             alert('It appears that you couldn\'t be logged in as ' + newUsername);
             $('#signInButton').prop('disabled', false);
           } else {
+            Accounts.config({
+              loginExpirationInDays: 0.02
+            });
             signinNotify();
           }
         });
@@ -169,6 +175,9 @@ function userPasswordCheck() {
         $('#signInButton').prop('disabled', false);
         return;
       }
+      Accounts.config({
+        loginExpirationInDays: 0.02
+      });
       signinNotify();
     }
   });

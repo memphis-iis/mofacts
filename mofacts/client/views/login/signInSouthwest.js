@@ -83,6 +83,9 @@ function testLogin() {
               Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Router.go('/profileSouthwest');
+              Accounts.config({
+                loginExpirationInDays: 0.02
+              });
             }
           });
         });
