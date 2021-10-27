@@ -84,7 +84,7 @@ function testLogin() {
               Meteor.call('updatePerformanceData', 'login', 'signinSouthwest.testLogin', Meteor.userId());
               Router.go('/profileSouthwest');
               Accounts.config({
-                loginExpirationInDays: 0.02
+                loginExpirationInDays: 0.5
               });
             }
           });

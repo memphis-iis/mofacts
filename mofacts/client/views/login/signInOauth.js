@@ -65,7 +65,7 @@ function testLogin() {
         Meteor.call('updatePerformanceData', 'login', 'signinOauth.testLogin', Meteor.userId());
         Router.go('/profile');
         Accounts.config({
-          loginExpirationInDays: 0.02
+          loginExpirationInDays: 0.5
         });
       }
     });
