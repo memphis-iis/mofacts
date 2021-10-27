@@ -845,15 +845,21 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
   const stims = Session.get('currentStimuliSet');
   if(filterPropertyName == 'audioStimulus'){
     for (const stim of stims) {
-      if (stim[filterPropertyName]) {
-        displaySrcs.push(`dynamic-assets/${Session.get('currentTdfId')}/audio/${stim[filterPropertyName]}` );
+      if (stim[filterPropertyName] && !stim[filterPropertyName].contains('://')) {
+        displaySrcs.push(`dynamic-assets/${Session.get('currentTdfId')}/audio/${stim[filterPropertyName]}`);
+      }
+      else if (stim[filterPropertyName]){
+        displaySrcs.push(stim[filterPropertyName]);
       }
     }
   }
   else if (filterPropertyName == 'imageStimulus'){
     for (const stim of stims) {
-      if (stim[filterPropertyName]) {
+      if (stim[filterPropertyName] && !stim[filterPropertyName].contains('://')) {
         displaySrcs.push(`dynamic-assets/${Session.get('currentTdfId')}/image/${stim[filterPropertyName]}` );
+      }
+      else if (stim[filterPropertyName]){
+        displaySrcs.push(stim[filterPropertyName]);
       }
     }
   }
