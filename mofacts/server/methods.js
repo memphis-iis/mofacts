@@ -2277,3 +2277,58 @@ Meteor.startup(async function() {
     },
   });
 });
+
+Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
+  name: 'dynamic-asset',
+  where: 'server',
+  action: function() {
+    let filename = this.params.filename;
+    let filetype = this.params.filetype; //should only be image or audio
+    let path = this.url;
+    let extension = filename.split('.')[1];
+
+    if (this.url.includes('..')){ //user is trying to do some naughty stuff
+      this.response.writeHead('404');
+      this.response.end();
+      return;
+    }
+
+    this.response.writeHeader('200', {
+      'Content-Type': `${filetype}/${extension}`
+    })
+    let content;
+
+    if (filetype == 'image'){
+      if(isProd){
+        serverConsole(`loading image from ${process.env.HOME + path}`)
+        content = fs.readFileSync(process.env.HOME + path)
+      }
+      else{
+        serverConsole(`loading image from ${process.env.PWD + '/..' + path}`)
+        try{
+          content = fs.readFileSync(process.env.PWD + '/..' + path)
+        }
+        catch(e){
+          serverConsole(e);
+        }
+      }
+    }
+    else if (filetype == 'audio'){
+      if(isProd){
+        serverConsole(`loading audio from ${process.env.HOME + path}`)
+        content = fs.readFileSync(process.env.HOME + path)
+      }
+      else{
+        serverConsole(`loading audio from ${process.env.PWD + '/..' + path}`)
+        try{
+          content = fs.readFileSync(process.env.PWD + '/..' + path)
+        }
+        catch(e){
+          serverConsole(e);
+        }
+      }
+    }
+    this.response.write(content);
+    this.response.end();
+  }
+});

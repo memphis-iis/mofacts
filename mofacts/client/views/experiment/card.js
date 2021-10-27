@@ -843,9 +843,25 @@ function preloadImages() {
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
   const displaySrcs = [];
   const stims = Session.get('currentStimuliSet');
-  for (const stim of stims) {
-    if (stim[filterPropertyName]) {
-      displaySrcs.push(stim[filterPropertyName]);
+  if(filterPropertyName == 'audioStimulus'){
+    for (const stim of stims) {
+      if (stim[filterPropertyName]) {
+        displaySrcs.push(`dynamic-assets/${Session.get('currentTdfId')}/audio/${stim[filterPropertyName]}` );
+      }
+    }
+  }
+  else if (filterPropertyName == 'imageStimulus'){
+    for (const stim of stims) {
+      if (stim[filterPropertyName]) {
+        displaySrcs.push(`dynamic-assets/${Session.get('currentTdfId')}/image/${stim[filterPropertyName]}` );
+      }
+    }
+  }
+  else{
+    for (const stim of stims) {
+      if (stim[filterPropertyName]) {
+        displaySrcs.push(stim[filterPropertyName]);
+      }
     }
   }
   return displaySrcs;
