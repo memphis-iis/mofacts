@@ -74,7 +74,7 @@ Template.signUp.events({
             console.log(currentUser + ' was logged in successfully!');
             Meteor.call('debugLog', 'Sign in was successful');
             Accounts.config({
-              loginExpirationInDays: 0.02
+              loginExpirationInDays: 0.5
             });
           }
           Router.go('/profile');

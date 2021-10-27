@@ -102,7 +102,7 @@ function userPasswordCheck() {
           $('#signInButton').prop('disabled', false);
         } else {
           Accounts.config({
-            loginExpirationInDays: 0.02
+            loginExpirationInDays: 0.5
           });
           signinNotify();
         }
@@ -145,7 +145,7 @@ function userPasswordCheck() {
             $('#signInButton').prop('disabled', false);
           } else {
             Accounts.config({
-              loginExpirationInDays: 0.02
+              loginExpirationInDays: 0.5
             });
             signinNotify();
           }
@@ -176,7 +176,7 @@ function userPasswordCheck() {
         return;
       }
       Accounts.config({
-        loginExpirationInDays: 0.02
+        loginExpirationInDays: 0.5
       });
       signinNotify();
     }
