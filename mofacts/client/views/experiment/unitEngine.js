@@ -239,8 +239,8 @@ function defaultUnitEngine(curExperimentData) {
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
         text: curStim.textStimulus,
-        audioSrc: curStim.audioStimulus.includes('://') ? curStim.audioStimulus : `dynamic-assets/${Session.get('currentTdfId')}/audio/${curStim.audioStimulus}`,
-        imgSrc: curStim.imageStimulus.includes('://') ? curStim.imageStimulus : `dynamic-assets/${Session.get('currentTdfId')}/image/${curStim.imageStimulus}`,
+        audioSrc: curStim.audioStimulus,
+        imgSrc: curStim.imageStimulus,
         videoSrc: curStim.videoStimulus,
         clozeText: curStim.clozeStimulus || curStim.clozeText,
       }));
@@ -253,8 +253,8 @@ function defaultUnitEngine(curExperimentData) {
           const curAltDisplay = curStim.alternateDisplays[displayIndex];
           currentDisplay = JSON.parse(JSON.stringify({
             text: curAltDisplay.textStimulus,
-            audioSrc: curAltDisplay.audioStimulus.includes('://') ? curAltDisplay.audioStimulus : `${Session.get('currentTdfId')}/audio/${curAltDisplay.audioStimulus}`,
-            imgSrc: curAltDisplay.imageStimulus.includes('://') ? curAltDisplay.imageStimulus : `${Session.get('currentTdfId')}/image/${curAltDisplay.imageStimulus}`,
+            audioSrc: curAltDisplay.audioStimulus,
+            imgSrc: curAltDisplay.imageStimulus,
             videoSrc: curAltDisplay.videoStimulus,
             clozeText: curAltDisplay.clozeStimulus || curAltDisplay.clozeText,
           }));
