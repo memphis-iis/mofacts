@@ -453,7 +453,7 @@ Template.card.events({
   'click #confirmFeedbackSelectionFromIndex': function(){
     Session.set('displayFeedback', false);
     Session.set('pausedLocks', Session.get('pausedLocks')-1);
-    Session.set('resetFromIndex', false);
+    Session.set('resetFeedbackSettingsFromIndex', false);
   },
   'click #overlearningButton': function(event) {
     event.preventDefault();
@@ -523,7 +523,7 @@ Template.card.helpers({
 
   'displayFeedback': () => Session.get('displayFeedback'),
 
-  'resetFromIndex': () => Session.get('resetFromIndex'),
+  'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
   'username': function() {
     if (!haveMeteorUser()) {
