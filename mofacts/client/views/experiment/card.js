@@ -450,6 +450,11 @@ Template.card.events({
     Session.set('displayFeedback', false);
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
   },
+  'click #confirmFeedbackSelectionFromIndex': function(){
+    Session.set('displayFeedback', false);
+    Session.set('pausedLocks', Session.get('pausedLocks')-1);
+    Session.set('resetFeedbackSettingsFromIndex', false);
+  },
   'click #overlearningButton': function(event) {
     event.preventDefault();
     leavePage('/profile');
@@ -517,6 +522,8 @@ Template.card.helpers({
   },
 
   'displayFeedback': () => Session.get('displayFeedback'),
+
+  'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
   'username': function() {
     if (!haveMeteorUser()) {
@@ -2696,12 +2703,7 @@ async function resumeFromComponentState() {
 
 
 async function getFeedbackParameters(){
-  if(typeof getCurrentDeliveryParams().allowFeedbackTypeSelect !== 'undefined'){
-    allowFeedbackTypeSelect = getCurrentDeliveryParams().allowFeedbackTypeSelect;
-  } else {
-    allowFeedbackTypeSelect = false;
-  }
-  if(allowFeedbackTypeSelect){
+  if(getCurrentDeliveryParams().allowFeedbackTypeSelect){
     Session.set('displayFeedback',true);
   } 
 }
