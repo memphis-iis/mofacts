@@ -139,7 +139,7 @@ Template.body.events({
     event.preventDefault();
     Session.set('pausedLocks', Session.get('pausedLocks')+1);
     Session.set('displayFeedback', true);
-    Session.set('resetFromIndex', true);
+    Session.set('resetFeedbackSettingsFromIndex', true);
   }, 
 
   'click #errorReportingSaveButton': function(event) {
