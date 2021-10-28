@@ -135,6 +135,13 @@ Template.body.events({
     $('#errorReportingModal').modal('show');
   },
 
+  'click #resetFeedbackSettingsButton': function(event) {
+    event.preventDefault();
+    Session.set('pausedLocks', Session.get('pausedLocks')+1);
+    Session.set('displayFeedback', true);
+    Session.set('resetFromIndex', true);
+  }, 
+
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
     console.log('save error reporting button pressed');
@@ -189,3 +196,8 @@ Template.registerHelper('isNormal', function() {
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
 });
+
+Template.registerHelper('showFeedbackResetButton', function() {
+  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
+})
+

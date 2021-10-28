@@ -27,7 +27,6 @@
                 "buttontrial": "true",
                 "deliveryparams": {
                     "feedbackType": "simple",
-                    "allowFeedbackTypeSelect": "true",
                     "practiceseconds": "1000000",
                     "drill": "5000",
                     "skipstudy": "false",
