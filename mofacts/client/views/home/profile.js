@@ -99,6 +99,10 @@ Template.profile.events({
     event.preventDefault();
     Router.go('/contentUpload');
   },
+  'click #assetUploadButton': function(event) {
+    event.preventDefault();
+    Router.go('/assetUpload');
+  },
 
   'click #dataDownloadButton': function(event) {
     event.preventDefault();
