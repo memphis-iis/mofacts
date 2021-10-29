@@ -9,7 +9,11 @@
         {{>profileDialogueToggles}}
         <div>
             <br />
-            <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
+            {{#if resetFeedbackSettingsFromIndex}}
+                <button id='confirmFeedbackSelectionFromIndex' class='btn'>Confirm feedback settings</button>
+            {{else}}
+                <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
+            {{/if}}
         </div>
     {{else}}
         {{#if displayReady}}

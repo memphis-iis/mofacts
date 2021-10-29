@@ -6,6 +6,14 @@ import {sessionCleanUp} from './lib/sessionUtils.js';
 import {restartMainCardTimeoutIfNecessary} from './views/experiment/card.js';
 import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
+import { init } from "meteor/simonsimcity:client-session-timeout";
+
+
+//Set checks if user is inactive
+const options = {
+  expiryTime: 30 * 60 * 60 * 1000 // 30 mins
+};
+init(options);
 export {redoCardImage, meteorCallAsync};
 
 const meteorCallAsync = Promise.promisify(Meteor.call);
@@ -135,6 +143,13 @@ Template.body.events({
     $('#errorReportingModal').modal('show');
   },
 
+  'click #resetFeedbackSettingsButton': function(event) {
+    event.preventDefault();
+    Session.set('pausedLocks', Session.get('pausedLocks')+1);
+    Session.set('displayFeedback', true);
+    Session.set('resetFeedbackSettingsFromIndex', true);
+  }, 
+
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
     console.log('save error reporting button pressed');
@@ -189,3 +204,8 @@ Template.registerHelper('isNormal', function() {
 Template.registerHelper('curStudentPerformance', function() {
   return Session.get('curStudentPerformance');
 });
+
+Template.registerHelper('showFeedbackResetButton', function() {
+  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
+})
+
