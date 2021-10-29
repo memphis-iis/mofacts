@@ -1,0 +1,25 @@
+<template name="assetUpload">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        {{#if isInRole 'admin,teacher'}}                      
+             <h1 class="text-center">Asset Uploader</h1>
+             <p>This uploads your assets for use in experiments. You may use video, audio, or image files. A link will be generated that you should use in your TDFs/stims.</p>
+            <table>
+                <td>
+                    <tr>
+                        {{#with currentUpload}}
+                            Uploading <b>{{file.name}}</b>:
+                            <span id="progress">{{progress.get}}%</span>
+                        {{else}}<br>
+                        <input id="fileInput" style="margin: auto; display:block;" type="file" />
+                        Asset Link: <a href="{{assetLink}}">{{assetLink}}</a>
+                        {{/with}}
+                    </tr>
+                </td>
+            </table>
+        {{else}}
+        <h2>You do not have access to this function.</h2>
+        {{/if}}
+        </div>
+        <div class="col-md-3"></div>
+  </template>
