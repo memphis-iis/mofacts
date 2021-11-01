@@ -9,6 +9,8 @@ import {createExperimentExport} from './experiment_times';
 import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
+import { FilesCollection } from 'meteor/ostrio:files';
+
 
 export {
   getTdfByFileName,
@@ -29,6 +31,16 @@ export {
 // for creating some MongoDB queries
 
 const fs = Npm.require('fs');
+
+if (Meteor.isClient) {
+  Meteor.subscribe('files.assets.all');
+}
+
+if (Meteor.isServer) {
+  Meteor.publish('files.assets.all', function () {
+    return DynamicAssets.find().cursor;
+  });
+}
 
 if (process.env.METEOR_SETTINGS_WORKAROUND) {
   Meteor.settings = JSON.parse(process.env.METEOR_SETTINGS_WORKAROUND);
