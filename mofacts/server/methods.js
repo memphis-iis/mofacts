@@ -672,8 +672,8 @@ async function editCourseAssignments(newCourseAssignment) {
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
   console.log('getTdfAssignmentsByCourseIdMap', instructorId);
-  const query = 'SELECT t.content #> array[\'tdfs\',\'tutor\',\'setspec\',\'0\',\'lessonname\',\'0\'] \
-                 AS displayname, a.TDFId, a.courseId \
+  const query = 'SELECT t.content \
+                 AS content, a.TDFId, a.courseId \
                  FROM assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
@@ -687,7 +687,7 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
     }
     assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({
       tdfid: assignment.tdfid,
-      displayname: assignment.displayname,
+      displayname: assignment.content.tdfs.tutor.setspec.lessonname,
     });
   }
   return assignmentTdfFileNamesByCourseIdMap;
