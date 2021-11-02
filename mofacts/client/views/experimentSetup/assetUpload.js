@@ -11,9 +11,6 @@ Template.assetUpload.helpers({
   currentUpload() {
     return Template.instance().currentUpload.get();
   },
-  'isUserInRole': function(userId, role) {
-    return Roles.userIsInRole(userId, role);
-  },
   assetLink: () => Session.get('assetLink'),
 });
 
