@@ -1153,7 +1153,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
     let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
     let studentUsername = userIdToUsernames[userid];
     if (!studentUsername) {
-      studentUsername = Meteor.find({_id: userid});
+      studentUsername = Meteor.users.find({_id: userid});
       userIdToUsernames[userid] = studentUsername;
     }
 
