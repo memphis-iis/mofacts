@@ -1,9 +1,7 @@
 <!-- User Administration Template -->
 
 <template name="userAdmin">
-{{#if isUserInRole _id 'admin'}}
-<h3>You do not have access to this function.</h3>
-{{else}}
+{{#if isInRole 'admin,teacher'}}  
     <br><br>
     <div class="col-md-12 responsiveTable">
         <h3>User Administration</h3>
@@ -119,5 +117,7 @@
             </div>
         </div>
     </div>
+    {{else}}
+    <h3>You do not have access to this function.</h3>
 {{/if}}
 </template>
