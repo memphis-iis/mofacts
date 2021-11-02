@@ -170,7 +170,6 @@ Template.instructorReporting.onRendered(async function() {
   Session.set('studentPerformanceForClassAndTdfIdMap', studentPerformanceForClassAndTdfIdMap);
 
   const instructorReportingTdfs = await meteorCallAsync('getTdfAssignmentsByCourseIdMap', Meteor.userId());
-  console.log('rusty', instructorReportingTdfs);
   Session.set('instructorReportingTdfs', instructorReportingTdfs);
 
   const courses = await meteorCallAsync('getAllCoursesForInstructor', Meteor.userId());
