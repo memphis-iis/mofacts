@@ -52,8 +52,8 @@
                             "display": {
                                 "clozeText": "John ate a ____ because he was hungry.",
                                 "text":"test text stuff",
-                                "audioSrc":"sounds/croatian/bolnica.mp3",
-                                "imgSrc":"images/TNplants/6151_IMG00293.JPG",
+                                "audioSrc":"bolnica.mp3",
+                                "imgSrc":"6151_IMG00258.JPG",
                                 "videoSrc":"https://bart.binarydolphin.com/shortfriends.webm"
                             },
                             "parameter": "-0.479299999999998"
