@@ -2873,6 +2873,9 @@ async function processUserTimesLog() {
     // Initialize client side student performance
     const curUser = Meteor.user();
     const currentTdfId = Session.get('currentTdfId');
+    const curTdf = Session.get('currentTdfFile');
+    const curTdfUnit = curTdf.tdfs.tutor.unit[0];
+
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
     if (needFirstUnitInstructions) {
