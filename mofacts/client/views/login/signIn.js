@@ -71,7 +71,6 @@ function signinNotify() {
     Meteor.call('updatePerformanceData', 'login', 'signin.signinNotify', Meteor.userId());
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
   }
-  Meteor.logoutOtherClients();
   Router.go('/profile');
 }
 
