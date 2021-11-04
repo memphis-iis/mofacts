@@ -588,6 +588,17 @@ Template.card.helpers({
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
   },
 
+  'speakerCardPosition': function() {
+    //centers the speaker icon if there are no displays. 
+    if(Session.get('currentDisplay') && 
+        !Session.get('currentDisplay').imgSrc && 
+        !Session.get('currentDisplay').videoSrc && 
+        !Session.get('currentDisplay').clozeText && 
+        !Session.get('currentDisplay').text)
+      return `col-md-12 text-center`;
+    return `col-md-1`
+  },
+
   'imageCard': function() {
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').imgSrc);
   },
