@@ -385,6 +385,7 @@ function getCurrentDeliveryParams() {
     'allowFeedbackTypeSelect': false,
     'falseAnswerLimit': undefined,
     'allowstimulusdropping': false,
+    'intertrialmessage': "",
   };
 
   // We've defined defaults - also define translatations for values
