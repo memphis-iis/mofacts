@@ -1762,11 +1762,7 @@ async function unitIsFinished(reason) {
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
-      leaveTarget = '/instructions';
-    } else {
-      console.log("No instructions found. Skipping.");
-    }
+    leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
@@ -1791,7 +1787,12 @@ async function unitIsFinished(reason) {
   }
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
   console.log('unitIsFinished,updateExperimentState', res);
-  leavePage(leaveTarget);
+  if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
+    leavePage(leaveTarget);
+  } else {
+    console.log("No instructions found. Skipping.");
+  }
+  
 }
 
 function getButtonTrial() {
@@ -2877,7 +2878,11 @@ async function processUserTimesLog() {
     if (needFirstUnitInstructions) {
       // They haven't seen our first instruction yet
       console.log('RESUME FINISHED: displaying initial instructions');
-      leavePage('/instructions');
+      if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
+        leavePage('/instructions');
+      } else {
+        console.log("No instructions found. Skipping.");
+      }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
       console.log('RESUME FINISHED: displaying current question');
@@ -2893,7 +2898,11 @@ async function processUserTimesLog() {
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime) {
             console.log('RESUME FINISHED: showing lockout instructions');
-            leavePage('/instructions');
+            if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
+              leavePage('/instructions');
+            } else {
+              console.log("No instructions found. Skipping.");
+            }
             return;
           }
         }
