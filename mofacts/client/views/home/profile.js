@@ -138,10 +138,17 @@ Template.profile.events({
     event.preventDefault();
     Router.go('/contentGeneration');
   },
+  'click #contentGenerationButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentGeneration');
+  },
 
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);
+  },
+  'click #wikiButton': function(event, instance) {
+    window.location.href="https://github.com/memphis-iis/mofacts-ies/wiki";
   },
 
   'click #select-disable': (event, instance) => {
