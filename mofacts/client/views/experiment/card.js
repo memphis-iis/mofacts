@@ -18,6 +18,7 @@ import {createScheduleUnit, createModelUnit, createEmptyUnit} from './unitEngine
 import {Answers} from './answerAssess';
 import {VAD} from '../../lib/vad';
 import {sessionCleanUp} from '../../lib/sessionUtils';
+import {instructContinue} from './instructions';
 
 export {
   speakMessageIfAudioPromptFeedbackEnabled,
@@ -1787,10 +1788,11 @@ async function unitIsFinished(reason) {
   }
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
   console.log('unitIsFinished,updateExperimentState', res);
-  if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
+  if (curTdfUnit.unitinstructions != "" && typeof curTdfUnit.unitinstructions !== 'undefined'){
     leavePage(leaveTarget);
   } else {
     console.log("No instructions found. Skipping.");
+    instructContinue();
   }
   
 }
@@ -2881,10 +2883,11 @@ async function processUserTimesLog() {
     if (needFirstUnitInstructions) {
       // They haven't seen our first instruction yet
       console.log('RESUME FINISHED: displaying initial instructions');
-      if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
+      if (curTdfUnit.unitinstructions != "" && typeof curTdfUnit.unitinstructions !== 'undefined'){
         leavePage('/instructions');
       } else {
         console.log("No instructions found. Skipping.");
+        instructContinue();
       }
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
@@ -2901,11 +2904,7 @@ async function processUserTimesLog() {
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime) {
             console.log('RESUME FINISHED: showing lockout instructions');
-            if (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== undefined){
               leavePage('/instructions');
-            } else {
-              console.log("No instructions found. Skipping.");
-            }
             return;
           }
         }
