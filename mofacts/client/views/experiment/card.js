@@ -1833,6 +1833,7 @@ async function cardStart() {
 }
 
 async function prepareCard() {
+  Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
   Session.set('currentDisplay', {});

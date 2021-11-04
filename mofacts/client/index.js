@@ -8,6 +8,20 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+//Prevents new tab
+
+
+const channel = new BroadcastChannel('tab');
+
+channel.postMessage('another-tab');
+// note that listener is added after posting the message
+
+channel.addEventListener('message', (msg) => {
+  if (msg.data === 'another-tab') {
+    Router.go('/tabwarning');
+  }
+});
+
 
 //Set checks if user is inactive
 const options = {

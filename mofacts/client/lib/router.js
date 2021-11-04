@@ -162,7 +162,8 @@ const defaultBehaviorRoutes = [
   'studentReporting',
   'voice',
   'feedback',
-  'assetUpload'
+  'assetUpload',
+  'tabwarning',
 ];
 
 const getDefaultRouteAction = function(routeName) {
