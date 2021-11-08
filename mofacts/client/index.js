@@ -164,7 +164,10 @@ Template.body.events({
     Session.set('resetFeedbackSettingsFromIndex', true);
   }, 
   'click #wikiButton': function(event) {
-    window.location.href="https://github.com/memphis-iis/mofacts-ies/wiki";
+    window.open(
+      'https://github.com/memphis-iis/mofacts-ies/wiki',
+      '_blank'
+    );
   }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
@@ -225,6 +228,6 @@ Template.registerHelper('showFeedbackResetButton', function() {
   return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
 })
 Template.registerHelper('isInSession', function() {
-  return !(Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions');
+  return (Session.get('curModule') == 'profile');
 })
 
