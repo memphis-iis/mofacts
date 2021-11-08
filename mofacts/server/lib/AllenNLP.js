@@ -345,6 +345,20 @@ function Split(pattern$$1, input$$6) {
 
 function CleanText(input$$7) {
   let arg00;
+  let input$$30;
+  let input$$29;
+  let input$$28;
+  let input$$27;
+  let input$$26;
+  let input$$25;
+  let input$$24;
+  let input$$23;
+  let input$$22;
+  let input$$21;
+  let input$$20;
+  let input$$19;
+  let input$$18;
+  let input$$17;
   let input$$16;
   let input$$15;
   let input$$14;
@@ -353,15 +367,29 @@ function CleanText(input$$7) {
   let input$$11;
   let input$$10;
   let input$$9;
-  input$$9 = RegexReplace("Page[ 0-9]+", "", input$$7);
-  input$$10 = RegexReplace("\\(fig[^\\)]+\\)", "", input$$9);
-  input$$11 = RegexReplace("\\(see[^\\)]+\\)", "", input$$10);
-  input$$12 = RegexReplace("\\(note[^\\)]+\\)", "", input$$11);
-  input$$13 = RegexReplace("\\([^\\)]+\\)", "", input$$12);
-  input$$14 = RegexReplace("\\[[^\\]]+\\]", "", input$$13);
-  input$$15 = RegexReplace("\\{[^\\}]+\\}", "", input$$14);
-  input$$16 = RegexReplace("\\s+", " ", input$$15);
-  arg00 = RegexReplace(" \\.$", ".", input$$16);
+  input$$9 = RegexReplace("\\bisn't\\b", "is not", input$$7);
+  input$$10 = RegexReplace("\\baren't\\b", "are not", input$$9);
+  input$$11 = RegexReplace("\\bwasn't\\b", "was not", input$$10);
+  input$$12 = RegexReplace("\\bweren't\\b", "were not", input$$11);
+  input$$13 = RegexReplace("\\bwon't\\b", "will not", input$$12);
+  input$$14 = RegexReplace("\\bcan't\\b", "can not", input$$13);
+  input$$15 = RegexReplace("\\bcouldn't\\b", "could not", input$$14);
+  input$$16 = RegexReplace("\\don't\\b", "do not", input$$15);
+  input$$17 = RegexReplace("\\bdoesn't\\b", "does not", input$$16);
+  input$$18 = RegexReplace("\\didn't\\b", "did not", input$$17);
+  input$$19 = RegexReplace("\\haven't\\b", "have not", input$$18);
+  input$$20 = RegexReplace("\\hasn't\\b", "has not", input$$19);
+  input$$21 = RegexReplace("\\hadn't\\b", "had not", input$$20);
+  input$$22 = RegexReplace("\\that's\\b", "that is", input$$21);
+  input$$23 = RegexReplace("Page[ 0-9]+", "", input$$22);
+  input$$24 = RegexReplace("\\(fig[^\\)]+\\)", "", input$$23);
+  input$$25 = RegexReplace("\\(see[^\\)]+\\)", "", input$$24);
+  input$$26 = RegexReplace("\\(note[^\\)]+\\)", "", input$$25);
+  input$$27 = RegexReplace("\\([^\\)]+\\)", "", input$$26);
+  input$$28 = RegexReplace("\\[[^\\]]+\\]", "", input$$27);
+  input$$29 = RegexReplace("\\{[^\\}]+\\}", "", input$$28);
+  input$$30 = RegexReplace("\\s+", " ", input$$29);
+  arg00 = RegexReplace(" \\.$", ".", input$$30);
   return transliteration.transliterate(arg00);
 }
 
@@ -383,11 +411,11 @@ function GetNLP(stringArrayJsonOption, inputText) {
     }
 
     return (pr$$1 = ((0, _Array.map)(function mapping$$1(chunk) {
-      let input$$18;
-      input$$18 = CleanText(chunk);
-      return GetSentences(input$$18);
+      let input$$32;
+      input$$32 = CleanText(chunk);
+      return GetSentences(input$$32);
     }, chunks, Array)), (Promise.all(pr$$1))).then(function (_arg1) {
-      var input$$19;
+      var input$$33;
 
       const allOK = function allOK(resultsArr) {
         return resultsArr.every(function predicate(r) {
@@ -433,7 +461,7 @@ function GetNLP(stringArrayJsonOption, inputText) {
           return x;
         }, array$$6, Array);
         patternInput = (0, _Array.unzip)(array$$7);
-        return (input$$19 = ((0, _String.join)(" ", patternInput[1])), (GetCoreference(input$$19))).then(function (_arg2) {
+        return (input$$33 = ((0, _String.join)(" ", patternInput[1])), (GetCoreference(input$$33))).then(function (_arg2) {
           return (GetForSentences(GetSRL, patternInput[1])).then(function (_arg3) {
             return (GetForSentences(GetDependencyParse, patternInput[1])).then(function (_arg4) {
               var array$$10, array$$9, mapping$$8, clo1, array$$12, array$$11, mapping$$9, clo1$$1, array$$14, array$$13, mapping$$10, clo1$$2;
@@ -552,8 +580,8 @@ function GetNLP(stringArrayJsonOption, inputText) {
 const prePunctuationSpaceRegex = (0, _RegExp.create)(" ([^\\w\\s]+)");
 exports.prePunctuationSpaceRegex = prePunctuationSpaceRegex;
 
-function removePrePunctuationSpaces(input$$22) {
-  return (0, _RegExp.replace)(prePunctuationSpaceRegex, input$$22, "$1");
+function removePrePunctuationSpaces(input$$36) {
+  return (0, _RegExp.replace)(prePunctuationSpaceRegex, input$$36, "$1");
 }
 
 function collapseDependencies(sa) {
@@ -874,13 +902,13 @@ function resolveReferents(da) {
     }
 
     let str;
-    let input$$23;
+    let input$$37;
     let strings$$5;
     strings$$5 = indexedWords.filter(function predicate$$14(w$$3) {
       return w$$3.length > 0;
     });
-    input$$23 = (0, _String.join)(" ", strings$$5);
-    str = removePrePunctuationSpaces(input$$23);
+    input$$37 = (0, _String.join)(" ", strings$$5);
+    str = removePrePunctuationSpaces(input$$37);
     return Array.from((0, _Seq.mapIndexed)(function mapping$$25(i$$19, c$$3) {
       if (i$$19 === 0) {
         return c$$3.toLocaleUpperCase();

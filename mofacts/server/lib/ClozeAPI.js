@@ -25,6 +25,7 @@ exports.GetClozables = GetClozables;
 exports.GetAllCloze = GetAllCloze;
 exports.GetAllClozeLukeFormat20200714 = GetAllClozeLukeFormat20200714;
 exports.GetAllClozeLukeFormat20201218 = GetAllClozeLukeFormat20201218;
+exports.GetAllClozeForHumanEvaluation2021061121 = GetAllClozeForHumanEvaluation2021061121;
 exports.RemoveOverlappingClozables = RemoveOverlappingClozables;
 exports.MakeItemWithTranformations = MakeItemWithTranformations;
 exports.MakeItem = MakeItem;
@@ -815,20 +816,82 @@ function GetAllClozeLukeFormat20201218(nlpJsonOption$$2, stringArrayJsonOption$$
   }));
 }
 
-function RemoveOverlappingClozables(clozables$$3) {
-  const clozablesOut = Array.from((clozables$$3.filter(function predicate$$9(cl$$2) {
-    return cl$$2.words.length < 4;
+function GetAllClozeForHumanEvaluation2021061121(nlpJsonOption$$3, stringArrayJsonOption$$3, inputText$$3) {
+  return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
+    var nlpJson$$4, input$$5;
+    return (nlpJsonOption$$3 == null ? (0, _AllenNLP.GetNLP)(stringArrayJsonOption$$3, inputText$$3) : (nlpJson$$4 = nlpJsonOption$$3, (input$$5 = ((0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(nlpJson$$4, undefined, undefined, {
+      ResolveType() {
+        return (0, _AllenNLP.DocumentAnnotation$reflection)();
+      }
+
+    })), ((0, _AllenNLP.Promisify)(input$$5))))).then(function (_arg1$$5) {
+      if (_arg1$$5.tag === 1) {
+        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$5.fields[0]));
+      } else {
+        let clozables$$3;
+        let array$$29;
+        array$$29 = GetClozables(_arg1$$5.fields[0]);
+        clozables$$3 = (0, _Array.map)(function mapping$$20(ra$$3) {
+          return ra$$3.slice();
+        }, array$$29, Array);
+        let output$$2;
+        output$$2 = (0, _Array.mapIndexed)(function mapping$$23(i$$15, sa$$4) {
+          let totalWeight$$4;
+          totalWeight$$4 = GetTotalWeight(_arg1$$5.fields[0].coreference, sa$$4);
+          let chainsLengthTwoOrMore;
+          let array$$32;
+          let array$$31;
+          array$$31 = (0, _Array.map)(function mapping$$21(id$$3) {
+            return _arg1$$5.fields[0].coreference.clusters[id$$3];
+          }, sa$$4.cor.clusters, Array);
+          array$$32 = array$$31.filter(function predicate$$9(c$$2) {
+            return c$$2.length > 1;
+          });
+          chainsLengthTwoOrMore = array$$32.length;
+          const array$$33 = clozables$$3[i$$15];
+          return (0, _Array.map)(function mapping$$22(cl$$2) {
+            let cloze$$2;
+            cloze$$2 = (0, _String.join)(" ", cl$$2.words);
+            let sentence$$4;
+            sentence$$4 = (0, _AllenNLP.removePrePunctuationSpaces)(sa$$4.sen);
+            const itemId$$3 = (0, _Util.structuralHash)(sa$$4) | 0;
+            const clozeId$$3 = (0, _Util.structuralHash)(cloze$$2) | 0;
+            return (0, _Types.anonRecord)({
+              Chains: chainsLengthTwoOrMore,
+              Cloze: cloze$$2,
+              ClozeProbability: cl$$2.prob,
+              ClozeStart: cl$$2.start,
+              ClozeStop: cl$$2.stop,
+              OriginalSentence: sentence$$4,
+              Sentence: sentence$$4,
+              SentenceIndex: i$$15,
+              SentenceWeight: totalWeight$$4,
+              Tags: (0, _List.append)(cl$$2.tags, cl$$2.trace),
+              clozeId: clozeId$$3,
+              itemId: itemId$$3
+            });
+          }, array$$33, Array);
+        }, _arg1$$5.fields[0].sentences, Array);
+        return Promise.resolve(new _Option.Result(0, "Ok", output$$2));
+      }
+    });
+  }));
+}
+
+function RemoveOverlappingClozables(clozables$$4) {
+  const clozablesOut = Array.from((clozables$$4.filter(function predicate$$10(cl$$3) {
+    return cl$$3.words.length < 4;
   })));
 
-  for (let ci = 0; ci <= clozables$$3.length - 1; ci++) {
-    for (let cj = ci; cj <= clozables$$3.length - 1; cj++) {
-      const overlap = (ci !== cj ? clozables$$3[ci].start <= clozables$$3[cj].stop : false) ? clozables$$3[cj].start <= clozables$$3[ci].stop : false;
+  for (let ci = 0; ci <= clozables$$4.length - 1; ci++) {
+    for (let cj = ci; cj <= clozables$$4.length - 1; cj++) {
+      const overlap = (ci !== cj ? clozables$$4[ci].start <= clozables$$4[cj].stop : false) ? clozables$$4[cj].start <= clozables$$4[ci].stop : false;
 
-      if (overlap ? clozables$$3[ci].stop - clozables$$3[ci].start >= clozables$$3[cj].stop - clozables$$3[cj].start : false) {
-        const value$$11 = (0, _Array.removeInPlace)(clozables$$3[cj], clozablesOut);
+      if (overlap ? clozables$$4[ci].stop - clozables$$4[ci].start >= clozables$$4[cj].stop - clozables$$4[cj].start : false) {
+        const value$$11 = (0, _Array.removeInPlace)(clozables$$4[cj], clozablesOut);
         void value$$11;
       } else if (overlap) {
-        const value$$12 = (0, _Array.removeInPlace)(clozables$$3[ci], clozablesOut);
+        const value$$12 = (0, _Array.removeInPlace)(clozables$$4[ci], clozablesOut);
         void value$$12;
       } else {
         void null;
@@ -839,31 +902,31 @@ function RemoveOverlappingClozables(clozables$$3) {
   return clozablesOut.slice();
 }
 
-function MakeItemWithTranformations(sa$$4, cl$$3) {
+function MakeItemWithTranformations(sa$$5, cl$$4) {
   let blank;
-  const strings$$10 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+  const strings$$11 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
     return (0, _Seq.map)(function (_) {
       return "__________";
-    }, (0, _Seq.rangeNumber)(cl$$3.start, 1, cl$$3.stop));
+    }, (0, _Seq.rangeNumber)(cl$$4.start, 1, cl$$4.stop));
   }), Array);
-  blank = (0, _String.join)(" ", strings$$10);
-  let sentence$$4;
-  const strings$$11 = (0, _Array.copy)(sa$$4.srl.words, Array);
-  sentence$$4 = (0, _String.join)(" ", strings$$11);
-  let cloze$$2;
-  cloze$$2 = (0, _String.join)(" ", cl$$3.words);
+  blank = (0, _String.join)(" ", strings$$11);
+  let sentence$$5;
+  const strings$$12 = (0, _Array.copy)(sa$$5.srl.words, Array);
+  sentence$$5 = (0, _String.join)(" ", strings$$12);
+  let cloze$$3;
+  cloze$$3 = (0, _String.join)(" ", cl$$4.words);
   let item;
-  const input$$5 = (0, _RegExp.replace)(sentence$$4, "\\b" + cloze$$2 + "\\b", blank);
-  item = (0, _AllenNLP.removePrePunctuationSpaces)(input$$5);
+  const input$$7 = (0, _RegExp.replace)(sentence$$5, "\\b" + cloze$$3 + "\\b", blank);
+  item = (0, _AllenNLP.removePrePunctuationSpaces)(input$$7);
   let crOption$$2;
   let list$$5;
-  list$$5 = (0, _List.choose)(function chooser$$2(_arg1$$5) {
-    if (_arg1$$5.tag === 12) {
-      return _arg1$$5.fields[0];
+  list$$5 = (0, _List.choose)(function chooser$$2(_arg1$$6) {
+    if (_arg1$$6.tag === 12) {
+      return _arg1$$6.fields[0];
     } else {
       return undefined;
     }
-  }, cl$$3.tags);
+  }, cl$$4.tags);
   crOption$$2 = (0, _List.tryHead)(list$$5);
   let paOption;
   let list$$7;
@@ -873,10 +936,10 @@ function MakeItemWithTranformations(sa$$4, cl$$3) {
     } else {
       return undefined;
     }
-  }, cl$$3.tags);
+  }, cl$$4.tags);
   paOption = (0, _List.tryHead)(list$$7);
   let tags$$2;
-  tags$$2 = (0, _List.filter)(function predicate$$10(_arg3$$1) {
+  tags$$2 = (0, _List.filter)(function predicate$$11(_arg3$$1) {
     switch (_arg3$$1.tag) {
       case 12:
       case 14:
@@ -889,26 +952,26 @@ function MakeItemWithTranformations(sa$$4, cl$$3) {
           return true;
         }
     }
-  }, cl$$3.tags);
-  var $target$$140, cr$$2, pa;
+  }, cl$$4.tags);
+  var $target$$149, cr$$2, pa;
 
   if (crOption$$2 != null) {
     if (paOption != null) {
-      $target$$140 = 0;
+      $target$$149 = 0;
       cr$$2 = crOption$$2;
       pa = paOption;
     } else {
-      $target$$140 = 1;
+      $target$$149 = 1;
     }
   } else {
-    $target$$140 = 1;
+    $target$$149 = 1;
   }
 
-  switch ($target$$140) {
+  switch ($target$$149) {
     case 0:
       {
-        const paItem = (0, _RegExp.replace)(pa, "\\b" + cloze$$2 + "\\b", blank);
-        const diffList$$2 = diff.diffWords(sa$$4.sen, cr$$2, (0, _Types.anonRecord)({
+        const paItem = (0, _RegExp.replace)(pa, "\\b" + cloze$$3 + "\\b", blank);
+        const diffList$$2 = diff.diffWords(sa$$5.sen, cr$$2, (0, _Types.anonRecord)({
           ignoreCase: true
         }));
         let diffMap$$2;
@@ -940,10 +1003,10 @@ function MakeItemWithTranformations(sa$$4, cl$$3) {
           Compare: _Util.comparePrimitives
         });
         let crCloze$$2;
-        const matchValue$$5 = (0, _Map.FSharpMap$$TryFind$$2B595)(diffMap$$2, cloze$$2);
+        const matchValue$$5 = (0, _Map.FSharpMap$$TryFind$$2B595)(diffMap$$2, cloze$$3);
 
         if (matchValue$$5 == null) {
-          crCloze$$2 = cloze$$2;
+          crCloze$$2 = cloze$$3;
         } else {
           const diffCloze$$2 = matchValue$$5;
           crCloze$$2 = diffCloze$$2;
@@ -951,13 +1014,13 @@ function MakeItemWithTranformations(sa$$4, cl$$3) {
 
         const crItem = (0, _RegExp.replace)(cr$$2, "\\b" + crCloze$$2 + "\\b", blank);
 
-        if (cr$$2 === sa$$4.sen ? pa === sa$$4.sen : false) {
-          return [item, cloze$$2, tags$$2];
-        } else if ((cr$$2 === sa$$4.sen ? pa !== sa$$4.sen : false) ? pa !== paItem : false) {
-          return [item, cloze$$2, new _Types.List(new Tag(14, "ClozeParaphraseTransformation", paItem), tags$$2)];
-        } else if ((cr$$2 !== sa$$4.sen ? pa === sa$$4.sen : false) ? cr$$2 !== crItem : false) {
-          return [item, cloze$$2, new _Types.List(new Tag(12, "ClozeCorefTransformation", crItem), new _Types.List(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$2), tags$$2))];
-        } else if (cr$$2 !== sa$$4.sen ? pa !== sa$$4.sen : false) {
+        if (cr$$2 === sa$$5.sen ? pa === sa$$5.sen : false) {
+          return [item, cloze$$3, tags$$2];
+        } else if ((cr$$2 === sa$$5.sen ? pa !== sa$$5.sen : false) ? pa !== paItem : false) {
+          return [item, cloze$$3, new _Types.List(new Tag(14, "ClozeParaphraseTransformation", paItem), tags$$2)];
+        } else if ((cr$$2 !== sa$$5.sen ? pa === sa$$5.sen : false) ? cr$$2 !== crItem : false) {
+          return [item, cloze$$3, new _Types.List(new Tag(12, "ClozeCorefTransformation", crItem), new _Types.List(new Tag(13, "CorrectResponseCorefTransformation", crCloze$$2), tags$$2))];
+        } else if (cr$$2 !== sa$$5.sen ? pa !== sa$$5.sen : false) {
           let tempTags;
           tempTags = Array.from(tags$$2);
 
@@ -974,41 +1037,41 @@ function MakeItemWithTranformations(sa$$4, cl$$3) {
             void null;
           }
 
-          return [item, cloze$$2, ((0, _List.ofSeq)(tempTags))];
+          return [item, cloze$$3, ((0, _List.ofSeq)(tempTags))];
         } else {
-          return [item, cloze$$2, tags$$2];
+          return [item, cloze$$3, tags$$2];
         }
       }
 
     case 1:
       {
-        return [item, cloze$$2, tags$$2];
+        return [item, cloze$$3, tags$$2];
       }
   }
 }
 
-function MakeItem(sa$$5, cl$$4) {
+function MakeItem(sa$$6, cl$$5) {
   let blank$$1;
-  const strings$$15 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
+  const strings$$16 = (0, _Array.ofSeq)((0, _Seq.delay)(function () {
     return (0, _Seq.map)(function (_$$1) {
       return "__________";
-    }, (0, _Seq.rangeNumber)(cl$$4.start, 1, cl$$4.stop));
+    }, (0, _Seq.rangeNumber)(cl$$5.start, 1, cl$$5.stop));
   }), Array);
-  blank$$1 = (0, _String.join)(" ", strings$$15);
-  let sentence$$5;
-  const strings$$16 = (0, _Array.copy)(sa$$5.srl.words, Array);
-  sentence$$5 = (0, _String.join)(" ", strings$$16);
-  let cloze$$3;
-  cloze$$3 = (0, _String.join)(" ", cl$$4.words);
+  blank$$1 = (0, _String.join)(" ", strings$$16);
+  let sentence$$6;
+  const strings$$17 = (0, _Array.copy)(sa$$6.srl.words, Array);
+  sentence$$6 = (0, _String.join)(" ", strings$$17);
+  let cloze$$4;
+  cloze$$4 = (0, _String.join)(" ", cl$$5.words);
   let item$$1;
-  const input$$6 = (0, _RegExp.replace)(sentence$$5, "\\b" + cloze$$3 + "\\b", blank$$1);
-  item$$1 = (0, _AllenNLP.removePrePunctuationSpaces)(input$$6);
-  return [item$$1, cloze$$3];
+  const input$$8 = (0, _RegExp.replace)(sentence$$6, "\\b" + cloze$$4 + "\\b", blank$$1);
+  item$$1 = (0, _AllenNLP.removePrePunctuationSpaces)(input$$8);
+  return [item$$1, cloze$$4];
 }
 
-function GetAcronymMap(input$$7) {
+function GetAcronymMap(input$$9) {
   const acronymRegex = (0, _RegExp.create)("\\(([A-Z]+)\\)");
-  const matches = (0, _RegExp.matches)(acronymRegex, input$$7);
+  const matches = (0, _RegExp.matches)(acronymRegex, input$$9);
   let acronymMap;
 
   if (matches.length !== 0) {
@@ -1018,12 +1081,12 @@ function GetAcronymMap(input$$7) {
         const index$$1 = m.index | 0;
         const start$$5 = (index$$1 - 50 > 0 ? index$$1 - 50 : 0) | 0;
         let words$$1;
-        const input$$8 = (0, _String.substring)(input$$7, start$$5, 50);
+        const input$$10 = (0, _String.substring)(input$$9, start$$5, 50);
         const pattern = " ";
-        words$$1 = (0, _AllenNLP.Split)(pattern, input$$8);
+        words$$1 = (0, _AllenNLP.Split)(pattern, input$$10);
         let firstLetterString;
         let arg00$$1;
-        arg00$$1 = (0, _Array.map)(function mapping$$20(w) {
+        arg00$$1 = (0, _Array.map)(function mapping$$24(w) {
           return w[0];
         }, words$$1, Array);
         firstLetterString = arg00$$1.join("");
@@ -1032,8 +1095,8 @@ function GetAcronymMap(input$$7) {
 
         if (lm != null) {
           let phrase;
-          const strings$$18 = words$$1.slice(lm.index, acronym.length + 1);
-          phrase = (0, _String.join)(" ", strings$$18);
+          const strings$$19 = words$$1.slice(lm.index, acronym.length + 1);
+          phrase = (0, _String.join)(" ", strings$$19);
           return (0, _Seq.append)((0, _Seq.singleton)([phrase, acronym]), (0, _Seq.delay)(function () {
             return (0, _Seq.singleton)([acronym, phrase]);
           }));
@@ -1059,21 +1122,21 @@ function GetAcronymMap(input$$7) {
   });
 }
 
-function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, doTrace, stringArrayJsonOption$$3, inputText$$3) {
+function GetSelectCloze(nlpJsonOption$$4, sentenceCountOption, itemCountOption, doTrace, stringArrayJsonOption$$4, inputText$$4) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    return GetAllCloze(nlpJsonOption$$3, stringArrayJsonOption$$3, inputText$$3).then(function (_arg1$$6) {
+    return GetAllCloze(nlpJsonOption$$4, stringArrayJsonOption$$4, inputText$$4).then(function (_arg1$$7) {
       var list$$14, count;
 
-      if (_arg1$$6.tag === 1) {
-        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$6.fields[0]));
+      if (_arg1$$7.tag === 1) {
+        return Promise.resolve(new _Option.Result(1, "Error", _arg1$$7.fields[0]));
       } else {
         let sentenceCount$$1;
 
         if (sentenceCountOption == null) {
           let sentences$$1;
-          sentences$$1 = (0, _Array.map)(function mapping$$21(x$$6) {
+          sentences$$1 = (0, _Array.map)(function mapping$$25(x$$6) {
             return x$$6.sen;
-          }, _arg1$$6.fields[0].sentences, Array);
+          }, _arg1$$7.fields[0].sentences, Array);
           sentenceCount$$1 = EstimateDesiredSentences(sentences$$1);
         } else {
           const sentenceCount = sentenceCountOption | 0;
@@ -1091,34 +1154,34 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
 
         let patternInput$$1;
         let list$$9;
+        let array$$46;
+        let array$$45;
+        let array$$43;
+        let array$$42;
         let array$$40;
         let array$$39;
-        let array$$37;
-        let array$$36;
-        let array$$34;
-        let array$$33;
-        array$$33 = (0, _Array.mapIndexed)(function mapping$$22(i$$15, s$$1) {
-          return [s$$1, _arg1$$6.fields[0].clozables[i$$15]];
-        }, _arg1$$6.fields[0].sentences, Array);
-        array$$34 = array$$33.filter(function predicate$$11(tupledArg$$9) {
+        array$$39 = (0, _Array.mapIndexed)(function mapping$$26(i$$16, s$$1) {
+          return [s$$1, _arg1$$7.fields[0].clozables[i$$16]];
+        }, _arg1$$7.fields[0].sentences, Array);
+        array$$40 = array$$39.filter(function predicate$$12(tupledArg$$9) {
           let value$$13;
           value$$13 = (0, _RegExp.isMatch)(badSentenceRegex, tupledArg$$9[0].sen);
           return !value$$13;
         });
-        array$$36 = (0, _Array.map)(function mapping$$23(tupledArg$$10) {
+        array$$42 = (0, _Array.map)(function mapping$$27(tupledArg$$10) {
           return [tupledArg$$10[0], (RemoveOverlappingClozables(tupledArg$$10[1]))];
-        }, array$$34, Array);
-        array$$37 = (0, _Array.map)(function mapping$$24(tupledArg$$11) {
-          return [tupledArg$$11[0], (tupledArg$$11[1].filter(function predicate$$12(cl$$6) {
-            return cl$$6.words.length < 4;
+        }, array$$40, Array);
+        array$$43 = (0, _Array.map)(function mapping$$28(tupledArg$$11) {
+          return [tupledArg$$11[0], (tupledArg$$11[1].filter(function predicate$$13(cl$$7) {
+            return cl$$7.words.length < 4;
           }))];
-        }, array$$36, Array);
-        array$$39 = array$$37.filter(function predicate$$13(tupledArg$$12) {
+        }, array$$42, Array);
+        array$$45 = array$$43.filter(function predicate$$14(tupledArg$$12) {
           return tupledArg$$12[1].length > 0;
         });
-        array$$40 = (0, _Array.map)(function mapping$$25(tupledArg$$13) {
-          return [tupledArg$$13[0], ((0, _Array.distinctBy)(function projection$$5(cl$$8) {
-            return cl$$8.words;
+        array$$46 = (0, _Array.map)(function mapping$$29(tupledArg$$13) {
+          return [tupledArg$$13[0], ((0, _Array.distinctBy)(function projection$$5(cl$$9) {
+            return cl$$9.words;
           }, tupledArg$$13[1], {
             Equals($x$$33, $y$$34) {
               return (0, _Array.equalsWith)(_Util.comparePrimitives, $x$$33, $y$$34);
@@ -1126,18 +1189,18 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
 
             GetHashCode: _Util.structuralHash
           }))];
-        }, array$$39, Array);
-        list$$9 = (0, _Array.toList)(array$$40);
-        patternInput$$1 = (0, _List.partition)(function predicate$$15(tupledArg$$14) {
-          let chainsLengthTwoOrMore;
-          let array$$42;
-          array$$42 = (0, _Array.map)(function mapping$$26(id$$3) {
-            return _arg1$$6.fields[0].coreference.clusters[id$$3];
+        }, array$$45, Array);
+        list$$9 = (0, _Array.toList)(array$$46);
+        patternInput$$1 = (0, _List.partition)(function predicate$$16(tupledArg$$14) {
+          let chainsLengthTwoOrMore$$1;
+          let array$$48;
+          array$$48 = (0, _Array.map)(function mapping$$30(id$$4) {
+            return _arg1$$7.fields[0].coreference.clusters[id$$4];
           }, tupledArg$$14[0].cor.clusters, Array);
-          chainsLengthTwoOrMore = array$$42.filter(function predicate$$14(c$$2) {
-            return c$$2.length > 1;
+          chainsLengthTwoOrMore$$1 = array$$48.filter(function predicate$$15(c$$3) {
+            return c$$3.length > 1;
           });
-          return chainsLengthTwoOrMore.length > 2;
+          return chainsLengthTwoOrMore$$1.length > 2;
         }, list$$9);
         let clozeTuples;
         const hardFilterSentenceCount = (0, _List.length)(patternInput$$1[0]) | 0;
@@ -1146,7 +1209,7 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
           let list$$12;
           let list$$11;
           list$$11 = (0, _List.sortByDescending)(function projection$$6(tupledArg$$15) {
-            return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$15[0]) | 0;
+            return GetTotalWeight(_arg1$$7.fields[0].coreference, tupledArg$$15[0]) | 0;
           }, patternInput$$1[0], {
             Compare: _Util.comparePrimitives
           });
@@ -1158,7 +1221,7 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
           });
         } else {
           const list$$15 = (0, _List.append)(patternInput$$1[0], (list$$14 = ((0, _List.sortByDescending)(function projection$$8(tupledArg$$17) {
-            return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$17[0]) | 0;
+            return GetTotalWeight(_arg1$$7.fields[0].coreference, tupledArg$$17[0]) | 0;
           }, patternInput$$1[1], {
             Compare: _Util.comparePrimitives
           })), (count = sentenceCount$$1 - (0, _List.length)(patternInput$$1[0]) | 0, (0, _List.take)(count, list$$14))));
@@ -1170,15 +1233,15 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         }
 
         let clozeProbTuples;
-        clozeProbTuples = (0, _List.map)(function mapping$$27(tupledArg$$19) {
+        clozeProbTuples = (0, _List.map)(function mapping$$31(tupledArg$$19) {
           let sorted;
-          let array$$44;
-          array$$44 = (0, _Array.sortBy)(function projection$$10(cl$$9) {
-            return cl$$9.prob;
+          let array$$50;
+          array$$50 = (0, _Array.sortBy)(function projection$$10(cl$$10) {
+            return cl$$10.prob;
           }, tupledArg$$19[1], {
             Compare: _Util.comparePrimitives
           });
-          sorted = (0, _Array.toList)(array$$44);
+          sorted = (0, _Array.toList)(array$$50);
           return [tupledArg$$19[0], (0, _List.head)(sorted), (0, _List.tail)(sorted)];
         }, clozeTuples);
         let restClozableMap;
@@ -1186,9 +1249,9 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         let list$$21;
         let list$$20;
         let list$$19;
-        list$$19 = (0, _List.collect)(function mapping$$29(tupledArg$$20) {
-          return (0, _List.map)(function mapping$$28(c$$3) {
-            return [tupledArg$$20[0], c$$3];
+        list$$19 = (0, _List.collect)(function mapping$$33(tupledArg$$20) {
+          return (0, _List.map)(function mapping$$32(c$$4) {
+            return [tupledArg$$20[0], c$$4];
           }, tupledArg$$20[2]);
         }, clozeProbTuples);
         list$$20 = (0, _List.sortBy)(function projection$$11(tupledArg$$21) {
@@ -1212,20 +1275,20 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         });
         let allClozableMap;
         let elements$$5;
-        elements$$5 = (0, _List.map)(function mapping$$31(tupledArg$$22) {
-          let cl$$11;
+        elements$$5 = (0, _List.map)(function mapping$$35(tupledArg$$22) {
+          let cl$$12;
           const matchValue$$6 = (0, _Map.FSharpMap$$TryFind$$2B595)(restClozableMap, tupledArg$$22[0]);
 
           if (matchValue$$6 == null) {
-            cl$$11 = new _Types.List();
+            cl$$12 = new _Types.List();
           } else {
             const t$$3 = matchValue$$6;
-            cl$$11 = (0, _List.map)(function mapping$$30(tuple$$8) {
+            cl$$12 = (0, _List.map)(function mapping$$34(tuple$$8) {
               return tuple$$8[1];
             }, t$$3);
           }
 
-          return [tupledArg$$22[0], new _Types.List(tupledArg$$22[1], cl$$11)];
+          return [tupledArg$$22[0], new _Types.List(tupledArg$$22[1], cl$$12)];
         }, clozeProbTuples);
         allClozableMap = (0, _Map.ofList)(elements$$5, {
           Compare($x$$53, $y$$54) {
@@ -1235,42 +1298,42 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         });
         let importantClozeMap;
         let elements$$6;
-        let array$$50;
-        let array$$49;
-        let array$$47;
-        let array$$46;
-        let array$$45;
-        array$$45 = (0, _Map.toArray)(allClozableMap);
-        array$$46 = (0, _Array.sortByDescending)(function projection$$13(tupledArg$$23) {
-          return GetTotalWeight(_arg1$$6.fields[0].coreference, tupledArg$$23[0]) | 0;
-        }, array$$45, {
+        let array$$56;
+        let array$$55;
+        let array$$53;
+        let array$$52;
+        let array$$51;
+        array$$51 = (0, _Map.toArray)(allClozableMap);
+        array$$52 = (0, _Array.sortByDescending)(function projection$$13(tupledArg$$23) {
+          return GetTotalWeight(_arg1$$7.fields[0].coreference, tupledArg$$23[0]) | 0;
+        }, array$$51, {
           Compare: _Util.comparePrimitives
         });
-        array$$47 = (0, _Array.collect)(function mapping$$32(tupledArg$$24) {
+        array$$53 = (0, _Array.collect)(function mapping$$36(tupledArg$$24) {
           return (0, _Array.ofList)(tupledArg$$24[1], Array);
-        }, array$$46, Array);
-        array$$49 = (0, _Array.chunkBySize)(30, array$$47);
-        array$$50 = (0, _Array.mapIndexed)(function mapping$$34(i$$16, cl$$13) {
-          return (0, _Array.map)(function mapping$$33(cl$$14) {
-            return [cl$$14, i$$16];
-          }, cl$$13, Array);
-        }, array$$49, Array);
-        elements$$6 = (0, _Array.collect)(function mapping$$35(x$$7) {
+        }, array$$52, Array);
+        array$$55 = (0, _Array.chunkBySize)(30, array$$53);
+        array$$56 = (0, _Array.mapIndexed)(function mapping$$38(i$$17, cl$$14) {
+          return (0, _Array.map)(function mapping$$37(cl$$15) {
+            return [cl$$15, i$$17];
+          }, cl$$14, Array);
+        }, array$$55, Array);
+        elements$$6 = (0, _Array.collect)(function mapping$$39(x$$7) {
           return x$$7;
-        }, array$$50, Array);
+        }, array$$56, Array);
         importantClozeMap = (0, _Map.ofArray)(elements$$6, {
           Compare($x$$57, $y$$58) {
             return $x$$57.CompareTo($y$$58);
           }
 
         });
-        let input$$9;
+        let input$$11;
 
-        if (stringArrayJsonOption$$3 == null) {
-          input$$9 = [inputText$$3];
+        if (stringArrayJsonOption$$4 == null) {
+          input$$11 = [inputText$$4];
         } else {
-          const chunksJson = stringArrayJsonOption$$3;
-          input$$9 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, undefined, undefined, {
+          const chunksJson = stringArrayJsonOption$$4;
+          input$$11 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(chunksJson, undefined, undefined, {
             ResolveType() {
               return (0, _Reflection.array_type)(_Reflection.string_type);
             }
@@ -1279,11 +1342,11 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         }
 
         let acronymMap$$1;
-        let json$$10;
-        let input$$10;
-        input$$10 = (0, _String.join)(" ", input$$9);
-        json$$10 = GetAcronymMap(input$$10);
-        acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(json$$10, undefined, undefined, {
+        let json$$12;
+        let input$$12;
+        input$$12 = (0, _String.join)(" ", input$$11);
+        json$$12 = GetAcronymMap(input$$12);
+        acronymMap$$1 = (0, _Decode.Auto$$$unsafeFromString$$Z5CB6BD)(json$$12, undefined, undefined, {
           ResolveType() {
             return (0, _Reflection.class_type)("Microsoft.FSharp.Collections.FSharpMap`2", [_Reflection.string_type, _Reflection.string_type]);
           }
@@ -1291,18 +1354,18 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
         });
         const sentences$$2 = [];
         const clozes = [];
-        (0, _Seq.iterate)(function action$$1(sa$$18) {
-          const matchValue$$7 = (0, _Map.FSharpMap$$TryFind$$2B595)(allClozableMap, sa$$18);
+        (0, _Seq.iterate)(function action$$1(sa$$19) {
+          const matchValue$$7 = (0, _Map.FSharpMap$$TryFind$$2B595)(allClozableMap, sa$$19);
 
           if (matchValue$$7 != null) {
-            const clozables$$5 = matchValue$$7;
-            void sentences$$2.push(new SentenceAPI(sa$$18.sen, (0, _Util.structuralHash)(sa$$18), true));
-            (0, _Seq.iterate)(function action(cl$$15) {
+            const clozables$$6 = matchValue$$7;
+            void sentences$$2.push(new SentenceAPI(sa$$19.sen, (0, _Util.structuralHash)(sa$$19), true));
+            (0, _Seq.iterate)(function action(cl$$16) {
               var arg0$$30;
-              const patternInput$$2 = MakeItemWithTranformations(sa$$18, cl$$15);
+              const patternInput$$2 = MakeItemWithTranformations(sa$$19, cl$$16);
               let tags$$3;
               let li;
-              const list$$25 = (0, _List.append)(new _Types.List((arg0$$30 = (0, _Map.FSharpMap$$get_Item$$2B595)(importantClozeMap, cl$$15) | 0, (new Tag(0, "WeightGroup", arg0$$30))), patternInput$$2[2]), cl$$15.trace);
+              const list$$25 = (0, _List.append)(new _Types.List((arg0$$30 = (0, _Map.FSharpMap$$get_Item$$2B595)(importantClozeMap, cl$$16) | 0, (new Tag(0, "WeightGroup", arg0$$30))), patternInput$$2[2]), cl$$16.trace);
               li = (0, _List.choose)(function chooser$$4(t$$4) {
                 switch (t$$4.tag) {
                   case 17:
@@ -1332,23 +1395,23 @@ function GetSelectCloze(nlpJsonOption$$3, sentenceCountOption, itemCountOption, 
                 correctResponses = patternInput$$2[1] + "|" + acronym$$1;
               }
 
-              void clozes.push(new ClozableAPI(patternInput$$2[0], (0, _Util.structuralHash)(sa$$18), (0, _Util.structuralHash)(patternInput$$2[0]), correctResponses, tags$$3));
-            }, clozables$$5);
+              void clozes.push(new ClozableAPI(patternInput$$2[0], (0, _Util.structuralHash)(sa$$19), (0, _Util.structuralHash)(patternInput$$2[0]), correctResponses, tags$$3));
+            }, clozables$$6);
           } else {
-            void sentences$$2.push(new SentenceAPI(sa$$18.sen, (0, _Util.structuralHash)(sa$$18), false));
+            void sentences$$2.push(new SentenceAPI(sa$$19.sen, (0, _Util.structuralHash)(sa$$19), false));
           }
-        }, _arg1$$6.fields[0].sentences);
+        }, _arg1$$7.fields[0].sentences);
         return Promise.resolve(new _Option.Result(0, "Ok", new ClozeAPI(sentences$$2.slice(), clozes.slice())));
       }
     });
   }));
 }
 
-function DoSimpleComputation(input$$11) {
-  let strings$$20;
+function DoSimpleComputation(input$$13) {
+  let strings$$21;
   let source$$30;
-  const source$$29 = input$$11.split("");
+  const source$$29 = input$$13.split("");
   source$$30 = (0, _Seq.reverse)(source$$29);
-  strings$$20 = source$$30;
-  return (0, _String.join)("", strings$$20);
+  strings$$21 = source$$30;
+  return (0, _String.join)("", strings$$21);
 }
