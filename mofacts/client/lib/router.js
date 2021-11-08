@@ -244,6 +244,8 @@ Router.route('/instructions', {
   action: function() {
     Session.set('instructionClientStart', Date.now());
     Session.set('curModule', 'instructions');
+    Session.set('fromInstructions', true);
+    Session.set('curUnitInstructionsSeen', true);
     this.render('instructions');
   },
   onAfterAction: function() {
