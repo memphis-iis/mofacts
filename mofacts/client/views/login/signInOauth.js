@@ -104,10 +104,11 @@ Template.signInOauth.events({
     $('#signInButton').prop('disabled', true);
     event.preventDefault();
     console.log('Google Login Proceeding');
-
+    
     const options = {
       requestOfflineToken: true,
       requestPermissions: ['email', 'profile'],
+      loginStyle: 'redirect',
     };
 
     Meteor.loginWithGoogle(options, function(err) {
