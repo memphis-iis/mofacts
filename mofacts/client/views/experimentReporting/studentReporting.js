@@ -155,7 +155,7 @@ async function drawDashboard(curStudentGraphData, studentData){
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
-  percentStimsSeen = totalAttempts / parseFloat(totalStimCount) * 100;
+  percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
   // Perform calculated data
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
