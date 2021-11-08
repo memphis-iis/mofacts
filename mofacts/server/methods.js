@@ -1102,6 +1102,10 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
+  let hintLevelAddendunm = "";
+  if(hintLevel){
+    let hintLevelAddendunm = "AND s.hintLevel=$3";
+  }
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
@@ -1109,8 +1113,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
-               AND s.hintLevel=$3;';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true' + hintLevelAddendunm +  ';';
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
