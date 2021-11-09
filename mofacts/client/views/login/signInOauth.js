@@ -108,6 +108,7 @@ Template.signInOauth.events({
     const options = {
       requestOfflineToken: true,
       requestPermissions: ['email', 'profile'],
+      loginStyle: 'redirect',
     };
 
     Meteor.loginWithGoogle(options, function(err) {
