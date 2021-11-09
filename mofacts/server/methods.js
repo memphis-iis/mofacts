@@ -672,8 +672,8 @@ async function editCourseAssignments(newCourseAssignment) {
 
 async function getTdfAssignmentsByCourseIdMap(instructorId) {
   console.log('getTdfAssignmentsByCourseIdMap', instructorId);
-  const query = 'SELECT t.content #> array[\'tdfs\',\'tutor\',\'setspec\',\'0\',\'lessonname\',\'0\'] \
-                 AS displayname, a.TDFId, a.courseId \
+  const query = 'SELECT t.content \
+                 AS content, a.TDFId, a.courseId \
                  FROM assignment AS a \
                  INNER JOIN tdf AS t ON t.TDFId = a.TDFId \
                  INNER JOIN course AS c ON c.courseId = a.courseId \
@@ -687,7 +687,7 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
     }
     assignmentTdfFileNamesByCourseIdMap[assignment.courseid].push({
       tdfid: assignment.tdfid,
-      displayname: assignment.displayname,
+      displayname: assignment.content.tdfs.tutor.setspec.lessonname,
     });
   }
   return assignmentTdfFileNamesByCourseIdMap;
@@ -1102,6 +1102,10 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
 
 async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid);
+  let hintLevelAddendunm = "";
+  if(hintLevel){
+    let hintLevelAddendunm = "AND s.hintLevel=$3";
+  }
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
@@ -1109,8 +1113,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel) {
                FROM componentState AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true \
-               AND s.hintLevel=$3;';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true' + hintLevelAddendunm +  ';';
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
@@ -1153,7 +1156,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
     let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
     let studentUsername = userIdToUsernames[userid];
     if (!studentUsername) {
-      studentUsername = Meteor.find({_id: userid});
+      studentUsername = Meteor.users.find({_id: userid});
       userIdToUsernames[userid] = studentUsername;
     }
 
@@ -2288,4 +2291,59 @@ Meteor.startup(async function() {
       return sendErrorReportSummaries();
     },
   });
+});
+
+Router.route('/dynamic-assets/:tdfid?/:filetype?/:filename?', {
+  name: 'dynamic-asset',
+  where: 'server',
+  action: function() {
+    let filename = this.params.filename;
+    let filetype = this.params.filetype; //should only be image or audio
+    let path = this.url;
+    let extension = filename.split('.')[1];
+
+    if (this.url.includes('..')){ //user is trying to do some naughty stuff
+      this.response.writeHead('404');
+      this.response.end();
+      return;
+    }
+
+    this.response.writeHeader('200', {
+      'Content-Type': `${filetype}/${extension}`
+    })
+    let content;
+
+    if (filetype == 'image'){
+      if(isProd){
+        serverConsole(`loading image from ${process.env.HOME + path}`)
+        content = fs.readFileSync(process.env.HOME + path)
+      }
+      else{
+        serverConsole(`loading image from ${process.env.PWD + '/..' + path}`)
+        try{
+          content = fs.readFileSync(process.env.PWD + '/..' + path)
+        }
+        catch(e){
+          serverConsole(e);
+        }
+      }
+    }
+    else if (filetype == 'audio'){
+      if(isProd){
+        serverConsole(`loading audio from ${process.env.HOME + path}`)
+        content = fs.readFileSync(process.env.HOME + path)
+      }
+      else{
+        serverConsole(`loading audio from ${process.env.PWD + '/..' + path}`)
+        try{
+          content = fs.readFileSync(process.env.PWD + '/..' + path)
+        }
+        catch(e){
+          serverConsole(e);
+        }
+      }
+    }
+    this.response.write(content);
+    this.response.end();
+  }
 });

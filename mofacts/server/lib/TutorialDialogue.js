@@ -4,6 +4,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.getRandomMove = getRandomMove;
+exports.firstLetterLower = firstLetterLower;
+exports.prefixDiscourseMarker = prefixDiscourseMarker;
 exports.DialogueMove$reflection = DialogueMove$reflection;
 exports.DialogueMove$$$GetRandom$$Z6391FD10 = DialogueMove$$$GetRandom$$Z6391FD10;
 exports.DialogueMove$$$Create$$Z29C2FE95 = DialogueMove$$$Create$$Z29C2FE95;
@@ -24,6 +26,10 @@ var _Util = require("./fable-library.2.10.2/Util");
 
 var _Map = require("./fable-library.2.10.2/Map");
 
+var _String = require("./fable-library.2.10.2/String");
+
+var _Array = require("./fable-library.2.10.2/Array");
+
 var _Types = require("./fable-library.2.10.2/Types");
 
 var _Reflection = require("./fable-library.2.10.2/Reflection");
@@ -36,13 +42,9 @@ var _AllenNLP = require("./AllenNLP");
 
 var _Option = require("./fable-library.2.10.2/Option");
 
-var _Array = require("./fable-library.2.10.2/Array");
-
 var _Set = require("./fable-library.2.10.2/Set");
 
 var _PromiseImpl = require("./Fable.Promise.2.1.0/PromiseImpl");
-
-var _String = require("./fable-library.2.10.2/String");
 
 var _Promise = require("./Fable.Promise.2.1.0/Promise");
 
@@ -65,6 +67,20 @@ function getRandomMove(dm) {
   return (0, _List.item)((0, _Util.randomNext)(0, (0, _List.length)((0, _Map.FSharpMap$$get_Item$$2B595)(dialogueBags, dm)) - 1), (0, _Map.FSharpMap$$get_Item$$2B595)(dialogueBags, dm));
 }
 
+function firstLetterLower(input) {
+  return (0, _String.substring)(input, 0, 1).toLocaleLowerCase() + (0, _String.substring)(input, 1);
+}
+
+function prefixDiscourseMarker(arr) {
+  let tail;
+  let strings;
+  let array$$1;
+  array$$1 = (0, _Array.skip)(1, arr, Array);
+  strings = (0, _Array.map)(firstLetterLower, array$$1, Array);
+  tail = (0, _String.join)(" ", strings);
+  return arr[0] + " " + tail;
+}
+
 const DialogueMove = (0, _Types.declare)(function TutorialDialogue_DialogueMove(Text$, Type) {
   this.Text = Text$;
   this.Type = Type;
@@ -83,7 +99,7 @@ function DialogueMove$$$Create$$Z29C2FE95(text, aType$$1) {
   return new DialogueMove(text, aType$$1);
 }
 
-const DialogueState = (0, _Types.declare)(function TutorialDialogue_DialogueState(ClozeItem, ClozeAnswer, Questions, LastQuestion, LastStudentAnswer, CurrentFeedback, CurrentElaboration, CurrentQuestion, Display, Finished) {
+const DialogueState = (0, _Types.declare)(function TutorialDialogue_DialogueState(ClozeItem, ClozeAnswer, Questions, LastQuestion, LastStudentAnswer, CurrentFeedback, CurrentElaboration, CurrentQuestion, Display, QuestionsAsked, Finished) {
   this.ClozeItem = ClozeItem;
   this.ClozeAnswer = ClozeAnswer;
   this.Questions = Questions;
@@ -93,16 +109,17 @@ const DialogueState = (0, _Types.declare)(function TutorialDialogue_DialogueStat
   this.CurrentElaboration = CurrentElaboration;
   this.CurrentQuestion = CurrentQuestion;
   this.Display = Display;
+  this.QuestionsAsked = QuestionsAsked;
   this.Finished = Finished;
 }, _Types.Record);
 exports.DialogueState = DialogueState;
 
 function DialogueState$reflection() {
-  return (0, _Reflection.record_type)("TutorialDialogue.DialogueState", [], DialogueState, () => [["ClozeItem", _Reflection.string_type], ["ClozeAnswer", _Reflection.string_type], ["Questions", (0, _Reflection.option_type)((0, _Reflection.array_type)((0, _QuestionGenerator.Question$reflection)()))], ["LastQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["LastStudentAnswer", (0, _Reflection.option_type)(_Reflection.string_type)], ["CurrentFeedback", (0, _Reflection.option_type)(DialogueMove$reflection())], ["CurrentElaboration", (0, _Reflection.option_type)((0, _Reflection.array_type)(DialogueMove$reflection()))], ["CurrentQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["Display", (0, _Reflection.option_type)(_Reflection.string_type)], ["Finished", (0, _Reflection.option_type)(_Reflection.bool_type)]]);
+  return (0, _Reflection.record_type)("TutorialDialogue.DialogueState", [], DialogueState, () => [["ClozeItem", _Reflection.string_type], ["ClozeAnswer", _Reflection.string_type], ["Questions", (0, _Reflection.option_type)((0, _Reflection.array_type)((0, _QuestionGenerator.Question$reflection)()))], ["LastQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["LastStudentAnswer", (0, _Reflection.option_type)(_Reflection.string_type)], ["CurrentFeedback", (0, _Reflection.option_type)(DialogueMove$reflection())], ["CurrentElaboration", (0, _Reflection.option_type)((0, _Reflection.array_type)(DialogueMove$reflection()))], ["CurrentQuestion", (0, _Reflection.option_type)((0, _QuestionGenerator.Question$reflection)())], ["Display", (0, _Reflection.option_type)(_Reflection.string_type)], ["QuestionsAsked", (0, _Reflection.option_type)(_Reflection.int32_type)], ["Finished", (0, _Reflection.option_type)(_Reflection.bool_type)]]);
 }
 
 function DialogueState$$$Initialize(clozeItem, clozeAnswer) {
-  return new DialogueState(clozeItem, clozeAnswer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+  return new DialogueState(clozeItem, clozeAnswer, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 }
 
 function DialogueState$$$InitializeTest() {
@@ -111,13 +128,13 @@ function DialogueState$$$InitializeTest() {
 
 function GetDialogue(state) {
   return (0, _Promise.PromiseBuilder$$Run$$212F1D4B)(_PromiseImpl.promise, (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-    var stringArrayJsonOption, input;
+    var stringArrayJsonOption, input$$2;
     const errors = [];
     const text$$1 = (0, _RegExp.replace)(state.ClozeItem, "(_ _|_)+", state.ClozeAnswer);
-    return (state.Questions == null ? (stringArrayJsonOption = undefined, (0, _AllenNLP.GetNLP)(stringArrayJsonOption, text$$1)) : (input = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input)))).then(function (_arg1) {
-      var input$$1;
-      return ((state.LastQuestion != null ? state.LastStudentAnswer != null : false) ? (0, _AllenNLP.GetTextualEntailment)(state.LastQuestion.Answer, state.LastStudentAnswer) : (input$$1 = (0, _AllenNLP.Entailment$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$1)))).then(function (_arg2) {
-        var lastQ, x, q$$5, list$$1, list, mapping$$1, clo1, list$$3, list$$2, mapping$$2, clo1$$1;
+    return (state.Questions == null ? (stringArrayJsonOption = undefined, (0, _AllenNLP.GetNLP)(stringArrayJsonOption, text$$1)) : (input$$2 = (0, _AllenNLP.DocumentAnnotation$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$2)))).then(function (_arg1) {
+      var input$$3;
+      return ((state.LastQuestion != null ? state.LastStudentAnswer != null : false) ? (0, _AllenNLP.GetTextualEntailment)(state.LastQuestion.Answer, state.LastStudentAnswer) : (input$$3 = (0, _AllenNLP.Entailment$$$CreateEmpty)(), ((0, _AllenNLP.Promisify)(input$$3)))).then(function (_arg2) {
+        var qs, lastQ, x, q$$5, list$$1, list, mapping$$1, clo1, list$$3, list$$2, mapping$$2, clo1$$1;
 
         const isOK = function isOK(r) {
           if (r.tag === 1) {
@@ -172,85 +189,123 @@ function GetDialogue(state) {
           prompts = questions.filter(function predicate$$1(q$$2) {
             return q$$2.QuestionType === "prompt";
           });
-          var $target$$21, h, lastQ$$1, ps$$1;
+          var $target$$29;
 
-          if (state.LastQuestion != null) {
-            if (lastQ = state.LastQuestion, lastQ.QuestionType === "hint" ? prompts.length > 0 : false) {
-              $target$$21 = 1;
-              lastQ$$1 = state.LastQuestion;
-              ps$$1 = prompts;
+          if (state.LastQuestion == null) {
+            if (prompts.length > 0) {
+              $target$$29 = 0;
             } else {
-              $target$$21 = 2;
+              $target$$29 = 1;
             }
-          } else if (hintOption != null) {
-            $target$$21 = 0;
-            h = hintOption;
           } else {
-            $target$$21 = 2;
+            $target$$29 = 1;
           }
 
-          switch ($target$$21) {
+          switch ($target$$29) {
             case 0:
               {
-                patternInput = [(h), (questions.filter(function predicate$$2(q$$3) {
-                  return !(0, _Util.equals)(q$$3, h);
+                let clozeAnswerSet;
+                const array$$5 = state.ClozeAnswer.split(" ");
+                clozeAnswerSet = (0, _Set.ofArray)(array$$5, {
+                  Compare: _Util.comparePrimitives
+                });
+                let p;
+                p = (0, _Array.maxBy)(function projection(ap) {
+                  let candidateSet;
+                  const array$$6 = ap.Focus.split(" ");
+                  candidateSet = (0, _Set.ofArray)(array$$6, {
+                    Compare: _Util.comparePrimitives
+                  });
+                  const intersection = (0, _Set.intersect)(candidateSet, clozeAnswerSet);
+                  return (0, _Set.FSharpSet$$get_Count)(intersection) | 0;
+                }, prompts, {
+                  Compare: _Util.comparePrimitives
+                });
+                patternInput = [(p), (questions.filter(function predicate$$2(q$$3) {
+                  return !(0, _Util.equals)(q$$3, p);
                 }))];
                 break;
               }
 
             case 1:
               {
-                let lastSet;
-                const array$$4 = lastQ$$1.Answer.split(" ");
-                lastSet = (0, _Set.ofArray)(array$$4, {
-                  Compare: _Util.comparePrimitives
-                });
-                let p;
-                p = (0, _Array.maxBy)(function projection(ap) {
-                  let candidateSet;
-                  const array$$5 = ap.Focus.split(" ");
-                  candidateSet = (0, _Set.ofArray)(array$$5, {
-                    Compare: _Util.comparePrimitives
-                  });
-                  const intersection = (0, _Set.intersect)(candidateSet, lastSet);
-                  return (0, _Set.FSharpSet$$get_Count)(intersection) | 0;
-                }, ps$$1, {
-                  Compare: _Util.comparePrimitives
-                });
-                patternInput = [(p), (questions.filter(function predicate$$3(q$$4) {
-                  return !(0, _Util.equals)(q$$4, p);
-                }))];
-                break;
-              }
+                var $target$$32, lastQ$$1, ps$$3, qs$$1;
 
-            case 2:
-              {
-                patternInput = [undefined, questions];
+                if (state.LastQuestion != null) {
+                  if (state.QuestionsAsked != null) {
+                    if (qs = state.QuestionsAsked | 0, (lastQ = state.LastQuestion, prompts.length > 0 ? qs === 1 : false)) {
+                      $target$$32 = 0;
+                      lastQ$$1 = state.LastQuestion;
+                      ps$$3 = prompts;
+                      qs$$1 = state.QuestionsAsked;
+                    } else {
+                      $target$$32 = 1;
+                    }
+                  } else {
+                    $target$$32 = 1;
+                  }
+                } else {
+                  $target$$32 = 1;
+                }
+
+                switch ($target$$32) {
+                  case 0:
+                    {
+                      let lastSet;
+                      const array$$9 = lastQ$$1.Answer.split(" ");
+                      lastSet = (0, _Set.ofArray)(array$$9, {
+                        Compare: _Util.comparePrimitives
+                      });
+                      let p$$1;
+                      p$$1 = (0, _Array.maxBy)(function projection$$1(ap$$1) {
+                        let candidateSet$$1;
+                        const array$$10 = ap$$1.Focus.split(" ");
+                        candidateSet$$1 = (0, _Set.ofArray)(array$$10, {
+                          Compare: _Util.comparePrimitives
+                        });
+                        const intersection$$1 = (0, _Set.intersect)(candidateSet$$1, lastSet);
+                        return (0, _Set.FSharpSet$$get_Count)(intersection$$1) | 0;
+                      }, ps$$3, {
+                        Compare: _Util.comparePrimitives
+                      });
+                      patternInput = [(p$$1), (questions.filter(function predicate$$3(q$$4) {
+                        return !(0, _Util.equals)(q$$4, p$$1);
+                      }))];
+                      break;
+                    }
+
+                  case 1:
+                    {
+                      patternInput = [undefined, questions];
+                      break;
+                    }
+                }
+
                 break;
               }
           }
 
           let feedbackOption;
-          var $target$$25, lq, sa$$1, te;
+          var $target$$35, lq, sa$$1, te;
 
           if (state.LastQuestion != null) {
             if (state.LastStudentAnswer != null) {
               if (teOption != null) {
-                $target$$25 = 0;
+                $target$$35 = 0;
                 lq = state.LastQuestion;
                 sa$$1 = state.LastStudentAnswer;
                 te = teOption;
               } else {
-                $target$$25 = 1;
+                $target$$35 = 1;
               }
             } else {
-              $target$$25 = 1;
+              $target$$35 = 1;
             }
           } else {
-            $target$$25 = 1;
+            $target$$35 = 1;
           }
 
-          switch ($target$$25) {
+          switch ($target$$35) {
             case 0:
               {
                 const polarity = (te.label_probs[0] > te.label_probs[1] ? 1 : -1) | 0;
@@ -269,27 +324,29 @@ function GetDialogue(state) {
           }
 
           const makeElaboration = function makeElaboration() {
+            var arr$$1, array$$13;
             const elaboration = [DialogueMove$$$GetRandom$$Z6391FD10("elaborationMarker"), DialogueMove$$$Create$$Z29C2FE95(text$$1, "elaboration"), DialogueMove$$$GetRandom$$Z6391FD10("shiftMarker")];
-            (0, _Array.addRangeInPlace)(((0, _Array.map)(function mapping(e$$2) {
+            void display.push((arr$$1 = (array$$13 = elaboration.slice(undefined, 1 + 1), ((0, _Array.map)(function mapping(e$$2) {
               return e$$2.Text;
-            }, elaboration, Array)), display);
+            }, array$$13, Array))), (prefixDiscourseMarker(arr$$1))));
+            void display.push(elaboration[2].Text);
             return elaboration;
           };
 
           let elaborationOption;
-          var $target$$27;
+          var $target$$37;
 
           if (feedbackOption != null) {
             if (x = feedbackOption, x.Type === "positiveFeedback") {
-              $target$$27 = 0;
+              $target$$37 = 0;
             } else {
-              $target$$27 = 1;
+              $target$$37 = 1;
             }
           } else {
-            $target$$27 = 1;
+            $target$$37 = 1;
           }
 
-          switch ($target$$27) {
+          switch ($target$$37) {
             case 0:
               {
                 const arg0$$3 = makeElaboration();
@@ -311,7 +368,8 @@ function GetDialogue(state) {
           }
 
           return (patternInput[0] != null ? elaborationOption == null ? (q$$5 = patternInput[0], (void display.push(q$$5.Text), Promise.resolve())) : (void null, Promise.resolve()) : (void null, Promise.resolve())).then(() => (0, _Promise.PromiseBuilder$$Delay$$62FBFDE1)(_PromiseImpl.promise, function () {
-            var Questions, Display, arg0$$8;
+            var c$$1, c, Questions, Display, arg0$$8;
+            const questionsAskedOption = patternInput[0] == null ? state.QuestionsAsked != null ? (c$$1 = state.QuestionsAsked | 0, c$$1) : undefined : state.QuestionsAsked == null ? 1 : (c = state.QuestionsAsked | 0, c + 1);
             let finishedOption;
 
             if (elaborationOption == null) {
@@ -321,7 +379,7 @@ function GetDialogue(state) {
               finishedOption = true;
             }
 
-            return (state.LastQuestion == null ? patternInput[0] == null : false) ? Promise.resolve(new _Option.Result(1, "Error", "Aborting dialogue: unable to generate questions")) : Promise.resolve(new _Option.Result(0, "Ok", (Questions = (patternInput[1]), (Display = (arg0$$8 = ((0, _String.join)(" ", display)), (arg0$$8)), new DialogueState(state.ClozeItem, state.ClozeAnswer, Questions, patternInput[0], state.LastStudentAnswer, feedbackOption, elaborationOption, patternInput[0], Display, finishedOption)))));
+            return (state.LastQuestion == null ? patternInput[0] == null : false) ? Promise.resolve(new _Option.Result(1, "Error", "Aborting dialogue: unable to generate questions")) : Promise.resolve(new _Option.Result(0, "Ok", (Questions = (patternInput[1]), (Display = (arg0$$8 = ((0, _String.join)(" ", display)), (arg0$$8)), new DialogueState(state.ClozeItem, state.ClozeAnswer, Questions, patternInput[0], state.LastStudentAnswer, feedbackOption, elaborationOption, patternInput[0], Display, questionsAskedOption, finishedOption)))));
           }));
         } else {
           const errorPayload = [];
@@ -382,8 +440,8 @@ function GetElaboratedDialogueState(correctAnswer, incorrectAnswer, clozeItem$$1
           const i = iaOption;
           patternInput$$1 = [i + ".", incorrectAnswer];
         } else if (caOption != null) {
-          const c = caOption;
-          patternInput$$1 = [c + ".", correctAnswer];
+          const c$$2 = caOption;
+          patternInput$$1 = [c$$2 + ".", correctAnswer];
         } else {
           patternInput$$1 = [clozeItem$$1, correctAnswer];
         }

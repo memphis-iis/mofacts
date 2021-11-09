@@ -270,6 +270,7 @@ function instructContinue() {
     console.log('instructContinue', res);
     Session.set('inResume', true);
     leavePage('/card');
+    Session.set('fromInstructions', true);
     Session.set('enterKeyLock', false);
     console.log('releasing enterKeyLock in instructContinue');
   }, 1);

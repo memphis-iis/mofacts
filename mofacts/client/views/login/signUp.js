@@ -77,6 +77,7 @@ Template.signUp.events({
               loginExpirationInDays: 0.5
             });
           }
+          Meteor.logoutOtherClients();
           Router.go('/profile');
         }
       });

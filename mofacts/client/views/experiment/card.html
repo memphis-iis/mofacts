@@ -78,9 +78,9 @@
                                 </div>
                             {{/if}}
                         </div>
-                        <div id="rightmostPanel" class="col-md-1">
+                        <div id="rightmostPanel" class="{{speakerCardPosition}}">
                             {{#if audioCard}}
-                                <img src="images/speaker.png" class="marginLeftAndRight h2 sound-img">
+                                <img src="images/speaker.png" class="h2 sound-img">
                             {{/if}}
                         </div>
                     </div>
@@ -222,7 +222,7 @@
             <div class="row">
                 <div class="col-md-offset-2 col-md-8">
                     <br /><br />
-                    <h2>Content loading...</h2>
+                    <h2>{{interTrialMessage}}</h2>
                 </div>
             </div>
         {{/if}}

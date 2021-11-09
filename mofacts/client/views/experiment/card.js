@@ -522,7 +522,9 @@ Template.card.helpers({
     }
   },
 
-  'displayFeedback': () => Session.get('displayFeedback'),
+  'interTrialMessage': () => getCurrentDeliveryParams().intertrialmessage,
+
+  'displayFeedback': () => Session.get('displayFeedback') && getCurrentDeliveryParams().allowFeedbackTypeSelect,
 
   'resetFeedbackSettingsFromIndex': () => Session.get('resetFeedbackSettingsFromIndex'),
 
@@ -587,6 +589,17 @@ Template.card.helpers({
 
   'audioCard': function() {
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
+  },
+
+  'speakerCardPosition': function() {
+    //centers the speaker icon if there are no displays. 
+    if(Session.get('currentDisplay') && 
+        !Session.get('currentDisplay').imgSrc && 
+        !Session.get('currentDisplay').videoSrc && 
+        !Session.get('currentDisplay').clozeText && 
+        !Session.get('currentDisplay').text)
+      return `col-md-12 text-center`;
+    return `col-md-1`
   },
 
   'imageCard': function() {
@@ -1758,6 +1771,9 @@ async function unitIsFinished(reason) {
   Session.set('currentTdfUnit', curTdfUnit);
   Session.set('currentDeliveryParams', getCurrentDeliveryParams());
   Session.set('currentUnitStartTime', Date.now());
+  Session.set('feedbackUnset', true);
+  Session.set('feedbackTypeFromHistory', undefined);
+  Session.set('curUnitInstructionsSeen', false);
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
@@ -1840,6 +1856,7 @@ async function cardStart() {
 }
 
 async function prepareCard() {
+  Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
   Session.set('displayReady', false);
   Session.set('currentDisplay', {});
@@ -2606,6 +2623,8 @@ async function resumeFromComponentState() {
   const stimuliSet = await meteorCallAsync('getStimuliSetById', stimuliSetId);
 
   Session.set('currentStimuliSet', stimuliSet);
+  Session.set('feedbackUnset', Session.get('fromInstructions') || Session.get('feedbackUnset'));
+  Session.set('fromInstructions', false);
 
   preloadStimuliFiles();
   checkUserAudioConfigCompatability();
@@ -2698,8 +2717,11 @@ async function resumeFromComponentState() {
 
   await updateExperimentState(newExperimentState, 'card.resumeFromComponentState');
 
-  getFeedbackParameters();
-
+  if (Session.get('feedbackUnset')){
+    getFeedbackParameters();
+    Session.set('feedbackUnset', false);
+  }
+  
   // Notice that no matter what, we log something about condition data
   // ALSO NOTICE that we'll be calling processUserTimesLog after the server
   // returns and we know we've logged what happened
@@ -2791,7 +2813,7 @@ async function processUserTimesLog() {
 
   // prepareCard will handle whether or not new units see instructions, but
   // it will miss instructions for the very first unit.
-  let needFirstUnitInstructions = true; 
+  let needFirstUnitInstructions = !Session.get('curUnitInstructionsSeen'); 
 
   // It's possible that they clicked Continue on a final unit, so we need to
   // know to act as if we're done

@@ -8,6 +8,20 @@ import {instructContinue} from './views/experiment/instructions.js';
 import {routeToSignin} from './lib/router.js';
 import { init } from "meteor/simonsimcity:client-session-timeout";
 
+//Prevents new tab
+
+
+const channel = new BroadcastChannel('tab');
+
+channel.postMessage('another-tab');
+// note that listener is added after posting the message
+
+channel.addEventListener('message', (msg) => {
+  if (msg.data === 'another-tab') {
+    Router.go('/tabwarning');
+  }
+});
+
 
 //Set checks if user is inactive
 const options = {
@@ -149,7 +163,12 @@ Template.body.events({
     Session.set('displayFeedback', true);
     Session.set('resetFeedbackSettingsFromIndex', true);
   }, 
-
+  'click #wikiButton': function(event) {
+    window.open(
+      'https://github.com/memphis-iis/mofacts-ies/wiki',
+      '_blank'
+    );
+  }, 
   'click #errorReportingSaveButton': function(event) {
     event.preventDefault();
     console.log('save error reporting button pressed');
@@ -207,5 +226,8 @@ Template.registerHelper('curStudentPerformance', function() {
 
 Template.registerHelper('showFeedbackResetButton', function() {
   return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
+})
+Template.registerHelper('isInSession', function() {
+  return (Session.get('curModule') == 'profile');
 })
 

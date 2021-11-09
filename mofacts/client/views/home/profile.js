@@ -138,10 +138,17 @@ Template.profile.events({
     event.preventDefault();
     Router.go('/contentGeneration');
   },
+  'click #contentGenerationButton': function(event) {
+    event.preventDefault();
+    Router.go('/contentGeneration');
+  },
 
   'click #tdfPracticeBtn': function(event, instance) {
     const showTdfs = instance.showTdfs.get();
     instance.showTdfs.set(!showTdfs);
+  },
+  'click #wikiButton': function(event, instance) {
+    window.location.href="https://github.com/memphis-iis/mofacts-ies/wiki";
   },
 
   'click #select-disable': (event, instance) => {
@@ -417,7 +424,10 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
   const audioPromptFeedbackVolume = document.getElementById('audioPromptFeedbackVolume').value;
   Session.set('audioPromptFeedbackVolume', audioPromptFeedbackVolume);
   const feedbackType = await meteorCallAsync('getUserLastFeedbackTypeFromHistory', currentTdfId);
-  Session.set('feedbackTypeFromHistory', feedbackType)
+  if(feedbackType)
+    Session.set('feedbackTypeFromHistory', feedbackType.feedbacktype)
+  else
+    Session.set('feedbackTypeFromHistory', null);
 
   // Set values for card.js to use later, in experiment mode we'll default to the values in the tdf
   Session.set('audioPromptFeedbackSpeakingRate', audioPromptFeedbackSpeakingRate);
