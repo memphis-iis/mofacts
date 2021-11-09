@@ -63,6 +63,9 @@ function defaultUnitEngine(curExperimentData) {
     unitFinished: function() {
       throw new Error('Missing Implementation');
     },
+    calculateIndices: function() {
+      throw new Error('Missing Implementation');
+    },
     saveComponentStates: async function() { },
     loadComponentStates: async function() { },
 
@@ -479,7 +482,6 @@ function modelUnitEngine() {
   function findMinProbCardAndHintLevel(cards, hiddenItems) {
     console.log('findMinProbCard');
     let currentMin = 1.00001;
-    let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -495,12 +497,6 @@ function modelUnitEngine() {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
-            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-              if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
-                currentHintLevelMin = stim.hintLevelProbabilites[k];
-                hintLevelIndex = k;
-              }
-            }
           }
         }
       }
@@ -531,7 +527,6 @@ function modelUnitEngine() {
   function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
     console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
-    let currentHintLevelMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -547,12 +542,6 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
-            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-              if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < ceiling ){
-                currentHintLevelMax = stim.hintLevelProbabilites[k];
-                hintLevelIndex = k;
-              }
-            }
           }
         }
       }
@@ -564,7 +553,6 @@ function modelUnitEngine() {
   function findMinProbDistCard(cards, hiddenItems) {
     console.log('findMinProbDistCard');
     let currentMin = 50.0;
-    let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
 
@@ -587,13 +575,6 @@ function modelUnitEngine() {
             currentMin = dist;
             clusterIndex=i;
             stimIndex=j;
-          }
-          for(let k=0; k<stims.hintLevelProbabilites.length; k++){
-            const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.stim.hintLevelProbabilites[k])) - optimalProb);
-            if(hintDist <= currentHintLevelMin){
-              currentHintLevelMin = dist;
-              hintLevelIndex = k;
-            }
           }
         }
       }
@@ -1189,20 +1170,10 @@ function modelUnitEngine() {
       await this.initializeActRModel();
     },
 
-    selectNextCard: async function() {
-      // The cluster (card) index, the cluster version (stim index), and
-      // whether or not we should show the overlearning text is determined
-      // here. See calculateCardProbabilities for how prob.probability is
-      // calculated
+    calculateIndices: async function() {
       this.calculateCardProbabilities();
       const hiddenItems = Session.get('hiddenItems');
-      let newClusterIndex = -1;
-      let newStimIndex = -1;
       const cards = cardProbabilities.cards;
-      let indices;
-
-      console.log('selectNextCard unitMode: ' + this.unitMode);
-
       switch (this.unitMode) {
         case 'thresholdCeiling':
           indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
@@ -1228,6 +1199,23 @@ function modelUnitEngine() {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
+      }
+      return indices;
+    },
+
+    selectNextCard: async function(indices) {
+      // The cluster (card) index, the cluster version (stim index), and
+      // whether or not we should show the overlearning text is determined
+      // here. See calculateCardProbabilities for how prob.probability is
+      // calculated
+      let newClusterIndex = -1;
+      let newStimIndex = -1;
+
+      console.log('selectNextCard unitMode: ' + this.unitMode);
+
+      if(indices === undefined || indices === null){
+        console.log('indices unset, calculating now')
+        indices = calculateIndices();
       }
 
       newClusterIndex = indices.clusterIndex;
