@@ -1156,7 +1156,8 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
     let {courseid, userid, tdfid, correct, incorrect, totalpracticeduration} = studentPerformance;
     let studentUsername = userIdToUsernames[userid];
     if (!studentUsername) {
-      studentUsername = Meteor.users.find({_id: userid});
+      console.log(Meteor.users.findOne({_id: userid}).username + ', ' + userid);
+      studentUsername = Meteor.users.findOne({_id: userid}).username;
       userIdToUsernames[userid] = studentUsername;
     }
 
@@ -1190,7 +1191,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].count += correct + incorrect;
     studentPerformanceForClassAndTdfIdMap[courseid][tdfid][userid].totalTime = totalpracticeduration;
   }
-  console.log('studentPerformanceForClass:', studentPerformanceForClass);
+  console.log('studentPerformanceForClass:', JSON.stringify(studentPerformanceForClass, null, 4));
   for (const index of Object.keys(studentPerformanceForClass)) {
     const coursetotals = studentPerformanceForClass[index];
     for (const index2 of Object.keys(coursetotals)) {
