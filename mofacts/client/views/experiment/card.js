@@ -1426,64 +1426,64 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
-  Meteor.setTimeout(async function() {
-    let wasReportedForRemoval = Session.get('wasReportedForRemoval');
-    const reviewEnd = Date.now();
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+  let wasReportedForRemoval = Session.get('wasReportedForRemoval');
+  const reviewEnd = Date.now();
+  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+      reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
 
-    // Give unit engine a chance to update any necessary stats
-    const endLatency = reviewEnd - trialStartTimestamp;
-    await engine.cardAnswered(isCorrect, endLatency, wasReportedForRemoval);
-    const answerLogAction = isTimeout ? '[timeout]' : 'answer';
-    Session.set('dialogueHistory', undefined);
-    const newExperimentState = {
-      lastAction: answerLogAction,
-      lastActionTimeStamp: Date.now(),
-    };
-    if (getTestType() !== 'i') {
-      const overallOutcomeHistory = Session.get('overallOutcomeHistory');
-      overallOutcomeHistory.push(isCorrect ? 1 : 0);
-      newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-      Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  // Give unit engine a chance to update any necessary stats
+  const endLatency = reviewEnd - trialStartTimestamp;
+  await engine.cardAnswered(isCorrect, endLatency, wasReportedForRemoval);
+  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  Session.set('dialogueHistory', undefined);
+  const newExperimentState = {
+    lastAction: answerLogAction,
+    lastActionTimeStamp: Date.now(),
+  };
+  if (getTestType() !== 'i') {
+    const overallOutcomeHistory = Session.get('overallOutcomeHistory');
+    overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
+    Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+  console.log('writing answerLogRecord to history:', answerLogRecord);
+  if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
+    try {
+      await meteorCallAsync('insertHistory', answerLogRecord);
+      await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    } catch (e) {
+      console.log('error writing history record:', e);
+      throw new Error('error inserting history/updating state:', e);
     }
-    console.log('writing answerLogRecord to history:', answerLogRecord);
-    if(!Meteor.user().profile.impersonating || Meteor.user().profile === undefined){
-      try {
-        await meteorCallAsync('insertHistory', answerLogRecord);
-        await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-      } catch (e) {
-        console.log('error writing history record:', e);
-        throw new Error('error inserting history/updating state:', e);
-      }
-    } else {
-      console.log('no history saved. impersonation mode.');
+  } else {
+    console.log('no history saved. impersonation mode.');
+  }
+
+  // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+  // is specified and we have seen that many (or more) timeouts in a row, then
+  // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+  // this feature MUST be turned on in the TDF.
+  if (!isTimeout) {
+    timeoutsSeen = 0; // Reset count
+  } else {
+    timeoutsSeen++;
+
+    // Figure out threshold (with default of 0)
+    // Also note: threshold < 1 means no autostop at all
+    const threshold = deliveryParams.autostopTimeoutThreshold;
+
+    if (threshold > 0 && timeoutsSeen >= threshold) {
+      console.log('Hit timeout threshold', threshold, 'Quitting');
+      leavePage('/profile');
+      return; // We are totally done
     }
+  }
 
-    // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-    // is specified and we have seen that many (or more) timeouts in a row, then
-    // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-    // this feature MUST be turned on in the TDF.
-    if (!isTimeout) {
-      timeoutsSeen = 0; // Reset count
-    } else {
-      timeoutsSeen++;
-
-      // Figure out threshold (with default of 0)
-      // Also note: threshold < 1 means no autostop at all
-      const threshold = deliveryParams.autostopTimeoutThreshold;
-
-      if (threshold > 0 && timeoutsSeen >= threshold) {
-        console.log('Hit timeout threshold', threshold, 'Quitting');
-        leavePage('/profile');
-        return; // We are totally done
-      }
-    }
-
+  
+  prepareCard(reviewTimeout, function() {
     hideUserFeedback();
     $('#userAnswer').val('');
-    prepareCard();
-  }, reviewTimeout);
+  });
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
@@ -1848,19 +1848,29 @@ async function cardStart() {
   }
 }
 
-async function prepareCard() {
-  Meteor.logoutOtherClients();
-  Session.set('wasReportedForRemoval', false);
-  Session.set('displayReady', false);
-  Session.set('currentDisplay', {});
-  Session.set('clozeQuestionParts', undefined);
-  console.log('displayReadyFalse, prepareCard');
-  if (engine.unitFinished()) {
-    unitIsFinished('Unit Engine');
-  } else {
-    await engine.selectNextCard();
-    await newQuestionHandler();
-  }
+async function prepareCard(reviewTimeout, cb) {
+  if(Session.get('unitType') == "model")
+    Session.set('engineIndices', await engine.calculateIndices());
+  else
+    Session.set('engineIndices', undefined);
+  Meteor.setTimeout(async function() {
+    if(cb){
+      cb();
+    }
+    Meteor.logoutOtherClients();
+    Session.set('wasReportedForRemoval', false);
+    Session.set('displayReady', false);
+    Session.set('currentDisplay', {});
+    Session.set('clozeQuestionParts', undefined);
+    console.log('displayReadyFalse, prepareCard');
+    if (engine.unitFinished()) {
+      unitIsFinished('Unit Engine');
+    } else {
+      await engine.selectNextCard(Session.get('engineIndices'));
+      await newQuestionHandler();
+      Session.set('engineIndices', undefined);
+    }
+  }, reviewTimeout);
 }
 
 // TODO: this probably no longer needs to be separate from prepareCard
@@ -2917,7 +2927,7 @@ async function processUserTimesLog() {
         }
       }
       console.log('RESUME FINISHED: next-question logic to commence');
-      await prepareCard();
+      await prepareCard(0);
     }
   }
 }
