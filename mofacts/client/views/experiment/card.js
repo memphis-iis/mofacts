@@ -1775,7 +1775,7 @@ async function unitIsFinished(reason) {
   Session.set('curUnitInstructionsSeen', false);
 
   let leaveTarget;
-  if (newUnitNum < curTdf.tdfs.tutor.unit.length && typeof curTdfUnit.unitinstructions !== 'undefined')_ {
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length && typeof curTdfUnit.unitinstructions !== 'undefined'){
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
     leaveTarget = '/instructions';
