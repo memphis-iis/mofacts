@@ -1775,7 +1775,7 @@ async function unitIsFinished(reason) {
   Session.set('curUnitInstructionsSeen', false);
 
   let leaveTarget;
-  if (newUnitNum < curTdf.tdfs.tutor.unit.length && (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== 'undefined')) {
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length && typeof curTdfUnit.unitinstructions !== 'undefined')_ {
     // Just hit a new unit - we need to restart with instructions
     console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
     leaveTarget = '/instructions';
@@ -2894,7 +2894,7 @@ async function processUserTimesLog() {
     const curTdfUnit = curTdf.tdfs.tutor.unit[0];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
-    if (needFirstUnitInstructions && (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== 'undefined')) {
+    if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
       // They haven't seen our first instruction yet
       console.log('RESUME FINISHED: displaying initial instructions');
       leavePage('/instructions');
@@ -2911,7 +2911,7 @@ async function processUserTimesLog() {
         if (lockoutMins > 0) {
           const unitStartTimestamp = Session.get('currentUnitStartTime');
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-          if (Date.now() < lockoutFreeTime && (curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructions !== 'undefined')) {
+          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') {
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;
