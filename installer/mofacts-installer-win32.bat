@@ -40,7 +40,7 @@ echo copying script to shortcut
 copy C:\MoFACTS_Installer\* C:\MoFACTS\
 copy C:\MoFACTS_Installer\mofacts-installer-win32.bat %userprofile%\Desktop\MoFACTs-IIS.bat
 echo downloading vagrant script
-start /W bitsadmin transfer "vagrant install script" https://raw.githubusercontent.com/memphis-iis/mofacts-ies/postgresMigration/installer/mofacts-vagrant.sh C:\MoFACTS\mofacts-vagrant.sh
+if NOT exist C:\MoFACTS\mofacts-vagrant.sh start /W bitsadmin transfer "vagrant install script" https://raw.githubusercontent.com/memphis-iis/mofacts-ies/postgresMigration/installer/mofacts-vagrant.sh C:\MoFACTS\mofacts-vagrant.sh
 echo handing off to vagrant
 start "" "%SYSTEMDRIVE%\Program Files\Git\bin\sh.exe" --login -i -c "sh /c/MoFACTs/mofacts-vagrant.sh"
 exit 0

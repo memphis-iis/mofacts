@@ -18,6 +18,10 @@ fi
 echo "checking for updates"
 cd /c/MoFACTs/mofacts-ies/
 git fetch origin
+echo "downloading mofacts config"
+curl https://s3.amazonaws.com/optimallearning.org/installer_files/2021-01-17-glossary-machine-dictionary-tagged.json /c/MoFACTs/mofacts-ies/2021-01-17-glossary-machine-dictionary-tagged.json
+curl https://s3.amazonaws.com/optimallearning.org/installer_files/2021-02-25-elaboratedFeedbackCache.json /c/MoFACTs/mofacts-ies/2021-02-25-elaboratedFeedbackCache.json
+curl https://s3.amazonaws.com/optimallearning.org/installer_files/settings.json /c/MoFACTs/mofacts-ies/mofacts/settings.json
 echo "starting vagrant box"
 vagrant up
 echo "starting the browser interface in 2 minutes. Don't panic. This takes several minutes to happen. Don't touch the browser until it loads MoFACTs."
