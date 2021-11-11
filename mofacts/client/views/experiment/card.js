@@ -1776,9 +1776,11 @@ async function unitIsFinished(reason) {
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
-    // Just hit a new unit - we need to restart with instructions
-    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    leaveTarget = '/instructions';
+    if(typeof curTdfUnit.unitinstructions !== 'undefined'){
+      // Just hit a new unit - we need to restart with instructions
+      console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+      leaveTarget = '/instructions';
+    }
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
@@ -1803,7 +1805,7 @@ async function unitIsFinished(reason) {
   }
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
   console.log('unitIsFinished,updateExperimentState', res);
-  leavePage(leaveTarget);
+  leavePage(leaveTarget);  
 }
 
 function getButtonTrial() {
@@ -2900,9 +2902,11 @@ async function processUserTimesLog() {
     // Initialize client side student performance
     const curUser = Meteor.user();
     const currentTdfId = Session.get('currentTdfId');
+    const curTdf = Session.get('currentTdfFile');
+    const curTdfUnit = curTdf.tdfs.tutor.unit[0];
     await setStudentPerformance(curUser._id, curUser.username, currentTdfId);
 
-    if (needFirstUnitInstructions) {
+    if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
       // They haven't seen our first instruction yet
       console.log('RESUME FINISHED: displaying initial instructions');
       leavePage('/instructions');
@@ -2919,7 +2923,7 @@ async function processUserTimesLog() {
         if (lockoutMins > 0) {
           const unitStartTimestamp = Session.get('currentUnitStartTime');
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-          if (Date.now() < lockoutFreeTime) {
+          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;
