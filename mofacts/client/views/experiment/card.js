@@ -1775,10 +1775,12 @@ async function unitIsFinished(reason) {
   Session.set('curUnitInstructionsSeen', false);
 
   let leaveTarget;
-  if (newUnitNum < curTdf.tdfs.tutor.unit.length && typeof curTdfUnit.unitinstructions !== 'undefined'){
-    // Just hit a new unit - we need to restart with instructions
-    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    leaveTarget = '/instructions';
+  if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
+    if(typeof curTdfUnit.unitinstructions !== 'undefined'){
+      // Just hit a new unit - we need to restart with instructions
+      console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+      leaveTarget = '/instructions';
+    }
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
@@ -2911,7 +2913,7 @@ async function processUserTimesLog() {
         if (lockoutMins > 0) {
           const unitStartTimestamp = Session.get('currentUnitStartTime');
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') {
+          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') ){
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;
