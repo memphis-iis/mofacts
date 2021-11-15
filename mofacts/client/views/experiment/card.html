@@ -16,6 +16,9 @@
             {{/if}}
         </div>
     {{else}}
+        {{#if userIsAdminOrTeacher}}
+            <button id='skipUnit' class='btn'>Skip Unit</button>
+        {{/if}}
         {{#if displayReady}}
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
