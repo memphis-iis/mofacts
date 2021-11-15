@@ -122,6 +122,7 @@ Session.set('inResume', false);
 Session.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 Session.set('numVisibleCards', 0);
+Session.set('questionAnswered', false);
 let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
@@ -428,6 +429,27 @@ Template.card.events({
     dialogueContinue();
   },
 
+  'click #userAudioReadyPretrial': function() {
+    startQuestionTimeout();
+    checkSimulation();
+  
+    if (Session.get('showOverlearningText')) {
+      $('#overlearningRow').show();
+    }
+    Session.set("selfPacePretrialEndTimeStamp", Date.now());
+    Session.set('userPlayedAudio', true);
+  },
+
+  'click #userAudioReadyPosttrial': function() {
+    //Start Timeout for audio to play again
+    selfPacePosttrialLatency = Date.now() - Session.get('trialEndTimeStamp');
+    Session.set('userPlayedAudio', true);
+    Session.set('trialEndTimeStamp', undefined);
+    playCurrentSound(function() {
+      prepareCard();
+    });
+  },
+
   'keypress #dialogueUserAnswer': function(e) {
     const key = e.keyCode || e.which;
     if (key == ENTER_KEY) {
@@ -589,6 +611,10 @@ Template.card.helpers({
   'audioCard': function() {
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
   },
+
+  'waitForUserAudioReadyPretrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && !Session.get("questionAnswered"),
+
+  'waitForUserAudioReadyPosttrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && Session.get("questionAnswered") && Session.get('showPosttrialAudioReplayButton'),
 
   'speakerCardPosition': function() {
     //centers the speaker icon if there are no displays. 
@@ -1156,8 +1182,10 @@ function handleUserInput(e, source, simAnswerCorrect) {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
   }
+  Session.set('questionAnswered', true);
 
   const trialEndTimeStamp = Date.now();
+  Session.set('trialEndTimeStamp', trialEndTimeStamp);
   const afterAnswerFeedbackCallbackWithEndTime = afterAnswerFeedbackCallback.bind(null,
       trialEndTimeStamp, source, userAnswer);
 
@@ -1301,6 +1329,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     isCorrect = correctAndText.isCorrect;
   }
   if(!isCorrect) showRemovalButton();
+  else Session.set('showPosttrialAudioReplayButton', true);
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = getCurrentDeliveryParams();
@@ -1482,7 +1511,12 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
 
     hideUserFeedback();
     $('#userAnswer').val('');
-    prepareCard();
+    if(getCurrentDeliveryParams().allowuserdelayaudioplayback){
+      Session.set('userPlayedAudio', false);
+    }
+    else{
+      prepareCard();
+    }
   }, reviewTimeout);
 }
 
@@ -1534,6 +1568,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
+  let selfPacePretrialLatency = -1;
+  let selfPacePosttrialLatency = -1;
 
   let reviewLatency = userFeedbackStart ? reviewEnd - userFeedbackStart : reviewEnd - reviewBegin;
 
@@ -1554,6 +1590,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     reviewLatency = endLatency;
     endLatency = -1;
     startLatency = -1;
+  }
+  if(getCurrentDeliveryParams().allowuserdelayaudioplayback){
+    selfPacePretrialLatency = Session.get("selfPacePretrialEndTimeStamp") - Session.get("selfPacePretrialStartTimeStamp");
+    Session.set("selfPacePretrialStartTimeStamp", undefined);
+    Session.set("selfPacePretrialEndTimeStamp", undefined);
   }
 
   // Figure out button trial entries
@@ -1701,6 +1742,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Review_Latency': reviewLatency,
     'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
     'CF_Button_Order': buttonEntries,
+    'CF_Self_Paced_Pretrial': selfPacePretrialLatency,
+    'CF_Self_Paced_Posttrial': selfPacePosttrialLatency,
     'CF_Note': '',
     'Feedback_Text': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
@@ -1851,6 +1894,7 @@ async function cardStart() {
 async function prepareCard() {
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
+  Session.set('questionAnswered', false);
   Session.set('displayReady', false);
   Session.set('currentDisplay', {});
   Session.set('clozeQuestionParts', undefined);
@@ -1865,6 +1909,7 @@ async function prepareCard() {
 
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
+  Session.set('userPlayedAudio', false);
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
 
   scrollList.update(
@@ -1902,11 +1947,16 @@ async function newQuestionHandler() {
     Session.set('currentDisplayEngine', currentDisplay);
   }
 
-  startQuestionTimeout();
-  checkSimulation();
-
-  if (Session.get('showOverlearningText')) {
-    $('#overlearningRow').show();
+  if(!Session.get('currentDeliveryParams').allowuserdelayaudioplayback){
+    startQuestionTimeout();
+    checkSimulation();
+  
+    if (Session.get('showOverlearningText')) {
+      $('#overlearningRow').show();
+    }
+  }
+  else{
+    Session.set("selfPacePretrialStartTimeStamp", Date.now());
   }
 }
 
@@ -2911,7 +2961,7 @@ async function processUserTimesLog() {
         if (lockoutMins > 0) {
           const unitStartTimestamp = Session.get('currentUnitStartTime');
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
-          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined') {
+          if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined')) {
             console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;

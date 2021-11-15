@@ -60,6 +60,8 @@ function sessionCleanUp() {
   Session.set('schedule', undefined);
 
   Session.set('wasReportedForRemoval', false);
+  Session.set('userPlayedAudio', false);
+  Session.set('showPosttrialAudioReplayButton', false);
   Session.set('hiddenItems', []);
   Session.set('numVisibleCards', 0);
 
