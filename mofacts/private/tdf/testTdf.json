@@ -26,6 +26,7 @@
                 "unitname": "Schedule Unit",
                 "buttontrial": "true",
                 "deliveryparams": {
+                    "allowuserdelayaudioplayback" : "true",
                     "feedbackType": "simple",
                     "practiceseconds": "1000000",
                     "drill": "5000",

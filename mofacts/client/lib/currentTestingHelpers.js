@@ -386,6 +386,7 @@ function getCurrentDeliveryParams() {
     'falseAnswerLimit': undefined,
     'allowstimulusdropping': false,
     'intertrialmessage': "",
+    'allowuserdelayaudioplayback': false,
   };
 
   // We've defined defaults - also define translatations for values
@@ -416,6 +417,7 @@ function getCurrentDeliveryParams() {
     'allowFeedbackTypeSelect': xlateBool,
     'falseAnswerLimit': _.intval,
     'allowstimulusdropping': xlateBool,
+    'allowuserdelayaudioplayback': xlateBool
   };
 
   let modified = false;

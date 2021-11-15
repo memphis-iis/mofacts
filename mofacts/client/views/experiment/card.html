@@ -15,7 +15,17 @@
                 <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
             {{/if}}
         </div>
-    {{else}}
+        {{else}}
+        {{#if waitForUserAudioReadyPretrial}}
+            <button type="button" id="userAudioReadyPretrial" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
+                Click when ready to hear tone
+            </button>
+        {{/if}}
+        {{#if waitForUserAudioReadyPosttrial}}
+            <button type="button" id="userAudioReadyPosttrial" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;">
+                Click when ready to hear tone
+            </button>
+        {{/if}}
         {{#if displayReady}}
             <div class="scrollHistoryContainer">
                 {{#if haveScrollList}}
