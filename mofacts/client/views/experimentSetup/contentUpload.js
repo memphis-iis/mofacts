@@ -1,4 +1,5 @@
 import {meteorCallAsync} from '../..';
+import { getCurrentClusterAndStimIndices } from '../experiment/card';
 
 const userFiles = new Mongo.Collection(null); // local-only - no database;
 
@@ -22,6 +23,7 @@ async function userFilesRefresh() {
           'idx': count,
           'type': 'tdf',
           'fileName': tdf.content.fileName.trim(),
+          'tdfID': tdf.TDFId,
         });
         count += 1;
       } catch (err) {
@@ -39,6 +41,7 @@ async function userFilesRefresh() {
             'idx': count,
             'type': 'stim',
             'fileName': stimFileName,
+            'stimID': 1,
           });
           count += 1;
         } catch (err) {
@@ -58,6 +61,7 @@ async function userFilesRefresh() {
           'idx': count,
           'type': 'stim',
           'fileName': stim.stimulusfilename,
+          'stimID': 1,
         });
         count += 1;
       } catch (err) {
@@ -99,6 +103,78 @@ Template.contentUpload.events({
     event.preventDefault();
     await doFileUpload('#upload-stim', 'stim', 'Stimlus');
     userFilesRefresh();
+  },
+  'click #tdf-download-btn': function(event){
+    event.preventDefault();
+    let unencodedData = Session.get('allTdfs')[$("#tdf-download-btn").val() - 1];
+    console.log('downloading tdf id', $("#tdf-download-btn").val() - 1);
+    let blob = new Blob([unencodedData], { type: 'application/json' });
+    let url = window.URL.createObjectURL(blob);
+    let downloadFileName = unencodedData.content.fileName.trim();
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = downloadFileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    alert('TDF downloaded.');
+  },
+  'click #stim-download-btn': async function(event){
+    event.preventDefault();
+    // Set Filename
+    const btnTarget = $(event.currentTarget);
+    const fileName = _.trim(btnTarget.data('filename'));
+    console.log('downloading stim', fileName);
+    // Get All Items matching filename
+    const allStims = await meteorCallAsync('getItemsByFileName',fileName);
+    let output = "";
+    let curCluster = "";
+    for(i = 0; i < allStims.length; i++){
+      let stim = allStims[i];
+      let stims = {
+          'stims': [{
+            'response': {
+              'correctResponse': stim.correctResponse,
+              'incorrectResponse': stim.incorrectResponse,
+            },
+            'display':{
+              'clozeStimulus': stim.clozeStimulus,
+              'clozeText': stim.textStimulus,
+              'audioSrc': stim.audioStimulus,
+              'videoSrc': stim.videoStimulus,
+              'imageSrc':stim.imageStimulus,
+            },
+            'parameter': stim.params,
+            'tags': stim.tags,
+            'alternateDisplays': stim.alternateDisplays,
+          }],
+      };
+      if(curCluster !== stim.clusterkc){
+        curCluster = stim.clusterkc;
+        clusterAdd = "\n\"clusters\": [\n";
+      } else {
+        clusterAdd = "";
+      }
+      stimConverted = JSON.stringify(stims,null,2);
+      regex = /}{/i;
+      output = clusterAdd + output +  stimConverted;
+      output = output.replace(regex,"},\n{");   
+    }
+
+    output = "{\n\"setspec\": {" + output + "]\n}\n}";
+    newJson = JSON.stringify(JSON.parse(output),null,2);
+    let blob = new Blob([newJson], { type: 'application/json' });
+    let url = window.URL.createObjectURL(blob);
+    let downloadFileName = _.trim(btnTarget.data('filename'));
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = downloadFileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+    alert('Stim Downloaded.');
   },
 
   'change #upload-tdf': function(event) {
