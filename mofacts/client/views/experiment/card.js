@@ -1783,9 +1783,16 @@ async function unitIsFinished(reason) {
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
-    // Just hit a new unit - we need to restart with instructions
-    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-    leaveTarget = '/instructions';
+    if(curTdfUnit.unitinstructions){
+      // Just hit a new unit - we need to restart with instructions
+      console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+      leaveTarget = '/instructions';
+    }
+    else{
+      leaveTarget = function () {
+        console.log("No Instructions for next unit. Skipping")
+      };
+    }
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
