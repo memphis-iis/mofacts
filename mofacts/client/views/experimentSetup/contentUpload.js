@@ -108,7 +108,7 @@ Template.contentUpload.events({
     event.preventDefault();
     let unencodedData = Session.get('allTdfs')[$("#tdf-download-btn").val() - 1];
     console.log('downloading tdf id', $("#tdf-download-btn").val() - 1);
-    let blob = new Blob([unencodedData], { type: 'application/json' });
+    let blob = new Blob([JSON.stringify(unencodedData,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = unencodedData.content.fileName.trim();
     var a = document.createElement("a");
@@ -128,42 +128,39 @@ Template.contentUpload.events({
     console.log('downloading stim', fileName);
     // Get All Items matching filename
     const allStims = await meteorCallAsync('getItemsByFileName',fileName);
-    let output = "";
-    let curCluster = "";
+    let curCluster = allStims[0].clusterKC;
+    let stims = [];
+    let output = "{\n\t\"setspec\": {\n\t\t\"clusters\": [\n\t\t\t{\n\t\t\t\t\"stims\": [\n";
     for(i = 0; i < allStims.length; i++){
       let stim = allStims[i];
-      let stims = {
-          'stims': [{
-            'response': {
-              'correctResponse': stim.correctResponse,
-              'incorrectResponse': stim.incorrectResponse,
-            },
-            'display':{
-              'clozeStimulus': stim.clozeStimulus,
-              'clozeText': stim.textStimulus,
-              'audioSrc': stim.audioStimulus,
-              'videoSrc': stim.videoStimulus,
-              'imageSrc':stim.imageStimulus,
-            },
-            'parameter': stim.params,
-            'tags': stim.tags,
-            'alternateDisplays': stim.alternateDisplays,
-          }],
-      };
-      if(curCluster !== stim.clusterkc){
-        curCluster = stim.clusterkc;
-        clusterAdd = "\n\"clusters\": [\n";
+      let itemResponseType = "";
+      stims[i] = {};
+      stims[i].response = {};
+      if(stim.correctResponse){stims[i].response.correctResponse = stim.correctResponse;}
+      if(stim.incorrectResponses){stims[i].response.incorrectResponses = stim.incorrectResponses.split(",");}
+      stims[i].display  = {};
+      if(stim.clozeStimulus){stims[i].display.clozeText = stim.clozeStimulus;}
+      if(stim.textStimulus){stims[i].display.text = stim.textStimulus;}
+      if(stim.audioStimulus){stims[i].display.audioSrc = stim.audioStimulus;}
+      if(stim.imageStimulus){stims[i].display.imgSrc = stim.imageStimulus;}
+      if(stim.videoStimulus){stims[i].display.videoSrc = stim.videoStimulus;}
+      if(stim.tags){stims[i].tags = stim.tags};
+      if(stim.alternateDisplays){stims[i].alternateDisplays = stim.alternateDisplays};
+      if(stim.params){stims[i].parameter = stim.params};
+      stimConverted = JSON.stringify(stims[i],null,2);
+      if(stim.clusterKC != curCluster){
+        curCluster = stim.clusterKC;
+        if(stim.itemResponseType){itemResponse = "\"responseType\": \"" + stim.itemResponseType + "\",\n";}
+        output = output + "\n]\n},\n{\n" + itemResponse + "\"stims\": [\n" + stimConverted;
+      } else if(i != 0) {
+        output = output + ",\n" + stimConverted;
       } else {
-        clusterAdd = "";
+        output = output + stimConverted;
       }
-      stimConverted = JSON.stringify(stims,null,2);
-      regex = /}{/i;
-      output = clusterAdd + output +  stimConverted;
-      output = output.replace(regex,"},\n{");   
     }
-
-    output = "{\n\"setspec\": {" + output + "]\n}\n}";
-    newJson = JSON.stringify(JSON.parse(output),null,2);
+    output = output.substring(0,output.length - 2) + "\n}\n]\n}\n]\n}\n}";
+    output = JSON.stringify(JSON.parse(output),null,2);
+    newJson = output;
     let blob = new Blob([newJson], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = _.trim(btnTarget.data('filename'));
@@ -174,7 +171,7 @@ Template.contentUpload.events({
     a.download = downloadFileName;
     a.click();
     window.URL.revokeObjectURL(url);
-    alert('Stim Downloaded.');
+    alert('Stim Exported.');
   },
 
   'change #upload-tdf': function(event) {
