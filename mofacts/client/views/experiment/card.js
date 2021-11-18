@@ -1793,6 +1793,11 @@ async function unitIsFinished(reason) {
       console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
       leaveTarget = '/instructions';
     }
+    else{
+      leaveTarget = function () {
+        console.log("No Instructions for next unit. Skipping")
+      };
+    }
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
