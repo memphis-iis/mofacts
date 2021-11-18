@@ -446,6 +446,11 @@ Template.card.events({
   'keypress #userForceCorrect': function(e) {
     handleUserForceCorrectInput(e, 'keypress');
   },
+  'click #skipUnit': function() {
+    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])){
+      unitIsFinished('Skipped by admin');
+    }
+  },
   'click #confirmFeedbackSelection': function() {
     Session.set('displayFeedback', false);
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
@@ -575,6 +580,8 @@ Template.card.helpers({
   'rawAnswer': ()=> Session.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
+
+  'userIsAdminOrTeacher': () => Roles.userIsInRole(Meteor.user(), ['admin', 'teacher']),
 
   'displayReady': () => Session.get('displayReady'),
 
