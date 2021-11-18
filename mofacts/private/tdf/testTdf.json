@@ -22,7 +22,6 @@
         },
         "unit": [
             {
-                "unitinstructions": "Here comes the test assessment session",
                 "unitname": "Schedule Unit",
                 "buttontrial": "true",
                 "deliveryparams": {
