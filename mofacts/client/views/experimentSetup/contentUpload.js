@@ -106,11 +106,18 @@ Template.contentUpload.events({
   },
   'click #tdf-download-btn': function(event){
     event.preventDefault();
-    let unencodedData = Session.get('allTdfs')[$("#tdf-download-btn").val() - 1];
+    let unencodedRawData = Session.get('allTdfs')[$("#tdf-download-btn").val() - 1];
     console.log('downloading tdf id', $("#tdf-download-btn").val() - 1);
+    let splitData = JSON.stringify(unencodedRawData.content,null,2).split('\n');
+    console.log('splitData',splitData);
+    unencodedData = splitData.slice(0,splitData.length - 5).join('\n');
+    unencodedData = unencodedData.substr(0, unencodedData.length -1) + "\n}";
+    console.log('unencodedData',unencodedData);
+    unencodedData = JSON.parse(unencodedData);
+    console.log('unencodedData',unencodedData);
     let blob = new Blob([JSON.stringify(unencodedData,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
-    let downloadFileName = unencodedData.content.fileName.trim();
+    let downloadFileName = unencodedRawData.content.fileName.trim();
     var a = document.createElement("a");
     document.body.appendChild(a);
     a.style = "display: none";
@@ -120,6 +127,7 @@ Template.contentUpload.events({
     window.URL.revokeObjectURL(url);
     alert('TDF downloaded.');
   },
+
   'click #stim-download-btn': async function(event){
     event.preventDefault();
     // Set Filename
