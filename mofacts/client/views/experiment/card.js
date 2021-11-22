@@ -2152,11 +2152,16 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
+
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
           Session.set('recordingLocked', true);
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
+<<<<<<< HEAD
+=======
+          Session.set('audioObject',audioObj)
+>>>>>>> 4b287fac76c4314d4781b5b39df7c71eaa780627
           window.currentAudioObj = audioObj;
           audioObj.addEventListener('ended', (event) => {
             Session.set('recordingLocked', false);
