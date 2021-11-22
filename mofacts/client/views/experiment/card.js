@@ -2491,9 +2491,7 @@ function startUserMedia(stream) {
   Router.go('/voice');
 }
 
-//Rusty
 function startRecording() {
-  
   //Check if audio is playing
   audioObj = Session.get('audioObject');
   window.currentAudioObj = audioObj;
