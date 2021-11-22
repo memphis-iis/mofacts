@@ -2152,7 +2152,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
-          Session.set('audioObject'.audioObj)
+          Session.set('audioObject',audioObj)
           window.currentAudioObj = audioObj;
           console.log('inside callback, playing audioObj:');
           audioObj.play();
