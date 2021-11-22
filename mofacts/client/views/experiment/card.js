@@ -2147,10 +2147,12 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
+
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
+          Session.set('audioObject'.audioObj)
           window.currentAudioObj = audioObj;
           console.log('inside callback, playing audioObj:');
           audioObj.play();
@@ -2489,13 +2491,26 @@ function startUserMedia(stream) {
   Router.go('/voice');
 }
 
+//Rusty
 function startRecording() {
-  if (recorder) {
-    Session.set('recording', true);
-    recorder.record();
-    console.log('RECORDING START');
-  } else {
-    console.log('NO RECORDER');
+  
+  //Check if audio is playing
+  audioObj = Session.get('audioObject');
+  window.currentAudioObj = audioObj;
+  while(true){  
+    if(!audioObj || window.currentAudioObj.ended == True){
+      if (recorder) {
+        Session.set('recording', true);
+        recorder.record();
+        console.log('RECORDING START');
+        break;
+      } else {
+        console.log('NO RECORDER');
+        break;
+      }
+    } else {
+      console.log('AUDIO PLAYING, WAIT UNTIL IT IS NOT.')
+    } 
   }
 }
 
