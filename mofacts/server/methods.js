@@ -1065,7 +1065,19 @@ async function getStimCountByStimuliSetId(stimuliSetId) {
   const ret = await db.one(query, stimuliSetId);
   return ret.count;
 }
+async function getItemsByFileName(stimFileName) {
+  const query = 'SELECT * FROM item \
+               WHERE stimulusfilename=$1 \
+               ORDER BY itemId';
+  const itemRet = await db.manyOrNone(query, stimFileName);
 
+  const items = [];
+  for (const item of itemRet) {
+    items.push(getItem(item));
+  }
+  console.log(items[0]);
+  return items;
+}
 async function getStudentReportingData(userId, TDFid, hintLevel) {
   const query = 'SELECT ordinality, SUM(CASE WHEN outcome=\'1\' THEN 1 ELSE 0 END) \
                  as numCorrect, COUNT(outcome) as numTotal FROM componentState, \
@@ -1687,7 +1699,7 @@ Meteor.startup(async function() {
 
     insertHiddenItem, getHiddenItems, getUserLastFeedbackTypeFromHistory,
 
-    getTdfIdByStimSetIdAndFileName,
+    getTdfIdByStimSetIdAndFileName, getItemsByFileName,
 
     createExperimentDataFile: async function(exp) {
       if(!Meteor.userId()){

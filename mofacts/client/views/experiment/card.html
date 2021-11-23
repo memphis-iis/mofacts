@@ -188,10 +188,12 @@
             </div>
             {{#if questionIsRemovable}}
                 <div class="removalContainer">
-                    <div class="row">
-                        <button type="button" id="removeQuestion" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap; display: none;">
-                            Report question as incorrect
-                        </button>
+                    <div class="row text-center">
+                        Is this answer incorrect? Click 
+                        <a href="#" id="removeQuestion">
+                            here
+                        </a> 
+                            to report it.
                         <div class="marginLeftAndRight {{fontSizeClass}} alert-success alert text-align" id="removalFeedback" hidden>
                             Thanks, we'll remove this question from your stack.
                         </div>
