@@ -422,11 +422,11 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
         componentState.trialsSinceLastSeen = null;
       }
 
-      const updateQuery = 'UPDATE componentState SET probabilityEstimate=${probabilityEstimate}, \
+      const updateQuery = 'UPDATE componentstate SET probabilityEstimate=${probabilityEstimate}, \
         firstSeen=${firstSeen}, lastSeen=${lastSeen}, trialsSinceLastSeen=${trialsSinceLastSeen}, \
         priorCorrect=${priorCorrect}, priorIncorrect=${priorIncorrect}, \
         priorStudy=${priorStudy}, totalPracticeDuration=${totalPracticeDuration}, outcomeStack=${outcomeStack} \
-        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND hintLevel=${hintLevel} AND componentType=${componentType} \
+        WHERE userId=${userId} AND TDFId=${TDFId} AND KCId=${KCId} AND componentType=${componentType} \
         RETURNING componentStateId';
       try {
         const componentStateId = await t.one(updateQuery, componentState);
@@ -434,7 +434,9 @@ async function setComponentStatesByUserIdTDFIdAndUnitNum(userId, TDFId, componen
       } catch (e) {
       // ComponentState didn't exist before so we'll insert it
         if (e.name == 'QueryResultError') {
-          const componentStateId = await t.one('INSERT INTO componentState(userId,TDFId,KCId,componentType, \
+          console.log("ComponentState didn't exist before so we'll insert it")
+          console.log(componentState)
+          const componentStateId = await t.one('INSERT INTO componentstate(userId,TDFId,KCId,componentType, \
             probabilityEstimate,hintLevel,firstSeen,lastSeen,trialsSinceLastSeen,priorCorrect,priorIncorrect,priorStudy, \
             totalPracticeDuration,outcomeStack) VALUES(${userId},${TDFId}, ${KCId}, ${componentType}, \
             ${probabilityEstimate},${hintLevel},  ${firstSeen},${lastSeen},${trialsSinceLastSeen},${priorCorrect},${priorIncorrect}, \
@@ -1005,17 +1007,33 @@ async function getStimDisplayTypeMap() {
 
 async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
   console.log('getPracticeTimeIntervalsMap', userIds, tdfId, date, userIds.join(','));
-  const query = 'SELECT userId, SUM(responseDuration) AS duration \
+  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
     FROM history WHERE recordedServerTime < $1 \
-    AND userId IN ($2) AND TDFId = $3 \
-    GROUP BY userId';
+    AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
+    GROUP BY userId";
 
-  const res = await db.manyOrNone(query, [date, userIds.join(','), tdfId]);
+  const res = await db.manyOrNone(query, [date, tdfId]);
   const practiceTimeIntervalsMap = {};
   for (const row of res) {
     practiceTimeIntervalsMap[row.userid] = parseInt(row.duration);
   }
+  console.log(practiceTimeIntervalsMap)
+  return practiceTimeIntervalsMap;
+}
 
+async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
+  console.log('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
+  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
+    FROM history WHERE recordedServerTime < $1 \
+    AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
+    GROUP BY userId";
+
+  const res = await db.manyOrNone(query, [date, tdfId]);
+  const practiceTimeIntervalsMap = {};
+  for (const row of res) {
+    practiceTimeIntervalsMap[row.userid] = parseInt(row.duration);
+  }
+  console.log(practiceTimeIntervalsMap)
   return practiceTimeIntervalsMap;
 }
 
@@ -1693,7 +1711,7 @@ Meteor.startup(async function() {
 
     getComponentStatesByUserIdTDFIdAndUnitNum, setComponentStatesByUserIdTDFIdAndUnitNum,
 
-    insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap,
+    insertHistory, getHistoryByTDFfileName, getPracticeTimeIntervalsMap, getUsersByUnitUpdateDate,
 
     loadStimsAndTdfsFromPrivate, getListOfStimTags, getStudentReportingData,
 
