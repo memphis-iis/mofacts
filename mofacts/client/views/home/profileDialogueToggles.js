@@ -25,6 +25,7 @@ Template.profileDialogueToggles.events({
   'click .dialogueSelectRadio': (event) => {
     _state.set('selectedDialogueType',
         event.currentTarget.getAttribute('data-dialogue-type'));
+    Session.set('feedbackTypeFromHistory', _state.get('selectedDialogueType'));
   },
 
 });

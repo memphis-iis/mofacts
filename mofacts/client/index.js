@@ -225,8 +225,8 @@ Template.registerHelper('curStudentPerformance', function() {
 });
 
 Template.registerHelper('showFeedbackResetButton', function() {
-  return (Session.get('curModule') == 'card' || Session.get('curModule') == 'instructions') && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
-})
+  return Session.get('curModule') == 'card' && Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')].deliveryparams.allowFeedbackTypeSelect
+});
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
 })
