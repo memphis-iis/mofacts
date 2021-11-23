@@ -2152,7 +2152,6 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           audioPromptSpeakingRate = Session.get('audioPromptQuestionSpeakingRate');
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
-
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
           Session.set('recordingLocked', true);
           if (window.currentAudioObj) {
@@ -2162,7 +2161,6 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           audioObj.addEventListener('ended', (event) => {
             Session.set('recordingLocked', false);
             startRecording();
-            
           });
           console.log('inside callback, playing audioObj:');
           audioObj.play();
