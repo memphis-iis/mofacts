@@ -1770,9 +1770,6 @@ async function unitIsFinished(reason) {
   const curUnitNum = Session.get('currentUnitNumber');
   const newUnitNum = curUnitNum + 1;
   const curTdfUnit = curTdf.tdfs.tutor.unit[newUnitNum];
-  if(curTdfUnit.unitinstructions != "" || typeof curTdfUnit.unitinstructionsquestion !== 'undefined'){
-    curTdfUnit.unitinstructions = "Please answer the following instruction question(s).";
-  }
 
   Session.set('questionIndex', 0);
   Session.set('clusterIndex', undefined);
@@ -1783,21 +1780,12 @@ async function unitIsFinished(reason) {
   Session.set('feedbackUnset', true);
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('curUnitInstructionsSeen', false);
-  Session.set('instructionQuestionResults', undefined);
 
   let leaveTarget;
-
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
-    if(curTdfUnit.unitinstructions != "" || (typeof curTdfUnit.unitinstructionsquestion !== 'undefined')){
-      // Just hit a new unit - we need to restart with instructions
-      console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-      leaveTarget = '/instructions';
-    }
-    else{
-      leaveTarget = function () {
-        console.log("No Instructions for next unit. Skipping")
-      };
-    }
+    // Just hit a new unit - we need to restart with instructions
+    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');

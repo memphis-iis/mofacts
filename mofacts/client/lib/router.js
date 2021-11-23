@@ -259,7 +259,8 @@ Router.route('/instructions', {
       const unit = Session.get('currentTdfUnit');
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
-      if (!txt && !pic) {
+      const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
+      if (!txt && !pic && !instructionsq) {
         console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();
       }
