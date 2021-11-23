@@ -76,7 +76,8 @@
                     "timeuntilaudio": "500",
                     "timeuntilaudiofeedback": "500",
                     "autostopTranscriptionAttemptLimit": "4",
-                    "prestimulusdisplaytime": "500"
+                    "prestimulusdisplaytime": "500",
+                    "allowFeedbackTypeSelect": "true"
                 }
             },
             {
