@@ -1007,7 +1007,7 @@ async function getStimDisplayTypeMap() {
 
 async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
   console.log('getPracticeTimeIntervalsMap', userIds, tdfId, date, userIds.join(','));
-  const query = "SELECT userId, SUM(responseDuration) AS duration \
+  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
     FROM history WHERE recordedServerTime < $1 \
     AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
     GROUP BY userId";
@@ -1023,7 +1023,7 @@ async function getPracticeTimeIntervalsMap(userIds, tdfId, date) {
 
 async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
   console.log('getUsersByUnitUpdateDate', userIds, tdfId, date, userIds.join(','));
-  const query = "SELECT userId, SUM(responseDuration) AS duration \
+  const query = "SELECT userId, SUM(CF_End_Latency) AS duration \
     FROM history WHERE recordedServerTime < $1 \
     AND userId IN ('" + userIds.join(`','`) + "') AND TDFId = $2 \
     GROUP BY userId";
