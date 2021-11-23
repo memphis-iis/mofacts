@@ -1,4 +1,17 @@
 <template name="instructorReporting">
+  <style>
+    /* Chrome, Safari, Edge, Opera */
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  /* Firefox */
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+  </style>
 {{#if isInRole 'admin, teacher'}}
   <br /><br />
     <legend class="text-center">Instructor Reporting</legend>
@@ -28,25 +41,14 @@
         <input type="date" id="practice-deadline-date" name="practice-deadline-date-select" disabled="true">
       </div>
       <div>
-        <h3>Practice Time Threshold</h3>
-        <select id="practice-time-select" disabled="true">
-          <option selected="selected" value="{{INVALID}}" disabled="true">Select a time threshold</option>
-          <option value="10">10 min</option>
-          <option value="20">20 min</option>
-          <option value="30">30 min</option>
-          <option value="40">40 min</option>
-          <option value="50">50 min</option>
-          <option value="60">60 min</option>
-          <option value="70">70 min</option>
-          <option value="80">80 min</option>
-          <option value="90">90 min</option>
-        </select>
+        <h3>Practice Time Threshold (Min)</h3>
+        <input type="number" id="practice-time-select" disabled="true">
       </div>
       <h3>Class Data</h3>
         <table border="1">
           <tr><th class="thWide">ID</th><th class="thWide">% Correct</th><th class="thWide">Count</th><th>Total Time (min)</th><th>Completed Before Deadline</th></tr>
           {{#each curClassStudentPerformance}}
-            <tr>
+            <tr id="{{this.userId}}">
               <td><a onclick="navigateToStudentReporting('{{this.username}}')">{{this.username}}</a></td>
               <td>{{this.percentCorrect}}</td>
               <td>{{this.count}}</td>

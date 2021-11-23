@@ -76,11 +76,28 @@ function generateUserMetThresholdMap(threshold) {
   userIds.forEach((uid) => {
     if (!userMetThresholdMap[uid] && userMetThresholdMap[uid] != 0) {
       userMetThresholdMap[uid] = 'NO ATTEMPT BEFORE DEADLINE';
+      $('#' + uid).hide()
+    }
+    else{
+      $('#' + uid).show()
     }
   });
 
   console.log('generateUserMetThresholdMap:', threshold, userMetThresholdMap);
   _state.set('userMetThresholdMap', userMetThresholdMap);
+}
+
+async function hideUsersByDate(date, tdfId){
+  const userIds = Session.get('curClassStudentPerformance').map( (x) => x.userId );
+  usersToShow = await meteorCallAsync('getUsersByUnitUpdateDate', userIds, tdfId, date)
+  for(user of userIds){
+    if (usersToShow[user]) {
+      $('#' + user).show()
+    }
+    else{
+      $('#' + user).hide()
+    }
+  }
 }
 
 Template.instructorReporting.helpers({
@@ -138,6 +155,7 @@ Template.instructorReporting.events({
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
     fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
+    hideUsersByDate(dateInt, _state.get('currentTdf'));
     _state.set('userMetThresholdMap', undefined);
     $('#practice-time-select').val(INVALID);
     $('#practice-time-select').prop('disabled', false);
