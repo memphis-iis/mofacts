@@ -122,7 +122,6 @@ Session.set('inResume', false);
 Session.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 Session.set('numVisibleCards', 0);
-Session.set('questionAnswered', false);
 let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
@@ -614,10 +613,6 @@ Template.card.helpers({
   'audioCard': function() {
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
   },
-
-  // 'waitForUserAudioReadyPretrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && !Session.get("questionAnswered") && Session.get('currentDisplay').audioSrc,
-
-  // 'waitForUserAudioReadyPosttrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && Session.get("questionAnswered") && Session.get('showPosttrialAudioReplayButton'),
 
   'speakerCardPosition': function() {
     //centers the speaker icon if there are no displays. 
@@ -1185,7 +1180,6 @@ function handleUserInput(e, source, simAnswerCorrect) {
       userAnswer = _.trim($('#userAnswer').val()).toLowerCase();
     }
   }
-  Session.set('questionAnswered', true);
 
   const trialEndTimeStamp = Date.now();
   Session.set('trialEndTimeStamp', trialEndTimeStamp);
@@ -1927,7 +1921,6 @@ async function cardStart() {
 async function prepareCard() {
   Meteor.logoutOtherClients();
   Session.set('wasReportedForRemoval', false);
-  Session.set('questionAnswered', false);
   Session.set('displayReady', false);
   Session.set('currentDisplay', {});
   Session.set('clozeQuestionParts', undefined);
@@ -1942,7 +1935,6 @@ async function prepareCard() {
 
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
-  Session.set('userPlayedAudio', false);
   console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
 
   scrollList.update(
