@@ -122,6 +122,7 @@ Session.set('inResume', false);
 Session.set('wasReportedForRemoval', false);
 Session.set('hiddenItems', []);
 Session.set('numVisibleCards', 0);
+Session.set('recordingLocked', false);
 let cachedSyllables = null;
 let speechTranscriptionTimeoutsSeen = 0;
 let timeoutsSeen = 0; // Reset to zero on resume or non-timeout
@@ -446,6 +447,11 @@ Template.card.events({
   'keypress #userForceCorrect': function(e) {
     handleUserForceCorrectInput(e, 'keypress');
   },
+  'click #skipUnit': function() {
+    if(Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])){
+      unitIsFinished('Skipped by admin');
+    }
+  },
   'click #confirmFeedbackSelection': function() {
     Session.set('displayFeedback', false);
     checkSyllableCacheForCurrentStimFile(processUserTimesLog);  
@@ -514,8 +520,11 @@ Template.card.helpers({
       if(Session.get('buttonTrial')){
         return 'Let me select that.';
       } else {
+        if(Session.get('recordingLocked')){
+          return 'I am waiting for audio to finish. Please do not speak until I am ready.';
+        } else {
         return 'Let me transcribe that.';
-      }
+      }}
     } else {
       return 'I am listening.';
     }
@@ -575,6 +584,8 @@ Template.card.helpers({
   'rawAnswer': ()=> Session.get('currentAnswer'),
 
   'currentProgress': () => Session.get('questionIndex'),
+
+  'userIsAdminOrTeacher': () => Roles.userIsInRole(Meteor.user(), ['admin', 'teacher']),
 
   'displayReady': () => Session.get('displayReady'),
 
@@ -1776,11 +1787,9 @@ async function unitIsFinished(reason) {
 
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
-    if(typeof curTdfUnit.unitinstructions !== 'undefined'){
-      // Just hit a new unit - we need to restart with instructions
-      console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
-      leaveTarget = '/instructions';
-    }
+    // Just hit a new unit - we need to restart with instructions
+    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
     console.log('UNIT FINISHED: No More Units');
@@ -2128,6 +2137,7 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const audioPromptMode = Session.get('audioPromptMode');
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
+      Session.set('recordingLocked', true);
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g, 'blank');
@@ -2141,10 +2151,15 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
           audioPromptVolume = Session.get('audioPromptQuestionVolume')
         }
         makeGoogleTTSApiCall(msg, ttsAPIKey, audioPromptSpeakingRate, audioPromptVolume, function(audioObj) {
+          Session.set('recordingLocked', true);
           if (window.currentAudioObj) {
             window.currentAudioObj.pause();
           }
           window.currentAudioObj = audioObj;
+          audioObj.addEventListener('ended', (event) => {
+            Session.set('recordingLocked', false);
+            startRecording();
+          });
           console.log('inside callback, playing audioObj:');
           audioObj.play();
         });
@@ -2483,12 +2498,12 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder) {
+  if (recorder && !Session.get('recordingLocked')) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
   } else {
-    console.log('NO RECORDER');
+    console.log('NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
   }
 }
 

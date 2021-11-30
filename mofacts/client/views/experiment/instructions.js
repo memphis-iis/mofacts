@@ -356,7 +356,6 @@ Template.instructions.rendered = function() {
   Session.set('curInstructionsAnswers',curTdfUnit.unitinstructionsquestions[unitInstructionQuestionsIndex].answers);
   Session.set('curInstructionsQuestion',curTdfUnit.unitinstructionsquestions[unitInstructionQuestionsIndex].question);
 
-};
 
 // //////////////////////////////////////////////////////////////////////////
 // Template Events
