@@ -212,6 +212,8 @@ Template.signInSouthwest.helpers({
   'teachers': () => Session.get('teachers'),
 
   'curTeacherClasses': () => Session.get('curTeacherClasses'),
+
+  'checkSectionExists': (sectionName) => sectionName != undefined && sectionName.length > 0,
 });
 
 Template.signInSouthwest.events({

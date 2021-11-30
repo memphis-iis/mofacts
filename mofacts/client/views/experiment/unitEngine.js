@@ -63,6 +63,9 @@ function defaultUnitEngine(curExperimentData) {
     unitFinished: function() {
       throw new Error('Missing Implementation');
     },
+    calculateIndices: function() {
+      throw new Error('Missing Implementation');
+    },
     saveComponentStates: async function() { },
     loadComponentStates: async function() { },
 
@@ -1189,20 +1192,10 @@ function modelUnitEngine() {
       await this.initializeActRModel();
     },
 
-    selectNextCard: async function() {
-      // The cluster (card) index, the cluster version (stim index), and
-      // whether or not we should show the overlearning text is determined
-      // here. See calculateCardProbabilities for how prob.probability is
-      // calculated
+    calculateIndices: async function() {
       this.calculateCardProbabilities();
       const hiddenItems = Session.get('hiddenItems');
-      let newClusterIndex = -1;
-      let newStimIndex = -1;
       const cards = cardProbabilities.cards;
-      let indices;
-
-      console.log('selectNextCard unitMode: ' + this.unitMode);
-
       switch (this.unitMode) {
         case 'thresholdCeiling':
           indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
@@ -1228,6 +1221,23 @@ function modelUnitEngine() {
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
+      }
+      return indices;
+    },
+
+    selectNextCard: async function(indices) {
+      // The cluster (card) index, the cluster version (stim index), and
+      // whether or not we should show the overlearning text is determined
+      // here. See calculateCardProbabilities for how prob.probability is
+      // calculated
+      let newClusterIndex = -1;
+      let newStimIndex = -1;
+
+      console.log('selectNextCard unitMode: ' + this.unitMode);
+
+      if(indices === undefined || indices === null){
+        console.log('indices unset, calculating now')
+        indices = calculateIndices();
       }
 
       newClusterIndex = indices.clusterIndex;

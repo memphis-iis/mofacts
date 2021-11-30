@@ -74,13 +74,46 @@ function generateUserMetThresholdMap(threshold) {
 
 
   userIds.forEach((uid) => {
+    let hideAllUsers = true;
     if (!userMetThresholdMap[uid] && userMetThresholdMap[uid] != 0) {
       userMetThresholdMap[uid] = 'NO ATTEMPT BEFORE DEADLINE';
+      $('#' + uid).hide()
+    }
+    else{
+      hideAllUsers = false;
+      $('#' + uid).show()
+    }
+    if(hideAllUsers){
+      $('#classReportingTotal').hide();
+    }
+    else{
+      $('#classReportingTotal').show();
     }
   });
 
   console.log('generateUserMetThresholdMap:', threshold, userMetThresholdMap);
   _state.set('userMetThresholdMap', userMetThresholdMap);
+}
+
+async function hideUsersByDate(date, tdfId){
+  let hideAllUsers = true;
+  const userIds = Session.get('curClassStudentPerformance').map( (x) => x.userId );
+  usersToShow = await meteorCallAsync('getUsersByUnitUpdateDate', userIds, tdfId, date)
+  for(user of userIds){
+    if (usersToShow[user]) {
+      hideAllUsers = false;
+      $('#' + user).show()
+    }
+    else{
+      $('#' + user).hide()
+    }
+  }
+  if(hideAllUsers){
+    $('#classReportingTotal').hide();
+  }
+  else{
+    $('#classReportingTotal').show();
+  }
 }
 
 Template.instructorReporting.helpers({
@@ -138,6 +171,7 @@ Template.instructorReporting.events({
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
     fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
+    hideUsersByDate(dateInt, _state.get('currentTdf'));
     _state.set('userMetThresholdMap', undefined);
     $('#practice-time-select').val(INVALID);
     $('#practice-time-select').prop('disabled', false);

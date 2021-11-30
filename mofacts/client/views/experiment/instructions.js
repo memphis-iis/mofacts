@@ -343,6 +343,9 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
+  if(typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructions !== "undefined"){
+    $('#continueBar').show();
+  }
 };
 
 // //////////////////////////////////////////////////////////////////////////

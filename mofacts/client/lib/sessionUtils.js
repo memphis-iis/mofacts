@@ -90,6 +90,7 @@ function sessionCleanUp() {
   Session.set('originalQuestion', undefined);
   Session.set('originalQuestion2', undefined);
   Session.set('clozeQuestionParts', undefined);
+  Session.set('engineIndices', undefined);
 
   Session.set('currentUnitStartTime', Date.now());
   Session.set('currentScore', 0);

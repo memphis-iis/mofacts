@@ -22,7 +22,6 @@
         },
         "unit": [
             {
-                "unitinstructions": "Here comes the test assessment session",
                 "unitname": "Schedule Unit",
                 "buttontrial": "true",
                 "deliveryparams": {
@@ -77,7 +76,8 @@
                     "timeuntilaudio": "500",
                     "timeuntilaudiofeedback": "500",
                     "autostopTranscriptionAttemptLimit": "4",
-                    "prestimulusdisplaytime": "500"
+                    "prestimulusdisplaytime": "500",
+                    "allowFeedbackTypeSelect": "true"
                 }
             },
             {
