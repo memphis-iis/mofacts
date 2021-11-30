@@ -447,6 +447,7 @@ Template.card.events({
     $('#userAudioReadyPosttrial').hide();
     Session.set('trialEndTimeStamp', undefined);
     playCurrentSound(function() {
+      $('#userAnswer').val('');
       afterAnswerSelfPacedCallback();
       hideUserFeedback();
       prepareCard();
@@ -1550,9 +1551,9 @@ async function writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTi
     }
   }
 
-  $('#userAnswer').val('');
   //done allow self-pacing in an assessment session, skip self-pacing if the user enters the correct answer or if there is no audio source and/or if were not allowing the user to self-pace. 
   if(!isSelfPaced){
+    $('#userAnswer').val('');
     prepareCard();
     hideUserFeedback();
   }
