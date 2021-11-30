@@ -60,6 +60,8 @@ export const outputFields = [
   'CF (Review Entry)', // forceCorrectFeedback
   'CF (Button Order)', // CF buttonOrder
   'CF (Note)', // CF note
+  'CF (self-paced-pretrial)', // Ammount of time spent waiting for user to start individual trial
+  'CF (self-paced-posttrial)', // Ammount of time spent waiting for user to start individual trial
   'Feedback Text',
   'dialogueHistory',
 ];

@@ -129,6 +129,8 @@ CREATE TABLE history (
     CF_Review_Latency BIGINT,
     CF_Review_Entry TEXT,
     CF_Button_Order TEXT,
+    CF_Self_Paced_Pretrial BIGINT,
+    CF_Self_Paced_Posttrial BIGINT,
     Feedback_Text TEXT,
     feedbackType feedbackTypeOptions,
     dialogueHistory JSONB,
