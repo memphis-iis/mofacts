@@ -591,8 +591,8 @@ function modelUnitEngine() {
             clusterIndex=i;
             stimIndex=j;
           }
-          for(let k=0; k<stims.hintLevelProbabilites.length; k++){
-            const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.stim.hintLevelProbabilites[k])) - optimalProb);
+          for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+            const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
             if(hintDist <= currentHintLevelMin){
               currentHintLevelMin = dist;
               hintLevelIndex = k;
