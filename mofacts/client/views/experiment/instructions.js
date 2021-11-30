@@ -15,6 +15,10 @@ let serverNotify = null;
 // Will get set on first periodic check and cleared when we leave the page
 let displayTimeStart = null;
 
+//Let Question Engine for unitinstructionsquestions start
+let unitInstructionQuestionsIndex = 0;
+const unitInstructionsQuestionsResponses = [];
+
 function startLockoutInterval() {
   clearLockoutInterval();
   // See below for lockoutPeriodicCheck - notice that we also do an immediate
@@ -302,11 +306,15 @@ Template.instructions.helpers({
   },
 
   instructionQuestion: function(){
-    return Session.get('currentTdfUnit').unitinstructionsquestion;
+    return Session.get('curInstructionsQuestion');
+  },
+
+  instructionAnswers: function(){
+    return Session.get('curInstructionsAnswers');
   },
 
   displayContinueButton: function(){
-    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestion !== "undefined"){
+    if(typeof Session.get('instructionQuestionResults') === "undefined" && typeof Session.get('currentTdfFile').tdfs.tutor.unit[0].unitinstructionsquestions !== "undefined"){
       return false;
     } else {
       return true;
@@ -343,6 +351,11 @@ Template.instructions.helpers({
 Template.instructions.rendered = function() {
   // Make sure lockout interval timer is running
   lockoutKick();
+  // Set instructions question index
+  let curTdfUnit = Session.get('currentTdfUnit') || "undefined";
+  Session.set('curInstructionsAnswers',curTdfUnit.unitinstructionsquestions[unitInstructionQuestionsIndex].answers);
+  Session.set('curInstructionsQuestion',curTdfUnit.unitinstructionsquestions[unitInstructionQuestionsIndex].question);
+
 };
 
 // //////////////////////////////////////////////////////////////////////////
@@ -353,12 +366,19 @@ Template.instructions.events({
     event.preventDefault();
     instructContinue();
   },
-  'click #instructionQuestionAffrimative': function() {
-    Session.set('instructionQuestionResults',true);
-    $('#instructionQuestion').hide();
-  },
-  'click #instructionQuestionNegative': function() {
-    Session.set('instructionQuestionResults',false);
-    $('#instructionQuestion').hide();
+  'click .unitInstructionsQuestionsAnswers': function(event) {
+    unitInstructionsQuestionsResponses.push(event.target.value);
+    unitInstructionQuestionsIndex++;
+    console.log('user answered question as:' + event.target.value + ". Moving on to " + unitInstructionQuestionsIndex);
+    console.log('unitInstructionsQuestionsResponses',unitInstructionsQuestionsResponses);
+    if(unitInstructionQuestionsIndex < Session.get('currentTdfUnit').unitinstructionsquestions.length){
+      Session.set('curInstructionsAnswers',Session.get('currentTdfUnit').unitinstructionsquestions[unitInstructionQuestionsIndex].answers);
+      Session.set('curInstructionsQuestion',Session.get('currentTdfUnit').unitinstructionsquestions[unitInstructionQuestionsIndex].question);
+    } else {
+      Session.set('curInstructionsAnswers',undefined);
+      Session.set('curInstructionsQuestion',undefined);
+      Session.set('instructionQuestionResults', unitInstructionsQuestionsResponses);
+    }
+
   }
 });

@@ -18,8 +18,9 @@
                     {{#if instructionQuestion}}
                         <div id="instructionQuestion"> 
                             <h3>{{instructionQuestion}}</h3>
-                            <button id="instructionQuestionAffrimative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">Yes</button>
-                            <button id="instructionQuestionNegative" class="btnPaddedAndMinWidth btn btn-block  btn-responsive">No</button>
+                            {{#each answer in instructionAnswers}}
+                            <button class="unitInstructionsQuestionsAnswers btnPaddedAndMinWidth btn btn-block  btn-responsive" value="{{answer}}">{{answer}}</button>
+                            {{/each}}
                         </div>
                     {{/if}}
                 </div>

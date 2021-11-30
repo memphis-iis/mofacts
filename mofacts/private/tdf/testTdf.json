@@ -23,6 +23,16 @@
         "unit": [
             {
                 "unitinstructions": "Here comes the test assessment session",
+                "unitinstructionsquestions":[
+                    {
+                    "question": "Did you read the chapter?",
+                    "answers":  ["No","Yes"]
+                    },
+                    {
+                    "question": "Did you study?",
+                    "answers":  ["No","Some", "Yes"]
+                    }
+                ],
                 "unitname": "Schedule Unit",
                 "buttontrial": "true",
                 "deliveryparams": {
