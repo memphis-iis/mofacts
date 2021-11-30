@@ -1407,9 +1407,9 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
 
-  // If incorrect answer for a drill on a sound not after a dialogue loop,
-  // we need to replay the sound, after the optional audio feedback delay time
-  if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect) {
+  // If incorrect answer for a drill on a sound not after a dialogue loop and user is not self-paced,
+  // we need to replay the sound, after the optional audio feedback delay time 
+  if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect && !Session.get('currentDeliveryParams').allowuserdelayaudioplayback) {
     setTimeout(function() {
       console.log('playing sound after timeuntilaudiofeedback', new Date());
       playCurrentSound();
