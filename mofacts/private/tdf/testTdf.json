@@ -60,6 +60,7 @@
                 "buttontrial": "false",
                 "buttonorder": "random",
                 "deliveryparams": {
+                    "allowuserdelayaudioplayback" : "true",
                     "feedbackType": "dialogue",
                     "forceCorrection": "false",
                     "practiceseconds": "1000000",
