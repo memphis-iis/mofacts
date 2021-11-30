@@ -130,6 +130,7 @@ let trialStartTimestamp = 0;
 let firstKeypressTimestamp = 0;
 let currentSound = null; // See later in this file for sound functions
 let userFeedbackStart = null;
+let afterAnswerSelfPacedCallback = null;
 
 // We need to track the name/ID for clear and reset. We need the function and
 // delay used for reset
@@ -430,6 +431,7 @@ Template.card.events({
   },
 
   'click #userAudioReadyPretrial': function() {
+    $('#userAudioReadyPretrial').hide();
     startQuestionTimeout();
     checkSimulation();
   
@@ -437,15 +439,16 @@ Template.card.events({
       $('#overlearningRow').show();
     }
     Session.set("selfPacePretrialEndTimeStamp", Date.now());
-    Session.set('userPlayedAudio', true);
   },
 
   'click #userAudioReadyPosttrial': function() {
     //Start Timeout for audio to play again
-    selfPacePosttrialLatency = Date.now() - Session.get('trialEndTimeStamp');
-    Session.set('userPlayedAudio', true);
+    Session.set('selfPacePosttrialLatency', Date.now() - Session.get('trialEndTimeStamp'));
+    $('#userAudioReadyPosttrial').hide();
     Session.set('trialEndTimeStamp', undefined);
     playCurrentSound(function() {
+      afterAnswerSelfPacedCallback();
+      hideUserFeedback();
       prepareCard();
     });
   },
@@ -612,9 +615,9 @@ Template.card.helpers({
     return !!(Session.get('currentDisplay')) && !!(Session.get('currentDisplay').audioSrc);
   },
 
-  'waitForUserAudioReadyPretrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && !Session.get("questionAnswered"),
+  // 'waitForUserAudioReadyPretrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && !Session.get("questionAnswered") && Session.get('currentDisplay').audioSrc,
 
-  'waitForUserAudioReadyPosttrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && Session.get("questionAnswered") && Session.get('showPosttrialAudioReplayButton'),
+  // 'waitForUserAudioReadyPosttrial': () =>  getCurrentDeliveryParams().allowuserdelayaudioplayback && !Session.get('userPlayedAudio') && Session.get("questionAnswered") && Session.get('showPosttrialAudioReplayButton'),
 
   'speakerCardPosition': function() {
     //centers the speaker icon if there are no displays. 
@@ -1323,13 +1326,24 @@ function clearScrollList() {
   Session.set('scrollListCount', 0);
 }
 
+function showAudioReplayButton(prefix){
+  if(prefix.toLowerCase() == 'pre'){
+    $('#userAudioReadyPretrial').show();
+  }
+  else if(prefix.toLowerCase() == 'post'){
+    $('#userAudioReadyPosttrial').show();
+  }
+}
 
 function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
-  if(!isCorrect) showRemovalButton();
-  else Session.set('showPosttrialAudioReplayButton', true);
+  if(!isCorrect){
+    showRemovalButton();
+    if(Session.get('currentDisplayEngine').audioSrc && getCurrentDeliveryParams().allowuserdelayaudioplayback)
+      showAudioReplayButton('post');
+  }
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
 
   const currentDeliveryParams = getCurrentDeliveryParams();
@@ -1443,7 +1457,6 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
-  const reviewBegin = Date.now();
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
 
@@ -1451,73 +1464,93 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
+
   const reviewTimeout = getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
-  // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
-  Meteor.setTimeout(async function() {
-    let wasReportedForRemoval = Session.get('wasReportedForRemoval');
-    const reviewEnd = Date.now();
-    const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-        reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+  // Stop previous timeout, log response data, and clear up any other vars for next question
+  if(!(deliveryParams.allowuserdelayaudioplayback && Session.get('currentDisplayEngine').audioSrc) || isCorrect){
+    Meteor.setTimeout(async function() {
+      writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect, false)
+    }, reviewTimeout);
+  }
+  else{
+    afterAnswerSelfPacedCallback = writeLogDataToHistory.bind(null, trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect, true)
+  }
+}
 
-    // Give unit engine a chance to update any necessary stats
-    const endLatency = reviewEnd - trialStartTimestamp;
-    await engine.cardAnswered(isCorrect, endLatency, wasReportedForRemoval);
-    const answerLogAction = isTimeout ? '[timeout]' : 'answer';
-    Session.set('dialogueHistory', undefined);
-    const newExperimentState = {
-      lastAction: answerLogAction,
-      lastActionTimeStamp: Date.now(),
-    };
-    if (getTestType() !== 'i') {
-      const overallOutcomeHistory = Session.get('overallOutcomeHistory');
-      overallOutcomeHistory.push(isCorrect ? 1 : 0);
-      newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
-      Session.set('overallOutcomeHistory', overallOutcomeHistory);
+async function writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect, isSelfPaced){
+  const testType = getTestType();
+  const reviewBegin = Date.now();
+  const deliveryParams = Session.get('currentDeliveryParams');
+
+  let wasReportedForRemoval = Session.get('wasReportedForRemoval');
+  let dialogueHistory;
+  if (Session.get('dialogueHistory')) {
+    dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
+  }
+  
+  const reviewEnd = Date.now();
+  const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
+      reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+
+  // Give unit engine a chance to update any necessary stats
+  const endLatency = reviewEnd - trialStartTimestamp;
+  await engine.cardAnswered(isCorrect, endLatency, wasReportedForRemoval);
+  const answerLogAction = isTimeout ? '[timeout]' : 'answer';
+  Session.set('dialogueHistory', undefined);
+  const newExperimentState = {
+    lastAction: answerLogAction,
+    lastActionTimeStamp: Date.now(),
+  };
+  if (getTestType() !== 'i') {
+    const overallOutcomeHistory = Session.get('overallOutcomeHistory');
+    overallOutcomeHistory.push(isCorrect ? 1 : 0);
+    newExperimentState.overallOutcomeHistory = overallOutcomeHistory;
+    Session.set('overallOutcomeHistory', overallOutcomeHistory);
+  }
+  if(isSelfPaced){
+    answerLogRecord.CF_Self_Paced_Posttrial = Session.get('selfPacePosttrialLatency');
+  }
+  console.log('writing answerLogRecord to history:', answerLogRecord);
+  if(!Meteor.user().profile.impersonating || Meteor.user().profile === undefined){
+    try {
+      await meteorCallAsync('insertHistory', answerLogRecord);
+      await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
+    } catch (e) {
+      console.log('error writing history record:', e);
+      throw new Error('error inserting history/updating state:', e);
     }
-    console.log('writing answerLogRecord to history:', answerLogRecord);
-    if(!Meteor.user().profile.impersonating || Meteor.user().profile === undefined){
-      try {
-        await meteorCallAsync('insertHistory', answerLogRecord);
-        await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-      } catch (e) {
-        console.log('error writing history record:', e);
-        throw new Error('error inserting history/updating state:', e);
-      }
-    } else {
-      console.log('no history saved. impersonation mode.');
+  } else {
+    console.log('no history saved. impersonation mode.');
+  }
+
+  // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
+  // is specified and we have seen that many (or more) timeouts in a row, then
+  // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
+  // this feature MUST be turned on in the TDF.
+  if (!isTimeout) {
+    timeoutsSeen = 0; // Reset count
+  } else {
+    timeoutsSeen++;
+
+    // Figure out threshold (with default of 0)
+    // Also note: threshold < 1 means no autostop at all
+    const threshold = deliveryParams.autostopTimeoutThreshold;
+
+    if (threshold > 0 && timeoutsSeen >= threshold) {
+      console.log('Hit timeout threshold', threshold, 'Quitting');
+      leavePage('/profile');
+      return; // We are totally done
     }
+  }
 
-    // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
-    // is specified and we have seen that many (or more) timeouts in a row, then
-    // we leave the page. Note that autostopTimeoutThreshold defaults to 0 so that
-    // this feature MUST be turned on in the TDF.
-    if (!isTimeout) {
-      timeoutsSeen = 0; // Reset count
-    } else {
-      timeoutsSeen++;
-
-      // Figure out threshold (with default of 0)
-      // Also note: threshold < 1 means no autostop at all
-      const threshold = deliveryParams.autostopTimeoutThreshold;
-
-      if (threshold > 0 && timeoutsSeen >= threshold) {
-        console.log('Hit timeout threshold', threshold, 'Quitting');
-        leavePage('/profile');
-        return; // We are totally done
-      }
-    }
-
+  $('#userAnswer').val('');
+  //done allow self-pacing in an assessment session, skip self-pacing if the user enters the correct answer or if there is no audio source and/or if were not allowing the user to self-pace. 
+  if(!isSelfPaced){
+    prepareCard();
     hideUserFeedback();
-    $('#userAnswer').val('');
-    if(getCurrentDeliveryParams().allowuserdelayaudioplayback){
-      Session.set('userPlayedAudio', false);
-    }
-    else{
-      prepareCard();
-    }
-  }, reviewTimeout);
+  }
 }
 
 function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) {
@@ -1742,7 +1775,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Review_Latency': reviewLatency,
     'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
     'CF_Button_Order': buttonEntries,
-    'CF_Self_Paced_Pretrial': selfPacePretrialLatency,
+    'CF_Self_Paced_Pretrial': selfPacePretrialLatency || -1,
     'CF_Self_Paced_Posttrial': selfPacePosttrialLatency,
     'CF_Note': '',
     'Feedback_Text': $('#UserInteraction').text() || '',
@@ -1946,17 +1979,17 @@ async function newQuestionHandler() {
     await updateExperimentState(newExperimentState, 'card.newQuestionHandler');
     Session.set('currentDisplayEngine', currentDisplay);
   }
-
-  if(!Session.get('currentDeliveryParams').allowuserdelayaudioplayback){
+  if(Session.get('currentDisplayEngine').audioSrc && getCurrentDeliveryParams().allowuserdelayaudioplayback){
+    Session.set("selfPacePretrialStartTimeStamp", Date.now());
+    showAudioReplayButton('pre');
+  }
+  else{
     startQuestionTimeout();
     checkSimulation();
   
     if (Session.get('showOverlearningText')) {
       $('#overlearningRow').show();
     }
-  }
-  else{
-    Session.set("selfPacePretrialStartTimeStamp", Date.now());
   }
 }
 
