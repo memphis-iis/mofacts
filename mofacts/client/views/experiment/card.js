@@ -545,6 +545,8 @@ Template.card.helpers({
     }
   },
 
+  'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
+
   'subWordClozeCurrentQuestionExists': function() {
     console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
     return typeof(Session.get('clozeQuestionParts')) != 'undefined' && Session.get('clozeQuestionParts') !== null;
@@ -1365,6 +1367,30 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
+    if(!isCorrect){
+      $('#UserInteraction').text(feedbackMessage + ' Next trial in: ')
+      var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      var lastSplice;
+  
+      var UserInteractionInterval = setInterval(function() {
+        var now = new Date().getTime()
+        var distance = countDownStart - now;
+        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+
+        if(lastSplice){
+          document.getElementById("UserInteraction").innerHTML = document.getElementById("UserInteraction").innerHTML.split(lastSplice)[0]
+        }
+      
+        document.getElementById("UserInteraction").innerHTML += seconds + "s";
+        lastSplice = seconds + "s";
+      
+        // If the count down is finished, end interval and clear userInteraction
+        if (distance < 0) {
+          clearInterval(UserInteractionInterval);
+          document.getElementById("UserInteraction").innerHTML = "";
+        }
+      }, 100);
+    }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
