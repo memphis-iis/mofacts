@@ -4,18 +4,19 @@
       <p style="font-size: larger;">Questions</p>
         <div id="switch-feedback" class="switch-3 switch-candy">
           <input class="audioPromptRadio" id="audioPromptQuestionOff" name="state-db" type="radio" checked="checked"/>
-          <label for="audioPromptQuestionOff" onclick="">I read the questions to myself</label>
+          <label for="audioPromptQuestionOff" onclick="">I read the questions to myself.</label>
         </div>
         <div id="switch-feedback" class="switch-3 switch-candy">
           <input class="audioPromptRadio" id="audioPromptQuestionOn" name="state-db" type="radio" />
-          <label for="audioPromptQuestionOn" onclick="">The computer reads the questions for me</label>
+          <label for="audioPromptQuestionOn" onclick="">The computer reads the questions for me. </label>
         </div>
-        <div class="audioPromptQuestionGroup invisible">
-          <div style="display: inline-block;">
+        <div class="audioPromptQuestionGroup invisible" style="padding-left:2%;">
+          <h5 style="color:green; padding-left:8%">Requires <span class="glyphicon glyphicon-headphones"></span> icon. Headphones recommended.</h5>
+          <div style="display: inline-block; padding-left:8%">
             <label for="audioPromptVolume" class="audioPromptQuestionVolume">Volume: </label>
             <input type="range" id="audioPromptQuestionVolume" min="-6" max="6" step=".5">
           </div>
-          <div style="display: inline-block;">
+          <div style="display: inline-block; padding-left: 8%;">
             <label for="audioPromptQuestionSpeakingRate">Speed: </label>
             <select type="select" id="audioPromptQuestionSpeakingRate">
               <option value=".25">0.25</option>
@@ -35,7 +36,7 @@
         <p style="font-size: larger;">Answers</p>
         <div id="switch-input" class="switch-3 switch-candy">
           <input class="audioInputRadio" id="audioInputOff" name="state-da" type="radio" checked="checked" />
-          <label for="audioInputOff" onclick="">I type the answers</label>
+          <label for="audioInputOff" onclick="">I type the answers.</label>
         </div>
         <div id="switch-input" class="switch-3 switch-candy">
           <input class="audioInputRadio" id="audioInputOn" name="state-da" type="radio" />
@@ -43,15 +44,15 @@
         </div>
       </div>
       <br/>
-      <div class="audioEnabledGroup invisible" style="width: 100%;">
-        <label for="audioInputSensitivity" style="padding-left: 8%;">
+      <div class="audioEnabledGroup invisible" style="padding-left:8%;">
+          <h5 style="color:green;">Requires <i class="fa fa-microphone"></i> icon. Headphones recommended. <br>Requires a quiet environment and may not work on all systems.</h5>
+        <label for="audioInputSensitivity">
           <span>Audio sensitivity: Quiet Room</span>
         </label>
         <input type="range" style="width:200px" id="audioInputSensitivity" value="20" step="1" min="0" max="60">
           <span style="font-weight: bold;">Noisy Room</span>
-      </div>
       {{#if showSpeechAPISetup}}
-        <div class="audioEnabledGroup invisible" style="padding-left: 10%;">
+        <div class="audioEnabledGroup invisible">
           {{#if speechAPIKeyIsSetup}}
             <p style="color:green">Speech api key is setup</p>
           {{else}}
@@ -60,6 +61,7 @@
           <button id='setupAPIKey' class="marginBottom">Set up API Key</button>
         </div>
       {{/if}}
+    </div>
     </div>
     <div class="audio-button-containers">
       <div class="flow">
@@ -70,16 +72,19 @@
         </div>
         <div id="switch-feedback" class="switch-3 switch-candy">
           <input class="audioPromptRadio" id="audioPromptFeedbackOn" name="state-d" type="radio" />
-          <label for="audioPromptFeedbackOn" onclick="">The computer reads the feedback out loud</label>
+          <label for="audioPromptFeedbackOn" onclick="">The computer reads the feedback out loud.</label>
+          <br />
+
         </div>
       </div>
       <br/>
-      <div class="audioPromptFeedbackGroup invisible">
-        <div style="display: inline-block;">
+      <div class="audioPromptFeedbackGroup invisible" style="padding-left:2%;">
+        <h5 style="color:green; padding-left:8%">Requires <span class="glyphicon glyphicon-headphones"></span> icon. Headphones recommended.</h5>
+        <div style="display: inline-block; padding-left:8%">
           <label for="audioPromptFeedbackVolume" class="audioPromptFeedbackVolume">Volume: </label>
           <input type="range" id="audioPromptFeedbackVolume" min="-6" max="6" step=".5">
         </div>
-        <div style="display: inline-block;">
+        <div style="display: inline-block; padding-left:8%">
           <label for="audioPromptFeedbackSpeakingRate">Speed: </label>
           <select type="select" id="audioPromptFeedbackSpeakingRate">
             <option value=".25">0.25</option>
@@ -95,7 +100,7 @@
       </div>
     </div>
     <div id="headphonesSuggestedDiv" class="invisible">
-      <h3>Headphones are suggested with both speech input and output enabled.</h3>
+      <h6 color="green">Headphones are suggested with both speech input and output enabled.</h6>
     </div>
     <div id='speechAPIModal' class="modal fade">
       <div class="modal-dialog" role="document">

@@ -15,7 +15,10 @@
                 <button id='confirmFeedbackSelection' class='btn'>Confirm feedback settings</button>
             {{/if}}
         </div>
-    {{else}}
+        {{else}}
+        <button type="button" id="userAudioReadyPretrial" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;display: none;">
+            Click when ready to hear tone
+        </button>
         {{#if userIsAdminOrTeacher}}
             <button id='skipUnit' class='btn'>Skip Unit</button>
         {{/if}}
@@ -186,6 +189,9 @@
                     </div>
                 </div>
             </div>
+            <button type="button" id="userAudioReadyPosttrial" class="button btn navbar-btn text-center" style="text-align:center; white-space:nowrap;display: none;">
+                Click when ready to hear tone
+            </button>
             {{#if questionIsRemovable}}
                 <div class="removalContainer">
                     <div class="row text-center">
