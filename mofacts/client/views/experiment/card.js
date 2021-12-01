@@ -1368,7 +1368,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .text(feedbackMessage)
         .show();
     if(!isCorrect){
-      $('#UserInteraction').text(feedbackMessage + ' Next trial in: ')
+      $('#UserInteraction').text(feedbackMessage + ' Continuing in: ')
       var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
       var lastSplice;
   
