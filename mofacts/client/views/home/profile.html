@@ -27,14 +27,17 @@
                         data-tdffilename="{{this.fileName}}"
                         data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
                         data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}</button>
-                    {{#if this.enableAudioPromptAndFeedback}}
-                        <p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>
-                    {{/if}}
-                    <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
-                    {{#if this.audioInputEnabled}}
-                        <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
-                    {{/if}}
+                        data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                        {{#if or this.enableAudioPromptAndFeedback this.audioInputEnabled}}
+                            <br>
+                            {{#if this.enableAudioPromptAndFeedback}}
+                            <span style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></span>
+                            {{/if}}
+                            {{#if this.audioInputEnabled}}
+                                <span style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></span>
+                            {{/if}}
+                        {{/if}}
+                    </button>
                 </div>
             {{/each}}
         {{/unless}}
@@ -72,7 +75,17 @@
                             data-currentStimuliSetId="{{this.currentStimuliSetId}}"
                             data-ignoreOutOfGrammarResponses="{{this.ignoreOutOfGrammarResponses}}"
                             data-speechOutOfGrammarFeedback="{{this.speechOutOfGrammarFeedback}}"
-                            data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}</button>
+                            data-isMultiTdf="{{this.isMultiTdf}}">{{this.name}}
+                            {{#if or this.enableAudioPromptAndFeedback this.audioInputEnabled}}
+                                <br>
+                                {{#if this.enableAudioPromptAndFeedback}}
+                                    <span style="display:inline-block" title="Audio Output available for this module"><span class="glyphicon glyphicon-headphones"></span></span>
+                                {{/if}}
+                                {{#if this.audioInputEnabled}}
+                                    <span style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></span>
+                                {{/if}}
+                            {{/if}}                                
+                        </button>
                             {{#if isInRole 'admin'}}
                                 {{#if showTdfAdminInfo}}
                                     <input type="checkbox" id="select-disable" uid="{{this.tdfid}}"/>
@@ -80,14 +93,6 @@
                                     <p class="admin-info-p" id="tdf-owner">own: {{tdfOwnersMap this.ownerId}}</p>
                                 {{/if}}
                             {{/if}}
-                            {{#if this.enableAudioPromptAndFeedback}}
-                                <p style="display:inline-block" title="Audio Output available for this module"><i class="fas fa-volume-up"></i></p>
-                            {{/if}}
-                            <p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>
-                            {{#if this.audioInputEnabled}}
-                                <p style="display:inline-block" title="Speech Input available for this module"><i class="fa fa-microphone"></i></p>
-                            {{/if}}
-
                         </div>
                     {{/each}}
                 {{/if}}

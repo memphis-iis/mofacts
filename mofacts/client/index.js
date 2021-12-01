@@ -230,4 +230,10 @@ Template.registerHelper('showFeedbackResetButton', function() {
 Template.registerHelper('isInSession', function() {
   return (Session.get('curModule') == 'profile');
 })
+Template.registerHelper('and',(a,b)=>{
+  return a && b;
+});
+Template.registerHelper('or',(a,b)=>{
+  return a || b;
+});
 
