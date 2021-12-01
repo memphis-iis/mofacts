@@ -120,6 +120,8 @@ function getHistory(history) {
     'CF (Review Latency)': history.cf_review_latency,
     'CF (Review Entry)': history.cf_review_entry,
     'CF (Button Order)': history.cf_button_order,
+    'CF (self-paced-pretrial)': history.cf_self_paced_pretrial,
+    'CF (self-paced-posttrial)': history.cf_self_paced_posttrial,
     'Feedback Text': history.feedback_text,
     'feedbackType': history.feedbackType,
     'dynamicTagFields': history.dynamicTagFields,
