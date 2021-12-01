@@ -47,6 +47,7 @@ var _Array = require("./fable-library.2.10.2/Array");
 var _Seq = require("./fable-library.2.10.2/Seq");
 
 var _RegExp = require("./fable-library.2.10.2/RegExp");
+const { serverConsole } = require("../methods");
 
 const Feedback = (0, _Types.declare)(function DefinitionalFeedback_Feedback(feedback) {
   this.feedback = feedback;
@@ -288,7 +289,9 @@ function GenerateFeedback(incorrectAnswer, correctAnswer) {
     let feedback;
     const matchValue$$4 = [(0, _Map.FSharpMap$$TryFind$$2B595)(definitionMap(), incorrectAnswer), (0, _Map.FSharpMap$$TryFind$$2B595)(definitionMap(), correctAnswer)];
     var $target$$39, correctEntry, incorrectEntry;
-
+    console.log(`incorrectAnswer: ${incorrectAnswer}`)
+    console.log(`correctAnswer: ${correctAnswer}`)
+    console.log(`matchValue: ${_Map.FSharpMap$$TryFind$$2B595}`)
     if (matchValue$$4[0] != null) {
       if (matchValue$$4[1] != null) {
         $target$$39 = 0;
@@ -314,7 +317,8 @@ function GenerateFeedback(incorrectAnswer, correctAnswer) {
           break;
         }
     }
-
+    serverConsole('----------------------------------------------------------')
+    console.log(`feedback: ${feedback}`)
     return feedback !== null ? Promise.resolve(new _Option.Result(0, "Ok", new Feedback(feedback))) : Promise.resolve(new _Option.Result(1, "Error", "Unable to generate definitional feedback. Definitional feedback cache is " + ((0, _Map.FSharpMap$$get_IsEmpty)(definitionMap()) ? "empty" : "full")));
   }));
 }
