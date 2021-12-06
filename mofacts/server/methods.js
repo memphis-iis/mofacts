@@ -1808,7 +1808,7 @@ Meteor.startup(async function() {
 
     getSimpleFeedbackForAnswer: function(userAnswer, correctAnswer) {
       // eslint-disable-next-line new-cap
-      const result = DefinitionalFeedback.GenerateFeedback(userAnswer, correctAnswer);
+      const result = ElaboratedFeedback.GenerateFeedback(userAnswer, correctAnswer);
       console.log('result: ' + JSON.stringify(result));
       return result;
     },
