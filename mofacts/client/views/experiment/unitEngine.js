@@ -706,6 +706,7 @@ function modelUnitEngine() {
       let count=0;
       let hintLevelIndex = 1;
       const ptemp=[];
+      const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
         for (let j=0; j<card.stims.length; j++) {
@@ -724,6 +725,11 @@ function modelUnitEngine() {
             }
           }
           const parms = this.calculateSingleProb(i, j, 0, count);
+          if(typeof parms.debugLog !== undefined){
+            tdfDebugLog.push(parms.debugLog);
+          } else {
+            tdfDebugLog.push(undefined);
+          }
           hintLevelProbabilities.push(parms.probability)
           for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
@@ -741,6 +747,7 @@ function modelUnitEngine() {
         }
       }
       console.log('calculateCardProbabilities', JSON.stringify(ptemp));
+      console.log('debug strings:', tdfDebugLog);
     },
 
     // Given a single item from the cardProbabilities, calculate the
