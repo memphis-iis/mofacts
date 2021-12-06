@@ -117,7 +117,6 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
       const ef = matchValue[0];
       elaboratedFeedback = ef;
     }
-    
     if (elaboratedFeedback != null) {
       void tags.push(new Tag(1, "CachedElaboratedFeedback"));
       const cs = correctnessStatement(incorrectAnswer$$1, correctAnswer$$1);
