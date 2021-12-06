@@ -1368,28 +1368,33 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .text(feedbackMessage)
         .show();
     if(!isCorrect){
-      $('#UserInteraction').text(feedbackMessage + ' Continuing in: ')
-      var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
-      var lastSplice;
+      // $('#UserInteraction').text(feedbackMessage + ' Continuing in: ')
+      // var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      // var lastSplice;
   
-      var UserInteractionInterval = setInterval(function() {
-        var now = new Date().getTime()
-        var distance = countDownStart - now;
-        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
-
-        if(lastSplice){
-          document.getElementById("UserInteraction").innerHTML = document.getElementById("UserInteraction").innerHTML.split(lastSplice)[0]
-        }
+      // var UserInteractionInterval = setInterval(function() {
+      //   var now = new Date().getTime()
+      //   var distance = countDownStart - now;
+      //   var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+        
+      //   try{
+      //     if(lastSplice){
+      //       document.getElementById("UserInteraction").innerHTML = document.getElementById("UserInteraction").innerHTML.split(lastSplice)[0]
+      //     }
+        
+      //     document.getElementById("UserInteraction").innerHTML += seconds + "s";
+      //     lastSplice = seconds + "s";
+      //   }
+      //   catch{
+      //     clearInterval(UserInteractionInterval);
+      //   }
       
-        document.getElementById("UserInteraction").innerHTML += seconds + "s";
-        lastSplice = seconds + "s";
-      
-        // If the count down is finished, end interval and clear userInteraction
-        if (distance < 0) {
-          clearInterval(UserInteractionInterval);
-          document.getElementById("UserInteraction").innerHTML = "";
-        }
-      }, 100);
+      //   // If the count down is finished, end interval and clear userInteraction
+      //   if (distance < 0) {
+      //     clearInterval(UserInteractionInterval);
+      //     document.getElementById("UserInteraction").innerHTML = "";
+      //   }
+      // }, 100);
     }
   }
 
