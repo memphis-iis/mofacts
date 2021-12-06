@@ -733,15 +733,15 @@ function modelUnitEngine() {
           hintLevelProbabilities.push(parms.probability)
           for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
-            if(typeof hintLevelParams.probability == "number" && >= 0){
-              throw 'Error: Probability is undefined, NaN, or less than or equal to 0.';
-            }
             hintLevelProbabilities.push(hintLevelParms.probability);
           }  
           stim.hintLevelProbabilites = hintLevelProbabilities;
           console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
+          if(!typeof stim.probabilityEstimate == "number"){
+            throw 'Error: Probability is undefined, NaN, or less than or equal to 0.';
+          }
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;           
         }
