@@ -238,7 +238,7 @@ function defaultUnitEngine(curExperimentData) {
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
       console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
-          cluster, cluster.stims[whichStim]);
+          cluster, cluster.stims[whichStim], whichHintLevel);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
         text: curStim.textStimulus,
@@ -392,17 +392,20 @@ function modelUnitEngine() {
     testType: 'd',
     clusterIndex: -1,
     whichStim: -1,
+    whichHintLevel: -1,
     forceButtonTrial: false,
     probabilityEstimate: -1,
   };
 
-  function setCurrentCardInfo(clusterIndex, whichStim) {
+  function setCurrentCardInfo(clusterIndex, whichStim, whichHintLevel) {
     currentCardInfo.clusterIndex = clusterIndex;
     currentCardInfo.whichStim = whichStim;
+    currentCardInfo.whichHintLevel = whichHintLevel;
     currentCardInfo.probabilityEstimate = cardProbabilities.cards[clusterIndex].stims[whichStim].probabilityEstimate;
     console.log('MODEL UNIT card selection => ',
         'cluster-idx:', clusterIndex,
         'whichStim:', whichStim,
+        'whichHintLevel:', whichHintLevel,
         'parameter', getStimParameterArray(clusterIndex, whichStim),
     );
   }
@@ -485,6 +488,7 @@ function modelUnitEngine() {
     let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
     let stimIndex=-1;
+    let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -521,14 +525,19 @@ function modelUnitEngine() {
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
               clusterIndex=i;
-              stimIndex=j;
+              for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+                if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
+                  currentHintLevelMin = stim.hintLevelProbabilites[k];
+                  hintLevelIndex = k;
+                }
+              }
             }
           }
         }
       }
     }
 
-    return {clusterIndex, stimIndex};
+    return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
@@ -537,6 +546,7 @@ function modelUnitEngine() {
     let currentHintLevelMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
+    let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -561,7 +571,7 @@ function modelUnitEngine() {
       }
     }
 
-    return {clusterIndex, stimIndex};
+    return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMinProbDistCard(cards, hiddenItems) {
@@ -570,6 +580,7 @@ function modelUnitEngine() {
     let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
     let stimIndex=-1;
+    let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -602,7 +613,7 @@ function modelUnitEngine() {
       }
     }
 
-    return {clusterIndex, stimIndex};
+    return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
@@ -610,6 +621,8 @@ function modelUnitEngine() {
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
+    let currentHintLevelMax = 0;
+    let hintLevelIndex=-1;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -629,12 +642,18 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
+            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+              if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
+                currentHintLevelMax = stim.hintLevelProbabilites[k];
+                hintLevelIndex = k;
+              }
+            }
           }
         }
       }
     }
 
-    return {clusterIndex, stimIndex};
+    return {clusterIndex, stimIndex, hintLevelIndex};
   }
 
   function updateCardAndStimData(cardIndex, whichStim) {
@@ -708,6 +727,9 @@ function modelUnitEngine() {
           hintLevelProbabilities.push(parms.probability)
           for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
+            if(typeof hintLevelParams.probability == "number" && >= 0){
+              throw 'Error: Probability is undefined, NaN, or less than or equal to 0.';
+            }
             hintLevelProbabilities.push(hintLevelParms.probability);
           }  
           stim.hintLevelProbabilites = hintLevelProbabilities;
@@ -1232,6 +1254,7 @@ function modelUnitEngine() {
       // calculated
       let newClusterIndex = -1;
       let newStimIndex = -1;
+      let newHintLevel = -1;
 
       console.log('selectNextCard unitMode: ' + this.unitMode);
 
@@ -1242,7 +1265,7 @@ function modelUnitEngine() {
 
       newClusterIndex = indices.clusterIndex;
       newStimIndex = indices.stimIndex;
-      newHintLevel = indices.hintLevel;
+      newHintLevel = indices.hintLevelIndex;
 
       console.log('selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
       // Found! Update everything and grab a reference to the card and stim
@@ -1266,8 +1289,8 @@ function modelUnitEngine() {
       };
 
       // Save for returning the info later (since we don't have a schedule)
-      setCurrentCardInfo(cardIndex, whichStim);
-      console.log('select next card:', cardIndex, whichStim);
+      setCurrentCardInfo(cardIndex, whichStim, whichHintLevel);
+      console.log('select next card:', cardIndex, whichStim, whichHintLevel);
       console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
