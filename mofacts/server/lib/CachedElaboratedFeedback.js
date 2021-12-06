@@ -103,7 +103,9 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
     const tags = [];
     let elaboratedFeedback;
     const matchValue = [(0, _Map.FSharpMap$$TryFind$$2B595)(cache(), [incorrectAnswer$$1, correctAnswer$$1]), (0, _Map.FSharpMap$$TryFind$$2B595)(cache(), [correctAnswer$$1, incorrectAnswer$$1])];
-
+    console.log("match value: " + matchValue)
+    console.log("incorrectAnswer$$1: " + incorrectAnswer$$1)
+    console.log("correctAnswer$$1: " + correctAnswer$$1)
     if (matchValue[0] == null) {
       if (matchValue[1] == null) {
         elaboratedFeedback = undefined;
@@ -115,7 +117,6 @@ function GenerateFeedback(incorrectAnswer$$1, correctAnswer$$1) {
       const ef = matchValue[0];
       elaboratedFeedback = ef;
     }
-
     if (elaboratedFeedback != null) {
       void tags.push(new Tag(1, "CachedElaboratedFeedback"));
       const cs = correctnessStatement(incorrectAnswer$$1, correctAnswer$$1);
