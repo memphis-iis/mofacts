@@ -1368,33 +1368,30 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .text(feedbackMessage)
         .show();
     if(!isCorrect){
-      // $('#UserInteraction').text(feedbackMessage + ' Continuing in: ')
-      // var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
-      // var lastSplice;
+      $('#CountdownTimer')
+        .addClass('text-align')
+        .text('Continuing in: ')
+        .show();
+      var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
   
-      // var UserInteractionInterval = setInterval(function() {
-      //   var now = new Date().getTime()
-      //   var distance = countDownStart - now;
-      //   var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+      var CountdownTimerInterval = setInterval(function() {
+        var now = new Date().getTime()
+        var distance = countDownStart - now;
+        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
         
-      //   try{
-      //     if(lastSplice){
-      //       document.getElementById("UserInteraction").innerHTML = document.getElementById("UserInteraction").innerHTML.split(lastSplice)[0]
-      //     }
-        
-      //     document.getElementById("UserInteraction").innerHTML += seconds + "s";
-      //     lastSplice = seconds + "s";
-      //   }
-      //   catch{
-      //     clearInterval(UserInteractionInterval);
-      //   }
+        try{
+          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+        }
+        catch{
+          clearInterval(CountdownTimerInterval);
+        }
       
-      //   // If the count down is finished, end interval and clear userInteraction
-      //   if (distance < 0) {
-      //     clearInterval(UserInteractionInterval);
-      //     document.getElementById("UserInteraction").innerHTML = "";
-      //   }
-      // }, 100);
+        // If the count down is finished, end interval and clear CountdownTimer
+        if (distance < 0) {
+          clearInterval(CountdownTimerInterval);
+          document.getElementById("CountdownTimer").innerHTML = "";
+        }
+      }, 100);
     }
   }
 
