@@ -2213,16 +2213,18 @@ function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, audio
   };
 
   const ttsURL = 'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + ttsAPIKey;
-
-  HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
-    if (err) {
-      console.log('err: ', err);
-    } else {
-      const audioDataEncoded = response.data.audioContent;
-      const audioData = decodeBase64AudioContent(audioDataEncoded);
-      callback(audioData);
-    }
-  });
+  // only make tts calls on pages: card, instruction, experiment
+  if(document.location.pathname == '/card' || document.location.pathname == '/instruction' || document.location.pathname.split('/')[1] == 'experiment'){
+    HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
+      if (err) {
+        console.log('err: ', err);
+      } else {
+        const audioDataEncoded = response.data.audioContent;
+        const audioData = decodeBase64AudioContent(audioDataEncoded);
+        callback(audioData);
+      }
+    });
+  }
 }
 
 // Speech recognition function to process audio data, this is called by the web worker
