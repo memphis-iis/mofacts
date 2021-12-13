@@ -1310,8 +1310,12 @@ function clearScrollList() {
 
 
 function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
+  Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
+  }
+  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect){
+    Session.set('isRefutation', true);
   }
   if(!isCorrect) showRemovalButton();
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
@@ -1372,7 +1376,13 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass('text-align')
         .text('Continuing in: ')
         .show();
-      var countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      var countDownStart;
+      if(Session.get('isRefutation')){
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
+      }
+      else{
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      }
   
       var CountdownTimerInterval = setInterval(function() {
         var now = new Date().getTime()
@@ -1545,6 +1555,8 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
       // Fast forward through feedback if we already did a dialogue feedback session
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
+      } else if(Session.get('isRefutation')) {
+        reviewTimeout = _.intval(deliveryParams.refutationstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
       }
@@ -1579,7 +1591,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (!reviewLatency) {
     let assumedReviewLatency = 0;
     if (testType === 'd' && !isCorrect) {
-      assumedReviewLatency = _.intval(deliveryParams.reviewstudy);
+      if(deliveryParams.feedbackType == 'refutational' && Session.get('isRefutation')) {
+        assumedReviewLatency = _.intval(deliveryParams.refutationstudy)
+      } else {
+        assumedReviewLatency = _.intval(deliveryParams.reviewstudy);
+      }
     }
     reviewLatency = assumedReviewLatency;
   }

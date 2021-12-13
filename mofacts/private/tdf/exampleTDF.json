@@ -53,8 +53,7 @@
                 "unitname": "Title of the unit goes here***",
                 "learningsession": {
                     "clusterlist": "0-33",
-                    "unitMode": "thresholdCeiling",
-                    "calculateProbability": "function mul(m1, m2) {  var result = 0;  var len = m1.length;  for (var i = 0; i < len; i++) {      result += m1[i] * m2[i]  }  return result}function logitdec(outcomes, decay) {  if (outcomes) {      var outcomessuc = JSON.parse(JSON.stringify(outcomes));      var outcomesfail = outcomes.map(function(value) {          return Math.abs(value - 1)      });      var w = outcomessuc.unshift(1);      var v = outcomesfail.unshift(1);      return Math.log(mul(outcomessuc, [...Array(w).keys()].reverse().map(function(value, index) {          return Math.pow(decay, value)      })) / mul(outcomesfail, [...Array(w).keys()].reverse().map(function(value, index) {          return Math.pow(decay, value)      })))  }  return 0}function recency(age, d) {if (age==0) { return 0;} else  {return Math.pow(1 + age, -d);  }}function quaddiffcor(seq, probs) {  return mul(seq, probs.map(function(value) {      return value * value  }))}function quaddiffcor(seq, probs) {  return mul(seq, probs.map(function(value) {      return value * value  }))}function quaddiffincor(seq, probs) {  return mul(Math.abs(seq-1), probs.map(function(value) {      return value * value  }))}function linediffcor(seq, probs) {  return mul(seq, probs)}function linediffincor(seq, probs) {  return mul(seq.map(function(value) {      return Math.abs(value - 1)  }), probs)}p.hintsylls = [];if((p.stimSuccessCount+p.stimFailureCount)<3 && p.syllables>2) {  var numHintSylls = getRandomInt(3);  for(var index=0;index<numHintSylls;index++){    p.hintsylls.push(index);  }}var intercept;function arrSum(arr){return arr.reduce(function(a,b){return a + b}, 0)}function errlist(seq) {  return seq.map(function(value) {return Math.abs(value - 1)})}if (p.hintsylls.length==0) {intercept=-.563} else if (p.hintsylls.length==1) {intercept=0.261} else {intercept=0.496}                    p.y = intercept    +                    .721 * logitdec(                        p.overallOutcomeHistory.slice(Math.max(p.overallOutcomeHistory.length-60,1),                        p.overallOutcomeHistory.length), .955) +                    .268 * logitdec(p.responseOutcomeHistory, .794) +                    10.4 * recency(p.stimSecsSinceLastShown, .519) +                    .943 *  recency(p.responseSecsSinceLastShown, .049) +                    1.40  * linediffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +                    -1.40 * quaddiffcor(p.stimOutcomeHistory, p.stimPreviousCalculatedProbabilities) +                    -.178 * arrSum(errlist(p.stimOutcomeHistory)) ;                    p.probability = 1.0 / (1.0 + Math.exp(-p.y));                  // console.log(p.overallOutcomeHistory+\\\" - \\\"+p.responseOutcomeHistory +\\\" - \\\"+p.stimSecsSinceLastShown+\\\" - \\\"+p.stimOutcomeHistory+\\\" - \\\"+p.stimPreviousCalculatedProbabilities);          return p            "
+                    "unitMode": "thresholdCeiling"
                 },
                 "deliveryparams": {
                     "autostopTimeoutThreshold": "2",
@@ -67,7 +66,8 @@
                     "fontsize": "3",
                     "correctscore": "1",
                     "incorrectscore": "0",
-                    "allowstimulusdropping": "true"
+                    "allowstimulusdropping": "true",
+                    "refutationstudy": "20000"
                 }
             }
         ]
