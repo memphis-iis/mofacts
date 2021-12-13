@@ -55,19 +55,17 @@ async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagLis
   const stimuliSetId = tdf.stimuliSetId;
   const stimuliSet = await getStimuliSetById(stimuliSetId);
   const curStimSet = stimuliSet.find((x) => x.clusterKC==clusterKC && x.stimulusKC==stimulusKC);
-  serverConsole('getValuesOfStimTagList:', typeof(curStimSet), Object.keys(curStimSet || {}));
+  serverConsole('getValuesOfStimTagList:', typeof(curStimSet), Object.keys(curStimSet || {}), curStimSet);
   const valueDict = {};
 
   for (const tag of tagList) {
-    for (const stim of curStimSet) {
-      if (!valueDict[tag] && stim.tags) {
-        valueDict[tag] = stim.tags[tag] || '';
-      } else {
-        valueDict[tag] = '';
-      }
+    if (!valueDict[tag] && curStimSet.tags) {
+      valueDict[tag] = curStimSet.tags[tag] || '';
+      console.log("valueDict[" + tag + "]: " + valueDict[tag]);
+    } else {
+      valueDict[tag] = '';
     }
   }
-
   return valueDict;
 }
 
@@ -116,14 +114,16 @@ async function createExperimentExport(expName) {
     for (let history of histories) {
       try {
         const clusterKC = history.kc_cluster;
-        const stimulusKC = history.cf_stimulus_version;
+        const stimulusKC = history.kc_default;
         //serverConsole('history:', clusterKC, stimulusKC, history);
         history = getHistory(history);
         const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
-
+        
+        console.log("dynamicStimTagValues: " + JSON.stringify(dynamicStimTagValues));
         for (const tag of Object.keys(dynamicStimTagValues)) {
-          history.dynamicTagFields['CF (' + tag + ')'] = dynamicStimTagValues[tag];
+          history.dynamicTagFields[tag] = dynamicStimTagValues[tag];
         }
+        console.log("DynamicStimTagFields: " + history.dynamicTagFields);
         record += await delimitedRecord(history) + "\n\r";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
