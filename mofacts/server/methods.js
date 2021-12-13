@@ -900,7 +900,6 @@ async function getHistoryByTDFfileName(TDFfileName) {
                  INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE t.content @> $1::jsonb';
   // let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
   const historyRet = await db.manyOrNone(query, [{'fileName': TDFfileName}]);
-
   return historyRet;
 }
 
