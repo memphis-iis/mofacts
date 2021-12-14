@@ -1843,6 +1843,9 @@ async function unitIsFinished(reason) {
   const newExperimentState = {
     questionIndex: 0,
     clusterIndex: 0,
+    shufIndex: 0,
+    whichHintLevel: 0,
+    whichStim: 0,
     lastUnitCompleted: curUnitNum,
     lastUnitStarted: newUnitNum,
     currentUnitNumber: newUnitNum,
@@ -2856,7 +2859,11 @@ async function processUserTimesLog() {
   Session.set('currentUnitStartTime', Date.now());
 
   // shufIndex is mapped, clusterIndex is raw
-  Session.set('clusterIndex', experimentState.shufIndex || experimentState.clusterIndex);
+  if(typeof experimentState.shufIndex !== "undefined"){
+      Session.set('clusterIndex', experimentState.shufIndex);
+  } else {
+      Session.set('clusterIndex', experimentState.clusterIndex);  
+  } 
 
   Session.set('currentDisplayEngine', experimentState.currentDisplayEngine);
   Session.set('currentQuestionPart2', experimentState.currentQuestionPart2);
