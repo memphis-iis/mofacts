@@ -705,6 +705,7 @@ function modelUnitEngine() {
     calculateCardProbabilities: function calculateCardProbabilities() {
       let count=0;
       let hintLevelIndex = 1;
+      let parms;
       const ptemp=[];
       const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
@@ -724,8 +725,8 @@ function modelUnitEngine() {
               console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
             }
           }
-          const parms = this.calculateSingleProb(i, j, 0, count);
-          if(typeof parms.debugLog !== undefined){
+          parms = this.calculateSingleProb(i, j, 0, count);
+          if(typeof parms.debugLog !== "undefined"){
             tdfDebugLog.push(parms.debugLog);
           } else {
             tdfDebugLog.push(undefined);
@@ -1188,7 +1189,8 @@ function modelUnitEngine() {
       });
       const cardIndex = Session.get('currentExperimentState').shufIndex;
       const whichStim = Session.get('currentExperimentState').whichStim;
-      setCurrentCardInfo(cardIndex, whichStim);
+      const whichHintLevel = Session.get('currentExperimentState').whichHintLevel;
+      setCurrentCardInfo(cardIndex, whichStim, whichHintLevel);
     },
     getCardProbabilitiesNoCalc: function() {
       return cardProbabilities;
@@ -1293,6 +1295,8 @@ function modelUnitEngine() {
         shufIndex: unmappedIndex,
         lastAction: 'question',
         lastTimeStamp: Date.now(),
+        whichStim: whichStim,
+        whichHintLevel: whichHintLevel
       };
 
       // Save for returning the info later (since we don't have a schedule)
