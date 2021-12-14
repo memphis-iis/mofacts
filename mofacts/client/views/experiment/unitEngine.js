@@ -710,11 +710,11 @@ function modelUnitEngine() {
       const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
+        const hintLevelProbabilities = [];
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
           const currentStimuliSetId = Session.get('currentStimuliSetId');
           let answerText = Answers.getDisplayAnswerText(getStimAnswer(i, j)).toLowerCase();
-          let hintLevelProbabilities = [];
           //Detect Hint Levels
           if (probFunctionHasHintSylls) {
             if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
