@@ -115,15 +115,12 @@ async function createExperimentExport(expName) {
       try {
         const clusterKC = history.kc_cluster;
         const stimulusKC = history.kc_default;
-        //serverConsole('history:', clusterKC, stimulusKC, history);
         history = getHistory(history);
         const dynamicStimTagValues = await getValuesOfStimTagList(expName, clusterKC, stimulusKC, listOfDynamicStimTags);
-        
-        console.log("dynamicStimTagValues: " + JSON.stringify(dynamicStimTagValues));
+
         for (const tag of Object.keys(dynamicStimTagValues)) {
-          history.dynamicTagFields[tag] = dynamicStimTagValues[tag];
+          history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
         }
-        console.log("DynamicStimTagFields: " + history.dynamicTagFields);
         record += await delimitedRecord(history) + "\n\r";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
