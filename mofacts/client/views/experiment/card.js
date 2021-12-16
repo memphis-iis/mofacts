@@ -1520,13 +1520,8 @@ async function writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTi
   }
   console.log('writing answerLogRecord to history:', answerLogRecord);
   if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
-    try {
       await meteorCallAsync('insertHistory', answerLogRecord);
       await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
-    } catch (e) {
-      console.log('error writing history record:', e);
-      throw new Error('error inserting history/updating state:', e);
-    }
   } else {
     console.log('no history saved. impersonation mode.');
   }

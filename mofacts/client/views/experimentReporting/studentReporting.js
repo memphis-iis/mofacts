@@ -135,7 +135,8 @@ async function updateDashboard(selectedTdfId){
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
     console.log("studentData loaded...",studentData);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0");
+    let itemLimit = null;
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,0,itemLimit);
 
     console.log('studentData', studentData);
     console.log('curStudentGraphData',curStudentGraphData);
@@ -151,11 +152,15 @@ async function updateDashboard(selectedTdfId){
 
 async function drawDashboard(curStudentGraphData, studentData){
   //Get Data from session variableS
+
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
-  percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-  console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
-  percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+  percentCorrect = (parseFloat(numCorrect) / totalAttempts);
+  proportionCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
+  proportionDeviation = .30;
+  proportionOptimum = .70;
+  masteredItems = Math.min(Math.max(proportionCorrect - proportionOptimum,proportionDeviation),proportionDeviation);
+  console.log('masteredItems',proportionCorrect, proportionDeviation, proportionOptimum, masteredItems);
   // Perform calculated data
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
@@ -191,10 +196,10 @@ async function drawDashboard(curStudentGraphData, studentData){
     });
     //Populate Dashboard values
     console.log('Testing dashCluster:',dashCluster);
-    dashCluster[0].set(percentStimsSeen);
-    dashCluster[1].set(percentCorrect);
+    dashCluster[0].set(masteredItems);
+    dashCluster[1].set(0);
     dashCluster[2].set(stimsSeenPredictedProbability);
-    dashCluster[3].set(stimsNotSeenPredictedProbability);
+    
 
   }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
