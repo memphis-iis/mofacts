@@ -735,6 +735,11 @@ function modelUnitEngine() {
           for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
             hintLevelProbabilities.push(hintLevelParms.probability);
+            if(typeof parms.debugLog !== "undefined"){
+              tdfDebugLog.push(parms.debugLog);
+            } else {
+              tdfDebugLog.push(undefined);
+            }
           }  
           stim.hintLevelProbabilites = hintLevelProbabilities;
           console.log('hintLevel probabilities', hintLevelProbabilities);
