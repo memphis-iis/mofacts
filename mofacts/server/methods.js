@@ -1148,7 +1148,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=0,retur
                FROM (SELECT * from componentState LIMIT $4) AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true' + hintLevelAddendunm +  ';';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true  ' + hintLevelAddendunm +  'ORDER BY componentstateID DESC;';
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel, returnRows]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
