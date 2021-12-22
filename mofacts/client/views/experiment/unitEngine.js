@@ -524,6 +524,7 @@ function modelUnitEngine() {
             if (hiddenItems.includes(stim.stimulusKC)) continue;
             if (stim.probabilityEstimate <= currentMin) {
               currentMin = stim.probabilityEstimate;
+              stimIndex = j;
               clusterIndex=i;
               for(let k=0; k<stim.hintLevelProbabilites.length; k++){
                 if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
@@ -716,21 +717,16 @@ function modelUnitEngine() {
           const currentStimuliSetId = Session.get('currentStimuliSetId');
           let answerText = Answers.getDisplayAnswerText(getStimAnswer(i, j)).toLowerCase();
           //Detect Hint Levels
-          if (probFunctionHasHintSylls) {
-            if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
-              console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is 1.');
-            } else {
-              const stimSyllableData = this.cachedSyllables.data[answerText];
-              hintLevelIndex = stimSyllableData.count;
-              console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
-            }
+          if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
+            hintLevelIndex = 1;
+            console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is 1.');
+          } else {
+            const stimSyllableData = this.cachedSyllables.data[answerText];
+            hintLevelIndex = stimSyllableData.count;
+            console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
           parms = this.calculateSingleProb(i, j, 0, count);
-          if(typeof parms.debugLog !== "undefined"){
-            tdfDebugLog.push(parms.debugLog);
-          } else {
-            tdfDebugLog.push(undefined);
-          }
+          tdfDebugLog.push(parms.debugLog);
           hintLevelProbabilities.push(parms.probability)
           for(let k=1; k<hintLevelIndex; k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
@@ -771,6 +767,7 @@ function modelUnitEngine() {
       // Current Indices
       p.clusterIndex = cardIndex;
       p.stimIndex = stimIndex;
+      p.hintLevel = hintLevel;
 
       // Top-level metrics
       p.userTotalResponses = cardProbabilities.numQuestionsAnswered;
@@ -811,9 +808,7 @@ function modelUnitEngine() {
           p.syllablesArray = stimSyllableData.syllables;
         }
       }
-
-      p.hintLevel = hintLevel;
-      
+     
       p.resp = cardProbabilities.responses[p.stimResponseText];
       p.responseSuccessCount = p.resp.priorCorrect;
       p.responseFailureCount = p.resp.priorIncorrect;
