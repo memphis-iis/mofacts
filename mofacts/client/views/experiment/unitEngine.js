@@ -728,20 +728,16 @@ function modelUnitEngine() {
           parms = this.calculateSingleProb(i, j, 0, count);
           tdfDebugLog.push(parms.debugLog);
           hintLevelProbabilities.push(parms.probability)
-          for(let k=1; k<hintLevelIndex; k++){
+          for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
             hintLevelProbabilities.push(hintLevelParms.probability);
-            if(typeof parms.debugLog !== "undefined"){
-              tdfDebugLog.push(parms.debugLog);
-            } else {
-              tdfDebugLog.push(undefined);
-            }
+            console.log('cluster: ' + i + ', card: ' + j + ', input hintlevel: ' + k + ', output hintLevel: ' + hintLevelParms.hintLevel + ', output probability: ' + hintLevelParms.probability) + ', debug message:' + hintLevelParms.debugLog;
           }  
           stim.hintLevelProbabilites = hintLevelProbabilities;
           console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
-          stim.probabilityEstimate = parms.probability;
-          if(!typeof stim.probabilityEstimate == "number"){
+          stim.probability = parms.probability;
+          if(!typeof stim.probability == "number"){
             throw 'Error: Probability is undefined, NaN, or less than or equal to 0.';
           }
           ptemp[count]=Math.round(100*parms.probability)/100;
@@ -749,7 +745,6 @@ function modelUnitEngine() {
         }
       }
       console.log('calculateCardProbabilities', JSON.stringify(ptemp));
-      console.log('debug strings:', tdfDebugLog);
     },
 
     // Given a single item from the cardProbabilities, calculate the
