@@ -1,4 +1,3 @@
-
 import {setStudentPerformance} from '../../lib/currentTestingHelpers';
 import {INVALID} from '../../../common/Definitions';
 import {meteorCallAsync} from '../..';
@@ -13,8 +12,8 @@ import gauge, {
 Session.set('studentReportingTdfs', []);
 Session.set('curStudentPerformance', {});
 
-let defaultGaugeOptions = {
-  angle: -.2,
+let gaugeOptionsSpeedOfLearning = {
+  angle: 0,
   lineWidth: 0.22,
   radiusScale:0.9,
   pointer: {
@@ -23,9 +22,13 @@ let defaultGaugeOptions = {
     color: '#000000'
   },
   staticZones: [
-     {strokeStyle: "#F03E3E", min: 0, max: 50, height: 1},
-     {strokeStyle: "#30B32D", min: 50, max: 80, height: 1},
-     {strokeStyle: "#FFDD00", min: 80, max: 100, height: 1},
+     {strokeStyle: "#a1fa73", min: 0, max: 50, height: 2},
+     {strokeStyle: "#96fa59", min: 51, max: 100, height: 1.8},
+     {strokeStyle: "#96fa59", min: 101, max: 150, height: 1.6},
+     {strokeStyle: "#8dc346", min: 151, max: 200, height: 1.4},
+     {strokeStyle: "#979336", min: 201, max: 250, height: 1.2},
+     {strokeStyle: "#b36427", min: 251, max: 300, height: 1.2},
+     {strokeStyle: "#dc201a", min: 301, max: 350, height: 1},
 
   ],
   renderTicks: {
@@ -39,17 +42,42 @@ let defaultGaugeOptions = {
     subColor: '#666666'
   },
 
-  staticLabels: {
-    font: "8px sans-serif",  // Specifies font
-    labels: [50, 60, 70, 80, 100],  // Print labels at these values
-    color: "#000000",  // Optional: Label text color
-    fractionDigits: 0  // Optional: Numerical precision. 0=round off.
+  limitMax: false,
+  limitMin: false,
+  highDpiSupport: true
+};
+let gaugeOptionsDifficulty = {
+  angle: 0,
+  lineWidth: 0.22,
+  radiusScale:0.9,
+  pointer: {
+    length: 0.5,
+    strokeWidth: 0.05,
+    color: '#000000'
+  },
+  staticZones: [
+     {strokeStyle: "#F03E3E", min: 0, max: 6, height: 1},
+     {strokeStyle: "#FFDD00", min: 6, max: 12, height: 1},
+     {strokeStyle: "#30B32D", min: 12, max: 48, height: 1},
+     {strokeStyle: "#FFDD00", min: 48, max: 54, height: 1},
+     {strokeStyle: "#F03E3E", min: 54, max: 60, height: 1},
+
+  ],
+  renderTicks: {
+    divisions: 5,
+    divWidth: 1.1,
+    divLength: 0.7,
+    divColor: '#333333',
+    subDivisions: 3,
+    subLength: 0.5,
+    subWidth: 0.6,
+    subColor: '#666666'
   },
   limitMax: false,
   limitMin: false,
   highDpiSupport: true
 };
-let defaultDonutOptions = {
+let donutOptionsMasteredItems = {
   lines: 12, // The number of lines to draw
   angle: .4, // The length of each line
   lineWidth: 0.13, // The line thickness
@@ -65,12 +93,17 @@ let defaultDonutOptions = {
   generateGradient: true
 };
 
+//Set Tooltips
+// Select all elements with data-toggle="tooltips" in the document
+$('[data-toggle="tooltip"]').tooltip();
+
 Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
+  curTotalAttempts: () => Session.get('curTotalAttempts'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
-  curTotalTime: () => Session.get('constantTotalTime'),
+  curTotalTime: () => Session.get('practiceDuration'),
   curStudentPerformanceCorrectInInteger: function() {
     var percentCorrectInteger = parseFloat(Session.get('stimsSeenPercentCorrect')).toFixed(0);
     return percentCorrectInteger;
@@ -80,6 +113,16 @@ Template.studentReporting.helpers({
   stimsNotSeenPredictedProbability: () => Session.get('stimsNotSeenPredictedProbability'),
   stimCount: () => Session.get('stimCount'),
   stimsSeen: () => Session.get('stimsSeen'),
+  itemMasteryRate: () => Session.get('itemMasteryRate'),
+  itemMasteryTime: () => Session.get('itemMasteryTime'),
+  displayDashboard: function(){
+    var totalAttempts = Session.get('curTotalAttempts');
+    if(totalAttempts > 29){
+      return true;
+    } else {
+      return false;
+    }
+  },
   INVALID: INVALID,
 });
 
@@ -135,7 +178,7 @@ async function updateDashboard(selectedTdfId){
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
     console.log("studentData loaded...",studentData);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0");
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0",30);
 
     console.log('studentData', studentData);
     console.log('curStudentGraphData',curStudentGraphData);
@@ -151,12 +194,17 @@ async function updateDashboard(selectedTdfId){
 
 async function drawDashboard(curStudentGraphData, studentData){
   //Get Data from session variableS
-  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
+  const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
+    // Perform calculated data
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
+  optimumDifficulty = 0.7;
+  totalPracticeDurationMinutes = totalPracticeDuration / 60000;
+  totalPracticeDurationMinutesDisplay = Math.round(totalPracticeDurationMinutes);
   console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
   percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
-  // Perform calculated data
+  speedOfLearning = Math.log(1+stimsIntroduced) * 100; //Multiply by 100 for graph scale
+  displayDifficulty =  (Math.min(Math.max((parseFloat(numCorrect)/stimsSeen) - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
   for(let i = 0; i < studentData.probEstimates.length; i++ ){
@@ -168,23 +216,37 @@ async function drawDashboard(curStudentGraphData, studentData){
     }
   stimsSeenPredictedProbability = stimsSeenProbabilties[stimsSeenProbabilties.length -1 ];
   stimsNotSeenPredictedProbability = stimsNotSeenProbabilites[stimsNotSeenProbabilites.length -1 ];
+  itemMasteryRate = Math.round(stimsSeen / totalPracticeDurationMinutes);
+  estimatedTimeMastery = Math.round(itemMasteryRate / totalStimCount);
   Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
   Session.set('stimCount',parseFloat(totalStimCount));
   Session.set('stimsSeen',stimsSeen);
+  Session.set('curTotalAttempts',totalAttempts);
+  Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
+  Session.set('itemMasteryRate', itemMasteryRate);
+  Session.set('itemMasteryTime',estimatedTimeMastery);
+  
+
   
   //Draw Dashboard
   let dashCluster = [];
   dashClusterCanvases = document.getElementsByClassName('dashCanvas');
     Array.prototype.forEach.call(dashClusterCanvases, function(element){
-      if(element.classList.contains('gauge')){
+      if(element.classList.contains('masteredItems')){
         console.log(element);
-        let gaugeMeter = new progressGauge(element,"gauge",0,100);
+        let gaugeMeter = new progressGauge(element,"donut",0,100,donutOptionsMasteredItems);
         dashCluster.push(gaugeMeter);
-      } else {
+      }
+      if(element.classList.contains('learningSpeed')){
         console.log(element);
-        let gaugeMeter = new progressGauge(element,"donut",0,100);
+        let gaugeMeter = new progressGauge(element,"gauge",0,300,gaugeOptionsSpeedOfLearning);
+        dashCluster.push(gaugeMeter);
+      }
+      if(element.classList.contains('difficulty')){
+        console.log(element);
+        let gaugeMeter = new progressGauge(element,"gauge",0,60,gaugeOptionsDifficulty);
         dashCluster.push(gaugeMeter);
       }
 
@@ -192,9 +254,8 @@ async function drawDashboard(curStudentGraphData, studentData){
     //Populate Dashboard values
     console.log('Testing dashCluster:',dashCluster);
     dashCluster[0].set(percentStimsSeen);
-    dashCluster[1].set(percentCorrect);
-    dashCluster[2].set(stimsSeenPredictedProbability);
-    dashCluster[3].set(stimsNotSeenPredictedProbability);
+    dashCluster[1].set(speedOfLearning);
+    dashCluster[2].set(displayDifficulty);
 
   }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
@@ -202,7 +263,7 @@ function progressGauge(target, gaugeType, currentValue,maxValue,options = defaul
       console.log('gauge canvas found and loaded.')
       console.log('gaugeType',gaugeType);
       if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);} 
-      if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(defaultDonutOptions);}
+      if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(options);}
       gauge.maxValue = maxValue; // set max gauge value
       gauge.animationSpeed = 32; // set animation speed (32 is default value)
       gauge.set(currentValue); // set actual value
