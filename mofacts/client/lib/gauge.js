@@ -630,15 +630,15 @@
             this.ctx.font = fontsize + rest;
             rotationAngle = this.getAngle(value.label) - 3 * Math.PI / 2;
             this.ctx.rotate(rotationAngle);
-            this.ctx.fillText(formatNumber(value.label, staticLabels.fractionDigits), 0, -radius - this.lineWidth / 2);
+            this.ctx.fillText(value.label, 0, -radius - this.lineWidth / 2);
             this.ctx.rotate(-rotationAngle);
           }
         } else {
           if ((!this.options.limitMin || value >= this.minValue) && (!this.options.limitMax || value <= this.maxValue)) {
             rotationAngle = this.getAngle(value) - 3 * Math.PI / 2;
             this.ctx.rotate(rotationAngle);
-            this.ctx.fillText(formatNumber(value, staticLabels.fractionDigits), 0, -radius - this.lineWidth / 2);
-            this.ctx.rotate(-rotationAngle);
+            this.ctx.fillText(formatNumber("test"), 0, -radius - this.lineWidth / 2);
+            this.ctx.rotate(-rotationAngle);150
           }
         }
       }

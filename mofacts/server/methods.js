@@ -1144,24 +1144,25 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=0,retur
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
-               SUM(s.totalPracticeDuration) AS totalPracticeDuration \
+               SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
+               COUNT(CASE WHEN (s.priorIncorrect = 1 AND s.priorCorrect = 0) OR (s.priorIncorrect = 0 AND s.priorCorrect = 1) THEN 1 END) AS stimsIntroduced \
                FROM (SELECT * from componentState LIMIT $4) AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true  ' + hintLevelAddendunm +  'ORDER BY componentstateID DESC;';
+               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true  ' + hintLevelAddendunm;
   const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel, returnRows]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
-                  WHERE s.userId=$1 AND s.tdfid=$2';                  
-  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid]);
+                  WHERE s.userId=$1 AND s.tdfid=$2 AND s.level_unitname = $3';                  
+  const perfRet2 = await db.oneOrNone(query2, [userId, TDFid,'Model Unit']);
   if (!perfRet || !perfRet2) return null;
   return {
     numCorrect: perfRet.numcorrect,
     numIncorrect: perfRet.numincorrect,
     totalStimCount: perfRet.totalstimcount,
     stimsSeen: perfRet2.stimsseen,
-    totalPracticeDuration: perfRet.totalpracticeduration
- 
+    totalPracticeDuration: perfRet.totalpracticeduration,
+    stimsIntroduced: perfRet.stimsintroduced
   };
 }
 
