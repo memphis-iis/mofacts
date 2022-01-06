@@ -16,33 +16,40 @@
             <option value="{{this.tdfid}}">{{this.displayName}}</option>
           {{/each}}
       </select>
-        for {{curTotalTime}} minutes. 
-  
-    <div class="row" style="padding-top:20px;">
+        for {{curTotalTime}} minute(s). You have practiced items {{curTotalAttempts}} time(s) so far.
+  {{#if displayDashboard}}
+    <div class="row" style="padding-top:20px;">   
       <div class="gauge col-sm-6 col-xs-12">
+        <p>Mastered Items</p>   
         <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}} of {{stimCount}}</b></div>  
-        <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-item-progress"></canvas>
-          <p>Items out of the {{stimCount}} total items for this unit.</p>      
+        <canvas class="dashCanvas masteredItems" width="100" height="100" id="canvas-unit-item-progress"></canvas>
       </div>
       <div class="gauge col-sm-6 col-xs-12">
-          <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{curStudentPerformanceCorrectInInteger}}%</b></div>  
-          <canvas class="dashCanvas donut" width="100" height="100" id="canvas-unit-percent-correct"></canvas>
-          <p>Percent correct so far.</p>      
+        <p>Speed of Learning</p>      
+          <div id="preview-textfield-custom" style="top:80px; position: relative;"></div>  
+          <canvas class="dashCanvas learningSpeed" width="150" height="100" id="canvas-unit-percent-correct"></canvas>
+          <p>Items mastered per minute: {{itemMasteryRate}}</p>
+          <p>Estimated time to master all items: {{itemMasteryTime}} minutes.</p>
       </div>
   </div>
-  <div class="row">
-      <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-test-prediction"></canvas>
-          <div id="preview-textfield" style="display:none;">0%</div>
-          <p>How the AI thinks you will will do if you were tested on all of the previously seen flashcards now. </p>      
-          
-      </div>
-      <div class="gauge col-sm-6 col-xs-12">
-          <canvas class="dashCanvas gauge" width="125" height="100" id="canvas-ai-new-card-prediction"></canvas>
-          <div id="preview-textfield" style="display:none;">0%</div>
-          <p>How the AI thinks you will do when you see a new flashcard.</p>      
+  <div class="row text-center">
+      <div class="gauge col-sm-12 col-xs-12">
+          <p>Difficulty</p>    
+          <canvas class="dashCanvas difficulty" width="250" height="100" id="canvas-ai-new-card-prediction"></canvas>
+          <div id="preview-textfield" style="display:none;">0%</div>  
+          <div class="row" style="margin:auto; max-width:250px;">
+            <div class="col-xs-6">
+              <p data-toggle="tooltip" title="MoFaCTs thinks it's choices have been too easy for optimal learning and will be trying to make it harder. Sit tight, and the system will introduce more items to pick up the pace.">Too Easy</p>
+            </div>
+            <div class="col-xs-6">
+              <p data-toggle="tooltip" title="MoFaCTs thinks it's choices have been too hard for optimal learning and will be trying to make it easier than before, you might try studying the feedback more carefully.">Too Hard</p>
+            </div>
+          </div>
       </div>
     </div>
+    {{else}}
+    <p>You do not have enough trials to display the progress report. It requires 30 trials.</p>
+    {{/if}}
 
 
      
