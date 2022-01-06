@@ -570,6 +570,8 @@ Template.card.helpers({
     }
   },
 
+  'ReviewStudyCountdown': () => Session.get('ReviewStudyCountdown'),
+
   'subWordClozeCurrentQuestionExists': function() {
     console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
     return typeof(Session.get('clozeQuestionParts')) != 'undefined' && Session.get('clozeQuestionParts') !== null;
@@ -1342,6 +1344,7 @@ function showAudioReplayButton(prefix){
 }
 
 function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, afterAnswerFeedbackCb, correctAndText) {
+  Session.set('isRefutation', undefined);
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
@@ -1350,8 +1353,11 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
     if(Session.get('currentDisplayEngine').audioSrc && getCurrentDeliveryParams().allowuserdelayaudioplayback)
       showAudioReplayButton('post');
   }
+  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect){
+    Session.set('isRefutation', true);
+  }
+  if(!isCorrect) showRemovalButton();
   const afterAnswerFeedbackCbBound = afterAnswerFeedbackCb.bind(null, isCorrect);
-
   const currentDeliveryParams = getCurrentDeliveryParams();
   if (currentDeliveryParams.scoringEnabled) {
     // Note that we track the score in the user progress object, but we
@@ -1403,6 +1409,38 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
         .addClass(isCorrect ? 'alert-success' : 'alert-danger')
         .text(feedbackMessage)
         .show();
+    if(!isCorrect){
+      $('#CountdownTimer')
+        .addClass('text-align')
+        .text('Continuing in: ')
+        .show();
+      var countDownStart;
+      if(Session.get('isRefutation')){
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().refutationstudy;
+      }
+      else{
+        countDownStart = new Date().getTime() + getCurrentDeliveryParams().reviewstudy;
+      }
+  
+      var CountdownTimerInterval = setInterval(function() {
+        var now = new Date().getTime()
+        var distance = countDownStart - now;
+        var seconds = Math.ceil((distance % (1000 * 60)) / 1000);
+        
+        try{
+          document.getElementById("CountdownTimer").innerHTML = 'Continuing in: ' + seconds + "s";
+        }
+        catch{
+          clearInterval(CountdownTimerInterval);
+        }
+      
+        // If the count down is finished, end interval and clear CountdownTimer
+        if (distance < 0) {
+          clearInterval(CountdownTimerInterval);
+          document.getElementById("CountdownTimer").innerHTML = "";
+        }
+      }, 100);
+    }
   }
 
   speakMessageIfAudioPromptFeedbackEnabled(feedbackMessage, 'feedback');
@@ -1574,6 +1612,8 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
       // Fast forward through feedback if we already did a dialogue feedback session
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
+      } else if(Session.get('isRefutation')) {
+        reviewTimeout = _.intval(deliveryParams.refutationstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
       }
@@ -1610,7 +1650,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (!reviewLatency) {
     let assumedReviewLatency = 0;
     if (testType === 'd' && !isCorrect) {
-      assumedReviewLatency = _.intval(deliveryParams.reviewstudy);
+      if(deliveryParams.feedbackType == 'refutational' && Session.get('isRefutation')) {
+        assumedReviewLatency = _.intval(deliveryParams.refutationstudy)
+      } else {
+        assumedReviewLatency = _.intval(deliveryParams.reviewstudy);
+      }
     }
     reviewLatency = assumedReviewLatency;
   }
@@ -1865,6 +1909,9 @@ async function unitIsFinished(reason) {
   const newExperimentState = {
     questionIndex: 0,
     clusterIndex: 0,
+    shufIndex: 0,
+    whichHintLevel: 0,
+    whichStim: 0,
     lastUnitCompleted: curUnitNum,
     lastUnitStarted: newUnitNum,
     currentUnitNumber: newUnitNum,
@@ -2256,16 +2303,18 @@ function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, audio
   };
 
   const ttsURL = 'https://texttospeech.googleapis.com/v1/text:synthesize?key=' + ttsAPIKey;
-
-  HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
-    if (err) {
-      console.log('err: ', err);
-    } else {
-      const audioDataEncoded = response.data.audioContent;
-      const audioData = decodeBase64AudioContent(audioDataEncoded);
-      callback(audioData);
-    }
-  });
+  // only make tts calls on pages: card, instruction, experiment
+  if(document.location.pathname == '/card' || document.location.pathname == '/instruction' || document.location.pathname.split('/')[1] == 'experiment'){
+    HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
+      if (err) {
+        console.log('err: ', err);
+      } else {
+        const audioDataEncoded = response.data.audioContent;
+        const audioData = decodeBase64AudioContent(audioDataEncoded);
+        callback(audioData);
+      }
+    });
+  }
 }
 
 // Speech recognition function to process audio data, this is called by the web worker
@@ -2881,7 +2930,11 @@ async function processUserTimesLog() {
   Session.set('currentUnitStartTime', Date.now());
 
   // shufIndex is mapped, clusterIndex is raw
-  Session.set('clusterIndex', experimentState.shufIndex || experimentState.clusterIndex);
+  if(typeof experimentState.shufIndex !== "undefined"){
+      Session.set('clusterIndex', experimentState.shufIndex);
+  } else {
+      Session.set('clusterIndex', experimentState.clusterIndex);  
+  } 
 
   Session.set('currentDisplayEngine', experimentState.currentDisplayEngine);
   Session.set('currentQuestionPart2', experimentState.currentQuestionPart2);

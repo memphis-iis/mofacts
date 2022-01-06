@@ -3,6 +3,7 @@ import {KC_MULTIPLE, MODEL_UNIT} from '../../common/Definitions';
 import {dialogueSelectState} from '../views/home/profileDialogueToggles';
 import {isEmpty} from '../../common/globalHelpers';
 import {getCurrentClusterAndStimIndices} from '../views/experiment/card';
+import { _ } from 'core-js';
 
 export {
   blankPassword,
@@ -363,6 +364,7 @@ function getCurrentDeliveryParams() {
     'initialview': 0,
     'drill': 0,
     'reviewstudy': 0,
+    'refutationstudy': 0,
     'correctprompt': 0,
     'skipstudy': false,
     'lockoutminutes': 0,
@@ -401,6 +403,7 @@ function getCurrentDeliveryParams() {
     'purestudy': _.intval,
     'skipstudy': xlateBool,
     'reviewstudy': _.intval,
+    'refutationstudy': _.intval,
     'correctprompt': _.intval,
     'lockoutminutes': _.intval,
     'fontsize': _.intval,
