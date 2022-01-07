@@ -736,9 +736,9 @@ function modelUnitEngine() {
           stim.hintLevelProbabilites = hintLevelProbabilities;
           console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
-          stim.probability = parms.probability;
-          if(!typeof stim.probability == "number"){
-            throw 'Error: Probability is undefined, NaN, or less than or equal to 0.';
+          stim.probabilityEstimate = parms.probability;
+          if(!typeof stim.probabilityEstimate == "number"){
+            throw 'Error: Probability Estimate is undefined, NaN, or less than or equal to 0.';
           }
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;           
