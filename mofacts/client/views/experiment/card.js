@@ -1745,6 +1745,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
     'instructionQuestionResult': Session.get('instructionQuestionResult'),
+    'Entry_Point': Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname
   };
   return answerLogRecord;
 }

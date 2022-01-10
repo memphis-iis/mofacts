@@ -125,6 +125,7 @@ function getHistory(history) {
     'dynamicTagFields': history.dynamictagfields,
     'recordedServerTime': history.recordedServerTime,
     'hintLevel':history.hintlevel,
+    'Entry_Point': history.entry_point
   };
   return historyOutput;
 }
