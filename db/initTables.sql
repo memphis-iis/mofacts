@@ -134,7 +134,8 @@ CREATE TABLE history (
     dialogueHistory JSONB,
     recordedServerTime BIGINT NOT NULL,
     instructionQuestionResult BOOLEAN,
-    hintLevel INTEGER
+    hintLevel INTEGER,
+    Entry_Point TEXT
 );
 
 CREATE INDEX idx_history_userId_TDFId on history (userId,TDFId);

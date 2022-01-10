@@ -233,7 +233,7 @@ function createData(error, result, fileName){
   document.body.appendChild(a);
   a.style = "display: none";
   a.href = window.URL.createObjectURL(blob);
-  a.download = fileName + "_" + today;
+  a.download = fileName + "_" + today + '.tsv';
   a.click();
   document.body.removeChild(a);
 }

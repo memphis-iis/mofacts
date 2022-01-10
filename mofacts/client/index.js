@@ -196,6 +196,8 @@ Template.body.events({
         // something happened during logout
         console.log('User:', Meteor.user(), 'Error:', error);
       } else {
+        Session.set('curTeacher', undefined);
+        Session.set('curClass', undefined);
         sessionCleanUp();
         routeToSignin();
       }
