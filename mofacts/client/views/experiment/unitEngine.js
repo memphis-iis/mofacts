@@ -180,7 +180,6 @@ function defaultUnitEngine(curExperimentData) {
       if (probFunctionParameters) {
         console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
-        let currentHintLevel = parseInt(probFunctionParameters.hintLevel);
         if (typeof(probFunctionParameters.hintsylls) === 'undefined' ||
             !this.cachedSyllables ||
             probFunctionParameters.hintsylls.length == 0) {
@@ -603,7 +602,7 @@ function modelUnitEngine() {
             clusterIndex=i;
             stimIndex=j;
           }
-          for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+          for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
             const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
             if(hintDist <= currentHintLevelMin){
               currentHintLevelMin = dist;
@@ -711,9 +710,9 @@ function modelUnitEngine() {
       const tdfDebugLog=[];
       for (let i=0; i<cardProbabilities.cards.length; i++) {
         const card = cardProbabilities.cards[i];
-        const hintLevelProbabilities = [];
         for (let j=0; j<card.stims.length; j++) {
           const stim = card.stims[j];
+          const hintLevelProbabilities = [];
           const currentStimuliSetId = Session.get('currentStimuliSetId');
           let answerText = Answers.getDisplayAnswerText(getStimAnswer(i, j)).toLowerCase();
           //Detect Hint Levels
