@@ -151,13 +151,12 @@ Template.signInSouthwest.onCreated(async function() {
 
   console.log('got teachers');
   const urlVars = getUrlVars();
-  if (!urlVars['showTestLogins']) {
+  if (!urlVars['showtestlogins']) {
     Session.set('showTestLogins', false);
     const testLogins = [
       'olney@southwest.tn.edu',
       'pavlik@southwest.tn.edu',
       'peperone@southwest.tn.edu',
-      'tackett@southwest.tn.edu',
     ];
     verifiedTeachers = verifiedTeachers.filter((x) => testLogins.indexOf(x.username) == -1);
     console.log('verifiedTeachers2', verifiedTeachers);

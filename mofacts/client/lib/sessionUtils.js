@@ -75,7 +75,6 @@ function sessionCleanUp() {
   Session.set('feedbackTypeFromHistory', undefined);
   Session.set('resetFeedbackSettingsFromIndex', false);
 
-  Session.set('curTeacher', undefined);
   Session.set('clusterIndex', undefined);
   Session.set('currentAnswer', undefined);
   Session.set('originalAnswer', undefined);

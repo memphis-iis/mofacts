@@ -62,4 +62,5 @@ export const outputFields = [
   'CF (Note)', // CF note
   'Feedback Text',
   'dialogueHistory',
+  'Entry_Point'
 ];

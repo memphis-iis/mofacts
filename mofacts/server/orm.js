@@ -122,9 +122,10 @@ function getHistory(history) {
     'CF (Button Order)': history.cf_button_order,
     'Feedback Text': history.feedback_text,
     'feedbackType': history.feedbackType,
-    'dynamicTagFields': history.dynamicTagFields,
+    'dynamicTagFields': history.dynamictagfields,
     'recordedServerTime': history.recordedServerTime,
-    'hintLevel':history.hintLevel,
+    'hintLevel':history.hintlevel,
+    'Entry_Point': history.entry_point
   };
   return historyOutput;
 }
