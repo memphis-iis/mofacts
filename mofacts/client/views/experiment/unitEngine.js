@@ -91,7 +91,6 @@ function defaultUnitEngine(curExperimentData) {
       let clozeAnswer = '';
       let clozeMissingSyllables = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
-      const syllableIndices = currentAnswerSyllables.displaySyllableIndices;
       const curHintLevel = hintLevel;
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
@@ -101,10 +100,7 @@ function defaultUnitEngine(curExperimentData) {
       // eslint-disable-next-line guard-for-in
       for (index = 0; index < curHintLevel; index++) {
         index = parseInt(index); 
-        if (syllableIndices.indexOf(index) != -1) {
-          clozeAnswer += syllablesArray[index];
-          clozeAnswerNoUnderscores += syllablesArray[index];
-        } else {
+       
           // Handle underscores for syllable array elements that contain whitespace
           if (syllablesArray[index].indexOf(' ') >= 0) {
             clozeAnswer += '__ __';
@@ -114,7 +110,6 @@ function defaultUnitEngine(curExperimentData) {
             clozeAnswer += '____';
             clozeAnswerOnlyUnderscores += '____';
             clozeMissingSyllables += syllablesArray[index];
-          }
         }
 
         reconstructedAnswer += syllablesArray[index];
@@ -140,7 +135,7 @@ function defaultUnitEngine(curExperimentData) {
           let clozeAnswerUnderscores = ""
           for(j=0;j<originalAnswerWordCount+1;j++){
             if(clozeAnswerSplit[j] !== undefined) { 
-              clozeAnswerUnderscores += '&nbsp<u>' + clozeAnswerSplit[j] + '</u>';
+              clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + '</u>';
             }else{
               clozeAnswerUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</u>';
             }           
@@ -180,20 +175,16 @@ function defaultUnitEngine(curExperimentData) {
       if (probFunctionParameters) {
         console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
-        if (typeof(probFunctionParameters.hintsylls) === 'undefined' ||
-            !this.cachedSyllables ||
-            probFunctionParameters.hintsylls.length == 0) {
+        if (!this.cachedSyllables) {
           console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
           console.log(typeof(probFunctionParameters.hintsylls),
               !this.cachedSyllables,
               (probFunctionParameters.hintsylls || []).length);
         } else {
           const answer = currentStimAnswer.replace(/\./g, '_');
-          const displaySyllableIndices = JSON.parse(JSON.stringify(probFunctionParameters.hintsylls));
           currentAnswerSyllables = {
             count: this.cachedSyllables.data[answer].count,
             syllableArray: this.cachedSyllables.data[answer].syllables,
-            displaySyllableIndices: displaySyllableIndices,
           };
         }
 
