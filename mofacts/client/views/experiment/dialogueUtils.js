@@ -52,21 +52,21 @@ function updateDialogueDisplay(newDisplay) {
   $('#dialogueUserAnswer').val('');
   Session.set('displayReady', true);
   Tracker.afterFlush(function() {
-    console.log('dialogue after flush');
+    // console.log('dialogue after flush');
     $('#dialogueUserAnswer').focus();
   });
 }
 
 function dialogueLoop(err, res) {
-  console.log('dialogue loop');
+  // console.log('dialogue loop');
   stopRecording();
   if (typeof(err) != 'undefined') {
-    console.log('error with dialogue loop, meteor call: ', err);
-    console.log(res);
+    // console.log('error with dialogue loop, meteor call: ', err);
+    // console.log(res);
     dialogueCallbackSaver();
   } else if (res.tag != 0) {
-    console.log('error with dialog loop, dialogue call: ' + res.name);
-    console.log(res);
+    // console.log('error with dialog loop, dialogue call: ' + res.name);
+    // console.log(res);
     dialogueCallbackSaver();
   } else if (res.tag == 0) {
     const result = res.fields[0];
@@ -88,30 +88,30 @@ function dialogueLoop(err, res) {
   }
   Meteor.setTimeout(() => {
     Session.set('enterKeyLock', false);
-    console.log('releasing enterKeyLock in dialogueLoop');
+    // console.log('releasing enterKeyLock in dialogueLoop');
   }, 2000);
 }
 
 function dialogueContinue() {
-  console.log('dialogueContinue');
+  // console.log('dialogueContinue');
   const dialogueLoopStage = Session.get('dialogueLoopStage');
   switch (dialogueLoopStage) {
     case 'intro':
       // Enter dialogue loop
       Session.set('displayReady', false); // This will get flipped back after we update the display inside dialogueLoop
       Session.set('dialogueLoopStage', 'insideLoop');
-      console.log('getDialogFeedbackForAnswer3', dialogueContext);
+      // console.log('getDialogFeedbackForAnswer3', dialogueContext);
       Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       break;
     case 'exit':
       // Exit dialogue loop
-      console.log('dialogue loop finished, restoring state');
+      // console.log('dialogue loop finished, restoring state');
       Session.set('displayReady', false);
       Session.set('dialogueLoopStage', undefined);
       // restore session state
       Session.set('currentDisplay', dialogueCurrentDisplaySaver);
       Session.set('closeQuestionParts', closeQuestionPartsSaver);
-      console.log('finished, exiting dialogue loop');
+      // console.log('finished, exiting dialogue loop');
       dialogueContext.UserPrompts = JSON.parse(JSON.stringify(dialogueUserPrompts));
       dialogueContext.UserAnswers = JSON.parse(JSON.stringify(dialogueUserAnswers));
       dialogueUserPrompts = [];
@@ -121,7 +121,7 @@ function dialogueContinue() {
     // eslint-disable-next-line no-fallthrough
     default:
       Session.set('enterKeyLock', false);
-      console.log('releasing enterKeyLock in dialogueContinue');
+      // console.log('releasing enterKeyLock in dialogueContinue');
   }
 }
 
@@ -131,20 +131,20 @@ function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
 
   Meteor.call('initializeTutorialDialogue', clozeAnswer, incorrectUserAnswer, clozeItem, (err, res)=>{
     if (err) {
-      console.log('ERROR initializing tutorial dialogue:', err);
+      // console.log('ERROR initializing tutorial dialogue:', err);
     } else {
-      console.log('initializeTutorialDialogue,res:', res);
+      // console.log('initializeTutorialDialogue,res:', res);
       if (res.tag != 0) {
-        console.log('cache miss, showing normal feedback:');
+        // console.log('cache miss, showing normal feedback:');
         Session.set('dialogueHistory', res);
-        console.log('dialogueHistory', Session.get('dialogueHistory'));
+        // console.log('dialogueHistory', Session.get('dialogueHistory'));
         Session.set('dialogueLoopStage', undefined);
         Tracker.afterFlush(()=>$('#userAnswer').val(incorrectUserAnswer));
         lookupFailCallback();
       } else {
         dialogueContext = res.fields[0];
         if (!dialogueContext) {
-          console.log('ERROR getting context during dialogue initialization');
+          // console.log('ERROR getting context during dialogue initialization');
         } else {
           closeQuestionPartsSaver = Session.get('clozeQuestionParts');
           Session.set('clozeQuestionParts', undefined);

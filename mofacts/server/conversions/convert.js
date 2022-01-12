@@ -105,7 +105,7 @@ function getNewItemFormat(stimFile, stimulusFilename, stimuliSetId, responseKCMa
       };
 
       if (stimulusFilename.indexOf('test') != -1) {
-        console.log('stim:', JSON.stringify(stim), item, stim.display, stim.display.text);
+        // console.log('stim:', JSON.stringify(stim), item, stim.display, stim.display.text);
       }
 
       items.push(item);

@@ -44,16 +44,16 @@ Template.userProfileEdit.events({
 
     Meteor.call('saveUserProfileData', data, function(error, serverReturn) {
       $('#profileWorkModal').modal('hide');
-      console.log(serverReturn);
+      // console.log(serverReturn);
 
       if (error) {
-        console.log('Error saving user profile', error);
+        // console.log('Error saving user profile', error);
         alert('Your changes were not saved! ' + error);
       } else if (!serverReturn || !serverReturn.result) {
-        console.log('Server failure while saving profile', serverReturn);
+        // console.log('Server failure while saving profile', serverReturn);
         alert('Your changes were not saved! The server said: ' + JSON.stringify(serverReturn, null, 2));
       } else {
-        console.log('Profile saved:', serverReturn);
+        // console.log('Profile saved:', serverReturn);
         // Clear any controls that shouldn't be kept around
         $('.clearOnSave').val('');
         alert('Your profile changes have been saved: save details follow\n\n' + JSON.stringify(serverReturn, null, 2));

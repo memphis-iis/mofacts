@@ -50,7 +50,7 @@ function leavePage(dest) {
 // call every 1000ms (1 second)
 const logLockout = _.throttle(
     function(lockoutminutes) {
-      console.log('LOCKOUT:', lockoutminutes, 'min');
+      // console.log('LOCKOUT:', lockoutminutes, 'min');
     },
     250,
 );
@@ -67,7 +67,7 @@ function lockoutKick() {
   const doDisplay = (display.minSecs > 0 || display.maxSecs > 0);
   const doLockout = (!lockoutInterval && currLockOutMinutes() > 0);
   if (doDisplay || doLockout) {
-    console.log('interval kicked');
+    // console.log('interval kicked');
     startLockoutInterval();
   }
 }
@@ -150,9 +150,9 @@ function lockoutPeriodicCheck() {
         Meteor.call('turkScheduleLockoutMessage', experimentId, lockoutFreeTime + 1, subject, turkemail,
             function(error) {
               if (typeof error !== 'undefined') {
-                console.log('Server schedule failed. Error:', error);
+                // console.log('Server schedule failed. Error:', error);
               } else {
-                console.log('Server accepted lockout msg schedule', lockoutFreeTime + 1, turkemail);
+                // console.log('Server accepted lockout msg schedule', lockoutFreeTime + 1, turkemail);
               }
             });
       };
@@ -266,13 +266,13 @@ function instructContinue() {
     };
 
     const res = await updateExperimentState(newExperimentState, 'instructions.instructContinue');
-    console.log('instructions,new experiment state:', newExperimentState);
-    console.log('instructContinue', res);
+    // console.log('instructions,new experiment state:', newExperimentState);
+    // console.log('instructContinue', res);
     Session.set('inResume', true);
     leavePage('/card');
     Session.set('fromInstructions', true);
     Session.set('enterKeyLock', false);
-    console.log('releasing enterKeyLock in instructContinue');
+    // console.log('releasing enterKeyLock in instructContinue');
   }, 1);
 }
 

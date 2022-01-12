@@ -66,12 +66,12 @@ Template.signUp.events({
           // This means that we have an issue of some kind - but there's
           // nothing that we can do? We'll just fall thru for now since
           // we don't have a good way to fix this
-          console.log('ERROR: The user was not logged in on account creation?', formUsername);
+          // console.log('ERROR: The user was not logged in on account creation?', formUsername);
           alert('It appears that you couldn\'t be logged in as ' + formUsername);
         } else {
           if (Session.get('debugging')) {
             const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-            console.log(currentUser + ' was logged in successfully!');
+            // console.log(currentUser + ' was logged in successfully!');
             Meteor.call('debugLog', 'Sign in was successful');
             Accounts.config({
               loginExpirationInDays: 0.5

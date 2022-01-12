@@ -160,7 +160,7 @@ function clearCardTimeout() {
         clearFunc(clearParm);
       }
     } catch (e) {
-      console.log('Error clearing meteor timeout/interval', e);
+      // console.log('Error clearing meteor timeout/interval', e);
     }
   };
   safeClear(Meteor.clearTimeout, timeoutName);
@@ -176,36 +176,36 @@ function clearCardTimeout() {
 // Start a timeout count
 // Note we reverse the params for Meteor.setTimeout - makes calling code much cleaner
 function beginMainCardTimeout(delay, func) {
-  console.log('beginMainCardTimeout', func);
+  // console.log('beginMainCardTimeout', func);
   clearCardTimeout();
 
   timeoutFunc = function() {
     const numRemainingLocks = Session.get('pausedLocks');
     if (numRemainingLocks > 0) {
-      console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
+      // console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
     } else {
       if (document.location.pathname != '/card') {
         leavePage(function() {
-          console.log('cleaning up page after nav away from card');
+          // console.log('cleaning up page after nav away from card');
         });
       } else if (typeof func === 'function') {
         func();
       } else {
-        console.log('function!!!: ' + JSON.stringify(func));
+        // console.log('function!!!: ' + JSON.stringify(func));
       }
     }
   };
   timeoutDelay = delay;
   const mainCardTimeoutStart = new Date();
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  console.log('mainCardTimeoutStart', mainCardTimeoutStart);
+  // console.log('mainCardTimeoutStart', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(timeoutFunc, timeoutDelay);
   varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
 
 // Reset the previously set timeout counter
 function resetMainCardTimeout() {
-  console.log('RESETTING MAIN CARD TIMEOUT');
+  // console.log('RESETTING MAIN CARD TIMEOUT');
   const savedFunc = timeoutFunc;
   const savedDelay = timeoutDelay;
   clearCardTimeout();
@@ -213,7 +213,7 @@ function resetMainCardTimeout() {
   timeoutDelay = savedDelay;
   const mainCardTimeoutStart = new Date();
   Session.set('mainCardTimeoutStart', mainCardTimeoutStart);
-  console.log('reset, mainCardTimeoutStart:', mainCardTimeoutStart);
+  // console.log('reset, mainCardTimeoutStart:', mainCardTimeoutStart);
   timeoutName = Meteor.setTimeout(savedFunc, savedDelay);
   varLenTimeoutName = Meteor.setInterval(varLenDisplayTimeout, 400);
 }
@@ -221,7 +221,7 @@ function resetMainCardTimeout() {
 // TODO: there is a minor bug here related to not being able to truly pause on
 // re-entering a tdf for the first trial
 function restartMainCardTimeoutIfNecessary() {
-  console.log('restartMainCardTimeoutIfNecessary');
+  // console.log('restartMainCardTimeoutIfNecessary');
   const mainCardTimeoutStart = Session.get('mainCardTimeoutStart');
   if (!mainCardTimeoutStart) {
     const numRemainingLocks = Session.get('pausedLocks')-1;
@@ -241,7 +241,7 @@ function restartMainCardTimeoutIfNecessary() {
     if (numRemainingLocks <= 0) {
       if (timeoutFunc) timeoutFunc();
     } else {
-      console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
+      // console.log('timeout reached but there are ' + numRemainingLocks + ' locks outstanding');
     }
   }
   timeoutName = Meteor.setTimeout(wrappedTimeout, remainingDelay);
@@ -266,9 +266,9 @@ function checkSimulation() {
 
   // If we we are here, then we should set a timeout to sim a correct answer
   const correct = Math.random() <= simCorrectProb;
-  console.log('SIM: will simulate response with correct=', correct, 'in', simTimeout);
+  // console.log('SIM: will simulate response with correct=', correct, 'in', simTimeout);
   simTimeoutName = Meteor.setTimeout(function() {
-    console.log('SIM: Fired!');
+    // console.log('SIM: Fired!');
     simTimeoutName = null;
     handleUserInput({}, 'simulation', correct);
   }, simTimeout);
@@ -339,17 +339,17 @@ function varLenDisplayTimeout() {
 
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
-  console.log('leaving page for dest: ' + dest);
+  // console.log('leaving page for dest: ' + dest);
   if (dest != '/card' && dest != '/instructions' && dest != '/voice') {
-    console.log('resetting subtdfindex, dest: ' + dest);
+    // console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
     if (window.AudioContext) {
-      console.log('closing audio context');
+      // console.log('closing audio context');
       stopRecording();
       clearAudioContextAndRelatedVariables();
     } else {
-      console.log('NOT closing audio context');
+      // console.log('NOT closing audio context');
     }
   }
   clearCardTimeout();
@@ -362,7 +362,7 @@ function leavePage(dest) {
 }
 
 Template.card.rendered = async function() {
-  console.log('RENDERED----------------------------------------------');
+  // console.log('RENDERED----------------------------------------------');
   // Catch page navigation events (like pressing back button) so we can call our cleanup method
   window.onpopstate = function() {
     if (document.location.pathname == '/card') {
@@ -463,7 +463,7 @@ Template.card.events({
         const answer = JSON.parse(JSON.stringify(_.trim($('#dialogueUserAnswer').val()).toLowerCase()));
         $('#dialogueUserAnswer').val('');
         const dialogueContext = DialogueUtils.updateDialogueState(answer);
-        console.log('getDialogFeedbackForAnswer', dialogueContext);
+        // console.log('getDialogFeedbackForAnswer', dialogueContext);
         Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
       }
     }
@@ -563,7 +563,7 @@ Template.card.helpers({
 
   'username': function() {
     if (!haveMeteorUser()) {
-      console.log('!haveMeteorUser');
+      // console.log('!haveMeteorUser');
       leavePage(routeToSignin);
     } else {
       return Meteor.user().username;
@@ -571,7 +571,7 @@ Template.card.helpers({
   },
 
   'subWordClozeCurrentQuestionExists': function() {
-    console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
+    // console.log('subWordClozeCurrentQuestionExists: ' + (typeof(Session.get('clozeQuestionParts')) != 'undefined'));
     return typeof(Session.get('clozeQuestionParts')) != 'undefined' && Session.get('clozeQuestionParts') !== null;
   },
 
@@ -770,7 +770,7 @@ function pollMediaDevices() {
   navigator.mediaDevices.enumerateDevices().then(function(devices) {
     if (selectedInputDevice != null) {
       if (devices.filter((x) => x.deviceId == selectedInputDevice).length == 0) {
-        console.log('input device lost!!!');
+        // console.log('input device lost!!!');
         reinitializeMediaDueToDeviceChange();
       }
     }
@@ -809,7 +809,7 @@ function initializeAudio() {
   try {
     // Older browsers might not implement mediaDevices at all, so we set an empty object first
     if (navigator.mediaDevices === undefined) {
-      console.log('media devices undefined');
+      // console.log('media devices undefined');
       navigator.mediaDevices = {};
     }
 
@@ -838,16 +838,16 @@ function initializeAudio() {
     navigator.mediaDevices.getUserMedia({audio: true, video: false})
         .then(startUserMedia)
         .catch(function(err) {
-          console.log('Error getting user media: ' + err.name + ': ' + err.message);
+          // console.log('Error getting user media: ' + err.name + ': ' + err.message);
         });
   } catch (e) {
-    console.log('Error initializing Web Audio browser');
+    // console.log('Error initializing Web Audio browser');
   }
 }
 
 function preloadAudioFiles() {
   const allSrcs = getCurrentStimDisplaySources('audioStimulus');
-  console.log('allSrcs,audio', allSrcs);
+  // console.log('allSrcs,audio', allSrcs);
   soundsDict = {};
   for (const source of allSrcs) {
     // eslint-disable-next-line no-undef
@@ -864,7 +864,7 @@ function preloadAudioFiles() {
         if (soundsDict[source]) {
           soundsDict[source].isCurrentlyPlaying = true;
         }
-        console.log('Sound played');
+        // console.log('Sound played');
       })(source),
 
       onend: (function(source) {
@@ -875,7 +875,7 @@ function preloadAudioFiles() {
           if (onEndCallbackDict[source]) {
             onEndCallbackDict[source]();
           }
-          console.log('Sound completed');
+          // console.log('Sound completed');
         };
       })(source),
     });
@@ -884,16 +884,16 @@ function preloadAudioFiles() {
 
 function preloadImages() {
   const curStimImgSrcs = getCurrentStimDisplaySources('imageStimulus');
-  console.log('curStimImgSrcs: ', curStimImgSrcs);
+  // console.log('curStimImgSrcs: ', curStimImgSrcs);
   imagesDict = {};
   let img;
   for (const src of curStimImgSrcs) {
     img = new Image();
     img.src = src;
-    console.log('img:' + img);
+    // console.log('img:' + img);
     imagesDict[src] = img;
   }
-  console.log('imagesDict: ', imagesDict);
+  // console.log('imagesDict: ', imagesDict);
 }
 
 function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
@@ -910,23 +910,23 @@ function getCurrentStimDisplaySources(filterPropertyName='clozeStimulus') {
 function preloadStimuliFiles() {
   // Pre-load sounds to be played into soundsDict to avoid audio lag issues
   if (curStimHasSoundDisplayType()) {
-    console.log('Sound type questions detected, pre-loading sounds');
+    // console.log('Sound type questions detected, pre-loading sounds');
     preloadAudioFiles();
   } else {
-    console.log('Non sound type detected');
+    // console.log('Non sound type detected');
   }
   if (curStimHasImageDisplayType()) {
-    console.log('image type questions detected, pre-loading images');
+    // console.log('image type questions detected, pre-loading images');
     preloadImages();
   } else {
-    console.log('Non image type detected');
+    // console.log('Non image type detected');
   }
 }
 
 function checkUserAudioConfigCompatability(){
   const audioPromptMode = Session.get('audioPromptMode');
   if (curStimHasImageDisplayType() && ((audioPromptMode == 'all' || audioPromptMode == 'question'))) {
-    console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
+    // console.log('PANIC: Unable to process TTS for image response', Session.get('currentRootTdfId'));
     alert('Question reading not supported on this TDF. Please disable and try again.');
     leavePage('/profile');
   }
@@ -966,17 +966,17 @@ function setUpButtonTrial() {
   if (buttonOptions) {
     buttonChoices = buttonOptions.split(',');
     correctButtonPopulated = true;
-    console.log('buttonChoices==buttonOptions', buttonChoices);
+    // console.log('buttonChoices==buttonOptions', buttonChoices);
   } else {
     const currentFalseResponses = getCurrentFalseResponses();
     for (const falseResponse of currentFalseResponses) {
       buttonChoices.push(falseResponse);
       correctButtonPopulated = false;
     }
-    console.log('buttonChoices==falseresponses and correct answer', buttonChoices);
+    // console.log('buttonChoices==falseresponses and correct answer', buttonChoices);
   }
   if (correctButtonPopulated == null) {
-    console.log('No correct button');
+    // console.log('No correct button');
     throw new Error('Bad TDF/Stim file - no buttonOptions and no false responses');
   }
 
@@ -1034,7 +1034,7 @@ function setUpButtonTrial() {
 function getCurrentFalseResponses() {
   const {curClusterIndex, curStimIndex} = getCurrentClusterAndStimIndices();
   const cluster = getStimCluster(curClusterIndex);
-  console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, cluster);
+  // console.log('getCurrentFalseResponses', curClusterIndex, curStimIndex, cluster);
 
   if (typeof(cluster) == 'undefined' || !cluster.stims || cluster.stims.length == 0 ||
     typeof(cluster.stims[curStimIndex].incorrectResponses) == 'undefined') {
@@ -1048,16 +1048,16 @@ function getCurrentClusterAndStimIndices() {
   let curClusterIndex = null;
   let curStimIndex = null;
 
-  console.log('getCurrentClusterAndStimIndices: ' + !engine);
+  // console.log('getCurrentClusterAndStimIndices: ' + !engine);
 
   if (!engine) {
-    console.log('getCurrentClusterAndStimIndices, no engine: ' + Session.get('clusterIndex'));
+    // console.log('getCurrentClusterAndStimIndices, no engine: ' + Session.get('clusterIndex'));
     curClusterIndex = Session.get('clusterIndex');
   } else {
     const currentQuest = engine.findCurrentCardInfo();
     curClusterIndex = currentQuest.clusterIndex;
     curStimIndex = currentQuest.whichStim;
-    console.log('getCurrentClusterAndStimIndices, engine: ', currentQuest);
+    // console.log('getCurrentClusterAndStimIndices, engine: ', currentQuest);
   }
 
   return {curClusterIndex, curStimIndex};
@@ -1081,7 +1081,7 @@ function playCurrentSound(onEndCallback) {
   clearPlayingSound();
 
   const currentAudioSrc = Session.get('currentDisplay').audioSrc;
-  console.log('currentAudioSrc: ' + currentAudioSrc);
+  // console.log('currentAudioSrc: ' + currentAudioSrc);
 
   // Reset sound and play it
   currentSound = soundsDict[currentAudioSrc];
@@ -1096,14 +1096,14 @@ function playCurrentSound(onEndCallback) {
 function handleUserForceCorrectInput(e, source) {
   const key = e.keyCode || e.which;
   if (key == ENTER_KEY || source === 'voice') {
-    console.log('handleUserForceCorrectInput');
+    // console.log('handleUserForceCorrectInput');
     $('#userForceCorrect').prop('disabled', true);
     stopRecording();
-    console.log('userForceCorrect, enter key');
+    // console.log('userForceCorrect, enter key');
     // Enter key - see if gave us the correct answer
     const entry = _.trim($('#userForceCorrect').val()).toLowerCase();
     if (getTestType() === 'n') {
-      console.log('force correct n type test');
+      // console.log('force correct n type test');
       if (entry.length < 4) {
         const oldPrompt = $('#forceCorrectGuidance').text();
         $('#userForceCorrect').prop('disabled', false);
@@ -1115,16 +1115,16 @@ function handleUserForceCorrectInput(e, source) {
         savedFunc();
       }
     } else {
-      console.log('force correct non n type test');
+      // console.log('force correct non n type test');
       const answer = Answers.getDisplayAnswerText(Session.get('currentAnswer')).toLowerCase();
       const originalAnswer = Answers.getDisplayAnswerText(Session.get('originalAnswer')).toLowerCase();
       if (entry === answer || entry === originalAnswer) {
-        console.log('force correct, correct answer');
+        // console.log('force correct, correct answer');
         const afterUserFeedbackForceCorrectCbHolder = afterUserFeedbackForceCorrectCb;
         afterUserFeedbackForceCorrectCb = undefined;
         afterUserFeedbackForceCorrectCbHolder();
       } else {
-        console.log('force correct, wrong answer');
+        // console.log('force correct, wrong answer');
         $('#userForceCorrect').prop('disabled', false);
         $('#userForceCorrect').val('');
         $('#forceCorrectGuidance').text('Incorrect - please enter \'' + answer + '\'');
@@ -1133,7 +1133,7 @@ function handleUserForceCorrectInput(e, source) {
       }
     }
   } else if (getTestType() === 'n') {
-    console.log('not enter key and test type n, resetting main card timeout');
+    // console.log('not enter key and test type n, resetting main card timeout');
     // "Normal" keypress - reset the timeout period
     resetMainCardTimeout();
   }
@@ -1313,7 +1313,7 @@ async function writeCurrentToScrollList(userAnswer, isTimeout, simCorrect, justA
       'userCorrect': isCorrect,
     }, function(err) {
       if (err) {
-        console.log('ERROR inserting scroll list member:', displayify(err));
+        // console.log('ERROR inserting scroll list member:', displayify(err));
       }
       Session.set('scrollListCount', currCount + 1);
     });
@@ -1384,7 +1384,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
 }
 
 async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackCbBound) {
-  console.log('showUserFeedback');
+  // console.log('showUserFeedback');
   userFeedbackStart = Date.now();
   const isButtonTrial = getButtonTrial();
   // For button trials with images where they get the answer wrong, assume incorrect feedback is an image path
@@ -1411,7 +1411,7 @@ async function showUserFeedback(isCorrect, feedbackMessage, afterAnswerFeedbackC
   // we need to replay the sound, after the optional audio feedback delay time 
   if (!!(Session.get('currentDisplay').audioSrc) && !isCorrect && !Session.get('currentDeliveryParams').allowuserdelayaudioplayback) {
     setTimeout(function() {
-      console.log('playing sound after timeuntilaudiofeedback', new Date());
+      // console.log('playing sound after timeuntilaudiofeedback', new Date());
       playCurrentSound();
     }, Session.get('currentDeliveryParams').timeuntilaudiofeedback);
   }
@@ -1518,17 +1518,17 @@ async function writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTi
   if(isSelfPaced){
     answerLogRecord.CF_Self_Paced_Posttrial = Session.get('selfPacePosttrialLatency');
   }
-  console.log('writing answerLogRecord to history:', answerLogRecord);
+  // console.log('writing answerLogRecord to history:', answerLogRecord);
   if(Meteor.user().profile === undefined || !Meteor.user().profile.impersonating){
     try {
       await meteorCallAsync('insertHistory', answerLogRecord);
       await updateExperimentState(newExperimentState, 'card.afterAnswerFeedbackCallback');
     } catch (e) {
-      console.log('error writing history record:', e);
+      // console.log('error writing history record:', e);
       throw new Error('error inserting history/updating state:', e);
     }
   } else {
-    console.log('no history saved. impersonation mode.');
+    // console.log('no history saved. impersonation mode.');
   }
 
   // Special: count the number of timeouts in a row. If autostopTimeoutThreshold
@@ -1545,7 +1545,7 @@ async function writeLogDataToHistory(trialEndTimeStamp, source, userAnswer, isTi
     const threshold = deliveryParams.autostopTimeoutThreshold;
 
     if (threshold > 0 && timeoutsSeen >= threshold) {
-      console.log('Hit timeout threshold', threshold, 'Quitting');
+      // console.log('Hit timeout threshold', threshold, 'Quitting');
       leavePage('/profile');
       return; // We are totally done
     }
@@ -1602,7 +1602,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   if (firstKeypressTimestamp != 0) {
     responseDuration = trialEndTimeStamp - firstKeypressTimestamp;
   }
-  console.log('gatherAnswerLogRecord', trialEndTimeStamp, firstKeypressTimestamp, responseDuration);
+  // console.log('gatherAnswerLogRecord', trialEndTimeStamp, firstKeypressTimestamp, responseDuration);
 
   const firstActionTimestamp = firstKeypressTimestamp || trialEndTimeStamp;
   let startLatency = firstActionTimestamp - trialStartTimestamp;
@@ -1859,11 +1859,11 @@ async function unitIsFinished(reason) {
   let leaveTarget;
   if (newUnitNum < curTdf.tdfs.tutor.unit.length) {
     // Just hit a new unit - we need to restart with instructions
-    console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
+    // console.log('UNIT FINISHED: show instructions for next unit', newUnitNum);
     leaveTarget = '/instructions';
   } else {
     // We have run out of units - return home for now
-    console.log('UNIT FINISHED: No More Units');
+    // console.log('UNIT FINISHED: No More Units');
     leaveTarget = '/profile';
   }
 
@@ -1884,7 +1884,7 @@ async function unitIsFinished(reason) {
     // nothing for now
   }
   const res = await updateExperimentState(newExperimentState, 'card.unitIsFinished');
-  console.log('unitIsFinished,updateExperimentState', res);
+  // console.log('unitIsFinished,updateExperimentState', res);
   leavePage(leaveTarget);  
 }
 
@@ -1922,7 +1922,7 @@ async function cardStart() {
     Session.set('buttonTrial', false);
     Session.set('buttonList', []);
 
-    console.log('cards template rendered => Performing resume');
+    // console.log('cards template rendered => Performing resume');
     Session.set('showOverlearningText', false);
 
     Session.set('inResume', false); // Turn this off to keep from re-resuming
@@ -1944,7 +1944,7 @@ async function prepareCard(reviewTimeout, cb) {
     Session.set('displayReady', false);
     Session.set('currentDisplay', {});
     Session.set('clozeQuestionParts', undefined);
-    console.log('displayReadyFalse, prepareCard');
+    // console.log('displayReadyFalse, prepareCard');
     if (engine.unitFinished()) {
       unitIsFinished('Unit Engine');
     } else {
@@ -1957,14 +1957,14 @@ async function prepareCard(reviewTimeout, cb) {
 
 // TODO: this probably no longer needs to be separate from prepareCard
 async function newQuestionHandler() {
-  console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
+  // console.log('newQuestionHandler - Secs since unit start:', elapsedSecs());
 
   scrollList.update(
       {'justAdded': 1},
       {'$set': {'justAdded': 0}},
       {'multi': true},
       function(err, numrecs) {
-        if (err) console.log('UDPATE ERROR:', displayify(err));
+        if (err) // console.log('UDPATE ERROR:', displayify(err));
       },
   );
 
@@ -1972,7 +1972,7 @@ async function newQuestionHandler() {
   speechTranscriptionTimeoutsSeen = 0;
   const isButtonTrial = getButtonTrial();
   Session.set('buttonTrial', isButtonTrial);
-  console.log('newQuestionHandler, isButtonTrial', isButtonTrial);
+  // console.log('newQuestionHandler, isButtonTrial', isButtonTrial);
 
   if (isButtonTrial) {
     $('#textEntryRow').hide();
@@ -2015,7 +2015,7 @@ function startQuestionTimeout() {
   if (!deliveryParams) {
     throw new Error('No delivery params');
   }
-  console.log('startQuestionTimeout deliveryParams', deliveryParams);
+  // console.log('startQuestionTimeout deliveryParams', deliveryParams);
 
   let delayMs = 0;
   if (getTestType() === 's' || getTestType() === 'f') { // Study
@@ -2032,13 +2032,13 @@ function startQuestionTimeout() {
   const currentDisplayEngine = Session.get('currentDisplayEngine');
   const closeQuestionParts = Session.get('clozeQuestionParts');
 
-  console.log('startQuestionTimeout, closeQuestionParts', closeQuestionParts);
+  // console.log('startQuestionTimeout, closeQuestionParts', closeQuestionParts);
 
   Session.set('displayReady', false);
   Session.set('clozeQuestionParts', undefined);
-  console.log('++++ CURRENT DISPLAY ++++');
-  console.log(currentDisplayEngine);
-  console.log('-------------------------');
+  // console.log('++++ CURRENT DISPLAY ++++');
+  // console.log(currentDisplayEngine);
+  // console.log('-------------------------');
 
   const beginQuestionAndInitiateUserInputBound = beginQuestionAndInitiateUserInput.bind(null, delayMs, deliveryParams);
   const pipeline = checkAndDisplayTwoPartQuestion.bind(null,
@@ -2047,25 +2047,25 @@ function startQuestionTimeout() {
 }
 
 function checkAndDisplayPrestimulus(deliveryParams, nextStageCb) {
-  console.log('checking for prestimulus display');
+  // console.log('checking for prestimulus display');
   // we'll [0], if it exists
   const prestimulusDisplay = Session.get('currentTdfFile').tdfs.tutor.setspec.prestimulusDisplay;
-  console.log('prestimulusDisplay:', prestimulusDisplay);
+  // console.log('prestimulusDisplay:', prestimulusDisplay);
 
   if (prestimulusDisplay) {
     const prestimulusDisplayWrapper = {'text': prestimulusDisplay};
-    console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
+    // console.log('prestimulusDisplay detected, displaying', prestimulusDisplayWrapper);
     Session.set('currentDisplay', prestimulusDisplayWrapper);
     Session.set('clozeQuestionParts', undefined);
     Session.set('displayReady', true);
     const prestimulusdisplaytime = deliveryParams.prestimulusdisplaytime;
-    console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
+    // console.log('delaying for ' + prestimulusdisplaytime + ' ms then starting question', new Date());
     setTimeout(function() {
-      console.log('past prestimulusdisplaytime, start two part question logic');
+      // console.log('past prestimulusdisplaytime, start two part question logic');
       nextStageCb();
     }, prestimulusdisplaytime);
   } else {
-    console.log('no prestimulusDisplay detected, continuing to next stage');
+    // console.log('no prestimulusDisplay detected, continuing to next stage');
     nextStageCb();
   }
 }
@@ -2077,33 +2077,33 @@ function checkAndDisplayTwoPartQuestion(deliveryParams, currentDisplayEngine, cl
   Session.set('clozeQuestionParts', closeQuestionParts);
   Session.set('displayReady', true);
 
-  console.log('checking for two part questions');
+  // console.log('checking for two part questions');
   // Handle two part questions
   const currentQuestionPart2 = Session.get('currentQuestionPart2');
   if (currentQuestionPart2) {
-    console.log('two part question detected, displaying first part');
+    // console.log('two part question detected, displaying first part');
     const twoPartQuestionWrapper = {'text': currentQuestionPart2};
     const initialviewTimeDelay = deliveryParams.initialview;
-    console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
+    // console.log('two part question detected, delaying for ' + initialviewTimeDelay + ' ms then continuing');
     setTimeout(function() {
-      console.log('after timeout, displaying question part two', new Date());
+      // console.log('after timeout, displaying question part two', new Date());
       Session.set('displayReady', false);
       Session.set('currentDisplay', twoPartQuestionWrapper);
       Session.set('clozeQuestionParts', undefined);
       Session.set('displayReady', true);
-      console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
+      // console.log('displayReadyTrue, checkAndDisplayTwoPartQuestion');
       Session.set('currentQuestionPart2', undefined);
       redoCardImage();
       nextStageCb();
     }, initialviewTimeDelay);
   } else {
-    console.log('one part question detected, continuing with question');
+    // console.log('one part question detected, continuing with question');
     nextStageCb();
   }
 }
 
 function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
-  console.log('beginQuestionAndInitiateUserInput');
+  // console.log('beginQuestionAndInitiateUserInput');
   firstKeypressTimestamp = 0;
   trialStartTimestamp = Date.now();
   const currentDisplay = Session.get('currentDisplay');
@@ -2111,12 +2111,12 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
   if (currentDisplay.audioSrc) {
     const timeuntilaudio = deliveryParams.timeuntilaudio;
     setTimeout(function() {
-      console.log('playing audio: ', new Date());
+      // console.log('playing audio: ', new Date());
       // We don't allow user input until the sound is finished playing
       playCurrentSound(function() {
         allowUserInput();
         beginMainCardTimeout(delayMs, function() {
-          console.log('stopping input after ' + delayMs + ' ms');
+          // console.log('stopping input after ' + delayMs + ' ms');
           stopUserInput();
           handleUserInput({}, 'timeout');
         });
@@ -2126,7 +2126,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     const questionToSpeak = currentDisplay.clozeText || currentDisplay.text;
     // Only speak the prompt if the question type makes sense
     if (questionToSpeak) {
-      console.log('text to speak playing prompt: ', new Date());
+      // console.log('text to speak playing prompt: ', new Date());
       let buttons = Session.get('buttonList');
       let buttonsToSpeak = '';
       if(buttons){
@@ -2138,7 +2138,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
     }
     allowUserInput();
     beginMainCardTimeout(delayMs, function() {
-      console.log('stopping input after ' + delayMs + ' ms');
+      // console.log('stopping input after ' + delayMs + ' ms');
       stopUserInput();
       handleUserInput({}, 'timeout');
     });
@@ -2146,7 +2146,7 @@ function beginQuestionAndInitiateUserInput(delayMs, deliveryParams) {
 }
 
 function allowUserInput() {
-  console.log('allow user input');
+  // console.log('allow user input');
   inputDisabled = false;
   startRecording();
 
@@ -2183,7 +2183,7 @@ function scrollElementIntoView(selector, scrollType) {
       } else {
         $(selector).get(0).scrollIntoView(scrollType ? true : false);
       }
-      console.log('Scrolled for', selector, scrollType);
+      // console.log('Scrolled for', selector, scrollType);
     });
   }, 1);
 }
@@ -2194,13 +2194,13 @@ function scrollElementIntoView(selector, scrollType) {
 // loads before it and stopUserInput is erroneously executed afterwards due to timing issues
 let inputDisabled = undefined;
 function stopUserInput() {
-  console.log('stop user input');
+  // console.log('stop user input');
   inputDisabled = true;
   stopRecording();
 
   // Need a delay here so we can wait for the DOM to load before manipulating it
   setTimeout(function() {
-    console.log('after delay, stopping user input');
+    // console.log('after delay, stopping user input');
     $('#continueStudy, #userAnswer, #multipleChoiceContainer button').prop('disabled', true);
   }, 200);
 }
@@ -2236,16 +2236,16 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
             Session.set('recordingLocked', false);
             startRecording();
           });
-          console.log('inside callback, playing audioObj:');
+          // console.log('inside callback, playing audioObj:');
           audioObj.play();
         });
-        console.log('providing audio feedback');
+        // console.log('providing audio feedback');
       } else {
-        console.log('Text-to-Speech API key not found');
+        // console.log('Text-to-Speech API key not found');
       }
     }
   } else {
-    console.log('audio feedback disabled');
+    // console.log('audio feedback disabled');
   }
 }
 
@@ -2264,7 +2264,7 @@ function makeGoogleTTSApiCall(message, ttsAPIKey, audioPromptSpeakingRate, audio
 
   HTTP.call('POST', ttsURL, {'data': request}, function(err, response) {
     if (err) {
-      console.log('err: ', err);
+      // console.log('err: ', err);
     } else {
       const audioDataEncoded = response.data.audioContent;
       const audioData = decodeBase64AudioContent(audioDataEncoded);
@@ -2279,7 +2279,7 @@ async function processLINEAR16(data) {
   if (resetMainCardTimeout && timeoutFunc && !inputDisabled) {
     resetMainCardTimeout(); // Give ourselves a bit more time for the speech api to return results
   } else {
-    console.log('not resetting during processLINEAR16');
+    // console.log('not resetting during processLINEAR16');
   }
   recorder.clear();
   const userAnswer = $('#forceCorrectionEntry').is(':visible') ?
@@ -2292,7 +2292,7 @@ async function processLINEAR16(data) {
     const setSpec = Session.get('currentTdfFile').tdfs.tutor.setspec;
     let speechRecognitionLanguage = setSpec.speechRecognitionLanguage;
     if (!speechRecognitionLanguage) {
-      console.log('no speechRecognitionLanguage in set spec, defaulting to en-US');
+      // console.log('no speechRecognitionLanguage in set spec, defaulting to en-US');
       speechRecognitionLanguage = 'en-US';
     } else {
       speechRecognitionLanguage = speechRecognitionLanguage[0];
@@ -2330,16 +2330,16 @@ async function processLINEAR16(data) {
     const tdfSpeechAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.speechAPIKey;
     // Make the actual call to the google speech api with the audio data for transcription
     if (tdfSpeechAPIKey && tdfSpeechAPIKey != '') {
-      console.log('tdf key detected');
+      // console.log('tdf key detected');
       makeGoogleSpeechAPICall(request, tdfSpeechAPIKey, answerGrammar);
     // If we don't have a tdf provided speech api key load up the user key
     // NOTE: we shouldn't be able to get here if there is no user key
     } else {
-      console.log('no tdf key, using user provided key');
+      // console.log('no tdf key, using user provided key');
       makeGoogleSpeechAPICall(request, Session.get('speechAPIKey'), answerGrammar);
     }
   } else {
-    console.log('processLINEAR16 userAnswer not defined');
+    // console.log('processLINEAR16 userAnswer not defined');
   }
 }
 
@@ -2362,7 +2362,7 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
     },
   };
 
-  console.log('Request:' + _.pick(request, 'config'));
+  // console.log('Request:' + _.pick(request, 'config'));
 
   return request;
 }
@@ -2370,7 +2370,7 @@ function generateRequestJSON(sampleRate, speechRecognitionLanguage, phraseHints,
 function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
   const speechURL = 'https://speech.googleapis.com/v1/speech:recognize?key=' + speechAPIKey;
   HTTP.call('POST', speechURL, {'data': request}, function(err, response) {
-    console.log(response);
+    // console.log(response);
     let transcript = '';
     const ignoreOutOfGrammarResponses = Session.get('ignoreOutOfGrammarResponses');
     const speechOutOfGrammarFeedback = 'Please try again or press enter or say skip';
@@ -2386,18 +2386,18 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
       ignoredOrSilent = true;
     } else if (response['data']['results']) {
       transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
-      console.log('transcript: ' + transcript);
+      // console.log('transcript: ' + transcript);
       if (ignoreOutOfGrammarResponses) {
         if (transcript == 'skip') {
           ignoredOrSilent = false;
         } else if (answerGrammar.indexOf(transcript) == -1) { // Answer not in grammar, ignore and reset/re-record
-          console.log('ANSWER OUT OF GRAMMAR, IGNORING');
+          // console.log('ANSWER OUT OF GRAMMAR, IGNORING');
           transcript = speechOutOfGrammarFeedback;
           ignoredOrSilent = true;
         }
       }
     } else {
-      console.log('NO TRANSCRIPT/SILENCE');
+      // console.log('NO TRANSCRIPT/SILENCE');
       transcript = 'Silence detected';
       ignoredOrSilent = true;
     }
@@ -2405,23 +2405,23 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
     const inUserForceCorrect = $('#forceCorrectionEntry').is(':visible');
     let userAnswer;
     if (getButtonTrial()) {
-      console.log('button trial, setting user answer to verbalChoice');
+      // console.log('button trial, setting user answer to verbalChoice');
       userAnswer = $('[verbalChoice=\'' + transcript + '\']')[0];
       if (!userAnswer) {
-        console.log('Choice couldn\'t be found');
+        // console.log('Choice couldn\'t be found');
         ignoredOrSilent = true;
       }
     } else if (DialogueUtils.isUserInDialogueLoop()) {
       if (DialogueUtils.isUserInDialogueIntroExit()) {
         speechTranscriptionTimeoutsSeen = 0;
       } else {
-        console.log('dialogue loop -> transcribe to dialogue user answer');
+        // console.log('dialogue loop -> transcribe to dialogue user answer');
         DialogueUtils.setDialogueUserAnswerValue(transcript);
       }
     } else {
       userAnswer = inUserForceCorrect ? document.getElementById('userForceCorrect') :
           document.getElementById('userAnswer');
-      console.log('regular trial, transcribing user response to user answer box');
+      // console.log('regular trial, transcribing user response to user answer box');
       userAnswer.value = transcript;
     }
 
@@ -2429,7 +2429,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
       ignoredOrSilent = false; // Force out of a silence loop if we've tried enough
       const transcriptionMsg = ' transcription attempts which is over autostopTranscriptionAttemptLimit, \
           forcing incorrect answer to move things along.';
-      console.log(speechTranscriptionTimeoutsSeen + transcriptionMsg);
+      // console.log(speechTranscriptionTimeoutsSeen + transcriptionMsg);
       // Dummy up some data so we don't fail downstream
       if (getButtonTrial()) {
         userAnswer = {'answer': {'name': 'a'}};
@@ -2461,7 +2461,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
         } else {
           const answer = DialogueUtils.getDialogueUserAnswerValue();
           const dialogueContext = DialogueUtils.updateDialogueState(answer);
-          console.log('getDialogFeedbackForAnswer2', dialogueContext);
+          // console.log('getDialogFeedbackForAnswer2', dialogueContext);
           Meteor.call('getDialogFeedbackForAnswer', dialogueContext, dialogueLoop);
         }
       } else {
@@ -2488,7 +2488,7 @@ function startUserMedia(stream) {
   const tracks = stream.getTracks();
   selectedInputDevice = tracks[0].getSettings().deviceId;
   pollMediaDevicesInterval = Meteor.setInterval(pollMediaDevices, 2000);
-  console.log('START USER MEDIA');
+  // console.log('START USER MEDIA');
   const input = audioContext.createMediaStreamSource(stream);
   streamSource = input;
   // Firefox hack https://support.mozilla.org/en-US/questions/984179
@@ -2496,7 +2496,7 @@ function startUserMedia(stream) {
   // Capture the sampling rate for later use in google speech api as input
   Session.set('sampleRate', input.context.sampleRate);
   const audioRecorderConfig = {errorCallback: function(x) {
-    console.log('Error from recorder: ' + x);
+    // console.log('Error from recorder: ' + x);
   }};
   // eslint-disable-next-line no-undef
   recorder = new Recorder(input, audioRecorderConfig);
@@ -2517,7 +2517,7 @@ function startUserMedia(stream) {
       // This will hopefully only be fired once while we're still on the voice.html interstitial,
       // once VAD.js loads we should navigate back to card to start the practice set
       if (!Session.get('VADInitialized')) {
-        console.log('VAD previously not initialized, now initialized');
+        // console.log('VAD previously not initialized, now initialized');
         Session.set('VADInitialized', true);
         $('#voiceDetected').value = 'Voice detected, refreshing now...';
         Session.set('inResume', true);
@@ -2530,15 +2530,15 @@ function startUserMedia(stream) {
       } else if (!Session.get('recording') || Session.get('pausedLocks')>0) {
         if (document.location.pathname != '/card' && document.location.pathname != '/instructions') {
           leavePage(function() {
-            console.log('cleaning up page after nav away from card, voice_stop');
+            // console.log('cleaning up page after nav away from card, voice_stop');
           });
           return;
         } else {
-          console.log('NOT RECORDING, VOICE STOP');
+          // console.log('NOT RECORDING, VOICE STOP');
           return;
         }
       } else {
-        console.log('VOICE STOP');
+        // console.log('VOICE STOP');
         recorder.stop();
         Session.set('recording', false);
         recorder.exportToProcessCallback();
@@ -2546,19 +2546,19 @@ function startUserMedia(stream) {
     },
     voice_start: function() {
       if (!Session.get('recording')) {
-        console.log('NOT RECORDING, VOICE START');
+        // console.log('NOT RECORDING, VOICE START');
         return;
       } else {
-        console.log('VOICE START');
+        // console.log('VOICE START');
         if (resetMainCardTimeout && timeoutFunc) {
           if (Session.get('recording')) {
-            console.log('voice_start resetMainCardTimeout');
+            // console.log('voice_start resetMainCardTimeout');
             resetMainCardTimeout();
           } else {
-            console.log('NOT RECORDING');
+            // console.log('NOT RECORDING');
           }
         } else {
-          console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
+          // console.log('RESETMAINCARDTIMEOUT NOT DEFINED');
         }
       }
     },
@@ -2566,7 +2566,7 @@ function startUserMedia(stream) {
   const vad = new VAD(options);
   Session.set('VADInitialized', false);
 
-  console.log('Audio recorder ready');
+  // console.log('Audio recorder ready');
 
   // Navigate to the voice interstitial which gives VAD.js time to load so we're
   // ready to transcribe when we finally come back to the practice set
@@ -2577,20 +2577,20 @@ function startRecording() {
   if (recorder && !Session.get('recordingLocked')) {
     Session.set('recording', true);
     recorder.record();
-    console.log('RECORDING START');
+    // console.log('RECORDING START');
   } else {
-    console.log('NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
+    // console.log('NO RECORDER / RECORDING LOCKED DURING AUDIO PLAYING');
   }
 }
 
 function stopRecording() {
-  console.log('stopRecording', recorder, Session.get('recording'));
+  // console.log('stopRecording', recorder, Session.get('recording'));
   if (recorder && Session.get('recording')) {
     recorder.stop();
     Session.set('recording', false);
 
     recorder.clear();
-    console.log('RECORDING END');
+    // console.log('RECORDING END');
   }
 }
 
@@ -2600,7 +2600,7 @@ async function getExperimentState() {
   const curExperimentState = await meteorCallAsync('getExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'));
   const sessExpState = Session.get('currentExperimentState');
-  console.log('getExperimentState:', curExperimentState, sessExpState);
+  // console.log('getExperimentState:', curExperimentState, sessExpState);
   Meteor.call('updatePerformanceData', 'utlQuery', 'card.getExperimentState', Meteor.userId());
   Session.set('currentExperimentState', curExperimentState);
   return curExperimentState || {};
@@ -2608,7 +2608,7 @@ async function getExperimentState() {
 
 async function updateExperimentState(newState, codeCallLocation) {
   const test = Session.get('currentExperimentState');
-  console.log('currentExperimentState:', test);
+  // console.log('currentExperimentState:', test);
   if (!Session.get('currentExperimentState')) {
     Session.set('currentExperimentState', {});
   }
@@ -2617,7 +2617,7 @@ async function updateExperimentState(newState, codeCallLocation) {
   const res = await meteorCallAsync('setExperimentState',
       Meteor.userId(), Session.get('currentRootTdfId'), newExperimentState, 'card.updateExperimentState');
   Session.set('currentExperimentState', newExperimentState);
-  console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
+  // console.log('updateExperimentState', codeCallLocation, 'old:', oldExperimentState, '\nnew:', newExperimentState);
   return res;
 }
 
@@ -2630,12 +2630,12 @@ async function updateExperimentState(newState, codeCallLocation) {
 // before continuing to resume the session
 async function resumeFromComponentState() {
   if (Session.get('inResume')) {
-    console.log('RESUME DENIED - already running in resume');
+    // console.log('RESUME DENIED - already running in resume');
     return;
   }
   Session.set('inResume', true);
 
-  console.log('Resuming from previous componentState info (if any)');
+  // console.log('Resuming from previous componentState info (if any)');
 
   // Clear any previous permutation and/or timeout call
   timeoutsSeen = 0;
@@ -2656,7 +2656,7 @@ async function resumeFromComponentState() {
   const rootTDFBoxed = await meteorCallAsync('getTdfById', Session.get('currentRootTdfId'));
   const rootTDF = rootTDFBoxed.content;
   if (!rootTDF) {
-    console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
+    // console.log('PANIC: Unable to load the root TDF for learning', Session.get('currentRootTdfId'));
     alert('Unfortunately, something is broken and this lesson cannot continue');
     leavePage('/profile');
     return;
@@ -2669,26 +2669,26 @@ async function resumeFromComponentState() {
 
   // We must always check for experiment condition
   if (needExpCondition) {
-    console.log('Experimental condition is required: searching');
+    // console.log('Experimental condition is required: searching');
     const prevCondition = experimentState.conditionTdfId;
 
     let conditionTdfId = null;
 
     if (prevCondition) {
       // Use previous condition and log a notification that we did so
-      console.log('Found previous experimental condition: using that');
+      // console.log('Found previous experimental condition: using that');
       conditionTdfId = prevCondition;
     } else {
       // Select condition and save it
-      console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
+      // console.log('No previous experimental condition: Selecting from ' + setspec.condition.length);
       conditionTdfId = await meteorCallAsync("getTdfIdByStimSetIdAndFileName", Session.get('currentStimuliSetId'), _.sample(setspec.condition));// Transform from tdffilename to tdfid
       newExperimentState.conditionTdfId = conditionTdfId;
       newExperimentState.conditionNote = 'Selected from ' + _.display(setspec.condition.length) + ' conditions';
-      console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
+      // console.log('Exp Condition', conditionTdfId, newExperimentState.conditionNote);
     }
 
     if (!conditionTdfId) {
-      console.log('No experimental condition could be selected!');
+      // console.log('No experimental condition could be selected!');
       alert('Unfortunately, something is broken and this lesson cannot continue');
       leavePage('/profile');
       return;
@@ -2704,7 +2704,7 @@ async function resumeFromComponentState() {
     // Also need to read new stimulus file (and note that we allow an exception
     // to kill us if the current tdf is broken and has no stimulus file)
     Session.set('currentStimuliSetId', curTdf.stimuliSetId);
-    console.log('condition stimuliSetId', curTdf);
+    // console.log('condition stimuliSetId', curTdf);
   } else {
     Session.set('currentTdfFile', rootTDF);
     Session.set('currentTdfName', rootTDF.fileName);
@@ -2712,7 +2712,7 @@ async function resumeFromComponentState() {
     Session.set('currentStimuliSetId', rootTDFBoxed.stimuliSetId);
 
     // Just notify that we're skipping
-    console.log('No Experimental condition is required: continuing', rootTDFBoxed);
+    // console.log('No Experimental condition is required: continuing', rootTDFBoxed);
   }
 
   const stimuliSetId = Session.get('currentStimuliSetId');
@@ -2729,24 +2729,24 @@ async function resumeFromComponentState() {
   // that the xcond parameter used for selecting from multiple deliveryParms's
   // is to be system assigned (as opposed to URL-specified)
   if (setspec.randomizedDelivery && setspec.randomizedDelivery.length) {
-    console.log('xcond for delivery params is sys assigned: searching');
+    // console.log('xcond for delivery params is sys assigned: searching');
     const prevExperimentXCond = experimentState.experimentXCond;
 
     let experimentXCond;
 
     if (prevExperimentXCond) {
       // Found it!
-      console.log('Found previous xcond for delivery');
+      // console.log('Found previous xcond for delivery');
       experimentXCond = prevExperimentXCond;
     } else {
       // Not present - we need to select one
-      console.log('NO previous xcond for delivery - selecting one');
+      // console.log('NO previous xcond for delivery - selecting one');
       const xcondCount = _.intval(_.first(setspec.randomizedDelivery));
       experimentXCond = Math.floor(Math.random() * xcondCount);
       newExperimentState.experimentXCond = experimentXCond;
     }
 
-    console.log('Setting XCond from sys-selection', experimentXCond);
+    // console.log('Setting XCond from sys-selection', experimentXCond);
     Session.set('experimentXCond', experimentXCond);
   }
 
@@ -2766,8 +2766,8 @@ async function resumeFromComponentState() {
     const shuffles = setSpec.shuffleclusters ? setSpec.shuffleclusters.trim().split(" ") : [''];
     const swaps = setSpec.swapclusters ? setSpec.swapclusters.trim().split(" ") : [''];
     clusterMapping = [];
-    console.log('shuffles.length', shuffles.length);
-    console.log('swaps.length', swaps.length);
+    // console.log('shuffles.length', shuffles.length);
+    // console.log('swaps.length', swaps.length);
 
     while (shuffles.length > 0 || swaps.length > 0) {
       clusterMapping = createStimClusterMapping(
@@ -2776,17 +2776,17 @@ async function resumeFromComponentState() {
           swaps.shift() || '',
           clusterMapping,
       );
-      console.log('while', clusterMapping);
+      // console.log('while', clusterMapping);
     }
     newExperimentState.clusterMapping = clusterMapping;
-    console.log('Cluster mapping created', clusterMapping);
+    // console.log('Cluster mapping created', clusterMapping);
   } else {
     // Found the cluster mapping record - extract the embedded mapping
-    console.log('Cluster mapping found', clusterMapping);
+    // console.log('Cluster mapping found', clusterMapping);
   }
 
   if (!clusterMapping || !clusterMapping.length || clusterMapping.length !== stimCount) {
-    console.log('Invalid cluster mapping', stimCount, clusterMapping);
+    // console.log('Invalid cluster mapping', stimCount, clusterMapping);
     throw new Error('The cluster mapping is invalid - can not continue');
   }
   // Go ahead and save the cluster mapping we found/created
@@ -2802,7 +2802,7 @@ async function resumeFromComponentState() {
 
   const curTdfUnit = Session.get('currentTdfFile').tdfs.tutor.unit[Session.get('currentUnitNumber')];
   Session.set('currentTdfUnit', curTdfUnit);
-  console.log('resume, currentTdfUnit:', curTdfUnit);
+  // console.log('resume, currentTdfUnit:', curTdfUnit);
 
   if (experimentState.questionIndex) {
     Session.set('questionIndex', experimentState.questionIndex);
@@ -2836,13 +2836,13 @@ async function getFeedbackParameters(){
 async function checkSyllableCacheForCurrentStimFile(cb) {
   const currentStimuliSetId = Session.get('currentStimuliSetId');
   cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-  console.log('cachedSyllables start: ', cachedSyllables);
+  // console.log('cachedSyllables start: ', cachedSyllables);
   if (!cachedSyllables) {
-    console.log('no cached syllables for this stim, calling server method to create them');
+    // console.log('no cached syllables for this stim, calling server method to create them');
     const curAnswers = getAllCurrentStimAnswers();
     Meteor.call('updateStimSyllableCache', currentStimuliSetId, curAnswers, function() {
       cachedSyllables = StimSyllables.findOne({filename: currentStimuliSetId});
-      console.log('new cachedSyllables: ', cachedSyllables);
+      // console.log('new cachedSyllables: ', cachedSyllables);
       cb();
     });
   } else {
@@ -2878,7 +2878,7 @@ async function processUserTimesLog() {
   const experimentState = Session.get('currentExperimentState');
   // Get TDF info
   const tdfFile = Session.get('currentTdfFile');
-  console.log('tdfFile', tdfFile);
+  // console.log('tdfFile', tdfFile);
 
   Session.set('overallOutcomeHistory', experimentState.overallOutcomeHistory || []);
 
@@ -2966,7 +2966,7 @@ async function processUserTimesLog() {
 
   if (moduleCompleted) {
     // They are DONE!
-    console.log('TDF already completed - leaving for profile page.');
+    // console.log('TDF already completed - leaving for profile page.');
     if (Session.get('loginMode') === 'experiment') {
       // Experiment users don't *have* a normal page
       leavePage(routeToSignin);
@@ -2999,11 +2999,11 @@ async function processUserTimesLog() {
 
     if (needFirstUnitInstructions && typeof curTdfUnit.unitinstructions !== 'undefined') {
       // They haven't seen our first instruction yet
-      console.log('RESUME FINISHED: displaying initial instructions');
+      // console.log('RESUME FINISHED: displaying initial instructions');
       leavePage('/instructions');
     } else if (resumeToQuestion) {
       // Question outstanding: force question display and let them give an answer
-      console.log('RESUME FINISHED: displaying current question');
+      // console.log('RESUME FINISHED: displaying current question');
       await newQuestionHandler();
     } else {
       // If we get this far and the unit engine thinks the unit is finished,
@@ -3015,13 +3015,13 @@ async function processUserTimesLog() {
           const unitStartTimestamp = Session.get('currentUnitStartTime');
           const lockoutFreeTime = unitStartTimestamp + (lockoutMins * (60 * 1000)); // minutes to ms
           if (Date.now() < lockoutFreeTime && (typeof curTdfUnit.unitinstructions !== 'undefined')) {
-            console.log('RESUME FINISHED: showing lockout instructions');
+            // console.log('RESUME FINISHED: showing lockout instructions');
             leavePage('/instructions');
             return;
           }
         }
       }
-      console.log('RESUME FINISHED: next-question logic to commence');
+      // console.log('RESUME FINISHED: next-question logic to commence');
       await prepareCard(0);
     }
   }

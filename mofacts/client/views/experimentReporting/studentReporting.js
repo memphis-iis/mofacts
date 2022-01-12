@@ -85,26 +85,26 @@ Template.studentReporting.helpers({
 
 Template.studentReporting.rendered = async function() {
   window.onpopstate = function(event) {
-    console.log('window popstate student reporting');
+    // console.log('window popstate student reporting');
     if (document.location.pathname == '/studentReporting' && Session.get('loginMode') === 'southwest') {
       Router.go('/profileSouthwest');
     } else {
       Router.go('/profile');
     }
   };
-  console.log('studentReporting rendered!!!');
+  // console.log('studentReporting rendered!!!');
 
   const studentUsername = Session.get('studentUsername') || Meteor.user().username;
   const studentID = Session.get('curStudentID') || Meteor.userId();
-  console.log('student,', studentUsername, studentID);
+  // console.log('student,', studentUsername, studentID);
 
   const tdfsAttempted = await meteorCallAsync('getTdfIDsAndDisplaysAttemptedByUserId', studentID);
   Session.set('studentReportingTdfs', tdfsAttempted);
-  console.log('studentReportingTdfs', tdfsAttempted);
+  // console.log('studentReportingTdfs', tdfsAttempted);
 
   // let dataAlreadyInCache = false;
   if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
-    console.log('admin/teacher');
+    // console.log('admin/teacher');
   } else {
     Session.set('curStudentID', studentID);
     Session.set('studentUsername', studentUsername);
@@ -127,18 +127,18 @@ Template.studentReporting.events({
 });
 
 async function updateDashboard(selectedTdfId){
-  console.log('change tdf select', selectedTdfId);
+  // console.log('change tdf select', selectedTdfId);
   if (selectedTdfId!==INVALID) {
     $(`#tdf-select option[value='${INVALID}']`).prop('disabled', true);
     $(`#select option[value='${INVALID}']`).prop('disabled', true);
     const studentID = Session.get('curStudentID') || Meteor.userId();
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
-    console.log("studentData loaded...",studentData);
+    // console.log("studentData loaded...",studentData);
     const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0");
 
-    console.log('studentData', studentData);
-    console.log('curStudentGraphData',curStudentGraphData);
+    // console.log('studentData', studentData);
+    // console.log('curStudentGraphData',curStudentGraphData);
     
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
     drawDashboard(curStudentGraphData, studentData);
@@ -154,7 +154,7 @@ async function drawDashboard(curStudentGraphData, studentData){
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration} = curStudentGraphData;
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-  console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
+  // console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
   percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
   // Perform calculated data
   const stimsSeenProbabilties = [];
@@ -179,18 +179,18 @@ async function drawDashboard(curStudentGraphData, studentData){
   dashClusterCanvases = document.getElementsByClassName('dashCanvas');
     Array.prototype.forEach.call(dashClusterCanvases, function(element){
       if(element.classList.contains('gauge')){
-        console.log(element);
+        // console.log(element);
         let gaugeMeter = new progressGauge(element,"gauge",0,100);
         dashCluster.push(gaugeMeter);
       } else {
-        console.log(element);
+        // console.log(element);
         let gaugeMeter = new progressGauge(element,"donut",0,100);
         dashCluster.push(gaugeMeter);
       }
 
     });
     //Populate Dashboard values
-    console.log('Testing dashCluster:',dashCluster);
+    // console.log('Testing dashCluster:',dashCluster);
     dashCluster[0].set(percentStimsSeen);
     dashCluster[1].set(percentCorrect);
     dashCluster[2].set(stimsSeenPredictedProbability);
@@ -199,8 +199,8 @@ async function drawDashboard(curStudentGraphData, studentData){
   }
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
     if(target != undefined){
-      console.log('gauge canvas found and loaded.')
-      console.log('gaugeType',gaugeType);
+      // console.log('gauge canvas found and loaded.')
+      // console.log('gaugeType',gaugeType);
       if(gaugeType == "gauge"){ gauge = new Gauge(target).setOptions(options);} 
       if(gaugeType == "donut"){ gauge = new Donut(target).setOptions(defaultDonutOptions);}
       gauge.maxValue = maxValue; // set max gauge value
@@ -209,7 +209,7 @@ function progressGauge(target, gaugeType, currentValue,maxValue,options = defaul
       gauge.setTextField(document.getElementById("preview-textfield"));
       return gauge;
   } else {
-      console.log('canvas not found in DOM call.')
+      // console.log('canvas not found in DOM call.')
   }
  
 }

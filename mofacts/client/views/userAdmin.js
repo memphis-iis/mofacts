@@ -63,10 +63,10 @@ Template.userAdmin.events({
     const userId = _.trim(btnTarget.data('userid'));
     const roleAction = _.trim(btnTarget.data('roleaction'));
     const roleName = _.trim(btnTarget.data('rolename'));
-    console.log('Action requested:', roleAction, 'to', roleName, 'for', userId);
+    // console.log('Action requested:', roleAction, 'to', roleName, 'for', userId);
 
     if (!userId || !roleAction || !roleName) {
-      console.log('Invalid parameters found!');
+      // console.log('Invalid parameters found!');
       return;
     }
 
@@ -81,7 +81,7 @@ Template.userAdmin.events({
       } else {
         disp = 'Server returned:' + JSON.stringify(result, null, 2);
       }
-      console.log(disp);
+      // console.log(disp);
       alert(disp);
     });
   },
@@ -101,29 +101,29 @@ function doFileUpload(fileElementSelector, fileDescrip) {
 
   _.each($(fileElementSelector).prop('files'), function(file) {
     count += 1;
-    console.log('file:' + JSON.stringify(file));
+    // console.log('file:' + JSON.stringify(file));
     const name = file.name;
     const fileReader = new FileReader();
 
     fileReader.onload = function() {
-      console.log('Upload attempted for', name);
+      // console.log('Upload attempted for', name);
 
       Meteor.call('saveUsersFile', name, fileReader.result, function(error, result) {
-        console.log('result:' + JSON.stringify(result));
+        // console.log('result:' + JSON.stringify(result));
         if (error) {
-          console.log('Critical failure saving ' + fileDescrip, error);
+          // console.log('Critical failure saving ' + fileDescrip, error);
           alert('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
         } else if (result.length > 0) {
-          console.log(fileDescrip + ' save failed', result);
+          // console.log(fileDescrip + ' save failed', result);
           alert('The ' + fileDescrip + ' file was not saved: ' + JSON.stringify(result));
         } else {
-          console.log(fileDescrip + ' Saved:', result);
+          // console.log(fileDescrip + ' Saved:', result);
           alert('Your ' + fileDescrip + ' file was saved');
           // Now we can clear the selected file
           $(fileElementSelector).val('');
           $(fileElementSelector).parent().find('.file-info').html('');
           const newAllUsers = Meteor.users.find({}, {fields: {username: 1}, sort: [['username', 'asc']]}).fetch();
-          console.log('newAllUsers:', newAllUsers, JSON.parse(JSON.stringify(Session.get('allUsers'))));
+          // console.log('newAllUsers:', newAllUsers, JSON.parse(JSON.stringify(Session.get('allUsers'))));
           Session.set('allUsers', newAllUsers);
         }
       });
@@ -132,5 +132,5 @@ function doFileUpload(fileElementSelector, fileDescrip) {
     fileReader.readAsBinaryString(file);
   });
 
-  console.log(fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+  // console.log(fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
 }

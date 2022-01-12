@@ -42,7 +42,7 @@ function getComponentState(componentState) {
     outcomeStack: componentState.outcomestack.split(',').filter((x) => x!=='').map((x) => parseInt(x)),
   };
   if(componentState.firstseen != outputComponentState.firstSeen.toString()){
-    console.log("orm error? ", componentState, outputComponentState);
+    // console.log("orm error? ", componentState, outputComponentState);
   }
   if (componentState.componenttype==='stimulus') {
     outputComponentState.probabilityEstimate = parseFloat(componentState.probabilityestimate);

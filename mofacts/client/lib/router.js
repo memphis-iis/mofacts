@@ -72,7 +72,7 @@ Session.set('clusterMapping', '');
 
 
 function routeToSignin() {
-  console.log('routeToSignin');
+  // console.log('routeToSignin');
   // If the isExperiment cookie is set we always for experiment mode. This
   // handles an experimental participant refreshing the browser
   const expCookie = _.chain(Cookie.get('isExperiment')).trim().intval().value();
@@ -83,10 +83,10 @@ function routeToSignin() {
   }
 
   const loginMode = Session.get('loginMode');
-  console.log('loginMode: ' + loginMode);
+  // console.log('loginMode: ' + loginMode);
 
   if (loginMode === 'experiment') {
-    console.log('loginMode === experiment');
+    // console.log('loginMode === experiment');
     const routeParts = ['/experiment'];
 
     const target = Session.get('experimentTarget');
@@ -100,13 +100,13 @@ function routeToSignin() {
 
     Router.go(routeParts.join('/'));
   } else if (loginMode === 'southwest') {
-    console.log('southwest login, routing to southwest login');
+    // console.log('southwest login, routing to southwest login');
     Router.go('/signInSouthwest');
   } else if (loginMode === 'password') {
-    console.log('password login');
+    // console.log('password login');
     Router.go('/signIn');
   } else { // Normal login mode
-    console.log('else, signin');
+    // console.log('else, signin');
     Router.go('/');
   }
 }
@@ -130,13 +130,13 @@ Router.route('/experiment/:target?/:xcond?', {
 
     const tdf = await meteorCallAsync('getTdfByExperimentTarget', target);
     if (tdf) {
-      console.log('tdf found');
+      // console.log('tdf found');
       const experimentPasswordRequired = tdf.content.tdfs.tutor.setspec.experimentPasswordRequired ?
           eval(tdf.content.tdfs.tutor.setspec.experimentPasswordRequired) : false;
       Session.set('experimentPasswordRequired', experimentPasswordRequired);
-      console.log('experimentPasswordRequired:' + experimentPasswordRequired);
+      // console.log('experimentPasswordRequired:' + experimentPasswordRequired);
 
-      console.log('EXPERIMENT target:', target, 'xcond', xcond);
+      // console.log('EXPERIMENT target:', target, 'xcond', xcond);
 
       Session.set('clusterMapping', '');
       this.render('signIn');
@@ -169,7 +169,7 @@ const defaultBehaviorRoutes = [
 const getDefaultRouteAction = function(routeName) {
   return function() {
     Session.set('curModule', routeName.toLowerCase());
-    console.log(routeName + ' ROUTE');
+    // console.log(routeName + ' ROUTE');
     this.render(routeName);
   };
 };
@@ -207,14 +207,14 @@ Router.route('/profile', {
         this.subscribe('allUsers').wait();
       }
       const loginMode = Session.get('loginMode');
-      console.log('loginMode: ' + loginMode);
+      // console.log('loginMode: ' + loginMode);
 
       if (loginMode === 'southwest') {
-        console.log('southwest login, routing to southwest profile');
+        // console.log('southwest login, routing to southwest profile');
         Session.set('curModule', 'profileSouthwest');
         this.render('/profileSouthwest');
       } else { // Normal login mode
-        console.log('else, progress');
+        // console.log('else, progress');
         Session.set('curModule', 'profile');
         this.render('profile');
       }
@@ -254,14 +254,14 @@ Router.route('/instructions', {
     // we have instruction logic that needs to have handled and Iron Router
     // doesn't like us setting up async re-routes.
     if (!haveMeteorUser()) {
-      console.log('No one logged in - allowing template to handle');
+      // console.log('No one logged in - allowing template to handle');
     } else {
       const unit = Session.get('currentTdfUnit');
       const txt = unit.unitinstructions ? unit.unitinstructions.trim() : undefined;
       const pic = unit.picture ? unit.picture.trim() : undefined;
       const instructionsq = unit.unitinstructionsquestion ? unit.unitinstructionsquestion.trim() : undefined;
       if (!txt && !pic && !instructionsq) {
-        console.log('Instructions empty: skipping', displayify(unit));
+        // console.log('Instructions empty: skipping', displayify(unit));
         instructContinue();
       }
     }
