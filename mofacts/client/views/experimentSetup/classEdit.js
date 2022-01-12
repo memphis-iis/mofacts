@@ -47,7 +47,7 @@ Template.classEdit.onRendered(async function() {
       classes[courseSection.courseid].sections.push(courseSection.sectionname);
     }
   }
-  console.log('classesFromCourseSections:', classes, courseSections);
+  // console.log('classesFromCourseSections:', classes, courseSections);
 
   Session.set('classes', Object.values(classes));
 });
@@ -58,7 +58,7 @@ Template.classEdit.helpers({
 
 Template.classEdit.events({
   'change #class-select': function(event, template) {
-    console.log('change class-select');
+    // console.log('change class-select');
     const curClassName = $(event.currentTarget).val();
     if (curClassName) {
       classSelectedSetup(curClassName);
@@ -97,7 +97,7 @@ Template.classEdit.events({
       } else {
         alert('Saved class successfully!');
         curClass.courseId = res;
-        console.log('curClass:' + JSON.stringify(curClass));
+        // console.log('curClass:' + JSON.stringify(curClass));
         Session.set('classes', classes);
         // Need a delay here so the reactive session var can update the template
         setTimeout(function() {

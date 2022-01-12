@@ -143,7 +143,7 @@ Template.profileAudioToggles.rendered = function() {
 
 Template.profileAudioToggles.events({
   'click .audioPromptRadio': function(event) {
-    console.log('audio prompt mode: ' + event.currentTarget.id);
+    // console.log('audio prompt mode: ' + event.currentTarget.id);
     const audioPromptMode = getAudioPromptModeFromPage();
 
     const showHeadphonesSuggestedDiv = (audioPromptMode != 'silent') && getAudioInputFromPage();
@@ -156,7 +156,7 @@ Template.profileAudioToggles.events({
   },
 
   'click .audioInputRadio': function(event) {
-    console.log('audio input mode: ' + event.currentTarget.id);
+    // console.log('audio input mode: ' + event.currentTarget.id);
     const audioInputEnabled = getAudioInputFromPage();
 
     const showHeadphonesSuggestedDiv = (getAudioPromptModeFromPage() != 'silent') && audioInputEnabled;
@@ -184,10 +184,10 @@ Template.profileAudioToggles.events({
       $('#speechAPIModal').modal('hide');
 
       if (error) {
-        console.log('Error saving speech api key', error);
+        // console.log('Error saving speech api key', error);
         alert('Your changes were not saved! ' + error);
       } else {
-        console.log('Profile saved:', serverReturn);
+        // console.log('Profile saved:', serverReturn);
         // Clear any controls that shouldn't be kept around
         $('.clearOnSave').val('');
         alert('Your profile changes have been saved');
@@ -202,10 +202,10 @@ Template.profileAudioToggles.events({
       checkAndSetSpeechAPIKeyIsSetup();
       $('#speechAPIModal').modal('hide');
       if (error) {
-        console.log('Error deleting speech api key', error);
+        // console.log('Error deleting speech api key', error);
         alert('Your changes were not saved! ' + error);
       } else {
-        console.log('User speech api key deleted');
+        // console.log('User speech api key deleted');
         alert('Your profile changes have been saved');
       }
     });
@@ -233,7 +233,7 @@ Template.profileAudioToggles.helpers({
 function checkAndSetSpeechAPIKeyIsSetup() {
   Meteor.call('isUserSpeechAPIKeySetup', function(err, data) {
     if (err) {
-      console.log('Error getting whether speech api key is setup');
+      // console.log('Error getting whether speech api key is setup');
     } else {
       Session.set('speechAPIKeyIsSetup', data);
     }

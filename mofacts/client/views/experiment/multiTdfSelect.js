@@ -8,7 +8,7 @@ Template.multiTdfSelect.events({
   // Start a Sub TDF
   'click .subTdfButton': async function(event) {
     event.preventDefault();
-    console.log(event);
+    // console.log(event);
 
     const target = $(event.currentTarget);
     selectSubTdf(
@@ -42,7 +42,7 @@ Template.multiTdfSelect.rendered = function() {
 };
 
 function addSubTdfButton(btnObj) {
-  console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
+  // console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   container = $(container).prepend(btnObj);
@@ -51,7 +51,7 @@ function addSubTdfButton(btnObj) {
 
 // Actual logic for selecting and starting a TDF
 async function selectSubTdf(lessonName, clusterList, subTdfIndex) {
-  console.log('Selected subtdf: ' + lessonName + ' with clusterList: ' + clusterList + ' and subTdfIndex: ' + subTdfIndex);
+  // console.log('Selected subtdf: ' + lessonName + ' with clusterList: ' + clusterList + ' and subTdfIndex: ' + subTdfIndex);
 
   Session.set('subTdfIndex', subTdfIndex);
   const newExperimentState = {

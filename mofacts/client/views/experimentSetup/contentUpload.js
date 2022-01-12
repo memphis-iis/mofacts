@@ -4,14 +4,14 @@ import { getCurrentClusterAndStimIndices } from '../experiment/card';
 const userFiles = new Mongo.Collection(null); // local-only - no database;
 
 async function userFilesRefresh() {
-  console.log('userFilesRefresh');
+  // console.log('userFilesRefresh');
   userFiles.remove({'temp': 1});
 
   let count = 0;
   const userId = Meteor.userId();
   let allTdfs = await meteorCallAsync('getAllTdfs');
   let allStims = await meteorCallAsync('getAllStims');
-  console.log('allTdfs', allTdfs, typeof(allTdfs));
+  // console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
   for (const tdf of Session.get('allTdfs')) {
@@ -107,14 +107,14 @@ Template.contentUpload.events({
   'click #tdf-download-btn': function(event){
     event.preventDefault();
     let unencodedRawData = Session.get('allTdfs')[$("#tdf-download-btn").val() - 1];
-    console.log('downloading tdf id', $("#tdf-download-btn").val() - 1);
+    // console.log('downloading tdf id', $("#tdf-download-btn").val() - 1);
     let splitData = JSON.stringify(unencodedRawData.content,null,2).split('\n');
-    console.log('splitData',splitData);
+    // console.log('splitData',splitData);
     unencodedData = splitData.slice(0,splitData.length - 5).join('\n');
     unencodedData = unencodedData.substr(0, unencodedData.length -1) + "\n}";
-    console.log('unencodedData',unencodedData);
+    // console.log('unencodedData',unencodedData);
     unencodedData = JSON.parse(unencodedData);
-    console.log('unencodedData',unencodedData);
+    // console.log('unencodedData',unencodedData);
     let blob = new Blob([JSON.stringify(unencodedData,null,2)], { type: 'application/json' });
     let url = window.URL.createObjectURL(blob);
     let downloadFileName = unencodedRawData.content.fileName.trim();
@@ -133,7 +133,7 @@ Template.contentUpload.events({
     // Set Filename
     const btnTarget = $(event.currentTarget);
     const fileName = _.trim(btnTarget.data('filename'));
-    console.log('downloading stim', fileName);
+    // console.log('downloading stim', fileName);
     // Get All Items matching filename
     const allStims = await meteorCallAsync('getItemsByFileName',fileName);
     let curCluster = allStims[0].clusterKC;
@@ -208,7 +208,7 @@ Template.contentUpload.events({
 async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
   let count = 0;
   const files = $(fileElementSelector).prop('files');
-  console.log('files:', files);
+  // console.log('files:', files);
   const errorStack = [];
 
   for (const file of files) {
@@ -221,18 +221,18 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
       alert('Please remove the following characters from your filename: < > : " / | ? *');
     } else {
       const fileData = await readFileAsDataURL(file);
-      console.log('Upload attempted for', name);
+      // console.log('Upload attempted for', name);
 
       try {
         const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
         if (!result.result) {
-          console.log(fileDescrip + ' save failed', result);
+          // console.log(fileDescrip + ' save failed', result);
           errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
         } else {
-          console.log(fileDescrip + ' Saved:', result);
+          // console.log(fileDescrip + ' Saved:', result);
         }
       } catch (error) {
-        console.log('Critical failure saving ' + fileDescrip, error);
+        // console.log('Critical failure saving ' + fileDescrip, error);
         errorStack.push('There was a critical failure saving your ' + fileDescrip + ' file:' + error);
       }
     }
@@ -246,7 +246,7 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
   $(fileElementSelector).val('');
   $(fileElementSelector).parent().find('.file-info').html('');
 
-  console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
+  // console.log(fileType, ':', fileDescrip, 'at ele', fileElementSelector, 'scheduled', count, 'uploads');
 }
 
 async function readFileAsDataURL(file) {

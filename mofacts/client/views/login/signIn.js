@@ -4,7 +4,7 @@ import {displayify} from '../../../common/globalHelpers';
 
 Template.signIn.onRendered(function() {
   if (Session.get('loginMode') !== 'experiment') {
-    console.log('password signin, setting login mode');
+    // console.log('password signin, setting login mode');
     Session.set('loginMode', 'password');
   }
 });
@@ -66,7 +66,7 @@ Template.signIn.helpers({
 function signinNotify() {
   if (Session.get('debugging')) {
     const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
-    console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
+    // console.log(currentUser + ' was logged in successfully! Current route is ', Router.current().route.getName());
     Meteor.call('debugLog', 'Sign in was successful');
     Meteor.call('updatePerformanceData', 'login', 'signin.signinNotify', Meteor.userId());
     Meteor.call('logUserAgentAndLoginTime', Meteor.userId(), navigator.userAgent);
@@ -95,10 +95,10 @@ function userPasswordCheck() {
     if (experimentPasswordRequired) {
       sessionCleanUp();
       Session.set('experimentPasswordRequired', true);
-      console.log('username:' + newUsername + ',password:' + newPassword);
+      // console.log('username:' + newUsername + ',password:' + newPassword);
       Meteor.loginWithPassword(newUsername, newPassword, function(error) {
         if (typeof error !== 'undefined') {
-          console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+          // console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
           alert('It appears that you couldn\'t be logged in as ' + newUsername);
           $('#signInButton').prop('disabled', false);
         } else {
@@ -126,7 +126,7 @@ function userPasswordCheck() {
         // If there was a call failure or server returned error message,
         // then we can't proceed
         if (errorMsgs.length > 0) {
-          console.log('Experiment user login errors:', displayify(errorMsgs));
+          // console.log('Experiment user login errors:', displayify(errorMsgs));
           $('#serverErrors')
               .html(errorMsgs.join('<br>'))
               .show();
@@ -141,7 +141,7 @@ function userPasswordCheck() {
 
         Meteor.loginWithPassword(newUsername, newPassword, function(error) {
           if (typeof error !== 'undefined') {
-            console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
+            // console.log('ERROR: The user was not logged in on experiment sign in?', newUsername, 'Error:', error);
             alert('It appears that you couldn\'t be logged in as ' + newUsername);
             $('#signInButton').prop('disabled', false);
           } else {
@@ -161,7 +161,7 @@ function userPasswordCheck() {
   // If we're here, we're NOT in experimental mode
   Meteor.loginWithPassword(newUsername, newPassword, function(error) {
     if (typeof error !== 'undefined') {
-      console.log('Login error: ' + error);
+      // console.log('Login error: ' + error);
       $('#invalidLogin').show();
       $('#serverErrors').html(error).show();
       $('#signInButton').prop('disabled', false);
@@ -171,7 +171,7 @@ function userPasswordCheck() {
         // with a blank password. Currently this is someone who's
         // managed to figure out to use the "normal" login flow. Tell
         // them the "correct" way to use the system.
-        console.log('Detected non-experimental login for turk ID', newUsername);
+        // console.log('Detected non-experimental login for turk ID', newUsername);
         alert('This login page is not for Mechanical Turk workers. Please use the link provided with your HIT');
         $('#signInButton').prop('disabled', false);
         return;

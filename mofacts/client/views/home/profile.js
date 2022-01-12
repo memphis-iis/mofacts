@@ -69,7 +69,7 @@ Template.profile.events({
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
-    console.log(event);
+    // console.log(event);
 
     const target = $(event.currentTarget);
     selectTdf(
@@ -87,7 +87,7 @@ Template.profile.events({
   'click #simulation': function(event, template) {
     const checked = template.$('#simulation').prop('checked');
     Session.set('runSimulation', checked);
-    console.log('runSimulation', Session.get('runSimulation'));
+    // console.log('runSimulation', Session.get('runSimulation'));
   },
 
   'click #mechTurkButton': function(event) {
@@ -204,7 +204,7 @@ function toggleTdfPresence(instance, mode) {
   const dis1 = instance.disabledTdfs.get();
 
 
-  console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
+  // console.log('toggleTdfPresence, mode: ', mode, tdfsToChange, en1, dis1, instance);
 
   Meteor.call('toggleTdfPresence', tdfsToChange, mode, () =>{
     const remainingTdfs = [];
@@ -249,7 +249,7 @@ Template.profile.rendered = async function() {
   sessionCleanUp();
   Session.set('showSpeechAPISetup', true);
   const allTdfs = await meteorCallAsync('getAllTdfs');
-  console.log('allTdfs', allTdfs, typeof(allTdfs));
+  // console.log('allTdfs', allTdfs, typeof(allTdfs));
   Session.set('allTdfs', allTdfs);
 
   $('#expDataDownloadContainer').html('');
@@ -279,7 +279,7 @@ Template.profile.rendered = async function() {
     const setspec = tdfObject.tdfs.tutor.setspec ? tdfObject.tdfs.tutor.setspec : null;
 
     if (!setspec) {
-      console.log('Invalid TDF - it will never work', tdfObject);
+      // console.log('Invalid TDF - it will never work', tdfObject);
       continue;
     }
 
@@ -359,10 +359,10 @@ Template.profile.rendered = async function() {
     const templateInstance = this;
     Meteor.call('getTdfOwnersMap', tdfOwnerIds, function(err, res) {
       if (err) {
-        console.log(err);
+        // console.log(err);
       } else {
         templateInstance.tdfOwnersMap.set(res);
-        console.log(templateInstance.tdfOwnersMap.get());
+        // console.log(templateInstance.tdfOwnersMap.get());
       }
     });
   }
@@ -385,7 +385,7 @@ Template.profile.rendered = async function() {
 // Actual logic for selecting and starting a TDF
 // eslint-disable-next-line max-len
 async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOutOfGrammarResponses, speechOutOfGrammarFeedback, how, isMultiTdf, fromSouthwest) {
-  console.log('Starting Lesson', lessonName, currentTdfId,
+  // console.log('Starting Lesson', lessonName, currentTdfId,
       'currentStimuliSetId:', currentStimuliSetId, 'isMultiTdf:', isMultiTdf);
 
   const audioPromptFeedbackView = Session.get('audioPromptFeedbackView');
@@ -441,13 +441,13 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
     userAgent = _.display(navigator.userAgent);
     prefLang = _.display(navigator.language);
   } catch (err) {
-    console.log('Error getting browser info', err);
+    // console.log('Error getting browser info', err);
   }
 
   // Check to see if the user has turned on audio prompt.
   // If so and if the tdf has it enabled then turn on, otherwise we won't do anything
   const userAudioPromptFeedbackToggled = (audioPromptFeedbackView == 'feedback') || (audioPromptFeedbackView == 'all') || (audioPromptFeedbackView == 'question');
-  console.log(curTdfContent);
+  // console.log(curTdfContent);
   const tdfAudioPromptFeedbackEnabled = !!curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback &&
       curTdfContent.tdfs.tutor.setspec.enableAudioPromptAndFeedback == 'true';
   const audioPromptTTSAPIKeyAvailable = !!curTdfContent.tdfs.tutor.setspec.textToSpeechAPIKey &&
@@ -482,15 +482,15 @@ async function selectTdf(currentTdfId, lessonName, currentStimuliSetId, ignoreOu
       const tdfKeyPresent = !!curTdfContent.tdfs.tutor.setspec.speechAPIKey &&
           !!curTdfContent.tdfs.tutor.setspec.speechAPIKey;
       if (!key && !tdfKeyPresent) {
-        console.log('speech api key not found, showing modal for user to input');
+        // console.log('speech api key not found, showing modal for user to input');
         $('#speechAPIModal').modal('show');
         continueToCard = false;
       } else {
-        console.log('audio input enabled and key present, navigating to card and initializing audio input');
+        // console.log('audio input enabled and key present, navigating to card and initializing audio input');
       }
     });
   } else {
-    console.log('audio toggle not checked, navigating to card');
+    // console.log('audio toggle not checked, navigating to card');
   }
 
   // Go directly to the card session - which will decide whether or

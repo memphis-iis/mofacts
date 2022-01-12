@@ -190,7 +190,7 @@ function displayify(obj) {
       }
     }
   } catch (e) {
-    console.log('Object displayify error', e);
+    // console.log('Object displayify error', e);
   }
 
   return JSON.stringify(dispObj, null, 2);

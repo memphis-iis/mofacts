@@ -75,12 +75,12 @@ function defaultUnitEngine(curExperimentData) {
 
     // Functions we supply
     init: async function() {
-      console.log('Engine created for unit:', this.unitType);
+      // console.log('Engine created for unit:', this.unitType);
       await this.initImpl();
     },
 
     replaceClozeWithSyllables: function(question, currentAnswerSyllables, origAnswer, hintLevel) {
-      console.log('replaceClozeWithSyllables1: ', question, currentAnswerSyllables, origAnswer);
+      // console.log('replaceClozeWithSyllables1: ', question, currentAnswerSyllables, origAnswer);
       if (!question || question.indexOf('_') == -1) {
         return {
           clozeQuestion: undefined,
@@ -134,7 +134,7 @@ function defaultUnitEngine(curExperimentData) {
 
       // Iterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
       for (let i = 0; i < clozeQuestionParts.length; i++) {
-        console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
+        // console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
         if (clozeQuestionParts[i].charAt(0) == '_') {
           let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
           let clozeAnswerUnderscores = ""
@@ -162,14 +162,14 @@ function defaultUnitEngine(curExperimentData) {
 
       const clozeQuestion = question.replace(/([_]+[ ]?)+/, clozeAnswer + ' ');
 
-      console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
+      // console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
       return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts, hintLevel};
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
         currentStimAnswer, probFunctionParameters, hintLevel) {
-      console.log('setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
+      // console.log('setUpCardQuestionSyllables: ', currentQuestion, currentQuestionPart2,
           currentStimAnswer, probFunctionParameters);
       let currentAnswer = currentStimAnswer;
       let clozeQuestionParts = undefined;
@@ -178,14 +178,14 @@ function defaultUnitEngine(curExperimentData) {
 
       // For now this distinguishes model engine from schedule engine, which doesn't do syllable replacement
       if (probFunctionParameters) {
-        console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
+        // console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
         let currentHintLevel = parseInt(probFunctionParameters.hintLevel);
         if (typeof(probFunctionParameters.hintsylls) === 'undefined' ||
             !this.cachedSyllables ||
             probFunctionParameters.hintsylls.length == 0) {
-          console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
-          console.log(typeof(probFunctionParameters.hintsylls),
+          // console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
+          // console.log(typeof(probFunctionParameters.hintsylls),
               !this.cachedSyllables,
               (probFunctionParameters.hintsylls || []).length);
         } else {
@@ -205,7 +205,7 @@ function defaultUnitEngine(curExperimentData) {
             currentQuestion = clozeQuestion;
             currentAnswer = clozeMissingSyllables;
             clozeQuestionParts = cQuestionParts;
-            console.log('clozeQuestionParts:', cQuestionParts);
+            // console.log('clozeQuestionParts:', cQuestionParts);
             const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
                 this.replaceClozeWithSyllables( currentQuestionPart2, currentAnswerSyllables, currentStimAnswer, hintLevel);
             if (clozeQuestion2) {
@@ -227,7 +227,7 @@ function defaultUnitEngine(curExperimentData) {
         }
       }
 
-      console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
+      // console.log('setUpCardQuestionSyllables:', currentQuestion, currentQuestionPart2,
           currentAnswerSyllables, clozeQuestionParts, currentAnswer);
       return {currentQuestionPostSylls: currentQuestion, currentQuestionPart2PostSylls: currentQuestionPart2,
         currentAnswerSyllables, clozeQuestionParts, currentAnswer, hintLevel};
@@ -237,7 +237,7 @@ function defaultUnitEngine(curExperimentData) {
       const newExperimentState = {};
       Session.set('alternateDisplayIndex', undefined);
       const cluster = getStimCluster(cardIndex);
-      console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
+      // console.log('setUpCardQuestionAndAnswerGlobals', cardIndex, whichStim, probFunctionParameters,
           cluster, cluster.stims[whichStim]);
       const curStim = cluster.stims[whichStim];
       let currentDisplay = JSON.parse(JSON.stringify({
@@ -299,9 +299,9 @@ function defaultUnitEngine(curExperimentData) {
       } = this.setUpCardQuestionSyllables(currentQuestion, currentQuestionPart2, currentStimAnswer,
           probFunctionParameters, whichHintLevel);
       
-      console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);  
-      console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
-      console.log('setUpCardQuestionAndAnswerGlobals3:', currentAnswerSyllables, clozeQuestionParts, currentAnswer);
+      // console.log('HintLevel: setUpCardQuestionAndAnswerGlobals',whichHintLevel);  
+      // console.log('setUpCardQuestionAndAnswerGlobals2:', currentQuestionPostSylls, currentQuestionPart2PostSylls);
+      // console.log('setUpCardQuestionAndAnswerGlobals3:', currentAnswerSyllables, clozeQuestionParts, currentAnswer);
 
       if (currentAnswerSyllables) {
         curStim.answerSyllables = currentAnswerSyllables;
@@ -333,7 +333,7 @@ function defaultUnitEngine(curExperimentData) {
   };
   engine.experimentState = curExperimentData.experimentState;
   engine.cachedSyllables = curExperimentData.cachedSyllables;
-  console.log('curExperimentData:', curExperimentData);
+  // console.log('curExperimentData:', curExperimentData);
   return engine;
 }
 
@@ -378,7 +378,7 @@ function emptyUnitEngine() {
 
 // TODO: pass in all session variables possible
 function modelUnitEngine() {
-  console.log('model unit engine created!!!');
+  // console.log('model unit engine created!!!');
   // Checked against practice seconds. Notice that we capture this on unit
   // creation, so if they leave in the middle of practice and come back to
   // the unit we'll start all over.
@@ -400,7 +400,7 @@ function modelUnitEngine() {
     currentCardInfo.clusterIndex = clusterIndex;
     currentCardInfo.whichStim = whichStim;
     currentCardInfo.probabilityEstimate = cardProbabilities.cards[clusterIndex].stims[whichStim].probabilityEstimate;
-    console.log('MODEL UNIT card selection => ',
+    // console.log('MODEL UNIT card selection => ',
         'cluster-idx:', clusterIndex,
         'whichStim:', whichStim,
         'parameter', getStimParameterArray(clusterIndex, whichStim),
@@ -472,7 +472,7 @@ function modelUnitEngine() {
   if (unit.learningsession) 
     probFunction = unit.learningsession.calculateProbability ? unit.learningsession.calculateProbability.trim() : undefined;
   const probFunctionHasHintSylls = typeof(probFunction) == 'undefined' ? false : probFunction.indexOf('hintsylls') > -1;
-  console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
+  // console.log('probFunctionHasHintSylls: ' + probFunctionHasHintSylls, typeof(probFunction));
   if (probFunction) {
     probFunction = new Function('p', '\'use strict\';\n' + probFunction); // jshint ignore:line
   } else {
@@ -480,7 +480,7 @@ function modelUnitEngine() {
   }
 
   function findMinProbCardAndHintLevel(cards, hiddenItems) {
-    console.log('findMinProbCard');
+    // console.log('findMinProbCard');
     let currentMin = 1.00001;
     let currentHintLevelMin = 1.00001;
     let clusterIndex=-1;
@@ -532,7 +532,7 @@ function modelUnitEngine() {
   }
 
   function findMaxProbCardAndHintLevel(cards, ceiling, hiddenItems) {
-    console.log('findMaxProbCardAndHintLevel');
+    // console.log('findMaxProbCardAndHintLevel');
     let currentMax = 0;
     let currentHintLevelMax = 0;
     let clusterIndex=-1;
@@ -565,7 +565,7 @@ function modelUnitEngine() {
   }
 
   function findMinProbDistCard(cards, hiddenItems) {
-    console.log('findMinProbDistCard');
+    // console.log('findMinProbDistCard');
     let currentMin = 50.0;
     let currentHintLevelMin = 50.0;
     let clusterIndex=-1;
@@ -582,7 +582,7 @@ function modelUnitEngine() {
           const parameters = stim.parameter;
           let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
-            // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            // // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
           }
           const dist = Math.abs(Math.log(stim.probabilityEstimate/(1-stim.probabilityEstimate)) - optimalProb);
@@ -606,7 +606,7 @@ function modelUnitEngine() {
   }
 
   function findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems) {
-    console.log('findMaxProbCardThresholdCeilingPerCard');
+    // console.log('findMaxProbCardThresholdCeilingPerCard');
     let currentMax = 0;
     let clusterIndex=-1;
     let stimIndex=-1;
@@ -622,7 +622,7 @@ function modelUnitEngine() {
           const parameters = stim.parameter;
           let thresholdCeiling=parameters[1];
           if (!thresholdCeiling) {
-            //  console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
+            //  // console.log("NO THRESHOLD CEILING SPECIFIED IN STIM, DEFAULTING TO 0.90");
             thresholdCeiling = 0.90;
           }
           if (stim.probabilityEstimate > currentMax && stim.probabilityEstimate < thresholdCeiling) {
@@ -698,11 +698,11 @@ function modelUnitEngine() {
           //Detect Hint Levels
           if (probFunctionHasHintSylls) {
             if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
-              console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is 1.');
+              // console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is 1.');
             } else {
               const stimSyllableData = this.cachedSyllables.data[answerText];
               hintLevelIndex = stimSyllableData.count;
-              console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
+              // console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
             }
           }
           const parms = this.calculateSingleProb(i, j, 0, count);
@@ -717,14 +717,14 @@ function modelUnitEngine() {
             hintLevelProbabilities.push(hintLevelParms.probability);
           }  
           stim.hintLevelProbabilites = hintLevelProbabilities;
-          console.log('hintLevel probabilities', hintLevelProbabilities);
+          // console.log('hintLevel probabilities', hintLevelProbabilities);
           stim.probFunctionParameters = parms;
           stim.probabilityEstimate = parms.probability;
           ptemp[count]=Math.round(100*parms.probability)/100;
           count++;           
         }
       }
-      console.log('calculateCardProbabilities', JSON.stringify(ptemp));
+      // console.log('calculateCardProbabilities', JSON.stringify(ptemp));
       console.log('debug strings:', tdfDebugLog);
     },
 
@@ -775,7 +775,7 @@ function modelUnitEngine() {
 
       if (probFunctionHasHintSylls) {
         if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
-          console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText);
+          // console.log('no cached syllables for: ' + currentStimuliSetId + '|' + answerText);
           throw new Error('can\'t find syllable data in database');
         } else {
           const stimSyllableData = this.cachedSyllables.data[answerText];
@@ -804,7 +804,7 @@ function modelUnitEngine() {
       p.overallOutcomeHistory = Session.get('overallOutcomeHistory');
 
       if (p.i<15) {
-        console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
+        // console.log('cardProbability parameters:', JSON.parse(JSON.stringify(p)));
       }
       return probFunction(p);
     },
@@ -824,7 +824,7 @@ function modelUnitEngine() {
         if (curUnitNumber == 2) {
           const subTdfIndex = Session.get('subTdfIndex');
           if (typeof(subTdfIndex) == 'undefined') {
-            console.log('assuming we are in studentReporting, therefore ignoring the clusterlists'); // TODO, make this an explicit argument and error when it happens if we don't pass in the argument
+            // console.log('assuming we are in studentReporting, therefore ignoring the clusterlists'); // TODO, make this an explicit argument and error when it happens if we don't pass in the argument
           } else {
             const unitClusterList = currentTdfFile.subTdfs[subTdfIndex].clusterList;
             extractDelimFields(unitClusterList, clusterList);
@@ -835,7 +835,7 @@ function modelUnitEngine() {
       } else {
           const sessCurUnit = JSON.parse(JSON.stringify(Session.get('currentTdfUnit')));
           // Figure out which cluster numbers that they want
-          console.log('setupclusterlist:', this.curUnit, sessCurUnit);
+          // console.log('setupclusterlist:', this.curUnit, sessCurUnit);
           let unitClusterList = "";
           // TODO: shouldn't need both
           if(this.curUnit && this.curUnit.learningsession && this.curUnit.learningsession.clusterlist){
@@ -846,14 +846,14 @@ function modelUnitEngine() {
         }
         extractDelimFields(unitClusterList, clusterList);
       }
-      console.log('clusterList', clusterList);
+      // console.log('clusterList', clusterList);
       for (let i = 0; i < clusterList.length; ++i) {
         const nums = rangeVal(clusterList[i]);
         for (let j = 0; j < nums.length; ++j) {
           cards[_.intval(nums[j])].canUse = true;
         }
       }
-      console.log('setupClusterList,cards:', cards);
+      // console.log('setupClusterList,cards:', cards);
     },
 
     // Initialize cards as we'll need them for the created engine (for current
@@ -869,9 +869,9 @@ function modelUnitEngine() {
       const initProbs = [];
       const curKCBase = getStimKCBaseForCurrentStimuliSet();
       let stimulusKC = curKCBase;
-      console.log('initializeActRModel', numQuestions, curKCBase);
+      // console.log('initializeActRModel', numQuestions, curKCBase);
       const reponseKCMap = await meteorCallAsync('getReponseKCMap');
-      console.log('initializeActRModel,reponseKCMap', reponseKCMap);
+      // console.log('initializeActRModel,reponseKCMap', reponseKCMap);
       for (i = 0; i < numQuestions; ++i) {
         const card = {
           clusterKC: (curKCBase + i),
@@ -955,7 +955,7 @@ function modelUnitEngine() {
         responses: initResponses, // Dictionary of text responses for
       });
 
-      console.log('initCards:', initCards, initProbs);
+      // console.log('initCards:', initCards, initProbs);
 
       // has to be done once ahead of time to give valid values for the beginning of the test.
       // calculateCardProbabilities();
@@ -1026,7 +1026,7 @@ function modelUnitEngine() {
         };
         componentStates.push(responseState);
       }
-      console.log('saveComponentStates', componentStates);
+      // console.log('saveComponentStates', componentStates);
       try{
         if(!Meteor.user().profile.impersonating){
           await meteorCallAsync('setComponentStatesByUserIdTDFIdAndUnitNum',
@@ -1038,7 +1038,7 @@ function modelUnitEngine() {
       }
     },
     loadComponentStates: async function() {// componentStates [{},{}]
-      console.log('loadComponentStates start');
+      // console.log('loadComponentStates start');
 
       let numQuestionsAnswered = 0;
       let numCorrectAnswers = 0;
@@ -1049,7 +1049,7 @@ function modelUnitEngine() {
 
       const componentStates = await meteorCallAsync('getComponentStatesByUserIdTDFIdAndUnitNum',
           Meteor.userId(), Session.get('currentTdfId'));
-      console.log('loadComponentStates,componentStates:', componentStates);
+      // console.log('loadComponentStates,componentStates:', componentStates);
 
       const clusterStimKCs = {};
       for (let i=0; i<cards.length; i++) {
@@ -1066,7 +1066,7 @@ function modelUnitEngine() {
 
       // No prior history, we assume KCs could have been affected by other units using them
       if (componentStates.length == 0) {
-        console.log('loadcomponentstates,length==0:', cardProbabilities);
+        // console.log('loadcomponentstates,length==0:', cardProbabilities);
         for (let cardIndex=0; cardIndex<cards.length; cardIndex++) {
           const card = cardProbabilities.cards[cardIndex];
           if (!probsMap[cardIndex]) probsMap[cardIndex] = {};
@@ -1075,14 +1075,14 @@ function modelUnitEngine() {
             probsMap[cardIndex][stimIndex] = 0;
           }
         }
-        console.log('loadComponentStates1', cards, probsMap, componentStates, clusterStimKCs, stimProbabilityEstimates);
+        // console.log('loadComponentStates1', cards, probsMap, componentStates, clusterStimKCs, stimProbabilityEstimates);
       } else {
         const curKCBase = getStimKCBaseForCurrentStimuliSet();
         const componentCards = componentStates.filter((x) => x.componentType == 'cluster');
         const stims = componentStates.filter((x) => x.componentType == 'stimulus');
         const responses = componentStates.filter((x) => x.componentType == 'response');
 
-        console.log('loadcomponentstates,length!=0:', cards, stims, responses, cardProbabilities);
+        // console.log('loadcomponentstates,length!=0:', cards, stims, responses, cardProbabilities);
         for (const componentCard of componentCards) {
           const clusterKC = componentCard.KCId;
           const cardIndex = clusterKC % curKCBase;
@@ -1134,7 +1134,7 @@ function modelUnitEngine() {
           const modelResponse = Object.values(cardProbabilities.responses).find((x) => x.KCId == response.KCId);
           Object.assign(modelResponse, response);
         }
-        console.log('loadComponentStates2', cards, stims, probsMap, componentStates,
+        // console.log('loadComponentStates2', cards, stims, probsMap, componentStates,
             clusterStimKCs, stimProbabilityEstimates);
       }
 
@@ -1190,7 +1190,7 @@ function modelUnitEngine() {
       if(unit.learningsession && unit.learningsession.unitMode){
         unitMode = unit.learningsession.unitMode.trim();
       }
-      console.log('UNIT MODE: ' + unitMode);
+      // console.log('UNIT MODE: ' + unitMode);
       return unitMode;
     })(),
 
@@ -1206,9 +1206,9 @@ function modelUnitEngine() {
       switch (this.unitMode) {
         case 'thresholdCeiling':
           indices = findMaxProbCardThresholdCeilingPerCard(cards, hiddenItems);
-          console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
+          // console.log('thresholdCeiling, indicies:', JSON.parse(JSON.stringify(indices)));
           if (indices.clusterIndex === -1) {
-            console.log('thresholdCeiling failed, reverting to min prob');
+            // console.log('thresholdCeiling failed, reverting to min prob');
             indices = findMinProbCardAndHintLevel(cards, hiddenItems);
           }
           break;
@@ -1240,10 +1240,10 @@ function modelUnitEngine() {
       let newClusterIndex = -1;
       let newStimIndex = -1;
 
-      console.log('selectNextCard unitMode: ' + this.unitMode);
+      // console.log('selectNextCard unitMode: ' + this.unitMode);
 
       if(indices === undefined || indices === null){
-        console.log('indices unset, calculating now')
+        // console.log('indices unset, calculating now')
         indices = calculateIndices();
       }
 
@@ -1251,7 +1251,7 @@ function modelUnitEngine() {
       newStimIndex = indices.stimIndex;
       newHintLevel = indices.hintLevel;
 
-      console.log('selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
+      // console.log('selectNextCard indices:', newClusterIndex, newStimIndex, newHintLevel, indices);
       // Found! Update everything and grab a reference to the card and stim
       const cardIndex = newClusterIndex;
       const card = cardProbabilities.cards[cardIndex];
@@ -1274,18 +1274,18 @@ function modelUnitEngine() {
 
       // Save for returning the info later (since we don't have a schedule)
       setCurrentCardInfo(cardIndex, whichStim);
-      console.log('select next card:', cardIndex, whichStim);
-      console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
+      // console.log('select next card:', cardIndex, whichStim);
+      // console.log('currentCardInfo:', JSON.parse(JSON.stringify(this.findCurrentCardInfo())));
 
 
       const stateChanges = await this.setUpCardQuestionAndAnswerGlobals(cardIndex, whichStim, whichHintLevel,
           stim.probFunctionParameters);
-      console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
+      // console.log('selectNextCard,', Session.get('clozeQuestionParts'), stateChanges);
       newExperimentState = Object.assign(newExperimentState, stateChanges);// Find objects we'll be touching
 
       let testType = 'd';
       if (Session.get('currentDeliveryParams').studyFirst && card.priorStudy == 0) {
-        console.log('STUDY FOR FIRST TRIAL !!!');
+        // console.log('STUDY FOR FIRST TRIAL !!!');
         testType = 's';
       }
       Session.set('testType', testType);
@@ -1299,22 +1299,22 @@ function modelUnitEngine() {
 
       // only log this for teachers/admins
       if (Roles.userIsInRole(Meteor.user(), ['admin', 'teacher'])) {
-        console.log('>>>BEGIN METRICS>>>>>>>');
+        // console.log('>>>BEGIN METRICS>>>>>>>');
 
-        console.log('Overall user stats => ',
+        // console.log('Overall user stats => ',
             'total responses:', cardProbabilities.numQuestionsAnswered,
             'total correct responses:', cardProbabilities.numCorrectAnswers,
         );
 
         // Log selections - note that the card output will also include the stim
-        console.log('Model selected card:', displayify(card));
-        console.log('Model selected stim:', displayify(stim));
+        // console.log('Model selected card:', displayify(card));
+        // console.log('Model selected stim:', displayify(stim));
 
         // Log time stats in human-readable form
         const elapsedStr = function(t) {
           return t < 1 ? 'Never Seen': secs(Date.now() - t);
         };
-        console.log(
+        // console.log(
             'Card First Seen:', elapsedStr(card.firstSeen),
             'Card Last Seen:', elapsedStr(card.lastSeen),
             'Total time in other practice:', secs(card.otherPracticeTime),
@@ -1326,10 +1326,10 @@ function modelUnitEngine() {
         // Display response and current response stats
         const responseText = stripSpacesAndLowerCase(Answers.getDisplayAnswerText(getStimAnswer(cardIndex, whichStim)));
         if (responseText && responseText in cardProbabilities.responses) {
-          console.log('Response is', responseText, displayify(cardProbabilities.responses[responseText]));
+          // console.log('Response is', responseText, displayify(cardProbabilities.responses[responseText]));
         }
 
-        console.log('<<<END   METRICS<<<<<<<');
+        // console.log('<<<END   METRICS<<<<<<<');
       }
 
       // It has now been officially one more trial since all the other cards
@@ -1345,7 +1345,7 @@ function modelUnitEngine() {
         await this.saveComponentStates();
         await updateExperimentState(newExperimentState, 'unitEngine.modelUnitEngine.selectNextCard');
       } catch (e) {
-        console.log('error in select next card server calls:', e);
+        // console.log('error in select next card server calls:', e);
         throw new Error('error in select next card server calls:', e);
       }
     },
@@ -1355,7 +1355,7 @@ function modelUnitEngine() {
       const cards = cardProbabilities.cards;
       const cluster = getStimCluster(Session.get('clusterIndex'));
       const card = _.prop(cards, cluster.shufIndex);
-      console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
+      // console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
       card.totalPracticeDuration += practiceTime;
       _.each(cards, function(otherCard, index) {
@@ -1401,7 +1401,7 @@ function modelUnitEngine() {
       stim.previousCalculatedProbabilities.push(currentStimProbability);
       card.previousCalculatedProbabilities.push(currentStimProbability);
 
-      console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
+      // console.log('cardAnswered, curTrialInfo:', currentStimProbability, card, stim);
       if (wasCorrect) card.priorCorrect += 1;
       else card.priorIncorrect += 1;
 
@@ -1423,7 +1423,7 @@ function modelUnitEngine() {
 
         resp.outcomeStack.push(wasCorrect ? 1 : 0);
       } else {
-        console.log('COULD NOT STORE RESPONSE METRICS',
+        // console.log('COULD NOT STORE RESPONSE METRICS',
             answerText,
             currentCardInfo.whichStim,
             displayify(cluster.stims[currentCardInfo.whichStim].correctResponse),
@@ -1458,12 +1458,12 @@ function modelUnitEngine() {
       const practiceSeconds = Session.get('currentDeliveryParams').practiceseconds;
       if (practiceSeconds < 1.0) {
         // Less than a second is an error or a missing values
-        console.log('No Practice Time Found and display timer: user must quit with Continue button');
+        // console.log('No Practice Time Found and display timer: user must quit with Continue button');
         return false;
       }
 
       const unitElapsedTime = (Date.now() - unitStartTimestamp) / 1000.0;
-      console.log('Model practice check', unitElapsedTime, '>', practiceSeconds);
+      // console.log('Model practice check', unitElapsedTime, '>', practiceSeconds);
       return (unitElapsedTime > practiceSeconds);
     },
   };
@@ -1475,8 +1475,8 @@ function scheduleUnitEngine() {
   function createSchedule(setspec, unitNumber, unit) {
     // First get the setting we'll use
     const settings = loadAssessmentSettings(setspec, unit);
-    console.log('ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION');
-    console.log('settings:', settings);
+    // console.log('ASSESSMENT SESSION LOADED FOR SCHEDULE CREATION');
+    // console.log('settings:', settings);
 
     // Shuffle clusters at start
     if (settings.randomClusters) {
@@ -1622,7 +1622,7 @@ function scheduleUnitEngine() {
         );
       }
 
-      console.log('Question swap/shuffle mapping:', displayify(
+      // console.log('Question swap/shuffle mapping:', displayify(
           _.map(mapping, function(val, idx) {
             return 'q[' + idx + '].cluster==' + quests[idx].clusterIndex +
                       ' ==> q[' + val + '].cluster==' + quests[val].clusterIndex;
@@ -1644,8 +1644,8 @@ function scheduleUnitEngine() {
       isButtonTrial: settings.isButtonTrial,
     };
 
-    console.log('Created schedule for current unit:');
-    console.log(schedule);
+    // console.log('Created schedule for current unit:');
+    // console.log(schedule);
 
     return schedule;
   }
@@ -1747,7 +1747,7 @@ function scheduleUnitEngine() {
 //      extractDelimFields(byGroup.group, settings.groups);
 
       if (settings.groups.length != settings.groupNames.length) {
-        console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
+        // console.log('WARNING! Num group names doesn\'t match num groups', settings.groupNames, settings.groups);
       }
     }
 
@@ -1801,7 +1801,7 @@ function scheduleUnitEngine() {
       const setSpec = file.tdfs.tutor.setspec;
       const currUnit = file.tdfs.tutor.unit[curUnitNum];
 
-      console.log('creating schedule with params:', setSpec, curUnitNum, currUnit);
+      // console.log('creating schedule with params:', setSpec, curUnitNum, currUnit);
       schedule = createSchedule(setSpec, curUnitNum, currUnit);
       if (!schedule) {
         alert('There is an issue with the TDF - experiment cannot continue');
@@ -1831,7 +1831,7 @@ function scheduleUnitEngine() {
       const questionIndex = Session.get('questionIndex');
       const sched = this.getSchedule();
       const questInfo = sched.q[questionIndex];
-      console.log('schedule selectNextCard', questionIndex, questInfo);
+      // console.log('schedule selectNextCard', questionIndex, questInfo);
       const curClusterIndex = questInfo.clusterIndex;
       const curStimIndex = questInfo.whichStim;
 
@@ -1856,7 +1856,7 @@ function scheduleUnitEngine() {
       Session.set('questionIndex', questionIndex + 1);
       Session.set('showOverlearningText', false); // No overlearning in a schedule
 
-      console.log('SCHEDULE UNIT card selection => ',
+      // console.log('SCHEDULE UNIT card selection => ',
           'cluster-idx-unmapped:', curClusterIndex,
           'whichStim:', curStimIndex,
       );

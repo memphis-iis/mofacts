@@ -17,7 +17,7 @@ Template.profileSouthwest.events({
   // Start a TDF
   'click .tdfButton': function(event) {
     event.preventDefault();
-    console.log(event);
+    // console.log(event);
 
     const target = $(event.currentTarget);
     selectTdf(
@@ -34,7 +34,7 @@ Template.profileSouthwest.events({
 });
 
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
-  console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
+  // console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   if (audioInputEnabled) {
     const audioHtml = '<p style="display:inline-block" title="Speech Input available for this module"> \
@@ -60,13 +60,13 @@ Template.profileSouthwest.rendered = async function() {
   Session.set('allTdfs', allTdfs);
 
   Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), function(err, result) {
-    console.log('err: ' + err + ', res: ' + result);
+    // console.log('err: ' + err + ', res: ' + result);
     const assignedTdfs = result;
-    console.log('assignedTdfs: ', assignedTdfs);
+    // console.log('assignedTdfs: ', assignedTdfs);
     // Check all the valid TDF's
     assignedTdfs.forEach( function(tdf) {
       const TDFId = tdf.TDFId;
-      console.log('assignedTdfs', tdf);
+      // console.log('assignedTdfs', tdf);
       const tdfObject = tdf.content;
       const isMultiTdf = tdfObject.isMultiTdf;
 
@@ -74,13 +74,13 @@ Template.profileSouthwest.rendered = async function() {
       const setspec = tdfObject.tdfs.tutor.setspec;
 
       if (!setspec) {
-        console.log('Invalid TDF - it will never work', tdfObject);
+        // console.log('Invalid TDF - it will never work', tdfObject);
         return;
       }
 
       const name = setspec.lessonname;
       if (!name) {
-        console.log('Skipping TDF with no name', setspec);
+        // console.log('Skipping TDF with no name', setspec);
         return;
       }
 

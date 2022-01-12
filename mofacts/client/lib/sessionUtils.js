@@ -44,7 +44,7 @@ export {sessionCleanUp};
 // Handle an entire session - note that we current don't limit this to the
 // client... but maybe we should?
 function sessionCleanUp() {
-  console.log('session cleanup!!!');
+  // console.log('session cleanup!!!');
 
   Session.set('alternateDisplayIndex', undefined);
   Session.set('audioEnabled', undefined);
