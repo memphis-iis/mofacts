@@ -15,7 +15,6 @@
             "speechAPIKey": "APIKEYHERE",
             "alternateImageFiltering": "true",
             "disableProgressReport": "true"
-            
         },
         "unit": [
             {
