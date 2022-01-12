@@ -1262,13 +1262,15 @@ async function getTdfIDsAndDisplaysAttemptedByUserId(userId, onlyWithLearningSes
       for (const unit of tdfObject.tdfs.tutor.unit) {
         if (unit.learningsession) {
           const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
-          tdfsAttempted.push({tdfid, displayName});
+          const disableProgressReport = tdfObject.tdfs.tutor.setspec.disableProgressReport;
+          tdfsAttempted.push({tdfid, displayName, disableProgressReport});
           break;
         }
       }
     } else {
       const displayName = tdfObject.tdfs.tutor.setspec.lessonname;
-      tdfsAttempted.push({tdfid, displayName});
+      const disableProgressReport = tdfObject.tdfs.tutor.setspec.disableProgressReport;
+      tdfsAttempted.push({tdfid, displayName, disableProgressReport});
     }
   }
 

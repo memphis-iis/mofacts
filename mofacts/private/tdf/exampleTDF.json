@@ -13,7 +13,9 @@
             "audioPromptSpeakingRate": "1",
             "textToSpeechAPIKey": "APIKEYHERE",
             "speechAPIKey": "APIKEYHERE",
-            "alternateImageFiltering": "true"
+            "alternateImageFiltering": "true",
+            "disableProgressReport": "true"
+            
         },
         "unit": [
             {
