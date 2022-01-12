@@ -79,9 +79,12 @@ Meteor.startup(function() {
         }
       }
     }
+
     console.logs = console.logs.concat(convertedArgs);
     console.logs = console.logs.slice(0, 100000);
-    console.defaultLog.apply(null, args);
+    if((Meteor.isProduction && args[args.length - 1] == "verbose") || Meteor.isDevelopment){
+      console.defaultLog.apply(null, args);
+    }
   };
   Session.set('debugging', true);
   sessionCleanUp();
