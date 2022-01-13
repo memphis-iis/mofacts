@@ -1131,25 +1131,28 @@ async function getStudentReportingData(userId, TDFid, hintLevel) {
   return {correctnessAcrossRepetitions, probEstimates};
 }
 
-async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=0,returnRows=null) {
+async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,returnRows=null) {
   console.log('getStudentPerformanceByIdAndTDFId', userId, TDFid, hintLevel, returnRows);
   let hintLevelAddendunm = "";
-  if(hintLevel){
-    let hintLevelAddendunm = "AND s.hintLevel=$3";
+  let limitAddendum = "";
+  if(hintLevel != null){
+    hintLevelAddendunm = "AND hintLevel=hintlevel";
+  }
+  if(returnRows != null){
+    hintLevelAddendunm = "ORDER BY componentstateid DESC LIMIT " + returnRows;
   }
   const query = 'SELECT SUM(s.priorCorrect) AS numCorrect, \
                SUM(s.priorIncorrect) AS numIncorrect, \
                COUNT(i.itemID) AS totalStimCount, \
                SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
                COUNT(CASE WHEN (s.priorIncorrect = 1 AND s.priorCorrect = 0) OR (s.priorIncorrect = 0 AND s.priorCorrect = 1) THEN 1 END) AS stimsIntroduced \
-               FROM (SELECT * from componentState LIMIT $4) AS s \
+               FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' \ AND showitem = true  ' + hintLevelAddendunm + limitAddendum + ') AS s \
                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
-               INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-               WHERE s.userId=$1 AND t.TDFId=$2 AND s.componentType =\'stimulus\' \ AND s.showitem = true  ' + hintLevelAddendunm;
-  const perfRet = await db.oneOrNone(query, [userId, TDFid, hintLevel, returnRows]);
+               INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId';
+  const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
-                  WHERE s.userId=$1 AND s.tdfid=$2 AND s.level_unitname = $3';                  
+                  WHERE s.userId=$1 AND s.tdfid=$2 AND s.level_unitname = $3';                
   const perfRet2 = await db.oneOrNone(query2, [userId, TDFid,'Model Unit']);
   if (!perfRet || !perfRet2) return null;
   return {
