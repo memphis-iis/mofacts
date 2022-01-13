@@ -1369,7 +1369,6 @@ function modelUnitEngine() {
       const card = _.prop(cards, cluster.shufIndex);
       console.log('cardAnswered, card: ', card, 'cluster.shufIndex: ', cluster.shufIndex);
 
-      card.totalPracticeDuration += practiceTime;
       _.each(cards, function(otherCard, index) {
         if (otherCard.firstSeen > 0) {
           if (index != cluster.shufIndex) {
