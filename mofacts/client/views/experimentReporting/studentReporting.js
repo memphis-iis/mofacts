@@ -178,7 +178,7 @@ async function updateDashboard(selectedTdfId){
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
     console.log("studentData loaded...",studentData);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,"0",30);
+    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,null,30);
 
     console.log('studentData', studentData);
     console.log('curStudentGraphData',curStudentGraphData);
@@ -200,7 +200,7 @@ async function drawDashboard(curStudentGraphData, studentData){
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   optimumDifficulty = 0.7;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
-  totalPracticeDurationMinutesDisplay = Math.round(totalPracticeDurationMinutes);
+  totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed(2);
   console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
   percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
   speedOfLearning = Math.log(1+stimsIntroduced) * 100; //Multiply by 100 for graph scale
