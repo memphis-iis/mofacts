@@ -151,7 +151,7 @@ Template.signInSouthwest.onCreated(async function() {
 
   console.log('got teachers');
   const urlVars = getUrlVars();
-  if (!urlVars['showtestlogins']) {
+  if (!urlVars['showTestLogins']) {
     Session.set('showTestLogins', false);
     const testLogins = [
       'olney@southwest.tn.edu',
