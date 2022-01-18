@@ -133,11 +133,11 @@ function defaultUnitEngine(curExperimentData) {
         if (clozeQuestionParts[i].charAt(0) == '_') {
           let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
           let clozeAnswerUnderscores = ""
-          for(j=0;j<originalAnswerWordCount+1;j++){
+          for(j=0;j<originalAnswerWordCount;j++){
             if(clozeAnswerSplit[j] !== undefined) { 
               clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + '</u>';
             }else{
-              clozeAnswerUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</u>';
+              clozeAnswerUnderscores += '&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</u>';
             }           
           }
           clozeQuestionParts[i] = clozeAnswerUnderscores;
