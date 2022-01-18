@@ -93,7 +93,7 @@ function defaultUnitEngine(curExperimentData) {
       let curHintLevel = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
       if(syllablesArray.length >= 2){
-        curHintLevel = Math.min(hintLevel, 1);
+        curHintLevel = 0;
       } else {
         curHintLevel = hintLevel;
       }
