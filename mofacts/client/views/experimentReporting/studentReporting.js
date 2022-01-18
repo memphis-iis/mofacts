@@ -115,14 +115,7 @@ Template.studentReporting.helpers({
   stimsSeen: () => Session.get('stimsSeen'),
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
-  displayDashboard: function(){
-    var totalAttempts = Session.get('curTotalAttempts');
-    if(totalAttempts > 29){
-      return true;
-    } else {
-      return false;
-    }
-  },
+  displayDashboard: () => Session.get('curTotalAttempts') > 29 ? true : false,
   INVALID: INVALID,
 });
 
@@ -231,33 +224,40 @@ async function drawDashboard(curStudentGraphData, studentData){
 
   
   //Draw Dashboard
-  let dashCluster = [];
-  dashClusterCanvases = document.getElementsByClassName('dashCanvas');
-    Array.prototype.forEach.call(dashClusterCanvases, function(element){
-      if(element.classList.contains('masteredItems')){
-        console.log(element);
-        let gaugeMeter = new progressGauge(element,"donut",0,100,donutOptionsMasteredItems);
+  if(Session.get('curTotalAttempts') > 29){
+    $('#dashboardGauges').show();
+    $('#guagesUnavailableMsg').hide();
+    let dashCluster = [];
+    dashClusterCanvases = document.getElementsByClassName('dashCanvas');
+    for(let dash of dashClusterCanvases){
+      if(dash.classList.contains('masteredItems')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"donut",0,100,donutOptionsMasteredItems);
         dashCluster.push(gaugeMeter);
       }
-      if(element.classList.contains('learningSpeed')){
-        console.log(element);
-        let gaugeMeter = new progressGauge(element,"gauge",0,300,gaugeOptionsSpeedOfLearning);
+      if(dash.classList.contains('learningSpeed')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"gauge",0,300,gaugeOptionsSpeedOfLearning);
         dashCluster.push(gaugeMeter);
       }
-      if(element.classList.contains('difficulty')){
-        console.log(element);
-        let gaugeMeter = new progressGauge(element,"gauge",0,60,gaugeOptionsDifficulty);
+      if(dash.classList.contains('difficulty')){
+        console.log(dash);
+        let gaugeMeter = new progressGauge(dash,"gauge",0,60,gaugeOptionsDifficulty);
         dashCluster.push(gaugeMeter);
       }
-
-    });
+    }
+    
     //Populate Dashboard values
     console.log('Testing dashCluster:',dashCluster);
     dashCluster[0].set(percentStimsSeen);
     dashCluster[1].set(speedOfLearning);
     dashCluster[2].set(displayDifficulty);
-
   }
+  else{
+    $('#dashboardGauges').hide();
+    $('#guagesUnavailableMsg').show();
+  }
+}
 function progressGauge(target, gaugeType, currentValue,maxValue,options = defaultGaugeOptions){
     if(target != undefined){
       console.log('gauge canvas found and loaded.')
