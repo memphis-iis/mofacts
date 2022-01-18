@@ -1693,6 +1693,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   } else if (isCorrect) {
     outcome = 'correct';
   }
+  let entryPoint = 'direct'
+  if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username && Session.get('curClass').sectionname){
+    entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname;
+  }
   const answerLogRecord = {
     'itemId': itemId,
     'KCId': stimulusKC,
@@ -1761,7 +1765,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
     'instructionQuestionResult': Session.get('instructionQuestionResult'),
-    'Entry_Point': Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname
+    'Entry_Point': entryPoint
   };
   return answerLogRecord;
 }
