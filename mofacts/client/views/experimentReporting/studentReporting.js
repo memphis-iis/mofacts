@@ -115,7 +115,6 @@ Template.studentReporting.helpers({
   stimsSeen: () => Session.get('stimsSeen'),
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
-  displayDashboard: () => Session.get('curTotalAttempts') > 29 ? true : false,
   INVALID: INVALID,
 });
 
