@@ -194,9 +194,9 @@ async function drawDashboard(curStudentGraphData, studentData){
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed(2);
   console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
-  percentStimsSeen = stimsSeen / parseFloat(totalStimCount) * 100;
-  speedOfLearning = Math.log(1+stimsIntroduced) * 100; //Multiply by 100 for graph scale
-  displayDifficulty =  (Math.min(Math.max((parseFloat(numCorrect)/stimsSeen) - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
+  percentStimsSeen = parseFloat(stimsSeen) / parseFloat(totalStimCount) * 100;
+  speedOfLearning = Math.log(1+parseFloat(stimsIntroduced)) * 100;
+  displayDifficulty =  (Math.min(Math.max((parseFloat(numCorrect)/parseFloat(stimsSeen)) - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
   const stimsSeenProbabilties = [];
   const stimsNotSeenProbabilites = [];
   for(let i = 0; i < studentData.probEstimates.length; i++ ){
@@ -208,8 +208,8 @@ async function drawDashboard(curStudentGraphData, studentData){
     }
   stimsSeenPredictedProbability = stimsSeenProbabilties[stimsSeenProbabilties.length -1 ];
   stimsNotSeenPredictedProbability = stimsNotSeenProbabilites[stimsNotSeenProbabilites.length -1 ];
-  itemMasteryRate = Math.round(stimsSeen / totalPracticeDurationMinutes);
-  estimatedTimeMastery = Math.round(itemMasteryRate / totalStimCount);
+  itemMasteryRate = parseFloat(stimsSeen) / totalPracticeDurationMinutes;
+  estimatedTimeMastery = itemMasteryRate * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
   Session.set('stimsSeenPercentCorrect',percentCorrect);
   Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
   Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
@@ -217,8 +217,8 @@ async function drawDashboard(curStudentGraphData, studentData){
   Session.set('stimsSeen',stimsSeen);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
-  Session.set('itemMasteryRate', itemMasteryRate);
-  Session.set('itemMasteryTime',estimatedTimeMastery);
+  Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
+  Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(2));
   
 
   
@@ -236,7 +236,7 @@ async function drawDashboard(curStudentGraphData, studentData){
       }
       if(dash.classList.contains('learningSpeed')){
         console.log(dash);
-        let gaugeMeter = new progressGauge(dash,"gauge",0,300,gaugeOptionsSpeedOfLearning);
+        let gaugeMeter = new progressGauge(dash,"gauge",0,350,gaugeOptionsSpeedOfLearning);
         dashCluster.push(gaugeMeter);
       }
       if(dash.classList.contains('difficulty')){
