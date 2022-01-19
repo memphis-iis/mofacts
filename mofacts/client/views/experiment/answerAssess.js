@@ -237,7 +237,7 @@ function _branchingCorrectText(answer) {
 }
 
 function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
-  const answerDisplay = originalAnswer || correctAnswer;
+  const answerDisplay = originalAnswer;
   let isCorrect; let matchText;
   if (answerIsBranched(correctAnswer)) {
     [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
@@ -248,7 +248,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
       dispAnswer = _.trim(dispAnswer.split('|')[0]);
     }
 
-    const match = stringMatch(correctAnswer, userAnswer, lfparameter);
+    const match = stringMatch(originalAnswer, userAnswer, lfparameter);
 
     if (match === 0) {
       isCorrect = false;
