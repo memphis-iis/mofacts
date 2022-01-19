@@ -313,7 +313,8 @@ const Answers = {
 
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
-      fullTextIsCorrect = checkAnswer(userInput, originalAnswer, originalAnswer, lfparameter);
+      let userInputWithAddedSylls = answer + userInput;
+      fullTextIsCorrect = checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter);
     }
 
     if (!fullTextIsCorrect.isCorrect) {
