@@ -91,7 +91,10 @@ function defaultUnitEngine(curExperimentData) {
       let clozeAnswer = '';
       let clozeMissingSyllables = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
-      const curHintLevel = hintLevel;
+      let curHintLevel = hintLevel;
+      if(syllablesArray <= 2){
+        curHintLevel = 0;
+      }
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
@@ -133,11 +136,16 @@ function defaultUnitEngine(curExperimentData) {
         if (clozeQuestionParts[i].charAt(0) == '_') {
           let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
           let clozeAnswerUnderscores = ""
-          for(j=0;j<originalAnswerWordCount+1;j++){
-            if(clozeAnswerSplit[j] !== undefined) { 
-              clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + '</u>';
+          for(j=0;j<originalAnswerWordCount;j++){
+            letterDifference = origAnswer.length - reconstructedAnswer.length;
+            spacesToFill = '';
+            for(k=0; k<letterDifference; k++){
+              spacesToFill += "&nbsp";
+            }
+            if(clozeAnswerSplit[j] !== undefined && j == 0) { 
+              clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + spacesToFill + "</u>";
             }else{
-              clozeAnswerUnderscores += '<u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp</u>';
+              clozeAnswerUnderscores += '&nbsp;<u>' + spacesToFill + '</u>';
             }           
           }
           clozeQuestionParts[i] = clozeAnswerUnderscores;
