@@ -90,12 +90,10 @@ function defaultUnitEngine(curExperimentData) {
 
       let clozeAnswer = '';
       let clozeMissingSyllables = '';
-      let curHintLevel = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
-      if(syllablesArray.length >= 2){
+      let curHintLevel = hintLevel;
+      if(syllablesArray <= 2){
         curHintLevel = 0;
-      } else {
-        curHintLevel = hintLevel;
       }
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
@@ -144,7 +142,7 @@ function defaultUnitEngine(curExperimentData) {
             for(k=0; k<letterDifference; k++){
               spacesToFill += "&nbsp";
             }
-            if(clozeAnswerSplit[j] !== undefined) { 
+            if(clozeAnswerSplit[j] !== undefined && j == 0) { 
               clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + spacesToFill + "</u>";
             }else{
               clozeAnswerUnderscores += '&nbsp;<u>' + spacesToFill + '</u>';
