@@ -1152,7 +1152,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
-                  WHERE s.userId=$1 AND s.tdfid=$2 AND s.level_unitname = $3';                
+                  WHERE s.userId=$1 AND s.tdfid=$2';                
   const perfRet2 = await db.oneOrNone(query2, [userId, TDFid,'Model Unit']);
   if (!perfRet || !perfRet2) return null;
   return {
