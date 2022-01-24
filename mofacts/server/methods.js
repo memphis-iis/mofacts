@@ -1177,7 +1177,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                 INNER JOIN assignment AS a on a.TDFId = t.TDFId \
                 INNER JOIN course AS c on c.courseId = a.courseId \
-                WHERE c.semester = $1 AND c.teacherUserId = $2 \
+                WHERE c.semester = $1 AND c.teacherUserId = $2  AND s.componenttype = \'stimulus\' \
                 GROUP BY s.userId, t.TDFId, c.courseId';
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
