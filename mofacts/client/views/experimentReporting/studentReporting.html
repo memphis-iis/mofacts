@@ -28,8 +28,12 @@
           <p>Speed of Learning</p>      
             <div id="preview-textfield-custom" style="top:80px; position: relative;"></div>  
             <canvas class="dashCanvas learningSpeed" width="150" height="100" id="canvas-unit-percent-correct"></canvas>
-            <p>Items mastered per minute: {{itemMasteryRate}}</p>
-            <p>Estimated time to master all items: {{itemMasteryTime}} minutes.</p>
+            {{#if displayItemsMasteredPerMinute}}
+              <p>Items mastered per minute: {{itemMasteryRate}}</p>
+            {{/if}}
+            {{#if displayEstimatedMasteryTime}}
+              <p>Estimated time to master all items: {{itemMasteryTime}} minutes.</p>
+            {{/if}}
         </div>
       </div>
       <div class="row text-center">
