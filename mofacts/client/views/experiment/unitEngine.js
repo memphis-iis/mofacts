@@ -98,7 +98,7 @@ function defaultUnitEngine(curExperimentData) {
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
       let clozeAnswerNoUnderscores = '';
-      let originalAnswerWordCount = origAnswer.split(' ').length;
+      let originalAnswerArray = origAnswer.split(' ');
 
       // eslint-disable-next-line guard-for-in
       for (index = 0; index < curHintLevel; index++) {
@@ -135,18 +135,19 @@ function defaultUnitEngine(curExperimentData) {
         console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
         if (clozeQuestionParts[i].charAt(0) == '_') {
           let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
-          let clozeAnswerUnderscores = ""
-          for(j=0;j<originalAnswerWordCount;j++){
-            letterDifference = origAnswer.length - reconstructedAnswer.length;
-            spacesToFill = '';
-            for(k=0; k<letterDifference; k++){
-              spacesToFill += "&nbsp";
+          let clozeAnswerUnderscores = "";
+          let reconstructedAnswerArray = reconstructedAnswer.split(" ");
+          for(k = 0; k < originalAnswerArray.length; k++){
+            if(originalAnswerArray[k] == reconstructedAnswer){
+              clozeAnswerUnderscores += '<u>' + reconstructedAnswerArray[k] + '</u>&nbsp;';
+            } else {
+              let missingSpacesText = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+              if(typeof reconstructedAnswerArray[k] !== "undefined"){
+                clozeAnswerUnderscores += '<u>' + reconstructedAnswerArray[k] +  missingSpacesText + '</u>&nbsp';
+              } else {
+                clozeAnswerUnderscores += '<u>' + missingSpacesText + '</u>&nbsp';
+              }
             }
-            if(clozeAnswerSplit[j] !== undefined && j == 0) { 
-              clozeAnswerUnderscores += '&nbsp<u>' + reconstructedAnswer + spacesToFill + "</u>";
-            }else{
-              clozeAnswerUnderscores += '&nbsp;<u>' + spacesToFill + '</u>';
-            }           
           }
           clozeQuestionParts[i] = clozeAnswerUnderscores;
         }
