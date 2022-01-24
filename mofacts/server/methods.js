@@ -1147,8 +1147,7 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
                SUM(s.totalPracticeDuration) AS totalPracticeDuration, \
                COUNT(CASE WHEN (s.priorIncorrect = 1 AND s.priorCorrect = 0) OR (s.priorIncorrect = 0 AND s.priorCorrect = 1) THEN 1 END) AS stimsIntroduced \
                FROM (SELECT * from componentState WHERE userId=$1 AND TDFId=$2 AND componentType =\'stimulus\' \ AND showitem = true  ' + hintLevelAddendunm + limitAddendum + ') AS s \
-               INNER JOIN item AS i ON i.stimulusKC = s.KCId \
-               INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId';
+               INNER JOIN item AS i ON i.stimulusKC = s.KCId';
   const perfRet = await db.oneOrNone(query, [userId, TDFid]);
   const query2 = 'SELECT COUNT(DISTINCT s.ItemId) AS stimsSeen \
                   FROM history AS s \
@@ -1177,7 +1176,7 @@ async function getStudentPerformanceForClassAndTdfId(instructorId) {
                 INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
                 INNER JOIN assignment AS a on a.TDFId = t.TDFId \
                 INNER JOIN course AS c on c.courseId = a.courseId \
-                WHERE c.semester = $1 AND c.teacherUserId = $2 \
+                WHERE c.semester = $1 AND c.teacherUserId = $2  AND s.componenttype = \'stimulus\' \
                 GROUP BY s.userId, t.TDFId, c.courseId';
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
