@@ -115,6 +115,8 @@ Template.studentReporting.helpers({
   stimsSeen: () => Session.get('stimsSeen'),
   itemMasteryRate: () => Session.get('itemMasteryRate'),
   itemMasteryTime: () => Session.get('itemMasteryTime'),
+  displayItemsMasteredPerMinute: () => Session.get('displayItemMasteryRate'),
+  displayEstimatedMasteryTime: () => Session.get('displayEstimatedMasteryTime'),
   INVALID: INVALID,
 });
 
@@ -170,58 +172,63 @@ async function updateDashboard(selectedTdfId){
     const studentUsername = Session.get('studentUsername') || Meteor.user().username;
     const studentData = await meteorCallAsync('getStudentReportingData', studentID, selectedTdfId, "0");
     console.log("studentData loaded...",studentData);
-    const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentID,selectedTdfId,null,30);
-
-    console.log('studentData', studentData);
-    console.log('curStudentGraphData',curStudentGraphData);
-    
     setStudentPerformance(studentID, studentUsername, selectedTdfId);
-    drawDashboard(curStudentGraphData, studentData);
+    drawDashboard(studentID, selectedTdfId);
     $('#tdf-select').val(selectedTdfId);
   }
 }
 
-
-
-
-async function drawDashboard(curStudentGraphData, studentData){
-  //Get Data from session variableS
+async function drawDashboard(studentId, selectedTdfId){
+  // Get TDF Parameters
+  selectedTdf = await meteorCallAsync('getTdfById',selectedTdfId);
+  selectedTdfIdProgressReportParams = selectedTdf.content.tdfs.tutor.setspec.progressReporterParams;
+  console.log('selectedTdfIdProgressReportParams',selectedTdfIdProgressReportParams);
+  if(typeof selectedTdfIdProgressReportParams === "undefined"){
+    selectedTdfIdProgressReportParams = [0.7,30,60,30,90,60];
+  } 
+  const [optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory] = selectedTdfIdProgressReportParams;
+  console.log('expanded params',  optimumDifficulty, difficultyHistory, masteryDisplay, masteryHistory, timeToMasterDisplay, timeToMasterHistory);
+  //Get Student Data
+  const curStudentGraphData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,null);
+  const speedOfLearningData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,30);
+  const masteryRateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,masteryHistory);
+  const masteryEstimateData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,timeToMasterHistory);
+  const difficultyData = await meteorCallAsync('getStudentPerformanceByIdAndTDFId',studentId,selectedTdfId,null,difficultyHistory);
+  console.log("difficultyData", masteryEstimateData)
+  //Expand Data
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
     // Perform calculated data
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
-  optimumDifficulty = 0.7;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed(2);
-  console.log('percentCorrect numCorrect totalAttempts',percentCorrect,numCorrect, totalAttempts);
   percentStimsSeen = parseFloat(stimsSeen) / parseFloat(totalStimCount) * 100;
-  speedOfLearning = Math.log(1+parseFloat(stimsIntroduced)) * 100;
-  displayDifficulty =  (Math.min(Math.max((parseFloat(numCorrect)/parseFloat(stimsSeen)) - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
-  const stimsSeenProbabilties = [];
-  const stimsNotSeenProbabilites = [];
-  for(let i = 0; i < studentData.probEstimates.length; i++ ){
-      if(studentData.probEstimates[i].lastSeen != 0){
-        stimsSeenProbabilties.push(studentData.probEstimates[i].probabilityEstimate);
-      } else {
-        stimsNotSeenProbabilites.push(studentData.probEstimates[i].probabilityEstimate);
-      }
-    }
-  stimsSeenPredictedProbability = stimsSeenProbabilties[stimsSeenProbabilties.length -1 ];
-  stimsNotSeenPredictedProbability = stimsNotSeenProbabilites[stimsNotSeenProbabilites.length -1 ];
-  itemMasteryRate = parseFloat(stimsSeen) / totalPracticeDurationMinutes;
-  estimatedTimeMastery = itemMasteryRate * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
-  Session.set('stimsSeenPercentCorrect',percentCorrect);
-  Session.set('stimsSeenPredictedProbability',stimsSeenPredictedProbability);
-  Session.set('stimsNotSeenPredictedProbability', stimsNotSeenPredictedProbability);
+  speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced) / parseFloat(speedOfLearningData.totalPracticeDuration)) * 100;
+  difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
+  displayDifficulty =  (Math.min(Math.max(difficultyCorrectProportion - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
+  totalPracticeDurationMasteryMinutes = masteryRateData.totalPracticeDuration / 60000;
+  itemMasteryRate = parseFloat(masteryRateData.stimsIntroduced) / totalPracticeDurationMasteryMinutes;
+  totalPracticeDurationMasteryEstMinutes = masteryEstimateData.totalPracticeDuration /60000;
+  itemMasteryRateEstimated = parseFloat(masteryEstimateData.stimsIntroduced) / totalPracticeDurationMasteryEstMinutes
+  estimatedTimeMastery = itemMasteryRateEstimated * (parseFloat(totalStimCount) - parseFloat(stimsIntroduced));
   Session.set('stimCount',parseFloat(totalStimCount));
   Session.set('stimsSeen',stimsSeen);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
   Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
   Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(2));
+  if(totalAttempts >= masteryDisplay){
+    Session.set('displayItemMasteryRate',true);
+  } else {
+    Session.set('displayItemMasteryRate',false);
+  }
+  if(totalAttempts >= timeToMasterDisplay){
+    Session.set('displayEstimatedMasteryTime true');
+  } else {
+    Session.set('displayEstimatedMasteryTime', false);
+  }
   
-
-  
+    
   //Draw Dashboard
   if(Session.get('curTotalAttempts') > 29){
     $('#dashboardGauges').show();
