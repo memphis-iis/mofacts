@@ -500,12 +500,13 @@ function modelUnitEngine() {
             currentMin = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
-            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-              if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
-                currentHintLevelMin = stim.hintLevelProbabilites[k];
-                hintLevelIndex = k;
-              }
-            }
+          }
+        }
+        stim = card.stims[stimIndex];
+        for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+          if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
+            currentHintLevelMin = stim.hintLevelProbabilites[k];
+            hintLevelIndex = k;
           }
         }
       }
@@ -524,12 +525,13 @@ function modelUnitEngine() {
               currentMin = stim.probabilityEstimate;
               stimIndex = j;
               clusterIndex=i;
-              for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-                if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
-                  currentHintLevelMin = stim.hintLevelProbabilites[k];
-                  hintLevelIndex = k;
-                }
-              }
+            }
+          }
+          const stim = card.stims[stimIndex]
+          for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+            if(stim.hintLevelProbabilites[k] <= currentHintLevelMin){
+              currentHintLevelMin = stim.hintLevelProbabilites[k];
+              hintLevelIndex = k;
             }
           }
         }
@@ -580,6 +582,7 @@ function modelUnitEngine() {
     let clusterIndex=-1;
     let stimIndex=-1;
     let hintLevelIndex=-1;
+    let optimalProb;
 
     for (let i=0; i<cards.length; i++) {
       const card = cards[i];
@@ -590,7 +593,7 @@ function modelUnitEngine() {
           const stim = card.stims[j];
           if (hiddenItems.includes(stim.stimulusKC)) continue;
           const parameters = stim.parameter;
-          let optimalProb = Math.log(parameters[1]/(1-parameters[1]));
+          optimalProb = Math.log(parameters[1]/(1-parameters[1]));
           if (!optimalProb) {
             // console.log("NO OPTIMAL PROB SPECIFIED IN STIM, DEFAULTING TO 0.90");
             optimalProb = 0.90;
@@ -601,14 +604,16 @@ function modelUnitEngine() {
             clusterIndex=i;
             stimIndex=j;
           }
-          for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
-            const hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
-            if(hintDist <= currentHintLevelMin){
-              currentHintLevelMin = dist;
-              hintLevelIndex = k;
-            }
-          }
+          
         }
+      }
+    }
+    const stim = cards[clusterIndex].stims[stimIndex];
+    for(let k=0; k<Math.min(stim.hintLevelProbabilites.length, 3); k++){
+      let hintDist = Math.abs(Math.log(stim.hintLevelProbabilites[k]/(1-stim.hintLevelProbabilites[k])) - optimalProb);
+      if(hintDist < currentHintLevelMin){
+        currentHintLevelMin = hintDist;
+        hintLevelIndex = k;
       }
     }
 
@@ -641,12 +646,13 @@ function modelUnitEngine() {
             currentMax = stim.probabilityEstimate;
             clusterIndex=i;
             stimIndex=j;
-            for(let k=0; k<stim.hintLevelProbabilites.length; k++){
-              if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
-                currentHintLevelMax = stim.hintLevelProbabilites[k];
-                hintLevelIndex = k;
-              }
-            }
+          }
+        }
+        const stim = card.stims[stimIndex];
+        for(let k=0; k<stim.hintLevelProbabilites.length; k++){
+          if(stim.hintLevelProbabilites[k] > currentHintLevelMax && stim.hintLevelProbabilites[k] < thresholdCeiling ){
+            currentHintLevelMax = stim.hintLevelProbabilites[k];
+            hintLevelIndex = k;
           }
         }
       }
@@ -1276,6 +1282,7 @@ function modelUnitEngine() {
       const whichStim = newStimIndex;
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
+      console.log("Rusty", whichHintLevel)
 
       // Save the card selection
       // Note that we always take the first stimulus and it's always a drill
