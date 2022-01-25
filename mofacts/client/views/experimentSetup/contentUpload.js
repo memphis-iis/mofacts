@@ -1,6 +1,4 @@
-import { result } from 'underscore';
 import {meteorCallAsync} from '../..';
-import { curSemester } from '../../../common/Definitions';
 import { resultsToError } from '../../../server/lib/Wikifier';
 import { getCurrentClusterAndStimIndices } from '../experiment/card';
 
