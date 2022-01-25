@@ -35,7 +35,9 @@ Template.tdfAssignmentEdit.onRendered(async function() {
   const allTdfDisplays = [];
   for (const i in allTdfObjects) {
     const tdf = allTdfObjects[i];
-    allTdfDisplays.push({fileName: tdf.fileName, displayName: tdf.tdfs.tutor.setspec.lessonname});
+    if (tdf.fileName.indexOf(curSemester) != -1) {
+      allTdfDisplays.push({fileName: tdf.fileName, displayName: tdf.tdfs.tutor.setspec.lessonname});
+    }
   }
   console.log('allTdfDisplays', allTdfDisplays);
   Session.set('allTdfFilenamesAndDisplayNames', allTdfDisplays);
