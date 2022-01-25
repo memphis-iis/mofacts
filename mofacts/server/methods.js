@@ -2165,9 +2165,9 @@ Meteor.startup(async function() {
         throw new Error('Unknown file type not allowed: ' + type);
       }
       if (filename.indexOf(curSemester) == -1) {
-        results.result = false;
-        results.errmsg = 'File does not have current semester in filename.';
-        return results;
+        filenameSplit = filename.split('.');
+        filenameExtension = filenameSplit.splice(-1).join('');
+        filename = filenameSplit[filenameSplit.length - 1] + "_" + curSemester + "." + filenameExtension;
       }
       try {
         if (type == 'tdf') {
