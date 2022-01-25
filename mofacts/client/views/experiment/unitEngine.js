@@ -730,7 +730,6 @@ function modelUnitEngine() {
             console.log('syllables detected for: ' + currentStimuliSetId + '|' + answerText + '. hintlevel index is ' + hintLevelIndex);
           }
           parms = this.calculateSingleProb(i, j, 0, count);
-          tdfDebugLog.push(parms.debugLog);
           hintLevelProbabilities.push(parms.probability)
           for(let k=0; k<Math.min(hintLevelIndex, 3); k++){
             let hintLevelParms = this.calculateSingleProb(i, j, k, count);
