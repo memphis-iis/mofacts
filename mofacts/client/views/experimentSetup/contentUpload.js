@@ -1,5 +1,7 @@
+import { result } from 'underscore';
 import {meteorCallAsync} from '../..';
 import { curSemester } from '../../../common/Definitions';
+import { resultsToError } from '../../../server/lib/Wikifier';
 import { getCurrentClusterAndStimIndices } from '../experiment/card';
 
 const userFiles = new Mongo.Collection(null); // local-only - no database;
@@ -231,6 +233,9 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
           errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
         } else {
           console.log(fileDescrip + ' Saved:', result);
+          if(result.errmsg){
+            errorStack.push('The ' + fileDescrip + ' file was saved with warnings:' + result.errmsg);
+          }
         }
       } catch (error) {
         console.log('Critical failure saving ' + fileDescrip, error);
