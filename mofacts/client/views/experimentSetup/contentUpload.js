@@ -1,5 +1,4 @@
 import {meteorCallAsync} from '../..';
-import { resultsToError } from '../../../server/lib/Wikifier';
 import { getCurrentClusterAndStimIndices } from '../experiment/card';
 
 const userFiles = new Mongo.Collection(null); // local-only - no database;
@@ -218,7 +217,7 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
     const name = file.name;
     if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
       name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
-      name.indexOf('?') != -1 || name.indexOf('*') != -1){
+      name.indexOf('?') != -1 || name.indexOf('*') != -1) {
       alert('Please remove the following characters from your filename: < > : " / | ? *');
     } else {
       const fileData = await readFileAsDataURL(file);
@@ -231,9 +230,6 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
           errorStack.push('The ' + fileDescrip + ' file was not saved: ' + result.errmsg);
         } else {
           console.log(fileDescrip + ' Saved:', result);
-          if(result.errmsg){
-            errorStack.push('The ' + fileDescrip + ' file was saved with warnings:' + result.errmsg);
-          }
         }
       } catch (error) {
         console.log('Critical failure saving ' + fileDescrip, error);

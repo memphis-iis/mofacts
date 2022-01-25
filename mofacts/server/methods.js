@@ -2164,6 +2164,7 @@ Meteor.startup(async function() {
       if (type != 'tdf' && type != 'stim') {
         throw new Error('Unknown file type not allowed: ' + type);
       }
+
       try {
         if (type == 'tdf') {
           const jsonContents = JSON.parse(filecontents);
@@ -2172,6 +2173,7 @@ Meteor.startup(async function() {
           if (lessonName.length < 1) {
             results.result = false;
             results.errmsg = 'TDF has no lessonname - it cannot be valid';
+            
             return results;
           }
           const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';

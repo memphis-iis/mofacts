@@ -30,7 +30,6 @@ Template.tdfAssignmentEdit.onRendered(async function() {
   const allTdfs = await meteorCallAsync('getAllTdfs');
   console.log('allTdfs', allTdfs);
   const allTdfObjects = allTdfs.map((tdf) => tdf.content);
-  console.log('allTdfObjects',allTdfObjects);
   if (!Session.get('allTdfs')) Session.set('allTdfs', allTdfObjects);
   const allTdfDisplays = [];
   for (const i in allTdfObjects) {
