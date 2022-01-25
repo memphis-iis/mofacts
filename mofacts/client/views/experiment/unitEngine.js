@@ -791,6 +791,7 @@ function modelUnitEngine() {
       p.stimResponseText = stripSpacesAndLowerCase(answerText); // Yes, lowercasing here is redundant. TODO: fix/cleanup
       const currentStimuliSetId = Session.get('currentStimuliSetId');
       answerText = answerText.replace(/\./g, '_');
+      p.answerText = answerText;
 
       if (probFunctionHasHintSylls) {
         if (!this.cachedSyllables.data || !this.cachedSyllables.data[answerText]) {
