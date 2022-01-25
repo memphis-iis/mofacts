@@ -2173,7 +2173,7 @@ Meteor.startup(async function() {
           if (lessonName.length < 1) {
             results.result = false;
             results.errmsg = 'TDF has no lessonname - it cannot be valid';
-            
+
             return results;
           }
           const stimFileName = json.tutor.setspec.stimulusfile ? json.tutor.setspec.stimulusfile : 'INVALID';
