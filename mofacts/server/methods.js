@@ -2164,12 +2164,15 @@ Meteor.startup(async function() {
       if (type != 'tdf' && type != 'stim') {
         throw new Error('Unknown file type not allowed: ' + type);
       }
-      if (filename.indexOf(curSemester) == -1) {
-        filenameSplit = filename.split('.');
-        filenameExtension = filenameSplit.splice(-1).join('');
-        filename = filenameSplit[filenameSplit.length - 1] + "_" + curSemester + "." + filenameExtension;
-      }
       try {
+        if (filename.indexOf(curSemester) == -1) {
+          filenameSplit = filename.split('.');
+          filenameExtension = filenameSplit.splice(-1).join('');
+          filename = filenameSplit[filenameSplit.length - 1] + "_" + curSemester + "." + filenameExtension;
+          results.result = false;
+          results.errmsg = "TDF filename is not valid. Please use the semester in the filename: " + filename;
+          return results;
+        }
         if (type == 'tdf') {
           const jsonContents = JSON.parse(filecontents);
           const json = {tutor: jsonContents.tutor};
