@@ -218,17 +218,11 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
     const name = file.name;
     if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
       name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
-      name.indexOf('?') != -1 || name.indexOf('*') != -1) {
-      alert('Please remove the following characters from your filename: < > : " / | ? *');
-      return false;
+      name.indexOf('?') != -1 || name.indexOf('*') != -1){
     } else {
-      if(name.indexOf(curSemester) != -1){
-        const fileData = await readFileAsDataURL(file);
-        console.log('Upload attempted for', name);
-      } else {
-        alert('Please check that ' + curSemester + ' is in your filenames.');
-        return false; 
-      } 
+      const fileData = await readFileAsDataURL(file);
+      console.log('Upload attempted for', name);
+
       try {
         const result = await meteorCallAsync('saveContentFile', fileType, name, fileData);
         if (!result.result) {
