@@ -2166,13 +2166,6 @@ Meteor.startup(async function() {
       }
       try {
         if (type == 'tdf') {
-          if (filename.indexOf(curSemester) == -1) {
-            filenameSplit = filename.split('.');
-            filenameExtension = filenameSplit.splice(-1).join('');
-            filenameReminder = filenameSplit[filenameSplit.length - 1] + "_" + curSemester + "." + filenameExtension;
-            results.errmsg += "TDF filename is not valid. Please use the semester in the filename: " + filenameReminder;
-            //Returns success, but with warnings.
-            }
           const jsonContents = JSON.parse(filecontents);
           const json = {tutor: jsonContents.tutor};
           const lessonName = _.trim(jsonContents.tutor.setspec.lessonname);
