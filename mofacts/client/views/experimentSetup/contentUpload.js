@@ -219,6 +219,7 @@ async function doFileUpload(fileElementSelector, fileType, fileDescrip) {
     if (name.indexOf('<') != -1 || name.indexOf('>') != -1 || name.indexOf(':') != -1 ||
       name.indexOf('"') != -1 || name.indexOf('/') != -1 || name.indexOf('|') != -1 ||
       name.indexOf('?') != -1 || name.indexOf('*') != -1){
+      alert('Please remove the following characters from your filename: < > : " / | ? *');
     } else {
       const fileData = await readFileAsDataURL(file);
       console.log('Upload attempted for', name);
