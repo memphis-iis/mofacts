@@ -187,6 +187,7 @@ Template.body.events({
 
   'click #logoutButton': function(event) {
     Meteor.call('clearImpersonation',Meteor.userId());
+    Session.set('curUnitInstructionsSeen', undefined)
     event.preventDefault();
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
