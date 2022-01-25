@@ -1282,7 +1282,6 @@ function modelUnitEngine() {
       const whichStim = newStimIndex;
       const whichHintLevel = newHintLevel;
       const stim = card.stims[whichStim];
-      console.log("Rusty", whichHintLevel)
 
       // Save the card selection
       // Note that we always take the first stimulus and it's always a drill
