@@ -37,17 +37,16 @@ const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedba
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   if (audioInputEnabled) {
-    const audioHtml = '<p style="display:inline-block" title="Speech Input available for this module"> \
-                       <i class="fa fa-microphone"></i></p>';
-    container = $(container).prepend(audioHtml);
+    const audioHtml = '<i class="fa fa-microphone"></i>';
   }
   container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   if (enableAudioPromptAndFeedback) {
-    const audioHtml = '<p style="display:inline-block" title="Audio Output available for this module"> \
-                       <i class="fas fa-volume-up"></i></p>';
-    container = $(container).prepend(audioHtml);
+    const audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
   }
   container = $(container).prepend(btnObj);
+  innerHtml = $(container).html();
+  innerHtml += "<br>" + audioHtml;
+  $(container).html(innerHtml);
   $('#testButtonContainer').append(container);
 };
 
