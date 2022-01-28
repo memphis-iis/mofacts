@@ -36,12 +36,13 @@ Template.profileSouthwest.events({
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
+  let audioHtml = "";
   if (audioInputEnabled) {
-    const audioHtml = '<i class="fa fa-microphone"></i>';
+    audioHtml = '<i class="fa fa-microphone"></i>';
   }
   container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   if (enableAudioPromptAndFeedback) {
-    const audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
+    audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
   }
   container = $(container).prepend(btnObj);
   innerHtml = $(container).html();
