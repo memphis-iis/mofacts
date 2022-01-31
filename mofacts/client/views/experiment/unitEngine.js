@@ -190,7 +190,6 @@ function defaultUnitEngine(curExperimentData) {
           console.log(typeof(probFunctionParameters.hintsylls),
               !this.cachedSyllables,
               (probFunctionParameters.hintsylls || []).length);
-              hintLevel = 0;
         } else {
           currentAnswerSyllables = {
             count: this.cachedSyllables.data[answer].count,
