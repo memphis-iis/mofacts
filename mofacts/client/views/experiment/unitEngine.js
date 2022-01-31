@@ -184,13 +184,14 @@ function defaultUnitEngine(curExperimentData) {
       if (probFunctionParameters) {
         console.log('getSubClozeAnswerSyllables, displaySyllableIndices/hintsylls: ', probFunctionParameters.hintsylls,
             ', this.cachedSyllables: ', this.cachedSyllables);
-        if (!this.cachedSyllables) {
+        const answer = currentStimAnswer.replace(/\./g, '_');
+        if (!this.cachedSyllables || !this.cachedSyllables.data[answer]) {
           console.log('no syllable index or cachedSyllables, defaulting to no subclozeanswer');
           console.log(typeof(probFunctionParameters.hintsylls),
               !this.cachedSyllables,
               (probFunctionParameters.hintsylls || []).length);
+              hintLevel = 0;
         } else {
-          const answer = currentStimAnswer.replace(/\./g, '_');
           currentAnswerSyllables = {
             count: this.cachedSyllables.data[answer].count,
             syllableArray: this.cachedSyllables.data[answer].syllables,
