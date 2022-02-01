@@ -101,18 +101,23 @@ function defaultUnitEngine(curExperimentData) {
       let originalAnswerArray = origAnswer.split(' ');
 
       // eslint-disable-next-line guard-for-in
-      for (index = 0; index < curHintLevel; index++) {
+      for (let index in syllablesArray) {
         index = parseInt(index); 
-       
-          // Handle underscores for syllable array elements that contain whitespace
+
+        // Handle underscores for syllable array elements that contain whitespace
+        
+        if(index >= hintLevel){
+          clozeMissingSyllables += syllablesArray[index];
           if (syllablesArray[index].indexOf(' ') >= 0) {
             clozeAnswer += '__ __';
             clozeAnswerOnlyUnderscores += '__ __';
-            clozeMissingSyllables += syllablesArray[index];
           } else {
             clozeAnswer += '____';
             clozeAnswerOnlyUnderscores += '____';
-            clozeMissingSyllables += syllablesArray[index];
+          }
+        } else {
+          clozeAnswer += syllablesArray[index];
+          clozeAnswerNoUnderscores += syllablesArray[index];
         }
 
         reconstructedAnswer += syllablesArray[index];
@@ -130,31 +135,6 @@ function defaultUnitEngine(curExperimentData) {
       // eslint-disable-next-line prefer-const
       let clozeQuestionParts = question.split(/([_]+[ ]?)+/);
 
-      // Iterate over clozeQuestionParts searching for underscores and replacing them with syllablized answer
-      for (let i = 0; i < clozeQuestionParts.length; i++) {
-        console.log('clozeQuestionParts', i, clozeQuestionParts[i]);
-        if (clozeQuestionParts[i].charAt(0) == '_') {
-          let clozeAnswerSplit = clozeAnswerNoUnderscores.split(" ");
-          let clozeAnswerUnderscores = "";
-          let reconstructedAnswerArray = reconstructedAnswer.split(" ");
-          for(k = 0; k < originalAnswerArray.length; k++){
-            if(originalAnswerArray[k] == reconstructedAnswer){
-              clozeAnswerUnderscores += '<u>' + reconstructedAnswerArray[k] + '</u>&nbsp;';
-            } else {
-              let missingSpacesText = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-              if(typeof reconstructedAnswerArray[k] !== "undefined"){
-                clozeAnswerUnderscores += '<u>' + reconstructedAnswerArray[k] +  missingSpacesText + '</u>&nbsp';
-              } else {
-                clozeAnswerUnderscores += '<u>' + missingSpacesText + '</u>&nbsp';
-              }
-            }
-          }
-          clozeQuestionParts[i] = clozeAnswerUnderscores;
-        }
-      }
-      clozeQuestionParts = clozeQuestionParts.join(' ');
-
-
       // If our third cloze part begins with an underscore,
       // our second cloze part should be our syllables, so
       // if the answer sans underscores doesn't end in whitespace,
@@ -164,11 +144,12 @@ function defaultUnitEngine(curExperimentData) {
         clozeQuestionParts[2] = clozeQuestionParts[2].trim();
       }
 
-      const clozeQuestion = question.replace(/([_]+[ ]?)+/, clozeAnswer + ' ');
+      const clozeQuestion = question.replace(/([_]+[ ]?)+/, '<u>' + clozeAnswer.split(' ').join('</u> <u>') + '</u> ');
+      clozeQuestionParts = clozeQuestion;
 
       console.log('replaceClozeWithSyllables2:', clozeQuestion, clozeMissingSyllables, clozeQuestionParts,
           clozeAnswerNoUnderscores, clozeAnswerOnlyUnderscores);
-      return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts, hintLevel};
+      return {clozeQuestion, clozeMissingSyllables, clozeQuestionParts, hintLevel, reconstructedAnswer};
     },
 
     setUpCardQuestionSyllables: function(currentQuestion, currentQuestionPart2,
@@ -198,11 +179,11 @@ function defaultUnitEngine(curExperimentData) {
         }
 
         if (currentAnswerSyllables) {
-          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts} =
+          const {clozeQuestion, clozeMissingSyllables, clozeQuestionParts: cQuestionParts, reconstructedAnswer} =
               this.replaceClozeWithSyllables(currentQuestion, currentAnswerSyllables, currentStimAnswer,hintLevel);
           if (clozeQuestion) {
             currentQuestion = clozeQuestion;
-            currentAnswer = clozeMissingSyllables;
+            currentAnswer = reconstructedAnswer;
             clozeQuestionParts = cQuestionParts;
             console.log('clozeQuestionParts:', cQuestionParts);
             const {clozeQuestion2, clozeMissingSyllables2, hintlevel2} =
