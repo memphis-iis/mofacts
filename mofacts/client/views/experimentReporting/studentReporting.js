@@ -201,7 +201,7 @@ async function drawDashboard(studentId, selectedTdfId){
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
-  totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed(2);
+  totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
   percentStimsSeen = parseFloat(stimsSeen) / parseFloat(totalStimCount) * 100;
   speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced) / parseFloat(speedOfLearningData.totalPracticeDuration)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
@@ -215,8 +215,8 @@ async function drawDashboard(studentId, selectedTdfId){
   Session.set('stimsSeen',stimsSeen);
   Session.set('curTotalAttempts',totalAttempts);
   Session.set('practiceDuration', totalPracticeDurationMinutesDisplay);
-  Session.set('itemMasteryRate', itemMasteryRate.toFixed(2));
-  Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(2));
+  Session.set('itemMasteryRate', itemMasteryRate.toFixed(0));
+  Session.set('itemMasteryTime',estimatedTimeMastery.toFixed(0));
   if(totalAttempts >= masteryDisplay){
     Session.set('displayItemMasteryRate',true);
   } else {
