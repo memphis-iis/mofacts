@@ -106,7 +106,7 @@ async function createExperimentExport(expName) {
     header[f] = t;
   });
 
-  record += delimitedRecord(header) + "\n\r";
+  record += delimitedRecord(header) + "\n";
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
   for(expName of expNames){
@@ -121,7 +121,7 @@ async function createExperimentExport(expName) {
         for (const tag of Object.keys(dynamicStimTagValues)) {
           history["CF (" + tag + ")"] = dynamicStimTagValues[tag];
         }
-        record += await delimitedRecord(history) + "\n\r";
+        record += await delimitedRecord(history) + "\n";
       } catch (e) {
         serverConsole('There was an error populating the record - it will be skipped', e, e.stack);
       }
