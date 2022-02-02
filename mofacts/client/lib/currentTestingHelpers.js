@@ -165,7 +165,7 @@ async function setStudentPerformance(studentID, studentUsername, tdfId) {
     'totalStimCount': studentPerformanceDataRet.totalStimCount,
     'totalTime': studentPerformanceData.totalPracticeDuration,
     // convert from ms to min
-    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(1),
+    'totalTimeDisplay': (studentPerformanceData.totalPracticeDuration / (60 * 1000)).toFixed(0),
   };
   Session.set('curStudentPerformance', studentPerformance);
   console.log('setStudentPerformance,output:', studentPerformanceData, studentPerformance);
