@@ -27,7 +27,6 @@
         <h3>Select Chapter</h3>
         <select id="tdf-select" disabled="true">
             <option selected="selected" value="{{INVALID}}" disabled="true">Select a tdf</option>
-            <option value="xml">All</option>
             {{#each curInstructorReportingTdfs}}
               <option value="{{this.tdfid}}">{{this.displayname}}</option>
             {{/each}}
