@@ -2359,8 +2359,7 @@ function makeGoogleSpeechAPICall(request, speechAPIKey, answerGrammar) {
     // least have a hint at what went wrong
     if (response['statusCode'] != 200) {
       const content = JSON.parse(response.content);
-      alert('Error with speech api call: ' + content['error']['message']);
-      transcript = '';
+      transcript = 'I did not get that. Please try again.';
       ignoredOrSilent = true;
     } else if (response['data']['results']) {
       transcript = response['data']['results'][0]['alternatives'][0]['transcript'].toLowerCase();
