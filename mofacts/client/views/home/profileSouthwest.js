@@ -35,22 +35,8 @@ Template.profileSouthwest.events({
 
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
-  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
-  let audioHtml = "";
-  if (audioInputEnabled) {
-    const audioHtml = '<p style="display:inline-block" title="Speech Input available for this module"> \
-                       <i class="fa fa-microphone"></i></p>';
-    container = $(container).prepend(audioHtml);
-  }
-  if (enableAudioPromptAndFeedback) {
-    const audioHtml = '<p style="display:inline-block" title="Audio available for this module"> \
-                       <i class="fa fa-volume-up"></i></p>';
-    container = $(container).prepend(audioHtml);
-  }
+  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>'
   container = $(container).prepend(btnObj);
-  innerHtml = $(container).html();
-  innerHtml += "<br>" + audioHtml;
-  $(container).html(innerHtml);
   $('#testButtonContainer').append(container);
 };
 
@@ -106,6 +92,17 @@ Template.profileSouthwest.rendered = async function() {
 
       // Only display the audio output available if enabled in tdf and tdf has key for it
       const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
+
+
+      //Display inner html for audio icons
+      let audioHtml = "";
+      if (audioInputEnabled) {
+        audioHtml = '<i class="fa fa-microphone"></i>';
+      }
+      if (enableAudioPromptAndFeedback) {
+        audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
+      }
+      innerBtnHtml = name + "<br>" + audioHtml;
 
       addButton(
           $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
