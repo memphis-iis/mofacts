@@ -36,18 +36,7 @@ Template.profileSouthwest.events({
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
-  let audioHtml = "";
-  if (audioInputEnabled) {
-    audioHtml = '<i class="fa fa-microphone"></i>';
-  }
-  container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
-  if (enableAudioPromptAndFeedback) {
-    audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
-  }
   container = $(container).prepend(btnObj);
-  innerHtml = $(container).html();
-  innerHtml += "<br>" + audioHtml;
-  $(container).html(innerHtml);
   $('#testButtonContainer').append(container);
 };
 
@@ -104,6 +93,17 @@ Template.profileSouthwest.rendered = async function() {
       // Only display the audio output available if enabled in tdf and tdf has key for it
       const audioOutputEnabled = enableAudioPromptAndFeedback && audioPromptTTSAPIKeyAvailable;
 
+
+      //Display inner html for audio icons
+      let audioHtml = "";
+      if (audioInputEnabled) {
+        audioHtml = '<i class="fa fa-microphone"></i>';
+      }
+      if (enableAudioPromptAndFeedback) {
+        audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
+      }
+      innerBtnHtml = name + "<br>" + audioHtml;
+
       addButton(
           $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
               .addClass('btn btn-block btn-responsive tdfButton')
@@ -113,7 +113,7 @@ Template.profileSouthwest.rendered = async function() {
               .data('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
               .data('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
               .data('isMultiTdf', isMultiTdf)
-              .html(name), audioInputEnabled, audioOutputEnabled,
+              .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
       );
     });
   });
