@@ -38,11 +38,14 @@ const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedba
   let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
   let audioHtml = "";
   if (audioInputEnabled) {
-    audioHtml = '<i class="fa fa-microphone"></i>';
+    const audioHtml = '<p style="display:inline-block" title="Speech Input available for this module"> \
+                       <i class="fa fa-microphone"></i></p>';
+    container = $(container).prepend(audioHtml);
   }
-  container = $(container).prepend('<p style="display:inline-block">&nbsp;&nbsp;&nbsp;</p>');
   if (enableAudioPromptAndFeedback) {
-    audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
+    const audioHtml = '<p style="display:inline-block" title="Audio available for this module"> \
+                       <i class="fa fa-volume-up"></i></p>';
+    container = $(container).prepend(audioHtml);
   }
   container = $(container).prepend(btnObj);
   innerHtml = $(container).html();
@@ -107,12 +110,12 @@ Template.profileSouthwest.rendered = async function() {
       addButton(
           $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
               .addClass('btn btn-block btn-responsive tdfButton')
-              .data('tdfid', TDFId)
-              .data('lessonname', name)
-              .data('currentStimuliSetId', currentStimuliSetId)
-              .data('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
-              .data('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
-              .data('isMultiTdf', isMultiTdf)
+              .attr('data-tdfid', TDFId)
+              .attr('data-lessonname', name)
+              .attr('data-currentStimuliSetId', currentStimuliSetId)
+              .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
+              .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
+              .attr('data-isMultiTdf', isMultiTdf)
               .html(name), audioInputEnabled, audioOutputEnabled,
       );
     });
