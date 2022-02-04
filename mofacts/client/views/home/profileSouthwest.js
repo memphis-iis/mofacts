@@ -35,7 +35,7 @@ Template.profileSouthwest.events({
 
 const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedback) {
   console.log('ADD BUTTON CALLED: ' + JSON.stringify(btnObj));
-  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>';
+  let container = '<div class=\'col-xs-12 col-sm-12 col-md-3 col-lg-3 text-center\'><br></div>'
   container = $(container).prepend(btnObj);
   $('#testButtonContainer').append(container);
 };
@@ -107,13 +107,13 @@ Template.profileSouthwest.rendered = async function() {
       addButton(
           $('<button type=\'button\' id=\''+TDFId+'\' name=\''+name+'\'>')
               .addClass('btn btn-block btn-responsive tdfButton')
-              .data('tdfid', TDFId)
-              .data('lessonname', name)
-              .data('currentStimuliSetId', currentStimuliSetId)
-              .data('ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
-              .data('speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
-              .data('isMultiTdf', isMultiTdf)
-              .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
+              .attr('data-tdfid', TDFId)
+              .attr('data-lessonname', name)
+              .attr('data-currentStimuliSetId', currentStimuliSetId)
+              .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
+              .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
+              .attr('data-isMultiTdf', isMultiTdf)
+              .html(name), audioInputEnabled, audioOutputEnabled,
       );
     });
   });
