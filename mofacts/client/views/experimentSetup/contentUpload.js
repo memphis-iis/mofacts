@@ -128,6 +128,13 @@ Template.contentUpload.events({
     alert('TDF downloaded.');
   },
 
+  'click #tdf-delete-btn': function(event){
+    const btnTarget = $(event.currentTarget);
+    const fileName = _.trim(btnTarget.data('filename'));
+    meteorCallAsync('deleteTDFFile',fileName);
+    userFilesRefresh();
+  },
+
   'click #stim-download-btn': async function(event){
     event.preventDefault();
     // Set Filename
@@ -180,6 +187,12 @@ Template.contentUpload.events({
     a.click();
     window.URL.revokeObjectURL(url);
     alert('Stim Exported.');
+  },
+
+  'click #stim-delete-btn': function(event){
+    const btnTarget = $(event.currentTarget);
+    const fileName = _.trim(btnTarget.data('filename'));
+    meteorCallAsync('deleteStimFile',fileName);
   },
 
   'change #upload-tdf': function(event) {

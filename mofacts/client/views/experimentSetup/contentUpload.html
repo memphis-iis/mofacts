@@ -37,7 +37,8 @@
                     <tr>
                         <th>Type</th>
                         <th>Name</th>
-                        <th>Action</th>
+                        <th>Download</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,9 +48,11 @@
                             <td>{{fileName}}</td>
                             {{#if tdfID}}
                             <td><button id="tdf-download-btn" value="{{tdfID}}" class="btn"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span></button></td>
+                            <td><button id="tdf-delete-btn" value="{{tdfID}}" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
                             {{/if}}
                             {{#if stimID}}
                             <td><button id="stim-download-btn" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-share-alt" aria-hidden="true"></span></button></td>
+                            <td><button id="stim-delete-btn" data-filename="{{fileName}}" class="btn"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button></td>
                             {{/if}}
                         </tr>
                     {{/each}}
