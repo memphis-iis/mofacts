@@ -72,6 +72,10 @@ Template.classEdit.events({
     const classes = Session.get('classes');
     if (isNewClass) {
       const curClassName = $('#newClassName').val();
+      if(curClassName == ""){
+        alert("Class cannot be blank.");
+        return false;
+      }
       curClass = {
         courseId: undefined,
         courseName: curClassName,
@@ -89,6 +93,13 @@ Template.classEdit.events({
     }
 
     const newSections = $('#sectionNames').val().trim().split('\n');
+    for(i = 0; i > newSections.length; i++){
+      newSection = newSections[i];
+      if(newSection == "" || newSection == " "){
+        alert("Cannot have blank section names");
+        return false;
+      }
+    }
     curClass.sections = newSections;
 
     function addEditClassCallback(err, res) {
