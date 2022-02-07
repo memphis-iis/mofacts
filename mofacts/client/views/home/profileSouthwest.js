@@ -97,10 +97,10 @@ Template.profileSouthwest.rendered = async function() {
       //Display inner html for audio icons
       let audioHtml = "";
       if (audioInputEnabled) {
-        audioHtml = '<i class="fa fa-microphone"></i>';
+        audioHtml += '<span><i class="fa fa-microphone"></i>&nbsp;</span>';
       }
       if (enableAudioPromptAndFeedback) {
-        audioHtml = '<span class="glyphicon glyphicon-headphones"></span>';
+        audioHtml += '<span class="glyphicon glyphicon-headphones">&nbsp;</span>';
       }
       innerBtnHtml = name + "<br>" + audioHtml;
 
@@ -113,7 +113,7 @@ Template.profileSouthwest.rendered = async function() {
               .attr('data-ignoreOutOfGrammarResponses', ignoreOutOfGrammarResponses)
               .attr('data-speechOutOfGrammarFeedback', speechOutOfGrammarFeedback)
               .attr('data-isMultiTdf', isMultiTdf)
-              .html(name), audioInputEnabled, audioOutputEnabled,
+              .html(innerBtnHtml), audioInputEnabled, audioOutputEnabled,
       );
     });
   });
