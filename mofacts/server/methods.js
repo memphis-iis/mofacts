@@ -1431,18 +1431,20 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
     const newFormatItems = getNewItemFormat(oldStimFormat, stimFilename, stimuliSetId, responseKCMap);
     const existingStims = await t.manyOrNone('SELECT * FROM item WHERE stimulusFilename = $1', stimFilename);
     let newStims = [];
+    let stimulusKC;
     if (existingStims && existingStims.length > 0) {
       for (const newStim of newFormatItems) {
-        const stimulusKC = newStim.stimulusKC;
+        stimulusKC = newStim.stimulusKC;
         let matchingStim = existingStims.find((x) => x.stimuluskc == stimulusKC);
         if (!matchingStim) {
+          console.log('matchingstims')
           newStims.push(newStim);
           continue;
         }
         matchingStim = getItem(matchingStim);
         const mergedStim = Object.assign(matchingStim, newStim);
         if (mergedStim.alternateDisplays) mergedStim.alternateDisplays = JSON.stringify(mergedStim.alternateDisplays);
-        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, stimulusFilename = ${stimulusFilename}, \
+        await t.none('UPDATE item SET stimuliSetId = ${stimuliSetId}, \
                       parentStimulusFileName = ${parentStimulusFileName}, stimulusKC = ${stimulusKC}, \
                       clusterKC = ${clusterKC}, responseKC = ${responseKC}, params = ${params}, \
                       optimalProb = ${optimalProb}, correctResponse = ${correctResponse}, \
@@ -1450,8 +1452,11 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
                       speechHintExclusionList = ${speechHintExclusionList}, clozeStimulus = ${clozeStimulus}, \
                       textStimulus = ${textStimulus}, audioStimulus = ${audioStimulus}, \
                       imageStimulus = ${imageStimulus}, videoStimulus = ${videoStimulus}, \
-                      alternateDisplays = ${alternateDisplays}, tags = ${tags}', mergedStim);
+                      alternateDisplays = ${alternateDisplays}, tags = ${tags} \
+                      WHERE stimulusFilename = ${stimulusFilename} AND stimulusKC = ${stimulusKC}', mergedStim);
       }
+      //if we get here we might have more stims in the old file than in the new. Need to remove them from the db.
+      await t.none(`DELETE FROM item WHERE stimulusKC > ${stimulusKC} and stimulusKC < ${stimuliSetId + 1} * 10000;`);
     } else {
       newStims = newFormatItems;
     }
