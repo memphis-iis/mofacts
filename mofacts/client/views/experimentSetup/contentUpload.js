@@ -193,6 +193,7 @@ Template.contentUpload.events({
     const btnTarget = $(event.currentTarget);
     const fileName = _.trim(btnTarget.data('filename'));
     meteorCallAsync('deleteStimFile',fileName);
+    userFilesRefresh();
   },
 
   'change #upload-tdf': function(event) {

@@ -2137,11 +2137,26 @@ Meteor.startup(async function() {
     //handle file deletions
     deleteStimFile: async function(stimFilename) {
       console.log('delete Stim File', stimFilename);
-      const query = 'DELETE FROM item WHERE stimulusFilename = $1';
-      await db.none(query, [stimFilename]);
-      const query2 = 'SELECT stimuliSetId FROM item WHERE stimulusFilename = $1 LIMIT 1';
+      stimSet = await getStimuliSetByFilename(stimFilename);
+      stimSetId = stimSet[0].stimuliSetId;
+      const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
+      tdfIds = await db.manyOrNone(query1, [stimSetId]);
+      for(i=0; i < tdfIds.length; i++){
+          tdf = tdfIds[i].tdfid;
+          const querya = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+          await db.none(querya, [tdf]);
+          const queryb = 'DELETE FROM componentstate WHERE tdfid = $1'
+          await db.none(queryb, [tdf]);
+          const queryc = 'DELETE FROM assignment WHERE tdfid = $1'
+          await db.none(queryc, [tdf]);
+          const queryd = 'DELETE FROM history WHERE tdfid = $1'
+          await db.none(queryd, [tdf]);
+      }
+      const query2 = 'DELETE FROM item WHERE stimulusFilename = $1';
       await db.none(query2, [stimFilename]);
-      res = "Stim deleted.";
+      const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
+      await db.none(query3, [stimSetId]);
+      res = "Stim and related TDFS deleted.";
       return res;
     },
 
@@ -2150,10 +2165,17 @@ Meteor.startup(async function() {
       const toRemove = await getTdfByFileName(tdfFileName);
       console.log(toRemove);
       if(toRemove.TDFId){
+        tdf = toRemove.TDFId;
+        const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
+        await db.none(querya, [tdf]);
+        const queryb = 'DELETE FROM assignment WHERE tdfid = $1'
+        await db.none(queryb, [tdf]);
+        const queryc = 'DELETE FROM history WHERE tdfid = $1'
+        await db.none(queryc, [tdf]);
+        const query2 = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+        await db.none(query2, [toRemove.TDFId]);
         const query1 = 'DELETE FROM tdf WHERE TDFId=$1';
         await db.none(query1, [toRemove.TDFId]);
-        const query2 = 'DELETE FROM item WHERE stimuliSetId = $1';
-        await db.none(query2, [toRemove.stimuliSetId]);
       } else {
         result = 'No matching tdf file found';
         return result;
