@@ -10,6 +10,7 @@ import {getNewItemFormat} from './conversions/convert';
 import {sendScheduledTurkMessages} from './turk_methods';
 import {getItem, getComponentState, getCourse, getTdf} from './orm';
 import { FilesCollection } from 'meteor/ostrio:files';
+import { result } from 'underscore';
 
 
 export {
@@ -1476,6 +1477,8 @@ async function upsertStimFile(stimFilename, stimJSON, ownerId) {
   });
 }
 
+
+
 async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   console.log('upsertTDFFile', tdfFilename);
   const prev = await getTdfByFileName(tdfFilename);
@@ -1531,14 +1534,6 @@ async function upsertTDFFile(tdfFilename, tdfJSON, ownerId) {
   }
 }
 
-function parseStringSync(str) {
-  let result;
-  // eslint-disable-next-line new-cap
-  require('xml2js').Parser().parseString(str, (e, r) => {
-    result = r;
-  });
-  return result;
-}
 
 async function loadStimsAndTdfsFromPrivate(adminUserId) {
   if (!isProd) {
@@ -2142,6 +2137,56 @@ Meteor.startup(async function() {
       }
       serverConsole('allErrors: ' + JSON.stringify(allErrors));
       return allErrors;
+    },
+
+    //handle file deletions
+    deleteStimFile: async function(stimFilename) {
+      console.log('delete Stim File', stimFilename);
+      stimSet = await getStimuliSetByFilename(stimFilename);
+      stimSetId = stimSet[0].stimuliSetId;
+      const query1 = 'SELECT tdfid FROM tdf WHERE stimulisetid = $1';
+      tdfIds = await db.manyOrNone(query1, [stimSetId]);
+      for(i=0; i < tdfIds.length; i++){
+          tdf = tdfIds[i].tdfid;
+          const querya = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+          await db.none(querya, [tdf]);
+          const queryb = 'DELETE FROM componentstate WHERE tdfid = $1'
+          await db.none(queryb, [tdf]);
+          const queryc = 'DELETE FROM assignment WHERE tdfid = $1'
+          await db.none(queryc, [tdf]);
+          const queryd = 'DELETE FROM history WHERE tdfid = $1'
+          await db.none(queryd, [tdf]);
+      }
+      const query2 = 'DELETE FROM item WHERE stimulusFilename = $1';
+      await db.none(query2, [stimFilename]);
+      const query3 = 'DELETE FROM tdf WHERE stimulisetid = $1';
+      await db.none(query3, [stimSetId]);
+      res = "Stim and related TDFS deleted.";
+      return res;
+    },
+
+    deleteTDFFile: async function(tdfFileName){
+      console.log("Remove TDF File:", tdfFileName);
+      const toRemove = await getTdfByFileName(tdfFileName);
+      console.log(toRemove);
+      if(toRemove.TDFId){
+        tdf = toRemove.TDFId;
+        const querya = 'DELETE FROM componentstate WHERE tdfid = $1'
+        await db.none(querya, [tdf]);
+        const queryb = 'DELETE FROM assignment WHERE tdfid = $1'
+        await db.none(queryb, [tdf]);
+        const queryc = 'DELETE FROM history WHERE tdfid = $1'
+        await db.none(queryc, [tdf]);
+        const query2 = 'DELETE FROM globalexperimentstate WHERE TDFId=$1'
+        await db.none(query2, [toRemove.TDFId]);
+        const query1 = 'DELETE FROM tdf WHERE TDFId=$1';
+        await db.none(query1, [toRemove.TDFId]);
+      } else {
+        result = 'No matching tdf file found';
+        return result;
+      }
+      result = "TDF deleted";
+      return result;
     },
 
     // Allow file uploaded with name and contents. The type of file must be
