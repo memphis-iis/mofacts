@@ -21,7 +21,7 @@
       <div class="row" style="padding-top:20px;">   
         <div class="gauge col-sm-6 col-xs-12">
           <p>Mastered Items</p>   
-          <div id="preview-textfield-custom" style="top:80px; position: relative;"><b>{{stimsSeen}} of {{stimCount}}</b></div>  
+          <div id="preview-textfield-custom" style="top:80px; position: relative; font-size: small;"><b>{{stimsSeen}} of {{stimCount}}</b></div>  
           <canvas class="dashCanvas masteredItems" width="100" height="100" id="canvas-unit-item-progress"></canvas>
         </div>
         <div class="gauge col-sm-6 col-xs-12">
@@ -43,10 +43,10 @@
           <div id="preview-textfield" style="display:none;">0%</div>  
           <div class="row" style="margin:auto; max-width:250px;">
             <div class="col-xs-6">
-              <p data-toggle="tooltip" title="MoFaCTs thinks it's choices have been too easy for optimal learning and will be trying to make it harder. Sit tight, and the system will introduce more items to pick up the pace.">Too Easy <br>(Hover for this for more info)</p>
+              <p data-toggle="tooltip" style="font-size: small;" title="MoFaCTs thinks it's choices have been too easy for optimal learning and will be trying to make it harder. Sit tight, and the system will introduce more items to pick up the pace.">Too Hard <br>(Hover over this for more info)</p>
             </div>
             <div class="col-xs-6">
-              <p data-toggle="tooltip" title="MoFaCTs thinks it's choices have been too hard for optimal learning and will be trying to make it easier than before, you might try studying the feedback more carefully.">Too Hard <br>(Hover over this for more info)</p>
+              <p data-toggle="tooltip" style="font-size: small;" title="MoFaCTs thinks it's choices have been too hard for optimal learning and will be trying to make it easier than before, you might try studying the feedback more carefully.">Too Easy <br>(Hover over this for more info)</p>
             </div>
           </div>
         </div>
