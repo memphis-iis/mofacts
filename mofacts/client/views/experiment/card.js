@@ -1562,7 +1562,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
       if (deliveryParams.feedbackType == 'dialogue' && dialogueHistory && dialogueHistory.LastStudentAnswer) {
         reviewTimeout = 0.001;
       } else if(Session.get('isRefutation')) {
-        reviewTimeout = _.intval(deliveryParams.refutationstudy);
+        reviewTimeout = _.intval(deliveryParams.refutationstudy) || _.intval(deliveryParams.reviewstudy);
       } else {
         reviewTimeout = _.intval(deliveryParams.reviewstudy);
       }
