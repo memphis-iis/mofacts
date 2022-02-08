@@ -1747,13 +1747,16 @@ Meteor.startup(async function() {
         throw new Meteor.Error('Unauthorized: You do not have permission to this data');
       }
   
-      const tdfNames = getTdfNamesAssignedByInstructor(uid);
-  
+      const tdfNames = await getTdfNamesAssignedByInstructor(uid);
+      
       if (!tdfNames.length > 0) {
         throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
       }
-  
-      return await createExperimentExport(tdfNames);
+      let experimentExport;
+      for (let tdfName of tdfNames){
+        experimentExport += await createExperimentExport(tdfName)
+      }
+      return experimentExport;
     },
 
     createClassDataFile: async function(classId) {
