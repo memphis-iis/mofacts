@@ -203,7 +203,7 @@ async function drawDashboard(studentId, selectedTdfId){
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
   percentStimsSeen = parseFloat(stimsSeen) / parseFloat(totalStimCount) * 100;
-  speedOfLearning = Math.log((1+parseFloat(speedOfLearningData.stimsIntroduced) * 100;
+  speedOfLearning = Math.log(1+parseFloat(speedOfLearningData.stimsIntroduced)) * 100;
   difficultyCorrectProportion = parseFloat(difficultyData.numCorrect) / (parseFloat(difficultyData.numCorrect) + parseFloat(difficultyData.numIncorrect));
   displayDifficulty =  (Math.min(Math.max(difficultyCorrectProportion - optimumDifficulty, -0.3) , 0.3) + 0.3) * 100; //Add .3 and Multiply by 100 for graph scale
   totalPracticeDurationMasteryMinutes = masteryRateData.totalPracticeDuration / 60000;
