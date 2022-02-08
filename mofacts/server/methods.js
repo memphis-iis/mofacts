@@ -703,7 +703,6 @@ async function getTdfsAssignedToStudent(userId, curSectionId) {
                  ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
   const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
   const formattedTdfs = tdfs.map((x) => getTdf(x));
-  console.log(formattedTdfs);
   return formattedTdfs;
 }
 
