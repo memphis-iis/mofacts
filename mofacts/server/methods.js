@@ -1042,6 +1042,7 @@ async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
 async function getListOfStimTags(tdfFileName) {
   serverConsole('getListOfStimTags, tdfFileName: ' + tdfFileName);
   const tdf = await getTdfByFileName(tdfFileName);
+  console.log(tdf)
   const stimuliSetId = tdf.stimuliSetId;
   serverConsole('getListOfStimTags, stimuliSetId: ' + stimuliSetId);
   const stims = await getStimuliSetById(stimuliSetId);
@@ -1747,13 +1748,16 @@ Meteor.startup(async function() {
         throw new Meteor.Error('Unauthorized: You do not have permission to this data');
       }
   
-      const tdfNames = getTdfNamesAssignedByInstructor(uid);
-  
+      const tdfNames = await getTdfNamesAssignedByInstructor(uid);
+      
       if (!tdfNames.length > 0) {
         throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
       }
-  
-      return await createExperimentExport(tdfNames);
+      let experimentExport;
+      for (let tdfName of tdfNames){
+        experimentExport += await createExperimentExport(tdfName)
+      }
+      return experimentExport;
     },
 
     createClassDataFile: async function(classId) {
