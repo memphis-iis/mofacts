@@ -2189,7 +2189,6 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
   const audioPromptMode = Session.get('audioPromptMode');
   if (enableAudioPromptAndFeedback) {
     if (audioPromptSource === audioPromptMode || audioPromptMode === 'all') {
-      Session.set('recordingLocked', true);
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g, 'blank');
