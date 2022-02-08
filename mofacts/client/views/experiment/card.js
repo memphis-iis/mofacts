@@ -1216,8 +1216,14 @@ async function userAnswerFeedback(userAnswer, isTimeout, simCorrect, afterAnswer
 
   // Answer assessment ->
   if (userAnswerWithTimeout != null) {
+    displayAnswer = "";
+    if(Session.get('hintLevel') && Session.get('currentAnswerSyllables')){
+      displayedHintLevel = Session.get('hintLevel') || 0;
+      answerSyllables = Session.get('currentAnswerSyllables').syllableArray || "";
+      displayAnswer = answerSyllables.slice(0, displayedHintLevel).join("");
+    }
     Answers.answerIsCorrect(userAnswerWithTimeout, Session.get('currentAnswer'), Session.get('originalAnswer'),
-        setspec, afterAnswerAssessmentCbWithArgs);
+    displayAnswer,setspec, afterAnswerAssessmentCbWithArgs);
   } else {
     afterAnswerAssessmentCbWithArgs(null);
   }
