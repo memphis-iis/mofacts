@@ -273,6 +273,10 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
       }
     }
   }
+  if(userAnswer === ''){
+    matchText = 'Please answer every question.';
+    isCorrect = false;
+  }
   return {isCorrect, matchText};
 }
 
@@ -304,7 +308,7 @@ const Answers = {
 
   // Return [isCorrect, matchText] if userInput correctly matches answer -
   // taking into account both branching answers and edit distance
-  answerIsCorrect: async function(userInput, answer, originalAnswer, setspec, callback) {
+  answerIsCorrect: async function(userInput, answer, originalAnswer, displayedAnswer, setspec, callback) {
     // Note that a missing or invalid lfparameter will result in a null value
     const lfparameter = parseFloat(setspec ? setspec.lfparameter || 0 : 0);
     const feedbackType = Session.get('currentDeliveryParams').feedbackType;
@@ -313,7 +317,7 @@ const Answers = {
 
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
-      let userInputWithAddedSylls = answer + userInput;
+      let userInputWithAddedSylls = displayedAnswer + userInput;
       fullTextIsCorrect = checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter);
     }
 
