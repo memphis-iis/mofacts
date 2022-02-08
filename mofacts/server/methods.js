@@ -695,14 +695,15 @@ async function getTdfAssignmentsByCourseIdMap(instructorId) {
   return assignmentTdfFileNamesByCourseIdMap;
 }
 
-async function getTdfsAssignedToStudent(userId) {
+async function getTdfsAssignedToStudent(userId, curSectionId) {
   console.log('getTdfsAssignedToStudent', userId);
   const query = 'SELECT t.* from TDF AS t INNER JOIN assignment AS a ON a.TDFId = t.TDFId INNER JOIN course AS c \
                  ON c.courseId = a.courseId INNER JOIN section AS s ON s.courseId = c.courseId \
                  INNER JOIN section_user_map AS m \
-                 ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2';
-  const tdfs = await db.manyOrNone(query, [userId, curSemester]);
+                 ON m.sectionId = s.sectionId WHERE m.userId = $1 AND c.semester = $2 AND s.sectionId = $3';
+  const tdfs = await db.manyOrNone(query, [userId, curSemester, curSectionId]);
   const formattedTdfs = tdfs.map((x) => getTdf(x));
+  console.log(formattedTdfs);
   return formattedTdfs;
 }
 
