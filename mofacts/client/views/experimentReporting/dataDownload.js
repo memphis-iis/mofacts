@@ -190,6 +190,7 @@ Template.dataDownload.events({
   'click #teacherDataDownloadLink': function(event) {
     event.preventDefault();
     let teacherID = event.currentTarget.getAttribute('data-teacherID');
+    console.log('teacherID: ' + teacherID)
     const fileName = 'mofacts_' + Meteor.user({_id : teacherID}).username.replace('/[/\\?%*:|"<>\s]/g', '_') + '_all_tdf_data.txt';
     Meteor.call('createTeacherDataFile', teacherID, function(error, result){
       createData(error, result, fileName);
