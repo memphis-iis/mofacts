@@ -1042,7 +1042,6 @@ async function getUsersByUnitUpdateDate(userIds, tdfId, date) {
 async function getListOfStimTags(tdfFileName) {
   serverConsole('getListOfStimTags, tdfFileName: ' + tdfFileName);
   const tdf = await getTdfByFileName(tdfFileName);
-  console.log(tdf)
   const stimuliSetId = tdf.stimuliSetId;
   serverConsole('getListOfStimTags, stimuliSetId: ' + stimuliSetId);
   const stims = await getStimuliSetById(stimuliSetId);
