@@ -275,7 +275,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
   }
   if(userAnswer === ''){
     matchText = 'Please answer every question.';
-    isCorrect = true;
+    isCorrect = false;
   }
   return {isCorrect, matchText};
 }
