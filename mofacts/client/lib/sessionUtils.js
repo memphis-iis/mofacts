@@ -118,6 +118,5 @@ function sessionCleanUp() {
   Session.set('feedbackParamsSet', undefined);
   Session.set('instructionQuestionResult', undefined);
   Session.set('hintLevel', undefined);
-  Session.set('curSectionId', undefined);
 }
 
