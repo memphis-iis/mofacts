@@ -339,7 +339,7 @@ function varLenDisplayTimeout() {
 // Clean up things if we navigate away from this page
 function leavePage(dest) {
   console.log('leaving page for dest: ' + dest);
-  if (dest != '/card' && dest != '/instructions' && dest != '/voice') {
+  if (dest != '/card' && dest != '/instructions' && dest != '/voice' && document.location.pathname != '/instructions') {
     console.log('resetting subtdfindex, dest: ' + dest);
     Session.set('subTdfIndex', null);
     sessionCleanUp();
