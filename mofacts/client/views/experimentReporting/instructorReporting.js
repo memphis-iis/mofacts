@@ -170,11 +170,13 @@ Template.instructorReporting.events({
     const date = event.currentTarget.value;
     const dateInt = new Date(date).getTime();
     console.log('practice deadline:', dateInt);
-    fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
-    hideUsersByDate(dateInt, _state.get('currentTdf'));
-    _state.set('userMetThresholdMap', undefined);
-    $('#practice-time-select').val(INVALID);
-    $('#practice-time-select').prop('disabled', false);
+    if(!dateInt.isNaN()){
+      fetchAndSetPracticeTimeIntervalsMap(dateInt, _state.get('currentTdf'));
+      hideUsersByDate(dateInt, _state.get('currentTdf'));
+      _state.set('userMetThresholdMap', undefined);
+      $('#practice-time-select').val(INVALID);
+      $('#practice-time-select').prop('disabled', false);
+    }
   },
 
   'change #practice-time-select': (event) => {
