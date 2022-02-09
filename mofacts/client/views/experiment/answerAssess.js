@@ -274,7 +274,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
     }
   }
   if(userAnswer === ''){
-    matchText = 'Skip.';
+    matchText = 'Please answer every question.';
     isCorrect = true;
   }
   return {isCorrect, matchText};
