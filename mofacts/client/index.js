@@ -131,7 +131,11 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    Router.go('/profile');
+    if(Session.get('loginMode') == 'southwest'){
+      Router.go('/profileSouthwest')
+    } else {
+      Router.go('/profile');
+    }
   },
 
   'click #progressButton': function(event) {
