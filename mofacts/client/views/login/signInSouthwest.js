@@ -118,6 +118,7 @@ setClass = function(curClassID) {
   const allClasses = Session.get('curTeacherClasses');
   const curClass = allClasses.find((aClass) => aClass.sectionid == curClassID);
   Session.set('curClass', curClass);
+  Session.set('curSectionId', curClass.sectionid)
   $('.login').prop('hidden', '');
 };
 

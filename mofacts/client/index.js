@@ -131,7 +131,11 @@ Template.body.events({
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();
     }
-    Router.go('/profile');
+    if(Session.get('loginMode') == 'southwest'){
+      Router.go('/profileSouthwest')
+    } else {
+      Router.go('/profile');
+    }
   },
 
   'click #progressButton': function(event) {
@@ -187,7 +191,8 @@ Template.body.events({
 
   'click #logoutButton': function(event) {
     Meteor.call('clearImpersonation',Meteor.userId());
-    Session.set('curUnitInstructionsSeen', undefined)
+    Session.set('curUnitInstructionsSeen', undefined);
+    Session.set('curSectionId', undefined);
     event.preventDefault();
     if (window.currentAudioObj) {
       window.currentAudioObj.pause();

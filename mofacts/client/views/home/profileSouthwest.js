@@ -47,7 +47,7 @@ Template.profileSouthwest.rendered = async function() {
   $('#expDataDownloadContainer').html('');
   const allTdfs = await meteorCallAsync('getAllTdfs');
   Session.set('allTdfs', allTdfs);
-  const curSectionId = Session.get('curClass').sectionid;
+  const curSectionId = Session.get('curSectionId');
   Meteor.call('getTdfsAssignedToStudent', Meteor.userId(), curSectionId, function(err, result) {
     console.log('err: ' + err + ', res: ' + result);
     const assignedTdfs = result;
