@@ -2556,7 +2556,7 @@ function startUserMedia(stream) {
 }
 
 function startRecording() {
-  if (recorder && !Session.get('recordingLocked')) {
+  if (recorder && !Session.get('recordingLocked') && Session.get('audioEnabledView')) {
     Session.set('recording', true);
     recorder.record();
     console.log('RECORDING START');
