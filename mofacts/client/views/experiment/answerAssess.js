@@ -274,8 +274,8 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
     }
   }
   if(userAnswer === ''){
-    matchText = 'Please answer every question.';
     isCorrect = false;
+    matchText = 'Incorrect. The correct answer is ' + dispAnswer + '.';
   }
   return {isCorrect, matchText};
 }
