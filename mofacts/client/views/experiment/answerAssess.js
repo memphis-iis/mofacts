@@ -144,7 +144,7 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
 // We also support a |-only regex(-ish) format (which is also honored by our
 // regex search)
 function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
-  if (userInput === ''){
+  if (userInput === '' || userAnswer === ''){
     //user didnt enter a response.
     return 0;
   } else if (/^[\|A-Za-z0-9 \.\%]+$/i.test(stimStr)) {
