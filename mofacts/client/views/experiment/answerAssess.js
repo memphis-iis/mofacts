@@ -143,8 +143,8 @@ function simpleStringMatch(userAnswer, correctAnswer, lfparameter, fullAnswerStr
 // match was exact, we return 1. If we matched on edit distance, we return 2.
 // We also support a |-only regex(-ish) format (which is also honored by our
 // regex search)
-function stringMatch(stimStr, userAnswer, lfparameter) {
-  if (userAnswer === ''){
+function stringMatch(stimStr, userAnswer, lfparameter, userInput) {
+  if (userInput === '' || userAnswer === ''){
     //user didnt enter a response.
     return 0;
   } else if (/^[\|A-Za-z0-9 \.\%]+$/i.test(stimStr)) {
@@ -239,7 +239,7 @@ function _branchingCorrectText(answer) {
   return result[0];
 }
 
-function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
+function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
   let isCorrect; let matchText;
   if (answerIsBranched(correctAnswer)) {
@@ -251,7 +251,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
       dispAnswer = _.trim(dispAnswer.split('|')[0]);
     }
 
-    const match = stringMatch(originalAnswer, userAnswer, lfparameter);
+    const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
 
     if (match === 0) {
       isCorrect = false;
@@ -269,7 +269,7 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
     }
 
     if (!matchText) {
-      if (userAnswer === '') {
+      if (userAnswer === '' || userInput === '') {
         matchText = 'The correct answer is ' + dispAnswer + '.';
       } else {
         matchText = isCorrect ? 'Correct' : 'Incorrect. The correct answer is ' + dispAnswer + '.';
@@ -317,7 +317,7 @@ const Answers = {
     // Try again with original answer in case we did a syllable answer and they input the full response
     if (!fullTextIsCorrect.isCorrect && !!originalAnswer) {
       let userInputWithAddedSylls = displayedAnswer + userInput;
-      fullTextIsCorrect = checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter);
+      fullTextIsCorrect = checkAnswer(userInputWithAddedSylls, originalAnswer, originalAnswer, lfparameter, userInput);
     }
 
     if (!fullTextIsCorrect.isCorrect) {
