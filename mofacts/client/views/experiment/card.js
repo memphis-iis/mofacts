@@ -1336,7 +1336,7 @@ function afterAnswerAssessmentCb(userAnswer, isCorrect, feedbackForAnswer, after
   if (isCorrect == null && correctAndText != null) {
     isCorrect = correctAndText.isCorrect;
   }
-  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect){
+  if (correctAndText.matchText.split(' ')[0] != 'Incorrect.' && !isCorrect && userAnswer != ''){
     Session.set('isRefutation', true);
   }
   if(!isCorrect) showRemovalButton();
