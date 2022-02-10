@@ -273,10 +273,6 @@ function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter) {
       }
     }
   }
-  if(userAnswer === ''){
-    isCorrect = false;
-    matchText = 'Incorrect. The correct answer is ' + dispAnswer + '.';
-  }
   return {isCorrect, matchText};
 }
 
