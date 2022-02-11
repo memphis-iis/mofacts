@@ -1167,18 +1167,21 @@ async function getStudentPerformanceByIdAndTDFId(userId, TDFid,hintLevel=null,re
 
 async function getStudentPerformanceForClassAndTdfId(instructorId) {
   const query = 'SELECT MAX(t.TDFId) AS tdfid, \
-                MAX(c.courseId) AS courseid, \
-                MAX(s.userId) AS userid, \
-                SUM(s.priorCorrect) AS correct, \
-                SUM(s.priorIncorrect) AS incorrect, \
-                SUM(s.totalPracticeDuration) AS totalPracticeDuration \
-                FROM componentState AS s \
-                INNER JOIN item AS i ON i.stimulusKC = s.KCId \
-                INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
-                INNER JOIN assignment AS a on a.TDFId = t.TDFId \
-                INNER JOIN course AS c on c.courseId = a.courseId \
-                WHERE c.semester = $1 AND c.teacherUserId = $2  AND s.componenttype = \'stimulus\' \
-                GROUP BY s.userId, t.TDFId, c.courseId';
+                    MAX(c.courseId) AS courseid, \
+                    MAX(s.userId) AS userid, \
+                    SUM(s.priorCorrect) AS correct, \
+                    SUM(s.priorIncorrect) AS incorrect, \
+                    SUM(s.totalPracticeDuration) AS totalPracticeDuration,\
+                    sc.sectionId AS sectionId \
+                    FROM componentState AS s \
+                    INNER JOIN item AS i ON i.stimulusKC = s.KCId \
+                    INNER JOIN tdf AS t ON t.stimuliSetId = i.stimuliSetId \
+                    INNER JOIN assignment AS a on a.TDFId = t.TDFId \
+                    INNER JOIN course AS c on c.courseId = a.courseId \
+                    INNER JOIN section_user_map AS sm on sm.userId = s.userId \
+                    INNER JOIN section AS sc on sc.sectionId = sm.sectionId \
+                    WHERE c.semester = $1 AND c.teacherUserId = $2 AND s.componenttype = \'stimulus\' AND sc.courseId = c.courseId \
+                    GROUP BY s.userId, t.TDFId, c.courseId, sc.sectionId;'
 
   const studentPerformanceRet = await db.manyOrNone(query, [curSemester, instructorId]);
   console.log('studentPerformanceRet', studentPerformanceRet);
