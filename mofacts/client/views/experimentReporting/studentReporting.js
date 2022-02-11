@@ -101,14 +101,7 @@ Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
-  curTotalAttempts: function(){
-    curTotalAttempts = Session.get('curTotalAttempts');
-    if(curTotalAttempts != "{\"$InfNaN\":0}"){
-      return "0";
-    } else {
-      return curTotalAttempts;
-    }
-  },
+  curTotalAttempts: () => Session.get('curTotalAttempts'),
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   curTotalTime: () => Session.get('practiceDuration'),
   curStudentPerformanceCorrectInInteger: function() {
@@ -205,7 +198,12 @@ async function drawDashboard(studentId, selectedTdfId){
   //Expand Data
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
     // Perform calculated data
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)  
+  
+  if(typeof numCorrect !== "undefined" || typeof numIncorrect != undefined){
+    totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
+  } else {
+    totalAttempts = 0;
+  }
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
