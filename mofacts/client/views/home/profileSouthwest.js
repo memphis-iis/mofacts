@@ -2,6 +2,7 @@ import {meteorCallAsync} from '../..';
 import {haveMeteorUser} from '../../lib/currentTestingHelpers';
 import {selectTdf} from './profile';
 import {routeToSignin} from '../../lib/router';
+import { Route53RecoveryCluster } from '../../../node_modules/aws-sdk/index';
 
 Template.profileSouthwest.helpers({
   username: function() {
@@ -41,6 +42,16 @@ const addButton = function(btnObj, audioInputEnabled, enableAudioPromptAndFeedba
 };
 
 Template.profileSouthwest.rendered = async function() {
+  const pageAccessedByReload = (
+    (window.performance.navigation && window.performance.navigation.type === 1) ||
+      window.performance
+        .getEntriesByType('navigation')
+        .map((nav) => nav.type)
+        .includes('reload')
+  );
+  if(pageAccessedByReload){
+    Router.go('/signInSouthwest');
+  }
   Session.set('currentExperimentState', undefined);
   Session.set('subTdfIndex', undefined);
   Session.set('showSpeechAPISetup', false);
