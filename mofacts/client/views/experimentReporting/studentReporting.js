@@ -101,7 +101,14 @@ Template.studentReporting.helpers({
   studentReportingTdfs: () => Session.get('studentReportingTdfs'),
   curClassPerformance: () => Session.get('curClassPerformance'),
   curClass: () => Session.get('curClass'),
-  curTotalAttempts: () => Session.get('curTotalAttempts'),
+  curTotalAttempts: function(){
+    curTotalAttempts = Session.get('curTotalAttempts');
+    if(curTotalAttempts.isNan()){
+      return "0";
+    } else {
+      return curTotalAttempts;
+    }
+  },
   curStudentPerformance: () => Session.get('curStudentPerformance'),
   curTotalTime: () => Session.get('practiceDuration'),
   curStudentPerformanceCorrectInInteger: function() {
