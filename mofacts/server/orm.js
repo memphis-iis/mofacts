@@ -90,6 +90,8 @@ function getHistory(history) {
     'Condition Typec': history.condition_typec,
     'Condition Named': history.condition_named,
     'Condition Typed': history.condition_typed,
+    'Condition Named': history.condition_namee,
+    'Condition Typed': history.condition_typee,
     'Level (Unit)': history.level_unit,
     'Level (Unitname)': history.level_unitname,
     'Problem Name': history.problem_name,
