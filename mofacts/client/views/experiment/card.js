@@ -2941,6 +2941,7 @@ async function processUserTimesLog() {
   const newExperimentState = {};
   const newUnitNum = experimentState.currentUnitNumber;
   const checkUnit = Session.get('currentUnitNumber');
+  const lastUnitCompleted = experimentState.lastUnitCompleted;
 
   switch (experimentState.lastAction) {
     case 'instructions':
@@ -2949,10 +2950,8 @@ async function processUserTimesLog() {
     case 'unit-end':
       // Logged completion of unit - if this is the final unit we also
       // know that the TDF is completed
-      if ((!!newUnitNum && !!checkUnit) && checkUnit === newUnitNum) {
-        if (newUnitNum >= tdfFile.tdfs.tutor.unit.length - 1) {
-          moduleCompleted = true; // TODO: what do we do for multiTdfs? Depends on structure of template parentTdf
-        }
+      if (lastUnitCompleted >= tdfFile.tdfs.tutor.unit.length) {
+        moduleCompleted = true; // TODO: what do we do for multiTdfs? Depends on structure of template parentTdf
       } else {
         needFirstUnitInstructions = tdfFile.tdfs.tutor.unit && tdfFile.tdfs.tutor.unit.unitinstructions;
       }
