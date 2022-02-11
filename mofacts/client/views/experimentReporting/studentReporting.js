@@ -199,9 +199,9 @@ async function drawDashboard(studentId, selectedTdfId){
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
     // Perform calculated data
   
-  if(typeof numCorrect !== "undefined" || typeof numIncorrect != undefined){
-    totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
-  } else {
+
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
+  if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
