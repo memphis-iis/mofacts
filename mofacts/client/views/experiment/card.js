@@ -2215,6 +2215,8 @@ function speakMessageIfAudioPromptFeedbackEnabled(msg, audioPromptSource) {
       // Replace underscores with blank so that we don't get awkward UNDERSCORE UNDERSCORE
       // UNDERSCORE...speech from literal reading of text
       msg = msg.replace(/_+/g, 'blank');
+      // Remove all HTML
+      msg = msg.replace( /(<([^>]+)>)/ig, '');
       let ttsAPIKey = '';
       if (Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey) {
         ttsAPIKey = Session.get('currentTdfFile').tdfs.tutor.setspec.textToSpeechAPIKey;
