@@ -201,7 +201,7 @@ async function drawDashboard(studentId, selectedTdfId){
   
 
   totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect);
-  if(totalAttempts.isNaN()){
+  if(isNaN(totalAttempts)){
     totalAttempts = 0;
   }
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
