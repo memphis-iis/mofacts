@@ -1743,6 +1743,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Condition_Typec': schedCondition,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
+    'Condition_Namee': 'section',
+    'Condition_Typee': Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname,
 
     'responseDuration': responseDuration,
 

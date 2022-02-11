@@ -100,6 +100,8 @@ CREATE TABLE history (
     Condition_Typec VARCHAR(1024),
     Condition_Named VARCHAR(1024),
     Condition_Typed VARCHAR(1024),
+    Condition_Namee VARCHAR(1024),
+    Condition_Typee VARCHAR(1024),
     Level_Unit INTEGER NOT NULL,
     Level_Unitname TEXT NOT NULL,
     Problem_Name TEXT NOT NULL,
