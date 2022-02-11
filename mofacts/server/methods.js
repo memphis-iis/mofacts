@@ -795,8 +795,6 @@ async function insertHistory(historyRecord) {
                             Condition_Typec, \
                             Condition_Named, \
                             Condition_Typed, \
-                            Condition_Namee, \
-                            Condition_Typee, \
                             Level_Unit, \
                             Level_Unitname, \
                             Problem_Name, \
@@ -860,7 +858,6 @@ async function insertHistory(historyRecord) {
     historyRecord.Condition_Typec,
     historyRecord.Condition_Named,
     historyRecord.Condition_Typed,
-    historyRecord.Condition_Namee,
     historyRecord.Condition_Typee,
     historyRecord.Level_Unit,
     historyRecord.Level_Unitname,

@@ -1743,8 +1743,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Condition_Typec': schedCondition,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
-    'Condition_Namee': 'section',
-    'Condition_Typee': entryPoint,
 
     'responseDuration': responseDuration,
 
