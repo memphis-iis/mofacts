@@ -103,7 +103,7 @@ Template.studentReporting.helpers({
   curClass: () => Session.get('curClass'),
   curTotalAttempts: function(){
     curTotalAttempts = Session.get('curTotalAttempts');
-    if(curTotalAttempts.isNan()){
+    if(curTotalAttempts != "{\"$InfNaN\":0}"){
       return "0";
     } else {
       return curTotalAttempts;
@@ -205,7 +205,7 @@ async function drawDashboard(studentId, selectedTdfId){
   //Expand Data
   const {numCorrect, numIncorrect, totalStimCount, stimsSeen,  totalPracticeDuration, stimsIntroduced} = curStudentGraphData;
     // Perform calculated data
-  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)
+  totalAttempts = parseFloat(numCorrect) + parseFloat(numIncorrect)  
   percentCorrect = (parseFloat(numCorrect) / totalAttempts) * 100;
   totalPracticeDurationMinutes = totalPracticeDuration / 60000;
   totalPracticeDurationMinutesDisplay = totalPracticeDurationMinutes.toFixed();
