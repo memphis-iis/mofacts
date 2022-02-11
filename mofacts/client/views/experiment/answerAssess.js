@@ -242,37 +242,42 @@ function _branchingCorrectText(answer) {
 function checkAnswer(userAnswer, correctAnswer, originalAnswer, lfparameter, userInput) {
   const answerDisplay = originalAnswer;
   let isCorrect; let matchText;
-  if (answerIsBranched(correctAnswer)) {
-    [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
+  if(userAnswer === ''){
+    matchText = 'Incorrect. The correct answer is ' + _.trim(answerDisplay) + '.';
+    isCorrect = false;
   } else {
-    let dispAnswer = _.trim(answerDisplay);
-    if (dispAnswer.indexOf('|') >= 0) {
-      // Take first answer if it's a bar-delimited string
-      dispAnswer = _.trim(dispAnswer.split('|')[0]);
-    }
-
-    const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
-
-    if (match === 0) {
-      isCorrect = false;
-      matchText = '';
-    } else if (match === 1) {
-      isCorrect = true;
-      matchText = 'Correct.';
-    } else if (match === 2) {
-      isCorrect = true;
-      matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
+    if (answerIsBranched(correctAnswer)) {
+      [isCorrect, matchText] = matchBranching(correctAnswer, userAnswer, lfparameter);
     } else {
-      console.log('MATCH ERROR: something fails in our comparison');
-      isCorrect = false;
-      matchText = '';
-    }
+      let dispAnswer = _.trim(answerDisplay);
+      if (dispAnswer.indexOf('|') >= 0) {
+        // Take first answer if it's a bar-delimited string
+        dispAnswer = _.trim(dispAnswer.split('|')[0]);
+      }
 
-    if (!matchText) {
-      if (userAnswer === '' || userInput === '') {
-        matchText = 'The correct answer is ' + dispAnswer + '.';
+      const match = stringMatch(originalAnswer, userAnswer, lfparameter, userInput);
+
+      if (match === 0) {
+        isCorrect = false;
+        matchText = '';
+      } else if (match === 1) {
+        isCorrect = true;
+        matchText = 'Correct.';
+      } else if (match === 2) {
+        isCorrect = true;
+        matchText = 'Close enough to the correct answer \''+ dispAnswer + '\'.';
       } else {
-        matchText = isCorrect ? 'Correct' : 'Incorrect. The correct answer is ' + dispAnswer + '.';
+        console.log('MATCH ERROR: something fails in our comparison');
+        isCorrect = false;
+        matchText = '';
+      }
+
+      if (!matchText) {
+        if (userAnswer === '' || userInput === '') {
+          matchText = 'The correct answer is ' + dispAnswer + '.';
+        } else {
+          matchText = isCorrect ? 'Correct' : 'Incorrect. The correct answer is ' + dispAnswer + '.';
+        }
       }
     }
   }
