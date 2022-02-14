@@ -115,6 +115,7 @@ function getHistory(history) {
     'CF (Correct Answer Syllables)': history.cf_correct_answer_syllables,
     'CF (Correct Answer Syllables Count)': history.cf_correct_answer_syllables_count,
     'CF (Display Syllable Indices)': history.cf_display_syllable_indices,
+    'CF (Displayed Hint Syllables)': history.cf_displayed_hint_syllables,
     'CF (Response Time)': history.cf_response_time,
     'CF (Start Latency)': history.cf_start_latency,
     'CF (End Latency)': history.cf_end_latency,

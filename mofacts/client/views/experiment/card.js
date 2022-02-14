@@ -1698,6 +1698,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const correctAnswer = temp[0];
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
+  let hintsDisplayed = "";
+  if(whichHintLevel != 0){
+    hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
+  }
   if (filledInDisplay.clozeText) {
     filledInDisplay.clozeText = filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
   }
@@ -1771,11 +1775,11 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Set_Shuffled_Index': shufIndex || clusterIndex,
     'CF_Alternate_Display_Index': Session.get('alternateDisplayIndex'),
     'CF_Stimulus_Version': whichStim,
-
     'CF_Correct_Answer': correctAnswer,
     'CF_Correct_Answer_Syllables': currentAnswerSyllables.syllableArray,
     'CF_Correct_Answer_Syllables_Count': currentAnswerSyllables.count,
     'CF_Display_Syllable_Indices': currentAnswerSyllables.displaySyllableIndices,
+    'CF_Displayed_Hint_Syllables': hintsDisplayed,
     'CF_Overlearning': false,
     'CF_Response_Time': trialEndTimeStamp,
     'CF_Start_Latency': startLatency,
@@ -1788,6 +1792,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'feedbackType': feedbackType,
     'dialogueHistory': dialogueHistory,
     'instructionQuestionResult': Session.get('instructionQuestionResult'),
+    'hintLevel': whichHintLevel,
     'Entry_Point': entryPoint
   };
   return answerLogRecord;
