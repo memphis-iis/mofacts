@@ -86,10 +86,7 @@ async function createExperimentExport(expName) {
   const listOfDynamicStimTags = await getListOfStimTags(expName);
   const listOfDynamicStimTagsWithColumnNames = [];
   for (const tag of listOfDynamicStimTags) {
-    let renamedField = 'CF (' + tag + ')';
-    if(FIELDSDS.indexOf(renamedField) !== -1){
-      listOfDynamicStimTagsWithColumnNames.push(renamedField);
-    }
+    listOfDynamicStimTagsWithColumnNames.push('CF (' + tag + ')');
   }
 
   FIELDSDS = FIELDSDS.concat(listOfDynamicStimTagsWithColumnNames);
