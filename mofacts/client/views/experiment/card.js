@@ -1782,6 +1782,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_End_Latency': reviewLatency,
     'CF_Review_Entry': _.trim($('#userForceCorrect').val()),
     'CF_Button_Order': buttonEntries,
+    'CF_Item_Removed': Session.get('wasReportedForRemoval') || false;
     'CF_Note': '',
     'Feedback_Text': $('#UserInteraction').text() || '',
     'feedbackType': feedbackType,
