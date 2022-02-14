@@ -1485,7 +1485,6 @@ function doClearForceCorrect(doForceCorrect, afterAnswerFeedbackCbBound) {
 }
 
 async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer, isTimeout, isCorrect) {
-  const reviewBegin = Date.now();
   const testType = getTestType();
   const deliveryParams = Session.get('currentDeliveryParams');
 
@@ -1500,7 +1499,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   let wasReportedForRemoval = Session.get('wasReportedForRemoval');
   const reviewEnd = Date.now();
   const answerLogRecord = gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
-      reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
+      reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval);
 
   // Give unit engine a chance to update any necessary stats
   const endLatency = reviewEnd - trialStartTimestamp;
@@ -1595,7 +1594,7 @@ function getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory) 
 }
 
 // eslint-disable-next-line max-len
-function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewBegin, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
+function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect, reviewEnd, testType, deliveryParams, dialogueHistory, wasReportedForRemoval) {
   const feedbackType = deliveryParams.feedbackType || 'simple';
   const cf_feedback_latency = userFeedbackStart ? reviewEnd - userFeedbackStart : 0;
   let responseDuration = 0;
@@ -1608,7 +1607,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let startLatency = firstActionTimestamp - trialStartTimestamp;
   let endLatency = trialEndTimeStamp - trialStartTimestamp;
 
-  let reviewLatency = userFeedbackStart ? reviewEnd - userFeedbackStart : reviewEnd - reviewBegin;
+  let reviewLatency = reviewEnd - userFeedbackStart;
 
   if (!reviewLatency) {
     let assumedReviewLatency = 0;
