@@ -876,6 +876,7 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Set_Shuffled_Index,
     historyRecord.CF_Alternate_Display_Index,
     historyRecord.CF_Stimulus_Version,
+    historyRecord.CF_Displayed_Hint_Syllables,
     historyRecord.CF_Correct_Answer,
     historyRecord.CF_Correct_Answer_Syllables,
     historyRecord.CF_Correct_Answer_Syllables_Count,
