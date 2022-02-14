@@ -824,6 +824,7 @@ async function insertHistory(historyRecord) {
                             CF_Review_Latency, \
                             CF_Review_Entry, \
                             CF_Button_Order, \
+                            CF_Item_Removed, \
                             Feedback_Text, \
                             feedbackType, \
                             dialogueHistory, \
@@ -887,6 +888,7 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Review_Latency,
     historyRecord.CF_Review_Entry,
     historyRecord.CF_Button_Order,
+    historyRecord.CF_Item_Removed,
     historyRecord.Feedback_Text,
     historyRecord.feedbackType,
     historyRecord.dialogueHistory,
