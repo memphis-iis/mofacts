@@ -100,7 +100,7 @@ function getHistory(history) {
     'Student Response Type': history.student_response_type,
     'Student Response Subtype': history.student_response_subtype,
     'Tutor Response Type': history.tutor_response_type,
-    'Tutor Response Subtype': history.kc_default,
+    'Tutor Response Subtype': "",
     'KC (Cluster)': history.kc_cluster,
     'CF (Audio Input Enabled)': history.cf_audio_input_enabled,
     'CF (Audio Output Enabled)': history.cf_audio_output_enabled,
