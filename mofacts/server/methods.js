@@ -819,7 +819,7 @@ async function insertHistory(historyRecord) {
                             CF_Correct_Answer_Syllables, \
                             CF_Correct_Answer_Syllables_Count, \
                             CF_Display_Syllable_Indices, \
-                            CF_Displayed_Hint_Syllables VARCHAR(1024), \
+                            CF_Displayed_Hint_Syllables, \
                             CF_Response_Time, \
                             CF_Start_Latency, \
                             CF_End_Latency, \
