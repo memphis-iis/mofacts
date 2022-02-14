@@ -1716,8 +1716,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     outcome = 'correct';
   }
   let entryPoint = 'direct'
-  if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username && Session.get('curClass').sectionname){
-    entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname;
+  if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username){
+    entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + '/' +  Session.get('curClass').sectionname;
   }
   const answerLogRecord = {
     'itemId': itemId,
