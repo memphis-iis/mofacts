@@ -886,6 +886,7 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Correct_Answer_Syllables,
     historyRecord.CF_Correct_Answer_Syllables_Count,
     historyRecord.CF_Display_Syllable_Indices,
+    historyRecord.CF_Displayed_Hint_Syllables, 
     historyRecord.CF_Response_Time,
     historyRecord.CF_Start_Latency,
     historyRecord.CF_End_Latency,
