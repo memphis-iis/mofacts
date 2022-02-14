@@ -1699,7 +1699,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const correctAnswer = temp[0];
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
-  let hintsDisplayed = [];
+  let hintsDisplayed = "";
   if(whichHintLevel != 0){
     hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
   }
