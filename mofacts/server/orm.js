@@ -122,6 +122,7 @@ function getHistory(history) {
     'CF (Review Latency)': history.cf_review_latency,
     'CF (Review Entry)': history.cf_review_entry,
     'CF (Button Order)': history.cf_button_order,
+    'CF (Item Removed)': history.cf_item_removed,
     'Feedback Text': history.feedback_text,
     'feedbackType': history.feedbackType,
     'dynamicTagFields': history.dynamictagfields,
