@@ -72,7 +72,7 @@ async function getValuesOfStimTagList(tdfFileName, clusterKC, stimulusKC, tagLis
 // Exported main function: call recordAcceptor with each record generated
 // for expName in datashop format. We do NOT terminate our records.
 // We return the number of records written
-async function createExperimentExport(expName) {
+async function createExperimentExport(expName, isFirstInFileArray = true) {
   let record = '';
   const header = {};
   let expNames = [];
@@ -106,7 +106,9 @@ async function createExperimentExport(expName) {
     header[f] = t;
   });
 
-  record += delimitedRecord(header) + "\n";
+  if(isFirstInFileArray) {
+    record += delimitedRecord(header) + "\n";
+  }
 
   Meteor.call('updatePerformanceData', 'utlQuery', 'experiment_times.createExperimentExport', 'SERVER_REPORT');
   for(expName of expNames){

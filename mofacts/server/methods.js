@@ -1752,9 +1752,9 @@ Meteor.startup(async function() {
       if (!tdfNames.length > 0) {
         throw new Meteor.Error('No tdfs found for any classes for: ' + Meteor.user().username);
       }
-      let experimentExport;
+      let experimentExport = await createExperimentExport(tdfNames.shift(), true);
       for (let tdfName of tdfNames){
-        experimentExport += await createExperimentExport(tdfName)
+        experimentExport += await createExperimentExport(tdfName, false)
       }
       return experimentExport;
     },
