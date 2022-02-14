@@ -122,6 +122,7 @@ CREATE TABLE history (
     CF_Correct_Answer_Syllables TEXT,
     CF_Correct_Answer_Syllables_Count INTEGER,
     CF_Display_Syllable_Indices TEXT,
+    CF_Displayed_Hint_Syllables VARCHAR(1024),
     CF_Response_Time BIGINT,
     CF_Start_Latency BIGINT,
     CF_End_Latency BIGINT,
