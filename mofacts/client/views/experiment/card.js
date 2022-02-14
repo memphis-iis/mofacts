@@ -1693,13 +1693,14 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
   const originalAnswer = Session.get('originalAnswer');
   const currentAnswer = Session.get('currentAnswer');
+  const whichHintLevel = Session.get('hintLevel') || 0;
   const fullAnswer = (typeof(originalAnswer) == 'undefined' || originalAnswer == '') ? currentAnswer : originalAnswer;
   const temp = _.trim((fullAnswer || '')).split('~');
   const correctAnswer = temp[0];
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
   let hintsDisplayed = "";
-  if(whichHintLevel != 0){
+  if(whichHintLevel != 0 || whichHintLevel == "undefined"){
     hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
   }
   if (filledInDisplay.clozeText) {
