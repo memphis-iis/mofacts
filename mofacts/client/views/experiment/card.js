@@ -1764,7 +1764,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Student_Response_Subtype': _.trim(findQTypeSimpified()),
     'Tutor_Response_Type': isStudy ? 'HINT_MSG' : 'RESULT',
     'Tutor_Response_Subtype': '',
-
     'KC_Default': stimulusKC,
     'KC_Category_Default': '',
     'KC_Cluster': clusterKC,
