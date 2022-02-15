@@ -1795,7 +1795,6 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'hintLevel': whichHintLevel,
     'Entry_Point': entryPoint
   };
-  console.log('rusty',answerLogRecord);
   return answerLogRecord;
 }
 
