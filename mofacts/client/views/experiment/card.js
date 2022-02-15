@@ -1696,6 +1696,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   const fullAnswer = (typeof(originalAnswer) == 'undefined' || originalAnswer == '') ? currentAnswer : originalAnswer;
   const temp = _.trim((fullAnswer || '')).split('~');
   const correctAnswer = temp[0];
+  const whichHintLevel = parseInt(Session.get('hintLevel')) || 0;
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
   let hintsDisplayed = "";
@@ -1795,6 +1796,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'hintLevel': whichHintLevel,
     'Entry_Point': entryPoint
   };
+  console.log('rusty',answerLogRecord);
   return answerLogRecord;
 }
 

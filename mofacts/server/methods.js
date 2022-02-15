@@ -819,6 +819,7 @@ async function insertHistory(historyRecord) {
                             CF_Correct_Answer_Syllables, \
                             CF_Correct_Answer_Syllables_Count, \
                             CF_Display_Syllable_Indices, \
+                            CF_Displayed_Hint_Syllables, \
                             CF_Response_Time, \
                             CF_Start_Latency, \
                             CF_End_Latency, \
@@ -837,7 +838,7 @@ async function insertHistory(historyRecord) {
   query += ' VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::text[], \
             $12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25, \
             $26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41, \
-            $42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55::jsonb,$56,$57,$58,$59)';
+            $42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57::jsonb,$58,$59,$60,$61)';
   const historyVals = [
     historyRecord.itemId,
     historyRecord.userId,
@@ -880,11 +881,11 @@ async function insertHistory(historyRecord) {
     historyRecord.CF_Set_Shuffled_Index,
     historyRecord.CF_Alternate_Display_Index,
     historyRecord.CF_Stimulus_Version,
-    historyRecord.CF_Displayed_Hint_Syllables,
     historyRecord.CF_Correct_Answer,
     historyRecord.CF_Correct_Answer_Syllables,
     historyRecord.CF_Correct_Answer_Syllables_Count,
     historyRecord.CF_Display_Syllable_Indices,
+    historyRecord.CF_Displayed_Hint_Syllables,
     historyRecord.CF_Response_Time,
     historyRecord.CF_Start_Latency,
     historyRecord.CF_End_Latency,
@@ -901,6 +902,7 @@ async function insertHistory(historyRecord) {
     historyRecord.hintLevel,
     historyRecord.Entry_Point
   ];
+  console.log(historyVals.length)
   await db.none(query, historyVals);
 }
 
