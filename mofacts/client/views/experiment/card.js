@@ -1700,6 +1700,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
   let hintsDisplayed = "";
+  let hintIndeces = [Array(whichHintLevel - 1).keys()];
   if(whichHintLevel != 0){
     hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
   }
@@ -1778,7 +1779,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'CF_Correct_Answer': correctAnswer,
     'CF_Correct_Answer_Syllables': currentAnswerSyllables.syllableArray,
     'CF_Correct_Answer_Syllables_Count': currentAnswerSyllables.count,
-    'CF_Display_Syllable_Indices': currentAnswerSyllables.displaySyllableIndices,
+    'CF_Display_Syllable_Indices': hintIndeces,
     'CF_Displayed_Hint_Syllables': hintsDisplayed,
     'CF_Overlearning': false,
     'CF_Response_Time': trialEndTimeStamp,
