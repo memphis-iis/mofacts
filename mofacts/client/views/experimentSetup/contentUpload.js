@@ -12,6 +12,7 @@ async function userFilesRefresh() {
   let allTdfs = await meteorCallAsync('getAllTdfs');
   let allStims = await meteorCallAsync('getAllStims');
   console.log('allTdfs', allTdfs, typeof(allTdfs));
+  console.log('allStims', allStims, typeof(allStims));
   Session.set('allTdfs', allTdfs);
 
   for (const tdf of Session.get('allTdfs')) {
@@ -52,21 +53,23 @@ async function userFilesRefresh() {
       }
     }
   }
-  for(const stim of allStims){
-    if (!userFiles.findOne({'fileName': stim.stimulusfilename})){
-      try{
-        userFiles.insert({
-          'temp': 1,
-          '_id': '' + count,
-          'idx': count,
-          'type': 'stim',
-          'fileName': stim.stimulusfilename,
-          'stimID': 1,
-        });
-        count += 1;
-      } catch (err) {
-        if (err.name !== 'MinimongoError') {
-          throw err;
+  for (const tdf of Session.get('allTdfs')) {
+    for(const stim of allStims){
+      if (!userFiles.findOne({'fileName': stim.stimulusfilename}) && userId == tdf.ownerId && stim.stimulisetid == tdf.stimulisetid){
+        try{
+          userFiles.insert({
+            'temp': 1,
+            '_id': '' + count,
+            'idx': count,
+            'type': 'stim',
+            'fileName': stim.stimulusfilename,
+            'stimID': 1,
+          });
+          count += 1;
+        } catch (err) {
+          if (err.name !== 'MinimongoError') {
+            throw err;
+          }
         }
       }
     }
