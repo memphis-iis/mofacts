@@ -10,6 +10,17 @@ Session.set('systemOverloaded', false);
 Session.set('systemDown', undefined);
 Session.set('classesByInstructorId', {});
 
+
+//Jquery get if back button is pushed
+jQuery(document).ready(function($) {
+
+  if (window.history && window.history.pushState) {
+    $(window).on('popstate', function() {
+        Router.go("/signInSouthwest");
+    });
+  }
+});
+
 function getUrlVars() {
   const vars = []; let hash;
   if (window.location.href.indexOf('?') > 0) {
