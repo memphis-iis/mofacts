@@ -908,9 +908,10 @@ async function insertHistory(historyRecord) {
 
 async function getHistoryByTDFfileName(TDFfileName) {
   const query = 'SELECT DISTINCT h.* FROM history AS h INNER JOIN item AS i ON i.itemId=h.itemId \
-                 INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE t.content @> $1::jsonb';
+                 INNER JOIN tdf AS t ON i.stimuliSetId=t.stimuliSetId WHERE h.condition_typea = $2 \
+                 and t.content @> $1::jsonb';
   // let query = 'SELECT * FROM history WHERE content @> $1' + '::jsonb';
-  const historyRet = await db.manyOrNone(query, [{'fileName': TDFfileName}]);
+  const historyRet = await db.manyOrNone(query, [{'fileName': TDFfileName}, TDFfileName]);
   return historyRet;
 }
 
