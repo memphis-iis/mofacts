@@ -97,19 +97,20 @@ Template.body.onRendered(function() {
 jQuery(document).ready(function($) {
   if (window.history && window.history.pushState) {
     $(window).on('popstate', function() {
-      if (document.location.pathname != '/signInSouthwest') {
+      if (document.location.pathname == '/signInSouthwest') {
         Router.go("/signInSouthwest");
       }
-      if (document.location.pathname != '/card') {
+      if ((document.location.pathname == '/card' || document.location.pathname == '/instructions')  && Meteor.userId()) {
         if(Session.get('loginMode') == 'southwest'){
           Router.go("/profileSouthwest");
         } else {
           Router.go("/profile");
         }
       }
+      if (!Meteor.userId()) {
+        Router.go("/");
+      }
     });
-  } else {
-    window.history.back();
   }
 });
   $('#errorReportingModal').on('hidden.bs.modal', function() {
