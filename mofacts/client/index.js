@@ -93,6 +93,25 @@ Meteor.startup(function() {
 });
 
 Template.body.onRendered(function() {
+//Jquery get if back button is pushed
+jQuery(document).ready(function($) {
+  if (window.history && window.history.pushState) {
+    $(window).on('popstate', function() {
+      if (document.location.pathname != '/signInSouthwest') {
+        Router.go("/signInSouthwest");
+      }
+      if (document.location.pathname != '/card') {
+        if(Session.get('loginMode') == 'southwest'){
+          Router.go("/profileSouthwest");
+        } else {
+          Router.go("/profile");
+        }
+      }
+    });
+  } else {
+    window.history.back();
+  }
+});
   $('#errorReportingModal').on('hidden.bs.modal', function() {
     console.log('error reporting modal hidden');
     restartMainCardTimeoutIfNecessary();
