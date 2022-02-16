@@ -91,9 +91,8 @@ function defaultUnitEngine(curExperimentData) {
       let clozeAnswer = '';
       let clozeMissingSyllables = '';
       const syllablesArray = currentAnswerSyllables.syllableArray;
-      let curHintLevel = hintLevel;
-      if(syllablesArray <= 2){
-        curHintLevel = 0;
+      if(syllablesArray.length <= 2){
+        hintLevel = 0;
       }
       let reconstructedAnswer = '';
       let clozeAnswerOnlyUnderscores = '';
