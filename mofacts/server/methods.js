@@ -1707,7 +1707,7 @@ Meteor.startup(async function() {
     return user;
   });
 
-  // Set the global logout time for inactive users
+  // Set the global logout time for all users
   Accounts.config({
     loginExpirationInDays: 0.5
   })
