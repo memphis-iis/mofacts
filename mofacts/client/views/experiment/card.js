@@ -1700,7 +1700,12 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
 
   const filledInDisplay = JSON.parse(JSON.stringify(Session.get('currentDisplay')));
   let hintsDisplayed = "";
-  let hintIndeces = [Array(whichHintLevel - 1).keys()];
+  let hintIndeces = null;
+  if(whichHintLevel > 0)
+  {
+    hintIndeces = [Array(whichHintLevel - 1).keys()];
+  }
+   
   if(whichHintLevel != 0){
     hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
   }
