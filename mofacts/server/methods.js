@@ -1707,6 +1707,11 @@ Meteor.startup(async function() {
     return user;
   });
 
+  // Set the global logout time for inactive users
+  Accounts.config({
+    loginExpirationInDays: 0.5
+  })
+
   // Set up our server-side methods
   Meteor.methods({
     getAllTdfs, getAllStims, getTdfById, getTdfByFileName, getTdfByExperimentTarget, getTdfIDsAndDisplaysAttemptedByUserId,
