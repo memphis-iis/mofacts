@@ -1704,7 +1704,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
    
   if(whichHintLevel != 0){
     hintIndeces = [Array(whichHintLevel - 1).keys()];
-    hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
+    hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel).join();
   }
   if (filledInDisplay.clozeText) {
     filledInDisplay.clozeText = filledInDisplay.clozeText.replace(/___+/g, correctAnswer);
@@ -1724,10 +1724,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
   let entryPoint = 'direct'
   if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username){
-    if(typeof Session.get('curClass').sectionname === "undefined"){
+    if(Session.get('curClass').sectionname === undefined){
       sectionname = ""
     } else {
-      sectionname = " \ " + Session.get('curClass').sectionname;
+      sectionname = "/" + Session.get('curClass').sectionname;
     }
     entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + sectionname;
   }
