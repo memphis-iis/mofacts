@@ -73,9 +73,6 @@ Template.signUp.events({
             const currentUser = Meteor.users.findOne({_id: Meteor.userId()}).username;
             console.log(currentUser + ' was logged in successfully!');
             Meteor.call('debugLog', 'Sign in was successful');
-            Accounts.config({
-              loginExpirationInDays: 0.5
-            });
           }
           Meteor.logoutOtherClients();
           Router.go('/profile');
