@@ -1724,10 +1724,10 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   }
   let entryPoint = 'direct'
   if(Session.get('curTeacher') && Session.get('curClass') && Session.get('curTeacher').username){
-    if(Session.get('curClass').sectionname === undefined){
+    if(typeof Session.get('curClass').sectionname === "undefined"){
       sectionname = ""
     } else {
-      sectionname = "/" + Session.get('curClass').sectionname;
+      sectionname = " \ " + Session.get('curClass').sectionname;
     }
     entryPoint = Session.get('curTeacher').username + '/' + Session.get('curClass').coursename + sectionname;
   }
