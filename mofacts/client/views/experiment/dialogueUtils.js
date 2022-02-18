@@ -106,6 +106,8 @@ function dialogueContinue() {
     case 'exit':
       // Exit dialogue loop
       console.log('dialogue loop finished, restoring state');
+      Session.set('dialogueTotalTime', Date.now() - Session.get('dialogueStart'));
+      Session.set('dialogueStart', undefined);
       Session.set('displayReady', false);
       Session.set('dialogueLoopStage', undefined);
       // restore session state
@@ -126,6 +128,7 @@ function dialogueContinue() {
 }
 
 function initiateDialogue(incorrectUserAnswer, callback, lookupFailCallback) {
+  Session.set('dialogueStart', Date.now());
   const clozeItem = Session.get('originalQuestion') || Session.get('currentDisplay').clozeText;
   const clozeAnswer = Session.get('originalAnswer') || Session.get('currentAnswer');
 
