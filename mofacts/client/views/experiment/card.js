@@ -1696,8 +1696,8 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
   let hintIndeces = null;
    
   if(whichHintLevel != 0){
-    hintIndeces = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel);
-    hintsDisplayed = hintIndeces;
+    hintIndeces = [Array(whichHintLevel - 1).keys()];
+    hintsDisplayed = currentAnswerSyllables.syllableArray.slice(0,whichHintLevel - 1).join();
   }
 
   if (filledInDisplay.clozeText) {
