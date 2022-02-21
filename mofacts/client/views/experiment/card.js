@@ -1750,7 +1750,7 @@ function gatherAnswerLogRecord(trialEndTimeStamp, source, userAnswer, isCorrect,
     'Condition_Named': 'how answered',
     'Condition_Typed': _.trim(source),
     'Condition_Namee': 'section',
-    'Condition_Typee': Session.get('curTeacher').username + '/' + Session.get('curClass').sectionname,
+    'Condition_Typee': entryPoint,
 
     'responseDuration': responseDuration,
 
