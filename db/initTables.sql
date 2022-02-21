@@ -129,7 +129,6 @@ CREATE TABLE history (
     CF_Start_Latency BIGINT,
     CF_End_Latency BIGINT,
     CF_Feedback_Latency BIGINT,
-    CF_Review_Latency BIGINT,
     CF_Review_Entry TEXT,
     CF_Button_Order TEXT,
     CF_Item_Removed BOOLEAN,
