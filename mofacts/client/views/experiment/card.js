@@ -1493,7 +1493,7 @@ async function afterAnswerFeedbackCallback(trialEndTimeStamp, source, userAnswer
   if (Session.get('dialogueHistory')) {
     dialogueHistory = JSON.parse(JSON.stringify(Session.get('dialogueHistory')));
   }
-  const reviewTimeout = isShortcut ? 0 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
+  const reviewTimeout = isShortcut ? 2000 : getReviewTimeout(testType, deliveryParams, isCorrect, dialogueHistory);
 
   // Stop previous timeout, log response data, and clear up any other vars for next question
   clearCardTimeout();
@@ -2886,8 +2886,20 @@ async function removeCardByUser() {
     dialogueContinue();
   }
   let cbVar = Session.get('removeQuestionShortcut');
-  afterAnswerFeedbackCallback(cbVar[0], cbVar[1], cbVar[2], cbVar[3], cbVar[4], true);
   Session.set('removeQuestionShortcut', undefined);
+  if(cbVar){
+    afterAnswerFeedbackCallback(cbVar[0], cbVar[1], cbVar[2], cbVar[3], cbVar[4], true);
+  }
+
+
+  if(Session.get('unitType') == "model")
+    Session.set('engineIndices', await engine.calculateIndices());
+  else
+    Session.set('engineIndices', undefined);
+
+  Meteor.setTimeout(async function() {
+    await prepareCard();
+  }, 2000);
 }
 
 async function processUserTimesLog() {
